@@ -1,0 +1,23 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs
+*.log
+
+# Cache
+*.cache
+*.pdb
+
+# Others
+*.db
+*.DS_Store
