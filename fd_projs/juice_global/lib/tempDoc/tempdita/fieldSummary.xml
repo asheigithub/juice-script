@@ -1,0 +1,735 @@
+<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="__AS3__:MethodClosure"><apiName>MethodClosure</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="__Global__"><apiName>__Global__</apiName><apiClassifier id="globalClassifier:ReferenceError"><apiName>ReferenceError</apiName><shortdesc>
+	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:byte"><apiName>byte</apiName><shortdesc>
+	 juice扩展的类型，八位无符号整数
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 juice扩展的类型，八位无符号整数
+	 </apiDesc></apiClassifierDetail><apiValue id="byte:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 可表示的最大 8 位无符号整数为 255。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>255</apiData><apiValueClassifier>byte</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最大 8 位无符号整数为 255。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="byte:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 可表示的最小无符号整数为 0。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0</apiData><apiValueClassifier>byte</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小无符号整数为 0。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Error"><apiName>Error</apiName><shortdesc>
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+	 您也可以创建 Error 类的子类，然后引发该子类的实例。
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
+	 </apiDesc></apiClassifierDetail><apiValue id="Error:message"><apiName>message</apiName><shortdesc>
+		 包含与 Error 对象关联的消息。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 包含与 Error 对象关联的消息。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Error:name"><apiName>name</apiName><shortdesc>
+		 包含 Error 对象的名称。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 包含 Error 对象的名称。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Error:errorID:get"><apiName>errorID</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="read"/><apiValueClassifier>int</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:ushort"><apiName>ushort</apiName><shortdesc>
+	 juice扩展的类型，十六位无符号整数
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 juice扩展的类型，十六位无符号整数
+	 </apiDesc></apiClassifierDetail><apiValue id="ushort:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 可表示的最大 16 位无符号整数为 65535。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>65535</apiData><apiValueClassifier>ushort</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最大 16 位无符号整数为 65535。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="ushort:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 可表示的最小 16 位无符号整数为 0。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0</apiData><apiValueClassifier>ushort</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小 16 位无符号整数为 0。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:String"><apiName>String</apiName><shortdesc>
+	 String 类为表示一串字符的数据类型。String 类提供了处理原始字符串值类型的方法和属性。可以使用 String() 函数将任意对象的值转换为 String 数据类型的对象。
+	 
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 String 类为表示一串字符的数据类型。String 类提供了处理原始字符串值类型的方法和属性。可以使用 String() 函数将任意对象的值转换为 String 数据类型的对象。
+	 
+	 </apiDesc></apiClassifierDetail><apiValue id="String:length:get"><apiName>length</apiName><shortdesc>
+		 一个整数，它指定在所指定的 String 对象中的字符数。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="read"/><apiValueClassifier>int</apiValueClassifier></apiValueDef><apiDesc>
+		 一个整数，它指定在所指定的 String 对象中的字符数。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:float"><apiName>float</apiName><shortdesc>
+	 juice的扩展类型，32位浮点数
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 juice的扩展类型，32位浮点数
+	 </apiDesc></apiClassifierDetail><apiValue id="float:Epsilon"><apiName>Epsilon</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.4e-45</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:uint"><apiName>uint</apiName><shortdesc>
+	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
+	 由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 0。uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。下例将创建一个 uint 对象并调用  toString() 方法：
+	 var myuint:uint = 1234;
+	 trace(myuint.toString()); // 1234
+	 下面的示例在不使用构造函数的情况下，将 MIN_VALUE 属性的值赋予一个变量：
+	 var smallest:uint = uint.MIN_VALUE;
+	 trace(smallest.toString()); // 0
+	 
+	 
+	   EXAMPLE:
+	 
+	   下面的示例声明 uint i（在 for 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
+	 
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class UintExample extends Sprite {
+	 public function UintExample() {
+	 for(var i:uint; i &amp;lt; 10; i++) {
+	 trace(i);
+	 }
+	 }
+	 }
+	 }
+	 
+	 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
+	 <p class="- topic/p ">由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。</p><p class="- topic/p ">可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">0</codeph>。</p><p class="- topic/p ">uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。</p><p class="- topic/p ">下例将创建一个 uint 对象并调用 <codeph class="+ topic/ph pr-d/codeph "> toString()</codeph> 方法：</p><pre class="- topic/pre " xml:space="preserve">
+	 var myuint:uint = 1234;
+	 trace(myuint.toString()); // 1234
+	 </pre><p class="- topic/p ">下面的示例在不使用构造函数的情况下，将 <codeph class="+ topic/ph pr-d/codeph ">MIN_VALUE</codeph> 属性的值赋予一个变量：</p><pre class="- topic/pre " xml:space="preserve">
+	 var smallest:uint = uint.MIN_VALUE;
+	 trace(smallest.toString()); // 0
+	 </pre>
+	 
+	   EXAMPLE:
+	 
+	   下面的示例声明 uint <codeph class="+ topic/ph pr-d/codeph ">i</codeph>（在 <codeph class="+ topic/ph pr-d/codeph ">for</codeph> 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
+	 <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class UintExample extends Sprite {
+	 public function UintExample() {
+	 for(var i:uint; i &lt; 10; i++) {
+	 trace(i);
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	 </apiDesc></apiClassifierDetail><apiValue id="uint:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 可表示的最大 32 位无符号整数为 4,294,967,295。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>4294967295</apiData><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最大 32 位无符号整数为 4,294,967,295。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="uint:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 可表示的最小无符号整数为 0。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0</apiData><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小无符号整数为 0。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiValue id="Math:E"><apiName>E</apiName><shortdesc>
+		 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.71828182845905。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2.71828182845905</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.71828182845905。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:LN10"><apiName>LN10</apiName><shortdesc>
+		 10 的自然对数的数学常数，表示为 loge10，其近似值为 2.302585092994046。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2.302585092994046</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 10 的自然对数的数学常数，表示为 loge10，其近似值为 2.302585092994046。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:LN2"><apiName>LN2</apiName><shortdesc>
+		 2 的自然对数的数学常数，表示为 loge2，其近似值为 0.6931471805599453。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.6931471805599453</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 2 的自然对数的数学常数，表示为 loge2，其近似值为 0.6931471805599453。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:LOG10E"><apiName>LOG10E</apiName><shortdesc>
+		 常数 e (Math.E) 以 10 为底的对数的数学常数，表示为 log10e，其近似值为 0.4342944819032518。 
+		 Math.log() 方法计算数字的自然对数。将 Math.log() 的结果与 Math.LOG10E 相乘得到以 10 为底的对数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.4342944819032518</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 常数 e (Math.E) 以 10 为底的对数的数学常数，表示为 log10e，其近似值为 0.4342944819032518。 
+		 Math.log() 方法计算数字的自然对数。将 Math.log() 的结果与 Math.LOG10E 相乘得到以 10 为底的对数。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:LOG2E"><apiName>LOG2E</apiName><shortdesc>
+		 常数 e 以 2 为底的对数的数学常数，表示为 log2e，其近似值为 1.442695040888963387。
+		 
+		   Math.log 方法计算数字的自然对数。将 Math.log() 的结果与 Math.LOG2E 相乘得到以 2 为底的对数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.442695040888963387</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 常数 e 以 2 为底的对数的数学常数，表示为 log2e，其近似值为 1.442695040888963387。
+		 
+		   Math.log 方法计算数字的自然对数。将 Math.log() 的结果与 Math.LOG2E 相乘得到以 2 为底的对数。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:PI"><apiName>PI</apiName><shortdesc>
+		 代表一个圆的周长与其直径的比值的数学常数，表示为 pi，其近似值为 3.141592653589793。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>3.141592653589793</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 代表一个圆的周长与其直径的比值的数学常数，表示为 pi，其近似值为 3.141592653589793。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:SQRT1_2"><apiName>SQRT1_2</apiName><shortdesc>
+		 代表 1/2 的平方根的数学常数，其近似值为 0.7071067811865476。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.7071067811865476</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 代表 1/2 的平方根的数学常数，其近似值为 0.7071067811865476。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Math:SQRT2"><apiName>SQRT2</apiName><shortdesc>
+		 代表 2 的平方根的数学常数，其近似值为 1.4142135623730951。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.4142135623730951</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 代表 2 的平方根的数学常数，其近似值为 1.4142135623730951。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:IIterator"><apiName>IIterator</apiName><shortdesc>
+	 迭代器接口。
+	 如果某个类 指定了 [iterator] 方法，
+	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
+	 如果成功返回一个IIterator接口，则开始迭代工作。
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef><apiDesc>
+	 迭代器接口。
+	 如果某个类 指定了 [iterator] 方法，
+	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
+	 如果成功返回一个IIterator接口，则开始迭代工作。
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Namespace"><apiName>Namespace</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiValue id="Namespace:prefix:get"><apiName>prefix</apiName><shortdesc>
+		 命名空间的前缀。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="read"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 命名空间的前缀。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Namespace:uri:get"><apiName>uri</apiName><shortdesc>
+		 命名空间的统一资源标识符 (URI)。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="read"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 命名空间的统一资源标识符 (URI)。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:int"><apiName>int</apiName><shortdesc>
+	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
+	 
+	 
+	 
+	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
+	 
+	 
+	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
+	 
+	 
+	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
+	 
+	 
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
+	 
+	 <ph>
+	 <p>
+	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
+	 </p>
+	 <p>
+	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
+	 </p>
+	 <p>
+	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
+	 </p>
+	 </ph>
+	 </apiDesc><example>以下示例调用 int 类的 toString() 方法，以返回字符串 1234：
+	 <codeblock>
+	 var myint:int = 1234;
+	 t.toString();
+	 </codeblock>
+	 </example><example>以下示例将 MIN_VALUE 属性的值分配给一个无需使用构造函数进行声明的变量：
+	 <codeblock>
+	 var smallest:int = int.MIN_VALUE;
+	 </codeblock>
+	 </example></apiClassifierDetail><apiValue id="int:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 可表示的最小 32 位带符号整数为 -2,147,483,648。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2147483647</apiData><apiValueClassifier>int</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小 32 位带符号整数为 -2,147,483,648。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="int:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 可表示的最大 32 位带符号整数为 2,147,483,647。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>-2147483648</apiData><apiValueClassifier>int</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最大 32 位带符号整数为 2,147,483,647。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Array"><apiName>Array</apiName><shortdesc>
+	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
+	 </apiDesc></apiClassifierDetail><apiValue id="Array:CASEINSENSITIVE"><apiName>CASEINSENSITIVE</apiName><shortdesc>
+		 指定 Array 类排序方法为不区分大小写的排序。您可以对 sort() 方法或 sortOn() 方法中的 options 参数使用此常数。 
+		 此常数的值为 1。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1</apiData><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 指定 Array 类排序方法为不区分大小写的排序。您可以对 sort() 方法或 sortOn() 方法中的 options 参数使用此常数。 
+		 此常数的值为 1。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Array:DESCENDING"><apiName>DESCENDING</apiName><shortdesc>
+		 指定 Array 类排序方法为降序排序。您可以对 sort() 方法或 sortOn() 方法中的 options 参数使用此常数。 
+		 此常数的值为 2。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2</apiData><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 指定 Array 类排序方法为降序排序。您可以对 sort() 方法或 sortOn() 方法中的 options 参数使用此常数。 
+		 此常数的值为 2。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Array:NUMERIC"><apiName>NUMERIC</apiName><shortdesc>
+		 指定 Array 类排序方法为数值（而不是字符串）排序。在 options 参数中包括此常数会导致 sort() 方法和 sortOn() 方法将数字作为数值排序，而不是作为数字字符的字符串排序。如果不使用 NUMERIC 常数，则排序将每个数组元素视为一个字符串，并且按照 Unicode 顺序生成结果。
+		 
+		   例如，以值为 [2005, 7, 35] 的数组为例，如果 NUMERIC 常数未包括在 options 参数中，则排序后的数组为 [2005, 35, 7]，但如果包括了 NUMERIC 常数，则排序后的数组为 [7, 35, 2005]。 此常数仅应用于数组中的数字；不应用于包含数值数据（如 ["23", "5"]）的字符串。此常数的值为 16。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>16</apiData><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 指定 Array 类排序方法为数值（而不是字符串）排序。在 options 参数中包括此常数会导致 sort() 方法和 sortOn() 方法将数字作为数值排序，而不是作为数字字符的字符串排序。如果不使用 NUMERIC 常数，则排序将每个数组元素视为一个字符串，并且按照 Unicode 顺序生成结果。
+		 
+		   例如，以值为 [2005, 7, 35] 的数组为例，如果 NUMERIC 常数未包括在 options 参数中，则排序后的数组为 [2005, 35, 7]，但如果包括了 NUMERIC 常数，则排序后的数组为 [7, 35, 2005]。 此常数仅应用于数组中的数字；不应用于包含数值数据（如 ["23", "5"]）的字符串。此常数的值为 16。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Array:length:get"><apiName>length</apiName><shortdesc>
+		 指定数组中元素数量的非负整数。在向数组中添加新元素时，此属性会自动更新。当您给数组元素赋值（例如，my_array[index] = value）时，如果 index 是数字，而且 index+1 大于 length 属性，则 length 属性会更新为 index+1。
+		 注意：如果您为 length 属性所赋的值小于现有长度，会将数组截断。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 指定数组中元素数量的非负整数。在向数组中添加新元素时，此属性会自动更新。当您给数组元素赋值（例如，my_array[index] = value）时，如果 index 是数字，而且 index+1 大于 length 属性，则 length 属性会更新为 index+1。
+		 <p><b>注意：</b>如果您为 length 属性所赋的值小于现有长度，会将数组截断。</p>
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Function"><apiName>Function</apiName><shortdesc>
+	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
+	 类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
+	 <p>类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。</p>
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><shortdesc>
+	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
+	 但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。Number 数据类型符合双精度 IEEE-754 标准。 需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 NaN（非数字）。
+	 
+	   EXAMPLE:
+	 
+	   下面的示例说明如何将一个具有六位小数的数字截断（使用舍入）为一个具有两位小数的数字。
+	 
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class NumberExample extends Sprite {
+	 public function NumberExample() {
+	 var num:Number = new Number(10.456345);
+	 var str:String = num.toFixed(2);
+	 trace(num); // 10.456345
+	 trace(str); // 10.46
+	 }
+	 }
+	 }
+	 
+	 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
+	 <p class="- topic/p ">但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。</p><p class="- topic/p ">Number 数据类型符合双精度 IEEE-754 标准。 </p><p class="- topic/p ">需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">NaN</codeph>（非数字）。</p>
+	 
+	   EXAMPLE:
+	 
+	   下面的示例说明如何将一个具有六位小数的数字截断（使用舍入）为一个具有两位小数的数字。
+	 <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class NumberExample extends Sprite {
+	 public function NumberExample() {
+	 var num:Number = new Number(10.456345);
+	 var str:String = num.toFixed(2);
+	 trace(num); // 10.456345
+	 trace(str); // 10.46
+	 }
+	 }
+	 }
+	 </codeblock>
+	 </apiDesc></apiClassifierDetail><apiValue id="Number:E"><apiName>E</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2.718281828459045</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:LN10"><apiName>LN10</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2.302585092994046</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:LN2"><apiName>LN2</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.6931471805599453</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:LOG10E"><apiName>LOG10E</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.4342944819032518</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:LOG2E"><apiName>LOG2E</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.4426950408889634</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 最大可表示数（双精度 IEEE-754）。此数字大约为 1.79e+308。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.79769313486231e+308</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 最大可表示数（双精度 IEEE-754）。此数字大约为 1.79e+308。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Number:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 可表示的最小非负非零数（双精度 IEEE-754）。此数字大约为 5e-324。可表示的全部数字中，最小数字实际为 -Number.MAX_VALUE。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>4.9406564584124654e-324</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小非负非零数（双精度 IEEE-754）。此数字大约为 5e-324。可表示的全部数字中，最小数字实际为 -Number.MAX_VALUE。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Number:NEGATIVE_INFINITY"><apiName>NEGATIVE_INFINITY</apiName><shortdesc>
+		 指定表示负无穷大的 IEEE-754 值。此属性的值与常数 -Infinity 的值相同。
+		 
+		   负无穷大是当数学运算或函数返回的值超过可表示的负值时，返回的一个特殊数值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>unknown</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 指定表示负无穷大的 IEEE-754 值。此属性的值与常数 -Infinity 的值相同。
+		 
+		   负无穷大是当数学运算或函数返回的值超过可表示的负值时，返回的一个特殊数值。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Number:NaN"><apiName>NaN</apiName><shortdesc>
+		 表示“非数字”(NaN) 的 IEEE-754 值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>NaN</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 表示“非数字”(NaN) 的 IEEE-754 值。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Number:PI"><apiName>PI</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>3.141592653589793</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:POSITIVE_INFINITY"><apiName>POSITIVE_INFINITY</apiName><shortdesc>
+		 指定表示正无穷大的 IEEE-754 值。此属性的值与常数 Infinity 的值相同。
+		 
+		   正无穷大是当数学运算或函数返回的值大于可表示的值时，返回的一个特殊数值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>Infinity</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
+		 指定表示正无穷大的 IEEE-754 值。此属性的值与常数 Infinity 的值相同。
+		 
+		   正无穷大是当数学运算或函数返回的值大于可表示的值时，返回的一个特殊数值。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Number:SQRT1_2"><apiName>SQRT1_2</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.7071067811865476</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="Number:SQRT2"><apiName>SQRT2</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.4142135623730951</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:IteratorResult"><apiName>IteratorResult</apiName><shortdesc>
+	 迭代器返回对象。
+	 done表示迭代是否结束
+	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.</shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 迭代器返回对象。
+	 done表示迭代是否结束
+	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.
+	 </apiDesc></apiClassifierDetail><apiValue id="IteratorResult:done"><apiName>done</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>Boolean</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="IteratorResult:key"><apiName>key</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiType value=""/></apiValueDef></apiValueDetail></apiValue><apiValue id="IteratorResult:value"><apiName>value</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiType value=""/></apiValueDef></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:short"><apiName>short</apiName><shortdesc>
+	 juice��չ�����ͣ�ʮ��λ�з�������
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 juice��չ�����ͣ�ʮ��λ�з�������
+	 </apiDesc></apiClassifierDetail><apiValue id="short:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 �ɱ�ʾ����� 16 λ�޷�������Ϊ 32767��
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>32767</apiData><apiValueClassifier>short</apiValueClassifier></apiValueDef><apiDesc>
+		 �ɱ�ʾ����� 16 λ�޷�������Ϊ 32767��
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="short:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 �ɱ�ʾ����С 16 λ�޷�������Ϊ -32768��
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>-32768</apiData><apiValueClassifier>short</apiValueClassifier></apiValueDef><apiDesc>
+		 �ɱ�ʾ����С 16 λ�޷�������Ϊ -32768��
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:sbyte"><apiName>sbyte</apiName><shortdesc>
+	 juice扩展的类型，八位有符号整数
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 juice扩展的类型，八位有符号整数
+	 </apiDesc></apiClassifierDetail><apiValue id="sbyte:MAX_VALUE"><apiName>MAX_VALUE</apiName><shortdesc>
+		 可表示的最大 8 位有符号整数为 127。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>127</apiData><apiValueClassifier>sbyte</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最大 8 位有符号整数为 127。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="sbyte:MIN_VALUE"><apiName>MIN_VALUE</apiName><shortdesc>
+		 可表示的最小 8 位有符号整数为 -128。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>-128</apiData><apiValueClassifier>sbyte</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小 8 位有符号整数为 -128。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:TypeError"><apiName>TypeError</apiName><shortdesc>
+	 表示发生了类型错误
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 表示发生了类型错误
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Object"><apiName>Object</apiName><shortdesc>
+	 Object 类位于 ActionScript 类层次结构的根处。Object 由构造函数使用 new 运算符语法创建，并且可以具有动态赋予其的属性。也可通过赋予对象文字值来创建 Object，如下所示：
+	 var obj:Object = {a:"foo", b:"bar"};
+	 不声明显式基类的所有类均可扩展内置 Object 类。
+	 可以使用 Object 类创建关联数组。关键是，关联数组是 Object 类的实例，而每个键/值对由属性及属性的值表示。要将关联数组声明为 Object 数据类型还有另一个原因：您可以使用对象文本来填充关联数组（但只能在您声明它时）。下面的示例使用对象文本创建一个关联数组，使用 dot 运算符和 array access 运算符访问项，然后通过创建一个新属性来添加新的键/值对：
+	 
+ var myAssocArray:Object = {fname:"John", lname:"Public"};
+ trace(myAssocArray.fname);     // John
+ trace(myAssocArray["lname"]);  // Public
+ myAssocArray.initial = "Q";
+ trace(myAssocArray.initial);   // Q
+	 
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/></apiClassifierDef><apiDesc>
+	 Object 类位于 ActionScript 类层次结构的根处。Object 由构造函数使用 new 运算符语法创建，并且可以具有动态赋予其的属性。也可通过赋予对象文字值来创建 Object，如下所示：
+	 <codeblock>var obj:Object = {a:"foo", b:"bar"};</codeblock>
+	 不声明显式基类的所有类均可扩展内置 Object 类。
+	 <p>可以使用 Object 类创建关联数组。关键是，关联数组是 Object 类的实例，而每个键/值对由属性及属性的值表示。要将关联数组声明为 Object 数据类型还有另一个原因：您可以使用对象文本来填充关联数组（但只能在您声明它时）。下面的示例使用对象文本创建一个关联数组，使用 dot 运算符和 array access 运算符访问项，然后通过创建一个新属性来添加新的键/值对：</p>
+	 <codeblock>
+ var myAssocArray:Object = {fname:"John", lname:"Public"};
+ trace(myAssocArray.fname);     // John
+ trace(myAssocArray["lname"]);  // Public
+ myAssocArray.initial = "Q";
+ trace(myAssocArray.initial);   // Q
+	 </codeblock>
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Class"><apiName>Class</apiName><shortdesc>
+	 为程序中的每个类定义创建一个 Class 对象。每个 Class 对象都是 Class 类的一个实例。Class 对象包含该类的静态属性和方法。在使用 new 运算符进行调用时，Class 对象会创建该类的实例。
+	 这是一种反射技术，用来区分类型，或者延迟决定实例化哪种类型
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 为程序中的每个类定义创建一个 Class 对象。每个 Class 对象都是 Class 类的一个实例。Class 对象包含该类的静态属性和方法。在使用 new 运算符进行调用时，Class 对象会创建该类的实例。
+	 <p>这是一种反射技术，用来区分类型，或者延迟决定实例化哪种类型</p>
+	 </apiDesc><example>下例演示如何通过下列步骤使用 Class 对象推迟有关实例化哪种类的决定，直到运行时为止：
+	 <p>1.声明两个类为 ClassA 和 ClassB。</p>
+	 <p>2.声明一个 Class 类型变量，名为 classToConstruct,根据此变量动态决定实例化类型</p>
+	 <codeblock>
+class ClassA {
+}
+    
+class ClassB {
+}
+
+var classToConstruct:Class;            
+var classInstance:Object;
+
+classToConstruct = ClassA;
+classInstance = new classToConstruct();
+trace(classInstance);    // [object ClassA]
+
+classToConstruct = ClassB;
+classInstance = new classToConstruct();
+trace(classInstance);    // [object ClassB]
+
+	 </codeblock>
+	 </example></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:ArgumentError"><apiName>ArgumentError</apiName><shortdesc>
+	 表示参数错误的类
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 表示参数错误的类
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Boolean"><apiName>Boolean</apiName><shortdesc>
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
+	 </apiDesc></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="flash.errors"><apiName>flash.errors</apiName><apiClassifier id="flash.errors:IllegalOperationError"><apiName>IllegalOperationError</apiName><shortdesc>
+	 当方法未实现或者实现中未涉及当前用法时，将引发 IllegalOperationError 异常。
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 当方法未实现或者实现中未涉及当前用法时，将引发 IllegalOperationError 异常。
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="flash.errors:EOFError"><apiName>EOFError</apiName><shortdesc>
+	 如果尝试读取的内容超出可用数据的末尾，则会引发 EOFError 异常。例如，当调用 IDataInput 接口中的一个读取方法，而数据不足以满足读取请求时，将引发 EOFError。
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 如果尝试读取的内容超出可用数据的末尾，则会引发 EOFError 异常。例如，当调用 IDataInput 接口中的一个读取方法，而数据不足以满足读取请求时，将引发 EOFError。
+	 </apiDesc></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="flash.utils"><apiName>flash.utils</apiName><apiClassifier id="flash.utils:Endian"><apiName>Endian</apiName><shortdesc>
+	 Endian 类中包含一些值，它们表示用于表示多字节数字的字节顺序。字节顺序为 bigEndian（最高有效字节位于最前）或 littleEndian（最低有效字节位于最前）。
+	 
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 Endian 类中包含一些值，它们表示用于表示多字节数字的字节顺序。字节顺序为 bigEndian（最高有效字节位于最前）或 littleEndian（最低有效字节位于最前）。
+	 
+	 </apiDesc></apiClassifierDetail><apiValue id="flash.utils:Endian:BIG_ENDIAN"><apiName>BIG_ENDIAN</apiName><shortdesc>
+		 表示多字节数字的最高有效字节位于字节序列的最前面。
+		 十六进制数字 0x12345678 包含 4 个字节（每个字节包含 2 个十六进制数字）。最高有效字节为 0x12。最低有效字节为 0x78。（对于等效的十进制数字 305419896，最高有效数字是 3，最低有效数字是 6）。使用 bigEndian 字节顺序（最高有效字节位于最前）的流将写入：
+		 12 34 56 78
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>bigEndian</apiData><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 表示多字节数字的最高有效字节位于字节序列的最前面。
+		 十六进制数字 0x12345678 包含 4 个字节（每个字节包含 2 个十六进制数字）。最高有效字节为 0x12。最低有效字节为 0x78。（对于等效的十进制数字 305419896，最高有效数字是 3，最低有效数字是 6）。使用 bigEndian 字节顺序（最高有效字节位于最前）的流将写入：
+		 12 34 56 78
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:Endian:LITTLE_ENDIAN"><apiName>LITTLE_ENDIAN</apiName><shortdesc>
+		 表示多字节数字的最低有效字节位于字节序列的最前面。
+		 十六进制数字 0x12345678 包含 4 个字节（每个字节包含 2 个十六进制数字）。最高有效字节为 0x12。最低有效字节为 0x78。（对于等效的十进制数字 305419896，最高有效数字是 3，最低有效数字是 6）。使用 littleEndian 字节顺序（最低有效字节位于最前）的流将写入：
+		 78 56 34 12
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>littleEndian</apiData><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 表示多字节数字的最低有效字节位于字节序列的最前面。
+		 十六进制数字 0x12345678 包含 4 个字节（每个字节包含 2 个十六进制数字）。最高有效字节为 0x12。最低有效字节为 0x78。（对于等效的十进制数字 305419896，最高有效数字是 3，最低有效数字是 6）。使用 littleEndian 字节顺序（最低有效字节位于最前）的流将写入：
+		 78 56 34 12
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="flash.utils:Dictionary"><apiName>Dictionary</apiName><shortdesc>
+	 Dictionary 类用于创建属性的动态集合，该集合使用 strict equality (===) 运算符进行键比较。将对象用作键时，会使用对象的标识来查找对象，而不是使用在对象上调用 toString() 所返回的值。
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 Dictionary 类用于创建属性的动态集合，该集合使用 strict equality (===) 运算符进行键比较。将对象用作键时，会使用对象的标识来查找对象，而不是使用在对象上调用 toString() 所返回的值。
+	 </apiDesc><example>以下语句显示了一个 Dictionary 对象和一个 key 对象之间的关系：
+	 <codeblock>
+ var dict = new Dictionary();
+ var obj = new Object();
+ var key:Object = new Object();
+ key.toString = function() { return "key" }
+ 
+ dict[key] = "Letters";
+ obj["key"] = "Letters";
+ 
+ dict[key] == "Letters"; // true
+ obj["key"] == "Letters"; // true
+ obj[key] == "Letters"; // true because key == "key" is true b/c key.toString == "key"
+ dict["key"] == "Letters"; // false because "key" === key is false
+ delete dict[key]; //removes the key
+	 </codeblock>
+	 </example></apiClassifierDetail></apiClassifier><apiClassifier id="flash.utils:IDataOutput"><apiName>IDataOutput</apiName><shortdesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef><apiDesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p><p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p><ul class="- topic/ul "><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li></ul>
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 <ol class="- topic/ol "><li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li><li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li><li class="- topic/li ">重新读取布尔值和双精度浮点数。</li></ol><p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p><codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());    // 3.141592653589793
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);        // EOFError: Error #2030: End of file was encountered.
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	 </apiDesc></apiClassifierDetail><apiValue id="flash.utils:IDataOutput:flash.utils:IDataOutput:endian:get"><apiName>endian</apiName><shortdesc>
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:IDataOutput:flash.utils:IDataOutput:objectEncoding:get"><apiName>objectEncoding</apiName><shortdesc>
+		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="flash.utils:IDataInput"><apiName>IDataInput</apiName><shortdesc>
+	 IDataInput 接口提供一组用于读取二进制数据的方法。此接口是写入二进制数据的 IDataOutput 接口的 I/O 对应接口。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。如果可用数据不足，则会引发 EOFError 异常。使用 IDataInput.bytesAvailable 属性来确定可供读取的数据有多少。符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataInputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataInputExample extends Sprite {        
+	 public function DataInputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef><apiDesc>
+	 IDataInput 接口提供一组用于读取二进制数据的方法。此接口是写入二进制数据的 IDataOutput 接口的 I/O 对应接口。
+	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。如果可用数据不足，则会引发 <codeph class="+ topic/ph pr-d/codeph ">EOFError</codeph> 异常。使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.bytesAvailable</codeph> 属性来确定可供读取的数据有多少。</p><p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p><ul class="- topic/ul "><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li></ul>
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataInputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 <ol class="- topic/ol "><li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li><li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li><li class="- topic/li ">重新读取布尔值和双精度浮点数。</li></ol><p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p><codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataInputExample extends Sprite {        
+	 public function DataInputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());    // 3.141592653589793
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);        // EOFError: Error #2030: End of file was encountered.
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	 </apiDesc></apiClassifierDetail><apiValue id="flash.utils:IDataInput:flash.utils:IDataInput:bytesAvailable:get"><apiName>bytesAvailable</apiName><shortdesc>
+		 返回可在输入缓冲区中读取的数据的字节数。在尝试使用某一种读取方法读取数据之前，用户代码必须调用 bytesAvailable 以确保有足够的数据可用。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="read"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 返回可在输入缓冲区中读取的数据的字节数。在尝试使用某一种读取方法读取数据之前，用户代码必须调用 bytesAvailable 以确保有足够的数据可用。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:IDataInput:flash.utils:IDataInput:endian:get"><apiName>endian</apiName><shortdesc>
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:IDataInput:flash.utils:IDataInput:objectEncoding:get"><apiName>objectEncoding</apiName><shortdesc>
+		 用于确定在使用 readObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 用于确定在使用 readObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="flash.utils:ByteArray"><apiName>ByteArray</apiName><shortdesc>
+	 ByteArray 类提供用于优化读取、写入以及处理二进制数据的方法和属性。
+	 内存中的数据是一个压缩字节数组（数据类型的最紧凑表示形式），但可以使用标准 []（数组访问）运算符来操作 ByteArray 类的实例。
+	 ByteArray 类可能的用途包括：
+	 通过使用数据类型优化数据的大小。
+	 使用从文件加载的二进制数据。
+	 
+	 
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiBaseInterface>flash.utils:IDataInput2</apiBaseInterface><apiBaseInterface>flash.utils:IDataOutput2</apiBaseInterface><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 ByteArray 类提供用于优化读取、写入以及处理二进制数据的方法和属性。
+	 <p>内存中的数据是一个压缩字节数组（数据类型的最紧凑表示形式），但可以使用标准 []（数组访问）运算符来操作 ByteArray 类的实例。</p>
+	 <p>ByteArray 类可能的用途包括：<ul>
+	 <li>通过使用数据类型优化数据的大小。</li>
+	 <li>使用从文件加载的二进制数据。</li>
+	 </ul></p>
+	 
+	 </apiDesc><example>以下示例将布尔值和 pi 的双精度浮点表示形式写入字节数组。
+	 <p><b>注意：</b>在字节上调用 trace() 时，它将输出存储于字节数组中的字节的十进制等效值。</p>
+	 <p>注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p>
+	 <codeblock>
+var byteArr:ByteArray = new ByteArray();
+
+byteArr.writeBoolean(false);
+trace(byteArr.length);            // 1
+trace(byteArr[0]);            // 0
+
+byteArr.writeDouble(Math.PI);
+trace(byteArr.length);            // 9
+trace(byteArr[0]);            // 0
+trace(byteArr[1]);            // 64
+trace(byteArr[2]);            // 9
+trace(byteArr[3]);            // 33
+trace(byteArr[4]);            // 251
+trace(byteArr[5]);            // 84
+trace(byteArr[6]);            // 68
+trace(byteArr[7]);            // 45
+trace(byteArr[8]);            // 24
+
+byteArr.position = 0;
+
+try {
+	trace(byteArr.readBoolean() == false); // true
+} 
+catch(e:EOFError) {
+	trace(e);           // EOFError: Error #2030: End of file was encountered.
+}
+
+try {
+	trace(byteArr.readDouble());        // 3.141592653589793
+}
+catch(e:EOFError) {
+	trace(e);           // EOFError: Error #2030: End of file was encountered.
+}
+
+try {
+	trace(byteArr.readDouble());
+} 
+catch(e:EOFError) {
+	trace(e);            // EOFError: Error #2030: End of file was encountered.
+}
+	 </codeblock>
+	 </example></apiClassifierDetail><apiValue id="flash.utils:ByteArray:bytesAvailable:get"><apiName>bytesAvailable</apiName><shortdesc>
+		 可从字节数组的当前位置到数组末尾读取的数据的字节数。
+		 
+		   每次访问 ByteArray 对象时，将 bytesAvailable 属性与读取方法结合使用，以确保读取有效的数据。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="read"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 可从字节数组的当前位置到数组末尾读取的数据的字节数。
+		 
+		   每次访问 ByteArray 对象时，将 bytesAvailable 属性与读取方法结合使用，以确保读取有效的数据。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:ByteArray:endian:get"><apiName>endian</apiName><shortdesc>
+		 更改或读取数据的字节顺序；Endian.BIG_ENDIAN 或 Endian.LITTLE_ENDIAN。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 更改或读取数据的字节顺序；Endian.BIG_ENDIAN 或 Endian.LITTLE_ENDIAN。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:ByteArray:length:get"><apiName>length</apiName><shortdesc>
+		 ByteArray 对象的长度（以字节为单位）。
+		 
+		   如果将长度设置为大于当前长度的值，则用零填充字节数组的右侧。如果将长度设置为小于当前长度的值，将会截断该字节数组。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 ByteArray 对象的长度（以字节为单位）。
+		 
+		   如果将长度设置为大于当前长度的值，则用零填充字节数组的右侧。如果将长度设置为小于当前长度的值，将会截断该字节数组。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:ByteArray:objectEncoding:get"><apiName>objectEncoding</apiName><shortdesc>
+		 用于确定在写入或读取 ByteArray 实例时应使用 ActionScript 3.0、ActionScript 2.0 还是 ActionScript 1.0 格式。该值为 ObjectEncoding 类中的常数。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 用于确定在写入或读取 ByteArray 实例时应使用 ActionScript 3.0、ActionScript 2.0 还是 ActionScript 1.0 格式。该值为 ObjectEncoding 类中的常数。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:ByteArray:position:get"><apiName>position</apiName><shortdesc>
+		 将文件指针的当前位置（以字节为单位）移动或返回到 ByteArray 对象中。下一次调用读取方法时将在此位置开始读取，或者下一次调用写入方法时将在此位置开始写入。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 将文件指针的当前位置（以字节为单位）移动或返回到 ByteArray 对象中。下一次调用读取方法时将在此位置开始读取，或者下一次调用写入方法时将在此位置开始写入。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier></apiPackage></allClasses>

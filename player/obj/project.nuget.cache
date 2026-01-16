@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "pK/nP0hjfUs=",
+  "success": true,
+  "projectFilePath": "F:\\GitHub\\juice-script-2\\juice-script-2\\player\\player.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\W11\\.nuget\\packages\\mcmaster.extensions.commandlineutils\\4.1.1\\mcmaster.extensions.commandlineutils.4.1.1.nupkg.sha512",
+    "C:\\Users\\W11\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,47 @@
+﻿using juicescript.ABC.Locaters;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace juicescript.ABC.INS
+{
+	public sealed class INS_Create_Prop : Instruction
+	{
+		public INS_Create_Prop(Token token) : base(token)
+		{
+		}
+
+		public override INS_Code INS_Code => INS_Code.create_prop;
+
+		public override int Size => 4 + 4 + 4;
+
+
+		
+		public StackLocater key;
+
+		public StackLocater value;
+
+
+		protected override void ReadFromBinary(BinaryReader br)
+		{
+			
+			key.ReadFromBinary(br);
+			value.ReadFromBinary(br);
+		}
+
+		protected override void WriteByte(BinaryWriter bw)
+		{
+			
+			key.Write(bw);
+			value.Write(bw);
+		}
+
+		public override string ToString()
+		{
+			return $"Create_Prop  {dst}.{key} = {value}"; 
+		}
+
+	}
+}

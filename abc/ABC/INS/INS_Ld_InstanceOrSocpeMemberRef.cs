@@ -1,0 +1,52 @@
+﻿using juicescript.ABC.Locaters;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace juicescript.ABC.INS
+{
+    public sealed class INS_Ld_InstanceOrSocpeMemberRef : Instruction
+    {
+        public override INS_Code INS_Code => INS_Code.ld_InstanceOrScopeMemberValueRef;
+
+        public override int Size
+        {
+            get
+            {
+                return 4 + 4 + 4;
+            }
+        }
+
+      
+
+        public StackLocater instance;
+
+        public uint scopemember_index;
+
+        public INS_Ld_InstanceOrSocpeMemberRef(Token token) : base(token)
+        {
+        }
+
+        protected override void WriteByte(BinaryWriter bw)
+        {
+           
+            instance.Write(bw);
+            bw.Write(scopemember_index);
+        }
+
+		protected override void ReadFromBinary(BinaryReader br)
+		{
+		
+            instance.ReadFromBinary(br);
+            scopemember_index = br.ReadUInt32();
+		}
+
+		public override string ToString()
+        {
+            return $"Ld_InstanceOrSocpe_MemberRef   [{dst}] <- [{instance} . scopemember: {scopemember_index}]&";
+        }
+
+    }
+}

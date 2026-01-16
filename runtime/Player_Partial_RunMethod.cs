@@ -1,0 +1,635 @@
+﻿using juicescript.ABC;
+using juicescript.ABC.Locaters;
+using juicescript.runtime.buildin;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using static juicescript.runtime.Player;
+
+namespace juicescript.runtime
+{
+	public partial class Player
+	{
+
+
+		/// <summary>
+		/// 特别注意在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
+		/// </summary>
+		/// <param name="method"></param>
+		/// <param name="thisPtr"></param>
+		/// <param name="scope_ptr"></param>
+		/// <param name="scopeType"></param>
+		/// <param name="args"></param>
+		/// <param name="argementPtr"></param>
+		/// <param name="slot"></param>
+		/// <param name="error"></param>
+		/// <param name="returnSlotIndex"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="NotImplementedException"></exception>
+		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType, ushort args, byte* argementPtr,
+			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex , int callee_closure_ptr = 0 ,bool skipcheckargscount = false)
+		{
+#if FORCOMPILER
+			if (IsComputeConstExpr)
+			{
+				ComputeConstExprOnRunMethod(method);
+			}
+#endif
+#if DEBUG
+			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
+			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
+			Context.GC.ForceGC(ref error);
+#endif
+
+
+			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
+			method.Body.GetInfo(ref info);
+
+			do
+			{
+				if (Context.BackTraceIndex >= Context.MAX_BACKTRACE)
+				{
+					break;
+				}
+
+				int para_argcount = 0;
+
+				if ( method.IsAnonymous || skipcheckargscount )//method.Trait == null && method.Parameters.Count == 0)
+				{
+					//不检查参数个数
+				}				
+				else
+				{
+					//检查参数个数
+					if (args > method.Parameters.Count)
+					{
+						if (method.Parameters.Count == 0 || !method.Parameters[method.Parameters.Count - 1].IsRest)
+						{
+							//throw new NotImplementedException("参数过多");
+
+							int expected = method.Parameters.Count;
+							do
+							{
+								--expected;
+							} while (expected >= 0 && (method.Parameters[expected].IsOptional || method.Parameters[expected].IsRest));
+
+							RaiseArgementErrorCountMisMatch(ref error, method, expected + 1, args);
+
+							goto lbl_handle_arg_err;
+
+						}
+					}
+					else if (args < method.Parameters.Count)
+					{
+						if (!method.Parameters[args].IsOptional && !method.Parameters[args].IsRest)
+						{
+							int expected = method.Parameters.Count;
+							do
+							{
+								--expected;
+							} while (expected >= 0 && method.Parameters[expected].IsOptional);
+
+
+							RaiseArgementErrorCountMisMatch(ref error, method, expected + 1, args);
+
+							goto lbl_handle_arg_err;
+						}
+					}
+				}
+
+
+				//先将 rest 部分元素序列放入
+				if (//method.Parameters.Count > 0 && method.Parameters[method.Parameters.Count - 1].IsRest
+					method.Flags.HasFlag(MethodFlags.NeedRest)
+					)
+				{
+					int restCount = args - (method.Parameters.Count - 1);
+					if (restCount > 0)
+					{
+						para_argcount = restCount;
+
+						if (Context.StackPosition + restCount >= Context.STACK_LENGTH)
+						{
+							break;
+						}
+
+						byte* P = argementPtr + sizeof(StackLocater) * (method.Parameters.Count - 1);
+
+						for (int i = 0; i < restCount; i++)
+						{
+							StackLocater argLocater;
+							LoadStackLocater(&argLocater, &P);
+
+							//考虑如下代码的存在，所以我们只能在存入数组时保存到实体
+							//class A{}
+							//class B{}
+							//(function ():void 
+							//{
+							//	var b = new A();
+							//	function k(...r):void 
+							//	{
+							//		b = new B();
+							//		trace(r[0]);
+							//	}
+							//	k(b);
+							//})();
+							NaNBoxing box = slot[argLocater.index];
+							if (!method.Flags.HasFlag(MethodFlags.Native)) //native代码，默认直接传引用，如果需要保存到堆自己在native里处理。
+							{
+								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+								{
+									var v = Context.GC.Heap[box.HeapPtr];
+									if (v.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+									{
+										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
+										var struct_ins = Context.GC.Heap[struct_ptr];
+
+										((RtPayloadInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
+										box.SetHeapPtr(struct_ptr);
+									}
+									else
+									{
+										box = GetSaveValue(box, ref error);
+										if (error.raised)
+										{
+											goto lbl_handle_arg_err;
+										}
+									}
+								}
+							}
+							Context.StackSlots[Context.StackPosition + i] = box;
+
+						}
+					}
+				}
+				else if (method.Flags.HasFlag(MethodFlags.NeedArguments)) //构造argements数组
+				{
+					para_argcount = args + 2;
+
+					if (Context.StackPosition + para_argcount >= Context.STACK_LENGTH)
+					{
+						break;
+					}
+
+					Context.GC.CheckGC(ref error);
+
+					//改在实际传参时赋值进去
+					//由于可能 method.Parameters.Count小于 args的情况，所以这里先把超出的部分填入
+					/*比如这种代码
+					 * var a;
+						var c;
+						(function ():void   
+						{
+							a = arguments;
+							c = arguments.callee;
+						})(1,2,3);
+
+						c(6,7);
+					*/
+					byte* P = argementPtr + method.Parameters.Count * sizeof(StackLocater) ;
+					for (int i = method.Parameters.Count ; i < args; i++)
+					{
+						StackLocater argLocater;
+						LoadStackLocater(&argLocater, &(P));
+
+						NaNBoxing box = slot[argLocater.index];
+						if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+						{
+							var v = Context.GC.Heap[box.HeapPtr];
+							if (v.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+							{
+								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
+								var struct_ins = Context.GC.Heap[struct_ptr];
+
+								((RtPayloadInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
+								box.SetHeapPtr(struct_ptr);
+							}
+							else
+							{
+								box = GetSaveValue(box, ref error);
+								if (error.raised)
+								{
+									goto lbl_handle_arg_err;
+								}
+							}
+						}
+						Context.StackSlots[Context.StackPosition + i] = box;
+					}
+
+
+					Memory<NaNBoxing> arguments = Context.StackSlots.AsMemory(Context.StackPosition, args);
+
+					int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
+					RtHeapInstance arg_rest = Context.GC.Heap[argumentsPtr];
+#if DEBUG
+					if (((RtPayloadArray)arg_rest.facility).StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
+					arg_rest.Type = Context.ARRAY.Instance;
+					((RtPayloadArray)arg_rest.facility).array_len = (uint)arguments.Length;
+					((RtPayloadArray)arg_rest.facility).stack_store = arguments;
+					((RtPayloadArray)arg_rest.facility).stack_store_startindex = Context.StackPosition;
+					((RtPayloadArray)arg_rest.facility).HEAPINSTANCE_PTR = 0;
+					((RtPayloadArray)arg_rest.facility).Set_PROPERTY_PTR(0, this);
+					((RtPayloadArray)arg_rest.facility).SetIsArguments(true);
+
+					if (callee_closure_ptr != 0)
+					{
+						
+						Context.StackSlots[Context.StackPosition + args + 1].SetHeapPtr(callee_closure_ptr);
+					}
+					else
+					{
+
+						int calleePtr = Context.M_ClosurePtr + Context.StackPosition + args + 1;
+#if DEBUG
+						if (Context.GC.Heap[calleePtr].TypeKind != RtHeapTypeKind.CLOSURE)
+						{
+							throw new NotImplementedException();
+						}
+#endif
+
+						
+						Context.GC.Heap[calleePtr].Type = method.Body;
+						RtPayloadClosure payloadClosure = (RtPayloadClosure)Context.GC.Heap[calleePtr].facility;
+						payloadClosure.This = thisPtr;
+						payloadClosure.ScopePtr = scope_ptr;
+						payloadClosure.ScopeType = null; payloadClosure._ref_as_type = null;
+
+						Context.StackSlots[Context.StackPosition + args + 1].SetHeapPtr(calleePtr);
+					}
+					//int calleePtr = Context.GC.AllocClosure(method);
+					//if (calleePtr == 0)
+					//{
+					//	RaiseOutOfMemory(ref error);
+					//	goto lbl_handle_arg_err;
+					//}
+
+					//RtPayloadClosure payloadClosure = (RtPayloadClosure)Context.GC.Heap[calleePtr].facility;
+					//payloadClosure.This = thisPtr;
+					//payloadClosure.ScopePtr = scope_ptr;
+					//payloadClosure.ScopeType = null; payloadClosure._ref_as_type = null;
+
+					//NaNBoxing callee = new NaNBoxing();
+					//callee.SetHeapPtr(calleePtr);
+
+					//CreateDynamic(ref error, arg_rest, CALLEESTR_PTR, callee);
+					//if (error.raised)
+					//{
+					//	goto lbl_handle_arg_err;
+					//}
+
+					Context.StackSlots[Context.StackPosition + args].SetHeapPtr(argumentsPtr);
+
+				}
+
+				
+
+				int scopeMembers = method.Body._link_codescope.Members.Count;
+				if (Context.StackPosition + para_argcount + scopeMembers + info.useSlots
+					//+ 1 
+					>= Context.STACK_LENGTH)
+				{
+					break;
+				}
+
+				Context.StackPosition += para_argcount;
+
+				int backTraceId = Context.BackTraceIndex;
+				
+				int mScopeId = backTraceId + Context.M_MethodScopePtr;
+				RtHeapInstance mScope = Context.GC.Heap[mScopeId];
+
+				mScope.Type = method.Body;
+				RtPayloadMethodScope m_scopePayload = (RtPayloadMethodScope)mScope.facility;
+				m_scopePayload.ParentPtr = scope_ptr;
+				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method.Body._link_codescope,true);
+
+#if FORCOMPILER
+				m_scopePayload.isCompiling = false;
+				if (IsComputeConstExpr)
+				{
+					m_scopePayload.isCompiling = true;
+					goto lbl_arguments_pass;
+				}
+#endif
+
+
+				//***传参***
+
+				fixed (byte* bp = method.Flags.HasFlag(MethodFlags.HasOptional) ? method.Body.param_defaultvalues : null)
+				{
+					Span<NaNBoxing> arguments_span = default;
+
+					if (method.Flags.HasFlag(MethodFlags.NeedArguments))
+					{
+						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
+						RtHeapInstance arg_arguments = Context.GC.Heap[argumentsPtr];
+						arguments_span = ((RtPayloadArray)arg_arguments.facility).stack_store.Span;
+					}
+
+					Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, method.Parameters.Count);
+					param_slots.Clear(); //防止GC 错误意外访问
+					for (ushort i = 0; i < param_slots.Length; i++)
+					{
+						var p = method.Parameters[i];
+						if (p.IsRest)
+						{
+							Memory<NaNBoxing> rest = Context.StackSlots.AsMemory(
+								Context.StackPosition
+
+								- para_argcount, para_argcount);
+
+							int restPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
+
+							RtHeapInstance arg_rest = Context.GC.Heap[restPtr];
+
+#if DEBUG
+							if (((RtPayloadArray)arg_rest.facility).StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+							{
+								throw new InvalidOperationException();
+							}
+#endif
+							arg_rest.Type = Context.ARRAY.Instance;
+							((RtPayloadArray)arg_rest.facility).array_len = (uint)rest.Length;
+							((RtPayloadArray)arg_rest.facility).stack_store = rest;
+							((RtPayloadArray)arg_rest.facility).stack_store_startindex = Context.StackPosition- para_argcount;
+							((RtPayloadArray)arg_rest.facility).HEAPINSTANCE_PTR = 0;
+							((RtPayloadArray)arg_rest.facility).Set_PROPERTY_PTR(0, this);
+							((RtPayloadArray)arg_rest.facility).SetIsRest(true);
+
+
+							NaNBoxing box = new NaNBoxing();
+							box.SetHeapPtr(restPtr);
+
+							m_scopePayload.SetSlot(box, i);
+
+						}
+						else
+						{
+							if (i < args)
+							{
+								StackLocater argLocater;
+								LoadStackLocater(&argLocater, &argementPtr);
+
+								NaNBoxing box = slot[argLocater.index];
+
+								Context.StackPosition += method.Parameters.Count;
+								Context.BackTraceIndex++;
+								ConvertValueType(ref error, box, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i],scope_ptr,thisPtr);
+								Context.BackTraceIndex--;
+								Context.StackPosition -= method.Parameters.Count;
+
+								if (error.raised)
+								{
+									Context.StackPosition -= para_argcount;
+
+									goto lbl_handle_arg_err;
+								}
+
+								if(true)
+								{
+									//这里是保存到参数中，也需要预准备保存到方法体。
+									box = param_slots[i];
+									if (box.ValueType == NaNBoxing.BoxType.HeapPtr) //仅在是堆对象时，才可能触发维护引用的操作
+									{
+										param_slots[i].SetUndefined();
+
+										ScopeHeapLocater scopeHeapLocater;
+										scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
+										scopeHeapLocater.MemberIndex = i;
+
+									
+
+										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, true);
+#if DEBUG
+										if (error.raised)
+										{
+											throw new InvalidOperationException();
+										}
+#endif
+										param_slots[i] = box;
+									}
+								}
+
+								if (method.Flags.HasFlag(MethodFlags.NeedArguments))
+								{
+									//有arguments,只能实例到堆。避免其他意外
+									box = param_slots[i];
+
+									if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+									{
+										var v = Context.GC.Heap[box.HeapPtr];
+										if (v.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+										{
+											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,
+												Context.StackPosition - para_argcount + i //实例到arguments数组
+												,false
+												);
+											var struct_ins = Context.GC.Heap[struct_ptr];
+
+											((RtPayloadInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
+											box.SetHeapPtr(struct_ptr);
+										}
+										else
+										{
+											box = GetSaveValue(box, ref error);
+											if (error.raised)
+											{
+												Context.StackPosition -= para_argcount;
+												goto lbl_handle_arg_err;
+											}
+											param_slots[i] = box;
+										}
+									}
+
+									arguments_span[i] = box;
+								}
+								
+							}
+							else
+							{
+								if (!p.IsOptional)
+								{
+									if (method.IsAnonymous || skipcheckargscount)
+									{
+										param_slots[i].SetUndefined();
+										continue;
+									}
+#if DEBUG
+									else
+									{ 
+										throw new InvalidOperationException();
+									}
+#endif
+								}
+							
+								Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
+								NaNBoxing value = constants[p.ValueExprIndex];
+								ConvertValueType(ref error, value, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i]);
+
+								if (error.raised)
+								{
+									Context.StackPosition -= para_argcount;
+									goto lbl_handle_arg_err;
+								}
+
+								//throw new NotImplementedException("有默认值的参数");
+								
+							}
+						}
+					}
+				}
+
+
+#if FORCOMPILER
+			lbl_arguments_pass:
+#endif
+
+				if (returnSlotIndex > -1)
+				{
+					Context.StackSlots[returnSlotIndex].setDefault(method.ReturnTypeKind);
+				}
+
+				if (info.instructions > 0)
+				{
+					int calleelastpos = Context.StackPosition;
+					Context.StackPosition += scopeMembers;
+
+					int stPos = Context.StackPosition;
+					Context.StackPosition += info.useSlots;
+					
+					//Context.BackTrace[Context.BackTraceIndex].Method = method;
+					Context.BackTraceIndex++; ;
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
+					slots.Clear(); //栈清空 -- 防止GC时错误访问
+					int P_PC;
+					Execute(ref info,mScope, thisPtr, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex,calleelastpos);
+
+					Context.BackTraceIndex--;
+					//Context.BackTrace[Context.BackTraceIndex].Method = null;
+
+
+
+					Context.StackPosition -= info.useSlots;
+					Context.StackPosition -= scopeMembers;
+
+					m_scopePayload.ParentPtr = 0;
+					mScope.Type = null;
+
+					Context.StackPosition -= para_argcount;
+
+					if (!error.raised)
+					{
+						if (returnSlotIndex >= 0)
+						{
+							return Context.StackSlots[returnSlotIndex];
+						}
+						else
+						{
+							return default(NaNBoxing);
+						}
+					}
+					else
+					{
+						//记录当前报错堆栈，看上级调用是否处理这个错误
+						Context.errorStack.AddTrace(method, P_PC);
+
+						return new NaNBoxing();
+					}
+
+				}
+				else if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
+				{
+
+					if (method.nativefunction_delegate == null)
+					{
+						string key =
+							method.__is_vector_method?
+							$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
+							:
+							$"{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${ (method.Body.QName ==null ? "@" :  method.Body.QName.Namespace.ToDebugNameSpaceString())}::{ ((method.Trait !=null && method.Trait.Kind == TraitKind.Getter)?"get#":((method.Trait != null && method.Trait.Kind == TraitKind.Setter)?"set#":"" ) ) }{method.Name}";
+
+						var m = NativeFunctionRegistry.GetFunction(key);
+						if (m != null)
+						{
+							method.nativefunction_delegate = (NativeFun)Delegate.CreateDelegate(typeof(NativeFun), m);
+						}
+						else
+						{
+							RaiseIllegaloperationError(ref error, key);
+							goto lbl_native_called;
+						}
+						
+					}
+
+					//Context.BackTrace[Context.BackTraceIndex].Method = method;
+					Context.BackTraceIndex++; ;
+					
+					((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
+
+					Context.BackTraceIndex--;
+					//Context.BackTrace[Context.BackTraceIndex].Method = null;
+
+
+				lbl_native_called:
+					m_scopePayload.ParentPtr = 0;
+					mScope.Type = null;
+					Context.StackPosition -= para_argcount;
+
+					if (!error.raised)
+					{
+						if (returnSlotIndex >= 0)
+						{
+							return Context.StackSlots[returnSlotIndex];
+						}
+						else
+						{
+							return default(NaNBoxing);
+						}
+					}
+					else
+					{
+						//记录当前报错堆栈，看上级调用是否处理这个错误
+						Context.errorStack.AddTrace(method, 0);
+						return new NaNBoxing();
+					}
+
+				}
+				else
+				{
+					//Context.StackPosition--;
+					Context.StackPosition -= para_argcount;
+					return new NaNBoxing();
+				}
+
+
+			} while (false);
+
+			//stackoverflow
+			Context.GC.CheckGC(ref error);
+			RaiseStackOverflow(ref error);
+
+			return new NaNBoxing();
+
+		lbl_handle_arg_err:
+
+
+			return new NaNBoxing();
+			;
+
+		}
+
+
+
+	}
+}

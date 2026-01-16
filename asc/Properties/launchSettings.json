@@ -1,0 +1,27 @@
+{
+  "profiles": {
+    "asc": {
+      "commandName": "Project"
+    },
+    "asc_symbol": {
+      "commandName": "Project",
+      "commandLineArgs": "symbol -r F:\\GitHub\\Box2DFlashAS3-master\\Box2DFlashAS3-master\\box2d\\src\\main\\joo -v"
+    },
+    "asc_ast": {
+      "commandName": "Project",
+      "commandLineArgs": "ast F:\\GitHub\\juice-script\\testscript\\src\\Main.as"
+    },
+    "asc_globalswc": {
+      "commandName": "Project",
+      "commandLineArgs": "-r F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\juice_global\\src -w global_swc -o juice_global.swc -f"
+    },
+    "asc_testcompile": {
+      "commandName": "Project",
+      "commandLineArgs": "-r F:\\GitHub\\juice-script\\testscript\\src -w work -l global_swc\\juice_global.swc -o testcomp.swc"
+    },
+    "asc_dev1": {
+      "commandName": "Project",
+      "commandLineArgs": "-r F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\dev_scripts\\dev1\\src \r\n-w F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\dev_scripts\\dev1\\obj \r\n-l F:\\GitHub\\juice-script-2\\juice-script-2\\asc\\bin\\Debug\\net6.0\\global_swc\\juice_global.swc -f"
+    }
+  }
+}

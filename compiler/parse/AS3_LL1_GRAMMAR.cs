@@ -1,0 +1,494 @@
+﻿using juicescript.compiler.Properties;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace juicescript.compiler.parse
+{
+    /// <summary>
+    /// AS3 LL1 文法
+    /// </summary>
+    public class AS3_LL1_GRAMMAR
+    {
+        public static string GRAMMAR
+        {
+            get 
+            {
+                return @"
+<AS3File>   ::=<PACKAGE>|<HOUT_PACKAGE><PACKAGE>;
+
+<PACKAGE>   ::= ""package"" <PACKAGE_NAME> ""{"" <PACKAGEBODY><OUT_PACKAGE>;
+<PACKAGEBODY> ::=""}"" |<PACKAGE_STMTS> ""}"";
+
+<OUT_PACKAGE> ::= <PACKAGE_STMTS>|null;
+<HOUT_PACKAGE>::= <PACKAGE_STMTS>|null;
+
+
+<PACKAGE_NAME> ::=<ClassPath>|null;
+
+
+<PACKAGE_STMTS> ::=<PACKAGE_STMT><PACKAGE_STMTS1>;
+<PACKAGE_STMTS1> ::=<PACKAGE_STMT><PACKAGE_STMTS1>|null;
+<PACKAGE_STMT> ::=<PACKAGE_BLOCK>|"";"";
+
+<PACKAGE_BLOCK> ::=""{""<Label> <PACKAGE_BLOCK_2> | <PACKAGE_EXPR> ;
+<PACKAGE_BLOCK_2>   ::= <PACKAGE_STMTS> ""}""|""}"";
+
+<PACKAGE_EXPR> ::= <ACCESS_DEF>|<Syntax>|<ExpressionList>|useless_label;
+
+
+<Import>    ::= ""import""  <Import_ClassPath> ;    
+<Import_ClassPath> ::= identifier<Import_ClassPath_1>;
+<Import_ClassPath_1> ::="".*""|"".""identifier<Import_ClassPath_1>|null;
+
+
+<Use>       ::= ""use"" ""namespace""  <ClassPath> ; //""default"" ""xml"" ""namespace"" ""="" <Expression>; 
+
+<CaseDefultOrXMLUse> ::=""default"" <CaseDefultOrXMLUse_1>;
+<CaseDefultOrXMLUse_1> ::= identifier ""namespace"" ""="" <Expression> ;
+
+
+
+<ClassPath> ::= <ClassName><ClassPath_1>;
+<ClassPath_1> ::="".""<ClassName><ClassPath_1>|null;
+<ClassName> ::= identifier;
+
+
+
+<NameSpace>         ::=""namespace"" <ClassPath><NameSpaceDefaultValue>;
+<NameSpaceDefaultValue> ::=""=""<Expression>|null;
+
+
+<DefClass> ::=""class"" <ClassName> <Extends> <Implements> ""{"" <ClassBody> ""}""; 
+<Extends>  ::=""extends"" <ImplList> |null;
+<Implements> ::=""implements"" <ImplList> |null;
+<ImplList>   ::= <ClassPath><ImplList1>;
+<ImplList1>  ::= "",""<ImplList>|null;
+
+<DefInterface> ::=""interface"" <InterfaceName> <Extends>  ""{"" <ClassBody>  ""}""; 
+<InterfaceName>  ::=identifier;
+
+
+<ACCESS_DEF>   ::=<ACCESS_KEYWORD><ACCESS_DEF>| <DefClass> | <DefInterface>|<Function>| <NameSpace> | <Const>|<Variable>;
+
+<ACCESS_KEYWORD> ::=""public"" |""private""   | ""internal"" |""final"" |""dynamic"" | ""static"" |""override"" | ""native"";//|<ClassMetaProperty> ;
+
+
+
+<ClassBody> ::=<Stmts>|null;
+<Stmts> ::= <Stmt> <StmtList>;
+<StmtList> ::= <Stmt><StmtList> | null;
+
+<BLOCK> ::=""{""<Label> <BP2>     ;
+<BP2>   ::= <Stmts> ""}""|""}"";
+
+<Stmt> ::= useless_label |<BLOCK>		|    <Syntax>|"";""|<ACCESS_MEMBER><EatAnSemicolon>;
+
+
+<Syntax> ::=<Use> |<Import> |<CaseDefultOrXMLUse>|
+			<IF>		|	
+			<FOR_STMT>		|	
+			<WHILE>			|<WITH>		|
+			<DO>			|	
+			<TRY>			|
+			<THROW>	<EatAnSemicolon>	|
+			<SWITCH>		|
+		<Return><EatAnSemicolon>		|
+		<Break><EatAnSemicolon>			|
+		<Continue><EatAnSemicolon>		|
+		<YIELD><EatAnSemicolon>
+		;
+
+<EatAnSemicolon> ::="";""|null;
+
+
+<ACCESS_MEMBER> ::=<ACCESS_MEMBER_KEYWORD><ACCESS_MEMBER> 
+					| <NameSpace>
+					| <Variable> 
+					| <Const> 
+					| <ExpressionList>
+					 ; //function和Expression间的二义性，见到function就是定义一个function
+<ACCESS_MEMBER_KEYWORD> ::=""public"" |""private""| ""internal""|""protected"" |""final"" |""static"" |""override"" |""dynamic"" | ""native"" | ""virtual"";
+
+
+<K_ExpressionList>   ::=<K_Expression><K_CommaOpt> ;
+<K_CommaOpt> ::=  "",""<K_CommaOpt_1> |null;
+<K_CommaOpt_1> ::=<K_Expression><K_CommaOpt>|null;
+
+
+//可用作标识符的句法关键字。。
+<ID_EABLED_KEYWORD> ::=""each""|""get""|""set""|""namespace""|""include""|""dynamic""|""final""|""native""|""override""|""static""|""catch""|""finally"";
+
+
+<DefineType> ::=""*""|<ClassPath>|<DefineTypeVector>;
+<DefineTypeVector>     ::=""Vector.<""<DefineType>"">"";
+
+<Variable> ::= ""var"" <VariableDefineList>;
+<VariableDefineList> ::=<VariableDefine><VariableDefineList1>;
+<VariableDefineList1> ::="",""<VariableDefine><VariableDefineList1>|null;
+<VariableDefine> ::=<VariableName> <VariableDEFType><VariableDefaultValue>; 
+
+
+<VariableName> ::= identifier|<ID_EABLED_KEYWORD>;
+<VariableDEFType> ::= "":"" <VariableType>|"":*""|null;
+<VariableType>    ::=<DefineType>;
+<VariableDefaultValue> ::= ""="" <Expression> |null;
+
+<Const>    ::= ""const"" <ConstDefineList>;
+<ConstDefineList> ::=<ConstDefine><ConstDefineList1>;
+<ConstDefineList1> ::="",""<ConstDefine><ConstDefineList1>|null;
+<ConstDefine> ::=<ConstName> <ConstDEFType><ConstDefaultValue>; 
+
+<ConstName> ::= identifier;
+<ConstDEFType> ::= "":"" <ConstType>|"":*""|null;
+<ConstType>    ::=<DefineType>;
+<ConstDefaultValue> ::= ""="" <Expression> |null;
+
+
+<Function>  ::= ""function"" <FunctionProperty>""(""<Parameters>"")""<FunctionReturnType> <FunctionCode> ;
+<FunctionCode> ::=""{"" <FunctionBody> ""}"" | null ;
+<FunctionProperty>  ::= ""get"" <FunctionName> |""set"" <FunctionName>|<FunctionName>; 
+<FunctionName> ::= identifier |null|<ID_EABLED_KEYWORD> ;
+
+<FunctionReturnType> ::="":""<FunctionType>|"":*""|"":void""|null;
+<FunctionType>    ::=<DefineType>;
+
+
+<Parameters> ::= <Parameter_list >|null  ;
+
+<Parameter_Array> ::=""...""<VariableName><ParameterDEFType>;
+
+<Parameter_list > ::=<Parameter><Parameter_list1>;
+<Parameter_list1> ::="",""<Parameter><Parameter_list1>|null;
+<Parameter> ::= identifier <ParameterDEFType><ParameterDefaultValue>|<Parameter_Array>;
+//<ParameterName> ::=<ID_EABLED_KEYWORD>|identifier;
+<ParameterDEFType> ::="":""<ParameterType>|"":*""|null;
+<ParameterType>    ::=<DefineType>;
+<ParameterDefaultValue> ::=""="" <Expression> |null;
+
+<FunctionBody>::=<Stmts>|null;
+
+<YIELD>	  ::=""yield""<YIELD_RB>;
+<YIELD_RB>::=""return"" <ReturnValue>|
+			 ""break"";	
+
+<Return>  ::=""return""<ReturnValue>;
+
+<ReturnValue> ::=<ExpressionList>|null;
+
+<Break>   ::=""break"" <LabelFlag> ;
+<Continue> ::=""continue"" <LabelFlag>;
+
+
+<Label>	::=label "":""|null;
+<LabelFlag> ::=identifier|null;
+
+<IF>   ::=""if"" <Label> ""("" <ExpressionList> "")"" <Stmt><IFElse>;
+<IFElse> ::=""else"" <Stmt>|null;
+
+
+<FOR_STMT>  ::=""for""<Label><FORTYPE>;			//<Label>在语法分析器初始阶段用程序移动到了关键字后面，否则无法写出文法
+
+<FORTYPE> ::=<Each>|<FOR_FORIN>;
+
+<Each> ::=""each"" ""("" <Each_TEMP1>;
+<Each_TEMP1> ::=<ForVar> <Each_TEMP2>;
+<Each_TEMP2> ::=""in"" <Expression> "")"" <Stmt> ;
+
+<ForVar> ::=<F_Variable>|<F_ExpressionList>|<Const>;
+
+<FOR_FORIN> ::=""("" <FOR_TEMP1> ;
+
+<FOR_TEMP1>  ::=<ForVar> <FOR_TEMP2>|<FOR>;
+<FOR_TEMP2> ::=<FORIN>|<FOR>;
+
+
+<FORIN>     ::=""in"" <Expression> "")"" <Stmt>;
+<FOR>       ::="";""<FORPART2>"";""<FORPART3>"")""<Stmt>;
+
+
+<FORPART2>  ::=<ExpressionList>|null;
+<FORPART3>  ::=<ExpressionList>|null;
+
+
+<WHILE>     ::=""while"" <Label> ""("" <ExpressionList> "")"" <Stmt>;
+<WITH>		::=""with""  <Label> ""("" <ExpressionList> "")"" ""{"" <WITHBODY> ""}"";
+<WITHBODY>  ::=<Stmt> | null;
+
+<DO>        ::= ""do""<Label><Stmt><DO_CONDITION>;
+<DO_CONDITION> ::=""while"" ""("" <ExpressionList> "")"";//|null;
+
+<TRY>       ::=""try""<Label> ""{"" <TRYBLOCK> ""}"" <CATCHLIST> <FINALLY>;
+<TRYBLOCK>  ::=<Stmts>|null; 
+
+<THROW>     ::=""throw"" <THROWEXCEPTION>;
+<THROWEXCEPTION> ::= <Expression> ;//|null; 
+
+
+<CATCHLIST> ::=<CATCH><CATCHLIST1>|null;
+<CATCHLIST1>::=<CATCH><CATCHLIST1>|null;
+<CATCH>     ::=""catch"" ""("" <VariableDefine> "")""""{""<CATCHBLOCK>""}"";
+
+<CATCHBLOCK> ::=<Stmts>|null; 
+<FINALLY> ::= ""finally"" ""{"" <FINALLYBLOCK> ""}"" |null;
+<FINALLYBLOCK> ::=<Stmts>|null;
+
+<SWITCH>	::=""switch""<Label> ""("" <Expression> "")"" ""{"" <CASEBODY>  ;
+<SWITCH_CASE> ::=""case"" <Expression> "":""<CASESTMT> | ""default:"" <CASESTMT> ;
+<CASESTMT>    ::=<Stmts>|null;
+<CASELIST>    ::=<SWITCH_CASE><CASELIST1>;
+<CASELIST1>	  ::=<SWITCH_CASE><CASELIST1>|null;
+<CASEBODY>	  ::=""}""|<CASELIST> ""}"" ;
+
+
+/***用于For in 初始变量赋值的表达式。*****For in中没有in操作符*****/
+
+<F_Variable> ::= ""var"" <F_VariableDefineList>;
+<F_VariableDefineList> ::=<F_VariableDefine><F_VariableDefineList1>;
+<F_VariableDefineList1> ::="",""<F_VariableDefine><F_VariableDefineList1>|null;
+<F_VariableDefine> ::=<F_VariableName> <F_VariableDEFType><F_VariableDefaultValue>; 
+
+
+<F_VariableName> ::= identifier|<ID_EABLED_KEYWORD>;
+<F_VariableDEFType> ::= "":"" <F_VariableType>|"":*""|null;
+<F_VariableType>    ::=<DefineType>;
+<F_VariableDefaultValue> ::= ""="" <F_Expression> |null;
+
+<F_ExpressionList>   ::=<F_Expression><F_CommaOpt> ;
+<F_CommaOpt> ::=  "",""<F_CommaOpt_1> |null;
+<F_CommaOpt_1> ::=<F_Expression><F_CommaOpt>|null;
+
+<F_Expression> ::= <F_Assigning>;
+
+<F_Assigning>  ::=<F_Ternary><F_AssigningOpt> ;    
+				                            
+<F_AssigningOpt> ::= ""=""<F_Assigning> |                      
+				   ""*=""<F_Assigning> |
+				   ""/=""<F_Assigning> |
+				   ""%=""<F_Assigning> |
+				   ""+=""<F_Assigning> |
+				   ""-=""<F_Assigning> |
+				   ""<<=""<F_Assigning> |
+				   "">>=""<F_Assigning> |
+				   "">>>=""<F_Assigning> |
+				   ""&=""<F_Assigning> |
+				   ""^=""<F_Assigning> |
+				   ""|=""<F_Assigning> |
+				   ""||=""<F_Assigning> |
+				   ""&&=""<F_Assigning>|
+				   null
+				   ;
+
+
+<F_Ternary>    ::=<F_LogicOr><F_TernaryOpt> ;      //三元运算符 ? 
+<F_TernaryOpt>    ::=""?"" <F_Ternary_True> "":"" <F_Ternary_False> | null;
+<F_Ternary_True>  ::= <F_Assigning>;
+<F_Ternary_False>  ::= <F_Assigning>;
+
+
+<F_LogicOr>    ::=<F_LogicAnd><F_LogicOrOpt>;      //逻辑或
+<F_LogicOrOpt> ::=""||""<F_LogicAnd><F_LogicOrOpt>|null;
+
+<F_LogicAnd>   ::=<F_BitOr><F_LogicAndOpt>;        //逻辑与
+<F_LogicAndOpt>::=""&&""<F_BitOr><F_LogicAndOpt>|null;
+
+<F_BitOr>     ::=<F_BitXor><F_BitOrOpt>;           //位或                     
+<F_BitOrOpt>  ::=""|""<F_BitXor><F_BitOrOpt> | null;
+
+<F_BitXor>     ::=<F_BitAnd><F_BitXorOpt>;           //位异或                     
+<F_BitXorOpt>  ::=""^""<F_BitAnd><F_BitXorOpt> | null;
+
+<F_BitAnd>     ::=<F_LogicEQ><F_BitAndOpt>;           //位与                     
+<F_BitAndOpt>  ::=""&""<F_LogicEQ><F_BitAndOpt> | null;
+
+<F_LogicEQ>    ::=<F_Logic><F_LogicEQOpt>;                                                          //逻辑相等   
+<F_LogicEQOpt> ::= ""==""<F_Logic><F_LogicEQOpt> | ""!=""<F_Logic><F_LogicEQOpt> 
+				|""===""<F_Logic><F_LogicEQOpt>|""!==""<F_Logic><F_LogicEQOpt> |null;                                                      
+
+<F_Logic>      ::=<BitShift><F_LogicOpt>;                                                         //逻辑关系
+<F_LogicOpt>   ::=  ""<"" <BitShift><F_LogicOpt> | "">"" <BitShift><F_LogicOpt> |
+				  ""<="" <BitShift><F_LogicOpt> | "">="" <BitShift><F_LogicOpt>	|                     
+				  ""as"" <BitShift><F_LogicOpt>	| 
+				  ""instanceof"" <BitShift><F_LogicOpt> |""is"" <BitShift><F_LogicOpt> |null;
+
+
+
+
+
+
+
+
+/*******For in结束**********************************/
+
+<A_FC> ::=<Call>|null;
+
+
+<Expression> ::= <Assigning>;
+<Assigning>  ::=<Ternary><AssigningOpt>;           //赋值
+				                            
+<AssigningOpt> ::= ""=""<Assigning> |                        //改为右结合
+				   ""*=""<Assigning> |
+				   ""/=""<Assigning> |
+				   ""%=""<Assigning> |
+				   ""+=""<Assigning> |
+				   ""-=""<Assigning> |
+				   ""<<=""<Assigning> |
+				   "">>=""<Assigning> |
+				   "">>>=""<Assigning> |
+				   ""&=""<Assigning> |
+				   ""^=""<Assigning> |
+				   ""|=""<Assigning> |
+				   ""||=""<Assigning> |
+				   ""&&=""<Assigning>|
+				   null
+				   ;
+
+
+<Ternary>    ::=<LogicOr><TernaryOpt> ;      //三元运算符 ? 
+<TernaryOpt>    ::=""?"" <Ternary_True> "":"" <Ternary_False> | null;
+<Ternary_True>  ::= <Assigning>;
+<Ternary_False>  ::= <Assigning>;
+
+
+
+<LogicOr>    ::=<LogicAnd><LogicOrOpt>;      //逻辑或
+<LogicOrOpt> ::=""||""<LogicAnd><LogicOrOpt>|null;
+
+<LogicAnd>   ::=<BitOr><LogicAndOpt>;        //逻辑与
+<LogicAndOpt>::=""&&""<BitOr><LogicAndOpt>|null;
+
+<BitOr>     ::=<BitXor><BitOrOpt>;           //位或                     
+<BitOrOpt>  ::=""|""<BitXor><BitOrOpt> | null;
+
+<BitXor>     ::=<BitAnd><BitXorOpt>;           //位异或                     
+<BitXorOpt>  ::=""^""<BitAnd><BitXorOpt> | null;
+
+<BitAnd>     ::=<LogicEQ><BitAndOpt>;           //位与                     
+<BitAndOpt>  ::=""&""<LogicEQ><BitAndOpt> | null;
+
+<LogicEQ>    ::=<Logic><LogicEQOpt>;                                                          //逻辑相等   
+<LogicEQOpt> ::= ""==""<Logic><LogicEQOpt> | ""!=""<Logic><LogicEQOpt> 
+				|""===""<Logic><LogicEQOpt>|""!==""<Logic><LogicEQOpt> |null;                                                      
+
+<Logic>      ::=<BitShift><LogicOpt>;                                                         //逻辑关系
+<LogicOpt>   ::=  ""<"" <BitShift><LogicOpt> | "">"" <BitShift><LogicOpt> |
+				  ""<="" <BitShift><LogicOpt> | "">="" <BitShift><LogicOpt>	|
+				  ""as"" <BitShift><LogicOpt>	| ""in"" <BitShift><LogicOpt> |
+				  ""instanceof"" <BitShift><LogicOpt> |""is"" <BitShift><LogicOpt> |null;
+
+
+
+
+<BitShift>    ::= <Plus> <BitShiftOpt>;
+<BitShiftOpt> ::= ""<<"" <Plus><BitShiftOpt> | "">>"" <Plus><BitShiftOpt>| "">>>"" <Plus><BitShiftOpt> |  null;          //移位 << >> >>>
+
+<Plus>    ::= <Multiply><PlusOpt>;
+<PlusOpt> ::= ""+"" <Multiply><PlusOpt> | ""-"" <Multiply><PlusOpt> |  null;                                    // 加减
+
+<Multiply> ::= <Unary> <MultiplyOpt>;                                                                       // 乘除模 * / % 
+<MultiplyOpt> ::= ""*"" <Unary><MultiplyOpt> | ""/"" <Unary><MultiplyOpt> | ""%"" <Unary><MultiplyOpt> | null;    
+
+<Unary>    ::=  ""+"" <Unary> | ""-"" <Unary> | ""~"" <Unary>| ""!"" <Unary>| ""delete""<Access> | ""typeof""<Unary> /*| ""void"" <Access> void会和返回值冲突.. */ //单目运算
+                | ""++"" <Access> | ""--"" <Access>| ""void"" <Access> |<Access>  ;                        
+
+
+
+
+<ThisSuper> ::=this <AccessOpt> |super <AccessOpt> ;
+
+
+<Access>   ::=  <NSAccess><AccessOpt> |<Function><A_FC><AccessOpt_AfterFun>;                                                                               //成员访问
+<AccessOpt> ::= ""."" <F_NSAccess><AccessOpt> | ""["" <Argements> ""]"" <AccessOpt> 
+				|""::"" <NSExpression><AccessOpt>
+				|"".internal"" ""::"" <NSExpression><AccessOpt>
+				|"".public"" ""::"" <NSExpression><AccessOpt>
+				|"".private"" ""::"" <NSExpression><AccessOpt>
+				|"".protected"" ""::"" <NSExpression><AccessOpt>
+				| <Call><AccessOpt> 
+				| <E_E4XAccess><E4XAccessOpt>
+				| <UnitSuffix><AccessOpt>
+				| null;
+
+<AccessOpt_AfterFun> ::= ""."" <F_NSAccess><AccessOpt>
+					|""::"" <NSExpression><AccessOpt>
+					| <Call><AccessOpt> 
+					| <E_E4XAccess><E4XAccessOpt>
+					| <UnitSuffix><AccessOpt>
+					| null;
+
+				
+<NSAccess> ::=  <Unit>|<ThisSuper>|<E4XAccess>|""public::""<NSExpression>|""internal::""<NSExpression>|""protected::""<NSExpression>|""private::""<NSExpression>; //<Unit><NSAccessOpt>|<ThisSuper>;
+<NSExpression> ::=<K_Unit>;
+
+<F_NSAccess> ::=  <E4XFilter>|<Unit>|<E4XAccess>; //<NSAccessOpt>;  //***.(@id==XXX)的情况
+
+
+<UnitSuffix> ::=""++"" | ""--"" ;    //后缀
+
+
+<Unit> ::=  ""new"" <Access>|<Object>|<ID_EABLED_KEYWORD>|identifier |number | string  |""("" <AExprList> "")"" | <Array> |<Vector>|""CONFIG::"" identifier ;
+//<F_Unit> ::= <Object>|<ID_EABLED_KEYWORD>|identifier |number | string  |""("" <AExprList> "")"" | <Array> |<Vector>|""CONFIG::"" identifier ;
+<K_Unit> ::= <ID_EABLED_KEYWORD>|identifier |number | string  |""("" <AExprList> "")"" | <Array>;
+
+
+
+
+<E4XAccess>    ::=""@""<E4XAccess_1>  ;
+<E4XAccess_1>  ::=identifier|""*""|""[""<AExprList>""]"";
+
+
+<E_E4XAccess>  ::=""..""<NSAccess>|"".*""|""..*"";
+<E4XFilter>    ::=""("" <AExprList> "")"";
+
+
+<E4XAccessOpt> ::= 
+				identifier<AccessOpt>
+				| <E4XAccess><AccessOpt>
+				| <AccessOpt>;
+				                                               
+
+
+
+<Call>       ::=""(""<Argements>"")"";
+<Argements>  ::= <AExprList>|null;
+
+//Array 的特点，逗号前如果没有值，就当作一个undefined
+
+<Array> ::=""["" <ArrayElements>;
+<ArrayElements> ::=<ArrayExprList> ""]"" |""]"" ;
+<ArrayElem> ::= <Expression> | "","" ;
+<ArrayExprList> ::=<ArrayElem><ArrayCommaOpt> ;
+<ArrayCommaOpt> ::= <ArrayCommaOpt_1>|null;
+<ArrayCommaOpt_1> ::=<ArrayElem><ArrayCommaOpt>;
+
+
+<AExprList> ::=<Expression><ACommaOpt> ;
+<ACommaOpt> ::=  "",""<ACommaOpt_1> |null;
+<ACommaOpt_1> ::=<Expression><ACommaOpt>;
+																			
+<ExpressionList>   ::=<Expression><CommaOpt> ;
+<CommaOpt> ::=  "",""<CommaOpt_1> |null;
+<CommaOpt_1> ::=<Expression><CommaOpt>;
+
+
+<Vector>   ::=<DefineTypeVector><VectorConstructor>| ""<""<DefineType>"">""<Array> ;
+<VectorConstructor> ::=""(""<Argements>"")""|null;
+
+<Object>   ::= ""{"" <ObjectBody>;
+<ObjectBody> ::=<ObjMembers> ""}"" | ""}"";
+<ObjMember> ::= useless_label <Assigning> | identifier"":""<Assigning>| <ID_EABLED_KEYWORD> "":"" <Assigning> |number"":""<Assigning>|string"":""<Assigning>|""{""label"":""<ObjectBody>;
+
+<ObjMembers> ::=<ObjMember><ObjMembers1>;
+<ObjMembers1> ::= "",""<ObjMember><ObjMembers1>|null;
+
+
+
+
+
+";
+            }
+        }
+    }
+}

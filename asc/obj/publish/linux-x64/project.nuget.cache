@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "fb2Rj6p1AsD6ERs1F8dO24JjIbJ7w+FHPFiUCGjOf9ebOBSuqwhah4wynAUpLAROqZUDJrzAdeGwr+5xZG9vQA==",
+  "success": true,
+  "projectFilePath": "F:\\GitHub\\juice-script-2\\juice-script-2\\asc\\asc.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\HMI\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-x64\\6.0.25\\microsoft.netcore.app.runtime.linux-x64.6.0.25.nupkg.sha512",
+    "C:\\Users\\HMI\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-x64\\6.0.25\\microsoft.aspnetcore.app.runtime.linux-x64.6.0.25.nupkg.sha512",
+    "C:\\Users\\HMI\\.nuget\\packages\\microsoft.netcore.app.host.linux-x64\\6.0.25\\microsoft.netcore.app.host.linux-x64.6.0.25.nupkg.sha512"
+  ],
+  "logs": []
+}

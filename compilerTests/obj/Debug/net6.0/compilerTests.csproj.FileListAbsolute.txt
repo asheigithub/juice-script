@@ -1,0 +1,7 @@
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\bin\Debug\net6.0\.msCoverageSourceRootsMapping_compilerTests
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\bin\Debug\net6.0\CoverletSourceRootsMapping_compilerTests
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\obj\Debug\net6.0\compilerTests.csproj.AssemblyReference.cache
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\obj\Debug\net6.0\compilerTests.GeneratedMSBuildEditorConfig.editorconfig
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\obj\Debug\net6.0\compilerTests.AssemblyInfoInputs.cache
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\obj\Debug\net6.0\compilerTests.AssemblyInfo.cs
+F:\GitHub\juice-script-2\juice-script-2\compilerTests\obj\Debug\net6.0\compilerTests.csproj.CoreCompileInputs.cache

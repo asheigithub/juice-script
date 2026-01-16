@@ -1,0 +1,8 @@
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\asc.exe
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\asc.dll
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\asc.deps.json
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\asc.runtimeconfig.json
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\asc.pdb
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\McMaster.Extensions.CommandLineUtils.dll
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\compiler.dll
+F:\GitHub\juice-script-2\juice-script-2\asc\bin\Release\net6.0\publish\compiler.pdb

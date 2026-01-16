@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><!-- saved from url=(0014)about:internet --><!-- saved from url=(0014)about:internet --><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><link rel="stylesheet" href="../../style.css" type="text/css" media="screen"><link rel="stylesheet" href="../../print.css" type="text/css" media="print"><link rel="stylesheet" href="../../override.css" type="text/css"><title>flash.utils Summary</title></head><body><script language="javascript" type="text/javascript" src="../../asdoc.js"></script><script language="javascript" type="text/javascript" src="../../help.js"></script><script language="javascript" type="text/javascript" src="../../cookies.js"></script><script language="javascript" type="text/javascript"><!--
+				asdocTitle = 'flash.utils package - API Documentation';
+				var baseRef = '../../';
+				window.onload = configPage;
+			--></script>
+<script type="text/javascript">
+			scrollToNameAnchor();
+		</script><table class="titleTable" cellpadding="0" cellspacing="0" id="titleTable" style="display:none"><tr><td class="titleTableTitle" align="left"> 用于Juice 的 ActionScript3参考 </td><td class="titleTableTopNav" align="right"><a href="../../package-summary.html" onclick="loadClassListFrame('../../all-classes.html')">All Packages</a>&nbsp;|&nbsp;<a href="../../class-summary.html" onclick="loadClassListFrame('../../all-classes.html')">All Classes</a>&nbsp;|&nbsp;<a href="../../all-index-A.html" onclick="loadClassListFrame('../../index-list.html')">Index</a>&nbsp;|&nbsp;<a id="framesLink1" href="../../index.html?flash/utils/package-detail.html&amp;flash/utils/class-list.html">Frames</a><a id="noFramesLink1" style="display:none" href="" onclick="parent.location=document.location"> No Frames </a></td><td class="titleTableLogo" align="right" rowspan="3"><img src="../../images/logo.jpg" class="logoImage" alt=" Adobe Logo " title=" Adobe Logo "></td></tr><tr class="titleTableRow2"><td class="titleTableSubTitle" id="subTitle" align="left">flash.utils</td><td class="titleTableSubNav" id="subNav" align="right"><a href="package.html#methodSummary">Functions</a>&nbsp;| <a href="package-detail.html#interfaceSummary"> Interfaces </a>&nbsp;| <a href="package-detail.html#classSummary">Classes</a></td></tr><tr class="titleTableRow3"><td colspan="3">&nbsp;</td></tr></table><script language="javascript" type="text/javascript" xml:space="preserve">
+				<!--
+				
+					if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("flash.utils"); titleBar_setSubNav(false,false,false,false,false,false,false,false,false,false,false	,false,true,true,true,false);}	
+				-->
+			</script><div class="MainContent"><br><br><hr><a name="methodSummary"></a><div class="summaryTableTitle">Functions</div><table cellpadding="3" cellspacing="0" class="summaryTable"><tr><th>&nbsp;</th><th width="30%">Function</th><th width="70%">Description</th></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="package.html#getDefinitionByName()">getDefinitionByName</a></td><td class="summaryTableLastCol">
+	 返回 name 参数指定的类的类对象引用。
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="package.html#getQualifiedClassName()">getQualifiedClassName</a></td><td class="summaryTableLastCol">
+	 返回对象的完全限定类名。
+	 </td></tr></table><a name="interfaceSummary"></a><div class="summaryTableTitle">Interfaces</div><table cellpadding="3" cellspacing="0" class="summaryTable"><tr><th>&nbsp;</th><th width="30%">Interface</th><th width="70%">Description</th></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><i><a href="IDataInput.html">IDataInput</a></i></td><td class="summaryTableLastCol">
+	 IDataInput 接口提供一组用于读取二进制数据的方法。此接口是写入二进制数据的 IDataOutput 接口的 I/O 对应接口。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。如果可用数据不足，则会引发 EOFError 异常。使用 IDataInput.bytesAvailable 属性来确定可供读取的数据有多少。符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataInputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataInputExample extends Sprite {        
+	 public function DataInputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><i><a href="IDataOutput.html">IDataOutput</a></i></td><td class="summaryTableLastCol">
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</td></tr></table><a name="classSummary"></a><div class="summaryTableTitle">Classes</div><table cellpadding="3" cellspacing="0" class="summaryTable"><tr><th>&nbsp;</th><th width="30%">Class</th><th width="70%">Description</th></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ByteArray.html">ByteArray</a></td><td class="summaryTableLastCol">
+	 ByteArray 类提供用于优化读取、写入以及处理二进制数据的方法和属性。
+	 内存中的数据是一个压缩字节数组（数据类型的最紧凑表示形式），但可以使用标准 []（数组访问）运算符来操作 ByteArray 类的实例。
+	 ByteArray 类可能的用途包括：
+	 通过使用数据类型优化数据的大小。
+	 使用从文件加载的二进制数据。
+	 
+	 
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Dictionary.html">Dictionary</a></td><td class="summaryTableLastCol">
+	 Dictionary 类用于创建属性的动态集合，该集合使用 strict equality (===) 运算符进行键比较。将对象用作键时，会使用对象的标识来查找对象，而不是使用在对象上调用 toString() 所返回的值。
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Endian.html">Endian</a></td><td class="summaryTableLastCol">
+	 Endian 类中包含一些值，它们表示用于表示多字节数字的字节顺序。字节顺序为 bigEndian（最高有效字节位于最前）或 littleEndian（最低有效字节位于最前）。
+	 
+	 </td></tr></table><p></p><div><p></p><center class="copyright"><footer> 用于Juice 的 ActionScript3参考 </footer><br/>Wed Nov 19 2025, 10:32 AM +08:00  </center></div></div></body></html><!-- 用于Juice 的 ActionScript3参考 <br/>Wed Nov 19 2025, 10:32 AM +08:00  -->

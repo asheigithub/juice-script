@@ -1,0 +1,198 @@
+﻿using juicescript.ABC;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace juicescript.runtime
+{
+	public sealed class RtPayloadMethodScope : FacilityBase
+	{
+
+		private Memory<NaNBoxing> Slots;
+
+		public int ParentPtr;
+
+		public override int Size
+		{
+			get
+			{
+				int size = 16 + 4;
+
+				size += Slots.Length * 8;
+
+				return size;
+			}
+		}
+
+		
+		internal bool IsStackSlot;
+		internal int StackPos;
+		internal int SlotCount;
+
+		/// <summary>
+		/// 实际上，只有RunMethod里的调用才会是在栈帧上分配
+		/// </summary>
+		/// <param name="array"></param>
+		/// <param name="start"></param>
+		/// <param name="codescope"></param>
+		/// <param name="isStackSlot"></param>
+		public void InitSlot(NaNBoxing[] array, int start, CodeScope codescope,bool isStackSlot)
+		{
+			IsStackSlot = isStackSlot;
+			StackPos = start;
+			SlotCount = codescope.Members.Count;
+
+			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count);
+#if FORCOMPILER
+			if (isCompiling)
+			{
+				hasSetData = new bool[Slots.Length];
+				scope = codescope;
+			}
+#endif
+
+
+			var span = Slots.Span;
+			for (int i = codescope.ParameterCout; i < span.Length; i++)
+			{
+				var member = codescope.Members[i];
+
+				if (
+					//((ASMethodBody)codescope.Container).Method.__ismethod &&
+					(member.Kind == ScopeMemberKind.Constant) && member.trait.Value != null && member.trait.Value.initValue.HasValue)
+				{
+					span[i] = member.trait.Value.initValue.Value;
+#if FORCOMPILER
+					if (isCompiling)
+					{
+						hasSetData[i] = true;
+					}
+#endif
+				}
+				else
+				{
+#if FORCOMPILER
+					if (isCompiling)
+					{
+						if (member.Kind != ScopeMemberKind.Parameter && member.trait.QName.Name.StartsWith("%"))
+						{
+							span[i].setFault();
+							return;
+						}
+					}
+					
+#endif
+
+
+					switch (member.TypeKind)
+					{
+						case TypeKind.Any:
+							span[i].SetUndefined();
+							break;
+						case TypeKind.Boolean:
+							span[i].SetBoolean(false);
+							break;
+						case TypeKind.SByte:
+							span[i].SetSByte(0);
+							break;
+						case TypeKind.Byte:
+							span[i].SetByte(0);
+							break;
+						case TypeKind.Short:
+							span[i].SetShort(0);
+							break;
+						case TypeKind.UShort:
+							span[i].SetUShort(0);
+							break;
+						case TypeKind.Int:
+							span[i].SetInt(0);
+							break;
+						case TypeKind.Uint:
+							span[i].SetUInt(0);
+							break;
+						case TypeKind.Float:
+							span[i].SetFloat(float.NaN);
+							break;
+						case TypeKind.Number:
+							span[i].SetNumber(double.NaN);
+							break;
+						default:
+							span[i].SetNull();
+							break;
+					}
+				}
+
+			}
+
+		}
+
+#if FORCOMPILER
+		internal bool isCompiling;
+		bool[] hasSetData;
+		CodeScope scope;
+#endif
+
+		//用于复制到堆时，避免重复处理。
+		internal int cloneing_ptr;
+
+		internal void SetSlot(NaNBoxing value, ushort memberIndex)
+		{
+			Slots.Span[memberIndex] = value;
+
+#if FORCOMPILER
+			if (isCompiling)
+			{
+				hasSetData[memberIndex] = true;
+			}
+#endif
+
+		}
+		[MethodImpl( MethodImplOptions.AggressiveInlining)]
+		internal NaNBoxing ReadSlot(ushort memberIndex
+//#if FORCOMPILER
+			, Player player
+//#endif
+			)
+		{
+#if FORCOMPILER
+			if (isCompiling)
+			{
+				
+				if (scope.Members[memberIndex].Kind != ScopeMemberKind.Constant || !hasSetData[memberIndex])
+				{
+					throw new EvalConstException();
+				}
+			}
+
+#endif
+
+			return Slots.Span[memberIndex];
+		}
+
+		internal Span<NaNBoxing> __get_slots_for_gc
+		{
+			get
+			{
+				return Slots.Span;
+			}
+		}
+
+		/// <summary>
+		/// 当加载到堆后，把槽位更新到使用new出来的堆对象的槽位
+		/// </summary>
+		/// <param name="newHeapScope"></param>
+		internal void ChangeStore(RtPayloadMethodScope newHeapScope)
+		{
+			IsStackSlot = newHeapScope.IsStackSlot;
+			StackPos = newHeapScope.StackPos;
+			SlotCount = newHeapScope.SlotCount;
+			Slots = newHeapScope.Slots;
+		}
+
+	}
+}

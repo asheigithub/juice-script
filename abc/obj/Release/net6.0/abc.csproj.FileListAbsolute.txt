@@ -1,0 +1,11 @@
+F:\GitHub\juice-script-2\juice-script-2\abc\bin\Release\net6.0\abc.deps.json
+F:\GitHub\juice-script-2\juice-script-2\abc\bin\Release\net6.0\abc.dll
+F:\GitHub\juice-script-2\juice-script-2\abc\bin\Release\net6.0\abc.pdb
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\abc.GeneratedMSBuildEditorConfig.editorconfig
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\abc.AssemblyInfoInputs.cache
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\abc.AssemblyInfo.cs
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\abc.csproj.CoreCompileInputs.cache
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\abc.dll
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\refint\abc.dll
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\abc.pdb
+F:\GitHub\juice-script-2\juice-script-2\abc\obj\Release\net6.0\ref\abc.dll

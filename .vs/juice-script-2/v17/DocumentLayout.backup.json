@@ -1,0 +1,530 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "F:\\GitHub\\juice-script-2\\juice-script-2\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D1E66905-A314-4291-B401-00C32EA89623}|abc\\abc.csproj|f:\\github\\juice-script-2\\juice-script-2\\abc\\abc\\ins\\ins_iter_get.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1E66905-A314-4291-B401-00C32EA89623}|abc\\abc.csproj|solutionrelative:abc\\abc\\ins\\ins_iter_get.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\il\\ilbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\il\\ilbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\player_partial_getsavevalue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\player_partial_getsavevalue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\player_partial_runmethod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\player_partial_runmethod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\il\\generator\\expressionil.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\il\\generator\\expressionil.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\parse\\lex.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\parse\\lex.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\il\\disassembler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\il\\disassembler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1E66905-A314-4291-B401-00C32EA89623}|abc\\abc.csproj|f:\\github\\juice-script-2\\juice-script-2\\abc\\abc\\ins\\ins_code.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1E66905-A314-4291-B401-00C32EA89623}|abc\\abc.csproj|solutionrelative:abc\\abc\\ins\\ins_code.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\playerexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\playerexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{944A2351-41FC-4FC5-B052-7788BAE0A576}|asc\\asc.csproj|f:\\github\\juice-script-2\\juice-script-2\\asc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{944A2351-41FC-4FC5-B052-7788BAE0A576}|asc\\asc.csproj|solutionrelative:asc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\compilepipeline.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\compilepipeline.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\iprint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\iprint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\buildin\\vectorimpl.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\buildin\\vectorimpl.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\buildin\\arrayimpl.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\buildin\\arrayimpl.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\rtpayloadvector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\rtpayloadvector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\buildin\\objectimpl.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\buildin\\objectimpl.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\rtpayloadarray.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\rtpayloadarray.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\methodresolver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\methodresolver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\rtpayloadmethodscope.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\rtpayloadmethodscope.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\scriptdef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\scriptdef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\buildin\\toplevel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\buildin\\toplevel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\il\\compileenv.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\il\\compileenv.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\il\\generator\\callfuncbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\il\\generator\\callfuncbuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\buildin\\function.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\buildin\\function.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\buildin\\flashdictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\buildin\\flashdictionary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|f:\\github\\juice-script-2\\juice-script-2\\runtime\\player_partial_compile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6CED5E9B-3CE8-4E5A-A627-6F26E02121B8}|runtime\\runtime.csproj|solutionrelative:runtime\\player_partial_compile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1E66905-A314-4291-B401-00C32EA89623}|abc\\abc.csproj|f:\\github\\juice-script-2\\juice-script-2\\abc\\abc\\asinstance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1E66905-A314-4291-B401-00C32EA89623}|abc\\abc.csproj|solutionrelative:abc\\abc\\asinstance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|f:\\github\\juice-script-2\\juice-script-2\\compiler\\vectordef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A17BF0EB-B34B-48C2-A139-62DC1A628ED3}|compiler\\compiler.csproj|solutionrelative:compiler\\vectordef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "INS_Iter_Get.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\abc\\ABC\\INS\\INS_Iter_Get.cs",
+              "RelativeDocumentMoniker": "abc\\ABC\\INS\\INS_Iter_Get.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\abc\\ABC\\INS\\INS_Iter_Get.cs",
+              "RelativeToolTip": "abc\\ABC\\INS\\INS_Iter_Get.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAgwCsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-15T01:14:51.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Player_Partial_GetSaveValue.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player_Partial_GetSaveValue.cs",
+              "RelativeDocumentMoniker": "runtime\\Player_Partial_GetSaveValue.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player_Partial_GetSaveValue.cs",
+              "RelativeToolTip": "runtime\\Player_Partial_GetSaveValue.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAG8CAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T07:07:25.939Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Lex.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\parse\\Lex.cs",
+              "RelativeDocumentMoniker": "compiler\\parse\\Lex.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\parse\\Lex.cs",
+              "RelativeToolTip": "compiler\\parse\\Lex.cs",
+              "ViewState": "AgIAAGgAAAAAAAAAAAAAAGsAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T09:13:46.688Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Disassembler.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\Disassembler.cs",
+              "RelativeDocumentMoniker": "compiler\\IL\\Disassembler.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\Disassembler.cs",
+              "RelativeToolTip": "compiler\\IL\\Disassembler.cs",
+              "ViewState": "AgIAAMQAAAAAAAAAAAAwwBQBAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T09:04:48.31Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Program.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\asc\\Program.cs",
+              "RelativeDocumentMoniker": "asc\\Program.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\asc\\Program.cs",
+              "RelativeToolTip": "asc\\Program.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAgwDwAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T08:54:53.503Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CompilePipeLine.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\CompilePipeLine.cs",
+              "RelativeDocumentMoniker": "compiler\\CompilePipeLine.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\CompilePipeLine.cs",
+              "RelativeToolTip": "compiler\\CompilePipeLine.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAQwDEAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T08:54:13.574Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "IPrint.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\IPrint.cs",
+              "RelativeDocumentMoniker": "runtime\\IPrint.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\IPrint.cs",
+              "RelativeToolTip": "runtime\\IPrint.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T06:12:19.941Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "RtPayloadVector.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\RtPayloadVector.cs",
+              "RelativeDocumentMoniker": "runtime\\RtPayloadVector.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\RtPayloadVector.cs",
+              "RelativeToolTip": "runtime\\RtPayloadVector.cs",
+              "ViewState": "AgIAAIkBAAAAAAAAAAArwMUBAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T06:11:42.627Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ObjectImpl.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\ObjectImpl.cs",
+              "RelativeDocumentMoniker": "runtime\\buildin\\ObjectImpl.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\ObjectImpl.cs",
+              "RelativeToolTip": "runtime\\buildin\\ObjectImpl.cs",
+              "ViewState": "AgIAAEIBAAAAAAAAAIAxwMUAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T01:37:46.558Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "INS_Code.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\abc\\ABC\\INS\\INS_Code.cs",
+              "RelativeDocumentMoniker": "abc\\ABC\\INS\\INS_Code.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\abc\\ABC\\INS\\INS_Code.cs",
+              "RelativeToolTip": "abc\\ABC\\INS\\INS_Code.cs",
+              "ViewState": "AgIAAO0AAAAAAAAAAAAawAMBAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-12T08:33:56.776Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "PlayerException.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\PlayerException.cs",
+              "RelativeDocumentMoniker": "runtime\\PlayerException.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\PlayerException.cs",
+              "RelativeToolTip": "runtime\\PlayerException.cs",
+              "ViewState": "AgIAAFMAAAAAAAAAAAArwGgAAABHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-07T02:15:17.767Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "CallFuncBuilder.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\Generator\\CallFuncBuilder.cs",
+              "RelativeDocumentMoniker": "compiler\\IL\\Generator\\CallFuncBuilder.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\Generator\\CallFuncBuilder.cs",
+              "RelativeToolTip": "compiler\\IL\\Generator\\CallFuncBuilder.cs",
+              "ViewState": "AgIAANcAAAAAAAAAAAAAAOIAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-07T01:09:36.242Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "Function.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\Function.cs",
+              "RelativeDocumentMoniker": "runtime\\buildin\\Function.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\Function.cs",
+              "RelativeToolTip": "runtime\\buildin\\Function.cs",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAEwJwAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-06T06:36:01.895Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ScriptDef.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\ScriptDef.cs",
+              "RelativeDocumentMoniker": "compiler\\ScriptDef.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\ScriptDef.cs",
+              "RelativeToolTip": "compiler\\ScriptDef.cs",
+              "ViewState": "AgIAAAkDAAAAAAAAAAAawB0DAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-06T05:33:34.967Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "CompileEnv.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\CompileEnv.cs",
+              "RelativeDocumentMoniker": "compiler\\IL\\CompileEnv.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\CompileEnv.cs",
+              "RelativeToolTip": "compiler\\IL\\CompileEnv.cs",
+              "ViewState": "AgIAAD8CAAAAAAAAAAAuwEcCAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-05T09:31:58.16Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Player_Partial_RunMethod.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player_Partial_RunMethod.cs",
+              "RelativeDocumentMoniker": "runtime\\Player_Partial_RunMethod.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player_Partial_RunMethod.cs",
+              "RelativeToolTip": "runtime\\Player_Partial_RunMethod.cs",
+              "ViewState": "AgIAACUBAAAAAAAAAAAawDMBAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-19T06:20:38.88Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "RtPayloadMethodScope.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\RtPayloadMethodScope.cs",
+              "RelativeDocumentMoniker": "runtime\\RtPayloadMethodScope.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\RtPayloadMethodScope.cs",
+              "RelativeToolTip": "runtime\\RtPayloadMethodScope.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFQAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T07:43:47.998Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Player.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player.cs",
+              "RelativeDocumentMoniker": "runtime\\Player.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player.cs",
+              "RelativeToolTip": "runtime\\Player.cs",
+              "ViewState": "AgIAALxFAAAAAAAAAAAAAMpFAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-05T02:53:19.583Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ILBuilder.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\ILBuilder.cs",
+              "RelativeDocumentMoniker": "compiler\\IL\\ILBuilder.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\ILBuilder.cs",
+              "RelativeToolTip": "compiler\\IL\\ILBuilder.cs",
+              "ViewState": "AgIAAKYDAAAAAAAAAAAawLoDAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T03:42:49.51Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "FlashDictionary.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\FlashDictionary.cs",
+              "RelativeDocumentMoniker": "runtime\\buildin\\FlashDictionary.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\FlashDictionary.cs",
+              "RelativeToolTip": "runtime\\buildin\\FlashDictionary.cs",
+              "ViewState": "AgIAACIBAAAAAAAAAAAAAEABAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-05T06:31:23.062Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ExpressionIL.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\Generator\\ExpressionIL.cs",
+              "RelativeDocumentMoniker": "compiler\\IL\\Generator\\ExpressionIL.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\IL\\Generator\\ExpressionIL.cs",
+              "RelativeToolTip": "compiler\\IL\\Generator\\ExpressionIL.cs",
+              "ViewState": "AgIAAE4TAAAAAAAAAAAwwGETAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-05T02:32:54.414Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "MethodResolver.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\MethodResolver.cs",
+              "RelativeDocumentMoniker": "compiler\\MethodResolver.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\MethodResolver.cs",
+              "RelativeToolTip": "compiler\\MethodResolver.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABQAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-29T09:16:24.355Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "RtPayloadArray.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\RtPayloadArray.cs",
+              "RelativeDocumentMoniker": "runtime\\RtPayloadArray.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\RtPayloadArray.cs",
+              "RelativeToolTip": "runtime\\RtPayloadArray.cs",
+              "ViewState": "AgIAAAwEAAAAAAAAAAAAACAEAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T08:22:13.573Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "Context.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Context.cs",
+              "RelativeDocumentMoniker": "runtime\\Context.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Context.cs",
+              "RelativeToolTip": "runtime\\Context.cs",
+              "ViewState": "AgIAAIcAAAAAAAAAAAAAANAAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-22T02:16:45.503Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Player_Partial_Compile.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player_Partial_Compile.cs",
+              "RelativeDocumentMoniker": "runtime\\Player_Partial_Compile.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\Player_Partial_Compile.cs",
+              "RelativeToolTip": "runtime\\Player_Partial_Compile.cs",
+              "ViewState": "AgIAAPAAAAAAAAAAAIAywAkBAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-24T03:51:44.28Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ArrayImpl.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\ArrayImpl.cs",
+              "RelativeDocumentMoniker": "runtime\\buildin\\ArrayImpl.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\ArrayImpl.cs",
+              "RelativeToolTip": "runtime\\buildin\\ArrayImpl.cs",
+              "ViewState": "AgIAAOIAAAAAAAAAAAAAAIUAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-05T02:57:58.824Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "VectorImpl.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\VectorImpl.cs",
+              "RelativeDocumentMoniker": "runtime\\buildin\\VectorImpl.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\VectorImpl.cs",
+              "RelativeToolTip": "runtime\\buildin\\VectorImpl.cs",
+              "ViewState": "AgIAANMAAAAAAAAAAAAAAOsAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-19T04:04:11.273Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "TopLevel.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\TopLevel.cs",
+              "RelativeDocumentMoniker": "runtime\\buildin\\TopLevel.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\runtime\\buildin\\TopLevel.cs",
+              "RelativeToolTip": "runtime\\buildin\\TopLevel.cs",
+              "ViewState": "AgIAAHkAAAAAAAAAAAArwI4AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-19T02:15:59.663Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "VectorDef.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\VectorDef.cs",
+              "RelativeDocumentMoniker": "compiler\\VectorDef.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\compiler\\VectorDef.cs",
+              "RelativeToolTip": "compiler\\VectorDef.cs",
+              "ViewState": "AgIAACkAAAAAAAAAAAAmwGYAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T07:29:30.269Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "ASInstance.cs",
+              "DocumentMoniker": "F:\\GitHub\\juice-script-2\\juice-script-2\\abc\\ABC\\ASInstance.cs",
+              "RelativeDocumentMoniker": "abc\\ABC\\ASInstance.cs",
+              "ToolTip": "F:\\GitHub\\juice-script-2\\juice-script-2\\abc\\ABC\\ASInstance.cs",
+              "RelativeToolTip": "abc\\ABC\\ASInstance.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAASwC8AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-31T05:39:41.896Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

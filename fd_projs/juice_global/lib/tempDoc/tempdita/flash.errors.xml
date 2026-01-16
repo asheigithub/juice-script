@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><apiPackage id="flash.errors"><apiName>flash.errors</apiName><apiDetail/><apiClassifier id="flash.errors:IllegalOperationError"><apiName>IllegalOperationError</apiName><shortdesc>
+	 当方法未实现或者实现中未涉及当前用法时，将引发 IllegalOperationError 异常。
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 当方法未实现或者实现中未涉及当前用法时，将引发 IllegalOperationError 异常。
+	 </apiDesc></apiClassifierDetail><apiConstructor id="flash.errors:IllegalOperationError:IllegalOperationError"><apiName>IllegalOperationError</apiName><shortdesc>
+		 创建新的 IllegalOperationError 对象。
+		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiData/><apiDesc>与此对象关联的字符串.
+		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>	 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 IllegalOperationError 对象。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="flash.errors:EOFError"><apiName>EOFError</apiName><shortdesc>
+	 如果尝试读取的内容超出可用数据的末尾，则会引发 EOFError 异常。例如，当调用 IDataInput 接口中的一个读取方法，而数据不足以满足读取请求时，将引发 EOFError。
+	 </shortdesc><prolog><author>
+	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 如果尝试读取的内容超出可用数据的末尾，则会引发 EOFError 异常。例如，当调用 IDataInput 接口中的一个读取方法，而数据不足以满足读取请求时，将引发 EOFError。
+	 </apiDesc></apiClassifierDetail><apiConstructor id="flash.errors:EOFError:EOFError"><apiName>EOFError</apiName><shortdesc>
+		 创建新的 EOFError 对象。
+		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiData/><apiDesc>与此错误对象相关联的字符串。
+		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>与此错误对象相关的数字
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 EOFError 对象。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier></apiPackage>
