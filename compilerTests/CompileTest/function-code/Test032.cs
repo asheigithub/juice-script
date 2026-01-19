@@ -1,3 +1,60 @@
+﻿using juicescript.runtime;
+using juicescript;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace compilerTests.CompileTest.function_code
+{
+    [TestClass]
+    public sealed class Test032 : CodeTestBase
+    {
+        protected override TestCodeProject LoadProject()
+        {
+            TestCodeProject project = new TestCodeProject();
+
+            project.libs = [Juice_GlobalSwc];
+
+            project.testCodes = new List<TestCodeFile>();
+            
+            project.testCodes.Add(
+                new TestCodeFile()
+                {
+                    Path = "BaseM.as",
+                    Code = @"
+package ns1 
+{
+	import flash.display.Sprite;
+	/**
+	 * ...
+	 * @author 
+	 */
+	public class BaseM extends Sprite
+	{
+		
+		public static const FFF = 6666;
+		protected static const VVV = ""abcd"";
+		public function BaseM() 
+		{
+			
+		}
+		
+	}
+
+}
+
+
+"
+				}
+                );
+
+            project.testCodes.Add(
+                new TestCodeFile()
+                {
+                    Path = "Main.as",
+                    Code = @"
 package 
 {
 	import flash.display.Sprite;
@@ -10,22 +67,22 @@ package
 	 */
 	public class Main extends BaseM
 	{
-		 var a;
-		 
+		public var v;
 		
 	}
+	
 }
+
 
 class Test262Error extends Error
 {
-	var a;
-	public function Test262Error(t=undefined)
+	public function Test262Error(t)
 	{
 		super(t);
 	}
 }
 
-function assert(mustBeTrue, message = undefined) {
+function assert(mustBeTrue, message=undefined) {
   if (mustBeTrue === true) {
     return;
   }
@@ -35,12 +92,6 @@ function assert(mustBeTrue, message = undefined) {
   }
   throw new Test262Error(message);
 }
-
-assert._toString = function (v:String) 
-{
-	return v;
-}
-
 assert._isSameValue = function (a, b) {
   if (a === b) {
     // Handle +/-0 vs. -/+0
@@ -88,9 +139,14 @@ assert.notSameValue = function (actual, unexpected, message) {
   throw new Test262Error(message);
 };
 
+assert._toString = function (v:String) 
+{
+	return v;
+}
+
 assert.throws = function (expectedErrorConstructor, func, message) {
   var expectedName, actualName;
-  if (typeof func !== "function") {
+  if (typeof func !== ""function"") {
     throw new Test262Error('assert.throws requires two arguments: the error constructor ' +
       'and a function to run');
     return;
@@ -125,6 +181,7 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
+	
 // 希望：返回值放在 >= heap.StackPos + heap.SlotCount + M_ClosurePtr 的 return 槽，
 // 且闭包链先到 Global。
 function make() {
@@ -141,36 +198,46 @@ function main() {
 }
 main();
 
-
-
-//assert.sameValue(obj['debugger'](), 42, 'property exists');
-
-
-
-//function  fib(i:int):int 
-	//{
-		//if (i === 1 || i === 2)
-		//{
-			//return 1;
-		//}
-		//else 
-		//{
-			//
-			//return fib(i - 2) + fib(i-1);
-			//
-		//}	
-	//}
-	//
-	//
-	//
-//trace(fib(35));
+trace('OK');
 
 
 
-//fid = null;
-
-//trace("fib4 = ",fib(4));
-
+"
+				}
 
 
-trace("OK");
+                );
+
+
+            return project;
+        }
+
+        protected override void TestIsPass(Player player, PlayerException ex)
+        {
+            player.ForceGC();
+            {
+                var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");
+                Assert.IsNotNull(global);
+                var globalInstance = player.Context.GC.Heap[global.__global_index__];
+                Assert.IsNotNull(globalInstance);
+                Assert.IsNull(ex);
+
+                RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+
+				StringPrint print = (StringPrint)player.Print;
+
+				Assert.AreEqual("OK\r\n", print.GetOutput());
+
+			}
+
+           
+        }
+
+
+        [TestMethod]
+        public void Test()
+        {
+            Run();
+        }
+    }
+}

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -768,8 +769,11 @@ namespace juicescript.runtime
 		/// </summary>
 		private unsafe void PrepareSaveMethodScope(RtPayloadMethodScope heap, ref ScopeHeapLocater heapLocater, ref NaNBoxing value, int* m_scope, int* method_scopes, ref ReceiveError error , bool is_prepare_arg = false)
 		{
+			
 			var updateRef = (int ptr, ref ScopeHeapLocater heapLocater, ASContainer type, int* m_scope, int* method_scopes) =>
 			{
+				Debug.Assert(m_scope != null && method_scopes != null);
+
 				RtPayloadInstance oldPayload;
 				ptr = RtPayloadInstance.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
 
@@ -986,6 +990,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							Debug.Assert(m_scope != null && method_scopes != null);
+
 							//函数闭包里保存的this,也需要拷贝一份引用到别的地方
 							var This = ((RtPayloadClosure)oldObj.facility).This;
 							if (This.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -1109,6 +1115,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							Debug.Assert(m_scope != null && method_scopes != null);
+
 							//更新数组的引用
 							RtPayloadArray oldPayload;
 							ptr = RtPayloadArray.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
@@ -1206,6 +1214,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							Debug.Assert(m_scope != null && method_scopes != null);
+
 							//更新数组的引用
 							RtPayloadVector oldPayload;
 							ptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(ptr,this,out oldPayload);
@@ -1677,7 +1687,15 @@ namespace juicescript.runtime
 
 									lbl_parent:
 										var scope = Context.GC.Heap[sptr];
-										if (scope.facility != heap)
+										if (scope.TypeKind == RtHeapTypeKind.GLOBAL || scope.TypeKind == RtHeapTypeKind.CLASS || scope.TypeKind == RtHeapTypeKind.INSTANCE)
+										{
+											// Y组合子等：先遇到 global/class/instance，未遇到 heap。与 StoreReturnSlot 第 597 行一致。
+											if (last_scope != null)
+												last_scope.ParentPtr = sptr;
+											else
+												dstClosure.ScopePtr = sptr;
+										}
+										else if (scope.facility != heap)
 										{
 #if DEBUG
 											if (scope.TypeKind != RtHeapTypeKind.MethodScope)

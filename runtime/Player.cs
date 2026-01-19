@@ -17652,7 +17652,7 @@ namespace juicescript.runtime
 									PrepareSaveMethodScope(heap, ref iterSrcObj_Holder, ref ins, m_scope, method_scopes, ref error);
 									if (error.raised)
 									{
-										//Context.StackPosition--; //在获取Context时，保留了一个槽位
+										
 										Context.GC.ReturnIterContextWhenGetIterFailed();
 										goto flag_handle_error;
 									}								
