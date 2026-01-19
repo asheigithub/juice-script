@@ -17581,11 +17581,11 @@ namespace juicescript.runtime
 								iterContextVar.ScopeIndex = (ushort)(dst_index >> 16);
 								iterContextVar.MemberIndex = (ushort)(dst_index & 0xFFFF);
 
-								if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
-								{
-									RaiseStackOverflow(ref error);
-									goto flag_handle_error;
-								}
+								//if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+								//{
+								//	RaiseStackOverflow(ref error);
+								//	goto flag_handle_error;
+								//}
 
 								RtHeapInstance iterctx;
 								int iter_context_ptr = Context.GC.RentIterContext(out iterctx);
@@ -17595,11 +17595,10 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								Context.StackPosition++; //给key或者value预留一个缓存槽。
+								//Context.StackPosition++; //执行iter.next时，保留给它当返回值槽用
 
 								((IterContxt)((RtPayloadInstance)iterctx.facility).wapperedObject).PC = PC;
-								((IterContxt)((RtPayloadInstance)iterctx.facility).wapperedObject).cache_slot_index = Context.StackPosition-1;
-
+								
 								// 将迭代器上下文存储到方法变量中
 								RtPayloadMethodScope heap = (RtPayloadMethodScope)methodscope.facility;
 #if DEBUG
@@ -17613,27 +17612,28 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.iter_get:
 							{
-								StackLocater insLoc;
+								StackLocater iterSrcLoc;
 								StackLocater iteratorLoc;
 								//StackLocater iter_contextLoc;
 
-								ScopeHeapLocater holderLoc;
+								ScopeHeapLocater iterSrcObj_Holder;
 								{
-									holderLoc.ScopeIndex = *(ushort*)PC; PC += 2;
-									holderLoc.MemberIndex = *(ushort*)PC; PC += 2;
+									iterSrcObj_Holder.ScopeIndex = *(ushort*)PC; PC += 2;
+									iterSrcObj_Holder.MemberIndex = *(ushort*)PC; PC += 2;
 								}
 
 								int flag_end_id;
 								int flag_offset;
 
-								insLoc.index = dst_index;
-								LoadStackLocater(&iteratorLoc, &PC);
-								//LoadStackLocater(&iter_contextLoc, &PC);
+								iteratorLoc.index = dst_index;
+								LoadStackLocater(&iterSrcLoc, &PC);
+								
+
 
 								LoadInt32(&flag_end_id, &PC);
 								LoadInt32(&flag_offset, &PC);
 
-								var ins = stackslots[insLoc.index];
+								var ins = stackslots[iterSrcLoc.index];
 
 								if (ins.ValueType == BoxType.HeapPtr)
 								{
@@ -17642,21 +17642,21 @@ namespace juicescript.runtime
 
 									RtPayloadMethodScope heap = (RtPayloadMethodScope)methodscope.facility;
 #if DEBUG
-									if (methodscope.Type._link_codescope.index != holderLoc.ScopeIndex)
+									if (methodscope.Type._link_codescope.index != iterSrcObj_Holder.ScopeIndex)
 									{
 										throw new InvalidOperationException();
 									}
 #endif
 									
 
-									PrepareSaveMethodScope(heap, ref holderLoc, ref ins, m_scope, method_scopes, ref error);
+									PrepareSaveMethodScope(heap, ref iterSrcObj_Holder, ref ins, m_scope, method_scopes, ref error);
 									if (error.raised)
 									{
-										Context.StackPosition--; //在获取Context时，保留了一个槽位
+										//Context.StackPosition--; //在获取Context时，保留了一个槽位
 										Context.GC.ReturnIterContextWhenGetIterFailed();
 										goto flag_handle_error;
 									}								
-									heap.SetSlot( ins, holderLoc.MemberIndex); //Context.GC.Heap[ins.HeapPtr];
+									heap.SetSlot( ins, iterSrcObj_Holder.MemberIndex); //Context.GC.Heap[ins.HeapPtr];
 
 									var obj = Context.GC.Heap[ins.HeapPtr];
 
@@ -17688,13 +17688,13 @@ namespace juicescript.runtime
 											RunMethod(type.iterator, ins, scope_ptr, type, 0, null, null, ref error, stackStPos + iteratorLoc.index);
 											if (error.raised)
 											{
-												Context.StackPosition--; //在获取Context时，保留了一个槽位
+												//Context.StackPosition--; //在获取Context时，保留了一个槽位
 												Context.GC.ReturnIterContextWhenGetIterFailed();
 												goto flag_handle_error;
 											}
 											if (stackslots[iteratorLoc.index].ValueType != BoxType.HeapPtr) //return null?
 											{
-												Context.StackPosition--; //在获取Context时，保留了一个槽位
+												//Context.StackPosition--; //在获取Context时，保留了一个槽位
 												Context.GC.ReturnIterContextWhenGetIterFailed();
 												PC = PC_START + flag_offset;
 											}
@@ -17751,7 +17751,7 @@ namespace juicescript.runtime
 						case INS_Code.iter_next:
 							{
 								int mode;
-								//StackLocater insLoc;
+								
 								StackLocater iterLoc;
 								StackLocater resultLoc;
 								
@@ -17759,8 +17759,6 @@ namespace juicescript.runtime
 								int flag_offset;
 
 								LoadInt32(&mode, &PC);
-
-								//insLoc.index = dst_index;
 
 								LoadStackLocater(&iterLoc, &PC);
 								LoadStackLocater(&resultLoc, &PC);
@@ -17790,7 +17788,7 @@ namespace juicescript.runtime
 								}
 
 #endif
-								int cache_slot_index = Context.StackPosition - 1;
+								//int cache_slot_index = Context.StackPosition - 1;
 
 								var resulttype = Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__;
 								int result_ptr = InitCacheInstance(resulttype, stackStPos + resultLoc.index,true);
@@ -17802,14 +17800,14 @@ namespace juicescript.runtime
 								var function = vtableitem.Trait.Method;
 
 
-								if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+								if (Context.StackPosition + 3 >= Context.STACK_LENGTH)
 								{
 									RaiseStackOverflow(ref error);
 									goto flag_handle_error;
 								}
 
 								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 2);
-								Context.StackPosition += 2;
+								Context.StackPosition += 3;
 
 								argSpan[0] = obj_h; //stackslots[insLoc.index]; //obj
 								argSpan[1] = stackslots[resultLoc.index];//result
@@ -17818,9 +17816,9 @@ namespace juicescript.runtime
 								tmpArgLoc[0].index = 0;
 								tmpArgLoc[1].index = 1;
 
-								RunMethod(function, stackslots[iterLoc.index], stackslots[iterLoc.index].HeapPtr, iter.Type, 2, (byte*)tmpArgLoc, argSpan, ref error,cache_slot_index );
+								RunMethod(function, stackslots[iterLoc.index], stackslots[iterLoc.index].HeapPtr, iter.Type, 2, (byte*)tmpArgLoc, argSpan, ref error,Context.StackPosition-1 );
 
-								Context.StackPosition -= 2;
+								Context.StackPosition -= 3;
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17915,7 +17913,7 @@ namespace juicescript.runtime
 
 								if (error.raised)
 								{
-									Context.StackPosition--;//在获取Context时，保留了一个槽位
+									//Context.StackPosition--;//在获取Context时，保留了一个槽位
 									Context.GC.ReturnIterContext(iter_ctx);
 									// 清空方法变量中的迭代器上下文
 									NaNBoxing undefined = default;
@@ -17927,7 +17925,7 @@ namespace juicescript.runtime
 								NaNBoxing load_error = stackslots[exception_ctx->hold_error.index];
 								if (load_error.ValueType != BoxType.Fault)
 								{
-									Context.StackPosition--;//在获取Context时，保留了一个槽位
+									//Context.StackPosition--;//在获取Context时，保留了一个槽位
 									//说明有异常存在，中止访问proto
 									Context.GC.ReturnIterContext(iter_ctx);
 									// 清空方法变量中的迭代器上下文
@@ -17968,7 +17966,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											Context.StackPosition--;//在获取Context时，保留了一个槽位
+											//Context.StackPosition--;//在获取Context时，保留了一个槽位
 											Context.GC.ReturnIterContext(iter_ctx);
 											// 清空方法变量中的迭代器上下文
 											NaNBoxing undefined = default;
@@ -17978,7 +17976,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										Context.StackPosition--;//在获取Context时，保留了一个槽位
+										//Context.StackPosition--;//在获取Context时，保留了一个槽位
 										Context.GC.ReturnIterContext(iter_ctx);
 										// 清空方法变量中的迭代器上下文
 										NaNBoxing undefined = default;

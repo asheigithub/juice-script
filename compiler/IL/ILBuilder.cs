@@ -831,8 +831,8 @@ namespace juicescript.compiler.IL
 				//}
 
 
-				ScopeHeapLocater holderLocater; TypeKind heaptype; ASTrait ex; CodeScope ex_scope; ScopeMember ex_member; VTableItem[] tableItem;
-				var _RV = ExpressionIL.FindIdentifier(forin.HoldObjVar.Name, null, compileEnv, forin.HoldObjVar.Token, out holderLocater, out heaptype, out ex, out ex_scope, out ex_member, out tableItem);
+				ScopeHeapLocater iterSrcObjSaveAtHeap; TypeKind heaptype; ASTrait ex; CodeScope ex_scope; ScopeMember ex_member; VTableItem[] tableItem;
+				var _RV = ExpressionIL.FindIdentifier(forin.HoldObjVar.Name, null, compileEnv, forin.HoldObjVar.Token, out iterSrcObjSaveAtHeap, out heaptype, out ex, out ex_scope, out ex_member, out tableItem);
 				if (_RV != ExpressionIL.FindIdResultType.ScopeMember || ex_scope != compileEnv.Scope)
 				{
 					throw new InvalidOperationException();
@@ -872,9 +872,9 @@ namespace juicescript.compiler.IL
 
 				//add get iter
 				INS_Iter_Get iter_Get = new INS_Iter_Get(forin.ForInExpression.Token);
-				iter_Get.holdObj = holderLocater;
-				iter_Get.dst = objLoc;
-				iter_Get.iterator = iter;
+				iter_Get.iterSrcObj_HoldInHeap = iterSrcObjSaveAtHeap;
+				iter_Get.dst = iter;
+				iter_Get.iterSrcobj = objLoc;
 				//iter_Get.iter_context = iter_context;
 				iter_Get.flag_end_id = for_body.breakFlag.flag_id;
 				compileEnv.instructions.Add(iter_Get);
@@ -956,8 +956,8 @@ namespace juicescript.compiler.IL
 				}
 
 				iter_Next.flag_next_end_id = next_failed.flag_id;
-				//iter_Next.dst = objLoc;
-				iter_Next.dst.index = holderLocater.MemberIndex;
+
+				iter_Next.dst.index = iterSrcObjSaveAtHeap.MemberIndex;
 				iter_Next.iterator = iter;
 				iter_Next.result = nextvalue;
 				
@@ -988,14 +988,12 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(try_Exit);
 
 
-
-
 				INS_Finally_Enter finally_Enter = new INS_Finally_Enter(goto_next.token);
 				compileEnv.instructions.Add(finally_Enter);
 				//add call close
 				INS_Iter_Close iter_Close = new INS_Iter_Close(goto_next.token);
-				iter_Close.holdObj = holderLocater;
-				iter_Close.dst = objLoc;
+				iter_Close.holdObj = iterSrcObjSaveAtHeap;
+				iter_Close.dst = objLoc;                  //当枚举结束，还需要继续枚举proto时，用proto覆盖objLoc,跳回去继续枚举。
 				iter_Close.iterator = iter;
 				iter_Close.iterContextVar = iterContextVarLocater;
 				compileEnv.instructions.Add(iter_Close);

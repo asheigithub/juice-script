@@ -20,13 +20,11 @@ namespace juicescript.ABC.INS
 
 		public override int Size => 4 + 4 + 4 +4 + 4;
 
-		public ScopeHeapLocater holdObj;
+		public ScopeHeapLocater iterSrcObj_HoldInHeap;
 		
-		public StackLocater iterator;
+		public StackLocater iterSrcobj;
 
-		//public StackLocater iter_context;
-
-
+		
 
 		public int flag_end_id;
 		public int flag_offset;
@@ -35,8 +33,8 @@ namespace juicescript.ABC.INS
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
-			holdObj.ReadFromBinary(br);
-			iterator.ReadFromBinary(br);
+			iterSrcObj_HoldInHeap.ReadFromBinary(br);
+			iterSrcobj.ReadFromBinary(br);
 			//iter_context.ReadFromBinary(br);
 			flag_end_id = br.ReadInt32();
 			flag_offset = br.ReadInt32();
@@ -44,8 +42,8 @@ namespace juicescript.ABC.INS
 
 		protected override void WriteByte(BinaryWriter bw)
 		{
-			holdObj.Write(bw);
-			iterator.Write(bw);
+			iterSrcObj_HoldInHeap.Write(bw);
+			iterSrcobj.Write(bw);
 			//iter_context.Write(bw);
 			bw.Write(flag_end_id);
 			bw.Write(flag_offset);
@@ -53,7 +51,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"ITER_Get {iterator}<-{holdObj}.[iterator]  if failed GOTO Flag_{flag_end_id} ";
+			return $"ITER_Get {dst.index}<-{iterSrcObj_HoldInHeap}.[iterator]  if failed GOTO Flag_{flag_end_id} ";
 		}
 
 	}

@@ -580,7 +580,7 @@ namespace juicescript.runtime.buildin
 		//public List<NaNBoxing> keys = new List<NaNBoxing>();
 
 		public byte* PC;
-		public int cache_slot_index;
+		//public int cache_slot_index;
 
 		public int heapPtr;
 
