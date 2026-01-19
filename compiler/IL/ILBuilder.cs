@@ -858,12 +858,16 @@ namespace juicescript.compiler.IL
 				StackLocater objLoc = BuildExpression(compileEnv, forin.ForInExpression, ref flagseed);
 				StackLocater iter = compileEnv.MakeStackLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.IITERATOR.Type_identifier);
 
-				StackLocater iter_context = compileEnv.MakeStackLocater(TypeKind.Any);
-				
-
+				// 获取迭代器上下文变量的位置
+				ScopeHeapLocater iterContextVarLocater; TypeKind iterCtxHeaptype; ASTrait iterCtxEx; CodeScope iterCtxEx_scope; ScopeMember iterCtxEx_member; VTableItem[] iterCtxTableItem;
+				var iterCtx_RV = ExpressionIL.FindIdentifier(forin.IterContextVar.Name, null, compileEnv, forin.IterContextVar.Token, out iterContextVarLocater, out iterCtxHeaptype, out iterCtxEx, out iterCtxEx_scope, out iterCtxEx_member, out iterCtxTableItem);
+				if (iterCtx_RV != ExpressionIL.FindIdResultType.ScopeMember || iterCtxEx_scope != compileEnv.Scope)
+				{
+					throw new InvalidOperationException();
+				}
 
 				INS_Iter_GetCtx iter_ctx = new INS_Iter_GetCtx(forin.ForInExpression.Token);
-				iter_ctx.dst = iter_context;
+				iter_ctx.iterContextVar = iterContextVarLocater;
 				compileEnv.instructions.Add(iter_ctx);
 
 				//add get iter
@@ -956,7 +960,7 @@ namespace juicescript.compiler.IL
 				iter_Next.dst.index = holderLocater.MemberIndex;
 				iter_Next.iterator = iter;
 				iter_Next.result = nextvalue;
-
+				
 				compileEnv.instructions.Add(iter_Next);
 
 				ExpressionIL.BuildAssigning(setvaluetovar, compileEnv);
@@ -993,7 +997,7 @@ namespace juicescript.compiler.IL
 				iter_Close.holdObj = holderLocater;
 				iter_Close.dst = objLoc;
 				iter_Close.iterator = iter;
-				iter_Close.iter_context = iter_context;
+				iter_Close.iterContextVar = iterContextVarLocater;
 				compileEnv.instructions.Add(iter_Close);
 
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(compileEnv.instructions.Where(i => i.token != null).GroupBy(i => i.token.line).OrderByDescending(g => g.Key).First().OrderByDescending(i => i.token.ptr).First().token.nextToken);

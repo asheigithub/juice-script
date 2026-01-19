@@ -23,25 +23,28 @@ namespace juicescript.ABC.INS
 
 		public ScopeHeapLocater holdObj;
 		public StackLocater iterator;
-		public StackLocater iter_context;
+		/// <summary>
+		/// 迭代器上下文存储位置（方法变量）
+		/// </summary>
+		public ScopeHeapLocater iterContextVar;
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
 			holdObj.ReadFromBinary(br);
 			iterator.ReadFromBinary(br);
-			iter_context.ReadFromBinary(br);
+			iterContextVar.ReadFromBinary(br);
 		}
 
 		protected override void WriteByte(BinaryWriter bw)
 		{
 			holdObj.Write(bw);
 			iterator.Write(bw);
-			iter_context.Write(bw);
+			iterContextVar.Write(bw);
 		}
 
 		public override string ToString()
 		{
-			return $"ITER_Close {holdObj}.{iterator} ";
+			return $"ITER_Close {holdObj}.{iterator} ctx:{iterContextVar}";
 		}
 
 	}

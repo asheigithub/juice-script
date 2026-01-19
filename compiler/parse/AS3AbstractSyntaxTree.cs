@@ -4169,6 +4169,12 @@ namespace juicescript.compiler.parse
                     forIn.HoldObjVar.Name = "%&" + "IterObjHolder" +   $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
 					memberscope.Peek().Members.Add(forIn.HoldObjVar);
 
+					// 添加迭代器上下文临时变量
+					AS3Variable iterCtxVar = new AS3Variable(node.MatchedToken);
+					iterCtxVar.Name = "%&" + "IterContext" + $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
+					memberscope.Peek().Members.Add(iterCtxVar);
+					forIn.IterContextVar = iterCtxVar;
+
 
 					//提取for in 
 					if (node.SelectGrammerLine.Derivation[0].Name == "F_Variable")
@@ -4235,6 +4241,12 @@ namespace juicescript.compiler.parse
 				forEach.HoldObjVar = new AS3Variable(node.MatchedToken);
 				forEach.HoldObjVar.Name = "%&" + "IterObjHolder" + $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
 				memberscope.Peek().Members.Add(forEach.HoldObjVar);
+
+				// 添加迭代器上下文临时变量
+				AS3Variable iterCtxVar = new AS3Variable(node.MatchedToken);
+				iterCtxVar.Name = "%&" + "IterContext" + $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
+				memberscope.Peek().Members.Add(iterCtxVar);
+				forEach.IterContextVar = iterCtxVar;
 
 				if (node.SelectGrammerLine.Derivation[0].Name == "F_Variable")
                 {

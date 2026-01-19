@@ -30,9 +30,14 @@ namespace juicescript.compiler.AST.Stmt
 
 		public AS3Expression ForInExpression;
 
-		public List<IAS3SyntaxNode> Body = new List<IAS3SyntaxNode>();
+        public List<IAS3SyntaxNode> Body = new List<IAS3SyntaxNode>();
 
         public AS3Variable HoldObjVar;
+
+        /// <summary>
+        /// 迭代器上下文临时变量
+        /// </summary>
+        public AS3Variable IterContextVar;
 
         public abstract void Write(int v, StringBuilder out_sb);
 		

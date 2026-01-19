@@ -23,6 +23,7 @@ namespace juicescript.ABC.INS
 		public StackLocater iterator;
 		public StackLocater result;
 
+		
 		public int flag_next_end_id;
 		public int flag_offset;
 
@@ -34,6 +35,7 @@ namespace juicescript.ABC.INS
 			
 			iterator.ReadFromBinary(br);
 			result.ReadFromBinary(br);
+			
 			flag_next_end_id = br.ReadInt32();
 			flag_offset = br.ReadInt32();
 		}
@@ -44,6 +46,7 @@ namespace juicescript.ABC.INS
 			
 			iterator.Write(bw);
 			result.Write(bw);
+			
 			bw.Write(flag_next_end_id);
 			bw.Write(flag_offset);
 		}
