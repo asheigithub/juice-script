@@ -22,7 +22,7 @@ namespace juicescript.ABC.INS
 
 
 		public ScopeHeapLocater holdObj;
-		public StackLocater iterator;
+		public ScopeHeapLocater iterator;
 		/// <summary>
 		/// 迭代器上下文存储位置（方法变量）
 		/// </summary>

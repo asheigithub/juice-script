@@ -210,7 +210,7 @@ trace('OK');
 		{
 			Assert.IsNotNull( ex );
 
-			Assert.AreEqual("[Fault] exception,[Message]=Error: Cannot create property touched on Number.", ex.ToDebugMessage());
+			Assert.AreEqual("[Fault] exception,[Message]=ReferenceError: Cannot create property touched on Number.", ex.ToDebugMessage());
 
 		}
 

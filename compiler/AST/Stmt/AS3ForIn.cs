@@ -39,6 +39,12 @@ namespace juicescript.compiler.AST.Stmt
         /// </summary>
         public AS3Variable IterContextVar;
 
+        /// <summary>
+        /// 保存Iter_Get获取的迭代器。因为如果要支持yield类操作，这些只能保存在函数的临时变量里。
+        /// </summary>
+        public AS3Variable HoldIterVar;
+
+
         public abstract void Write(int v, StringBuilder out_sb);
 		
 	}

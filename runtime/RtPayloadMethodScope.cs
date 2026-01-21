@@ -48,6 +48,7 @@ namespace juicescript.runtime
 			SlotCount = codescope.Members.Count;
 
 			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count);
+			cloneout_ptr = 0;
 #if FORCOMPILER
 			if (isCompiling)
 			{
@@ -137,8 +138,29 @@ namespace juicescript.runtime
 		CodeScope scope;
 #endif
 
-		//用于复制到堆时，避免重复处理。
-		internal int cloneing_ptr;
+		/*
+		 function makeCounter() {
+				var count = 0;
+	
+				trace(count);
+	
+				return {
+					inc: function() { count++; },
+					get_: function() { return count; }
+				};
+			}
+
+			var c = makeCounter();
+
+			c.inc();
+			c.inc();
+
+			trace( c.get_() );
+		*/
+		/// <summary>
+		/// 用于复制到堆时，避免重复处理。 注意它可能被多个下级函数引用，所以不要在clone完成后立即置0！仅在Init时置0
+		/// </summary>
+		internal int cloneout_ptr; 
 
 		internal void SetSlot(NaNBoxing value, ushort memberIndex)
 		{
@@ -192,6 +214,7 @@ namespace juicescript.runtime
 			StackPos = newHeapScope.StackPos;
 			SlotCount = newHeapScope.SlotCount;
 			Slots = newHeapScope.Slots;
+
 		}
 
 	}

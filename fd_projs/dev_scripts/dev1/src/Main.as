@@ -16,134 +16,20 @@ package
 	}
 }
 
-class Test262Error extends Error
-{
-	var a;
-	public function Test262Error(t=undefined)
-	{
-		super(t);
-	}
-}
 
-function assert(mustBeTrue, message = undefined) {
-  if (mustBeTrue === true) {
-    return;
-  }
+trace( [1, 2].toString());
 
-  if (message === undefined) {
-    message = 'Expected true but got ' + assert._toString(mustBeTrue);
-  }
-  throw new Test262Error(message);
-}
-
-assert._toString = function (v:String) 
-{
-	return v;
-}
-
-assert._isSameValue = function (a, b) {
-  if (a === b) {
-    // Handle +/-0 vs. -/+0
-    return a !== 0 || 1 / a === 1 / b;
-  }
-
-  // Handle NaN vs. NaN
-  return a !== a && b !== b;
-};
-
-assert.sameValue = function (actual, expected, message) {
-  try {
-    if (assert._isSameValue(actual, expected)) {
-      return;
-    }
-  } catch (error) {
-    throw new Test262Error(message + ' (_isSameValue operation threw) ' + error);
-    return;
-  }
-
-  if (message === undefined) {
-    message = '';
-  } else {
-    message += ' ';
-  }
-
-  message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(expected) + '») to be true';
-
-  throw new Test262Error(message);
-};
-
-assert.notSameValue = function (actual, unexpected, message) {
-  if (!assert._isSameValue(actual, unexpected)) {
-    return;
-  }
-
-  if (message === undefined) {
-    message = '';
-  } else {
-    message += ' ';
-  }
-
-  message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(unexpected) + '») to be false';
-
-  throw new Test262Error(message);
-};
-
-assert.throws = function (expectedErrorConstructor, func, message) {
-  var expectedName, actualName;
-  if (typeof func !== "function") {
-    throw new Test262Error('assert.throws requires two arguments: the error constructor ' +
-      'and a function to run');
-    return;
-  }
-  if (message === undefined) {
-    message = '';
-  } else {
-    message += ' ';
-  }
-
-  try {
-    func();
-  } catch (thrown) {	  
-	  trace(thrown.name); 
-    if (typeof thrown !== 'object' || thrown === null) {
-      message += 'Thrown value was not an object!';
-      throw new Test262Error(message);
-    } else if (thrown.constructor !== expectedErrorConstructor) {
-      expectedName = expectedErrorConstructor.name;
-      actualName = thrown.constructor.name;
-      if (expectedName === actualName) {
-        message += 'Expected a ' + expectedName + ' but got a different error constructor with the same name';
-      } else {
-        message += 'Expected a ' + expectedName + ' but got a ' + actualName;
-      }
-      throw new Test262Error(message);
-    }
-    return;
-  }
-
-  message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
-  throw new Test262Error(message);
-};
-
-// 希望：返回值放在 >= heap.StackPos + heap.SlotCount + M_ClosurePtr 的 return 槽，
-// 且闭包链先到 Global。
-function make() {
-    return function() { return 1; };  // 闭包 ScopePtr = make 的 scope
-}
-function passthru(f) {
-    return f;  // 原样返回，尽量不触发 GetSaveValue 到堆
-}
-function main() {
-    var f = make();       // f 可能已在堆或 return 槽，取决于 make 的 return 路径
-    var p = passthru(f);  //  again
-    var x = p;            // 若 p 的地址满足 else，且 make 的 scope 的 ParentPtr 是 Global，就有可能
-	
-}
-main();
+//assert(log.join(",") == "11,12");
 
 
 
-//assert.sameValue(obj['debugger'](), 42, 'property exists');
+
+
+
+
+
+//assert(log.toString() == "1,2,3,4,5,7");
+
 
 
 

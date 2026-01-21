@@ -202,9 +202,9 @@ namespace juicescript.runtime
 								else
 								{
 									RtPayloadMethodScope cacheMscope = (RtPayloadMethodScope)instance.facility;
-									if (cacheMscope.cloneing_ptr != 0)
+									if (cacheMscope.cloneout_ptr != 0)
 									{
-										value.SetHeapPtr(cacheMscope.cloneing_ptr);
+										value.SetHeapPtr(cacheMscope.cloneout_ptr);
 										break;
 									}
 
@@ -219,7 +219,7 @@ namespace juicescript.runtime
 										return value;
 									}
 
-									cacheMscope.cloneing_ptr = ptr;
+									cacheMscope.cloneout_ptr = ptr;
 
 									heapObj = Context.GC.Heap[ptr];
 									heapObj.Type = instance.Type;
@@ -234,7 +234,7 @@ namespace juicescript.runtime
 										NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
 										if (error.raised)
 										{
-											cacheMscope.cloneing_ptr = 0;
+											cacheMscope.cloneout_ptr = 0;
 											return new NaNBoxing();
 										}
 
@@ -243,7 +243,7 @@ namespace juicescript.runtime
 									}
 									cacheMscope.ChangeStore(heap_scope);
 
-									cacheMscope.cloneing_ptr = 0;
+									//cacheMscope.cloneing_ptr = 0;
 
 									if (cacheMscope.ParentPtr != 0)
 									{
@@ -650,7 +650,7 @@ namespace juicescript.runtime
 												return;
 											}
 
-											cacheMscope.cloneing_ptr = ptr;
+											cacheMscope.cloneout_ptr = ptr;
 
 											heapObj = Context.GC.Heap[ptr];
 											heapObj.Type = scope.Type;
@@ -663,14 +663,14 @@ namespace juicescript.runtime
 												NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
 												if (error.raised)
 												{
-													cacheMscope.cloneing_ptr = 0;
+													cacheMscope.cloneout_ptr = 0;
 													return;
 												}
 
 												heap_scope.SetSlot(slotV, (ushort)i);
 											}
 											cacheMscope.ChangeStore(heap_scope);
-											cacheMscope.cloneing_ptr = 0;
+											//cacheMscope.cloneing_ptr = 0;
 
 											if (last_scope != null)
 											{
@@ -1720,7 +1720,7 @@ namespace juicescript.runtime
 														return;
 													}
 
-													cacheMscope.cloneing_ptr = ptr;
+													cacheMscope.cloneout_ptr = ptr;
 
 													heapObj = Context.GC.Heap[ptr];
 													heapObj.Type = scope.Type;
@@ -1733,14 +1733,14 @@ namespace juicescript.runtime
 														NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
 														if (error.raised)
 														{
-															cacheMscope.cloneing_ptr = 0;
+															cacheMscope.cloneout_ptr = 0;
 															return;
 														}
 
 														heap_scope.SetSlot(slotV, (ushort)i);
 													}
 													cacheMscope.ChangeStore(heap_scope);
-													cacheMscope.cloneing_ptr = 0;
+													//cacheMscope.cloneing_ptr = 0;
 
 													if (last_scope != null)
 													{

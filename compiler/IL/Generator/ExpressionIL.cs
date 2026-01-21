@@ -12,6 +12,8 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
+using System.Security.Cryptography;
 
 namespace juicescript.compiler.IL.Generator
 {
@@ -795,6 +797,45 @@ namespace juicescript.compiler.IL.Generator
 									{
 										throw new InvalidOperationException("不可能是接口");
 									}
+								}
+								else if (instance_type.Maj == TypeKind.Super)
+								{
+									//调父类的写入属性
+									ASClass astype = FindClassById(compileEnv, (ulong)instance_type.Mir);
+									vTable = astype.Instance._vtable;
+
+									if (FindClassById(compileEnv, (ulong)instance_type.Mir).Instance.IsInterface)
+									{
+										throw new InvalidOperationException("不可能是接口");
+									}
+
+									var _index = vTable.Items.FindIndex(v => v.Trait == t[1]);
+									if (_index < 0)
+										throw new InvalidOperationException();
+									if (_index > 65535)
+										throw new ResolverException(step.token, "vtable.items.count > 65535");
+
+									int mid = compileEnv.AddSuperMethod(astype, _index);
+
+									INS_Ld_SuperMethod ld_SuperMethod = new INS_Ld_SuperMethod(step.token);
+									ld_SuperMethod.dst = compileEnv.MakeStackLocater( TypeKind.Function);
+									ld_SuperMethod.instance = instance;
+									ld_SuperMethod.const_index = mid;
+
+									compileEnv.instructions.Add(ld_SuperMethod);
+
+									INS_BindThis_Call bindThis_Call = new INS_BindThis_Call(step.token);
+									bindThis_Call.dst = valueLocater;
+									bindThis_Call.function = ld_SuperMethod.dst;
+									bindThis_Call._this_ = instance;
+									bindThis_Call.args = new StackLocater[1];
+									bindThis_Call.args[0] = valueLocater;
+
+									compileEnv.instructions.Add(bindThis_Call);
+
+									result = valueLocater;
+
+									break;
 								}
 								else
 								{
@@ -4629,555 +4670,589 @@ namespace juicescript.compiler.IL.Generator
 
 		public StackLocater Build(AST.AS3Expression expression, CompileEnv compileEnv, ref int flag_seed)
 		{
-			if (expression.exprStepList.Count == 0)
+
+			try
 			{
-				#region 编译单纯一个字符的情况
-				if (expression.Value.Data.FF1Type == FF1DataValueType.super_pointer)
+				compileEnv.stack_loaded_heapunit.Push(new Dictionary<object, StackLocater>());
+
+
+				if (expression.exprStepList.Count == 0)
 				{
-					throw new ResolverException(expression.Token, $"Unable to generate code for 'super'");
+					#region 编译单纯一个字符的情况
+					if (expression.Value.Data.FF1Type == FF1DataValueType.super_pointer)
+					{
+						throw new ResolverException(expression.Token, $"Unable to generate code for 'super'");
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.const_number
+						||
+						expression.Value.Data.FF1Type == FF1DataValueType.const_string
+						||
+						expression.Value.Data.FF1Type == FF1DataValueType.const_regexp
+						)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.as3_array)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.as3_vector)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.as3_function)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.this_pointer)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.dynamicobj)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.identifier)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+						//               string identifier = expression.Value.Data.Value.ToString();
+						//               var token = expression.Token;
+						//if (Equals(identifier, "Infinity"))
+						//               {
+						//                   int constindex = compileEnv.AddConstNumber(double.PositiveInfinity);
+
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Number);
+
+						//                   INS_Ld_Const ld_Const = new INS_Ld_Const(token);
+						//                   ld_Const.stack = stackLocater;
+						//                   ld_Const.const_index = constindex;
+
+						//                   compileEnv.instructions.Add(ld_Const);
+
+						//                   return stackLocater;
+						//               }
+						//               else if (Equals(identifier, "NaN"))
+						//               {
+						//                   int constindex = compileEnv.AddConstNumber(double.NaN);
+
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Number);
+
+						//                   INS_Ld_Const ld_Const = new INS_Ld_Const(token);
+						//                   ld_Const.stack = stackLocater;
+						//                   ld_Const.const_index = constindex;
+
+						//                   compileEnv.instructions.Add(ld_Const);
+
+						//                   return stackLocater;
+						//               }
+						//               else if (Equals(identifier, "false"))
+						//               {
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Boolean);
+
+						//                   INS_Ld_False ld_False = new INS_Ld_False(token);
+						//                   ld_False.stack = stackLocater;
+
+						//                   compileEnv.instructions.Add(ld_False);
+
+						//                   return stackLocater;
+						//               }
+						//               else if (Equals(identifier, "true"))
+						//               {
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Boolean);
+
+						//                   INS_Ld_True ld_True = new INS_Ld_True(token);
+						//                   ld_True.stack = stackLocater;
+
+						//                   compileEnv.instructions.Add(ld_True);
+
+						//                   return stackLocater;
+						//               }
+						//               else if (Equals(identifier, "null"))
+						//               {
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Null);
+
+						//                   INS_Ld_Null ld_Null = new INS_Ld_Null(token);
+						//                   ld_Null.stack = stackLocater;
+
+						//                   compileEnv.instructions.Add(ld_Null);
+
+						//                   return stackLocater;
+						//               }
+						//               else if (Equals(identifier, "undefined"))
+						//               {
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Null);
+
+						//                   INS_Ld_Undefined ld_undefined = new INS_Ld_Undefined(token);
+						//                   ld_undefined.stack = stackLocater;
+
+						//                   compileEnv.instructions.Add(ld_undefined);
+
+						//                   return stackLocater;
+						//               }
+						//               else if (Equals(identifier, "arguments") && compileEnv.Scope.Kind == CodeScopeKind.Method)
+						//               {
+						//                   var method = ((ASMethodBody)compileEnv.Scope.Container).Method;
+						//                   if (method.Parameters.Count > 0 && method.Parameters[method.Parameters.Count - 1].IsRest)
+						//                   {
+						//                       throw new ResolverException(token, "'arguments' can not be used in a function with '...' paramaters.");
+						//                   }
+
+						//                   method.Flags |= MethodFlags.NeedArguments;
+
+						//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Array, TypeKind.Array);
+
+						//                   INS_Ld_Arguments ld_Arguments = new INS_Ld_Arguments(token);
+						//                   ld_Arguments.target = stackLocater;
+
+						//                   compileEnv.instructions.Add(ld_Arguments);
+
+						//                   return stackLocater;
+						//               }
+						//               else
+						//               {
+						//                   ScopeHeapLocater heapLocater; TypeKind heapType; ASTrait out_trait; CodeScope codescope; ScopeMember scopeMember; VTableItem[] out_vtableItems;
+						//                   var _Rv = FindIdentifier(expression.Value.Data.Value.ToString(), null, compileEnv, expression.Token,
+						//                       out heapLocater, out heapType, out out_trait, out codescope, out scopeMember, out out_vtableItems);
+
+						//                   if (_Rv == FindIdResultType.NotFound)
+						//                   {
+						//                       //查找导入的类
+						//                       var match = compileEnv.imports.Where((t) => { return t.QName.Name == expression.Value.Data.Value.ToString(); }).ToArray();
+						//                       if (match.Length > 1)
+						//                       {
+						//                           throw new ResolverException(expression.Token, $"Ambiguous reference to {match[0].QName.Name}");
+						//                       }
+						//                       else if (match.Length == 1)
+						//                       {
+						//                           //加载类型元数据
+						//                           if (match[0].Kind == TraitKind.Class)
+						//                           {
+						//                               var stackLoc = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)match[0].Class.Type_identifier);
+
+						//                               INS_Ld_Class ld_Class = new INS_Ld_Class(expression.Token);
+						//                               ld_Class.stack = stackLoc;
+						//                               ld_Class.classid_index = compileEnv.AddConstClassId(match[0].Class);
+
+						//                               compileEnv.instructions.Add(ld_Class);
+
+						//                               return stackLoc;
+
+						//                           }
+						//                           else if (match[0].Kind == TraitKind.Constant
+						//                               &&
+						//                               match[0].ValueKind == ConstantKind.Namespace
+						//                               )
+						//                           {
+						//                               var stackLoc = compileEnv.MakeStackLocater(TypeKind.Namespace);
+
+						//                               var ns_index = compileEnv.AddConstNamespaceId(match[0].Value.Namespace);
+
+						//                               INS_Ld_Namespace ld_Namespace = new INS_Ld_Namespace(expression.Token);
+						//                               ld_Namespace.stack = stackLoc;
+						//                               ld_Namespace.namespace_index = ns_index;
+
+						//                               compileEnv.instructions.Add(ld_Namespace);
+
+						//                               return stackLoc;
+						//                           }
+						//                           else
+						//                           {
+						//                               throw new InvalidOperationException();
+						//                           }
+						//                       }
+						//                       else
+						//                       {
+						//                           throw new ResolverException(expression.Token, $"Access of possibly undefined property {expression.Value.Data.Value}.");
+						//                       }
+						//                   }
+						//                   else if (
+						//                       _Rv == FindIdResultType.ScopeMember
+						//                       )
+						//                   {
+						//                       if ((scopeMember).Kind == ScopeMemberKind.Constant && (scopeMember).ValueKind == ConstantKind.Namespace)
+						//                       {
+						//                           //命名空间
+						//                           ASNamespace ns = scopeMember.trait.Value.Namespace;
+
+						//                           var stackLoc = compileEnv.MakeStackLocater(TypeKind.Namespace);
+						//                           var ns_index = compileEnv.AddConstNamespaceId(ns);
+
+						//                           INS_Ld_Namespace ld_Namespace = new INS_Ld_Namespace(expression.Token);
+						//                           ld_Namespace.stack = stackLoc;
+						//                           ld_Namespace.namespace_index = ns_index;
+
+						//                           compileEnv.instructions.Add(ld_Namespace);
+
+						//                           return stackLoc;
+						//                       }
+						//                       else if (scopeMember.Kind == ScopeMemberKind.Parameter || scopeMember.Kind == ScopeMemberKind.Slot || scopeMember.Kind == ScopeMemberKind.Constant)
+						//                       {
+						//                           var stackLoc = compileEnv.MakeStackLocater(heapType);
+
+						//                           INS_Ld_ScopeHeap ld_ScopeHeap = new INS_Ld_ScopeHeap(expression.Token);
+						//                           ld_ScopeHeap.stack = stackLoc;
+						//                           ld_ScopeHeap.heap = heapLocater;
+
+						//                           compileEnv.instructions.Add(ld_ScopeHeap);
+
+						//                           return stackLoc;
+						//                       }
+						//                       else
+						//                       {
+						//                           throw new InvalidOperationException();
+						//                       }
+						//                   }
+						//                   else if (_Rv == FindIdResultType.NeedLoadClass_ScopeMember)
+						//                   {
+						//                       ASClass @class = (ASClass)codescope.Container;
+
+
+						//                       var stackLoc = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)@class.Type_identifier);
+						//                       INS_Ld_Class ld_Class = new INS_Ld_Class(expression.Token);
+						//                       ld_Class.stack = stackLoc;
+						//                       ld_Class.classid_index = compileEnv.AddConstClassId(@class);
+
+						//                       compileEnv.instructions.Add(ld_Class);
+
+						//                       return stackLoc;
+						//                   }
+						//                   else if (_Rv == FindIdResultType.Ambiguous)
+						//                   {
+						//                       throw new ResolverException(expression.Token,
+						//                           $"Ambiguous reference to {expression.Value.Data.Value.ToString()}");
+						//                   }
+						//                   else if (_Rv == FindIdResultType.NeedLoadClass_VTableItems || _Rv == FindIdResultType.VTableItems)
+						//                   {
+						//                       if (out_vtableItems[0] == null)
+						//                       {
+						//                           throw new ResolverException(
+						//                               expression.Token,
+						//                               $"Illegal read of write-only property {out_vtableItems[1].Trait.QName.ToDebugTypeName()} on {codescope.Container.QName.Name}."
+						//                               );
+						//                       }
+
+						//                       //throw new NotImplementedException();
+						//                       // do load from property
+
+						//                       return LoadRightValue(expression.Value, compileEnv, expression.Token);
+
+
+						//                   }
+						//                   else
+						//                   {
+						//                       throw new InvalidOperationException();
+						//                   }
+						//               }
+					}
+					else
+					{
+						throw new InvalidOperationException();
+					}
+					#endregion
 				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.const_number
-					||
-					expression.Value.Data.FF1Type == FF1DataValueType.const_string
-					||
-					expression.Value.Data.FF1Type == FF1DataValueType.const_regexp
-					)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.as3_array)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.as3_vector)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.as3_function)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.this_pointer)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.dynamicobj)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-				}
-				else if (expression.Value.Data.FF1Type == FF1DataValueType.identifier)
-				{
-					return LoadRightValue(expression.Value, compileEnv, expression.Token);
-					//               string identifier = expression.Value.Data.Value.ToString();
-					//               var token = expression.Token;
-					//if (Equals(identifier, "Infinity"))
-					//               {
-					//                   int constindex = compileEnv.AddConstNumber(double.PositiveInfinity);
 
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Number);
-
-					//                   INS_Ld_Const ld_Const = new INS_Ld_Const(token);
-					//                   ld_Const.stack = stackLocater;
-					//                   ld_Const.const_index = constindex;
-
-					//                   compileEnv.instructions.Add(ld_Const);
-
-					//                   return stackLocater;
-					//               }
-					//               else if (Equals(identifier, "NaN"))
-					//               {
-					//                   int constindex = compileEnv.AddConstNumber(double.NaN);
-
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Number);
-
-					//                   INS_Ld_Const ld_Const = new INS_Ld_Const(token);
-					//                   ld_Const.stack = stackLocater;
-					//                   ld_Const.const_index = constindex;
-
-					//                   compileEnv.instructions.Add(ld_Const);
-
-					//                   return stackLocater;
-					//               }
-					//               else if (Equals(identifier, "false"))
-					//               {
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Boolean);
-
-					//                   INS_Ld_False ld_False = new INS_Ld_False(token);
-					//                   ld_False.stack = stackLocater;
-
-					//                   compileEnv.instructions.Add(ld_False);
-
-					//                   return stackLocater;
-					//               }
-					//               else if (Equals(identifier, "true"))
-					//               {
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Boolean);
-
-					//                   INS_Ld_True ld_True = new INS_Ld_True(token);
-					//                   ld_True.stack = stackLocater;
-
-					//                   compileEnv.instructions.Add(ld_True);
-
-					//                   return stackLocater;
-					//               }
-					//               else if (Equals(identifier, "null"))
-					//               {
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Null);
-
-					//                   INS_Ld_Null ld_Null = new INS_Ld_Null(token);
-					//                   ld_Null.stack = stackLocater;
-
-					//                   compileEnv.instructions.Add(ld_Null);
-
-					//                   return stackLocater;
-					//               }
-					//               else if (Equals(identifier, "undefined"))
-					//               {
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Null);
-
-					//                   INS_Ld_Undefined ld_undefined = new INS_Ld_Undefined(token);
-					//                   ld_undefined.stack = stackLocater;
-
-					//                   compileEnv.instructions.Add(ld_undefined);
-
-					//                   return stackLocater;
-					//               }
-					//               else if (Equals(identifier, "arguments") && compileEnv.Scope.Kind == CodeScopeKind.Method)
-					//               {
-					//                   var method = ((ASMethodBody)compileEnv.Scope.Container).Method;
-					//                   if (method.Parameters.Count > 0 && method.Parameters[method.Parameters.Count - 1].IsRest)
-					//                   {
-					//                       throw new ResolverException(token, "'arguments' can not be used in a function with '...' paramaters.");
-					//                   }
-
-					//                   method.Flags |= MethodFlags.NeedArguments;
-
-					//                   StackLocater stackLocater = compileEnv.MakeStackLocater(TypeKind.Array, TypeKind.Array);
-
-					//                   INS_Ld_Arguments ld_Arguments = new INS_Ld_Arguments(token);
-					//                   ld_Arguments.target = stackLocater;
-
-					//                   compileEnv.instructions.Add(ld_Arguments);
-
-					//                   return stackLocater;
-					//               }
-					//               else
-					//               {
-					//                   ScopeHeapLocater heapLocater; TypeKind heapType; ASTrait out_trait; CodeScope codescope; ScopeMember scopeMember; VTableItem[] out_vtableItems;
-					//                   var _Rv = FindIdentifier(expression.Value.Data.Value.ToString(), null, compileEnv, expression.Token,
-					//                       out heapLocater, out heapType, out out_trait, out codescope, out scopeMember, out out_vtableItems);
-
-					//                   if (_Rv == FindIdResultType.NotFound)
-					//                   {
-					//                       //查找导入的类
-					//                       var match = compileEnv.imports.Where((t) => { return t.QName.Name == expression.Value.Data.Value.ToString(); }).ToArray();
-					//                       if (match.Length > 1)
-					//                       {
-					//                           throw new ResolverException(expression.Token, $"Ambiguous reference to {match[0].QName.Name}");
-					//                       }
-					//                       else if (match.Length == 1)
-					//                       {
-					//                           //加载类型元数据
-					//                           if (match[0].Kind == TraitKind.Class)
-					//                           {
-					//                               var stackLoc = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)match[0].Class.Type_identifier);
-
-					//                               INS_Ld_Class ld_Class = new INS_Ld_Class(expression.Token);
-					//                               ld_Class.stack = stackLoc;
-					//                               ld_Class.classid_index = compileEnv.AddConstClassId(match[0].Class);
-
-					//                               compileEnv.instructions.Add(ld_Class);
-
-					//                               return stackLoc;
-
-					//                           }
-					//                           else if (match[0].Kind == TraitKind.Constant
-					//                               &&
-					//                               match[0].ValueKind == ConstantKind.Namespace
-					//                               )
-					//                           {
-					//                               var stackLoc = compileEnv.MakeStackLocater(TypeKind.Namespace);
-
-					//                               var ns_index = compileEnv.AddConstNamespaceId(match[0].Value.Namespace);
-
-					//                               INS_Ld_Namespace ld_Namespace = new INS_Ld_Namespace(expression.Token);
-					//                               ld_Namespace.stack = stackLoc;
-					//                               ld_Namespace.namespace_index = ns_index;
-
-					//                               compileEnv.instructions.Add(ld_Namespace);
-
-					//                               return stackLoc;
-					//                           }
-					//                           else
-					//                           {
-					//                               throw new InvalidOperationException();
-					//                           }
-					//                       }
-					//                       else
-					//                       {
-					//                           throw new ResolverException(expression.Token, $"Access of possibly undefined property {expression.Value.Data.Value}.");
-					//                       }
-					//                   }
-					//                   else if (
-					//                       _Rv == FindIdResultType.ScopeMember
-					//                       )
-					//                   {
-					//                       if ((scopeMember).Kind == ScopeMemberKind.Constant && (scopeMember).ValueKind == ConstantKind.Namespace)
-					//                       {
-					//                           //命名空间
-					//                           ASNamespace ns = scopeMember.trait.Value.Namespace;
-
-					//                           var stackLoc = compileEnv.MakeStackLocater(TypeKind.Namespace);
-					//                           var ns_index = compileEnv.AddConstNamespaceId(ns);
-
-					//                           INS_Ld_Namespace ld_Namespace = new INS_Ld_Namespace(expression.Token);
-					//                           ld_Namespace.stack = stackLoc;
-					//                           ld_Namespace.namespace_index = ns_index;
-
-					//                           compileEnv.instructions.Add(ld_Namespace);
-
-					//                           return stackLoc;
-					//                       }
-					//                       else if (scopeMember.Kind == ScopeMemberKind.Parameter || scopeMember.Kind == ScopeMemberKind.Slot || scopeMember.Kind == ScopeMemberKind.Constant)
-					//                       {
-					//                           var stackLoc = compileEnv.MakeStackLocater(heapType);
-
-					//                           INS_Ld_ScopeHeap ld_ScopeHeap = new INS_Ld_ScopeHeap(expression.Token);
-					//                           ld_ScopeHeap.stack = stackLoc;
-					//                           ld_ScopeHeap.heap = heapLocater;
-
-					//                           compileEnv.instructions.Add(ld_ScopeHeap);
-
-					//                           return stackLoc;
-					//                       }
-					//                       else
-					//                       {
-					//                           throw new InvalidOperationException();
-					//                       }
-					//                   }
-					//                   else if (_Rv == FindIdResultType.NeedLoadClass_ScopeMember)
-					//                   {
-					//                       ASClass @class = (ASClass)codescope.Container;
-
-
-					//                       var stackLoc = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)@class.Type_identifier);
-					//                       INS_Ld_Class ld_Class = new INS_Ld_Class(expression.Token);
-					//                       ld_Class.stack = stackLoc;
-					//                       ld_Class.classid_index = compileEnv.AddConstClassId(@class);
-
-					//                       compileEnv.instructions.Add(ld_Class);
-
-					//                       return stackLoc;
-					//                   }
-					//                   else if (_Rv == FindIdResultType.Ambiguous)
-					//                   {
-					//                       throw new ResolverException(expression.Token,
-					//                           $"Ambiguous reference to {expression.Value.Data.Value.ToString()}");
-					//                   }
-					//                   else if (_Rv == FindIdResultType.NeedLoadClass_VTableItems || _Rv == FindIdResultType.VTableItems)
-					//                   {
-					//                       if (out_vtableItems[0] == null)
-					//                       {
-					//                           throw new ResolverException(
-					//                               expression.Token,
-					//                               $"Illegal read of write-only property {out_vtableItems[1].Trait.QName.ToDebugTypeName()} on {codescope.Container.QName.Name}."
-					//                               );
-					//                       }
-
-					//                       //throw new NotImplementedException();
-					//                       // do load from property
-
-					//                       return LoadRightValue(expression.Value, compileEnv, expression.Token);
-
-
-					//                   }
-					//                   else
-					//                   {
-					//                       throw new InvalidOperationException();
-					//                   }
-					//               }
-				}
 				else
 				{
-					throw new InvalidOperationException();
-				}
-				#endregion
-			}
+					StackLocater expressionValue = new StackLocater() { index = int.MinValue };
 
-			else
-			{
-				StackLocater expressionValue = new StackLocater() { index = int.MinValue };
+					Dictionary<string, INS_Flag> expression_flags = new Dictionary<string, INS_Flag>();
 
-				Dictionary<string, INS_Flag> expression_flags = new Dictionary<string, INS_Flag>();
-
-				for (int i = 0; i < expression.exprStepList.Count; i++)
-				{
-					var step = expression.exprStepList[i];
-
-					if (step.Type != OpType.Access && step.Type != OpType.CallFunc)
+					for (int i = 0; i < expression.exprStepList.Count; i++)
 					{
-						if (step.Arg2 != null && !step.Arg2.IsReg)
+						var step = expression.exprStepList[i];
+
+						if (step.Type != OpType.Access && step.Type != OpType.CallFunc)
 						{
-							if (step.Arg2.Data.FF1Type == FF1DataValueType.super_pointer)
+							if (step.Arg2 != null && !step.Arg2.IsReg)
 							{
-								throw new ResolverException(expression.Token,
-									$"'super' is not allowed here");
+								if (step.Arg2.Data.FF1Type == FF1DataValueType.super_pointer)
+								{
+									throw new ResolverException(expression.Token,
+										$"'super' is not allowed here");
+								}
 							}
 						}
+
+						switch (step.Type)
+						{
+							case OpType.Assigning:
+								expressionValue = BuildAssigning(step, compileEnv);
+								break;
+							case OpType.Load:
+
+								if (step.OpCode == "Ld")
+								{
+									expressionValue = LoadRightValue(step.Arg2, compileEnv, step.token);
+								}
+								else if (step.OpCode == "Ld_R")
+								{
+									expressionValue = LoadRightValue(step.Arg2, compileEnv, step.token, step.Arg1.Reg);
+								}
+								else if (step.OpCode == "Ld_Callable")
+								{
+									ASTrait o;
+									CodeScope codeScope;
+									ScopeMember scopeMember;
+									VTableItem[] out_vtableItems;
+									TypeKind heapType;
+									ScopeHeapLocater heapLocater;
+									var find = FindIdentifier(step.Arg2.Data.Value.ToString(), null, compileEnv, step.token, out heapLocater, out heapType, out o, out codeScope, out scopeMember, out out_vtableItems);
+									//如果不是可以改变的变量，就跳过Ld步骤
+									if (find == FindIdResultType.ScopeMember)
+									{
+										if (
+											o != null
+											&& (
+											(o.TypeKind == TypeKind.Any && o.Value != null && o.Value.ValueType == ASTrait.TraitValueType.AS3Function)
+											||
+											o.Kind == TraitKind.Constant
+											)
+											)
+										{
+											step.Arg1.IsReg = false;
+											step.Arg1.Reg = null;
+											step.Arg1.Data = step.Arg2.Data;
+											break;
+										}
+									}
+									else if (find == FindIdResultType.NeedLoadClass_VTableItems ||
+										find == FindIdResultType.VTableItems
+										)
+									{
+										step.Arg1.IsReg = false;
+										step.Arg1.Reg = null;
+										step.Arg1.Data = step.Arg2.Data;
+										break;
+									}
+									else if (find == FindIdResultType.NeedLoadClass_ScopeMember)
+									{
+										if (o.Kind == TraitKind.Constant)
+										{
+											step.Arg1.IsReg = false;
+											step.Arg1.Reg = null;
+											step.Arg1.Data = step.Arg2.Data;
+											break;
+										}
+									}
+
+									expressionValue = LoadRightValue(step.Arg2, compileEnv, step.token, step.Arg1.Reg);
+								}
+								else
+								{
+									throw new InvalidOperationException();
+								}
+								break;
+							case OpType.BitOr:
+								BuildBitOr(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.BitXor:
+								BuildBitXor(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.BitAnd:
+								BuildBitAnd(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.LogicEQ:
+								BuildLogicEQ(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.Logic:
+								//throw new NotImplementedException();
+								BuildLogic(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.BitShift:
+								BuildBitShift(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.Plus:
+								BuildPlus(step, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.Multiply:
+								BuildMultiply(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.Unary:
+								BuildUnary(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.Constructor:
+								new ConstructorBuilder().Build(step, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+
+								break;
+							case OpType.Access:
+								BuildAccess(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.E4XAccess:
+								throw new NotImplementedException();
+								break;
+							case OpType.E4XFilter:
+								throw new NotImplementedException();
+								break;
+							case OpType.NameSpaceAccess:
+								BuildNSAccess(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								//throw new NotImplementedException();
+								break;
+							case OpType.CallFunc:
+								new CallFuncBuilder().Build(step, expression, compileEnv);
+								expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
+								break;
+							case OpType.Suffix:
+
+								var ovalue = LoadRightValue(step.Arg2, compileEnv, step.token);
+
+								StackLocater newvalue = compileEnv.GetStackLocater(step.Arg3.Reg, TypeKind.Number);
+								StackLocater result = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Number);
+
+
+
+								INS_Incr_Decr Incr_Decr = new INS_Incr_Decr(step.token);
+								Incr_Decr.source = ovalue;
+								Incr_Decr.dst = newvalue;
+								Incr_Decr.result = result;
+								if (step.OpCode == "++")
+								{
+									Incr_Decr.addvalue = 1;
+								}
+								else if (step.OpCode == "--")
+								{
+									Incr_Decr.addvalue = -1;
+								}
+								else
+								{
+									throw new InvalidOperationException();
+								}
+
+								compileEnv.instructions.Add(Incr_Decr);
+
+
+								AS3ExprStep stepAssign = new AS3ExprStep(step.token);
+								stepAssign.Arg1 = step.Arg2;
+								stepAssign.Arg2 = step.Arg3;
+								stepAssign.Type = OpType.Assigning;
+								stepAssign.OpCode = "=";
+
+								BuildAssigning(stepAssign, compileEnv, "Operand of " + (step.OpCode == "++" ? "increment" : "decrement"));
+								expressionValue = ovalue;
+
+
+								break;
+
+							case OpType.Flag:
+								//throw new NotImplementedException();
+
+								compileEnv.instructions.Add(expression_flags[step.OpCode]);
+
+								break;
+							case OpType.IF_True_Goto:
+								//throw new NotImplementedException();
+								{
+									string flag_str = step.OpCode;
+									INS_Flag flag;
+									if (!expression_flags.ContainsKey(flag_str))
+									{
+										flag = new INS_Flag(step.token);
+										flag.flag_id = flag_seed++;
+										expression_flags.Add(flag_str, flag);
+									}
+									else
+									{
+										flag = expression_flags[flag_str];
+									}
+
+									INS_If_True_Goto if_True_Goto = new INS_If_True_Goto(step.token);
+									if_True_Goto.flag_id = flag.flag_id;
+									if_True_Goto.condition = LoadRightValue(step.Arg1, compileEnv, step.token);
+									compileEnv.instructions.Add(if_True_Goto);
+
+								}
+								break;
+							case OpType.IF_False_Goto:
+								//throw new NotImplementedException();
+								{
+									string flag_str = step.OpCode;
+									INS_Flag flag;
+									if (!expression_flags.ContainsKey(flag_str))
+									{
+										flag = new INS_Flag(step.token);
+										flag.flag_id = flag_seed++;
+										expression_flags.Add(flag_str, flag);
+									}
+									else
+									{
+										flag = expression_flags[flag_str];
+									}
+
+
+									INS_If_False_Goto if_False_Goto = new INS_If_False_Goto(step.token);
+									if_False_Goto.flag_id = flag.flag_id;
+									if_False_Goto.condition = LoadRightValue(step.Arg1, compileEnv, step.token);
+									compileEnv.instructions.Add(if_False_Goto);
+
+								}
+								break;
+							case OpType.GotoFlag:
+
+								{
+									string flag_str = step.OpCode;
+									INS_Flag flag = new INS_Flag(step.token);
+									flag.flag_id = flag_seed++;
+									expression_flags.Add(flag_str, flag);
+
+									INS_Goto @goto = new INS_Goto(step.token);
+									@goto.jumpTrys = 0;
+									@goto.flag_id = flag.flag_id;
+									compileEnv.instructions.Add(@goto);
+								}
+
+								//throw new NotImplementedException();
+								break;
+							default:
+								throw new NotImplementedException();
+						}
+
 					}
 
-					switch (step.Type)
+					if (expressionValue.index == int.MinValue)
 					{
-						case OpType.Assigning:
-							expressionValue = BuildAssigning(step, compileEnv);
-							break;
-						case OpType.Load:
-
-							if (step.OpCode == "Ld")
-							{
-								expressionValue = LoadRightValue(step.Arg2, compileEnv, step.token);
-							}
-							else if (step.OpCode == "Ld_R")
-							{
-								expressionValue = LoadRightValue(step.Arg2, compileEnv, step.token, step.Arg1.Reg);
-							}
-							else if (step.OpCode == "Ld_Callable")
-							{
-								ASTrait o;
-								CodeScope codeScope;
-								ScopeMember scopeMember;
-								VTableItem[] out_vtableItems;
-								TypeKind heapType;
-								ScopeHeapLocater heapLocater;
-								var find = FindIdentifier(step.Arg2.Data.Value.ToString(), null, compileEnv, step.token, out heapLocater, out heapType, out o, out codeScope, out scopeMember, out out_vtableItems);
-								//如果不是可以改变的变量，就跳过Ld步骤
-								if (find == FindIdResultType.ScopeMember)
-								{
-									if (
-										o !=null
-										&&(
-										(o.TypeKind == TypeKind.Any && o.Value != null && o.Value.ValueType == ASTrait.TraitValueType.AS3Function)
-										||
-										o.Kind == TraitKind.Constant
-										)
-										)
-									{
-										step.Arg1.IsReg = false;
-										step.Arg1.Reg = null;
-										step.Arg1.Data = step.Arg2.Data;
-										break;
-									}
-								}
-								else if (find == FindIdResultType.NeedLoadClass_VTableItems ||
-									find == FindIdResultType.VTableItems
-									)
-								{
-									step.Arg1.IsReg = false;
-									step.Arg1.Reg = null;
-									step.Arg1.Data = step.Arg2.Data;
-									break;
-								}
-								else if (find == FindIdResultType.NeedLoadClass_ScopeMember)
-								{
-									if (o.Kind== TraitKind.Constant)
-									{
-										step.Arg1.IsReg = false;
-										step.Arg1.Reg = null;
-										step.Arg1.Data = step.Arg2.Data;
-										break;
-									}
-								}
-
-								expressionValue = LoadRightValue(step.Arg2, compileEnv, step.token, step.Arg1.Reg);
-							}
-							else
-							{
-								throw new InvalidOperationException();
-							}
-							break;
-						case OpType.BitOr:
-							BuildBitOr(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.BitXor:
-							BuildBitXor(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.BitAnd:
-							BuildBitAnd(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.LogicEQ:
-							BuildLogicEQ(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.Logic:
-							//throw new NotImplementedException();
-							BuildLogic(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.BitShift:
-							BuildBitShift(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.Plus:
-							BuildPlus(step, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.Multiply:
-							BuildMultiply(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.Unary:
-							BuildUnary(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.Constructor:
-							new ConstructorBuilder().Build(step, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-
-							break;
-						case OpType.Access:
-							BuildAccess(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.E4XAccess:
-							throw new NotImplementedException();
-							break;
-						case OpType.E4XFilter:
-							throw new NotImplementedException();
-							break;
-						case OpType.NameSpaceAccess:
-							BuildNSAccess(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							//throw new NotImplementedException();
-							break;
-						case OpType.CallFunc:
-							new CallFuncBuilder().Build(step, expression, compileEnv);
-							expressionValue = compileEnv.GetStackLocater(step.Arg1.Reg);
-							break;
-						case OpType.Suffix:
-
-							var ovalue = LoadRightValue(step.Arg2, compileEnv, step.token);
-
-							StackLocater newvalue = compileEnv.GetStackLocater(step.Arg3.Reg, TypeKind.Number);
-							StackLocater result = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Number);
-
-							
-
-							INS_Incr_Decr Incr_Decr = new INS_Incr_Decr(step.token);
-							Incr_Decr.source = ovalue;
-							Incr_Decr.dst = newvalue;
-							Incr_Decr.result = result;
-							if (step.OpCode == "++")
-							{		
-								Incr_Decr.addvalue = 1;
-							}
-							else if (step.OpCode == "--")
-							{
-								Incr_Decr.addvalue = -1;
-							}
-							else
-							{
-								throw new InvalidOperationException();	
-							}
-
-							compileEnv.instructions.Add(Incr_Decr);
-
-
-							AS3ExprStep stepAssign = new AS3ExprStep(step.token);
-							stepAssign.Arg1 = step.Arg2;
-							stepAssign.Arg2 = step.Arg3;
-							stepAssign.Type = OpType.Assigning;
-							stepAssign.OpCode = "=";
-
-							BuildAssigning(stepAssign, compileEnv, "Operand of " + (step.OpCode=="++"?"increment":"decrement") );
-							expressionValue = ovalue;
-
-
-							break;
-							
-						case OpType.Flag:
-							//throw new NotImplementedException();
-
-							compileEnv.instructions.Add(expression_flags[step.OpCode]);
-
-							break;
-						case OpType.IF_True_Goto:
-							//throw new NotImplementedException();
-							{
-								string flag_str = step.OpCode;
-								INS_Flag flag;
-								if (!expression_flags.ContainsKey(flag_str))
-								{
-									flag = new INS_Flag(step.token);
-									flag.flag_id = flag_seed++;
-									expression_flags.Add(flag_str, flag);
-								}
-								else
-								{
-									flag = expression_flags[flag_str];
-								}
-
-								INS_If_True_Goto if_True_Goto = new INS_If_True_Goto(step.token);
-								if_True_Goto.flag_id = flag.flag_id;
-								if_True_Goto.condition = LoadRightValue(step.Arg1, compileEnv, step.token);
-								compileEnv.instructions.Add(if_True_Goto);
-
-							}
-							break;
-						case OpType.IF_False_Goto:
-							//throw new NotImplementedException();
-							{
-								string flag_str = step.OpCode;
-								INS_Flag flag;
-								if (!expression_flags.ContainsKey(flag_str))
-								{
-									flag = new INS_Flag(step.token);
-									flag.flag_id = flag_seed++;
-									expression_flags.Add(flag_str, flag);
-								}
-								else
-								{
-									flag = expression_flags[flag_str];
-								}
-
-
-								INS_If_False_Goto if_False_Goto = new INS_If_False_Goto(step.token);
-								if_False_Goto.flag_id = flag.flag_id;
-								if_False_Goto.condition = LoadRightValue(step.Arg1, compileEnv, step.token);
-								compileEnv.instructions.Add(if_False_Goto);
-
-							}
-							break;
-						case OpType.GotoFlag:
-
-							{
-								string flag_str = step.OpCode;
-								INS_Flag flag = new INS_Flag(step.token);
-								flag.flag_id = flag_seed++;
-								expression_flags.Add(flag_str, flag);
-
-								INS_Goto @goto = new INS_Goto(step.token);
-								@goto.jumpTrys = 0;
-								@goto.flag_id = flag.flag_id;
-								compileEnv.instructions.Add(@goto);
-							}
-
-							//throw new NotImplementedException();
-							break;
-						default:
-							throw new NotImplementedException();
+						throw new InvalidOperationException();
 					}
 
+					if (expression.Value == null)
+					{
+						return expressionValue;
+					}
+					else if (expression.Value.IsReg)
+					{
+						return compileEnv.GetStackLocater(expression.Value.Reg);
+					}
+					else if (expression.Value.Data.FF1Type == FF1DataValueType.dynamicobj
+						||
+						expression.Value.Data.FF1Type == FF1DataValueType.as3_array
+						||
+						expression.Value.Data.FF1Type == FF1DataValueType.as3_vector
+						)
+					{
+						return LoadRightValue(expression.Value, compileEnv, expression.Token);
+					}
+					else
+					{
+						return expressionValue;
+					}
+					//return expressionValue;
+
 				}
 
-				if (expressionValue.index == int.MinValue)
-				{
-					throw new InvalidOperationException();
-				}
-				return expressionValue;
-
+			}
+			finally
+			{
+				compileEnv.stack_loaded_heapunit.Pop();
 			}
 
 		}
@@ -5842,47 +5917,85 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						var ttype = FindClassById(compileEnv, (ulong)instancetype.Maj);
-						var type = ttype.Instance;
-						int t_index = type._vtable.Items.FindIndex(t => t.Trait == traitRef.Item1[0]);
-						if (t_index < 0)
-							throw new InvalidOperationException();
-						if (t_index > 65535)
+						ASClass ttype;
+						if (instancetype.Maj != TypeKind.Super)
 						{
-							throw new ParseException(type.QName.ToDebugTypeName() + ".vtable.items.count > 65535");
-						}
+							ttype = FindClassById(compileEnv, (ulong)instancetype.Maj);
 
-						var stacklocator = makeOrGetLocater(traitRef.Item1[0].Method.ReturnTypeKind);
+							var type = ttype.Instance;
+							int t_index = type._vtable.Items.FindIndex(t => t.Trait == traitRef.Item1[0]);
+							if (t_index < 0)
+								throw new InvalidOperationException();
+							if (t_index > 65535)
+							{
+								throw new ParseException(type.QName.ToDebugTypeName() + ".vtable.items.count > 65535");
+							}
 
-						if (type.IsInterface)
-						{
-							//throw new NotImplementedException();
+							var stacklocator = makeOrGetLocater(traitRef.Item1[0].Method.ReturnTypeKind);
 
-							int class_id = compileEnv.AddConstClassId(ttype);
+							if (type.IsInterface)
+							{
+								//throw new NotImplementedException();
 
-							INS_readPoperty_Interface readPoperty_Interface = new INS_readPoperty_Interface(token);
-							readPoperty_Interface.dst = stacklocator;
-							readPoperty_Interface.instance = instance;
-							readPoperty_Interface.class_id = class_id;
-							readPoperty_Interface.const_index = (ushort)t_index;
+								int class_id = compileEnv.AddConstClassId(ttype);
 
-							compileEnv.SetCallResult(stacklocator);
-							compileEnv.instructions.Add(readPoperty_Interface);
+								INS_readPoperty_Interface readPoperty_Interface = new INS_readPoperty_Interface(token);
+								readPoperty_Interface.dst = stacklocator;
+								readPoperty_Interface.instance = instance;
+								readPoperty_Interface.class_id = class_id;
+								readPoperty_Interface.const_index = (ushort)t_index;
+
+								compileEnv.SetCallResult(stacklocator);
+								compileEnv.instructions.Add(readPoperty_Interface);
 
 
+							}
+							else
+							{
+								INS_readPoperty readPoperty = new INS_readPoperty(token);
+								readPoperty.dst = stacklocator;
+								readPoperty.instance = instance;
+								readPoperty.const_index = (ushort)t_index;
+
+								compileEnv.SetCallResult(stacklocator);
+								compileEnv.instructions.Add(readPoperty);
+							}
+							return stacklocator;
 						}
 						else
 						{
-							INS_readPoperty readPoperty = new INS_readPoperty(token);
-							readPoperty.dst = stacklocator;
-							readPoperty.instance = instance;
-							readPoperty.const_index = (ushort)t_index;
+							ttype = FindClassById(compileEnv, (ulong)instancetype.Mir);
+							var type = ttype.Instance;
+							int t_index = type._vtable.Items.FindIndex(t => t.Trait == traitRef.Item1[0]);
+							if (t_index < 0)
+								throw new InvalidOperationException();
+							if (t_index > 65535)
+							{
+								throw new ParseException(type.QName.ToDebugTypeName() + ".vtable.items.count > 65535");
+							}
 
-							compileEnv.SetCallResult(stacklocator);
-							compileEnv.instructions.Add(readPoperty);
+							var stacklocator = makeOrGetLocater(traitRef.Item1[0].Method.ReturnTypeKind);
+
+							int mid = compileEnv.AddSuperMethod(ttype, t_index);
+
+							INS_Ld_SuperMethod ld_SuperMethod = new INS_Ld_SuperMethod(token);
+							ld_SuperMethod.dst = compileEnv.MakeStackLocater( TypeKind.Function) ;
+							ld_SuperMethod.instance = instance;
+							ld_SuperMethod.const_index = mid;
+
+							compileEnv.instructions.Add(ld_SuperMethod);
+
+							INS_BindThis_Call bindThis_Call = new INS_BindThis_Call(token);
+							bindThis_Call.dst = stacklocator;
+							bindThis_Call.args = new StackLocater[0];
+							bindThis_Call.function = ld_SuperMethod.dst;
+							bindThis_Call._this_ = instance;
+
+							compileEnv.instructions.Add(bindThis_Call);
+
+							return stacklocator;
+
 						}
-						return stacklocator;
-
 					}
 
 				}
@@ -6298,194 +6411,251 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else if (data.Data.FF1Type == FF1DataValueType.as3_vector)
 				{
-					AS3Vector as3vector = (AS3Vector)data.Data.Value;
 
-					string vec = as3vector.VectorTypeStr;
-
-					List<TypeKind> type_path = new List<TypeKind>();
-					while (vec.StartsWith("Vector.<"))
+					if (compileEnv.stack_loaded_heapunit.Peek().ContainsKey(data.Data.Value))
 					{
-						type_path.Add(TypeKind.Vector);
-
-						vec = vec.Substring(8, vec.Length - 9);
-					}
-
-					if (vec == "*")
-					{
-						type_path.Add(TypeKind.Any);
+						return compileEnv.stack_loaded_heapunit.Peek()[data.Data.Value];
 					}
 					else
 					{
-						StackLocater vector_type = parseIdentifier(vec);
 
-						CompileTypeKind typeKind = compileEnv.ReadStackType(vector_type);
-						if (typeKind.Maj != TypeKind.Class)
+						AS3Vector as3vector = (AS3Vector)data.Data.Value;
+
+						string vec = as3vector.VectorTypeStr;
+
+						List<TypeKind> type_path = new List<TypeKind>();
+						while (vec.StartsWith("Vector.<"))
 						{
-							throw new ResolverException(token, "Type was not found or was not a compile-time constant: " + vec + ".");
+							type_path.Add(TypeKind.Vector);
+
+							vec = vec.Substring(8, vec.Length - 9);
 						}
 
-						type_path.Add(typeKind.Mir);
-					}
-					VectorDef vector = VectorDef.CreateOrGet(compileEnv.CompileContext, type_path);
-
-					int constindex = compileEnv.AddVectorDef(vector);
-
-
-
-
-
-					StackLocater stackLocater = makeOrGetLocater2(TypeKind.Vector, vector.Identifier);
-
-					INS_Ld_VectorType ld_Const = new INS_Ld_VectorType(token);
-					ld_Const.dst = stackLocater;
-					ld_Const.vectortype_index = constindex;
-
-					compileEnv.instructions.Add(ld_Const);
-
-					if (as3vector.Constructor == null)
-					{
-						return stackLocater;
-					}
-					else
-					{
-						if (newop != null)
+						if (vec == "*")
 						{
-							newop.Arg3 = as3vector.Constructor;
-							return stackLocater;
-							
+							type_path.Add(TypeKind.Any);
 						}
 						else
 						{
-							var items = (List<AS3DataStackElement>)as3vector.Constructor.Data.Value;
-							List<StackLocater> arguments = new List<StackLocater>();
-							for (int i = 0; i < items.Count; i++)
-							{
-								var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
-								
-								var arg = ExpressionIL.TestTypeConvert(compileEnv, v, new CompileTypeKind() { Maj = vector.buildVector.ElementType }, items[i].IsReg ? data.Data.token : items[i].Data.token);
-								arguments.Add(arg);
+							StackLocater vector_type = parseIdentifier(vec);
 
+							CompileTypeKind typeKind = compileEnv.ReadStackType(vector_type);
+							if (typeKind.Maj != TypeKind.Class)
+							{
+								throw new ResolverException(token, "Type was not found or was not a compile-time constant: " + vec + ".");
 							}
 
-							ld_Const.dst = compileEnv.MakeStackLocater(TypeKind.Vector, vector.Identifier);
-
-							INS_bindGlobal_Call method_Call = new INS_bindGlobal_Call( token );
-							method_Call.dst = stackLocater;
-							method_Call.function = ld_Const.dst;
-							method_Call.args = arguments.ToArray();
-
-							compileEnv.instructions.Add(method_Call);
-
-							return stackLocater;
-
-							//构造Vector并初始化元素。
-							//throw new NotImplementedException();
+							type_path.Add(typeKind.Mir);
 						}
+						VectorDef vector = VectorDef.CreateOrGet(compileEnv.CompileContext, type_path);
+
+						int constindex = compileEnv.AddVectorDef(vector);
+
+
+
+
+
+						StackLocater stackLocater = makeOrGetLocater2(TypeKind.Vector, vector.Identifier);
+
+						INS_Ld_VectorType ld_Const = new INS_Ld_VectorType(token);
+						ld_Const.dst = stackLocater;
+						ld_Const.vectortype_index = constindex;
+
+						compileEnv.instructions.Add(ld_Const);
+
+						if (as3vector.Constructor == null)
+						{
+							compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, stackLocater);
+							return stackLocater;
+						}
+						else
+						{
+							if (newop != null)
+							{
+								newop.Arg3 = as3vector.Constructor;
+
+								compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, stackLocater);
+
+								return stackLocater;
+
+							}
+							else
+							{
+								var items = (List<AS3DataStackElement>)as3vector.Constructor.Data.Value;
+								List<StackLocater> arguments = new List<StackLocater>();
+								for (int i = 0; i < items.Count; i++)
+								{
+									var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
+
+									var srctype = compileEnv.ReadStackType(v);
+									if (srctype.Maj == TypeKind.Array && items.Count == 1)
+									{
+										arguments.Add(v);
+									}
+									else
+									{
+										var arg = ExpressionIL.TestTypeConvert(compileEnv, v, new CompileTypeKind() { Maj = vector.buildVector.ElementType }, items[i].IsReg ? data.Data.token : items[i].Data.token);
+										arguments.Add(arg);
+									}
+
+								}
+
+								ld_Const.dst = compileEnv.MakeStackLocater(TypeKind.Vector, vector.Identifier);
+
+								INS_bindGlobal_Call method_Call = new INS_bindGlobal_Call(token);
+								method_Call.dst = stackLocater;
+								method_Call.function = ld_Const.dst;
+								method_Call.args = arguments.ToArray();
+
+								compileEnv.instructions.Add(method_Call);
+
+
+								compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, stackLocater);
+								return stackLocater;
+
+								//构造Vector并初始化元素。
+								//throw new NotImplementedException();
+							}
+						}
+
 					}
 				}
 				else if (data.Data.FF1Type == FF1DataValueType.as3_function)
 				{
-					ASMethod method = compileEnv.CompileContext.dict_method_as3function[(AS3Function)data.Data.Value];
+					if (compileEnv.stack_loaded_heapunit.Peek().ContainsKey(data.Data.Value))
+					{
+						return compileEnv.stack_loaded_heapunit.Peek()[data.Data.Value];
+					}
+					else
+					{
 
-					int methodid = compileEnv.AddConstMethod(method);
+						ASMethod method = compileEnv.CompileContext.dict_method_as3function[(AS3Function)data.Data.Value];
 
-					StackLocater stackLocater = makeOrGetLocater(TypeKind.Function);
+						int methodid = compileEnv.AddConstMethod(method);
 
-					INS_Ld_Function ld_Function = new INS_Ld_Function(token);
-					ld_Function.dst = stackLocater;
-					ld_Function.const_index = methodid;
-					ld_Function.heapLocater.ScopeIndex = ushort.MaxValue;
-					ld_Function.heapLocater.MemberIndex = ushort.MaxValue;
+						StackLocater stackLocater = makeOrGetLocater(TypeKind.Function);
 
-					compileEnv.instructions.Add(ld_Function);
+						INS_Ld_Function ld_Function = new INS_Ld_Function(token);
+						ld_Function.dst = stackLocater;
+						ld_Function.const_index = methodid;
+						ld_Function.heapLocater.ScopeIndex = ushort.MaxValue;
+						ld_Function.heapLocater.MemberIndex = ushort.MaxValue;
 
-					return stackLocater;
+						compileEnv.instructions.Add(ld_Function);
+
+
+						compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, stackLocater);
+
+						return stackLocater;
+					}
 
 				}
 				else if (data.Data.FF1Type == FF1DataValueType.dynamicobj)
 				{
-					var items = (Hashtable)data.Data.Value;
-
-
-					INS_Ld_Class ld_Class = new INS_Ld_Class(token);
-					ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)compileEnv.CompileContext.player_for_compiler.Context.OBJECT.Type_identifier);
-					ld_Class.classid_index = compileEnv.AddConstClassId(compileEnv.CompileContext.player_for_compiler.Context.OBJECT);
-					compileEnv.instructions.Add(ld_Class);
-
-
-					StackLocater dst = makeOrGetLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.OBJECT.Type_identifier);
-
-					INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
-					new_Instance.dst = dst;
-					new_Instance.typeLocator = ld_Class.dst;
-					new_Instance.args = new StackLocater[0];
-
-					compileEnv.instructions.Add(new_Instance);
-
-					if (items.Count > 0)
+					if (compileEnv.stack_loaded_heapunit.Peek().ContainsKey(data.Data.Value))
 					{
-						HashSet<string> addedprops = new HashSet<string>();
-
-						foreach (var key in items.Keys)
-						{
-							var v = items[key];
-							StackLocater local = LoadRightValue((AS3DataStackElement)v, compileEnv, (Token)key);
-
-							if (!addedprops.Contains(((Token)key).StringValue))
-							{
-								addedprops.Add(((Token)key).StringValue);
-
-								int const_index = compileEnv.AddConstString(((Token)key).StringValue);
-								var prop_name = compileEnv.MakeStackLocater(TypeKind.String);
-
-								INS_Ld_Const ld_Const = new INS_Ld_Const((Token)key);
-								ld_Const.dst = prop_name;
-								ld_Const.const_index = const_index;
-								compileEnv.instructions.Add(ld_Const);
-
-								INS_Create_Prop create_Prop = new INS_Create_Prop((Token)key);
-								create_Prop.dst = dst;
-								create_Prop.key = prop_name;
-								create_Prop.value = local;
-
-								compileEnv.instructions.Add(create_Prop);
-							}
-
-						}
-						//throw new NotImplementedException();
+						return compileEnv.stack_loaded_heapunit.Peek()[data.Data.Value];
 					}
+					else
+					{
 
-					return dst;
+						var items = (Hashtable)data.Data.Value;
+
+
+						INS_Ld_Class ld_Class = new INS_Ld_Class(token);
+						ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)compileEnv.CompileContext.player_for_compiler.Context.OBJECT.Type_identifier);
+						ld_Class.classid_index = compileEnv.AddConstClassId(compileEnv.CompileContext.player_for_compiler.Context.OBJECT);
+						compileEnv.instructions.Add(ld_Class);
+
+
+						StackLocater dst = makeOrGetLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.OBJECT.Type_identifier);
+
+						INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
+						new_Instance.dst = dst;
+						new_Instance.typeLocator = ld_Class.dst;
+						new_Instance.args = new StackLocater[0];
+
+						compileEnv.instructions.Add(new_Instance);
+
+						if (items.Count > 0)
+						{
+							HashSet<string> addedprops = new HashSet<string>();
+
+							foreach (var key in items.Keys)
+							{
+								var v = items[key];
+								StackLocater local = LoadRightValue((AS3DataStackElement)v, compileEnv, (Token)key);
+
+								if (!addedprops.Contains(((Token)key).StringValue))
+								{
+									addedprops.Add(((Token)key).StringValue);
+
+									int const_index = compileEnv.AddConstString(((Token)key).StringValue);
+									var prop_name = compileEnv.MakeStackLocater(TypeKind.String);
+
+									INS_Ld_Const ld_Const = new INS_Ld_Const((Token)key);
+									ld_Const.dst = prop_name;
+									ld_Const.const_index = const_index;
+									compileEnv.instructions.Add(ld_Const);
+
+									INS_Create_Prop create_Prop = new INS_Create_Prop((Token)key);
+									create_Prop.dst = dst;
+									create_Prop.key = prop_name;
+									create_Prop.value = local;
+
+									compileEnv.instructions.Add(create_Prop);
+								}
+
+							}
+							//throw new NotImplementedException();
+						}
+
+						compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
+
+						return dst;
+					}
 				}
 
 				else if (data.Data.FF1Type == FF1DataValueType.as3_array)
 				{
-					var items = (List<AS3DataStackElement>)data.Data.Value;
-					INS_Ld_Class ld_Class = new INS_Ld_Class(token);
-					ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)compileEnv.CompileContext.player_for_compiler.Context.ARRAY.Type_identifier);
-					ld_Class.classid_index = compileEnv.AddConstClassId(compileEnv.CompileContext.player_for_compiler.Context.ARRAY);
-					compileEnv.instructions.Add(ld_Class);
-
-
-					StackLocater dst = makeOrGetLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.ARRAY.Type_identifier);
-
-					List<StackLocater> arguments = new List<StackLocater>();
-					arguments.Add(dst);
-
-					for (int i = 0; i < items.Count; i++)
+					if (compileEnv.stack_loaded_heapunit.Peek().ContainsKey(data.Data.Value))
 					{
-						var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
-						arguments.Add(v);
+						return compileEnv.stack_loaded_heapunit.Peek()[data.Data.Value];
 					}
+					else
+					{
 
-					INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
-					new_Instance.dst = dst;
-					new_Instance.typeLocator = ld_Class.dst;
-					new_Instance.args = arguments.ToArray();
+						var items = (List<AS3DataStackElement>)data.Data.Value;
+						INS_Ld_Class ld_Class = new INS_Ld_Class(token);
+						ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)compileEnv.CompileContext.player_for_compiler.Context.ARRAY.Type_identifier);
+						ld_Class.classid_index = compileEnv.AddConstClassId(compileEnv.CompileContext.player_for_compiler.Context.ARRAY);
+						compileEnv.instructions.Add(ld_Class);
 
-					compileEnv.instructions.Add(new_Instance);
 
-					return dst;
+						StackLocater dst = makeOrGetLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.ARRAY.Type_identifier);
+
+						List<StackLocater> arguments = new List<StackLocater>();
+						arguments.Add(dst);
+
+						for (int i = 0; i < items.Count; i++)
+						{
+							var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
+							arguments.Add(v);
+						}
+
+						INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
+						new_Instance.dst = dst;
+						new_Instance.typeLocator = ld_Class.dst;
+						new_Instance.args = arguments.ToArray();
+
+						compileEnv.instructions.Add(new_Instance);
+
+
+
+						compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
+
+						return dst;
+					}
 				}
 				else if (data.Data.FF1Type == FF1DataValueType.const_regexp)
 				{

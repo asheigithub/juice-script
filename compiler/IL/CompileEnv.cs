@@ -170,6 +170,24 @@ namespace juicescript.compiler.IL
         internal List<AS3Variable> parent_catching_variable; // 当编译在catch块中定义的function时，可以查找捕获的变量
 
 
+		/*
+         * var i;
+            var j=0;
+            if( (i= function(){} ) === i) //考虑这行代码，在loadrightvalue遇到内嵌function,[],{}这样的堆对象时，避免重复构造对象
+            {
+	            trace(j);
+            }
+            else
+            {
+	            trace("eee");
+            }
+         */
+		internal Stack<Dictionary<object, StackLocater>> stack_loaded_heapunit = new Stack<Dictionary<object, StackLocater>>(); 
+
+
+
+
+
         /// <summary>
         /// 为当前CodeScope分配一个新的栈地址
         /// </summary>

@@ -29,7 +29,27 @@ namespace juicescript.ABC.INS
 		public int flag_end_id;
 		public int flag_offset;
 
-
+		/// <summary>
+		/// 迭代器存储位置（方法变量）
+		/// 复用 dst.index 的存储空间：
+		/// - 高16位：ScopeIndex
+		/// - 低16位：MemberIndex
+		/// </summary>
+		public ScopeHeapLocater iterVar
+		{
+			get
+			{
+				return new ScopeHeapLocater
+				{
+					ScopeIndex = (ushort)(dst.index >> 16),
+					MemberIndex = (ushort)(dst.index & 0xFFFF)
+				};
+			}
+			set
+			{
+				dst.index = (value.ScopeIndex << 16) | value.MemberIndex;
+			}
+		}
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
@@ -51,7 +71,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"ITER_Get {dst.index}<-{iterSrcObj_HoldInHeap}.[iterator]  if failed GOTO Flag_{flag_end_id} ";
+			return $"ITER_Get {iterVar}<-{iterSrcObj_HoldInHeap}.[iterator]  if failed GOTO Flag_{flag_end_id} ";
 		}
 
 	}

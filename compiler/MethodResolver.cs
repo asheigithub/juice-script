@@ -584,7 +584,10 @@ namespace juicescript.compiler
 								{
 									if (getter.Trait.Method.ReturnTypeKind != setter.Trait.Method.Parameters[0].TypeKind
 										&&
-										setter.Trait.Method.Parameters[0].TypeKind != TypeKind.Any
+										!(setter.Trait.Method.Parameters[0].TypeKind == TypeKind.Any
+											||
+											getter.Trait.Method.ReturnTypeKind == TypeKind.Any
+										)
 
 										)
 									{

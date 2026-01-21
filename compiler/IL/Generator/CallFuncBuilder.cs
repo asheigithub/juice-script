@@ -341,7 +341,45 @@ namespace juicescript.compiler.IL.Generator
                             }
                             else if (findtrait.TypeKind == TypeKind.Any)
                             {
-                                if (findtrait.Value != null && findtrait.Value.ValueType == ASTrait.TraitValueType.AS3Function)
+        //                        var need_loadrightvalue = (ASMethod m) =>
+        //                        {
+                                    
+								//	AS3Function function = compileEnv.CompileContext.dict_method_as3function.First((kv) => kv.Value == m).Key;
+        //                            //return !string.IsNullOrEmpty(function.Name) && function.IsAnonymous && m.Name.StartsWith( function.Name + "#anonymous:");
+
+        //                            return m.Body == compileEnv.Scope.Container // 直接递归调用!
+
+								//	|| !m.IsAnonymous ;  //直接返回命名函数！
+
+								//};
+
+
+                                if (findtrait.Value != null && findtrait.Value.ValueType == ASTrait.TraitValueType.AS3Function
+                                    
+         //                           && 
+         //                           !
+         //                           ( //检查闭包返回,如这种变态代码: 这时比如走LoadRightValue
+									///*
+         //                            function makeFact() {
+         //                               return function f(n) {
+         //                                   return n == 0 ? 1 : n * f(n - 1);
+         //                               };
+         //                           }
+
+         //                           var fact = makeFact();
+         //                           assert(fact(5) == 120);
+
+         //                           ---
+         //                           function outer() {
+         //                               function inner() { return 42; }
+         //                               return function() { return inner(); };
+         //                           }
+
+
+         //                            */
+									//need_loadrightvalue(compileEnv.CompileContext.dict_method_as3function[(AS3Function)findtrait.Value._value])
+		//							)
+									)
                                 {
                                     //function a(){}; a();
                                     //this是定义function的代码的this,可能是instance,class,global

@@ -862,21 +862,28 @@ namespace juicescript.runtime.gc
                         { 
                             //throw new NotImplementedException();
                             RtPayloadMethodScope rtPayload = (RtPayloadMethodScope)obj.facility;
-                            var slots = rtPayload.__get_slots_for_gc;
-                            for (int i = 0; i < slots.Length; i++)
+
+                            if (rtPayload.cloneout_ptr != 0)
                             {
-                                if (slots[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+                                mark(Heap[rtPayload.cloneout_ptr]);
+                            }
+                            else
+                            {
+                                var slots = rtPayload.__get_slots_for_gc;
+                                for (int i = 0; i < slots.Length; i++)
                                 {
-                                    mark(Heap[slots[i].HeapPtr]);
+                                    if (slots[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+                                    {
+                                        mark(Heap[slots[i].HeapPtr]);
+                                    }
                                 }
-                            }
 
-                            if (rtPayload.ParentPtr != 0)
-                            {
-                                mark(Heap[rtPayload.ParentPtr]);
-                            }
+                                if (rtPayload.ParentPtr != 0)
+                                {
+                                    mark(Heap[rtPayload.ParentPtr]);
+                                }
 
-                            
+                            }
 
                         }
                         break;

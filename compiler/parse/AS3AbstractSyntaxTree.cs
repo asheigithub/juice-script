@@ -3800,6 +3800,12 @@ namespace juicescript.compiler.parse
             {
 				throw new SyntaxException(node.MatchedToken, "The return statement cannot be used in package initialization code.");
 			}
+            if (memberscope.Peek() is AS3OutPackage)
+            {
+				throw new SyntaxException(node.MatchedToken, "The return statement cannot be used in package initialization code.");
+			}
+
+
 
 			flag_fun_anonymous.Push(true);
 
@@ -3816,7 +3822,22 @@ namespace juicescript.compiler.parse
 
         void ENTER_YIELD_RB(ParseExpr node)
         {
-            if (node.Nodes.Count == 1)
+			if (memberscope.Peek() is AS3Interface)
+			{
+				throw new SyntaxException(node.MatchedToken, "'yield' is not allowed here");
+			}
+			if (memberscope.Peek() is AS3Package.PackageMemberScope)
+			{
+				throw new SyntaxException(node.MatchedToken, "The yield statement cannot be used in package initialization code.");
+			}
+			if (memberscope.Peek() is AS3OutPackage)
+			{
+				throw new SyntaxException(node.MatchedToken, "The yield statement cannot be used in package initialization code.");
+			}
+
+
+
+			if (node.Nodes.Count == 1)
             {
                 code_stack.Peek().Add(new AS3YieldBreak(node.MatchedToken));
             }
@@ -4176,6 +4197,13 @@ namespace juicescript.compiler.parse
 					forIn.IterContextVar = iterCtxVar;
 
 
+					// 添加保存Iter_get获取的迭代器的临时变量
+					AS3Variable iterVar = new AS3Variable(node.MatchedToken);
+					iterVar.Name = "%&" + "IterHolder" + $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
+					memberscope.Peek().Members.Add(iterVar);
+					forIn.HoldIterVar = iterVar;
+
+
 					//提取for in 
 					if (node.SelectGrammerLine.Derivation[0].Name == "F_Variable")
                     {
@@ -4247,6 +4275,13 @@ namespace juicescript.compiler.parse
 				iterCtxVar.Name = "%&" + "IterContext" + $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
 				memberscope.Peek().Members.Add(iterCtxVar);
 				forEach.IterContextVar = iterCtxVar;
+
+				// 添加保存Iter_get获取的迭代器的临时变量
+				AS3Variable iterVar = new AS3Variable(node.MatchedToken);
+				iterVar.Name = "%&" + "IterHolder" + $"%{node.MatchedToken.line}:{node.MatchedToken.ptr}";
+				memberscope.Peek().Members.Add(iterVar);
+				forEach.HoldIterVar = iterVar;
+
 
 				if (node.SelectGrammerLine.Derivation[0].Name == "F_Variable")
                 {

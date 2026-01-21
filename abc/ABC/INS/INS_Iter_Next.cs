@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace juicescript.ABC.INS
 {
+	/// <summary>
+	/// dst中实际保存的是iterSrcObjSaveAtHeap
+	/// </summary>
 	public sealed class INS_Iter_Next : Instruction
 	{
 		public INS_Iter_Next(Token token) : base(token)
@@ -20,14 +23,28 @@ namespace juicescript.ABC.INS
 		public int mode;
 
 		
-		public StackLocater iterator;
+		public ScopeHeapLocater iterator;
 		public StackLocater result;
 
 		
 		public int flag_next_end_id;
 		public int flag_offset;
 
-
+		public ScopeHeapLocater iterSrcObjSaveInVar
+		{
+			get
+			{
+				return new ScopeHeapLocater
+				{
+					ScopeIndex = (ushort)(dst.index >> 16),
+					MemberIndex = (ushort)(dst.index & 0xFFFF)
+				};
+			}
+			set
+			{
+				dst.index = (value.ScopeIndex << 16) | value.MemberIndex;
+			}
+		}
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
@@ -53,7 +70,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"ITER_Next { ( new ScopeHeapLocater() {  MemberIndex = (ushort)dst.index} ) }.{iterator}.next( in {result} mode:{(mode == 0 ? "key" : "value")})  if {result}->false GOTO Flag_{flag_next_end_id} ";
+			return $"ITER_Next { iterSrcObjSaveInVar }.{iterator}.next( in {result} mode:{(mode == 0 ? "key" : "value")})  if {result}->false GOTO Flag_{flag_next_end_id} ";
 		}
 
 	}

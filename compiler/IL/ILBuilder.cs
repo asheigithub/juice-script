@@ -68,8 +68,18 @@ namespace juicescript.compiler.IL
 
 			for (int i = 0; i < compileEnv.Codes.Count; i++)
 			{
-				AST.IAS3SyntaxNode code = compileEnv.Codes[i];
-				BuildAS3SyntaxNode(compileEnv, code,trycatchState,blockcontexts,ref flagseed);
+				try
+				{
+					compileEnv.stack_loaded_heapunit.Push(new Dictionary<object, StackLocater>());
+
+					AST.IAS3SyntaxNode code = compileEnv.Codes[i];
+					BuildAS3SyntaxNode(compileEnv, code, trycatchState, blockcontexts, ref flagseed);
+				}
+				finally
+				{
+					compileEnv.stack_loaded_heapunit.Pop();
+				}
+
             }
 
 			#region MethodFlags
@@ -116,16 +126,28 @@ namespace juicescript.compiler.IL
 						}
 					}
 					else if (instruction.INS_Code == INS_Code.ld_function)
-					{ 
+					{
 						INS_Ld_Function ld_Function = (INS_Ld_Function)instruction;
 						if (check.index == ld_Function.heapLocater.ScopeIndex)
 						{
 							flag = true;
 						}
 					}
+					else if (instruction.INS_Code == INS_Code.ld_function_bindglobal_call)
+					{
+						INS_Ld_Function_BindGlobal_Call ld_function_bindg_call = (INS_Ld_Function_BindGlobal_Call)instruction;
+						if (check.index == ld_function_bindg_call.heapLocater.ScopeIndex)
+						{
+							flag = true;
+						}
+					}
+					
+					
+					
 
 
 
+					
 					//仅有这2个之类能访问到method方法的scopemember。
 					//那个用 stacklocator的负值找到的是 class,instance,global中的成员。
 
@@ -398,13 +420,21 @@ namespace juicescript.compiler.IL
 				}
 
 
+				//for (int i = 0; i < @if.condition.Count; i++)
+				//{
+				//	BuildAS3SyntaxNode(compileEnv, @if.condition[i], trycatchState, blockcontexts, ref flagseed);
+				//}
+
+				//AS3Expression expr = (AS3Expression)@if.condition[@if.condition.Count - 1];
+				//StackLocater condition = ExpressionIL.LoadRightValue(expr.Value, compileEnv, expr.Token);
+
+				StackLocater condition = default;
+
 				for (int i = 0; i < @if.condition.Count; i++)
 				{
-					BuildAS3SyntaxNode(compileEnv, @if.condition[i], trycatchState, blockcontexts, ref flagseed);
+					condition = BuildExpression(compileEnv, (AS3Expression)@if.condition[i],ref flagseed);
 				}
 
-				AS3Expression expr = (AS3Expression)@if.condition[@if.condition.Count - 1];
-				StackLocater condition = ExpressionIL.LoadRightValue(expr.Value, compileEnv, expr.Token);
 
 				bool truepart_blank = @if.truepart.Count == 0 || (@if.truepart.Count == 1 && @if.truepart[0] is AS3Block && ((AS3Block)@if.truepart[0]).Code.Count == 0);
 				bool falsepart_blank = @if.truepart.Count == 0 || (@if.falsepart.Count == 1 && @if.falsepart[0] is AS3Block && ((AS3Block)@if.falsepart[0]).Code.Count == 0);
@@ -519,6 +549,28 @@ namespace juicescript.compiler.IL
 				}
 
 
+			}
+			else if (code is AS3YieldReturn)
+			{
+				AS3YieldReturn yieldReturn = (AS3YieldReturn)code;
+
+				if (compileEnv.Scope.Kind == CodeScopeKind.Script)
+				{
+					throw new ResolverException(code.Token, "The yield statement cannot be used in global initialization code.");
+				}
+				else if (compileEnv.Scope.Kind == CodeScopeKind.Class || compileEnv.Scope.Kind == CodeScopeKind.Instance)
+				{
+					throw new InvalidOperationException();
+				}
+
+				var m = ((ASMethodBody)compileEnv.Scope.Container).Method;
+				if (m.ReturnTypeKind != TypeKind.Any)
+				{
+					throw new ResolverException( m.Token , "generator must return *");
+				}
+
+
+				throw new NotImplementedException();
 			}
 			else if (code is AS3Return)
 			{
@@ -831,12 +883,20 @@ namespace juicescript.compiler.IL
 				//}
 
 
-				ScopeHeapLocater iterSrcObjSaveAtHeap; TypeKind heaptype; ASTrait ex; CodeScope ex_scope; ScopeMember ex_member; VTableItem[] tableItem;
-				var _RV = ExpressionIL.FindIdentifier(forin.HoldObjVar.Name, null, compileEnv, forin.HoldObjVar.Token, out iterSrcObjSaveAtHeap, out heaptype, out ex, out ex_scope, out ex_member, out tableItem);
+				ScopeHeapLocater iterSrcObjSaveAtVar; TypeKind heaptype; ASTrait ex; CodeScope ex_scope; ScopeMember ex_member; VTableItem[] tableItem;
+				var _RV = ExpressionIL.FindIdentifier(forin.HoldObjVar.Name, null, compileEnv, forin.HoldObjVar.Token, out iterSrcObjSaveAtVar, out heaptype, out ex, out ex_scope, out ex_member, out tableItem);
 				if (_RV != ExpressionIL.FindIdResultType.ScopeMember || ex_scope != compileEnv.Scope)
 				{
 					throw new InvalidOperationException();
 				}
+
+				ScopeHeapLocater iterSaveAtVar;
+				_RV = ExpressionIL.FindIdentifier(forin.HoldIterVar.Name, null, compileEnv, forin.HoldObjVar.Token, out iterSaveAtVar, out heaptype, out ex, out ex_scope, out ex_member, out tableItem);
+				if (_RV != ExpressionIL.FindIdResultType.ScopeMember || ex_scope != compileEnv.Scope)
+				{
+					throw new InvalidOperationException();
+				}
+
 
 
 				//iter = get  obj.iter 
@@ -856,7 +916,7 @@ namespace juicescript.compiler.IL
 				//Flag_End
 
 				StackLocater objLoc = BuildExpression(compileEnv, forin.ForInExpression, ref flagseed);
-				StackLocater iter = compileEnv.MakeStackLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.IITERATOR.Type_identifier);
+				//StackLocater iter = compileEnv.MakeStackLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.IITERATOR.Type_identifier);
 
 				// 获取迭代器上下文变量的位置
 				ScopeHeapLocater iterContextVarLocater; TypeKind iterCtxHeaptype; ASTrait iterCtxEx; CodeScope iterCtxEx_scope; ScopeMember iterCtxEx_member; VTableItem[] iterCtxTableItem;
@@ -872,10 +932,10 @@ namespace juicescript.compiler.IL
 
 				//add get iter
 				INS_Iter_Get iter_Get = new INS_Iter_Get(forin.ForInExpression.Token);
-				iter_Get.iterSrcObj_HoldInHeap = iterSrcObjSaveAtHeap;
-				iter_Get.dst = iter;
+				iter_Get.iterSrcObj_HoldInHeap = iterSrcObjSaveAtVar;
+				iter_Get.iterVar = iterSaveAtVar;
 				iter_Get.iterSrcobj = objLoc;
-				//iter_Get.iter_context = iter_context;
+
 				iter_Get.flag_end_id = for_body.breakFlag.flag_id;
 				compileEnv.instructions.Add(iter_Get);
 
@@ -957,10 +1017,10 @@ namespace juicescript.compiler.IL
 
 				iter_Next.flag_next_end_id = next_failed.flag_id;
 
-				iter_Next.dst.index = iterSrcObjSaveAtHeap.MemberIndex;
-				iter_Next.iterator = iter;
+				iter_Next.iterSrcObjSaveInVar = iterSrcObjSaveAtVar;
+				iter_Next.iterator = iterSaveAtVar;
 				iter_Next.result = nextvalue;
-				
+
 				compileEnv.instructions.Add(iter_Next);
 
 				ExpressionIL.BuildAssigning(setvaluetovar, compileEnv);
@@ -992,9 +1052,9 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(finally_Enter);
 				//add call close
 				INS_Iter_Close iter_Close = new INS_Iter_Close(goto_next.token);
-				iter_Close.holdObj = iterSrcObjSaveAtHeap;
+				iter_Close.holdObj = iterSrcObjSaveAtVar;
 				iter_Close.dst = objLoc;                  //当枚举结束，还需要继续枚举proto时，用proto覆盖objLoc,跳回去继续枚举。
-				iter_Close.iterator = iter;
+				iter_Close.iterator = iterSaveAtVar;
 				iter_Close.iterContextVar = iterContextVarLocater;
 				compileEnv.instructions.Add(iter_Close);
 
@@ -1132,15 +1192,19 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(while_body.continueFlag);
 
 
+
+				StackLocater _c = default;
 				for (int i = 0; i < @while.Condition.Count; i++)
 				{
-					BuildAS3SyntaxNode(compileEnv, @while.Condition[i], trycatchState, blockcontexts, ref flagseed);
+					_c = BuildExpression(compileEnv, (AS3Expression)@while.Condition[i], ref flagseed);
 				}
 
 				if (@while.Condition.Count > 0)
 				{
 					var condition = (AS3Expression)@while.Condition[@while.Condition.Count - 1];
-					StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
+					//StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
+
+					var condition_reg = _c;
 
 					INS_If_False_Goto if_False_Goto = new INS_If_False_Goto(condition.Token);
 					if_False_Goto.condition = condition_reg;
@@ -1203,16 +1267,20 @@ namespace juicescript.compiler.IL
 
 				compileEnv.instructions.Add(while_body.continueFlag);
 
+
+
+				StackLocater _c = default;
 				for (int i = 0; i < doWhile.Condition.Count; i++)
 				{
-					BuildAS3SyntaxNode(compileEnv, doWhile.Condition[i], trycatchState, blockcontexts, ref flagseed);
+					_c = BuildExpression(compileEnv, (AS3Expression)doWhile.Condition[i], ref flagseed);
 				}
 
 				if (doWhile.Condition.Count > 0)
 				{
 
 					var condition = (AS3Expression)doWhile.Condition[doWhile.Condition.Count - 1];
-					StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
+					//StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
+					StackLocater condition_reg = _c;
 
 					INS_If_True_Goto if_true_goto = new INS_If_True_Goto(condition.Token);
 					if_true_goto.condition = condition_reg;
@@ -1297,8 +1365,15 @@ namespace juicescript.compiler.IL
 
 				Dictionary<int, INS_Flag> flag_case_pass = new Dictionary<int, INS_Flag>();
 
+				//for (int i = 0; i < @switch.Expr.exprStepList.Count; i++)
+				//{
+				//	BuildExpression(compileEnv, @switch.Expr, ref flagseed);
+				//}
 
-				StackLocater var_loc = ExpressionIL.LoadRightValue(@switch.Expr.Value, compileEnv, @switch.Expr.Token);
+				//StackLocater var_loc = ExpressionIL.LoadRightValue(@switch.Expr.Value, compileEnv, @switch.Expr.Token);
+
+				StackLocater var_loc = BuildExpression(compileEnv, @switch.Expr, ref flagseed);
+
 				for (int i = 0; i < @switch.CaseTestList.Count; i++)
 				{
 					if (@switch.CaseTestList[i] != null)
@@ -1403,7 +1478,7 @@ namespace juicescript.compiler.IL
 			}
 			else if (code is AS3With)
 			{
-				throw new ResolverException(code.Token,"[with] is not support");
+				throw new ResolverException(code.Token, "[with] is not support");
 			}
 			else
 			{
