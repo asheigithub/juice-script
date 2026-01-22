@@ -123,11 +123,14 @@ namespace juicescript.runtime
                                 stringBuilder.Append(((RtPayloadNameSpace)instance.facility).ASNamespace.def_uri);
                                 break;
                             case RtHeapTypeKind.VECTOR:
-                                throw new NotImplementedException();
+								stringBuilder.Append("[Vector]");
+								break;
+                            case RtHeapTypeKind.ARRAY:
+								stringBuilder.Append("[Array]");
                                 break;
-                            default:
-
-                                break;
+							default:
+								stringBuilder.Append(instance.TypeKind);
+								break;
                         }
 
 

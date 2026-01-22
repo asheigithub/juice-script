@@ -437,7 +437,7 @@ namespace juicescript.compiler.IL
 
 
 				bool truepart_blank = @if.truepart.Count == 0 || (@if.truepart.Count == 1 && @if.truepart[0] is AS3Block && ((AS3Block)@if.truepart[0]).Code.Count == 0);
-				bool falsepart_blank = @if.truepart.Count == 0 || (@if.falsepart.Count == 1 && @if.falsepart[0] is AS3Block && ((AS3Block)@if.falsepart[0]).Code.Count == 0);
+				bool falsepart_blank = @if.falsepart.Count == 0 || (@if.falsepart.Count == 1 && @if.falsepart[0] is AS3Block && ((AS3Block)@if.falsepart[0]).Code.Count == 0);
 
 
 				if (truepart_blank && falsepart_blank
@@ -710,7 +710,7 @@ namespace juicescript.compiler.IL
 						{
 							jumptrys++;
 						}
-						else if (((Block)blocks[i]).BreakTarget && ((Block)blocks[i]).Label == breaklabel)
+						else if (((Block)blocks[i]).BreakTarget && ((Block)blocks[i]).Label !=null && ((Block)blocks[i]).Label.Split("@").Contains( breaklabel))
 						{
 							breakflag = ((Block)blocks[i]).breakFlag;
 							break;
@@ -810,7 +810,7 @@ namespace juicescript.compiler.IL
 						{
 							jumptrys++;
 						}
-						else if (((Block)blocks[i]).ContinueTarget && ((Block)blocks[i]).Label == @continue.continueTarget)
+						else if (((Block)blocks[i]).ContinueTarget && ((Block)blocks[i]).Label !=null && ((Block)blocks[i]).Label.Split("@").Contains( @continue.continueTarget))
 						{
 							continueflag = ((Block)blocks[i]).continueFlag;
 							break;

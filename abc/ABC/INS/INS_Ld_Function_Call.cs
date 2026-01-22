@@ -11,7 +11,6 @@ namespace juicescript.ABC.INS
     {
         public override INS_Code INS_Code => INS_Code.ld_function_call;
 
-        
         public int const_index;
 
         public StackLocater[] args;

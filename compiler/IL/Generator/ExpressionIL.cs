@@ -6492,6 +6492,10 @@ namespace juicescript.compiler.IL.Generator
 									{
 										arguments.Add(v);
 									}
+									else if (srctype.Maj == TypeKind.Object && items.Count == 1)
+									{
+										arguments.Add(v);
+									}
 									else
 									{
 										var arg = ExpressionIL.TestTypeConvert(compileEnv, v, new CompileTypeKind() { Maj = vector.buildVector.ElementType }, items[i].IsReg ? data.Data.token : items[i].Data.token);

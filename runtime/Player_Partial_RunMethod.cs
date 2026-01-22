@@ -253,7 +253,7 @@ namespace juicescript.runtime
 #if DEBUG
 						if (Context.GC.Heap[calleePtr].TypeKind != RtHeapTypeKind.CLOSURE)
 						{
-							throw new NotImplementedException();
+							throw new InvalidOperationException();
 						}
 #endif
 

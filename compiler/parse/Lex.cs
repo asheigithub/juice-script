@@ -951,7 +951,7 @@ namespace juicescript.compiler.parse
                 }
                 else if (isIdStChar(nc) && char.ToLower(nc) != 'e' && char.ToLower(nc) !='f')
                 {
-                    throw new LexException("Expecting either a 'semicolon' or a 'new line' here.", cline, lineptr);
+                    throw new LexException("Expected PAREN_CLOSE", cline, lineptr);
                 }
                 else
                 {

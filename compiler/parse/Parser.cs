@@ -909,234 +909,380 @@ namespace juicescript.compiler.parse
 
 
 
-			#region 检测语句label
-			for (int index = 2; index < words.Count; index++)
+            #region 检测语句label
             {
-                var token = words[index];
-                if (token.Type == Token.TokenType.identifier)
+                Dictionary<Token, Token> s_label = new Dictionary<Token, Token>();
+
+                bool exists;
+
+                do
                 {
-                    if (token.StringValue == "for" || token.StringValue == "while" || token.StringValue == "do" || token.StringValue == "switch"
-                        || token.StringValue == "if" || token.StringValue == "try" || token.StringValue == "with"
-                        )
-                    { 
-                        //前向查找
-                        bool found = false;
-                        var fidx = index;
-                        int fstep = 0;
-                        int stepidx = 0;
-                        while (!found && fidx > 0)
-                        {
-                            fidx = fidx - 1;
-                            var test = words[fidx];
-                            if (fstep == 0) //查找":"
-                            {
-                                if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
-                                    continue;
-                                else if (test.Type == Token.TokenType.other && test.StringValue == ":" )
-                                {
-                                    if (!mustNotLabel.Contains(test))
-                                    {
-                                        fstep = 1;
-                                        stepidx = fidx;
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-                                else
-                                    break;
-                            }
-                            if (fstep == 1)//查找 identifier为 label名
-                            {
-                                if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
-                                    continue;
-                                else if (test.Type == Token.TokenType.identifier)
-                                { //前一个必须是空或者;
-                                    if (fidx > 0)
-                                    {
-                                        var test2 = words[fidx - 1];
-                                        if (!(test2.Type == Token.TokenType.whitespace || (test2.Type == Token.TokenType.other && test2.StringValue == ";")))
-                                            break;
+                    exists=false;
 
-                                        if (fidx > 1) // 排除  case A: if(XX) 这种情况
-                                        { 
-                                            var test3 = words[fidx - 2];
-                                            if (test2.Type == Token.TokenType.whitespace && test3.Type == Token.TokenType.identifier && test3.StringValue == "case")
+					for (int index = 2; index < words.Count; index++)
+					{
+						var token = words[index];
+						if (token.Type == Token.TokenType.identifier)
+						{
+							if (token.StringValue == "for" || token.StringValue == "while" || token.StringValue == "do" || token.StringValue == "switch"
+								|| token.StringValue == "if" || token.StringValue == "try" || token.StringValue == "with"
+								)
+							{
+								//前向查找
+								bool found = false;
+								var fidx = index;
+								int fstep = 0;
+								int stepidx = 0;
+								while (!found && fidx > 0)
+								{
+									fidx = fidx - 1;
+									var test = words[fidx];
+									if (fstep == 0) //查找":"
+									{
+										if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
+											continue;
+										else if (test.Type == Token.TokenType.other && test.StringValue == ":")
+										{
+											if (!mustNotLabel.Contains(test))
+											{
+												fstep = 1;
+												stepidx = fidx;
+												continue;
+											}
+											else
+											{
+												break;
+											}
+										}
+										else
+											break;
+									}
+									if (fstep == 1)//查找 identifier为 label名
+									{
+                                        if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
+                                            continue;
+                                        else if (test.Type == Token.TokenType.identifier)
+                                        { //前一个必须是空或者;
+                                            if (fidx > 0)
                                             {
-                                                break;
+                                                var test2 = words[fidx - 1];
+                                                if (!(test2.Type == Token.TokenType.whitespace || (test2.Type == Token.TokenType.other && test2.StringValue == ";")))
+                                                    break;
+
+                                                if (fidx > 1) // 排除  case A: if(XX) 这种情况
+                                                {
+                                                    var test3 = words[fidx - 2];
+                                                    if (test2.Type == Token.TokenType.whitespace && test3.Type == Token.TokenType.identifier && test3.StringValue == "case")
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+
                                             }
-                                        }
-
-                                    }
-                                    found = true;
-                                    test.Type = Token.TokenType.label;
-                                    //*将label:移动到关键字后面去
-                                    words[fidx] = words[index]; //关键字向前移动
-                                    words[index] = words[stepidx]; //冒号后移
-                                    words[stepidx] = test;
-
-                                    
+                                            found = true;
 
 
-									index = index + 3;
-                                    break;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+                                            if (!s_label.ContainsKey(words[index]))
+                                            {
+												s_label.Add(token, test);
+
+												test.Type = Token.TokenType.label;
+                                                //*将label:移动到关键字后面去
+                                                words[fidx] = words[index]; //关键字向前移动
+                                                words[index] = words[stepidx]; //冒号后移
+                                                words[stepidx] = test;
+                                            }
+                                            else
+                                            {
+                                                //将label设为无用
+
+                                                test.Type = Token.TokenType.comments;
+                                                words[stepidx].Type = Token.TokenType.comments;
+
+                                                var olbl = s_label[words[index]];
+                                                olbl.StringValue += "@" + test.StringValue;
+											}
+
+
+                                            index = index + 3;
+
+                                            exists = true;
+
+											break;
+										}
+										else
+										{
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+
+				} while (exists);
+
             }
-
             #endregion
 
             #region 查找代码块label
-            //' label:{
-            for (int i = 2; i < words.Count; i++)
+
             {
-                var token = words[i];
-                if (token.Type == Token.TokenType.other)
+				Dictionary<Token, Token> s_label = new Dictionary<Token, Token>();
+
+				bool exists;
+
+                do
                 {
-                    if (token.StringValue == "{")
-                    {
-                        //前向查找:
-                        int fidx = i;
-                        while (fidx > 0)
-                        {
-                            fidx = fidx - 1;
-                            var test = words[fidx];
-                            if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
-                                continue;
-                            else
-                                break;
-                        }
-                        if (!(words[fidx].Type == Token.TokenType.other && words[fidx].StringValue == ":") )
-                        {
-                            continue;
-                        }
-                        if (mustNotLabel.Contains(words[fidx]))
-                        {
-                            continue;
-                        }
+                    exists = false;
 
-                        var stepidx = fidx;
-                        //查找identifier;
-                        while (fidx > 0)
-                        {
-                            fidx = fidx - 1;
-                            var test = words[fidx];
-                            if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
-                                continue;
-                            else if (test.Type == Token.TokenType.identifier)
-                                break;
-                            else
-                                break;
-                        }
-                        if (words[fidx].Type != Token.TokenType.identifier)
-                        {
-                            continue;
-                        }
 
-                        var identifieridx = fidx;
-                        if (words[identifieridx].StringValue == "default")
-                            continue;
-
-                        //向前查找其他排除项
-                        while (fidx > 0)
-                        {
-                            fidx = fidx - 1;
-                            var test = words[fidx];
-
-                            if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
-                                continue;
-                            if (test.Type == Token.TokenType.other && (test.StringValue == "." || test.StringValue == "?" || findinkeywords(definekeywords, test.StringValue)))
-                                goto continue_for;
-							else if (test.Type == Token.TokenType.other && test.StringValue == ";")
+					//' label:{
+					for (int i = 2; i < words.Count; i++)
+					{
+						var token = words[i];
+						if (token.Type == Token.TokenType.other)
+						{
+							if (token.StringValue == "{")
 							{
-								break;
-							}
-							else if (test.Type == Token.TokenType.other && test.StringValue == ":")
-							{
-								//如果前面又是一个label或者: 则可以通过
-								break;
-							}
-							//else if (test.Type == Token.TokenType.other && test.StringValue == ":")
-							//{
-							//    //再向前查看一个token,如果不是label则取消
-							//    bool pass = false;
-							//    var t = fidx;
-							//    while (t > 0)
-							//    {
-							//        t = t - 1;
-							//        var tt = words[t];
-							//        if (tt.Type == Token.TokenType.whitespace || tt.Type == Token.TokenType.comments)
-							//            continue;
-							//        else if (tt.Type == Token.TokenType.label)
-							//        {
-							//            pass = true; break;
-							//        }
-							//        else
-							//            break;
-							//    }
-							//    if (pass)
-							//    {
-							//        break;
-							//    }
-							//    else
-							//    {
-							//        goto continue_for;
-							//    }
-							//}
-							else if (test.Type == Token.TokenType.identifier && test.StringValue == "case")
-                            {
-                                goto continue_for;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
+								//前向查找:
+								int fidx = i;
+								while (fidx > 0)
+								{
+									fidx = fidx - 1;
+									var test = words[fidx];
+									if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
+										continue;
+									else
+										break;
+								}
+								if (!(words[fidx].Type == Token.TokenType.other && words[fidx].StringValue == ":"))
+								{
+									continue;
+								}
+								if (mustNotLabel.Contains(words[fidx]))
+								{
+									continue;
+								}
 
-                        words[identifieridx].Type = Token.TokenType.label;
-                        var temp = words[identifieridx];
-                        //'**将label:移动到关键字后面去
-                        words[identifieridx] = words[i]; //'关键字向前移动
-                        words[i] = words[stepidx];       //'冒号后移
-                        words[stepidx] = temp;
+								var stepidx = fidx;
+								//查找identifier;
+								while (fidx > 0)
+								{
+									fidx = fidx - 1;
+									var test = words[fidx];
+									if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
+										continue;
+									else if (test.Type == Token.TokenType.identifier)
+										break;
+									else
+										break;
+								}
+								if (words[fidx].Type != Token.TokenType.identifier)
+								{
+									continue;
+								}
 
-                        
-                    }
-                }
-                continue_for:
-                ;
+								var identifieridx = fidx;
+								if (words[identifieridx].StringValue == "default")
+									continue;
+
+								//向前查找其他排除项
+								while (fidx > 0)
+								{
+									fidx = fidx - 1;
+									var test = words[fidx];
+
+									if (test.Type == Token.TokenType.whitespace || test.Type == Token.TokenType.comments)
+										continue;
+									if (test.Type == Token.TokenType.other && (test.StringValue == "." || test.StringValue == "?" || findinkeywords(definekeywords, test.StringValue)))
+										goto continue_for;
+									else if (test.Type == Token.TokenType.other && test.StringValue == ";")
+									{
+										break;
+									}
+									else if (test.Type == Token.TokenType.other && test.StringValue == ":")
+									{
+										//如果前面又是一个label或者: 则可以通过
+										break;
+									}
+									//else if (test.Type == Token.TokenType.other && test.StringValue == ":")
+									//{
+									//    //再向前查看一个token,如果不是label则取消
+									//    bool pass = false;
+									//    var t = fidx;
+									//    while (t > 0)
+									//    {
+									//        t = t - 1;
+									//        var tt = words[t];
+									//        if (tt.Type == Token.TokenType.whitespace || tt.Type == Token.TokenType.comments)
+									//            continue;
+									//        else if (tt.Type == Token.TokenType.label)
+									//        {
+									//            pass = true; break;
+									//        }
+									//        else
+									//            break;
+									//    }
+									//    if (pass)
+									//    {
+									//        break;
+									//    }
+									//    else
+									//    {
+									//        goto continue_for;
+									//    }
+									//}
+									else if (test.Type == Token.TokenType.identifier && test.StringValue == "case")
+									{
+										goto continue_for;
+									}
+									else
+									{
+										break;
+									}
+								}
+
+
+                                if (!s_label.ContainsKey(words[i]))
+                                {
+									s_label.Add(words[i], words[identifieridx]);
+
+									words[identifieridx].Type = Token.TokenType.label;
+                                    var temp = words[identifieridx];
+                                    //'**将label:移动到关键字后面去
+                                    words[identifieridx] = words[i]; //'关键字向前移动
+                                    words[i] = words[stepidx];       //'冒号后移
+                                    words[stepidx] = temp;
+
+
+                                }
+                                else
+                                {
+									//将label设为无用
+									words[identifieridx].Type = Token.TokenType.comments;
+									words[stepidx].Type = Token.TokenType.comments;
+
+									var olbl = s_label[words[i]];
+									olbl.StringValue += "@" + words[identifieridx].StringValue;
+								}
+
+                                exists = true;
+
+							}
+						}
+					continue_for:
+						;
+					}
+
+
+
+				} while (exists);
+
+
             }
-
-
             #endregion
 
             #region 查找行首label
             bool isnewline = true;
+
+            Stack<Stack<Token>> key_tokens = new Stack<Stack<Token>>(); //if (xxx) lbl: while(xxx) lbl:lbl:
+            Token last_newline = null; 
+            HashSet<Token> is_singleline = new HashSet<Token>();// if (xxx) lbl: 这样的label,如果后面\n后还是一个label,则不管这个换行，仍然算一行
+            Token lastlabel = null;
             for (int i = 0; i < words.Count; i++)
             {
                 var token = words[i];
 
+                if (token.Type == Token.TokenType.identifier && token.StringValue == "if")
+                {
+                    key_tokens.Push(new Stack<Token>());
+                }
+				else if (token.Type == Token.TokenType.identifier && token.StringValue == "while")
+				{
+					key_tokens.Push(new Stack<Token>());
+				}
+				else if (token.Type == Token.TokenType.identifier && token.StringValue == "for")
+				{
+					key_tokens.Push(new Stack<Token>());
+				}
+
+
                 if (token.Type == Token.TokenType.comments)
                 {
-
+                    continue;
                 }
                 else if (token.Type == Token.TokenType.whitespace && token.StringValue == "\n")
                 {
                     isnewline = true;
+
+                    if (!is_singleline.Contains(last_newline))
+                    {
+                        last_newline = token;
+                    }
                 }
                 else if (token.Type == Token.TokenType.other && token.StringValue == "{")
                 {
-					//function fn() {}{x: 42};  x 是一个 label;
-					isnewline = true;
+                    //function fn() {}{x: 42};  x 是一个 label;
+                    isnewline = true; last_newline = token;
+                }
+                else if (token.Type == Token.TokenType.other && token.StringValue == ";")
+                {
+                    isnewline = true; last_newline = token;
+                }
+                else if (token.Type == Token.TokenType.identifier && token.StringValue == "else")
+                {
+                    isnewline = true; last_newline = token; is_singleline.Add(token);
+                }
+                else if (token.Type == Token.TokenType.identifier && token.StringValue == "do")
+                {
+                    isnewline = true; last_newline = token; is_singleline.Add(token);
+                }
+                else if (token.Type == Token.TokenType.other && token.StringValue == "(")
+                {
+                    if (key_tokens.Count > 0)
+                    {
+                        key_tokens.Peek().Push(token);
+                    }
+                }
+                else if (token.Type == Token.TokenType.other && token.StringValue == ")")
+                {
+                    if (key_tokens.Count > 0)
+                    {
+                        var b = key_tokens.Peek();
+                        if (b.Count == 0)
+                        {
+                            throw new SyntaxException(token, ") not match");
+                        }
+                        else
+                        {
+                            b.Pop();
+
+                            if (b.Count == 0)
+                            {
+                                isnewline = true; last_newline = token; is_singleline.Add(token);
+                                key_tokens.Pop();
+
+                            }
+                            else
+                            {
+                                isnewline = true; last_newline = token;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        isnewline = true; last_newline = token;
+                    }
+                }
+                else if (token.Type == Token.TokenType.whitespace)
+                {
+                    continue;
+                }
+                else if (token.Type == Token.TokenType.label) // aa:do XXX 这种可能出现
+                {
+                    while (words[++i].StringValue != ":") ;
+                    continue;
                 }
                 else
                 {
@@ -1211,20 +1357,39 @@ namespace juicescript.compiler.parse
                                 //    }
                                 //}
 
-                                token.Type = Token.TokenType.useless_label;
+                                if (is_singleline.Contains(last_newline))
+                                {
+                                    if (lastlabel?.StringValue == token.StringValue)
+                                    {
+                                        throw new ResolverException(token, "Duplicate label definition.");
+                                    }
 
-                                words[stepidx].Type = Token.TokenType.whitespace;
-                                words[stepidx].StringValue = "";
+                                    token.Type = Token.TokenType.comments;
+                                }
+                                else
+                                {
+                                    token.Type = Token.TokenType.useless_label;//{ a:XX}  这种，必须保留为useless_labed;
+                                }
 
+                                words[stepidx].Type = Token.TokenType.comments;
+                                //words[stepidx].StringValue = "";
 
+                                lastlabel = token;
 
+                            }
+                            else
+                            {
+                                isnewline = false;
                             }
 
                         }
-
+                        else
+                        {
+                            isnewline = false;
+                        }
                     }
 
-                    isnewline = false;
+
                 }
 
             //continue_for:
@@ -1376,6 +1541,45 @@ namespace juicescript.compiler.parse
                 }
 
             }
+			#endregion
+
+
+			#region 再次检查do while中间是不是全是空的
+			{
+				Stack<Token> do_tokens = new Stack<Token>();
+
+				int skips = 0;
+
+				for (int index = 0; index < words.Count; index++)
+				{
+					var token = words[index];
+                    if (token.Type == Token.TokenType.identifier && token.StringValue == "do")
+                    {
+                        skips = 0;
+                        do_tokens.Push(token);
+                    }
+                    else if (token.Type == Token.TokenType.identifier && token.StringValue == "while")
+                    {
+                        if (skips == 0)
+                        {
+                            throw new SyntaxException(token, "Unable to generate code for 'do'");
+                        }
+
+                    }
+                    else if (token.Type == Token.TokenType.comments || token.Type == Token.TokenType.whitespace)
+                    {
+
+                    }
+                    else if (token.Type == Token.TokenType.label)
+                    {
+                        while (words[++index].StringValue != ":") ; //吃掉紧随的:
+                    }
+                    else
+                    {
+                        skips++;
+                    }
+				}
+			}
 			#endregion
 
 

@@ -99,7 +99,8 @@ namespace juicescript.runtime
 					as_type = instance.Type;
 					break;
 				case RtHeapTypeKind.NAMESPACE:
-					throw new NotImplementedException();
+					as_type = Context.NAMESPACE.Instance;
+					break;
 				case RtHeapTypeKind.MethodScope:
 				case RtHeapTypeKind.STACK_CACHE_OBJ:
 				default:
@@ -180,7 +181,7 @@ namespace juicescript.runtime
 #if DEBUG
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 #endif
 			if (fun.ValueType != NaNBoxing.BoxType.HeapPtr)

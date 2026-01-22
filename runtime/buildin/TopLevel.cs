@@ -306,7 +306,7 @@ namespace juicescript.runtime.buildin
 			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
 
 			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 
 			
 			var arguments = rest_array.stack_store.Span;

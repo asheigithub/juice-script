@@ -275,7 +275,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				throw new NotImplementedException();
+				context.StackSlots[returnSlotIndex].SetBoolean(false);
 			}
 
 		}
@@ -317,7 +317,7 @@ namespace juicescript.runtime.buildin
 #if DEBUG
 					if (theClass.ValueType != NaNBoxing.BoxType.HeapPtr)
 					{
-						throw new NotImplementedException();
+						throw new InvalidOperationException();
 					}
 #endif
 
@@ -481,7 +481,7 @@ namespace juicescript.runtime.buildin
 #if DEBUG
 				if (dynamic.TypeKind != RtHeapTypeKind.DYNAMIC_PROPERTYS)
 				{
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 				}
 #endif
 				RtPayloadDynamic prop = (RtPayloadDynamic)dynamic.facility;
@@ -509,7 +509,7 @@ namespace juicescript.runtime.buildin
 #if DEBUG
 						if (shape.TypeKind != RtHeapTypeKind.SHAPE)
 						{
-							throw new NotImplementedException();
+							throw new InvalidOperationException();
 						}
 #endif
 						shape_ptr = ((RtPayloadShape)shape.facility).PTR_PARENT;
@@ -586,7 +586,8 @@ namespace juicescript.runtime.buildin
 
 		public override void OnDelete()
 		{
-			throw new NotImplementedException();
+			//这里不应该会被GC执行到。
+			throw new InvalidOperationException();
 		}
 
 		public override void OnGCMark(Context context)

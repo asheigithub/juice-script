@@ -639,8 +639,7 @@ namespace juicescript.runtime
 		/// <summary>
 		/// 计算虚函数表
 		/// </summary>
-		/// <param name="script"></param>
-		/// <exception cref="NotImplementedException"></exception>
+		/// <param name="script"></param>		
 		public void ComputeVTable(ASScript script)
 		{
 
@@ -1174,7 +1173,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 				}
 			}
 
@@ -2760,6 +2759,43 @@ namespace juicescript.runtime
 
 		}
 
+		private void RaiseReferenceError_CanNotDeleteProperty(ref ReceiveError error, NaNBoxing refInstance)
+		{
+			error.raised = true;
+			RtHeapInstance _temp = null;
+			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
+			if (errPtr == 0)
+			{
+				error.error.setFault();
+			}
+			else
+			{
+				NaNBoxing errName = new NaNBoxing();
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, _temp.Type._link_codescope, this);
+
+				RtPayloadInstance payloadInstance = (RtPayloadInstance)_temp.facility;
+
+				int messagePtr = Context.GC.AllocString($"Cannot delete property aaa on {refInstance.ValueType}.");
+				if (messagePtr != 0)
+				{
+					NaNBoxing naNBoxing = new NaNBoxing();
+					naNBoxing.SetHeapPtr(messagePtr);
+					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
+				}
+				else
+				{
+					NaNBoxing naNBoxing = new NaNBoxing();
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
+				}
+
+				error.error.SetHeapPtr(errPtr);
+
+			}
+
+		}
+
 
 		int cache_ARGEMENT_ERROR_NAME;
 		private void RaiseArgementErrorCountMisMatch(ref ReceiveError error, ASMethod method, int expected, int got)
@@ -3664,7 +3700,8 @@ namespace juicescript.runtime
 		{
 			if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
-				throw new NotImplementedException();
+				//讲道理，Number,Boolean之类好像没有属性
+				throw new InvalidOperationException();
 			}
 			else
 			{
@@ -3862,7 +3899,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 				}
 			}
 		}
@@ -4486,7 +4523,23 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										throw new NotImplementedException();
+										//这里应付有索引器的情况，所以这里不需要再触发toString了。
+										if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+										{
+											RaiseStackOverflow(ref error);
+											return default;
+										}
+										Context.StackPosition++;
+										ConvertValueType(ref error, _obj.indexer_key, TypeKind.String, Context.STRING, ref Context.StackSlots[Context.StackPosition - 1]);
+										Context.StackPosition--;
+										if (error.raised)
+										{
+											return default;
+										}
+
+										searchName = Extensions.GetPrimitiveValueToString(this,Context.StackSlots[Context.StackPosition]);
+
+										//throw new NotImplementedException();
 									}
 
 									NaNBoxing value; int shape_ptr; int index; RtPayloadDynamic prop;
@@ -7578,7 +7631,10 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										throw new NotImplementedException();
+										RaiseTypeError(ref error, invalue, (TypeKind)totype_class.Type_identifier);
+										return;
+
+										//throw new NotImplementedException();
 									}
 								}
 								
@@ -7845,8 +7901,8 @@ namespace juicescript.runtime
 			else if (argsCount == 1)
 			{
 				var invalue = slots[arguments->index];
-
-				if (totype_class.Instance.Flags.HasFlag(ClassFlags.Vector) && invalue.ValueType == BoxType.HeapPtr && Context.GC.Heap[invalue.HeapPtr].TypeKind == RtHeapTypeKind.ARRAY)
+				bool istovector = totype_class.Instance.Flags.HasFlag(ClassFlags.Vector);
+				if ( istovector && invalue.ValueType == BoxType.HeapPtr && Context.GC.Heap[invalue.HeapPtr].TypeKind == RtHeapTypeKind.ARRAY)
 				{
 					//转化为Vector
 					int ptrIndex = returnSlotindex;
@@ -8736,7 +8792,7 @@ namespace juicescript.runtime
 			}
 
 #endif
-
+			string name = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
 
 			RtPayloadShape.PropertyAttribute attribute = 0;
 			if (configurable)
@@ -8749,7 +8805,7 @@ namespace juicescript.runtime
 
 			if (PROPERTY_PTR == 0)
 			{
-
+				
 
 				//先创建或者查找Shape。(第一个属性就是)
 				var blank_shape = (RtPayloadShape)Context.GC.Heap[Context.BlankShapePtr].facility;
@@ -8770,7 +8826,7 @@ namespace juicescript.runtime
 						&&
 
 						string.Equals(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
-							((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
+							name,
 							StringComparison.Ordinal)
 						)
 					{
@@ -8889,7 +8945,8 @@ namespace juicescript.runtime
 				{
 					if (!shape.Attribute.HasFlag(RtPayloadShape.PropertyAttribute.Writable))
 					{
-						throw new NotImplementedException();
+						RaiseError(ref error,"not writeable property " + name );
+						return;
 					}
 
 					if (CopyIfSameTypeStructAndReplaceSrc(prop.Slots[index], ref value))
@@ -11620,7 +11677,9 @@ namespace juicescript.runtime
 
 										if (_obj.RefInstance.ValueType != BoxType.HeapPtr)
 										{
-											throw new NotImplementedException();
+											RaiseReferenceError_CanNotDeleteProperty(ref error,_obj.RefInstance);
+											goto flag_handle_error;
+											//throw new NotImplementedException();
 										}
 										else
 										{
@@ -12435,7 +12494,8 @@ namespace juicescript.runtime
 
 								if (name.ValueType != NaNBoxing.BoxType.HeapPtr)
 								{
-									throw new NotImplementedException("cast to string");
+									//throw new NotImplementedException("cast to string");
+									searchName = Extensions.GetPrimitiveValueToString(this, name);
 								}
 								else
 								{
@@ -12458,7 +12518,25 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										throw new NotImplementedException("cast to string");
+										Context.GC.CheckGC(ref error);
+										if (Context.StackPosition >= Context.STACK_LENGTH)
+										{
+											RaiseStackOverflow(ref error);
+											goto flag_handle_error;
+										}
+
+										ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+										Context.StackPosition++;
+										ConvertValueType(ref error, name, TypeKind.String, Context.STRING, ref conv, scope_ptr, thisPtr);
+										if (error.raised)
+										{
+											Context.StackPosition--;
+											goto flag_handle_error;
+										}
+
+										searchName = Extensions.GetPrimitiveValueToString(this,conv);
+
+										//throw new NotImplementedException("cast to string");
 									}
 								}
 
@@ -13105,7 +13183,7 @@ namespace juicescript.runtime
 									case NaNBoxing.BoxType.Short:
 									case NaNBoxing.BoxType.UShort:
 									case NaNBoxing.BoxType.Float:
-										throw new NotImplementedException();
+										throw new InvalidOperationException(); //这些东西没有成员
 #if DEBUG
 									case NaNBoxing.BoxType.Undefined:
 									case NaNBoxing.BoxType.Fault:
@@ -14406,7 +14484,7 @@ namespace juicescript.runtime
 								}
 								if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
 								{
-									throw new NotImplementedException();
+									throw new InvalidOperationException(); //非堆对象不可能有要写的属性
 								}
 								else
 								{
@@ -14499,7 +14577,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										throw new NotImplementedException();
+										throw new InvalidOperationException();//其他类型应该没有要写的属性
 									}
 
 
@@ -17869,7 +17947,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										throw new NotImplementedException();
+										throw new InvalidOperationException();
 									}
 
 

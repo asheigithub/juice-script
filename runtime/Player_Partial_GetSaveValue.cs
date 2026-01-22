@@ -923,7 +923,8 @@ namespace juicescript.runtime
 #endif
 										else
 										{
-											throw new NotImplementedException();
+											//肯定不会和instance相同，过。 
+											//throw new NotImplementedException();
 										}
 
 									}

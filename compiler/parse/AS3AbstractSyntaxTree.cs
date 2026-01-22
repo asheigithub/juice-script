@@ -1,20 +1,20 @@
 ﻿using juicescript.compiler.AST;
 using juicescript.compiler.AST.Expr;
 using juicescript.compiler.AST.Stmt;
-using juicescript.compiler.IL.Generator;
 using juicescript.compiler.IL;
+using juicescript.compiler.IL.Generator;
 using MyMD5;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Numerics;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
@@ -426,7 +426,13 @@ namespace juicescript.compiler.parse
             cls.Access = access;
             cls.Name = ParseExpr.getNodeValue(node.Nodes[1]);
 
-            if (inpackage)
+			if (cls.Name == "null" || cls.Name == "undefined")
+			{
+				throw new SyntaxException(node.MatchedToken, $"'{cls.Name}' is not allowed here'.");
+			}
+
+
+			if (inpackage)
             {
                 if (cls.Package.MainClass != null || cls.Package.MainInterface != null || cls.Package.MainNamespace != null)
                 {
@@ -487,7 +493,12 @@ namespace juicescript.compiler.parse
             _interface_.Access = access;
             _interface_.Name = ParseExpr.getNodeValue(node.Nodes[1]);
 
-            if (inpackage)
+			if (_interface_.Name == "null" || _interface_.Name == "undefined")
+			{
+				throw new SyntaxException(node.MatchedToken, $"'{_interface_.Name}' is not allowed here'.");
+			}
+
+			if (inpackage)
             {
                 if (_interface_.Package.MainClass != null || _interface_.Package.MainInterface != null || _interface_.Package.MainNamespace != null)
                 {
@@ -1179,7 +1190,13 @@ namespace juicescript.compiler.parse
             if (fprop.Nodes.Count == 1)
             {
                 function.Name = ParseExpr.getNodeValue(fprop.Nodes[0]);
-            }
+
+				if (function.Name == "null" || function.Name == "undefined")
+				{
+					throw new SyntaxException(node.MatchedToken, $"'{function.Name}' is not allowed here.");
+				}
+
+			}
             else
             {
                 var name = ParseExpr.getNodeValue(fprop.Nodes[1]);
@@ -1551,6 +1568,10 @@ namespace juicescript.compiler.parse
             variable.Access = access;
             variable.Name = ParseExpr.getNodeValue(node.Nodes[0]);
 
+            if (variable.Name == "null" || variable.Name == "undefined")
+            {
+				throw new SyntaxException(node.MatchedToken, $"Expected IDENTIFIER but got '{variable.Name}'.");
+			}
            
             if (memberscope.Peek() is AS3Interface)
             {
@@ -1793,7 +1814,13 @@ namespace juicescript.compiler.parse
             @const.Access = access;
             @const.Name = ParseExpr.getNodeValue(node.Nodes[0]);
 
-            if (memberscope.Peek() is AS3Interface)
+			if (@const.Name == "null" || @const.Name == "undefined")
+			{
+				throw new SyntaxException(node.MatchedToken, $"Expected IDENTIFIER but got '{@const.Name}'.");
+			}
+
+
+			if (memberscope.Peek() is AS3Interface)
             {
                 throw new SyntaxException(node.MatchedToken, "A 'const' declaration is not permitted in an interface.");
             }
@@ -3135,30 +3162,32 @@ namespace juicescript.compiler.parse
                         goto lbl_pass;
                     }
 
-
-                    if (node.MatchedToken.StringValue == ")")
+                    
+                    if (node.MatchedToken.StringValue == ")" && node.MatchedToken.Type == Token.TokenType.other)
                     {
                         goto lbl_pass;
                     }
-                    if (node.MatchedToken.StringValue == "}")
+                    if (node.MatchedToken.StringValue == "}" && node.MatchedToken.Type == Token.TokenType.other)
                     {
                         goto lbl_pass;
                     }
-                    if (node.MatchedToken.StringValue == "]")
+                    if (node.MatchedToken.StringValue == "]" && node.MatchedToken.Type == Token.TokenType.other)
                     {
                         goto lbl_pass;
                     }
-                    if (node.MatchedToken.StringValue == ";")
+                    if (node.MatchedToken.StringValue == ";" && node.MatchedToken.Type == Token.TokenType.other)
                     {
                         goto lbl_pass;
                     }
                        
-                    if (node.MatchedToken.StringValue == ":")
+                    if (node.MatchedToken.StringValue == ":" && node.MatchedToken.Type == Token.TokenType.other)
                     {
                         goto lbl_pass;
                     }
 
-                    if (nsaccess_line != node.MatchedToken.line)
+					
+
+					if (nsaccess_line != node.MatchedToken.line)
                     {
                         goto lbl_pass;
                     }
@@ -4099,12 +4128,22 @@ namespace juicescript.compiler.parse
 
             enter_events.Add(node.Nodes[5], (e)=>
             {
+                if (e.MatchedToken.StringValue != "{" && e.MatchedToken.StringValue !="(")
+				{
+                    flag_fun_notallow.Push(true);
+                }
                 code_stack.Push(_if.truepart);               
             } );
 
             quit_events.Add(node.Nodes[5], (e) =>
             {
                 code_stack.Pop();
+
+
+                if (e.MatchedToken.StringValue != "{" && e.MatchedToken.StringValue !="(")
+                {
+                    flag_fun_notallow.Pop();
+                }
             });
 
             enter_events.Add(node.Nodes[6], (e) => 
@@ -4112,12 +4151,34 @@ namespace juicescript.compiler.parse
                 code_stack.Push(_if.falsepart);
             } );
 
-            quit_events.Add(node.Nodes[6], (e) => 
-            {
-                code_stack.Pop();
+            quit_events.Add(node.Nodes[6], (e) =>
+			{
+				code_stack.Pop();
             });
 
             code_stack.Peek().Add(_if);
+        }
+
+        void ENTER_IFElse(ParseExpr node)
+        {
+            if (node.Nodes.Count > 1)
+            {
+				enter_events.Add(node.Nodes[1], (e) =>
+				{
+					if (e.MatchedToken.StringValue != "{" && e.MatchedToken.StringValue != "(")
+					{
+						flag_fun_notallow.Push(true);
+					}
+				});
+
+				quit_events.Add(node.Nodes[1], (e) =>
+				{
+					if (e.MatchedToken.StringValue != "{" && e.MatchedToken.StringValue != "(")
+					{
+						flag_fun_notallow.Pop();
+					}
+				});
+			}
         }
 
 

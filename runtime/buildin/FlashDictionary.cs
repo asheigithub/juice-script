@@ -494,8 +494,9 @@ namespace juicescript.runtime.buildin
 							}
 
 						case RtHeapTypeKind.VECTOR:
-							throw new NotImplementedException();
-						
+							//throw new NotImplementedException();
+							return key.HeapPtr.GetHashCode();
+
 						case RtHeapTypeKind.STACK_CACHE_OBJ:
 						case RtHeapTypeKind.DYNAMIC_PROPERTYS:
 						case RtHeapTypeKind.SHAPE:
