@@ -294,6 +294,9 @@ namespace juicescript.compiler.IL
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(@try.finally_exit_token);
 				//tryCatchContext.Finally_Exit = finally_Exit;
 
+
+				tryCatchContext.state = TryCatchContext.State.Try;
+
 				//try 块
 				compileEnv.instructions.Add(try_Enter);
 				for (int i = 0; i < @try.TryBlock.Count; i++)
@@ -301,6 +304,9 @@ namespace juicescript.compiler.IL
 					BuildAS3SyntaxNode(compileEnv, @try.TryBlock[i], trycatchState, blockcontexts, ref flagseed);
 				}
 				compileEnv.instructions.Add(try_Exit);
+
+
+				tryCatchContext.state = TryCatchContext.State.Catch;
 
 				//catch块
 				for (int i = 0; i < @try.CatchList.Count; i++)
@@ -339,7 +345,7 @@ namespace juicescript.compiler.IL
 				}
 
 
-
+				tryCatchContext.state = TryCatchContext.State.Finally;
 				//finally块			
 				compileEnv.instructions.Add(finally_Enter);
 				if (@try.FinallyBlock != null)
@@ -568,6 +574,17 @@ namespace juicescript.compiler.IL
 				{
 					throw new ResolverException( m.Token , "generator must return *");
 				}
+
+				//yield 不能在 catch和finally块中发起。
+
+				if (trycatchState.Any((t) => t.state == TryCatchContext.State.Catch || t.state == TryCatchContext.State.Finally))
+				{
+					throw new ResolverException(m.Token,"Can't yield in catch block or finally block");
+				}
+
+				((ASMethodBody)compileEnv.Scope.Container).Method.Flags |= MethodFlags.Generator;
+
+				
 
 
 				throw new NotImplementedException();

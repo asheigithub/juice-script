@@ -14,14 +14,14 @@ namespace juicescript.compiler.IL
 
 	internal class TryCatchContext : ContextBase
 	{
-		//public Instruction Try_Enter;
-		//public Instruction Try_Exit;
+		public enum State
+		{ 
+			Try,
+			Catch,
+			Finally
+		}
 
-		//public Instruction Finally_Enter;
-		//public Instruction Finally_Exit;
-
-		//public List<Tuple<Instruction, Instruction>> CatchList;
-
+		public State state;
 
 	}
 

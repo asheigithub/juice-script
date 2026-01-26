@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CH.SipHash" Version="1.0.2" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\abc\abc.csproj" />
     <ProjectReference Include="..\runtime\runtime.csproj" />
   </ItemGroup>

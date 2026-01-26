@@ -1,4 +1,5 @@
-﻿using juicescript.ABC;
+﻿using CH.SipHash;
+using juicescript.ABC;
 using juicescript.compiler.AST;
 using juicescript.compiler.AST.Expr;
 using juicescript.compiler.AST.Stmt;
@@ -31,7 +32,17 @@ namespace juicescript.compiler
         private List<ASClass> _classes;
         private List<ASContainer> _containers;
 
-       
+
+        public static ulong GetClassId(string qname)
+        {
+
+            byte[] hash = System.IO.Hashing.XxHash64.Hash(System.Text.Encoding.UTF8.GetBytes(qname));
+			return BitConverter.ToUInt64(hash, 0);
+            //return SipHash.SipHash_2_4( System.Text.Encoding.UTF8.GetBytes(qname),0,0);
+
+        }
+
+
         public ScriptDef Build(Parser parser, string srcFile, string projectDir,out AS3SrcFile as3src)
         {
             //Dictionary<ASClass,Token> class_token = new Dictionary<ASClass,Token>();
@@ -183,7 +194,7 @@ namespace juicescript.compiler
 						}
                         else
                         {
-                            class_id = new MyMD5.MyMD5().Hash(instance.QName.ToString()).ToIdentifier();
+                            class_id = GetClassId(instance.QName.ToString()); //CityHash.CityHash.CityHash64(instance.QName.ToString());  //new MyMD5.MyMD5().Hash(instance.QName.ToString()).ToIdentifier();
                         }
                         
 
@@ -330,7 +341,8 @@ namespace juicescript.compiler
                         MakeInfMembers(instance, as3.Package.MainInterface, as3.Package.Name + ":" + instance.QName.Name, scriptMethods,as3);
 
                         ASClass @class = new ASClass(as3.Package.MainInterface.Token,
-                             new MyMD5.MyMD5().Hash(instance.QName.ToString()).ToIdentifier()
+                            GetClassId(instance.QName.ToString())
+                             //CityHash.CityHash.CityHash64(instance.QName.ToString())
                             ); //class_token.Add(@class, as3.Package.MainInterface.Token);
                         @class.Instance = instance;
 
@@ -445,7 +457,7 @@ namespace juicescript.compiler
                             MakeClassInstanceMembers(instance, cls, outscopeNS, NamespaceKind.Private, scriptMethods, as3);
 
                             ASClass @class = new ASClass(as3.OutPackage.outpackage_classes_interfaces[i].Token,
-                                 new MyMD5.MyMD5().Hash(instance.QName.ToString()).ToIdentifier()
+                                 GetClassId(instance.QName.ToString())
                                 ); //class_token.Add(@class, as3.OutPackage.outpackage_classes_interfaces[i].Token);
                             @class.Instance = instance;
 
@@ -587,7 +599,7 @@ namespace juicescript.compiler
                             MakeInfMembers(instance, inf, outscopeNS + ":" + inf.Name, scriptMethods, as3);
 
                             ASClass @class = new ASClass(as3.OutPackage.outpackage_classes_interfaces[i].Token, 
-                                new MyMD5.MyMD5().Hash(instance.QName.ToString()).ToIdentifier()); //class_token.Add(@class, as3.OutPackage.outpackage_classes_interfaces[i].Token);
+                                GetClassId(instance.QName.ToString())); //class_token.Add(@class, as3.OutPackage.outpackage_classes_interfaces[i].Token);
                             @class.Instance = instance;
 
                             var interfaceTrait =

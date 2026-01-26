@@ -23,35 +23,35 @@ namespace MyMD5
             this.P1 = P1; this.P2 = P2;
         }
 
-        public ulong ToIdentifier()
-        {
-            unsafe
-            {
-                ulong p1 = P1;
-                ulong p2 = P2;
+        //public ulong ToIdentifier()
+        //{
+        //    unsafe
+        //    {
+        //        ulong p1 = P1;
+        //        ulong p2 = P2;
 
-                Span<byte> bytes1 = new Span<byte>(&p1,sizeof(ulong));
-                Span<byte> bytes2 = new Span<byte>(&p2,sizeof(ulong));
+        //        Span<byte> bytes1 = new Span<byte>(&p1,sizeof(ulong));
+        //        Span<byte> bytes2 = new Span<byte>(&p2,sizeof(ulong));
 
-                ulong result = 0;
-                Span<byte> bytes = new Span<byte>(&result,sizeof(ulong));
+        //        ulong result = 0;
+        //        Span<byte> bytes = new Span<byte>(&result,sizeof(ulong));
 
-                for (int i = 0;i<bytes.Length;i++) 
-                {
-                    if (i % 2 == 0)
-                    {
-                        bytes[i] = bytes1[i];
-                    }
-                    else
-                    {
-                        bytes[i] = bytes1[2];
-                    }
-                }
+        //        for (int i = 0;i<bytes.Length;i++) 
+        //        {
+        //            if (i % 2 == 0)
+        //            {
+        //                bytes[i] = bytes1[i];
+        //            }
+        //            else
+        //            {
+        //                bytes[i] = bytes1[2];
+        //            }
+        //        }
 
-                return result;
-            }
+        //        return result;
+        //    }
             
-        }
+        //}
 
 
         public override int GetHashCode()

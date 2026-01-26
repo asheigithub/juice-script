@@ -58,5 +58,9 @@ namespace juicescript.ABC
         /// </summary>
         NoTry = 1024,
 
+
+        Generator = 2048,
+
+
     }
 }

@@ -83,7 +83,7 @@ namespace juicescript.compiler
 
             }
 
-            vectorDef.Identifier = (TypeKind)new MyMD5.MyMD5().Hash(vectorDef._TypeStr_).ToIdentifier();
+            vectorDef.Identifier = (TypeKind) ScriptDefBuilder.GetClassId(vectorDef._TypeStr_);
             //context.dict_VectorDefs[vectorDef.Identifier] = vectorDef;
             if (!context.vectorDefs.Contains(vectorDef))
             {
