@@ -23,3 +23,5 @@ packages/
 *.DS_Store
 *.7z
 /juice-script-2.7z
+/.kiro/specs/array-push-function
+/AGENTS.md

@@ -180,7 +180,7 @@ function f(n) {
 }
 var eval = f;
 
-f(20);
+f(10);
 
 assert.sameValue(callCount, 1);
 

@@ -292,6 +292,12 @@ namespace juicescript.compiler.IL
 				case INS_Code.iter_next:
 					instruction = new INS_Iter_Next(token);
 					break;
+				case INS_Code.yield_return:
+					instruction = new INS_Yield_Return(token);
+					break;
+				case INS_Code.yield_break:
+					instruction = new INS_Yield_Break(token);
+					break;
 				case INS_Code.return_void:
 					instruction = new INS_Return_Void(token);
 					break;

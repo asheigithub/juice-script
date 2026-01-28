@@ -196,7 +196,7 @@ package
 		 * @param	args	要追加到数组中的一个或多个值。
 		 * @return	一个表示新数组长度的整数。
 		 */
-		AS3 native function push (...rest) : uint;
+		//AS3 native function push (...rest) : uint;
 
 		/**
 		 * 从数组中删除一个单独的元素。此方法会修改数组但不制作副本。

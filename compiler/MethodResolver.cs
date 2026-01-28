@@ -1010,6 +1010,11 @@ namespace juicescript.compiler
 			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst);
 
 
+
+			//Generator函数顶部插入恢复状态指令
+
+
+
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{
@@ -2387,6 +2392,47 @@ namespace juicescript.compiler
 
 					}
 				}
+
+				//检查特殊函数如Generator等，是否满足条件
+				{
+					if (method.Flags.HasFlag(MethodFlags.Generator))
+					{
+						int useslotcount; NaNBoxing[] constants; Instruction[] instructions;
+						Disassembler.Disassemble(method.Body.ByteCode, out useslotcount, out constants, out instructions);
+
+
+						if (method.Flags.HasFlag(MethodFlags.NeedArguments))
+						{
+							throw new ResolverException(new Token() {
+								sourceFile = method.Token.sourceFile,
+								sourceFileFullPath = method.Token.sourceFileFullPath,
+								line = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.line ,
+							     ptr = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.ptr
+							},
+
+							"arguments not allow in generator function");
+						}
+
+
+						if (instructions.Any(i => i.INS_Code == INS_Code.return_op || i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void))
+						{
+							throw new ResolverException(new Token()
+							{
+								sourceFile = method.Token.sourceFile,
+								sourceFileFullPath = method.Token.sourceFileFullPath,
+								line = instructions.First(i => i.INS_Code == INS_Code.return_op || i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void).token.line,
+								ptr = instructions.First(i => i.INS_Code == INS_Code.return_op || i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void).token.ptr
+							},
+
+							"return not allow in generator function");
+						}
+
+
+						
+					}
+				}
+
+
 
 
 				ComputeJump(method,false);

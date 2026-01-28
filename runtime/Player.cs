@@ -1333,7 +1333,10 @@ namespace juicescript.runtime
 					{
 						Context.IITERATOR = cls;
 					}
-
+					else if (cls != null && cls.QName.Name == "generator" && cls.QName.Namespace.Name == "FilePrivateNS:IIterator")
+					{
+						Context.GENERATOR = cls;
+					}
 				}
 			}
 
@@ -3212,6 +3215,35 @@ namespace juicescript.runtime
 			var proto_ptr = ((RtPayloadScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__].facility).PROTO__PTR;
 			var proto = Context.GC.Heap[proto_ptr];
 
+			//tostring
+			{
+				{
+					Context.GC.Root.Add(Context.GC.Heap[TOSTRING_STR]);
+
+					ASMethod tostring = new ASMethod(Context.ARRAY._link_codescope.Parent.Container, Context.ARRAY.Token);
+					tostring.ReturnTypeKind = TypeKind.String;
+					tostring.Flags = MethodFlags.Native;
+					tostring.Name = "toString";
+					tostring.Body = new ASMethodBody(tostring);
+					tostring.Body.ByteCode = new byte[12];
+					tostring.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = Context.ARRAY._link_codescope.Parent };
+					tostring.IsAnonymous = true;
+					tostring.__is_buildin_proto = true;
+
+					int tostring_ptr = Context.GC.AllocClosure(tostring);
+					if (tostring_ptr == 0)
+					{
+						throw new LoaderException("Array proto : toString alloc failed");
+					}
+
+				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+
+					NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
+					CreateDynamic(ref error, proto, TOSTRING_STR, v, false, false, true);
+				}
+
+			}
+
 			//concat
 			{
 
@@ -3253,6 +3285,51 @@ namespace juicescript.runtime
 
 				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
 				CreateDynamic(ref error, proto, concat, v, false, false, false);
+
+
+			}
+
+			//push
+			{
+
+				var push = Context.GC.AllocString("push");
+				if (push == 0)
+				{
+					throw new LoaderException("push string alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[push]);
+
+				ASMethod m = new ASMethod(Context.ARRAY._link_codescope.Parent.Container, Context.ARRAY.Token);
+				m.ReturnTypeKind = TypeKind.Uint;
+				m.Flags = MethodFlags.Native | MethodFlags.NeedRest;
+				m.Name = "push";
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = new byte[12];
+				m.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = Context.ARRAY._link_codescope.Parent };
+				m.IsAnonymous = true;
+				m.Parameters.Add(new ASParameter(m) { IsOptional = false, Name = "rest", IsRest = true , TypeKind = TypeKind.Array, Type = Context.ARRAY.QName});
+				m.Body._link_codescope.Members.Add(new ScopeMember(m.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "rest",
+					Type = m.Parameters[0].Type,
+					TypeKind = m.Parameters[0].TypeKind,
+					__rt_type_class__ = Context.ARRAY
+				});
+
+				m.__is_buildin_proto = true;
+
+				int push_ptr = Context.GC.AllocClosure(m);
+				if (push_ptr == 0)
+				{
+					throw new LoaderException("Array proto: push alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[push_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[push_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
+
+				NaNBoxing v2 = default; v2.SetHeapPtr(push_ptr);
+				CreateDynamic(ref error, proto, push, v2, false, false, false);
 
 
 			}
@@ -3309,6 +3386,9 @@ namespace juicescript.runtime
 			InitScript((ASScript)Context.TYPE_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("TYPE_ERROR instance init failed"); }
 			InitScript((ASScript)Context.REFERENCE_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("REFERENCE_ERROR instance init failed"); }
 			InitScript((ASScript)Context.ARGEMENT_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("ARGEMENT_ERROR instance init failed"); }
+			InitScript((ASScript)Context.IITERATOR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("IITERATOR instance init failed"); }
+
+
 
 
 			//InitScript((ASScript)Context.SBYTE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException(" instance init failed"); }
@@ -11445,7 +11525,7 @@ namespace juicescript.runtime
 		}
 
 
-		unsafe struct ExceptionContext
+		unsafe internal struct ExceptionContext
 		{
 
 			internal int catch_count;
@@ -11460,15 +11540,37 @@ namespace juicescript.runtime
 			internal ScopeHeapLocater catched_error;
 		}
 
+		internal interface IResume_State
+		{
+			unsafe void Resume(ExceptionContext* e_ctx,  ExceptionContext** current_e_ctx , byte* PC_START, byte** PC , Span<NaNBoxing> stackslots);
+
+			unsafe void End();
+
+			bool IsCallClose();
+
+
+#if DEBUG
+			unsafe void Debug_SaveOrLoadIterCtxIndex(int* iter_ctx_index);
+#endif
+
+		}
+
+
 		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
-			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos)
+			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos,IResume_State resume_state)
 		{
 			//ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			//method.Body.GetInfo(ref info);
 
 #if DEBUG
 			int iter_ctx_index = Context.GC.IterCtxIndex;
+
+			if (resume_state != null)
+			{
+				resume_state.Debug_SaveOrLoadIterCtxIndex(&iter_ctx_index);
+			}
+
 #endif
 
 
@@ -11492,6 +11594,37 @@ namespace juicescript.runtime
 				byte* PC = p + sizeof(int) * 3 + 2 * sizeof(int) * info.instructions + sizeof(NaNBoxing) * info.constants;
 				byte* PC_START = PC;
 				byte* PC_END = p + method.Body.ByteCode.Length - 4; //已经四字节对齐，所以最后一个END指令长度也是4
+
+				if (resume_state != null)
+				{
+					resume_state.Resume(exception_ctx_stack, &exception_ctx , PC_START ,&PC,stackslots);
+
+					if (resume_state.IsCallClose()) //是否被要求关闭
+					{
+						if (exception_ctx != NO_TRY)
+						{
+							ExceptionContext* ctx = NO_TRY + 1;
+							ctx->FINALLY_JUMPTO_PTR = PC_END;
+							do
+							{
+								var finally_p = ctx->FINALLY_PTR;
+								++ctx;
+
+								ctx->FINALLY_JUMPTO_PTR = finally_p;
+
+							} while (ctx < exception_ctx);
+
+							PC = exception_ctx->FINALLY_PTR;
+						}
+						else
+						{
+							resume_state.End();
+							goto flag_end;
+						}
+
+
+					}
+				}
 
 				NaNBoxing global_obj = default;
 				
@@ -13677,7 +13810,7 @@ namespace juicescript.runtime
 								}
 								if (funValue.ValueType == NaNBoxing.BoxType.Null)
 								{
-									RaiseTypeError_AccessNull(ref error);
+									RaiseTypeError(ref error,funValue, TypeKind.Function);
 									goto flag_handle_error;
 								}
 								
@@ -13853,7 +13986,7 @@ namespace juicescript.runtime
 								}
 								if (funValue.ValueType == NaNBoxing.BoxType.Null)
 								{
-									RaiseTypeError_AccessNull(ref error);
+									RaiseTypeError(ref error,funValue, TypeKind.Function);
 									goto flag_handle_error;
 								}
 
@@ -17726,14 +17859,123 @@ namespace juicescript.runtime
 
 						//							}
 						//							break;
-						case INS_Code.iter_initctx:
+						case INS_Code.yield_break:
 							{
-								InitScript((ASScript)Context.IITERATOR._link_codescope.Parent.Container, ref error);
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+#endif
+								
+								if (exception_ctx != NO_TRY)
+								{
+									Debug.Assert(exception_ctx->state == 0); // yield只能在try中发出
+									Debug.Assert(stackslots[exception_ctx->hold_error.index].ValueType == BoxType.Fault);
+
+									//stackslots[exception_ctx->hold_error.index].setFault();//这里反正也肯定是Fault
+
+									ExceptionContext* ctx = NO_TRY + 1;
+									ctx->FINALLY_JUMPTO_PTR = PC_END;
+									do
+									{
+										Debug.Assert(ctx->state == 0); // yield只能在try中发出
+
+										var finally_p = ctx->FINALLY_PTR;
+										++ctx;
+
+										ctx->FINALLY_JUMPTO_PTR = finally_p;
+
+									} while (ctx < exception_ctx);
+
+									PC =  exception_ctx->FINALLY_PTR;
+
+									break;
+								}
+								else
+								{
+#if PROFILEPLAYER
+								InstructionProfiler.Profile_ActionEnd(opcode);
+#endif
+									resume_state.End();
+									goto flag_end;
+								}
+							}
+							
+						case INS_Code.yield_return:
+							{
+#if DEBUG
+								if (returnSlotIndex < 0)
+								{
+									throw new InvalidOperationException();
+								}
+#endif
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+#endif
+
+								Context.GC.CheckGC(ref error);
+
+								StackLocater value;
+								value.index = dst_index;
+
+								var lv = LoadValue(stackslots[value.index],
+									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
 								if (error.raised)
 								{
+									//如果有异常，那就不会保存上下文
 									goto flag_handle_error;
 								}
 
+								if (lv.ValueType == BoxType.HeapPtr)
+								{
+									StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error,true);
+									if (error.raised)
+									{
+										Context.StackSlots[returnSlotIndex].SetUndefined();
+										goto flag_handle_error;
+									}
+								}
+								else
+								{
+									Context.StackSlots[returnSlotIndex] = lv;
+								}
+
+
+								//保存上下文状态
+								int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
+								int exception_at = (int)(exception_ctx - exception_ctx_stack);
+
+								GeneratorImpl.GeneratorWapper generatorWapper = (GeneratorImpl.GeneratorWapper)resume_state;
+								generatorWapper.exception_ctx_at = exception_at;
+								if (exception_ctx_count > 0)
+								{
+									for (int i = 1; i < exception_at+1; i++)
+									{
+										generatorWapper.exceptionContext[i] = *(NO_TRY + i);
+#if DEBUG
+										if (stackslots[generatorWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
+										{
+											//yield禁止在有catch的try结构内使用，所以不可能有hold的异常。
+											throw new InvalidOperationException();
+										}
+#endif
+									}
+								}
+
+								generatorWapper.state = 1;
+								generatorWapper.RESUME_PC = (int)(PC - PC_START);
+
+								PC_PTR = generatorWapper.RESUME_PC;
+								//中断运行
+								return;
+							}
+							
+						case INS_Code.iter_initctx:
+							{
 								InitScript((ASScript)Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__._link_codescope.Parent.Container, ref error);
 								if (error.raised)
 								{
@@ -17848,7 +18090,12 @@ namespace juicescript.runtime
 									{
 										
 										var type = (ASInstance)obj.Type;
-										if (type.iterator == null)
+
+										if (type == Context.GENERATOR.Instance)
+										{
+											heap.SetSlot(ins, iterVar.MemberIndex);
+										}
+										else if (type.iterator == null)
 										{
 
 											var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
@@ -17956,6 +18203,8 @@ namespace juicescript.runtime
 								}
 								else
 								{
+
+									Context.GC.ReturnIterContextWhenGetIterFailed(); //需要返回
 									PC = PC_START + flag_offset;
 								}
 								break;
@@ -18031,7 +18280,9 @@ namespace juicescript.runtime
 								RtHeapInstance result = Context.GC.Heap[stackslots[resultLoc.index].HeapPtr];
 
 
-								int m_idx = ((ASInstance)iter.Type)._interface_impl_.First((i) => i.interface_type == Context.IITERATOR.Type_identifier)[0];
+								int m_idx = 
+									iter.Type == Context.GENERATOR.Instance ? 0 :
+									((ASInstance)iter.Type)._interface_impl_.First((i) => i.interface_type == Context.IITERATOR.Type_identifier)[0];
 								var vtableitem = iter.Type._vtable.Items[m_idx];
 								var function = vtableitem.Trait.Method;
 
@@ -18148,7 +18399,8 @@ namespace juicescript.runtime
 								stackslots[insLoc.index] = obj_h;
 
 
-								int m_idx = ((ASInstance)iter.Type)._interface_impl_.First((i) => i.interface_type == Context.IITERATOR.Type_identifier)[1];
+								int m_idx = iter.Type == Context.GENERATOR.Instance ? 1:									
+									((ASInstance)iter.Type)._interface_impl_.First((i) => i.interface_type == Context.IITERATOR.Type_identifier)[1];
 								var vtableitem = iter.Type._vtable.Items[m_idx];
 								var function = vtableitem.Trait.Method;
 
@@ -18171,9 +18423,17 @@ namespace juicescript.runtime
 								NaNBoxing load_error = stackslots[exception_ctx->hold_error.index];
 								if (load_error.ValueType != BoxType.Fault)
 								{
-									//Context.StackPosition--;//在获取Context时，保留了一个槽位
+									
 									//说明有异常存在，中止访问proto
 									Context.GC.ReturnIterContext(iter_ctx);
+									// 清空方法变量中的迭代器上下文
+									NaNBoxing undefined = default;
+									undefined.SetUndefined();
+									heap.SetSlot(undefined, iterContextVar.MemberIndex);
+								}
+								else if (obj.Type == Context.GENERATOR.Instance) //结束
+								{
+									Context.GC.ReturnIterContext(iter_ctx); 
 									// 清空方法变量中的迭代器上下文
 									NaNBoxing undefined = default;
 									undefined.SetUndefined();
@@ -18359,6 +18619,10 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 							InstructionProfiler.Profile_ActionEnd(opcode);
 #endif
+							if (resume_state != null)
+							{
+								resume_state.End();
+							}
 							goto flag_end;
 #if DEBUG
 						default:
@@ -18738,10 +19002,12 @@ namespace juicescript.runtime
 #if DEBUG
 			if ((error.raised && error.error.ValueType != BoxType.Fault) || !error.raised)
 			{
+				
 				if (iter_ctx_index != Context.GC.IterCtxIndex)
 				{
 					throw new InvalidOperationException();
 				}
+				
 			}
 #endif
 

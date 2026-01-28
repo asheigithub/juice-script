@@ -203,7 +203,76 @@ namespace juicescript.runtime.buildin
 			((RtPayloadArray)arrayinstance.facility).SetLength(len.UIntValue,context.player,ref error);
 		}
 
+		class ArrayToString : IPrint
+		{
+			internal StringBuilder sb;
+			public void Write(string message)
+			{
+				sb.Append(message);
+			}
 
+			public void WriteLine(string message)
+			{
+				sb.AppendLine(message);
+			}
+		}
+
+		[NativeFunction(".Array$@::toString")]
+		public static void Array_toString(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.Array, context.ARRAY, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+			var v = context.StackSlots[returnSlotIndex];
+			if (v.ValueType != NaNBoxing.BoxType.HeapPtr)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+			RtHeapInstance arr = context.GC.Heap[v.HeapPtr];
+			Debug.Assert(arr.TypeKind == RtHeapTypeKind.ARRAY);
+
+			RtPayloadArray arr_payload = (RtPayloadArray)arr.facility;
+
+			StringBuilder sb = new StringBuilder();
+			ArrayToString arrayToString = new ArrayToString();
+			arrayToString.sb = sb;
+
+			arr_payload.Trace(context, stackStPos, ref error, scope_ptr, arrayToString, arr);
+
+			string str = sb.ToString();
+			if (string.IsNullOrEmpty(str))
+			{
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+			}
+			else
+			{ 
+				int p = context.GC.AllocString(str);
+				if (p == 0)
+				{
+					context.player.RaiseOutOfMemory(ref error);
+					return;
+				}
+				else
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(p);
+				}
+			}
+
+		}
 
 
 		[NativeFunction(".Array$@::concat")]
@@ -346,6 +415,67 @@ namespace juicescript.runtime.buildin
 			int finalptr = RtPayloadArray.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out targetArray);
 			context.StackSlots[returnSlotIndex].SetHeapPtr(finalptr);
 
+		}
+
+		[NativeFunction(".Array$@::push")]
+		public static void Array_push(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			// 1. Validate thisPtr is an Array
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr || 
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				context.StackSlots[returnSlotIndex].SetUInt(0);
+				return;
+			}
+
+			// 2. Get array instance and rest parameters
+			var arrayInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var rest = scope.ReadSlot(0, context.player);
+			var restArray = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+			var restSpan = restArray.stack_store.Span;
+
+			// 3. Get current length
+			var array = (RtPayloadArray)arrayInstance.facility;
+			uint currentLength = array.GetLength(context.player);
+
+			// 4. Handle empty push case
+			if (restSpan.Length == 0)
+			{
+				context.StackSlots[returnSlotIndex].SetUInt(currentLength);
+				return;
+			}
+
+			// 5. Check for overflow
+			if (currentLength > uint.MaxValue - (uint)restSpan.Length)
+			{
+				context.player.RaiseRangeError(ref error, ((long)currentLength + restSpan.Length).ToString() , uint.MaxValue);
+				context.StackSlots[returnSlotIndex].SetUInt(currentLength);
+				return;
+			}
+
+			// 6. Push each element
+			for (int i = 0; i < restSpan.Length; i++)
+			{
+				uint targetIndex = currentLength + (uint)i;
+				context.player.SetArraySlot(restSpan[i], targetIndex, arrayInstance, ref error);
+				if (error.raised)
+				{
+					context.StackSlots[returnSlotIndex].SetUInt(currentLength);
+					return;
+				}
+			}
+
+			// 7. Return new length
+			uint newLength = currentLength + (uint)restSpan.Length;
+			context.StackSlots[returnSlotIndex].SetUInt(newLength);
 		}
 
 	}

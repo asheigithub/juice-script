@@ -254,7 +254,7 @@ namespace juicescript.compiler.IL
 
 				AS3Try @try = (AS3Try)code;
 
-				TryCatchContext tryCatchContext = new TryCatchContext();
+				TryCatchContext tryCatchContext = new TryCatchContext(@try);
 				//tryCatchContext.CatchList = new List<Tuple<Instruction, Instruction>>();
 				trycatchState.Push(tryCatchContext);
 
@@ -438,7 +438,7 @@ namespace juicescript.compiler.IL
 
 				for (int i = 0; i < @if.condition.Count; i++)
 				{
-					condition = BuildExpression(compileEnv, (AS3Expression)@if.condition[i],ref flagseed);
+					condition = BuildExpression(compileEnv, (AS3Expression)@if.condition[i], ref flagseed);
 				}
 
 
@@ -572,22 +572,85 @@ namespace juicescript.compiler.IL
 				var m = ((ASMethodBody)compileEnv.Scope.Container).Method;
 				if (m.ReturnTypeKind != TypeKind.Any)
 				{
-					throw new ResolverException( m.Token , "generator must return *");
+					throw new ResolverException(m.Token, "generator must return *");
 				}
 
 				//yield 不能在 catch和finally块中发起。
 
 				if (trycatchState.Any((t) => t.state == TryCatchContext.State.Catch || t.state == TryCatchContext.State.Finally))
 				{
-					throw new ResolverException(m.Token,"Can't yield in catch block or finally block");
+					throw new ResolverException(m.Token, "Can't yield in catch block or finally block");
 				}
 
+				if (trycatchState.Any((t) => t.tryStatement != null && t.tryStatement.CatchList.Count > 0))
+				{
+					throw new ResolverException(m.Token, "Can't yield in [try_catch_finally] that have [catch] blocks");
+				}
+
+
+
 				((ASMethodBody)compileEnv.Scope.Container).Method.Flags |= MethodFlags.Generator;
+				((ASMethodBody)compileEnv.Scope.Container).Method.Flags |= MethodFlags.NeedActivation; //构造器必然需要构造闭包。
+
+				StackLocater ret = default;
+
+				if (yieldReturn.ReturnValue.Count > 0)
+				{
+					for (int r = 0; r < yieldReturn.ReturnValue.Count; r++)
+					{
+						ret = BuildExpression(compileEnv, (AS3Expression)yieldReturn.ReturnValue[r], ref flagseed);
+					}
+				}
+				else
+				{
+					throw new ResolverException(m.Token, "yield must return a value");
+				}
+
+
+				INS_Yield_Return yield_Return = new INS_Yield_Return(m.Token);
+				yield_Return.dst = ret;
+
+				compileEnv.instructions.Add(yield_Return);
+
+				//throw new NotImplementedException();
+			}
+			else if (code is AS3YieldBreak)
+			{
+				AS3YieldBreak yieldBreak = (AS3YieldBreak)code;
+
+				if (compileEnv.Scope.Kind == CodeScopeKind.Script)
+				{
+					throw new ResolverException(code.Token, "The yield statement cannot be used in global initialization code.");
+				}
+				else if (compileEnv.Scope.Kind == CodeScopeKind.Class || compileEnv.Scope.Kind == CodeScopeKind.Instance)
+				{
+					throw new InvalidOperationException();
+				}
+
+				var m = ((ASMethodBody)compileEnv.Scope.Container).Method;
+				if (m.ReturnTypeKind != TypeKind.Any)
+				{
+					throw new ResolverException(m.Token, "generator must return *");
+				}
+
+				//yield 不能在 catch和finally块中发起。
+
+				if (trycatchState.Any((t) => t.state == TryCatchContext.State.Catch || t.state == TryCatchContext.State.Finally))
+				{
+					throw new ResolverException(m.Token, "Can't yield in catch block or finally block");
+				}
+
+				if (trycatchState.Any((t) => t.tryStatement != null && t.tryStatement.CatchList.Count > 0))
+				{
+					throw new ResolverException(m.Token, "Can't yield in [try_catch_finally] that have [catch] blocks");
+				}
 
 				
+				((ASMethodBody)compileEnv.Scope.Container).Method.Flags |= MethodFlags.Generator;
+				((ASMethodBody)compileEnv.Scope.Container).Method.Flags |= MethodFlags.NeedActivation; //构造器必然需要构造闭包。
 
+				compileEnv.instructions.Add(new INS_Yield_Break(yieldBreak.Token));
 
-				throw new NotImplementedException();
 			}
 			else if (code is AS3Return)
 			{
@@ -727,7 +790,7 @@ namespace juicescript.compiler.IL
 						{
 							jumptrys++;
 						}
-						else if (((Block)blocks[i]).BreakTarget && ((Block)blocks[i]).Label !=null && ((Block)blocks[i]).Label.Split("@").Contains( breaklabel))
+						else if (((Block)blocks[i]).BreakTarget && ((Block)blocks[i]).Label != null && ((Block)blocks[i]).Label.Split("@").Contains(breaklabel))
 						{
 							breakflag = ((Block)blocks[i]).breakFlag;
 							break;
@@ -827,7 +890,7 @@ namespace juicescript.compiler.IL
 						{
 							jumptrys++;
 						}
-						else if (((Block)blocks[i]).ContinueTarget && ((Block)blocks[i]).Label !=null && ((Block)blocks[i]).Label.Split("@").Contains( @continue.continueTarget))
+						else if (((Block)blocks[i]).ContinueTarget && ((Block)blocks[i]).Label != null && ((Block)blocks[i]).Label.Split("@").Contains(@continue.continueTarget))
 						{
 							continueflag = ((Block)blocks[i]).continueFlag;
 							break;
@@ -956,7 +1019,7 @@ namespace juicescript.compiler.IL
 				iter_Get.flag_end_id = for_body.breakFlag.flag_id;
 				compileEnv.instructions.Add(iter_Get);
 
-				TryCatchContext tryCatchContext = new TryCatchContext();
+				TryCatchContext tryCatchContext = new TryCatchContext(null);
 				trycatchState.Push(tryCatchContext);
 				blockcontexts.Push(tryCatchContext);
 

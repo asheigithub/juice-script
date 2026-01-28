@@ -34,3 +34,10 @@ class iter_context
 {
 	
 }
+
+[wapper]
+class generator
+{
+	private native function next(obj:*, r:IteratorResult ):void;
+	private native function close(obj:*):void;
+}

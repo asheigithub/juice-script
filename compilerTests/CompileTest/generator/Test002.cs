@@ -1,15 +1,14 @@
-﻿using juicescript;
-using juicescript.runtime;
+﻿using juicescript.runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace compilerTests.CompileTest.t262call
+namespace compilerTests.CompileTest.generator
 {
 	[TestClass]
-	public sealed class Test027 : CodeTestBase
+	public sealed class Test002 : CodeTestBase
 	{
 		protected override TestCodeProject LoadProject()
 		{
@@ -33,6 +32,13 @@ package ns1
 	 */
 	public class BaseM extends Sprite
 	{
+		
+		public static const FFF = 6666;
+		protected static const VVV = ""abcd"";
+		public function BaseM() 
+		{
+			
+		}
 		
 	}
 
@@ -60,10 +66,17 @@ package
 	 */
 	public class Main extends BaseM
 	{
-		
+		public var v;
 	}
 	
 }
+
+
+
+import adobe.utils.CustomActions;
+import flash.sampler.NewObjectSample;
+import flash.utils.ByteArray;
+import flash.utils.Dictionary;
 
 
 class Test262Error extends Error
@@ -84,6 +97,12 @@ function assert(mustBeTrue, message) {
   }
   throw new Test262Error(message);
 }
+
+assert._toString = function (v:String) 
+{
+	return v;
+}
+
 assert._isSameValue = function (a, b) {
   if (a === b) {
     // Handle +/-0 vs. -/+0
@@ -170,37 +189,28 @@ assert.throws = function (expectedErrorConstructor, func, message) {
 
 
 
-class T
+function test2()
 {
-	public function T()
-	{
-		var callCount = 0;
-
-	var f,  scope = {};
-
-	  f = function (n) {
-		""use strict"";
-		if (n === 0) {
-		  callCount += 1
-		  return;
-		}
-		return this.eval(n - 1);
-	  }
-
-	scope.eval = f;
-
-	f.call(scope,10);
-
-	assert.sameValue(callCount, 1);
-		
-	}
+    var log = [];
 	
+    for (var i in (function() {
+        log.push(""A"");
+        yield return 10;
+        log.push(""B"");
+        yield return 20;
+        log.push(""C"");
+    })())
+    {
+        log.push(""Y"" + i);
+    }
+
+    assert.sameValue(log.toString(), ""A,Y10,B,Y20,C"");
 }
 
-new T();
+test2();
 
-trace(""OK"");
 
+trace('OK');
 
 "
 				}

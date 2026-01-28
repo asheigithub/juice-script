@@ -184,7 +184,7 @@ var f, scope = {};
 
 scope.eval = f;
 
-f.call(scope,20);
+f.call(scope,10);
 
 assert.sameValue(callCount, 1);
 
@@ -216,7 +216,7 @@ trace(""OK"");
 
 				StringPrint print = (StringPrint)player.Print;
 
-				Assert.AreEqual("20\r\n19\r\n18\r\n17\r\n16\r\n15\r\n14\r\n13\r\n12\r\n11\r\n10\r\n9\r\n8\r\n7\r\n6\r\n5\r\n4\r\n3\r\n2\r\n1\r\n0\r\nOK\r\n", print.GetOutput());
+				Assert.AreEqual("10\r\n9\r\n8\r\n7\r\n6\r\n5\r\n4\r\n3\r\n2\r\n1\r\n0\r\nOK\r\n", print.GetOutput());
 
 			}
 

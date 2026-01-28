@@ -4303,7 +4303,7 @@ namespace juicescript.compiler.parse
                     {
                         var expr = code_stack.Pop();
 
-                        forIn.ForInExpression = (AS3Expression)expr[0];
+                        forIn.ForInExpression = (AS3Expression)expr[expr.Count-1];
 
                     });
 
@@ -4377,7 +4377,7 @@ namespace juicescript.compiler.parse
                 quit_events.Add(node.Parent.Nodes[1].Nodes[1], (e) =>
                 {
                     var expr = code_stack.Pop();
-                    forEach.ForInExpression = (AS3Expression)expr[0];
+                    forEach.ForInExpression = (AS3Expression)expr[expr.Count-1];
 
                 });
 

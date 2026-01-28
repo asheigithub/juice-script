@@ -459,7 +459,7 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								//((RtPayloadScriptClass)global.facility).computing_member = member;
-								Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1);
+								Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
 							}
 							finally
 							{
@@ -509,7 +509,7 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								//((RtPayloadScriptClass)@class.facility).computing_member = member;
-								Execute(ref info,scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1);
+								Execute(ref info,scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
@@ -609,7 +609,7 @@ namespace juicescript.runtime
 								}
 								Execute(ref info,scopeinstance, thisP, run_methodscope, 
 									is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
-									, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1);
+									, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
@@ -794,7 +794,7 @@ namespace juicescript.runtime
 						int P_PC;
 
 						
-						Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1);
+						Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						
 						if (error.raised)
 						{
@@ -821,7 +821,7 @@ namespace juicescript.runtime
 						int P_PC;
 
 						
-						Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1);
+						Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						
 
 						if (error.raised)
@@ -906,7 +906,7 @@ namespace juicescript.runtime
 						Execute(ref info, scopeinstance, thisP, run_methodscope, 
 							is_closure ? scopeinstance.Type : scope.Container
 							//scope.Container
-							, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1);
+							, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						
 
 

@@ -195,7 +195,7 @@ namespace juicescript.compiler.parse
 
 <Each> ::=""each"" ""("" <Each_TEMP1>;
 <Each_TEMP1> ::=<ForVar> <Each_TEMP2>;
-<Each_TEMP2> ::=""in"" <Expression> "")"" <Stmt> ;
+<Each_TEMP2> ::=""in"" <ExpressionList> "")"" <Stmt> ;
 
 <ForVar> ::=<F_Variable>|<F_ExpressionList>|<Const>;
 
@@ -205,7 +205,7 @@ namespace juicescript.compiler.parse
 <FOR_TEMP2> ::=<FORIN>|<FOR>;
 
 
-<FORIN>     ::=""in"" <Expression> "")"" <Stmt>;
+<FORIN>     ::=""in"" <ExpressionList> "")"" <Stmt>;
 <FOR>       ::="";""<FORPART2>"";""<FORPART3>"")""<Stmt>;
 
 

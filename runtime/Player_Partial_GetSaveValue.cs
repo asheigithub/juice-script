@@ -339,7 +339,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void StoreReturnSlot(ref NaNBoxing returnSlot,int stackStPos, int returnSlotIndex, int calleelastpos, int scope_ptr, NaNBoxing value, ref ReceiveError error)
+		private unsafe void StoreReturnSlot(ref NaNBoxing returnSlot,int stackStPos, int returnSlotIndex, int calleelastpos, int scope_ptr, NaNBoxing value, ref ReceiveError error,bool isyieldreturn =false)
 		{
 #if DEBUG
 			if (value.ValueType != NaNBoxing.BoxType.HeapPtr)
@@ -354,7 +354,11 @@ namespace juicescript.runtime
 				var obj = Context.GC.Heap[value.HeapPtr];
 				if (obj.TypeKind == RtHeapTypeKind.INSTANCE)
 				{
-					if (!(value.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH) //堆里
+					if (!isyieldreturn && obj.Type == Context.GENERATOR.Instance)
+					{
+						RaiseTypeError(ref error, value, TypeKind.Function);
+					}
+					else if (!(value.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH) //堆里
 						||
 						(value.HeapPtr < Context.CacheInstancePtr + calleelastpos) //传入
 						)

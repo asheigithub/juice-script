@@ -1,4 +1,5 @@
 ﻿using juicescript.ABC.INS;
+using juicescript.compiler.AST.Stmt;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,12 @@ namespace juicescript.compiler.IL
 		}
 
 		public State state;
+		public AS3Try tryStatement;
+
+		public TryCatchContext(AS3Try @try)
+		{ 
+			tryStatement = @try;
+		}
 
 	}
 

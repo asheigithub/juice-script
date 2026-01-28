@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -270,26 +270,26 @@ namespace juicescript.ABC.INS
         iter_close = 232,
         iter_next =234,
 
-        /// <summary>
-        /// 函数返回，将returnSlot赋值为 undefined
-        /// </summary>
-        return_void = 240,
+		yield_return = 238,
+		yield_break = 239,
+
+		/// <summary>
+		/// 函数返回，将returnSlot赋值为 undefined
+		/// </summary>
+		return_void = 240,
         /// <summary>
         /// 函数返回，将returnSlot赋值
         /// </summary>
         return_value = 242,
 
-        
-
-        throw_error =244,
+		
+		throw_error =244,
         try_enter =245,   // try catch finall 支持
         try_exit = 246,
         catch_enter =247,
         catch_exit = 248,
         finally_enter =249,
         finally_exit = 250,
-
-
 
 
         END = 255       //结束

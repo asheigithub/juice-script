@@ -17,11 +17,11 @@ namespace juicescript.runtime
 
 
 #if DEBUG
-        public const int MAX_BACKTRACE = 24;
+        public const int MAX_BACKTRACE = 20;
 #else
-		public const int MAX_BACKTRACE = 48;
+		public const int MAX_BACKTRACE = 40;
 #endif
-		public const int MAX_TRY_NESTED = 32;
+		public const int MAX_TRY_NESTED = 16;
 
         internal readonly Player player;
 
@@ -75,6 +75,8 @@ namespace juicescript.runtime
         public ASClass BOOLEAN;
 
         public ASClass NAMESPACE;
+
+        public ASClass GENERATOR;
 
         public SWCFile global_swc;
 
