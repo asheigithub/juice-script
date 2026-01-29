@@ -85,6 +85,8 @@ namespace juicescript.runtime.buildin
 					printer.Write(arg.FloatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
 				case NaNBoxing.BoxType.HeapPtr:
 					printer.Write(((RtPayloadString)context.GC.Heap[arg.HeapPtr].facility).Str );return;
+				case NaNBoxing.BoxType.LocalString:
+					printer.Write(arg.LocalStringValue); return;
 			}
 		}
 

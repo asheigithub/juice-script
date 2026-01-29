@@ -748,6 +748,13 @@ namespace juicescript.runtime.gc
                                                     case TypeKind.Namespace:
                                                     case TypeKind.Object:
                                                     case TypeKind.Class:
+                                                        if (((NaNBoxing*)ptr)->ValueType == NaNBoxing.BoxType.LocalString)
+                                                        {
+                                                            break;
+                                                        }
+                                                            
+
+
 #if DEBUG
                                                         if (((NaNBoxing*)ptr)->ValueType != NaNBoxing.BoxType.HeapPtr
                                                             &&

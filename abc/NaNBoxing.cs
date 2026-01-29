@@ -63,6 +63,7 @@ namespace juicescript
         public const ulong TAG_USHORT = 0xFFF80A0000000000;
         public const ulong TAG_FLOAT = 0xFFF80B0000000000;
         public const ulong TAG_HEAP_POINTER = 0xFFF80C0000000000;
+        public const ulong TAG_LOCAL_STRING = 0xFFF80D0000000000;
 
         //internal const ulong MASK_EXPONENT = 0x7ff0000000000000;
         //internal const ulong MASK_SIGNATURE = 0xFFFFFFFF00000000;
@@ -95,8 +96,9 @@ namespace juicescript
             UShort = (uint)(TAG_USHORT >> 40) & 0xF,
             Float = (uint)(TAG_FLOAT >> 40) & 0xF,
             HeapPtr = (uint)(TAG_HEAP_POINTER >> 40) & 0xF,
+            LocalString = (uint)(TAG_LOCAL_STRING >> 40) & 0xF,
 
-            Fault = 0xF0
+            Fault = 0xE0
         }
 
 
@@ -173,6 +175,26 @@ namespace juicescript
                         isequal = f1 == f2;
 
                     return true;
+                }
+                else if (signature1 == 13 && signature2 == 13)
+                {
+                    // LocalString与LocalString比较
+                    string str1 = LocalStringValue;
+                    string str2 = other.LocalStringValue;
+                    isequal = string.CompareOrdinal(str1, str2) == 0;
+                    return true;
+                }
+                else if (signature1 == 13 && signature2 == 12)
+                {
+                    // LocalString与HeapPtr字符串比较 - 需要在运行时上下文中处理
+                    isequal = false;
+                    return false;
+                }
+                else if (signature1 == 12 && signature2 == 13)
+                {
+                    // HeapPtr字符串与LocalString比较 - 需要在运行时上下文中处理
+                    isequal = false;
+                    return false;
                 }
                 else
                 {
@@ -304,7 +326,34 @@ namespace juicescript
                 uint signature1 = (uint)(a.store >> 40) & 0xF;
                 uint signature2 = (uint)(b.store >> 40) & 0xF;
 
-                if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature1 < 1)
+                // Handle LocalString + LocalString case for fast string concatenation
+                if (signature1 == 13 && signature2 == 13)
+                {
+                    // Both are LocalString, try to concatenate directly
+                    string str1 = a.LocalStringValue;
+                    string str2 = b.LocalStringValue;
+                    string concatenated = str1 + str2;
+                    
+                    // Check if result can fit in LocalString (5 bytes max)
+                    int utf8ByteCount = SafeGetUtf8ByteCount(concatenated);
+                    if (utf8ByteCount > 0 && utf8ByteCount <= 5)
+                    {
+                        // Create LocalString result
+                        Span<byte> utf8Bytes = stackalloc byte[utf8ByteCount];
+                        int actualBytes = SafeGetUtf8Bytes(concatenated, utf8Bytes);
+                        if (actualBytes > 0)
+                        {
+                            result.SetLocalString(utf8Bytes.Slice(0, actualBytes));
+                            return true;
+                        }
+                    }
+                    
+                    // If encoding failed or result too long, fall back to slow path
+                    return false;
+                }
+                
+                // LocalString with other types should fall back to slow path for string concatenation
+                if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature2 < 1)
                 {
                     return false;
                 }
@@ -564,7 +613,8 @@ namespace juicescript
                 uint signature1 = (uint)(a.store >> 40) & 0xF;
                 uint signature2 = (uint)(b.store >> 40) & 0xF;
 
-                if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature1 < 1)
+                // LocalString (signature 13) should fall back to slow path for string operations
+                if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature2 < 1)
                 {
                     return false;
                 }
@@ -789,6 +839,8 @@ namespace juicescript
                         return v.FloatValue;// BoxType.Float;
 					case 12:
                         return double.NaN;// BoxType.HeapPtr;
+					case 13:
+                        return double.NaN;// BoxType.LocalString - strings cannot be converted to numbers directly
 					default:
                         return double.NaN; //BoxType.Fault;
 				}
@@ -836,6 +888,8 @@ namespace juicescript
 						return v.FloatValue;// BoxType.Float;
 					case 12:
 						return float.NaN;// BoxType.HeapPtr;
+					case 13:
+						return float.NaN;// BoxType.LocalString - strings cannot be converted to numbers directly
 					default:
 						return float.NaN; //BoxType.Fault;
 				}
@@ -928,6 +982,8 @@ namespace juicescript
                             return BoxType.Float;
                         case 12:
                             return BoxType.HeapPtr;
+                        case 13:
+                            return BoxType.LocalString;
                         default:
                             return BoxType.Fault;
                     }
@@ -1110,6 +1166,35 @@ namespace juicescript
             }
         }
 
+        public string LocalStringValue
+        {
+            get
+            {
+                // 提取所有5字节，然后找到实际字符串结束位置
+                Span<byte> utf8Bytes = stackalloc byte[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    utf8Bytes[i] = (byte)((store >> (32 - i * 8)) & 0xFF);
+                }
+                
+                // 找到第一个零字节的位置，或使用全部5字节
+                int actualLength = 5;
+                for (int i = 0; i < 5; i++)
+                {
+                    if (utf8Bytes[i] == 0)
+                    {
+                        actualLength = i;
+                        break;
+                    }
+                }
+                
+                if (actualLength == 0) return string.Empty;
+                
+                // 只使用实际长度的字节进行解码
+                return Encoding.UTF8.GetString(utf8Bytes.Slice(0, actualLength));
+            }
+        }
+
         /// <summary>
         /// 原始内容
         /// </summary>
@@ -1149,6 +1234,8 @@ namespace juicescript
                     return $"NaNBoxing: {ValueType},{FloatValue}";
                 case BoxType.HeapPtr:
                     return $"NaNBoxing: {ValueType},P{HeapPtr}";
+                case BoxType.LocalString:
+                    return $"NaNBoxing: {ValueType},\"{LocalStringValue}\"";
                 case BoxType.Fault:
                 default:
                     return $"NaNBoxing: Fault occurred!!";
@@ -1157,9 +1244,138 @@ namespace juicescript
             
         }
 
+        /// <summary>
+        /// 安全的UTF-8编码方法，不会抛出异常
+        /// 如果编码失败，返回空字节数组
+        /// </summary>
+        /// <param name="str">要编码的字符串</param>
+        /// <returns>UTF-8字节数组，失败时返回空数组</returns>
+        private static byte[] SafeGetUtf8Bytes(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return Array.Empty<byte>();
+                
+            try
+            {
+                // 使用替换回退策略，遇到无法编码的字符时用替换字符代替
+                var encoder = Encoding.UTF8.GetEncoder();
+                encoder.Fallback = EncoderFallback.ReplacementFallback;
+                
+                int byteCount = Encoding.UTF8.GetByteCount(str);
+                byte[] bytes = new byte[byteCount];
+                Encoding.UTF8.GetBytes(str, 0, str.Length, bytes, 0);
+                return bytes;
+            }
+            catch
+            {
+                // 如果仍然失败，返回空字节数组
+                return Array.Empty<byte>();
+            }
+        }
+
+        /// <summary>
+        /// 安全的UTF-8编码方法（Span版本），不会抛出异常
+        /// 如果编码失败，返回0
+        /// </summary>
+        /// <param name="str">要编码的字符串</param>
+        /// <param name="destination">目标字节缓冲区</param>
+        /// <returns>实际写入的字节数，失败时返回0</returns>
+        private static int SafeGetUtf8Bytes(string str, Span<byte> destination)
+        {
+            if (string.IsNullOrEmpty(str))
+                return 0;
+                
+            try
+            {
+                // 使用替换回退策略
+                var encoder = Encoding.UTF8.GetEncoder();
+                encoder.Fallback = EncoderFallback.ReplacementFallback;
+                
+                return Encoding.UTF8.GetBytes(str, destination);
+            }
+            catch
+            {
+                // 如果仍然失败，返回0
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 安全的UTF-8字节长度计算，不会抛出异常
+        /// </summary>
+        /// <param name="str">要计算的字符串</param>
+        /// <returns>UTF-8字节长度，失败时返回0</returns>
+        private static int SafeGetUtf8ByteCount(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return 0;
+                
+            try
+            {
+                return Encoding.UTF8.GetByteCount(str);
+            }
+            catch
+            {
+                // 如果失败，返回0
+                return 0;
+            }
+        }
+
+        public void SetLocalString(ReadOnlySpan<byte> utf8Bytes)
+        {
+            // 调用者已经确保utf8Bytes.Length <= 5 (只有5字节可用空间)
+            Debug.Assert(utf8Bytes.Length <= 5, "UTF-8 bytes length should not exceed 5");
+            
+            ulong data = TAG_LOCAL_STRING;
+            
+            // 存储UTF-8字节，从高位开始，剩余位置自动为0
+            for (int i = 0; i < utf8Bytes.Length; i++)
+            {
+                data |= ((ulong)utf8Bytes[i]) << (32 - i * 8);
+            }
+            
+            store = data;
+        }
+
         public void setFault()
         {
-            store = 0xFFF80D0000000000;
+            store = 0xFFF80E0000000000;
+        }
+
+        /// <summary>
+        /// 尝试从字符串创建LocalString的安全接口
+        /// 提供安全的LocalString创建，返回bool指示创建是否成功
+        /// </summary>
+        /// <param name="str">要创建LocalString的字符串（不能为null）</param>
+        /// <param name="result">创建的LocalString结果</param>
+        /// <returns>如果成功创建LocalString返回true，否则返回false</returns>
+        public static bool TryCreateLocalString(string str, out NaNBoxing result)
+        {
+            Debug.Assert(str != null, "String cannot be null - use SetNull() for null values");
+
+            result = default;
+            
+            if (string.IsNullOrEmpty(str))
+            {
+                result = new NaNBoxing();
+                result.SetLocalString(ReadOnlySpan<byte>.Empty);
+                return true;
+            }
+            
+            int utf8ByteCount = SafeGetUtf8ByteCount(str);
+            if (utf8ByteCount > 0 && utf8ByteCount <= 5)
+            {
+                Span<byte> utf8Bytes = stackalloc byte[utf8ByteCount];
+                int actualBytes = SafeGetUtf8Bytes(str, utf8Bytes);
+                if (actualBytes > 0)
+                {
+                    result = new NaNBoxing();
+                    result.SetLocalString(utf8Bytes.Slice(0, actualBytes));
+                    return true;
+                }
+            }
+            
+            return false;
         }
 
 		public void setDefault(TypeKind returnTypeKind)

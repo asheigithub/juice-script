@@ -616,6 +616,10 @@ namespace juicescript.runtime
                             throw new InvalidOperationException();
                         }
                     }
+                case BoxType.LocalString:
+                    {
+                        return prop_name.LocalStringValue;
+                    }
 				case NaNBoxing.BoxType.Fault:
 				default:
 					throw new InvalidOperationException();

@@ -2024,6 +2024,37 @@ namespace juicescript.runtime
 			error.error.setFault();
 		}
 
+		/// <summary>
+		/// 安全地创建字符串，优先使用LocalString，失败时回退到堆分配
+		/// </summary>
+		/// <param name="str">要创建的字符串（不能为null）</param>
+		/// <param name="result">创建的NaNBoxing结果</param>
+		/// <param name="error">错误信息</param>
+		/// <returns>是否成功创建</returns>
+		private bool TryCreateStringValue(string str, out NaNBoxing result, ref ReceiveError error)
+		{
+			Debug.Assert(str != null, "String cannot be null - use SetNull() for null values");
+			
+			result = default;
+			
+			// 首先尝试创建LocalString
+			if (NaNBoxing.TryCreateLocalString(str, out result))
+			{
+				return true;
+			}
+			
+			// 回退到堆分配
+			int strptr = Context.GC.AllocString(str);
+			if (strptr == 0)
+			{
+				RaiseOutOfMemory(ref error);
+				return false;
+			}
+			
+			result.SetHeapPtr(strptr);
+			return true;
+		}
+
 		int cache_OUTOFMEMORY_STR;
 		internal void RaiseOutOfMemory(ref ReceiveError error)
 		{
@@ -5737,6 +5768,28 @@ namespace juicescript.runtime
 				}
 			}
 
+			// LocalString与HeapPtr字符串比较
+			if (v1.ValueType == NaNBoxing.BoxType.LocalString && v2.ValueType == NaNBoxing.BoxType.HeapPtr)
+			{
+				var ins2 = Context.GC.Heap[v2.HeapPtr];
+				if (ins2.TypeKind == RtHeapTypeKind.STRING)
+				{
+					string str1 = v1.LocalStringValue;
+					string str2 = ((RtPayloadString)ins2.facility).Str;
+					return string.CompareOrdinal(str1, str2) == 0;
+				}
+			}
+			else if (v1.ValueType == NaNBoxing.BoxType.HeapPtr && v2.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				var ins1 = Context.GC.Heap[v1.HeapPtr];
+				if (ins1.TypeKind == RtHeapTypeKind.STRING)
+				{
+					string str1 = ((RtPayloadString)ins1.facility).Str;
+					string str2 = v2.LocalStringValue;
+					return string.CompareOrdinal(str1, str2) == 0;
+				}
+			}
+
 			//比较数字值
 			switch (v1.ValueType)
 			{
@@ -6454,6 +6507,28 @@ namespace juicescript.runtime
 			}
 			else
 			{
+				// LocalString与HeapPtr字符串比较
+				if (key1.ValueType == NaNBoxing.BoxType.LocalString && key2.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					var ins2 = Context.GC.Heap[key2.HeapPtr];
+					if (ins2.TypeKind == RtHeapTypeKind.STRING)
+					{
+						string str1 = key1.LocalStringValue;
+						string str2 = ((RtPayloadString)ins2.facility).Str;
+						return string.CompareOrdinal(str1, str2) == 0;
+					}
+				}
+				else if (key1.ValueType == NaNBoxing.BoxType.HeapPtr && key2.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					var ins1 = Context.GC.Heap[key1.HeapPtr];
+					if (ins1.TypeKind == RtHeapTypeKind.STRING)
+					{
+						string str1 = ((RtPayloadString)ins1.facility).Str;
+						string str2 = key2.LocalStringValue;
+						return string.CompareOrdinal(str1, str2) == 0;
+					}
+				}
+				
 				return false;
 			}
 
@@ -6527,6 +6602,13 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Float:
 							outvalue.SetBoolean(!(invalue.FloatValue == 0 || float.IsNaN(invalue.FloatValue)));
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Boolean: false if empty string, true otherwise
+								string str = invalue.LocalStringValue;
+								outvalue.SetBoolean(!string.IsNullOrEmpty(str));
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								if (Context.GC.Heap[invalue.HeapPtr].TypeKind == RtHeapTypeKind.STRING
@@ -6599,6 +6681,14 @@ namespace juicescript.runtime
 								outvalue.SetSByte((sbyte)(long)invalue.FloatValue);
 							}
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to SByte: parse string as integer
+								string str = invalue.LocalStringValue;
+								int v = ReadIntFromString(str);
+								outvalue.SetSByte((sbyte)v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -6684,6 +6774,14 @@ namespace juicescript.runtime
 								outvalue.SetByte((byte)(long)invalue.FloatValue);
 							}
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Byte: parse string as unsigned integer
+								string str = invalue.LocalStringValue;
+								uint v = ReadUIntFromString(str);
+								outvalue.SetByte((byte)v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -6766,6 +6864,14 @@ namespace juicescript.runtime
 								outvalue.SetShort((short)(long)invalue.FloatValue);
 							}
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Short: parse string as integer
+								string str = invalue.LocalStringValue;
+								int v = ReadIntFromString(str);
+								outvalue.SetShort((short)v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -6850,6 +6956,14 @@ namespace juicescript.runtime
 								outvalue.SetUShort((ushort)(long)invalue.FloatValue);
 							}
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to UShort: parse string as unsigned integer
+								string str = invalue.LocalStringValue;
+								uint v = ReadUIntFromString(str);
+								outvalue.SetUShort((ushort)v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -6933,6 +7047,14 @@ namespace juicescript.runtime
 								outvalue.SetInt((int)(long)invalue.FloatValue);
 							}
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Int: parse string as integer
+								string str = invalue.LocalStringValue;
+								int v = ReadIntFromString(str);
+								outvalue.SetInt(v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -7015,6 +7137,14 @@ namespace juicescript.runtime
 								outvalue.SetUInt((uint)(long)invalue.FloatValue);
 							}
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Uint: parse string as unsigned integer
+								string str = invalue.LocalStringValue;
+								uint v = ReadUIntFromString(str);
+								outvalue.SetUInt(v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -7085,6 +7215,14 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Float:
 							outvalue = invalue;
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Float: parse string as double then convert to float
+								string str = invalue.LocalStringValue;
+								double v = ReadDoubleFromString(str);
+								outvalue.SetFloat((float)v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -7153,6 +7291,14 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Float:
 							outvalue.SetNumber(invalue.FloatValue);
 							return;
+						case NaNBoxing.BoxType.LocalString:
+							{
+								// LocalString to Number: parse string as double
+								string str = invalue.LocalStringValue;
+								double v = ReadDoubleFromString(str);
+								outvalue.SetNumber(v);
+								return;
+							}
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -7217,6 +7363,7 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Short:
 						case NaNBoxing.BoxType.UShort:
 						case NaNBoxing.BoxType.Float:
+						case NaNBoxing.BoxType.LocalString:
 						case NaNBoxing.BoxType.HeapPtr:
 							outvalue = invalue;
 							return;
@@ -7246,18 +7393,13 @@ namespace juicescript.runtime
 								}
 								else
 								{
-
-									int ptr = Context.GC.AllocString(invalue.Number.ToString());
-									if (ptr == 0)
+									string str = invalue.Number.ToString();
+									// 使用辅助函数优化字符串创建
+									if (!TryCreateStringValue(str, out outvalue, ref error))
 									{
-										RaiseOutOfMemory(ref error);
-										return;
+										return; // 错误已经在TryCreateStringValue中处理
 									}
-									else
-									{
-										outvalue.SetHeapPtr(ptr);
-										return;
-									}
+									return;
 								}
 							}
 						case NaNBoxing.BoxType.Undefined:
@@ -7278,93 +7420,63 @@ namespace juicescript.runtime
 							return;
 						case NaNBoxing.BoxType.Int:
 							{
-
-								int ptr = Context.GC.AllocString(invalue.IntValue.ToString());
-								if (ptr == 0)
+								string str = invalue.IntValue.ToString();
+								// 使用辅助函数优化字符串创建
+								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
-									RaiseOutOfMemory(ref error);
-									return;
+									return; // 错误已经在TryCreateStringValue中处理
 								}
-								else
-								{
-									outvalue.SetHeapPtr(ptr);
-									return;
-								}
+								return;
 							}
 						case NaNBoxing.BoxType.Uint:
 							{
-
-								int ptr = Context.GC.AllocString(invalue.UIntValue.ToString());
-								if (ptr == 0)
+								string str = invalue.UIntValue.ToString();
+								// 使用辅助函数优化字符串创建
+								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
-									RaiseOutOfMemory(ref error);
-									return;
+									return; // 错误已经在TryCreateStringValue中处理
 								}
-								else
-								{
-									outvalue.SetHeapPtr(ptr);
-									return;
-								}
+								return;
 							}
 						case NaNBoxing.BoxType.Sbyte:
 							{
-
-								int ptr = Context.GC.AllocString(invalue.SByteValue.ToString());
-								if (ptr == 0)
+								string str = invalue.SByteValue.ToString();
+								// 使用辅助函数优化字符串创建
+								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
-									RaiseOutOfMemory(ref error);
-									return;
+									return; // 错误已经在TryCreateStringValue中处理
 								}
-								else
-								{
-									outvalue.SetHeapPtr(ptr);
-									return;
-								}
+								return;
 							}
 						case NaNBoxing.BoxType.Byte:
 							{
-
-								int ptr = Context.GC.AllocString(invalue.ByteValue.ToString());
-								if (ptr == 0)
+								string str = invalue.ByteValue.ToString();
+								// 使用辅助函数优化字符串创建
+								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
-									RaiseOutOfMemory(ref error);
-									return;
+									return; // 错误已经在TryCreateStringValue中处理
 								}
-								else
-								{
-									outvalue.SetHeapPtr(ptr);
-									return;
-								}
+								return;
 							}
 						case NaNBoxing.BoxType.Short:
 							{
-
-								int ptr = Context.GC.AllocString(invalue.ShortValue.ToString());
-								if (ptr == 0)
+								string str = invalue.ShortValue.ToString();
+								// 使用辅助函数优化字符串创建
+								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
-									RaiseOutOfMemory(ref error);
-									return;
+									return; // 错误已经在TryCreateStringValue中处理
 								}
-								else
-								{
-									outvalue.SetHeapPtr(ptr);
-									return;
-								}
+								return;
 							}
 						case NaNBoxing.BoxType.UShort:
 							{
-
-								int ptr = Context.GC.AllocString(invalue.UShortValue.ToString());
-								if (ptr == 0)
+								string str = invalue.UShortValue.ToString();
+								// 使用辅助函数优化字符串创建
+								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
-									RaiseOutOfMemory(ref error);
-									return;
+									return; // 错误已经在TryCreateStringValue中处理
 								}
-								else
-								{
-									outvalue.SetHeapPtr(ptr);
-									return;
-								}
+								return;
 							}
 						case NaNBoxing.BoxType.Float:
 							{
@@ -7385,20 +7497,19 @@ namespace juicescript.runtime
 								}
 								else
 								{
-
-									int ptr = Context.GC.AllocString(invalue.FloatValue.ToString());
-									if (ptr == 0)
+									string str = invalue.FloatValue.ToString();
+									// 使用辅助函数优化字符串创建
+									if (!TryCreateStringValue(str, out outvalue, ref error))
 									{
-										RaiseOutOfMemory(ref error);
-										return;
+										return; // 错误已经在TryCreateStringValue中处理
 									}
-									else
-									{
-										outvalue.SetHeapPtr(ptr);
-										return;
-									}
+									return;
 								}
 							}
+						case NaNBoxing.BoxType.LocalString:
+							// LocalString is already a string, just return it
+							outvalue = invalue;
+							return;
 						case NaNBoxing.BoxType.HeapPtr:
 							{
 								var instance = Context.GC.Heap[invalue.HeapPtr];
@@ -7564,6 +7675,7 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Short:
 						case NaNBoxing.BoxType.UShort:
 						case NaNBoxing.BoxType.Float:
+						case NaNBoxing.BoxType.LocalString:
 
 							RaiseTypeError(ref error, invalue, totype);
 							return;
@@ -7624,6 +7736,7 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Short:
 						case NaNBoxing.BoxType.UShort:
 						case NaNBoxing.BoxType.Float:
+						case NaNBoxing.BoxType.LocalString:
 
 							RaiseTypeError(ref error, invalue, totype);
 							return;
@@ -7670,6 +7783,7 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Short:
 						case NaNBoxing.BoxType.UShort:
 						case NaNBoxing.BoxType.Float:
+						case NaNBoxing.BoxType.LocalString:
 
 							RaiseTypeError(ref error, invalue, totype);
 							return;
@@ -9725,6 +9839,10 @@ namespace juicescript.runtime
 			if ((n1.ValueType == BoxType.HeapPtr && Context.GC.Heap[n1.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
 				||
 				(n2.ValueType == BoxType.HeapPtr && Context.GC.Heap[n2.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
+				||
+				n1.ValueType == BoxType.LocalString
+				||
+				n2.ValueType == BoxType.LocalString
 				)
 			{
 				hint = HINT.h_string;
@@ -9767,6 +9885,18 @@ namespace juicescript.runtime
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
+							case BoxType.LocalString:
+								{
+									var str2 = n2.LocalStringValue;
+									string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
+									
+									// 使用安全的字符串创建方法
+									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									{
+										return; // 错误已经在TryCreateStringValue中处理
+									}
+								}
+								break;
 #if DEBUG
 							case BoxType.Fault:
 							default:
@@ -9794,6 +9924,18 @@ namespace juicescript.runtime
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
+							case BoxType.LocalString:
+								{
+									var str2 = n2.LocalStringValue;
+									string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
+									
+									// 使用安全的字符串创建方法
+									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									{
+										return; // 错误已经在TryCreateStringValue中处理
+									}
+								}
+								break;
 #if DEBUG
 							case BoxType.Fault:
 							default:
@@ -10019,6 +10161,74 @@ namespace juicescript.runtime
 						}
 					}
 					break;
+				case NaNBoxing.BoxType.LocalString:
+					{
+						var str1 = n1.LocalStringValue;
+						
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.Boolean:
+							case BoxType.Int:
+							case BoxType.Uint:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+								{
+									var str2 = Extensions.GetPrimitiveValueToString(this, n2);
+									string concatenated = str1 + str2;
+									
+									// 使用安全的字符串创建方法
+									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									{
+										return; // 错误已经在TryCreateStringValue中处理
+									}
+								}
+								break;
+							case BoxType.HeapPtr:
+								{
+									var instance2 = Context.GC.Heap[n2.HeapPtr];
+									if (instance2.TypeKind == RtHeapTypeKind.STRING)
+									{
+										var str2 = ((RtPayloadString)instance2.facility).Str;
+										string concatenated = str1 + str2;
+										
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										throw new InvalidOperationException();
+									}
+								}
+								break;
+							case BoxType.LocalString:
+								{
+									var str2 = n2.LocalStringValue;
+									string concatenated = str1 + str2;
+									
+									// 使用安全的字符串创建方法
+									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									{
+										return; // 错误已经在TryCreateStringValue中处理
+									}
+								}
+								break;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
 						var instance1 = Context.GC.Heap[n1.HeapPtr];
@@ -10041,30 +10251,40 @@ namespace juicescript.runtime
 								case BoxType.Float:
 									{
 										var str2 = Extensions.GetPrimitiveValueToString(this,n2);
-										int strptr = Context.GC.AllocString(str1 + str2);
-										if (strptr == 0)
+										string concatenated = str1 + str2;
+										
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
-											RaiseOutOfMemory(ref error);
-											return;
+											return; // 错误已经在TryCreateStringValue中处理
 										}
-
-										stackslots[dst.index].SetHeapPtr(strptr);
+									}
+									break;
+								case BoxType.LocalString:
+									{
+										var str2 = n2.LocalStringValue;
+										string concatenated = str1 + str2;
+										
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
 									}
 									break;
 								case BoxType.HeapPtr:
 									{
 										var instance2 = Context.GC.Heap[n2.HeapPtr];
-										if (instance1.TypeKind == RtHeapTypeKind.STRING)
+										if (instance2.TypeKind == RtHeapTypeKind.STRING)
 										{
 											var str2 = ((RtPayloadString)instance2.facility).Str;
-											int strptr = Context.GC.AllocString(str1 + str2);
-											if (strptr == 0)
+											string concatenated = str1 + str2;
+											
+											// 使用安全的字符串创建方法
+											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 											{
-												RaiseOutOfMemory(ref error);
-												return;
+												return; // 错误已经在TryCreateStringValue中处理
 											}
-
-											stackslots[dst.index].SetHeapPtr(strptr);
 										}
 										else
 										{
@@ -10097,7 +10317,6 @@ namespace juicescript.runtime
 			return;
 		lbL_primtive_add_heap:;
 			{
-
 				var instance = Context.GC.Heap[n2.HeapPtr];
 				if (instance.TypeKind == RtHeapTypeKind.STRING)
 				{
@@ -10105,15 +10324,13 @@ namespace juicescript.runtime
 					var str2 = ((RtPayloadString)instance.facility).Str;
 					Context.GC.CheckGC(ref error);
 
-					int strptr = Context.GC.AllocString(str + str2);
-					if (strptr == 0)
+					string concatenated = str + str2;
+					
+					// 使用安全的字符串创建方法
+					if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 					{
-						RaiseOutOfMemory(ref error);
-						return;
+						return; // 错误已经在TryCreateStringValue中处理
 					}
-
-					stackslots[dst.index].SetHeapPtr(strptr);
-
 				}
 #if DEBUG
 				else
@@ -10917,17 +11134,104 @@ namespace juicescript.runtime
 
 			int c_r;
 
-			if (n1.ValueType == BoxType.HeapPtr && n2.ValueType == BoxType.HeapPtr)
+			// 处理字符串比较的各种情况
+			if ((n1.ValueType == BoxType.HeapPtr && Context.GC.Heap[n1.HeapPtr].TypeKind == RtHeapTypeKind.STRING) ||
+			    n1.ValueType == BoxType.LocalString)
 			{
-				string str1 = ((RtPayloadString)Context.GC.Heap[n1.HeapPtr].facility).Str;
-				string str2 = ((RtPayloadString)Context.GC.Heap[n2.HeapPtr].facility).Str;
+				if ((n2.ValueType == BoxType.HeapPtr && Context.GC.Heap[n2.HeapPtr].TypeKind == RtHeapTypeKind.STRING) ||
+				    n2.ValueType == BoxType.LocalString)
+				{
+					// 两个都是字符串类型，进行字符串比较
+					string str1, str2;
+					
+					if (n1.ValueType == BoxType.LocalString)
+					{
+						str1 = n1.LocalStringValue;
+					}
+					else
+					{
+						str1 = ((RtPayloadString)Context.GC.Heap[n1.HeapPtr].facility).Str;
+					}
+					
+					if (n2.ValueType == BoxType.LocalString)
+					{
+						str2 = n2.LocalStringValue;
+					}
+					else
+					{
+						str2 = ((RtPayloadString)Context.GC.Heap[n2.HeapPtr].facility).Str;
+					}
 
-				int c = string.CompareOrdinal(str1, str2);
+					int c = string.CompareOrdinal(str1, str2);
+					c_r = c;
+				}
+				else
+				{
+					// n1是字符串，n2不是字符串，转换为数字比较
+					ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1);
+#if DEBUG
+					if (error.raised)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
+					ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2);
+#if DEBUG
+					if (error.raised)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
 
-				c_r = c;
+					if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
+					{
+						stackslots[dst.index].SetBoolean(false);
+						return;
+					}
+
+					if (n1.Number < n2.Number)
+						c_r = -1;
+					else if (n1.Number == n2.Number)
+						c_r = 0;
+					else
+						c_r = 1;
+				}
+			}
+			else if ((n2.ValueType == BoxType.HeapPtr && Context.GC.Heap[n2.HeapPtr].TypeKind == RtHeapTypeKind.STRING) ||
+			         n2.ValueType == BoxType.LocalString)
+			{
+				// n1不是字符串，n2是字符串，转换为数字比较
+				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1);
+#if DEBUG
+				if (error.raised)
+				{
+					throw new InvalidOperationException();
+				}
+#endif
+				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2);
+#if DEBUG
+				if (error.raised)
+				{
+					throw new InvalidOperationException();
+				}
+#endif
+
+				if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
+				{
+					stackslots[dst.index].SetBoolean(false);
+					return;
+				}
+
+				if (n1.Number < n2.Number)
+					c_r = -1;
+				else if (n1.Number == n2.Number)
+					c_r = 0;
+				else
+					c_r = 1;
 			}
 			else
 			{
+				// 两个都不是字符串，转换为数字比较
 				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会失败
 #if DEBUG
 				if (error.raised)
@@ -11463,6 +11767,9 @@ namespace juicescript.runtime
 
 
 					}
+				case BoxType.LocalString:
+					// LocalString应该被视为String类型
+					return (typeclass == Context.STRING || typeclass == Context.OBJECT);
 #if DEBUG
 				case BoxType.Fault:
 				default:
@@ -12117,6 +12424,10 @@ namespace juicescript.runtime
 										as_type = Context.BOOLEAN.Instance;
 										kind = (RtHeapTypeKind)255;
 										break;
+									case BoxType.LocalString:
+										as_type = Context.STRING.Instance;
+										kind = (RtHeapTypeKind)255;
+										break;
 #if DEBUG
 									case NaNBoxing.BoxType.Fault:
 									default:
@@ -12272,6 +12583,11 @@ namespace juicescript.runtime
 										as_type = Context.BOOLEAN.Instance;
 										kind = (RtHeapTypeKind)255;
 										goto lbl_instance_primitive;
+									case BoxType.LocalString:
+										as_type = Context.STRING.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+
 #if DEBUG
 									case NaNBoxing.BoxType.Fault:
 									default:
@@ -12324,6 +12640,9 @@ namespace juicescript.runtime
 
 										switch (prop_name.ValueType)
 										{
+											case BoxType.LocalString:
+												name = prop_name.LocalStringValue;
+												goto lbl_name_solved;
 											case NaNBoxing.BoxType.Number:
 												{
 													double v = prop_name.Number;
@@ -12531,7 +12850,7 @@ namespace juicescript.runtime
 
 								}
 
-
+							lbl_name_solved:
 
 								var scope = methodscope; //Context.GC.Heap[scope_ptr];
 #if DEBUG
@@ -17102,6 +17421,9 @@ namespace juicescript.runtime
 									case BoxType.Float:
 										stackslots[dst.index].SetHeapPtr(TYPEOF_number_STR);
 										break;
+									case BoxType.LocalString:
+										stackslots[dst.index].SetHeapPtr(TYPEOF_string_STR);
+										break;
 									case BoxType.HeapPtr:
 										RtHeapInstance instance = Context.GC.Heap[v.HeapPtr];
 										switch (instance.TypeKind)
@@ -17306,6 +17628,10 @@ namespace juicescript.runtime
 										case BoxType.UShort:
 										case BoxType.Float:
 											stackslots[dst.index].SetBoolean( Is(v,typeclass) ); // 已改为按数值范围处理
+											break;
+										case BoxType.LocalString:
+											// LocalString应该被视为String类型
+											stackslots[dst.index].SetBoolean(typeclass == Context.STRING || typeclass == Context.OBJECT);
 											break;
 										case BoxType.HeapPtr:
 											{

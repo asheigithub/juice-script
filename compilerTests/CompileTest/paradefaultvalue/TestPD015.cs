@@ -113,9 +113,9 @@ var q;
 			Assert.IsNull(ex);
 
 			NaNBoxing o = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(1);
-			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
-			Assert.AreEqual( RtHeapTypeKind.STRING , player.Context.GC.Heap[o.HeapPtr].TypeKind );
-			Assert.AreEqual("abcd3", ((RtPayloadString)player.Context.GC.Heap[o.HeapPtr].facility).Str );
+			Assert.AreEqual(NaNBoxing.BoxType.LocalString, o.ValueType);
+			//Assert.AreEqual( RtHeapTypeKind.STRING , player.Context.GC.Heap[o.HeapPtr].TypeKind );
+			Assert.AreEqual("abcd3", o.LocalStringValue );
 
 
 		}

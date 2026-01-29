@@ -90,9 +90,9 @@ a.t = false;
             Assert.AreEqual(a_v.Type, OO.Instance);
 
             Assert.AreEqual("3",
-                ((RtPayloadString)
-                player.Context.GC.Heap[((RtPayloadInstance)a_v.facility).ReadSlot(0, OO.Instance._link_codescope,player).HeapPtr].facility
-                ).Str
+                
+                ((RtPayloadInstance)a_v.facility).ReadSlot(0, OO.Instance._link_codescope,player).LocalStringValue
+               
                 );
 
             Assert.AreEqual("NaN",

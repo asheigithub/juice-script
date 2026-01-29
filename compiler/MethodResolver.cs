@@ -1205,6 +1205,30 @@ namespace juicescript.compiler
 										continue;
 									}
 								}
+								else if (v.ValueType == NaNBoxing.BoxType.LocalString)
+								{
+									string str = v.LocalStringValue;
+
+									if (dict_newstring.ContainsKey(str))
+									{
+										v = dict_newstring[str];
+									}
+									else
+									{
+										int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+										if (heapptr == 0)
+											throw new InvalidOperationException();
+										if (heapptr > 0xffffff)
+										{
+											throw new ParseException("heapptr > 0xffffff");
+										}
+
+										int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+										v.SetHeapPtr(ptr);
+
+										dict_newstring.Add(str, v);
+									}
+								}
 								else if (v.ValueType == NaNBoxing.BoxType.Fault)
 								{
 									continue;
@@ -1653,6 +1677,42 @@ namespace juicescript.compiler
 										else
 										{
 											throw new ResolverException(method.Token, "Parameter initializer unknown or is not a compile - time constant.");
+										}
+									}
+									else if (value.ValueType == NaNBoxing.BoxType.LocalString)
+									{
+										string str = value.LocalStringValue;
+										int k = constants.FindIndex(
+											(n) => n.ValueType == NaNBoxing.BoxType.HeapPtr
+											&&
+											n.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String
+											&&
+											context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].TypeKind == RtHeapTypeKind.STRING
+											&&
+											string.CompareOrdinal(str, ((RtPayloadString)context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].facility).Str) == 0
+											);
+
+										if (k >= 0)
+										{
+											para.ValueExprIndex = k;
+										}
+										else
+										{
+											int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+											if (heapptr == 0)
+												throw new InvalidOperationException();
+											if (heapptr > 0xffffff)
+											{
+												throw new ParseException("heapptr > 0xffffff");
+											}
+
+											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+											NaNBoxing boxing = new NaNBoxing();
+											boxing.SetHeapPtr(ptr);
+
+											constants.Add(boxing);
+											para.ValueExprIndex = constants.Count - 1;
 										}
 									}
 									else if (value.ValueType == NaNBoxing.BoxType.Fault)
