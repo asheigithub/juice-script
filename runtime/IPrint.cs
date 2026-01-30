@@ -13,14 +13,14 @@ namespace juicescript.runtime
 		public void WriteLine(string message);
 
 
-		public void Write(Span<char> chars);
+		public void Write(ReadOnlySpan<char> chars);
 	}
 
 	internal class DefaultPrint : IPrint
 	{
 		public static DefaultPrint Instance = new DefaultPrint();
 
-		public void Write(Span<char> chars)
+		public void Write(ReadOnlySpan<char> chars)
 		{ 
 			Console.Out.Write(chars);
 		}

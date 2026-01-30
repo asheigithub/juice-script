@@ -35,6 +35,10 @@ namespace compilerTests
                 return output.ToString();
             }
 
+			public void Write(ReadOnlySpan<char> chars)
+			{
+                output.Append(chars);
+			}
 		}
 
 

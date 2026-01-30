@@ -211,7 +211,7 @@ namespace juicescript.runtime.buildin
 				sb.Append(message);
 			}
 
-			public void Write(Span<char> chars)
+			public void Write(ReadOnlySpan<char> chars)
 			{
 				sb.Append(chars);
 			}

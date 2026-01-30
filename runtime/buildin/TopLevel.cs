@@ -92,7 +92,7 @@ namespace juicescript.runtime.buildin
 						if (charCount > 0)
 						{
 							//printer.Write(new string(chars.Slice(0, charCount)));
-							printer.Write(chars);
+							printer.Write(chars.Slice(0, charCount));
 						}
 						return;
 					}

@@ -4133,9 +4133,7 @@ namespace juicescript.runtime
 							Context.GC.CheckGC(ref error);
 							int search_ptr = _obj.searchPropertyNamePtr;
 							string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
-							//_obj.searchPropertyNamePtr = 0; //由于 a++ 这样的代码存在，后续可能还需要用到这个searchProperty.
-
-
+							
 
 							NaNBoxing ns = new NaNBoxing();
 							ASNamespace @namespace = null;
@@ -4144,7 +4142,7 @@ namespace juicescript.runtime
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
 								RtHeapInstance ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
-								//_obj.searchNameSpacePtr = 0; //由于 a++ 这样的代码存在，searchNameSpacePtr.
+								
 							}
 
 
@@ -9365,7 +9363,7 @@ namespace juicescript.runtime
 			return PROPERTY_PTR;
 		}
 
-		internal bool FindDynamicValue(RtHeapInstance instance, string searchName, out NaNBoxing value, out int matchShapePtr, out int slotindex, out RtPayloadDynamic prop)
+		internal bool FindDynamicValue(RtHeapInstance instance, ReadOnlySpan<char> searchName, out NaNBoxing value, out int matchShapePtr, out int slotindex, out RtPayloadDynamic prop)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 			if (PROPERTY_PTR != 0)
@@ -9379,12 +9377,13 @@ namespace juicescript.runtime
 				{
 					var shape = (RtPayloadShape)Context.GC.Heap[p].facility;
 
-					if (string.Equals(
-						//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
-						searchName,
-						((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
-						StringComparison.Ordinal
-						))
+					//if (string.Equals(
+					//	//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
+					//	searchName,
+					//	((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+					//	StringComparison.Ordinal
+					//	))
+					if(searchName.CompareTo( ((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str.AsSpan(), StringComparison.Ordinal) == 0)
 					{
 						matchShapePtr = p;
 						value = prop.Slots[index];
