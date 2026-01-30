@@ -5774,9 +5774,14 @@ namespace juicescript.runtime
 				var ins2 = Context.GC.Heap[v2.HeapPtr];
 				if (ins2.TypeKind == RtHeapTypeKind.STRING)
 				{
-					string str1 = v1.LocalStringValue;
 					string str2 = ((RtPayloadString)ins2.facility).Str;
-					return string.CompareOrdinal(str1, str2) == 0;
+					
+					// 使用高效的字符比较，避免创建LocalString的字符串
+					Span<char> chars1 = stackalloc char[16];
+					int charCount1 = v1.GetLocalStringChars(chars1);
+					if (charCount1 < 0) return false; // 解码失败
+					
+					return str2.AsSpan().SequenceEqual(chars1.Slice(0, charCount1));
 				}
 			}
 			else if (v1.ValueType == NaNBoxing.BoxType.HeapPtr && v2.ValueType == NaNBoxing.BoxType.LocalString)
@@ -5785,8 +5790,13 @@ namespace juicescript.runtime
 				if (ins1.TypeKind == RtHeapTypeKind.STRING)
 				{
 					string str1 = ((RtPayloadString)ins1.facility).Str;
-					string str2 = v2.LocalStringValue;
-					return string.CompareOrdinal(str1, str2) == 0;
+					
+					// 使用高效的字符比较，避免创建LocalString的字符串
+					Span<char> chars2 = stackalloc char[16];
+					int charCount2 = v2.GetLocalStringChars(chars2);
+					if (charCount2 < 0) return false; // 解码失败
+					
+					return str1.AsSpan().SequenceEqual(chars2.Slice(0, charCount2));
 				}
 			}
 
@@ -6513,9 +6523,14 @@ namespace juicescript.runtime
 					var ins2 = Context.GC.Heap[key2.HeapPtr];
 					if (ins2.TypeKind == RtHeapTypeKind.STRING)
 					{
-						string str1 = key1.LocalStringValue;
 						string str2 = ((RtPayloadString)ins2.facility).Str;
-						return string.CompareOrdinal(str1, str2) == 0;
+						
+						// 使用高效的字符比较，避免创建LocalString的字符串
+						Span<char> chars1 = stackalloc char[16];
+						int charCount1 = key1.GetLocalStringChars(chars1);
+						if (charCount1 < 0) return false; // 解码失败
+						
+						return str2.AsSpan().SequenceEqual(chars1.Slice(0, charCount1));
 					}
 				}
 				else if (key1.ValueType == NaNBoxing.BoxType.HeapPtr && key2.ValueType == NaNBoxing.BoxType.LocalString)
@@ -6524,8 +6539,13 @@ namespace juicescript.runtime
 					if (ins1.TypeKind == RtHeapTypeKind.STRING)
 					{
 						string str1 = ((RtPayloadString)ins1.facility).Str;
-						string str2 = key2.LocalStringValue;
-						return string.CompareOrdinal(str1, str2) == 0;
+						
+						// 使用高效的字符比较，避免创建LocalString的字符串
+						Span<char> chars2 = stackalloc char[16];
+						int charCount2 = key2.GetLocalStringChars(chars2);
+						if (charCount2 < 0) return false; // 解码失败
+						
+						return str1.AsSpan().SequenceEqual(chars2.Slice(0, charCount2));
 					}
 				}
 				
@@ -6605,8 +6625,10 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Boolean: false if empty string, true otherwise
-								string str = invalue.LocalStringValue;
-								outvalue.SetBoolean(!string.IsNullOrEmpty(str));
+								// 使用高效方法检查是否为空字符串，避免创建字符串对象
+								Span<byte> bytes = stackalloc byte[5];
+								int byteCount = invalue.GetLocalStringBytes(bytes);
+								outvalue.SetBoolean(byteCount > 0);
 								return;
 							}
 						case NaNBoxing.BoxType.HeapPtr:
@@ -6684,7 +6706,15 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to SByte: parse string as integer
-								string str = invalue.LocalStringValue;
+								// 使用高效方法获取字符串，只在需要时创建
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount <= 0)
+								{
+									outvalue.SetSByte(0);
+									return;
+								}
+								string str = new string(chars.Slice(0, charCount));
 								int v = ReadIntFromString(str);
 								outvalue.SetSByte((sbyte)v);
 								return;
@@ -6777,7 +6807,15 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Byte: parse string as unsigned integer
-								string str = invalue.LocalStringValue;
+								// 使用高效方法获取字符串，只在需要时创建
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount <= 0)
+								{
+									outvalue.SetByte(0);
+									return;
+								}
+								string str = new string(chars.Slice(0, charCount));
 								uint v = ReadUIntFromString(str);
 								outvalue.SetByte((byte)v);
 								return;
@@ -6867,7 +6905,15 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Short: parse string as integer
-								string str = invalue.LocalStringValue;
+								// 使用高效方法获取字符串，只在需要时创建
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount <= 0)
+								{
+									outvalue.SetShort(0);
+									return;
+								}
+								string str = new string(chars.Slice(0, charCount));
 								int v = ReadIntFromString(str);
 								outvalue.SetShort((short)v);
 								return;
@@ -6959,9 +7005,18 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to UShort: parse string as unsigned integer
-								string str = invalue.LocalStringValue;
-								uint v = ReadUIntFromString(str);
-								outvalue.SetUShort((ushort)v);
+								// Use efficient char-based parsing to avoid string allocation
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount > 0)
+								{
+									uint v = ReadUIntFromString(new string(chars.Slice(0, charCount)));
+									outvalue.SetUShort((ushort)v);
+								}
+								else
+								{
+									outvalue.SetUShort(0);
+								}
 								return;
 							}
 						case NaNBoxing.BoxType.HeapPtr:
@@ -7050,9 +7105,18 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Int: parse string as integer
-								string str = invalue.LocalStringValue;
-								int v = ReadIntFromString(str);
-								outvalue.SetInt(v);
+								// Use efficient char-based parsing to avoid string allocation
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount > 0)
+								{
+									int v = ReadIntFromString(new string(chars.Slice(0, charCount)));
+									outvalue.SetInt(v);
+								}
+								else
+								{
+									outvalue.SetInt(0);
+								}
 								return;
 							}
 						case NaNBoxing.BoxType.HeapPtr:
@@ -7140,9 +7204,18 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Uint: parse string as unsigned integer
-								string str = invalue.LocalStringValue;
-								uint v = ReadUIntFromString(str);
-								outvalue.SetUInt(v);
+								// Use efficient char-based parsing to avoid string allocation
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount > 0)
+								{
+									uint v = ReadUIntFromString(new string(chars.Slice(0, charCount)));
+									outvalue.SetUInt(v);
+								}
+								else
+								{
+									outvalue.SetUInt(0);
+								}
 								return;
 							}
 						case NaNBoxing.BoxType.HeapPtr:
@@ -7218,9 +7291,18 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Float: parse string as double then convert to float
-								string str = invalue.LocalStringValue;
-								double v = ReadDoubleFromString(str);
-								outvalue.SetFloat((float)v);
+								// Use efficient char-based parsing to avoid string allocation
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount > 0)
+								{
+									double v = ReadDoubleFromString(new string(chars.Slice(0, charCount)));
+									outvalue.SetFloat((float)v);
+								}
+								else
+								{
+									outvalue.SetFloat(float.NaN);
+								}
 								return;
 							}
 						case NaNBoxing.BoxType.HeapPtr:
@@ -7294,9 +7376,18 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.LocalString:
 							{
 								// LocalString to Number: parse string as double
-								string str = invalue.LocalStringValue;
-								double v = ReadDoubleFromString(str);
-								outvalue.SetNumber(v);
+								// Use efficient char-based parsing to avoid string allocation
+								Span<char> chars = stackalloc char[16];
+								int charCount = invalue.GetLocalStringChars(chars);
+								if (charCount > 0)
+								{
+									double v = ReadDoubleFromString(new string(chars.Slice(0, charCount)));
+									outvalue.SetNumber(v);
+								}
+								else
+								{
+									outvalue.SetNumber(double.NaN);
+								}
 								return;
 							}
 						case NaNBoxing.BoxType.HeapPtr:
@@ -9887,13 +9978,28 @@ namespace juicescript.runtime
 								goto lbL_primtive_add_heap;
 							case BoxType.LocalString:
 								{
-									var str2 = n2.LocalStringValue;
-									string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
-									
-									// 使用安全的字符串创建方法
-									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									// Use efficient char-based concatenation to avoid string allocation
+									Span<char> chars2 = stackalloc char[16];
+									int charCount2 = n2.GetLocalStringChars(chars2);
+									if (charCount2 > 0)
 									{
-										return; // 错误已经在TryCreateStringValue中处理
+										string str2 = new string(chars2.Slice(0, charCount2));
+										string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
+										
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										// Empty LocalString, just convert n1 to string
+										string concatenated = Extensions.GetPrimitiveValueToString(this, n1);
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return;
+										}
 									}
 								}
 								break;
@@ -9926,13 +10032,28 @@ namespace juicescript.runtime
 								goto lbL_primtive_add_heap;
 							case BoxType.LocalString:
 								{
-									var str2 = n2.LocalStringValue;
-									string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
-									
-									// 使用安全的字符串创建方法
-									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									// Use efficient char-based concatenation to avoid string allocation
+									Span<char> chars2 = stackalloc char[16];
+									int charCount2 = n2.GetLocalStringChars(chars2);
+									if (charCount2 > 0)
 									{
-										return; // 错误已经在TryCreateStringValue中处理
+										string str2 = new string(chars2.Slice(0, charCount2));
+										string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
+										
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										// Empty LocalString, just convert n1 to string
+										string concatenated = Extensions.GetPrimitiveValueToString(this, n1);
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return;
+										}
 									}
 								}
 								break;
@@ -10163,7 +10284,10 @@ namespace juicescript.runtime
 					break;
 				case NaNBoxing.BoxType.LocalString:
 					{
-						var str1 = n1.LocalStringValue;
+						// Use efficient char-based operations to avoid string allocation
+						Span<char> chars1 = stackalloc char[16];
+						int charCount1 = n1.GetLocalStringChars(chars1);
+						string str1 = charCount1 > 0 ? new string(chars1.Slice(0, charCount1)) : string.Empty;
 						
 						switch (n2.ValueType)
 						{
@@ -10211,13 +10335,27 @@ namespace juicescript.runtime
 								break;
 							case BoxType.LocalString:
 								{
-									var str2 = n2.LocalStringValue;
-									string concatenated = str1 + str2;
-									
-									// 使用安全的字符串创建方法
-									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									// Use efficient char-based concatenation for LocalString + LocalString
+									Span<char> chars2 = stackalloc char[16];
+									int charCount2 = n2.GetLocalStringChars(chars2);
+									if (charCount2 > 0)
 									{
-										return; // 错误已经在TryCreateStringValue中处理
+										string str2 = new string(chars2.Slice(0, charCount2));
+										string concatenated = str1 + str2;
+										
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										// n2 is empty LocalString, result is just str1
+										if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
+										{
+											return;
+										}
 									}
 								}
 								break;
@@ -10262,13 +10400,27 @@ namespace juicescript.runtime
 									break;
 								case BoxType.LocalString:
 									{
-										var str2 = n2.LocalStringValue;
-										string concatenated = str1 + str2;
-										
-										// 使用安全的字符串创建方法
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										// Use efficient char-based concatenation to avoid string allocation
+										Span<char> chars2 = stackalloc char[16];
+										int charCount2 = n2.GetLocalStringChars(chars2);
+										if (charCount2 > 0)
 										{
-											return; // 错误已经在TryCreateStringValue中处理
+											string str2 = new string(chars2.Slice(0, charCount2));
+											string concatenated = str1 + str2;
+											
+											// 使用安全的字符串创建方法
+											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+											{
+												return; // 错误已经在TryCreateStringValue中处理
+											}
+										}
+										else
+										{
+											// n2 is empty LocalString, result is just str1
+											if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
+											{
+												return;
+											}
 										}
 									}
 									break;
@@ -11146,7 +11298,10 @@ namespace juicescript.runtime
 					
 					if (n1.ValueType == BoxType.LocalString)
 					{
-						str1 = n1.LocalStringValue;
+						// Use efficient char-based extraction to avoid string allocation when possible
+						Span<char> chars1 = stackalloc char[16];
+						int charCount1 = n1.GetLocalStringChars(chars1);
+						str1 = charCount1 > 0 ? new string(chars1.Slice(0, charCount1)) : string.Empty;
 					}
 					else
 					{
@@ -11155,7 +11310,10 @@ namespace juicescript.runtime
 					
 					if (n2.ValueType == BoxType.LocalString)
 					{
-						str2 = n2.LocalStringValue;
+						// Use efficient char-based extraction to avoid string allocation when possible
+						Span<char> chars2 = stackalloc char[16];
+						int charCount2 = n2.GetLocalStringChars(chars2);
+						str2 = charCount2 > 0 ? new string(chars2.Slice(0, charCount2)) : string.Empty;
 					}
 					else
 					{
@@ -12641,7 +12799,10 @@ namespace juicescript.runtime
 										switch (prop_name.ValueType)
 										{
 											case BoxType.LocalString:
-												name = prop_name.LocalStringValue;
+												// Use efficient char-based extraction to avoid string allocation
+												Span<char> chars = stackalloc char[16];
+												int charCount = prop_name.GetLocalStringChars(chars);
+												name = charCount > 0 ? new string(chars.Slice(0, charCount)) : string.Empty;
 												goto lbl_name_solved;
 											case NaNBoxing.BoxType.Number:
 												{

@@ -618,7 +618,13 @@ namespace juicescript.runtime
                     }
                 case BoxType.LocalString:
                     {
-                        return prop_name.LocalStringValue;
+                        Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
+                        int charCount = prop_name.GetLocalStringChars(chars);
+                        if (charCount > 0)
+                        {
+                            return new string(chars.Slice(0, charCount));
+                        }
+                        return string.Empty;
                     }
 				case NaNBoxing.BoxType.Fault:
 				default:

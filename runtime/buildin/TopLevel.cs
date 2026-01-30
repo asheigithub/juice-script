@@ -86,7 +86,16 @@ namespace juicescript.runtime.buildin
 				case NaNBoxing.BoxType.HeapPtr:
 					printer.Write(((RtPayloadString)context.GC.Heap[arg.HeapPtr].facility).Str );return;
 				case NaNBoxing.BoxType.LocalString:
-					printer.Write(arg.LocalStringValue); return;
+					{
+						Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
+						int charCount = arg.GetLocalStringChars(chars);
+						if (charCount > 0)
+						{
+							//printer.Write(new string(chars.Slice(0, charCount)));
+							printer.Write(chars);
+						}
+						return;
+					}
 			}
 		}
 

@@ -178,10 +178,25 @@ namespace juicescript
                 }
                 else if (signature1 == 13 && signature2 == 13)
                 {
-                    // LocalString与LocalString比较
-                    string str1 = LocalStringValue;
-                    string str2 = other.LocalStringValue;
-                    isequal = string.CompareOrdinal(str1, str2) == 0;
+                    // LocalString与LocalString比较 - 使用高效的字节比较
+                    Span<byte> bytes1 = stackalloc byte[5];
+                    Span<byte> bytes2 = stackalloc byte[5];
+                    
+                    int len1 = GetLocalStringBytes(bytes1);
+                    int len2 = other.GetLocalStringBytes(bytes2);
+                    
+                    if (len1 != len2)
+                    {
+                        isequal = false;
+                    }
+                    else if (len1 == 0)
+                    {
+                        isequal = true; // 两个都是空字符串
+                    }
+                    else
+                    {
+                        isequal = bytes1.Slice(0, len1).SequenceEqual(bytes2.Slice(0, len2));
+                    }
                     return true;
                 }
                 else if (signature1 == 13 && signature2 == 12)
@@ -329,26 +344,26 @@ namespace juicescript
                 // Handle LocalString + LocalString case for fast string concatenation
                 if (signature1 == 13 && signature2 == 13)
                 {
-                    // Both are LocalString, try to concatenate directly
-                    string str1 = a.LocalStringValue;
-                    string str2 = b.LocalStringValue;
-                    string concatenated = str1 + str2;
+                    // Both are LocalString, try to concatenate directly using bytes
+                    Span<byte> bytes1 = stackalloc byte[5];
+                    Span<byte> bytes2 = stackalloc byte[5];
                     
-                    // Check if result can fit in LocalString (5 bytes max)
-                    int utf8ByteCount = SafeGetUtf8ByteCount(concatenated);
-                    if (utf8ByteCount > 0 && utf8ByteCount <= 5)
+                    int len1 = a.GetLocalStringBytes(bytes1);
+                    int len2 = b.GetLocalStringBytes(bytes2);
+                    
+                    // Check if concatenated result can fit in LocalString (5 bytes max)
+                    if (len1 >= 0 && len2 >= 0 && (len1 + len2) <= 5)
                     {
-                        // Create LocalString result
-                        Span<byte> utf8Bytes = stackalloc byte[utf8ByteCount];
-                        int actualBytes = SafeGetUtf8Bytes(concatenated, utf8Bytes);
-                        if (actualBytes > 0)
-                        {
-                            result.SetLocalString(utf8Bytes.Slice(0, actualBytes));
-                            return true;
-                        }
+                        // Create concatenated LocalString directly from bytes
+                        Span<byte> concatenated = stackalloc byte[len1 + len2];
+                        bytes1.Slice(0, len1).CopyTo(concatenated);
+                        bytes2.Slice(0, len2).CopyTo(concatenated.Slice(len1));
+                        
+                        result.SetLocalString(concatenated);
+                        return true;
                     }
                     
-                    // If encoding failed or result too long, fall back to slow path
+                    // If result too long, fall back to slow path
                     return false;
                 }
                 
@@ -1166,32 +1181,113 @@ namespace juicescript
             }
         }
 
+        /// <summary>
+        /// 获取LocalString的字符内容到指定的Span中，避免字符串分配
+        /// </summary>
+        /// <param name="destination">目标字符缓冲区</param>
+        /// <returns>实际写入的字符数，如果缓冲区不够大则返回-1</returns>
+        public int GetLocalStringChars(Span<char> destination)
+        {
+            // 提取所有5字节，然后找到实际字符串结束位置
+            Span<byte> utf8Bytes = stackalloc byte[5];
+            for (int i = 0; i < 5; i++)
+            {
+                utf8Bytes[i] = (byte)((store >> (32 - i * 8)) & 0xFF);
+            }
+            
+            // 找到第一个零字节的位置，或使用全部5字节
+            int actualLength = 5;
+            for (int i = 0; i < 5; i++)
+            {
+                if (utf8Bytes[i] == 0)
+                {
+                    actualLength = i;
+                    break;
+                }
+            }
+            
+            if (actualLength == 0) return 0; // 空字符串
+            
+            try
+            {
+                // 尝试解码到目标缓冲区
+                return Encoding.UTF8.GetChars(utf8Bytes.Slice(0, actualLength), destination);
+            }
+            catch
+            {
+                // 如果缓冲区不够大或解码失败，返回-1
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 获取LocalString的UTF-8字节内容
+        /// </summary>
+        /// <param name="destination">目标字节缓冲区</param>
+        /// <returns>实际写入的字节数</returns>
+        public int GetLocalStringBytes(Span<byte> destination)
+        {
+            // 提取所有5字节，然后找到实际字符串结束位置
+            Span<byte> utf8Bytes = stackalloc byte[5];
+            for (int i = 0; i < 5; i++)
+            {
+                utf8Bytes[i] = (byte)((store >> (32 - i * 8)) & 0xFF);
+            }
+            
+            // 找到第一个零字节的位置，或使用全部5字节
+            int actualLength = 5;
+            for (int i = 0; i < 5; i++)
+            {
+                if (utf8Bytes[i] == 0)
+                {
+                    actualLength = i;
+                    break;
+                }
+            }
+            
+            if (actualLength > destination.Length)
+                return -1; // 缓冲区不够大
+                
+            utf8Bytes.Slice(0, actualLength).CopyTo(destination);
+            return actualLength;
+        }
+
+        /// <summary>
+        /// 获取LocalString作为字符串（为了向后兼容保留）
+        /// 注意：此方法会分配字符串对象，建议使用GetLocalStringChars方法
+        /// </summary>
         public string LocalStringValue
         {
             get
             {
-                // 提取所有5字节，然后找到实际字符串结束位置
-                Span<byte> utf8Bytes = stackalloc byte[5];
-                for (int i = 0; i < 5; i++)
-                {
-                    utf8Bytes[i] = (byte)((store >> (32 - i * 8)) & 0xFF);
-                }
+                Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
+                int charCount = GetLocalStringChars(chars);
                 
-                // 找到第一个零字节的位置，或使用全部5字节
-                int actualLength = 5;
-                for (int i = 0; i < 5; i++)
+                if (charCount == 0) return string.Empty;
+                if (charCount == -1) 
                 {
-                    if (utf8Bytes[i] == 0)
+                    // 回退到原始实现
+                    Span<byte> utf8Bytes = stackalloc byte[5];
+                    for (int i = 0; i < 5; i++)
                     {
-                        actualLength = i;
-                        break;
+                        utf8Bytes[i] = (byte)((store >> (32 - i * 8)) & 0xFF);
                     }
+                    
+                    int actualLength = 5;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (utf8Bytes[i] == 0)
+                        {
+                            actualLength = i;
+                            break;
+                        }
+                    }
+                    
+                    if (actualLength == 0) return string.Empty;
+                    return Encoding.UTF8.GetString(utf8Bytes.Slice(0, actualLength));
                 }
                 
-                if (actualLength == 0) return string.Empty;
-                
-                // 只使用实际长度的字节进行解码
-                return Encoding.UTF8.GetString(utf8Bytes.Slice(0, actualLength));
+                return new string(chars.Slice(0, charCount));
             }
         }
 

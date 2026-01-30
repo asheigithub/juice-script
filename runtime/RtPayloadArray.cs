@@ -1067,7 +1067,7 @@ namespace juicescript.runtime
 
 					if (i < array_len - 1)
 					{
-						printer.Write(",");
+						printer.Write(",".AsSpan());
 					}
 				}
 
@@ -1101,7 +1101,7 @@ namespace juicescript.runtime
 
 					if (i < array_len - 1)
 					{
-						printer.Write(",");
+						printer.Write(",".AsSpan());
 					}
 				}
 			}

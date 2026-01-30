@@ -198,6 +198,11 @@ namespace juicescript.runtime.buildin
 				stringBuilder.Append(message);
 			}
 
+			public void Write(Span<char> chars)
+			{
+				stringBuilder.Append(chars);
+			}
+
 			public void WriteLine(string message)
 			{
 				stringBuilder.AppendLine(message);

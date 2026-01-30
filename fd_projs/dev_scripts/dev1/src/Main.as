@@ -27,7 +27,7 @@ class Test262Error extends Error
 
 
 
-var b = new String(1);
+var b = new String("-1.234");
 
 // CHECK#2
 if (( b << 0) !== -1) {
