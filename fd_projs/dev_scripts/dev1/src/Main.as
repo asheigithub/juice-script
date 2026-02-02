@@ -26,16 +26,6 @@ class Test262Error extends Error
 
 
 
-
-var b = new String("-1.234");
-
-// CHECK#2
-if (( b << 0) !== -1) {
-  throw new Test262Error('#2: (""-1.234"" << 0) === -1. Actual: ' + ((b << 0)));
-}
-
-
-
 //class Test262Error extends Error
 //{
 	//var a;

@@ -1208,16 +1208,10 @@ namespace juicescript
             
             if (actualLength == 0) return 0; // 空字符串
             
-            try
-            {
-                // 尝试解码到目标缓冲区
-                return Encoding.UTF8.GetChars(utf8Bytes.Slice(0, actualLength), destination);
-            }
-            catch
-            {
-                // 如果缓冲区不够大或解码失败，返回-1
-                return -1;
-            }
+        
+            // 尝试解码到目标缓冲区
+            return Encoding.UTF8.GetChars(utf8Bytes.Slice(0, actualLength), destination);
+            
         }
 
         /// <summary>

@@ -838,9 +838,9 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.STACK_CACHE_OBJ:
                         {
                             RtPayloadStackCache rtPayload = (RtPayloadStackCache)obj.facility;
-                            if (rtPayload.searchPropertyNamePtr > 0)
+                            if (rtPayload.searchPropertyName.ValueType == NaNBoxing.BoxType.HeapPtr )
                             {
-                                mark(Heap[rtPayload.searchPropertyNamePtr]);
+                                mark(Heap[rtPayload.searchPropertyName.HeapPtr]);
                             }
                             if (rtPayload.searchNameSpacePtr > 0)
                             {

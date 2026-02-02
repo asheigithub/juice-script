@@ -20,7 +20,7 @@ namespace juicescript.runtime
         }
 
 
-        public override int Size => 8 + 8 + 8 + 8 + 8;
+        public override int Size => 8 + 4 + 4 + 4 + 4 + 4;
 
         /// <summary>
         /// 指向下一个子节点

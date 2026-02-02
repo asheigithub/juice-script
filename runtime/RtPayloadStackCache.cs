@@ -1,4 +1,4 @@
-﻿using juicescript.ABC;
+using juicescript.ABC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace juicescript.runtime
 
         
 
-        public int searchPropertyNamePtr;
+        public NaNBoxing searchPropertyName;
 
         public int searchNameSpacePtr;
 
@@ -31,11 +31,11 @@ namespace juicescript.runtime
         public int s_index;
 
 
-        public override int Size
+public override int Size
         {
             get
             {
-                return 4 /*+ 2*/ +2 + 4 + 4 + 4 + 4 + 4;
+                return 4 /*+ 2*/ +2 + 8 + 4 + 4 + 4 + 4;
             }
         }
     }

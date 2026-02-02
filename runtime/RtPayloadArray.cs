@@ -397,7 +397,9 @@ namespace juicescript.runtime
 
 						//创建动态对象callee
 						//throw new NotImplementedException();
-						player.CreateDynamic(ref error, arr_instance, player.CALLEE_STR, callee_v, true, false, true);
+
+						NaNBoxing callee_str = default;callee_str.SetHeapPtr(player.CALLEE_STR);
+						player.CreateDynamic(ref error, arr_instance, callee_str, callee_v, true, false, true);
 						if (error.raised)
 						{
 							return 0;

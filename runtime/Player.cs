@@ -2469,7 +2469,7 @@ namespace juicescript.runtime
 
 		internal int cache_REFERENCE_ERROR_NAME;
 
-		private void RaiseReferenceError_RTQNameNotFound(ref ReceiveError error, NaNBoxing ns, string searchName, NaNBoxing instance)//RtHeapInstance instance)
+		private void RaiseReferenceError_RTQNameNotFound(ref ReceiveError error, NaNBoxing ns, ReadOnlySpan<char> searchName, NaNBoxing instance)//RtHeapInstance instance)
 		{
 
 			error.raised = true;
@@ -2577,7 +2577,7 @@ namespace juicescript.runtime
 
 		}
 
-		private void RaiseReferenceError_MulitNameNotFound(ref ReceiveError error, string name, ASMultiname typename)
+		private void RaiseReferenceError_MulitNameNotFound(ref ReceiveError error, ReadOnlySpan<char> name, ASMultiname typename)
 		{
 
 			error.raised = true;
@@ -2733,7 +2733,7 @@ namespace juicescript.runtime
 
 		}
 
-		private void RaiseReferenceError_CanNotCreateProperty(ref ReceiveError error, ASNamespace ns, string searchName, ASMultiname qName)
+		private void RaiseReferenceError_CanNotCreateProperty(ref ReceiveError error, ASNamespace ns, ReadOnlySpan<char> searchName, ASMultiname qName)
 		{
 
 			error.raised = true;
@@ -3019,7 +3019,9 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 
 				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
-				CreateDynamic(ref error, proto, TOSTRING_STR, v, false, false, false);
+
+				NaNBoxing v_str = default;v_str.SetHeapPtr(TOSTRING_STR);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 			}
 
@@ -3051,7 +3053,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[valueof_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 
 				NaNBoxing v = default; v.SetHeapPtr(valueof_ptr);
-				CreateDynamic(ref error, proto, VALUEOF_STR, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(VALUEOF_STR);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 			}
 
 			//hasOwnProperty
@@ -3093,7 +3096,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[hasownproperty_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v = default; v.SetHeapPtr(hasownproperty_ptr);
-				CreateDynamic(ref error, proto, hasOwnProperty, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(hasOwnProperty);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 
 
@@ -3138,7 +3142,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[isprototypeof_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v = default; v.SetHeapPtr(isprototypeof_ptr);
-				CreateDynamic(ref error, proto, isPrototypeOf, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(isPrototypeOf);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 			}
 
 		}
@@ -3177,7 +3182,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[invokecall_ptr].facility).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(invokecall_ptr);
-				CreateDynamic(ref error, proto, call_ptr, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(call_ptr);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 			}
 
@@ -3203,7 +3209,8 @@ namespace juicescript.runtime
 
 
 				NaNBoxing v = default; v.SetHeapPtr(invokeapply_ptr);
-				CreateDynamic(ref error, proto, apply_ptr, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(apply_ptr);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 			}
 
@@ -3230,7 +3237,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
 
 				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
-				CreateDynamic(ref error, proto, TOSTRING_STR, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 			}
 		}
@@ -3270,7 +3278,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 
 					NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
-					CreateDynamic(ref error, proto, TOSTRING_STR, v, false, false, true);
+					NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+					CreateDynamic(ref error, proto, v_str, v, false, false, true);
 				}
 
 			}
@@ -3315,7 +3324,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[concat_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
-				CreateDynamic(ref error, proto, concat, v, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(concat);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 
 			}
@@ -3360,7 +3370,8 @@ namespace juicescript.runtime
 				((RtPayloadClosure)Context.GC.Heap[push_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v2 = default; v2.SetHeapPtr(push_ptr);
-				CreateDynamic(ref error, proto, push, v2, false, false, false);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(push);
+				CreateDynamic(ref error, proto, v_str, v2, false, false, false);
 
 
 			}
@@ -3637,7 +3648,8 @@ namespace juicescript.runtime
 			//构造proto的constructor, 就是Class自己。
 			var proto = Context.GC.Heap[((RtPayloadScriptClass)Context.GC.Heap[index].facility).PROTO__PTR];
 			NaNBoxing constructor = new NaNBoxing(); constructor.SetHeapPtr(index);
-			CreateDynamic(ref error, proto, CONSTRUCTOR_STR, constructor, true, false, true);
+			NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR);
+			CreateDynamic(ref error, proto, v_str, constructor, true, false, true);
 			if (error.raised)
 			{
 				error.error.setFault();
@@ -3975,8 +3987,9 @@ namespace juicescript.runtime
 								}
 								else
 								{
+									NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR);
 									//创建constructor   这个属性可以被删除。
-									CreateDynamic(ref error, prototype, CONSTRUCTOR_STR, closure_heap, true, false, true);
+									CreateDynamic(ref error, prototype, v_str, closure_heap, true, false, true);
 									if (error.raised)
 									{
 										return default;
@@ -4112,7 +4125,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error,  Span<NaNBoxing> stackslots, int returnSlotIndex)
+		internal unsafe NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error,  Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 			NaNBoxing result = box;
 			if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -4128,12 +4141,28 @@ namespace juicescript.runtime
 
 						RtHeapInstance refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
 
-						if (_obj.searchPropertyNamePtr > 0) //动态属性
+						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType ==  BoxType.LocalString ) //动态属性
 						{
 							Context.GC.CheckGC(ref error);
-							int search_ptr = _obj.searchPropertyNamePtr;
-							string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+
+							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+
 							
+							Span<char> temp = stackalloc char[16];
+							ReadOnlySpan<char> searchName;
+
+							if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
+							{
+								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+								searchName = temp.Slice(0, l);
+							}
+							else
+							{
+								searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str.AsSpan();
+							}
+
+							
+
 
 							NaNBoxing ns = new NaNBoxing();
 							ASNamespace @namespace = null;
@@ -4277,7 +4306,7 @@ namespace juicescript.runtime
 							else if (refObj.TypeKind == RtHeapTypeKind.ARRAY &&
 									((RtPayloadArray)refObj.facility).isArguments()
 									&& @namespace == null
-									&& string.CompareOrdinal("callee", searchName) == 0
+									&& "callee".AsSpan().CompareTo( searchName, StringComparison.Ordinal) == 0
 								)
 							{
 								result = Context.StackSlots[callee_slotindex];
@@ -4716,12 +4745,26 @@ namespace juicescript.runtime
 					{
 
 
-						if (_obj.searchPropertyNamePtr > 0) //动态属性
+						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 						{
 							Context.GC.CheckGC(ref error);
-							int search_ptr = _obj.searchPropertyNamePtr;
-							string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
-							_obj.searchPropertyNamePtr = 0;
+
+							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+
+							ReadOnlySpan<char> searchName;
+							Span<char> temp = stackalloc char[16];
+							if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
+							{
+								searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str;
+							}
+							else
+							{
+								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+								searchName = temp.Slice(0, l);								
+							}
+
+
+							_obj.searchPropertyName.SetUndefined();
 
 							ASClass primitiveCls = null;
 
@@ -8520,7 +8563,7 @@ namespace juicescript.runtime
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = (ushort)i;
-					cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8586,7 +8629,7 @@ namespace juicescript.runtime
 					}
 
 					cachePayload.scopemember_index = 0;
-					cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8599,25 +8642,30 @@ namespace juicescript.runtime
 				{
 					Context.GC.CheckGC(ref error);
 
-					int searchPtr;
+					NaNBoxing searchPtr = default;
 					if (string.CompareOrdinal(name, "valueOf") == 0)
 					{
-						searchPtr = VALUEOF_STR;
+						searchPtr.SetHeapPtr( VALUEOF_STR);
 					}
 					else if (string.CompareOrdinal(name, "toString") == 0)
 					{
-						searchPtr = TOSTRING_STR;
+						searchPtr.SetHeapPtr ( TOSTRING_STR);
 					}
 					else
 					{
 						//未找到，进行动态属性处理
-						searchPtr = Context.GC.AllocString(name);
+						//searchPtr = Context.GC.AllocString(name);
+						if (!TryCreateStringValue(name, out searchPtr, ref error))
+						{
+							goto flag_handle_error;
+						}
+
 					}
-					if (searchPtr == 0)
-					{
-						RaiseOutOfMemory(ref error);
-						goto flag_handle_error;
-					}
+					//if (searchPtr == 0)
+					//{
+					//	RaiseOutOfMemory(ref error);
+					//	goto flag_handle_error;
+					//}
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
@@ -8633,7 +8681,7 @@ namespace juicescript.runtime
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
-					cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8678,7 +8726,7 @@ namespace juicescript.runtime
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = (ushort)i;
-					cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8739,7 +8787,7 @@ namespace juicescript.runtime
 					}
 
 					cachePayload.scopemember_index = 0;
-					cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8769,25 +8817,30 @@ namespace juicescript.runtime
 
 						Context.GC.CheckGC(ref error);
 
-						int searchPtr;
+						NaNBoxing searchPtr=default;
 						if (string.CompareOrdinal(name, "valueOf") == 0)
 						{
-							searchPtr = VALUEOF_STR;
+							searchPtr.SetHeapPtr( VALUEOF_STR);
 						}
 						else if (string.CompareOrdinal(name, "toString") == 0)
 						{
-							searchPtr = TOSTRING_STR;
+							searchPtr.SetHeapPtr( TOSTRING_STR);
 						}
 						else
 						{
 							//未找到，进行动态属性处理
-							searchPtr = Context.GC.AllocString(name);
+							//searchPtr = Context.GC.AllocString(name);
+							if (!TryCreateStringValue(name, out searchPtr, ref error))
+							{
+								goto flag_handle_error;
+							}
+
 						}
-						if (searchPtr == 0)
-						{
-							RaiseOutOfMemory(ref error);
-							goto flag_handle_error;
-						}
+						//if (searchPtr == 0)
+						//{
+						//	RaiseOutOfMemory(ref error);
+						//	goto flag_handle_error;
+						//}
 
 
 
@@ -8812,8 +8865,8 @@ namespace juicescript.runtime
 							cachePayload.RefInstance = instance;
 							cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 							cachePayload.scopemember_index = 0;
-							cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = as_type;
-							cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.SetHeapPtr(searchPtr);
+							cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
+							cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = searchPtr;
 
 							stackslots[stack.index].SetHeapPtr(cacheobjpointer);
 
@@ -8826,7 +8879,7 @@ namespace juicescript.runtime
 							cachePayload.RefInstance = instance;
 							cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 							cachePayload.scopemember_index = 0;
-							cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.as_type = as_type;
+							cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 							cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 							stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8849,25 +8902,30 @@ namespace juicescript.runtime
 				{
 					Context.GC.CheckGC(ref error);
 
-					int searchPtr;
+					NaNBoxing searchPtr = default;
 					if (string.CompareOrdinal(name, "valueOf") == 0)
 					{
-						searchPtr = VALUEOF_STR;
+						searchPtr.SetHeapPtr(VALUEOF_STR);
 					}
 					else if (string.CompareOrdinal(name, "toString") == 0)
 					{
-						searchPtr = TOSTRING_STR;
+						searchPtr.SetHeapPtr(TOSTRING_STR);
 					}
 					else
 					{
 						//未找到，进行动态属性处理
-						searchPtr = Context.GC.AllocString(name);
+						//searchPtr = Context.GC.AllocString(name);
+						if (!TryCreateStringValue(name, out searchPtr, ref error))
+						{
+							goto flag_handle_error;
+						}
+
 					}
-					if (searchPtr == 0)
-					{
-						RaiseOutOfMemory(ref error);
-						goto flag_handle_error;
-					}
+					//if (searchPtr == 0)
+					//{
+					//	RaiseOutOfMemory(ref error);
+					//	goto flag_handle_error;
+					//}
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
@@ -8883,7 +8941,7 @@ namespace juicescript.runtime
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
-					cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8908,7 +8966,7 @@ namespace juicescript.runtime
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = (ushort)i;
-					cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8978,7 +9036,7 @@ namespace juicescript.runtime
 					}
 
 					cachePayload.scopemember_index = 0;
-					cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = Context.FUNCTION.Instance;
+					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = Context.FUNCTION.Instance;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -8991,25 +9049,30 @@ namespace juicescript.runtime
 
 					Context.GC.CheckGC(ref error);
 
-					int searchPtr;
+					NaNBoxing searchPtr = default;
 					if (string.CompareOrdinal(name, "valueOf") == 0)
 					{
-						searchPtr = VALUEOF_STR;
+						searchPtr.SetHeapPtr(VALUEOF_STR);
 					}
 					else if (string.CompareOrdinal(name, "toString") == 0)
 					{
-						searchPtr = TOSTRING_STR;
+						searchPtr.SetHeapPtr(TOSTRING_STR);
 					}
 					else
 					{
 						//未找到，进行动态属性处理
-						searchPtr = Context.GC.AllocString(name);
+						//searchPtr = Context.GC.AllocString(name);
+						if (!TryCreateStringValue(name, out searchPtr, ref error))
+						{
+							goto flag_handle_error;
+						}
+
 					}
-					if (searchPtr == 0)
-					{
-						RaiseOutOfMemory(ref error);
-						goto flag_handle_error;
-					}
+					//if (searchPtr == 0)
+					//{
+					//	RaiseOutOfMemory(ref error);
+					//	goto flag_handle_error;
+					//}
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
@@ -9025,7 +9088,7 @@ namespace juicescript.runtime
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
-					cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.as_type = as_type;
+					cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -9061,7 +9124,7 @@ namespace juicescript.runtime
 		/// <param name="error"></param>
 		/// <param name="propname"></param>
 		/// <param name="value"></param>
-		internal unsafe void CreateDynamic(ref ReceiveError error, RtHeapInstance instance, int propname_ptr, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
+		internal unsafe void CreateDynamic(ref ReceiveError error, RtHeapInstance instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 
@@ -9075,7 +9138,19 @@ namespace juicescript.runtime
 			}
 
 #endif
-			string name = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
+			//string name = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
+			ReadOnlySpan<char> name;
+			Span<char> temp = stackalloc char[16];
+			if (propname.ValueType == BoxType.LocalString)
+			{
+				int l = propname.GetLocalStringChars(temp);
+				name = temp.Slice(0,l);
+			}
+			else
+			{
+				name = ((RtPayloadString)Context.GC.Heap[propname.HeapPtr].facility).Str;
+			}
+
 
 			RtPayloadShape.PropertyAttribute attribute = 0;
 			if (configurable)
@@ -9108,9 +9183,12 @@ namespace juicescript.runtime
 
 						&&
 
-						string.Equals(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
-							name,
-							StringComparison.Ordinal)
+						//string.Equals(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+						//	name,
+						//	StringComparison.Ordinal)
+
+						name.CompareTo(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str, StringComparison.Ordinal) == 0
+
 						)
 					{
 						break;
@@ -9130,6 +9208,24 @@ namespace juicescript.runtime
 						RaiseOutOfMemory(ref error);
 						return;
 					}
+
+					int propname_ptr;
+					if (propname.ValueType == BoxType.HeapPtr)
+					{
+						propname_ptr = propname.HeapPtr;
+					}
+					else
+					{
+						propname_ptr = Context.GC.AllocString(name.ToString());
+						if (propname_ptr == 0)
+						{
+							RaiseOutOfMemory(ref error);
+							return;
+						}
+					}
+
+
+
 					shape = (RtPayloadShape)Context.GC.Heap[ptr].facility;
 
 					shape.Attribute = attribute;
@@ -9208,11 +9304,15 @@ namespace juicescript.runtime
 				{
 					shape = (RtPayloadShape)Context.GC.Heap[p].facility;
 
-					if (string.Equals(
-					((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
-					((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
-					StringComparison.Ordinal
-					))
+					if (
+						name.CompareTo(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str, StringComparison.Ordinal) == 0
+					//	string.Equals(
+					//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
+					//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+					//StringComparison.Ordinal
+					//)
+						
+						)
 					{
 						break;
 					}
@@ -9228,7 +9328,7 @@ namespace juicescript.runtime
 				{
 					if (!shape.Attribute.HasFlag(RtPayloadShape.PropertyAttribute.Writable))
 					{
-						RaiseError(ref error,"not writeable property " + name );
+						RaiseError(ref error,$"not writeable property {name}" );
 						return;
 					}
 
@@ -9257,11 +9357,13 @@ namespace juicescript.runtime
 					{
 						shape = (RtPayloadShape)Context.GC.Heap[p_child].facility;
 
-						if (string.Equals(
-							((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
-							((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
-							StringComparison.Ordinal
-							)
+						if (
+							//string.Equals(
+							//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
+							//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+							//StringComparison.Ordinal
+							//)
+							name.CompareTo(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str, StringComparison.Ordinal) == 0
 							&&
 							//shape.Attribute.HasFlag(RtPayloadShape.PropertyAttribute.Configurable | RtPayloadShape.PropertyAttribute.Writable | RtPayloadShape.PropertyAttribute.Enumerable)
 							shape.Attribute == attribute
@@ -9302,9 +9404,22 @@ namespace juicescript.runtime
 						var new_shape = (RtPayloadShape)Context.GC.Heap[nshape_ptr].facility;
 
 						new_shape.Attribute = attribute;
-						//RtPayloadShape.PropertyAttribute.Configurable |
-						//RtPayloadShape.PropertyAttribute.Enumerable |
-						//RtPayloadShape.PropertyAttribute.Writable;
+
+						int propname_ptr;
+						if (propname.ValueType == BoxType.HeapPtr)
+						{
+							propname_ptr = propname.HeapPtr;
+						}
+						else
+						{
+							propname_ptr = Context.GC.AllocString(name.ToString());
+							if (propname_ptr == 0)
+							{
+								RaiseOutOfMemory(ref error);
+								return;
+							}
+						}
+
 
 						new_shape.PTR_NAME = propname_ptr;
 						//string pname = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
@@ -12282,12 +12397,23 @@ namespace juicescript.runtime
 										{
 											RtHeapInstance refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
 
-											if (_obj.searchPropertyNamePtr > 0) //动态属性
+											if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 											{
 
-												int search_ptr = _obj.searchPropertyNamePtr;
-												string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
-												_obj.searchPropertyNamePtr = 0;
+												//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+												Span<char> temp = stackalloc char[16];
+												ReadOnlySpan<char> searchName;
+												if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
+												{
+													searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str;
+												}
+												else
+												{
+													int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+													searchName = temp.Slice(0, l);
+												}
+
+												_obj.searchPropertyName.SetUndefined();
 
 												NaNBoxing ns = new NaNBoxing();
 												ASNamespace @namespace = null;
@@ -12323,7 +12449,7 @@ namespace juicescript.runtime
 												else if (refObj.TypeKind == RtHeapTypeKind.ARRAY &&
 														((RtPayloadArray)refObj.facility).isArguments()
 														&& @namespace == null
-														&& string.CompareOrdinal("callee", searchName) == 0
+														&& "callee".AsSpan().CompareTo( searchName, StringComparison.Ordinal) == 0
 													)
 												{
 													Context.StackSlots[stackStPos - method.Body._link_codescope.Members.Count - 1].SetUndefined();
@@ -12782,7 +12908,7 @@ namespace juicescript.runtime
 									cachePayload.RefInstance = instance_box;
 									cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 									cachePayload.scopemember_index = 0;
-									cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = instance.Type;
+									cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 									cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = prop_name;
 
 									stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -12946,7 +13072,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
-										cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.SetUInt(array_i);
 
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -13375,7 +13501,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
-										cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
 										goto lbl_rtqname_success;
@@ -13400,12 +13526,19 @@ namespace juicescript.runtime
 									{
 										Context.GC.CheckGC(ref error);
 
-										int searchPtr = Context.GC.AllocString(searchName);
-										if (searchPtr == 0)
+										//int searchPtr = Context.GC.AllocString(searchName);
+										//if (searchPtr == 0)
+										//{
+										//	RaiseOutOfMemory(ref error);
+										//	goto flag_handle_error;
+										//}
+
+										NaNBoxing searchPtr;
+										if (!TryCreateStringValue(searchName, out searchPtr, ref error))
 										{
-											RaiseOutOfMemory(ref error);
 											goto flag_handle_error;
 										}
+
 
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
@@ -13421,7 +13554,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
-										cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = primitive_codescope.TypeLayout.ASType.Instance;
+										cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = primitive_codescope.TypeLayout.ASType.Instance;
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
 
 										goto lbl_rtqname_dynamicprop;
@@ -13481,7 +13614,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance.SetHeapPtr(instancePtr);
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
-										cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -13544,7 +13677,7 @@ namespace juicescript.runtime
 											}
 
 											cachePayload.scopemember_index = 0;
-											cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = instance.Type;
+											cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 											cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 											stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -13556,10 +13689,15 @@ namespace juicescript.runtime
 									{
 										Context.GC.CheckGC(ref error);
 
-										int searchPtr = Context.GC.AllocString(searchName);
-										if (searchPtr == 0)
+										//int searchPtr = Context.GC.AllocString(searchName);
+										//if (searchPtr == 0)
+										//{
+										//	RaiseOutOfMemory(ref error);
+										//	goto flag_handle_error;
+										//}
+										NaNBoxing searchPtr;
+										if (!TryCreateStringValue(searchName, out searchPtr, ref error))
 										{
-											RaiseOutOfMemory(ref error);
 											goto flag_handle_error;
 										}
 
@@ -13577,7 +13715,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance.SetHeapPtr(o_instancePtr);
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
-										cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -13612,7 +13750,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance.SetHeapPtr(instancePtr);
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
-										cachePayload.searchPropertyNamePtr = 0; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
 
@@ -13674,7 +13812,7 @@ namespace juicescript.runtime
 											}
 
 											cachePayload.scopemember_index = 0;
-											cachePayload.searchPropertyNamePtr = 0; cachePayload.as_type = instance.Type;
+											cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 											cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
 											stackslots[stack.index].SetHeapPtr(cacheobjpointer);
@@ -13692,10 +13830,16 @@ namespace juicescript.runtime
 									{
 										Context.GC.CheckGC(ref error);
 
-										int searchPtr = Context.GC.AllocString(searchName);
-										if (searchPtr == 0)
+										//int searchPtr = Context.GC.AllocString(searchName);
+										//if (searchPtr == 0)
+										//{
+										//	RaiseOutOfMemory(ref error);
+										//	goto flag_handle_error;
+										//}
+
+										NaNBoxing searchPtr;
+										if (!TryCreateStringValue(searchName, out searchPtr, ref error))
 										{
-											RaiseOutOfMemory(ref error);
 											goto flag_handle_error;
 										}
 
@@ -13713,7 +13857,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance.SetHeapPtr(o_instancePtr);
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
-										cachePayload.searchPropertyNamePtr = searchPtr; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
 
@@ -13840,7 +13984,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)scopemember_index;
-										cachePayload.searchPropertyNamePtr = 0; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 										stackslots[target.index].SetHeapPtr(cacheobjpointer);
 
@@ -13876,7 +14020,7 @@ namespace juicescript.runtime
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)scopemember_index;
-										cachePayload.searchPropertyNamePtr = 0; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 										stackslots[target.index].SetHeapPtr(cacheobjpointer);
 
@@ -15665,14 +15809,29 @@ namespace juicescript.runtime
 								if (cacheObj.RefInstance.ValueType != BoxType.HeapPtr)
 								{
 #if DEBUG
-									if (!(cacheObj.searchPropertyNamePtr > 0))
+									if (!(cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString))
 									{
 										throw new InvalidOperationException();
 									}
 #endif
-									int searchname_ptr = cacheObj.searchPropertyNamePtr;
-									string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr].facility).Str;
-									cacheObj.searchPropertyNamePtr = 0;
+
+									
+									Span<char> temp = stackalloc char[16];
+									ReadOnlySpan<char> searchName;
+									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
+									{
+										searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr].facility).Str;
+									}
+									else
+									{
+										int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
+										searchName = temp.Slice(0, l);
+									}
+									
+
+
+
+									cacheObj.searchPropertyName.SetUndefined();
 
 
 									ASNamespace @namespace = null;
@@ -15695,13 +15854,35 @@ namespace juicescript.runtime
 								{
 									RtHeapInstance instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 
-									if (cacheObj.searchPropertyNamePtr > 0)
+									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString )
 									{
 										Context.GC.CheckGC(ref error); //只能在此处先GC,否则后面会意外回收searchname_ptr。 
 
-										int searchname_ptr = cacheObj.searchPropertyNamePtr;
-										string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr].facility).Str;
-										cacheObj.searchPropertyNamePtr = 0;
+										//int searchname_ptr;// = cacheObj.searchPropertyNamePtr;
+										//string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr].facility).Str;
+										Span<char> temp = stackalloc char[16];
+										ReadOnlySpan<char> searchName;
+										if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
+										{
+											//searchname_ptr = cacheObj.searchPropertyName.HeapPtr;
+											searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr].facility).Str;
+										}
+										else
+										{
+											int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
+											searchName = temp.Slice(0, l);
+
+											//searchname_ptr = Context.GC.AllocString(cacheObj.searchPropertyName.LocalStringValue);
+											//if (searchname_ptr == 0)
+											//{
+											//	RaiseOutOfMemory(ref error);
+											//	goto flag_handle_error;
+											//}
+											//cacheObj.searchPropertyName.SetHeapPtr(searchname_ptr);
+										}
+										//
+										//cacheObj.searchPropertyName.SetUndefined(); 本应在这里清理,但是后面还有CreateDynamic需要用。
+
 
 
 										ASNamespace @namespace = null;
@@ -15730,18 +15911,20 @@ namespace juicescript.runtime
 										{
 
 											RaiseReferenceError_CanNotCreateProperty(ref error, @namespace, searchName, cacheObj.as_type.QName);
-
+											cacheObj.searchPropertyName.SetUndefined();
 											goto flag_handle_error;
 										}
 										else if (instance.TypeKind == RtHeapTypeKind.NAMESPACE)
 										{
 											RaiseReferenceError_CanNotCreateProperty(ref error, @namespace, searchName, cacheObj.as_type.QName);
+											cacheObj.searchPropertyName.SetUndefined();
 											goto flag_handle_error;
 										}
 										else if (instance.TypeKind == RtHeapTypeKind.VECTOR)
 										{
 
 											RaiseReferenceError_CanNotCreateProperty(ref error, @namespace, searchName, instance.Type.QName);
+											cacheObj.searchPropertyName.SetUndefined();
 											goto flag_handle_error;
 										}
 										else if (instance.TypeKind == RtHeapTypeKind.CLOSURE
@@ -15750,17 +15933,20 @@ namespace juicescript.runtime
 											)
 										{
 											RaiseReferenceError_CanNotCreateProperty(ref error, @namespace, searchName, buildin_as_methodclosure);
+											cacheObj.searchPropertyName.SetUndefined();
 											goto flag_handle_error;
 										}
 										else if (instance.TypeKind == RtHeapTypeKind.STRING)
 										{
 											RaiseReferenceError_CanNotCreateProperty(ref error, @namespace, searchName, instance.Type.QName);
+											cacheObj.searchPropertyName.SetUndefined();
 											goto flag_handle_error;
 										}
 										else
 										{
 											//保存缓存到实体的代码已移动到CreateDynamic内部。
-											CreateDynamic(ref error, instance, searchname_ptr, box, true, true, true);
+											CreateDynamic(ref error, instance, cacheObj.searchPropertyName, box, true, true, true);
+											cacheObj.searchPropertyName.SetUndefined();
 											if (error.raised)
 											{
 												goto flag_handle_error;
@@ -16675,7 +16861,7 @@ namespace juicescript.runtime
 								if (ins.TypeKind != RtHeapTypeKind.INSTANCE) throw new InvalidOperationException();
 								if (k.TypeKind != RtHeapTypeKind.STRING) throw new InvalidOperationException();
 #endif
-								CreateDynamic(ref error, ins, key_v.HeapPtr, value_v, true, true, true);
+								CreateDynamic(ref error, ins, key_v, value_v, true, true, true);
 								if (error.raised)
 								{
 									goto flag_handle_error;
