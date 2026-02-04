@@ -20,7 +20,7 @@ namespace juicescript.runtime
         }
 
 
-        public override int Size => 8 + 4 + 4 + 4 + 4 + 4;
+        public override int Size => 8 + 4 + 4 + 4 + 4 + 8;
 
         /// <summary>
         /// 指向下一个子节点
@@ -43,9 +43,9 @@ namespace juicescript.runtime
         public PropertyAttribute Attribute;
 
         /// <summary>
-        /// 属性名
+        /// 属性名 - 使用LocalString优化，短名称内联存储，长名称使用堆分配
         /// </summary>
-        public int PTR_NAME;
+        public NaNBoxing PTR_NAME;
 
 
     }

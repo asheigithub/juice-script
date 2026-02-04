@@ -529,7 +529,7 @@ namespace juicescript.runtime.buildin
 					NaNBoxing done = default; done.SetBoolean(false);
 					result.SetSlot(done, 0, result_ins.Type._link_codescope, context.player);
 
-					NaNBoxing key = default; key.SetHeapPtr(shapepayload.PTR_NAME);
+					NaNBoxing key = shapepayload.PTR_NAME;
 					NaNBoxing value = prop.Slots[prop.Slots.Count - current - 1];
 
 					result.SetSlot(key, 1, result_ins.Type._link_codescope, context.player);

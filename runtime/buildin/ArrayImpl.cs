@@ -360,16 +360,38 @@ namespace juicescript.runtime.buildin
 					Dictionary<uint, NaNBoxing> own_property = new Dictionary<uint, NaNBoxing>();
 					//先遍历proto,把洞补了
 					context.player.VisitArrayProto(src_instance, 
-						(string key,NaNBoxing v) => 
+						(NaNBoxing key,NaNBoxing v) => 
 						{
-							uint index;
-							if (uint.TryParse(key, out index))
+							
+
+							if (key.ValueType == NaNBoxing.BoxType.LocalString)
 							{
-								if (index < src_len)
+								Span<char> temp = stackalloc char[16];
+
+								int l = key.GetLocalStringChars(temp);
+								uint index;
+								if (uint.TryParse(temp.Slice(0, l), out index))
 								{
-									own_property.TryAdd(index, v);
+									if (index < src_len)
+									{
+										own_property.TryAdd(index, v);
+									}
 								}
 							}
+							else
+							{
+								var k = ((RtPayloadString)context.GC.Heap[key.HeapPtr].facility).Str.AsSpan();
+								uint index;
+								if (uint.TryParse(k, out index))
+								{
+									if (index < src_len)
+									{
+										own_property.TryAdd(index, v);
+									}
+								}
+
+							}
+							
 						
 						} );
 

@@ -2316,6 +2316,137 @@ namespace juicescript.runtime
 			}
 		}
 
+		/// <summary>
+		/// 比较Shape属性名，支持LocalString和HeapPtr两种存储方式
+		/// </summary>
+		/// <param name="shapeName">Shape中存储的属性名</param>
+		/// <param name="searchName">要比较的属性名</param>
+		/// <returns>0表示相等，非0表示不等</returns>
+		private int CompareShapePropertyName(NaNBoxing shapeName, ReadOnlySpan<char> searchName)
+		{
+			if (shapeName.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				// LocalString比较
+				Span<char> chars = stackalloc char[16];
+				int charCount = shapeName.GetLocalStringChars(chars);
+				if (charCount < 0) return -1; // 解码失败
+				
+				return searchName.CompareTo(chars.Slice(0, charCount), StringComparison.Ordinal);
+			}
+			else if (shapeName.ValueType == NaNBoxing.BoxType.HeapPtr && shapeName.HeapPtr != 0)
+			{
+				// HeapPtr字符串比较
+				string str = ((RtPayloadString)Context.GC.Heap[shapeName.HeapPtr].facility).Str;
+				return searchName.CompareTo(str.AsSpan(), StringComparison.Ordinal);
+			}
+			else
+			{
+				// 空属性名或其他类型，认为不匹配
+				return -1;
+			}
+		}
+
+		private int CompareShapePropertyName(NaNBoxing shapeName1, NaNBoxing shapeName2)
+		{ 
+			// 处理相同引用的情况
+			if (shapeName1.Raw == shapeName2.Raw)
+			{
+				return 0;
+			}
+
+			// 处理 LocalString vs LocalString
+			if (shapeName1.ValueType == NaNBoxing.BoxType.LocalString && 
+				shapeName2.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				// 使用高效的字符比较，避免字符串分配
+				Span<char> chars1 = stackalloc char[16];
+				Span<char> chars2 = stackalloc char[16];
+				
+				int charCount1 = shapeName1.GetLocalStringChars(chars1);
+				int charCount2 = shapeName2.GetLocalStringChars(chars2);
+				
+				if (charCount1 < 0 || charCount2 < 0) 
+				{
+					// 解码失败，按类型比较
+					return charCount1.CompareTo(charCount2);
+				}
+
+				ReadOnlySpan<char> c1 = chars1;
+				ReadOnlySpan<char> c2 = chars2;
+
+				return c1.Slice(0, charCount1).CompareTo(c2.Slice(0, charCount2), StringComparison.Ordinal);
+			}
+
+			// 处理 LocalString vs HeapPtr
+			if (shapeName1.ValueType == NaNBoxing.BoxType.LocalString && 
+				shapeName2.ValueType == NaNBoxing.BoxType.HeapPtr)
+			{
+				if (shapeName2.HeapPtr == 0) return 1; // LocalString > null
+				
+				Span<char> chars1 = stackalloc char[16];
+				int charCount1 = shapeName1.GetLocalStringChars(chars1);
+				if (charCount1 < 0) return -1; // 解码失败
+
+
+				ReadOnlySpan<char> c1 = chars1;
+				
+				string str2 = ((RtPayloadString)Context.GC.Heap[shapeName2.HeapPtr].facility).Str;
+				return c1.Slice(0, charCount1).CompareTo(str2.AsSpan(), StringComparison.Ordinal);
+			}
+
+			// 处理 HeapPtr vs LocalString
+			if (shapeName1.ValueType == NaNBoxing.BoxType.HeapPtr && 
+				shapeName2.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				if (shapeName1.HeapPtr == 0) return -1; // null < LocalString
+				
+				Span<char> chars2 = stackalloc char[16];
+				int charCount2 = shapeName2.GetLocalStringChars(chars2);
+				if (charCount2 < 0) return 1; // 解码失败
+
+				ReadOnlySpan<char> c2 = chars2;
+
+				string str1 = ((RtPayloadString)Context.GC.Heap[shapeName1.HeapPtr].facility).Str;
+				return str1.AsSpan().CompareTo(c2.Slice(0, charCount2), StringComparison.Ordinal);
+			}
+
+			// 处理 HeapPtr vs HeapPtr
+			if (shapeName1.ValueType == NaNBoxing.BoxType.HeapPtr && 
+				shapeName2.ValueType == NaNBoxing.BoxType.HeapPtr)
+			{
+				// 处理null情况
+				if (shapeName1.HeapPtr == 0 && shapeName2.HeapPtr == 0) return 0;
+				if (shapeName1.HeapPtr == 0) return -1;
+				if (shapeName2.HeapPtr == 0) return 1;
+				
+				// 比较堆字符串，使用AsSpan避免额外分配
+				string str1 = ((RtPayloadString)Context.GC.Heap[shapeName1.HeapPtr].facility).Str;
+				string str2 = ((RtPayloadString)Context.GC.Heap[shapeName2.HeapPtr].facility).Str;
+				return str1.AsSpan().CompareTo(str2.AsSpan(), StringComparison.Ordinal);
+			}
+
+			// 处理其他类型组合 - 按类型优先级排序
+			// LocalString < HeapPtr < 其他类型
+			int priority1 = GetShapeNameTypePriority(shapeName1.ValueType);
+			int priority2 = GetShapeNameTypePriority(shapeName2.ValueType);
+			
+			return priority1.CompareTo(priority2);
+		}
+
+		/// <summary>
+		/// 获取Shape属性名类型的优先级，用于排序
+		/// </summary>
+		private int GetShapeNameTypePriority(NaNBoxing.BoxType type)
+		{
+			return type switch
+			{
+				NaNBoxing.BoxType.LocalString => 1,
+				NaNBoxing.BoxType.HeapPtr => 2,
+				_ => 3
+			};
+		}
+
+
 		int cache_ATERM_UNDEFINED;
 		private void RaiseTypeError_ATermUndefined(ref ReceiveError error)
 		{
@@ -4097,7 +4228,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal void VisitArrayProto(RtHeapInstance arrObj,Action<string,NaNBoxing> OnVisit)
+		internal void VisitArrayProto(RtHeapInstance arrObj,Action<NaNBoxing,NaNBoxing> OnVisit)
 		{
 			VisitDynamicValue(arrObj, OnVisit);
 
@@ -4147,7 +4278,8 @@ namespace juicescript.runtime
 
 							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
 
-							
+
+
 							Span<char> temp = stackalloc char[16];
 							ReadOnlySpan<char> searchName;
 
@@ -4155,6 +4287,7 @@ namespace juicescript.runtime
 							{
 								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
 								searchName = temp.Slice(0, l);
+
 							}
 							else
 							{
@@ -9187,7 +9320,7 @@ namespace juicescript.runtime
 						//	name,
 						//	StringComparison.Ordinal)
 
-						name.CompareTo(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str, StringComparison.Ordinal) == 0
+						CompareShapePropertyName(shape.PTR_NAME, name) == 0
 
 						)
 					{
@@ -9209,21 +9342,6 @@ namespace juicescript.runtime
 						return;
 					}
 
-					int propname_ptr;
-					if (propname.ValueType == BoxType.HeapPtr)
-					{
-						propname_ptr = propname.HeapPtr;
-					}
-					else
-					{
-						propname_ptr = Context.GC.AllocString(name.ToString());
-						if (propname_ptr == 0)
-						{
-							RaiseOutOfMemory(ref error);
-							return;
-						}
-					}
-
 
 
 					shape = (RtPayloadShape)Context.GC.Heap[ptr].facility;
@@ -9233,7 +9351,8 @@ namespace juicescript.runtime
 					//RtPayloadShape.PropertyAttribute.Enumerable |
 					//RtPayloadShape.PropertyAttribute.Writable;
 
-					shape.PTR_NAME = propname_ptr;
+
+					shape.PTR_NAME = propname;
 
 					shape.PTR_PARENT = Context.BlankShapePtr;
 					shape.PTR_CHILD = 0;
@@ -9305,7 +9424,7 @@ namespace juicescript.runtime
 					shape = (RtPayloadShape)Context.GC.Heap[p].facility;
 
 					if (
-						name.CompareTo(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str, StringComparison.Ordinal) == 0
+						CompareShapePropertyName(shape.PTR_NAME, name) == 0
 					//	string.Equals(
 					//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
 					//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
@@ -9363,7 +9482,7 @@ namespace juicescript.runtime
 							//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
 							//StringComparison.Ordinal
 							//)
-							name.CompareTo(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str, StringComparison.Ordinal) == 0
+							CompareShapePropertyName(shape.PTR_NAME, name) == 0
 							&&
 							//shape.Attribute.HasFlag(RtPayloadShape.PropertyAttribute.Configurable | RtPayloadShape.PropertyAttribute.Writable | RtPayloadShape.PropertyAttribute.Enumerable)
 							shape.Attribute == attribute
@@ -9405,23 +9524,9 @@ namespace juicescript.runtime
 
 						new_shape.Attribute = attribute;
 
-						int propname_ptr;
-						if (propname.ValueType == BoxType.HeapPtr)
-						{
-							propname_ptr = propname.HeapPtr;
-						}
-						else
-						{
-							propname_ptr = Context.GC.AllocString(name.ToString());
-							if (propname_ptr == 0)
-							{
-								RaiseOutOfMemory(ref error);
-								return;
-							}
-						}
 
-
-						new_shape.PTR_NAME = propname_ptr;
+						new_shape.PTR_NAME = propname;
+						
 						//string pname = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
 
 						var current_shape = (RtPayloadShape)Context.GC.Heap[prop.SHAPE_PTR].facility;
@@ -9498,7 +9603,7 @@ namespace juicescript.runtime
 					//	((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
 					//	StringComparison.Ordinal
 					//	))
-					if(searchName.CompareTo( ((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str.AsSpan(), StringComparison.Ordinal) == 0)
+					if(CompareShapePropertyName(shape.PTR_NAME, searchName) == 0)
 					{
 						matchShapePtr = p;
 						value = prop.Slots[index];
@@ -9517,7 +9622,7 @@ namespace juicescript.runtime
 			value = default; matchShapePtr = 0; slotindex = -1; return false;
 		}
 
-		private void VisitDynamicValue(RtHeapInstance instance,Action<string,NaNBoxing> OnVisitProp)
+		private void VisitDynamicValue(RtHeapInstance instance,Action<NaNBoxing,NaNBoxing> OnVisitProp)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 			if (PROPERTY_PTR != 0)
@@ -9533,7 +9638,8 @@ namespace juicescript.runtime
 
 					if (shape.Attribute.HasFlag(RtPayloadShape.PropertyAttribute.Enumerable))
 					{
-						OnVisitProp( ((RtPayloadString)Context.GC.Heap[ shape.PTR_NAME].facility).Str , prop.Slots[index]);
+						
+						OnVisitProp(shape.PTR_NAME, prop.Slots[index]);
 					}
 					--index;
 					p = shape.PTR_PARENT;
@@ -9572,7 +9678,8 @@ namespace juicescript.runtime
 				for (int i = path.Count - 1; i >= 0; i--)
 				{
 					RtPayloadShape tomatch = (RtPayloadShape)Context.GC.Heap[path[i]].facility;
-					string tomatch_name = ((RtPayloadString)Context.GC.Heap[tomatch.PTR_NAME].facility).Str;
+					//string tomatch_name = GetShapePropertyNameAsString(tomatch.PTR_NAME);
+					var tomatch_name = tomatch.PTR_NAME;
 
 					bool found = false;
 
@@ -9584,12 +9691,15 @@ namespace juicescript.runtime
 
 						if (search_p != shape_ptr)
 						{
-							string s_name = ((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str;
+							//string s_name = GetShapePropertyNameAsString(shape.PTR_NAME);
+							var s_name = shape.PTR_NAME;
 
 							if (
 								tomatch.Attribute == shape.Attribute
 								&&
-								string.Equals(s_name, tomatch_name, StringComparison.Ordinal))
+								//string.Equals(s_name, tomatch_name, StringComparison.Ordinal))
+								CompareShapePropertyName(s_name,tomatch_name) == 0)
+
 							{
 								//找到了，继续找下一个链
 								chain_node = shape;
@@ -12151,7 +12261,7 @@ namespace juicescript.runtime
 			}
 
 #endif
-
+			Span<char> temp = stackalloc char[16];//用于从LocalString中提取值
 
 			var method = ((ASMethodBody)methodscope.Type).Method;
 
@@ -12401,7 +12511,7 @@ namespace juicescript.runtime
 											{
 
 												//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
-												Span<char> temp = stackalloc char[16];
+												
 												ReadOnlySpan<char> searchName;
 												if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
 												{
@@ -15816,7 +15926,7 @@ namespace juicescript.runtime
 #endif
 
 									
-									Span<char> temp = stackalloc char[16];
+									
 									ReadOnlySpan<char> searchName;
 									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
 									{
@@ -15860,7 +15970,7 @@ namespace juicescript.runtime
 
 										//int searchname_ptr;// = cacheObj.searchPropertyNamePtr;
 										//string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr].facility).Str;
-										Span<char> temp = stackalloc char[16];
+										
 										ReadOnlySpan<char> searchName;
 										if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
 										{

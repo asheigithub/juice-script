@@ -1152,9 +1152,10 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.SHAPE:
                         RtPayloadShape shape = (RtPayloadShape)instance.facility;
-                        if (shape.PTR_NAME != 0)
+                        // 标记属性名 - 支持LocalString和HeapPtr
+                        if (shape.PTR_NAME.ValueType == NaNBoxing.BoxType.HeapPtr && shape.PTR_NAME.HeapPtr != 0)
                         {
-                            Heap[shape.PTR_NAME].gc_mark = true;
+                            Heap[shape.PTR_NAME.HeapPtr].gc_mark = true;
                         }
                         break;
                     default:
