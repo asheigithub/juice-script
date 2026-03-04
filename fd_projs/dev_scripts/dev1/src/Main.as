@@ -16,13 +16,25 @@ package
 	}
 }
 
-class Test262Error extends Error
+
+
+
+var p:Promise = new Promise( function (resolve):void 
 {
-	public function Test262Error(t)
-	{
-		super(t);
-	}
-}
+	
+	resolve(42);	
+} );
+
+
+p.then( null  ).catch (null).then(null);
+
+//class Test262Error extends Error
+//{
+	//public function Test262Error(t)
+	//{
+		//super(t);
+	//}
+//}
 
 
 

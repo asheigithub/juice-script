@@ -3712,6 +3712,8 @@ namespace juicescript.runtime
 				ex = null;
 			}
 
+			Context.MicroTaskQueue.RunMicrotasks(Context);
+
 		}
 
 		internal void InitScript(ASScript script, ref ReceiveError error)
@@ -19730,6 +19732,7 @@ namespace juicescript.runtime
 
 									error.raised = false;
 									error.error = default;
+									Context.errorStack.Clear();
 
 									//进入catch块
 									PC = PC_START + catch_enter_p;

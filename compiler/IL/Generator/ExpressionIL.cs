@@ -6631,12 +6631,12 @@ namespace juicescript.compiler.IL.Generator
 
 						var items = (List<AS3DataStackElement>)data.Data.Value;
 						INS_Ld_Class ld_Class = new INS_Ld_Class(token);
-						ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, (TypeKind)compileEnv.CompileContext.player_for_compiler.Context.ARRAY.Type_identifier);
-						ld_Class.classid_index = compileEnv.AddConstClassId(compileEnv.CompileContext.player_for_compiler.Context.ARRAY);
+						ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, TypeKind.Array);
+						ld_Class.classid_index = compileEnv.AddConstClassId( (ulong)TypeKind.Array );
 						compileEnv.instructions.Add(ld_Class);
 
 
-						StackLocater dst = makeOrGetLocater((TypeKind)compileEnv.CompileContext.player_for_compiler.Context.ARRAY.Type_identifier);
+						StackLocater dst = makeOrGetLocater(TypeKind.Array);
 
 						List<StackLocater> arguments = new List<StackLocater>();
 						arguments.Add(dst);

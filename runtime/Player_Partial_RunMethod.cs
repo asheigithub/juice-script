@@ -617,13 +617,24 @@ namespace juicescript.runtime
 
 					if (!error.raised)
 					{
-						if (returnSlotIndex >= 0)
+						if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
 						{
-							return Context.StackSlots[returnSlotIndex];
+							Context.StackPosition += para_argcount;
+
+							Debug.Assert(method.IsConstructor); // 只有在有类成员初始化代码并且构造函数还是native的时候会触发
+
+							goto run_native;
 						}
 						else
 						{
-							return default(NaNBoxing);
+							if (returnSlotIndex >= 0)
+							{
+								return Context.StackSlots[returnSlotIndex];
+							}
+							else
+							{
+								return default(NaNBoxing);
+							}
 						}
 					}
 					else
@@ -637,60 +648,7 @@ namespace juicescript.runtime
 				}
 				else if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
 				{
-
-					if (method.nativefunction_delegate == null)
-					{
-						string key =
-							method.__is_vector_method?
-							$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
-							:
-							$"{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${ (method.Body.QName ==null ? "@" :  method.Body.QName.Namespace.ToDebugNameSpaceString())}::{ ((method.Trait !=null && method.Trait.Kind == TraitKind.Getter)?"get#":((method.Trait != null && method.Trait.Kind == TraitKind.Setter)?"set#":"" ) ) }{method.Name}";
-
-						var m = NativeFunctionRegistry.GetFunction(key);
-						if (m != null)
-						{
-							method.nativefunction_delegate = (NativeFun)Delegate.CreateDelegate(typeof(NativeFun), m);
-						}
-						else
-						{
-							RaiseIllegaloperationError(ref error, key);
-							goto lbl_native_called;
-						}
-						
-					}
-
-					//Context.BackTrace[Context.BackTraceIndex].Method = method;
-					Context.BackTraceIndex++; ;
-					
-					((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
-
-					Context.BackTraceIndex--;
-					//Context.BackTrace[Context.BackTraceIndex].Method = null;
-
-
-				lbl_native_called:
-					m_scopePayload.ParentPtr = 0;
-					mScope.Type = null;
-					Context.StackPosition -= para_argcount;
-
-					if (!error.raised)
-					{
-						if (returnSlotIndex >= 0)
-						{
-							return Context.StackSlots[returnSlotIndex];
-						}
-						else
-						{
-							return default(NaNBoxing);
-						}
-					}
-					else
-					{
-						//记录当前报错堆栈，看上级调用是否处理这个错误
-						Context.errorStack.AddTrace(method, 0);
-						return new NaNBoxing();
-					}
-
+					goto run_native;
 				}
 				else
 				{
@@ -699,6 +657,61 @@ namespace juicescript.runtime
 					return new NaNBoxing();
 				}
 
+				
+			run_native:
+
+				if (method.nativefunction_delegate == null)
+				{
+					string key =
+						method.__is_vector_method ?
+						$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
+						:
+						$"{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
+
+					var m = NativeFunctionRegistry.GetFunction(key);
+					if (m != null)
+					{
+						method.nativefunction_delegate = (NativeFun)Delegate.CreateDelegate(typeof(NativeFun), m);
+					}
+					else
+					{
+						RaiseIllegaloperationError(ref error, key);
+						goto lbl_native_called;
+					}
+
+				}
+
+				//Context.BackTrace[Context.BackTraceIndex].Method = method;
+				Context.BackTraceIndex++; ;
+
+				((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
+
+				Context.BackTraceIndex--;
+			//Context.BackTrace[Context.BackTraceIndex].Method = null;
+
+
+			lbl_native_called:
+				m_scopePayload.ParentPtr = 0;
+				mScope.Type = null;
+				Context.StackPosition -= para_argcount;
+
+				if (!error.raised)
+				{
+					if (returnSlotIndex >= 0)
+					{
+						return Context.StackSlots[returnSlotIndex];
+					}
+					else
+					{
+						return default(NaNBoxing);
+					}
+				}
+				else
+				{
+					//记录当前报错堆栈，看上级调用是否处理这个错误
+					Context.errorStack.AddTrace(method, 0);
+					return new NaNBoxing();
+				}
 
 			} while (false);
 

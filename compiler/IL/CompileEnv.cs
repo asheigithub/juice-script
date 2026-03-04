@@ -495,8 +495,66 @@ namespace juicescript.compiler.IL
             return Constants.Count - 1;
         }
 
+		internal int AddConstClassId(ulong classid)
+		{
 
-        internal int AddConstClassId(ASClass @class)
+
+			for (int i = 0; i < Constants.Count; i++)
+			{
+				if (Constants[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					int p = Constants[i].HeapPtr;
+					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.LD_Class)
+					{
+						ulong cid = CompileContext.constpool_ldclass[p & 0xffffff];
+						if (cid == classid)
+						{
+							return i;
+						}
+
+						//RtHeapInstance heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+						//if (heapInstance.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS
+						//    && heapInstance.Type == @class)
+						//{
+						//    return i;
+						//}
+					}
+				}
+			}
+
+			int index = CompileContext.constpool_ldclass.IndexOf(classid);
+			if (index < 0)
+			{
+				index = CompileContext.constpool_ldclass.Count;
+				CompileContext.constpool_ldclass.Add(classid);
+			}
+
+			int ptr = (0xffffff & index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
+
+			NaNBoxing boxing = new NaNBoxing();
+			boxing.SetHeapPtr(ptr);
+			Constants.Add(boxing);
+
+			return Constants.Count - 1;
+
+
+			//int heapPtr = CompileContext.player_for_compiler.Context.GC.AllocLD_Class(@class);
+			//if (heapPtr == 0)
+			//    throw new InvalidOperationException();
+			//if (heapPtr > 0xffffff)
+			//{
+			//    throw new ParseException("heapptr > 0xffffff");
+			//}
+			//int ptr = (0xffffff & heapPtr) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
+
+			//NaNBoxing boxing = new NaNBoxing();
+			//boxing.SetHeapPtr(ptr);
+			//Constants.Add(boxing);
+
+			//return Constants.Count - 1;
+		}
+
+		internal int AddConstClassId(ASClass @class)
         {
 
 

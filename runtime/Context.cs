@@ -1,10 +1,12 @@
 ﻿using juicescript.ABC;
+using juicescript.runtime.buildin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.runtime.buildin.PromiseImpl;
 
 namespace juicescript.runtime
 {
@@ -141,10 +143,13 @@ namespace juicescript.runtime
         /// </summary>
         internal int CacheVectorPtr;
 
-        
-        public Context(Player player, int gc_limit = int.MaxValue)
+		internal PromiseMicroTaskQueue MicroTaskQueue { get; set; }
+
+		public Context(Player player, int gc_limit = int.MaxValue)
         {
             this.player = player;
+
+            MicroTaskQueue = new PromiseMicroTaskQueue();
 
             link_const_class = new List<ASClass>();
             link_const_methods = new List<ASMethod>();
