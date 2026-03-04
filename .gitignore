@@ -25,3 +25,4 @@ packages/
 /juice-script-2.7z
 /.kiro/specs/array-push-function
 /AGENTS.md
+/.kiro/specs/promise-completion
