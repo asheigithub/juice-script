@@ -1,5 +1,4 @@
-﻿using CH.SipHash;
-using juicescript.ABC;
+﻿using juicescript.ABC;
 using juicescript.compiler.AST;
 using juicescript.compiler.AST.Expr;
 using juicescript.compiler.AST.Stmt;
