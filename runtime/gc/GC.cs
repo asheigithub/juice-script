@@ -1036,10 +1036,13 @@ namespace juicescript.runtime.gc
                 mark(iterctx);
             }
 
+            //遍历微任务循环
+            context.MicroTaskQueue.OnGCMark(context);
 
 
-            //遍历Root。
-            for (int i = 0; i < Root.Count; i++)
+
+			//遍历Root。
+			for (int i = 0; i < Root.Count; i++)
             {
                 var instance = Root[i];
 

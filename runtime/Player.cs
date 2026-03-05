@@ -111,6 +111,9 @@ namespace juicescript.runtime
 		private List<SWCFile> waitforlink = new List<SWCFile>();
 		private Dictionary<ASMultiname, string> lib_types = new Dictionary<ASMultiname, string>();
 
+
+		internal ASNamespaceSet nsSetIncludingPublicAndAS3;
+
 		public SWCFile LoadLib(byte[] data)
 		{
 			using (MemoryStream ms = new MemoryStream(data))
@@ -182,6 +185,22 @@ namespace juicescript.runtime
 					}
 
 				} while (flag);
+
+
+				if(nsSetIncludingPublicAndAS3 == null)
+				{
+					var nsPublic = swc.Namespaces.FirstOrDefault(n => n !=null && n.Kind == NamespaceKind.Package && n.Name == "" && n.def_uri == null);
+					var nsAS3 = swc.Namespaces.FirstOrDefault(n => n !=null && n.Kind == NamespaceKind.PackageInternal && n.Name == ":AS3" && n.def_uri == "http://adobe.com/AS3/2006/builtin");
+
+					if(nsPublic !=null && nsAS3 != null)
+					{
+						nsSetIncludingPublicAndAS3 = new ASNamespaceSet();
+						nsSetIncludingPublicAndAS3.Namespaces = new List<ASNamespace>();
+						nsSetIncludingPublicAndAS3.Namespaces.Add(nsPublic);
+						nsSetIncludingPublicAndAS3.Namespaces.Add(nsAS3);
+					}
+
+				}
 
 				return swc;
 			}
@@ -1336,6 +1355,10 @@ namespace juicescript.runtime
 					else if (cls != null && cls.QName.Name == "generator" && cls.QName.Namespace.Name == "FilePrivateNS:IIterator")
 					{
 						Context.GENERATOR = cls;
+					}
+					else if(cls !=null && cls.QName.Name == "Promise")
+					{
+						Context.PROMISE = cls;
 					}
 				}
 			}
@@ -3712,7 +3735,24 @@ namespace juicescript.runtime
 				ex = null;
 			}
 
-			Context.MicroTaskQueue.RunMicrotasks(Context);
+
+			ReceiveError microtask_fault = default;
+			Context.MicroTaskQueue.RunMicrotasks(Context,ref microtask_fault);
+			if (microtask_fault.raised)
+			{
+				Debug.Assert(microtask_fault.error.ValueType == BoxType.Fault); //微任务循环会吃掉异常，除非是oom这种。
+				if (ex == null)
+				{
+					ex = new PlayerException(this, microtask_fault.error, "Run Microtask Fault.");
+				}
+				else
+				{
+					ex = new PlayerException(this, error.error, ex.Message + "\n\nRun Microtask Fault.");
+				}
+
+				Context.errorStack.Clear();
+			}
+
 
 		}
 

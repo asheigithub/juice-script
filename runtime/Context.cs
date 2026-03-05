@@ -80,6 +80,8 @@ namespace juicescript.runtime
 
         public ASClass GENERATOR;
 
+        public ASClass PROMISE;
+
         public SWCFile global_swc;
 
         public gc.GC GC { get; private set; }

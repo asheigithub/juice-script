@@ -1,4 +1,4 @@
-﻿using juicescript.ABC;
+using juicescript.ABC;
 using juicescript.ABC.Locaters;
 using System;
 using System.Collections;
@@ -24,7 +24,7 @@ namespace juicescript.runtime.buildin
 		{
 			Debug.Assert(thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			RtHeapInstance _this = context.GC.Heap[ thisPtr.HeapPtr];
+			RtHeapInstance _this = context.GC.Heap[thisPtr.HeapPtr];
 			Debug.Assert(_this.TypeKind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(_this.Type.QName.Name == "Promise");
 
@@ -32,10 +32,10 @@ namespace juicescript.runtime.buildin
 
 			RtHeapInstance executor_closure;
 			// 2. 验证executor是否为函数
-			if (!IsCallable(executor,context,out executor_closure))
+			if (!IsCallable(executor, context, out executor_closure))
 			{
 				context.player.RaiseTypeError(
-					ref error,executor, TypeKind.Function);
+					ref error, executor, TypeKind.Function);
 				return;
 			}
 
@@ -69,7 +69,7 @@ namespace juicescript.runtime.buildin
 			// 准备参数 _reject
 			{
 				var _reject = _this.Type._vtable.Items[3];
-				int ptrIndex = stackStPos+1;
+				int ptrIndex = stackStPos + 1;
 				int m_closurePtr = context.M_ClosurePtr + ptrIndex;
 
 				context.GC.Heap[m_closurePtr].Type = _reject.Trait.Method.Body;
@@ -125,7 +125,7 @@ namespace juicescript.runtime.buildin
 					error.raised = false;
 
 					context.errorStack.Clear();
-					
+
 					NaNBoxing reason = context.player.GetSaveValue(e, ref error);
 					if (error.raised)
 					{
@@ -137,8 +137,8 @@ namespace juicescript.runtime.buildin
 
 				}
 				else
-				{ 
-					
+				{
+
 				}
 			}
 
@@ -204,7 +204,7 @@ namespace juicescript.runtime.buildin
 				// 清空回调列表，释放内存
 				promiseWapper.reactions.Clear();
 				promiseWapper.reactions = null;
-				
+
 			}
 
 			// 6. 如果没有回调，Promise就保持fulfilled状态
@@ -334,8 +334,8 @@ namespace juicescript.runtime.buildin
 
 			PromiseWapper wapper = new PromiseWapper();
 			((RtPayloadInstance)nextPromiseInstance.facility).wapperedObject = wapper;
-			
-			NaNBoxing nextPromise = default;nextPromise.SetHeapPtr(nextPromise_ptr);
+
+			NaNBoxing nextPromise = default; nextPromise.SetHeapPtr(nextPromise_ptr);
 
 			if (promiseWapper._state == PromiseState.pending)
 			{
@@ -392,9 +392,9 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
-			
+
 			var onRejected = scope.ReadSlot(0, context.player);
-			
+
 			if (onRejected.ValueType != NaNBoxing.BoxType.Undefined &&
 				onRejected.ValueType != NaNBoxing.BoxType.Null)
 			{
@@ -433,7 +433,7 @@ namespace juicescript.runtime.buildin
 				Reaction reaction = new Reaction();
 				reaction.nextPromise = nextPromise;
 				reaction.onRejected = onRejected;
-				
+
 				if (promiseWapper.reactions == null)
 				{
 					promiseWapper.reactions = new List<Reaction>();
@@ -447,7 +447,7 @@ namespace juicescript.runtime.buildin
 				{
 					Type = MicroTaskType.PromiseFulfill,
 					//PromiseInstance = thisPtr,
-					CallbackFunction = new NaNBoxing() ,
+					CallbackFunction = new NaNBoxing(),
 					Value = promiseWapper._value,
 					NextPromiseInstance = nextPromise
 				};
@@ -477,7 +477,7 @@ namespace juicescript.runtime.buildin
 
 
 
-		static bool IsCallable(NaNBoxing value,Context context,out RtHeapInstance closure)
+		static bool IsCallable(NaNBoxing value, Context context, out RtHeapInstance closure)
 		{
 			switch (value.ValueType)
 			{
@@ -561,36 +561,225 @@ namespace juicescript.runtime.buildin
 				_count = 0;
 			}
 
-			internal void RunMicrotasks(Context context)
+			internal void RunMicrotasks(Context context,ref ReceiveError task_fault)
 			{
 				PromiseMicroTask task;
-				while ( TryDequeue(out task) )
+				unsafe
 				{
-					if (task.Type == MicroTaskType.PromiseFulfill)
+					StackLocater* args1 = stackalloc StackLocater[1];
+					args1->index = 0;
+
+					while (TryDequeue(out task))
 					{
-						NaNBoxing value;
-
-						if (task.CallbackFunction.ValueType != NaNBoxing.BoxType.HeapPtr)
+						if (task.Type == MicroTaskType.PromiseFulfill)
 						{
-							//直接透传
-							value = task.Value;
+							if (task.CallbackFunction.ValueType != NaNBoxing.BoxType.HeapPtr)
+							{
+								// onFulfilled 未提供，直接透传
+								ResolvePromise(context, task.NextPromiseInstance, task.Value);
+								continue;
+							}
 
-							ResolvePromise(context, task.NextPromiseInstance, value);
+							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
+							if (cbInstance.TypeKind != RtHeapTypeKind.CLOSURE)
+							{
+								// 理论上不会发生；降级为透传
+								ResolvePromise(context, task.NextPromiseInstance, task.Value);
+								continue;
+							}
 
+							var cbClosure = (RtPayloadClosure)cbInstance.facility;
+							var cbMethod = ((ASMethodBody)cbInstance.Type).Method;
+
+							if (context.StackPosition + 4 >= Context.STACK_LENGTH)
+							{
+								ReceiveError tempErr = default;
+								context.player.RaiseStackOverflow(ref tempErr);
+								if (tempErr.error.ValueType == NaNBoxing.BoxType.Fault)
+								{
+									task_fault = tempErr;
+									return;
+								}
+
+								((PromiseWapper)((RtPayloadInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr].facility).wapperedObject)
+									.Reject(context, tempErr.error);
+
+								continue;
+							}
+
+							int basePos = context.StackPosition;
+							context.StackSlots[basePos] = task.Value;
+							context.StackSlots[basePos + 1].SetUndefined();
+							context.StackSlots[basePos + 2] = task.NextPromiseInstance;
+							context.StackSlots[basePos + 3] = task.CallbackFunction;
+							context.StackPosition += 4;
+
+							ReceiveError error = default;
+							var slots = context.StackSlots.AsSpan(basePos, 1);
+
+							context.player.RunMethod(
+								cbMethod,
+								cbClosure.This,
+								cbClosure.ScopePtr,
+								cbClosure.ScopeType,
+								1,
+								(byte*)args1,
+								slots,
+								ref error,
+								basePos + 1,
+								task.CallbackFunction.HeapPtr
+							);
+
+							context.StackPosition -= 4;
+
+							if (error.raised)
+							{
+								if (error.error.ValueType == NaNBoxing.BoxType.Fault)
+								{
+									task_fault = error;
+									return;
+								}
+
+								NaNBoxing e = error.error;
+								error.error.SetUndefined();
+								error.raised = false;
+								context.errorStack.Clear();
+
+								ReceiveError tempErr = default;
+								NaNBoxing reason = context.player.GetSaveValue(e, ref tempErr);
+								if (tempErr.raised)
+								{
+									tempErr.error.setFault();
+									task_fault = tempErr;
+									return;
+								}
+
+								((PromiseWapper)((RtPayloadInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr].facility).wapperedObject)
+									.Reject(context, reason);
+
+								continue;
+							}
+
+							NaNBoxing ret = context.StackSlots[basePos + 1];
+							ReceiveError saveErr = default;
+							ret = context.player.GetSaveValue(ret, ref saveErr);
+							if (saveErr.raised)
+							{
+								saveErr.error.setFault();
+								task_fault = saveErr;
+								return;
+							}
+
+							ResolvePromise(context, task.NextPromiseInstance, ret);
 						}
 						else
 						{
-							throw new NotImplementedException();
+							Debug.Assert(task.Type == MicroTaskType.PromiseReject);
+
+							if (task.CallbackFunction.ValueType != NaNBoxing.BoxType.HeapPtr)
+							{
+								// onRejected 未提供，直接向后透传拒绝
+								((PromiseWapper)((RtPayloadInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr].facility).wapperedObject)
+									.Reject(context, task.Value);
+								continue;
+							}
+
+							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
+							if (cbInstance.TypeKind != RtHeapTypeKind.CLOSURE)
+							{
+								((PromiseWapper)((RtPayloadInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr].facility).wapperedObject)
+									.Reject(context, task.Value);
+								continue;
+							}
+
+							var cbClosure = (RtPayloadClosure)cbInstance.facility;
+							var cbMethod = ((ASMethodBody)cbInstance.Type).Method;
+
+							if (context.StackPosition + 4 >= Context.STACK_LENGTH)
+							{
+								ReceiveError tempErr = default;
+								context.player.RaiseStackOverflow(ref tempErr);
+								if (tempErr.error.ValueType == NaNBoxing.BoxType.Fault)
+								{
+									task_fault = tempErr;
+									return;
+								}
+
+								((PromiseWapper)((RtPayloadInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr].facility).wapperedObject)
+									.Reject(context, tempErr.error);
+
+								continue;
+							}
+
+							int basePos = context.StackPosition;
+							context.StackSlots[basePos] = task.Value;
+							context.StackSlots[basePos + 1].SetUndefined();
+							context.StackSlots[basePos + 2] = task.NextPromiseInstance;
+							context.StackSlots[basePos + 3] = task.CallbackFunction;
+
+							context.StackPosition += 4;
+
+							ReceiveError error = default;
+							var slots = context.StackSlots.AsSpan(basePos, 1);
+
+							context.player.RunMethod(
+								cbMethod,
+								cbClosure.This,
+								cbClosure.ScopePtr,
+								cbClosure.ScopeType,
+								1,
+								(byte*)args1,
+								slots,
+								ref error,
+								basePos + 1,
+								task.CallbackFunction.HeapPtr
+							);
+
+							context.StackPosition -= 4;
+
+							if (error.raised)
+							{
+								if (error.error.ValueType == NaNBoxing.BoxType.Fault)
+								{
+									task_fault = error;
+									return;
+								}
+
+								NaNBoxing e = error.error;
+								error.error.SetUndefined();
+								error.raised = false;
+								context.errorStack.Clear();
+
+								ReceiveError tempErr = default;
+								NaNBoxing reason = context.player.GetSaveValue(e, ref tempErr);
+								if (tempErr.raised)
+								{
+									tempErr.error.setFault();
+									task_fault = tempErr;
+									return;
+								}
+
+								((PromiseWapper)((RtPayloadInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr].facility).wapperedObject)
+									.Reject(context, reason);
+
+								continue;
+							}
+
+							NaNBoxing ret = context.StackSlots[basePos + 1];
+							ReceiveError saveErr = default;
+							ret = context.player.GetSaveValue(ret, ref saveErr);
+							if (saveErr.raised)
+							{
+								saveErr.error.setFault();
+								task_fault = saveErr;
+								return;
+							}
+
+							// onRejected 返回值会使 nextPromise 走 resolve 流程（通常转为 fulfilled）
+							ResolvePromise(context, task.NextPromiseInstance, ret);
 						}
 
-						
-						
 					}
-					else
-					{
-						throw new NotImplementedException();
-					}
-
 				}
 			}
 
@@ -600,34 +789,527 @@ namespace juicescript.runtime.buildin
 
 				if (context.player.IsStrictlyEqual(nextPromiseInstance, value))
 				{
-					
+
 					ReceiveError tempErr = default;
 					context.player.RaiseError(ref tempErr, "Chaining cycle");
 					if (tempErr.error.ValueType == NaNBoxing.BoxType.Fault)
 					{
 						return;
-					}					
-					p.Reject(context,tempErr.error);
+					}
+					p.Reject(context, tempErr.error);
 					return;
 				}
 
-				if ( context.player.IsPrimitive( value))
+				if (context.player.IsPrimitive(value))
 				{
 					p.FulFill(context, value);
+					return;
 				}
 
+				// Step 5: Check if value is a Promise instance
+				var heapInstance = context.GC.Heap[value.HeapPtr];
+				if (heapInstance.TypeKind == RtHeapTypeKind.INSTANCE &&
+					heapInstance.Type is ASInstance asInstance &&
+					asInstance._link_codescope.TypeLayout.ASType.Type_identifier == context.PROMISE.Type_identifier
+					)
+				{
+					// Value is a Promise, adopt its state
+					var valuePromise = (PromiseWapper)((RtPayloadInstance)heapInstance.facility).wapperedObject;
+
+					if (valuePromise._state == PromiseState.fulfilled)
+					{
+						p.FulFill(context, valuePromise._value);
+						return;
+					}
+					else if (valuePromise._state == PromiseState.rejected)
+					{
+						p.Reject(context, valuePromise._reason);
+						return;
+					}
+					else // pending
+					{
+						// Add reaction to wait for value Promise to settle
+						Reaction reaction = new Reaction();
+						reaction.nextPromise = nextPromiseInstance;
+
+						// Create callbacks that will resolve/reject nextPromise
+						// when valuePromise settles
+						// (Implementation details in Algorithm 4)
+
+						if (valuePromise.reactions == null)
+						{
+							valuePromise.reactions = new List<Reaction>();
+						}
+						valuePromise.reactions.Add(reaction);
+						return;
+					}
+				}
 				//考虑then able
+				Debug.Assert(context.player.nsSetIncludingPublicAndAS3 != null); //必须的命名空间已经准备好。globalswc里就有，不可能没有。
+																				 // Step 6: Try to get "then" property
+				ReceiveError thenErr = default;
+				NaNBoxing thenValue;
+				if (!TryGetThenProperty(context, value, out thenValue, ref thenErr))
+				{
+					// Error accessing "then" property
+					if (thenErr.error.ValueType == NaNBoxing.BoxType.Fault)
+					{
+						return; // Unrecoverable fault
+					}
+					p.Reject(context, thenErr.error);
+					return;
+				}
 
+				// Step 7: Check if "then" is callable
+				RtHeapInstance thenClosure;
+				if (!IsCallable(thenValue, context, out thenClosure))
+				{
+					// "then" is not a function, fulfill with value
+					p.FulFill(context, value);
+					return;
+				}
 
+				// Step 8: Call thenable.then(resolveCallback, rejectCallback)
+				ReceiveError callErr = default;
+				CallThenable(context, thenValue, value, nextPromiseInstance, ref callErr);
+
+				if (callErr.raised)
+				{
+					if (callErr.error.ValueType == NaNBoxing.BoxType.Fault)
+					{
+						return; // Unrecoverable fault
+					}
+					p.Reject(context, callErr.error);
+					return;
+				}
 
 			}
 
+			private bool TryGetThenProperty(
+				Context context,
+				NaNBoxing value,
+				out NaNBoxing thenValue,
+				ref ReceiveError error)
+			{
+				thenValue = default;
+				thenValue.SetUndefined();
 
+				// Validate input
+				if (value.ValueType != NaNBoxing.BoxType.HeapPtr)
+				{
+					return true; // Not an object, "then" is undefined
+				}
+
+				var heapInstance = context.GC.Heap[value.HeapPtr];
+
+				// Get type information
+				RtHeapTypeKind kind = heapInstance.TypeKind;
+				ASContainer as_type = heapInstance.Type as ASContainer;
+
+				if (as_type == null)
+				{
+					return true; // No type info, "then" is undefined
+				}
+
+				// Get namespace set for property resolution
+				ASNamespaceSet ns_set = context.player.nsSetIncludingPublicAndAS3;
+				
+				// Check stack space
+				if (context.StackPosition + 4 >= Context.STACK_LENGTH)
+				{
+					context.player.RaiseStackOverflow(ref error);
+					return false;
+				}
+
+				int basePos = context.StackPosition;
+				context.StackPosition += 4; // Reserve space for property lookup
+
+				
+				// Use MultiNameLSearch to find "then" property
+				StackLocater stack = new StackLocater { index = 0 };
+				var stackslots = context.StackSlots.AsSpan(basePos, 4);
+
+				int code = context.player.MultiNameLSearch(
+					ns_set,
+					kind,
+					as_type,
+					"then",
+					stack,
+					stackslots,
+					basePos,
+					value,
+					value, // this_ptr same as instance
+					ref error,
+					true   // exclude_user_ns
+				);
+
+				if (code == 1)
+				{
+					context.StackPosition = basePos;
+					// Error during property search
+					return false;
+				}
+				else if (code == 2)
+				{
+					context.StackPosition = basePos;
+					// Ambiguous property - treat as error
+					context.player.RaiseError(ref error, "Ambiguous property 'then'");
+					return false;
+				}
+				else if (code == 0)
+				{
+					// Property found - result is in stackslots[0]
+					NaNBoxing result = stackslots[0];
+
+					// Check if result is a cache object (getter/setter)
+					if (result.ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						var resultHeap = context.GC.Heap[result.HeapPtr];
+
+						if (resultHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
+						{
+							// This is a property accessor, need to invoke getter
+							var cache = (RtPayloadStackCache)resultHeap.facility;
+
+							if (cache.trait[0] != null && cache.trait[0].Kind == TraitKind.Getter)
+							{
+								// Invoke getter
+								ASMethod getterMethod = cache.trait[0].Method;
+								NaNBoxing thisPtr = value; // Use the object as 'this'
+
+								try
+								{
+									unsafe
+									{
+										thenValue = context.player.RunMethod(
+											getterMethod,
+											thisPtr,
+											value.HeapPtr,
+											(ASContainer)heapInstance.Type,
+											0,        // No arguments
+											null,     // No argument pointer
+											stackslots,
+											ref error,
+											basePos   // Return slot
+										);
+									}
+
+									if (error.raised)
+									{
+										context.StackPosition = basePos;
+										return false;
+									}
+
+									context.StackPosition = basePos;
+									return true;
+								}
+								catch
+								{
+									context.StackPosition = basePos;
+									return false;
+								}
+							}
+							else if (cache.searchPropertyName.ValueType != NaNBoxing.BoxType.Undefined)
+							{
+								// Dynamic property - search through prototype chain
+								NaNBoxing dynValue;
+								int matchShapePtr;
+								int slotIndex;
+								RtPayloadDynamic dynProp;
+
+								// First search on the object itself
+								if (context.player.FindDynamicValue(heapInstance, "then", out dynValue, out matchShapePtr, out slotIndex, out dynProp))
+								{
+									thenValue = dynValue;
+									context.StackPosition = basePos;
+									return true;
+								}
+
+								// Not found on object, search prototype chain
+								int protoPtr = 0;
+
+								// Get prototype based on object type
+								if (heapInstance.TypeKind == RtHeapTypeKind.INSTANCE)
+								{
+									protoPtr = ((RtPayloadInstance)heapInstance.facility).PROTOTYPE(context.player, (ASInstance)heapInstance.Type);
+								}
+								else if (heapInstance.TypeKind == RtHeapTypeKind.CLOSURE)
+								{
+									protoPtr = ((RtPayloadClosure)heapInstance.facility).PROTOTYPE(context.player);
+								}
+								else if (heapInstance.TypeKind == RtHeapTypeKind.ARRAY)
+								{
+									protoPtr = ((RtPayloadScriptClass)context.GC.Heap[context.ARRAY.__instance_index__].facility).PROTO__PTR;
+								}
+								else if (heapInstance.TypeKind == RtHeapTypeKind.GLOBAL)
+								{
+									protoPtr = ((RtPayloadScriptClass)context.GC.Heap[context.OBJECT.__instance_index__].facility).PROTO__PTR;
+								}
+
+								// Walk the prototype chain
+								int maxSteps = 32; // Prevent infinite loops
+								while (protoPtr > 0 && maxSteps > 0)
+								{
+									var protoObj = context.GC.Heap[protoPtr];
+
+									if (context.player.FindDynamicValue(protoObj, "then", out dynValue, out matchShapePtr, out slotIndex, out dynProp))
+									{
+										thenValue = dynValue;
+										context.StackPosition = basePos;
+										return true;
+									}
+
+									// Move to next prototype
+									if (protoObj.TypeKind == RtHeapTypeKind.INSTANCE)
+									{
+										protoPtr = ((RtPayloadInstance)protoObj.facility).PROTOTYPE(context.player, (ASInstance)protoObj.Type);
+									}
+									else
+									{
+										break; // Can't continue
+									}
+
+									maxSteps--;
+								}
+
+								// Not found in prototype chain, "then" is undefined
+								thenValue.SetUndefined();
+								context.StackPosition = basePos;
+								return true;
+							}
+						}
+						else if (resultHeap.TypeKind == RtHeapTypeKind.CLOSURE)
+						{
+							// Found a method closure
+							thenValue = result;
+							context.StackPosition = basePos;
+							return true;
+						}
+					}
+
+					// Direct value
+					thenValue = result;
+					context.StackPosition = basePos;
+					return true;
+				}
+				else
+				{
+					Debug.Assert(false, "返回code超过预期");
+
+					context.StackPosition = basePos;
+					return false;
+				}
+			}
+
+			// CallThenable - 调用thenable的then方法
+			private void CallThenable(
+				Context context,
+				NaNBoxing thenFunction,
+				NaNBoxing thenableObject,
+				NaNBoxing targetPromise,
+				ref ReceiveError error)
+			{
+				// 创建共享状态对象
+				int statePtr = context.GC.AllocHeapInstance(context.OBJECT, out var stateHeap);
+				stateHeap.TypeKind = RtHeapTypeKind.WAPPER;
+				
+				var callbackState = new ThenableCallbackState
+				{
+					alreadyCalled = false,
+					targetPromise = targetPromise,
+					queue = this
+				};
+				
+				stateHeap.facility = callbackState;
+				((RtPayloadInstance)stateHeap.facility).wapperedObject = callbackState;
+
+				// 检查栈空间
+				if (context.StackPosition + 2 >= Context.STACK_LENGTH)
+				{
+					context.player.RaiseStackOverflow(ref error);
+					return;
+				}
+
+				int basePos = context.StackPosition;
+				context.StackPosition += 2;
+
+				try
+				{
+					// 创建resolve回调闭包
+					int resolveClosurePtr = context.GC.AllocHeapInstance(context.FUNCTION, out var resolveHeap);
+					resolveHeap.TypeKind = RtHeapTypeKind.CLOSURE;
+					
+					var resolveClosure = new RtPayloadClosure();
+					resolveClosure.NativeCallback = (ctx, method, scope_ptr, thisPtr, stackStPos, ref err, returnSlotIndex) =>
+					{
+						ThenableResolveCallback(ctx, statePtr, stackStPos, ref err);
+					};
+					
+					resolveHeap.facility = resolveClosure;
+					context.StackSlots[basePos].SetHeapPtr(resolveClosurePtr);
+
+					// 创建reject回调闭包
+					int rejectClosurePtr = context.GC.AllocHeapInstance(context.FUNCTION, out var rejectHeap);
+					rejectHeap.TypeKind = RtHeapTypeKind.CLOSURE;
+					
+					var rejectClosure = new RtPayloadClosure();
+					rejectClosure.NativeCallback = (ctx, method, scope_ptr, thisPtr, stackStPos, ref err, returnSlotIndex) =>
+					{
+						ThenableRejectCallback(ctx, statePtr, stackStPos, ref err);
+					};
+					
+					rejectHeap.facility = rejectClosure;
+					context.StackSlots[basePos + 1].SetHeapPtr(rejectClosurePtr);
+
+					// 调用thenable.then(resolveCallback, rejectCallback)
+					var thenClosure = context.GC.Heap[thenFunction.HeapPtr];
+					var thenMethod = ((ASMethodBody)thenClosure.Type).Method;
+					var thenPayload = (RtPayloadClosure)thenClosure.facility;
+
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args[0].index = 0;
+						args[1].index = 1;
+
+						var slots = context.StackSlots.AsSpan(basePos, 2);
+
+						context.player.RunMethod(
+							thenMethod,
+							thenableObject,  // this指向thenable对象
+							thenPayload.ScopePtr,
+							thenPayload.ScopeType,
+							2,  // 两个参数
+							(byte*)args,
+							slots,
+							ref error,
+							-1  // 不需要返回值
+						);
+					}
+
+					if (error.raised)
+					{
+						// 调用then时发生错误，拒绝Promise
+						if (!callbackState.alreadyCalled)
+						{
+							callbackState.alreadyCalled = true;
+							var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[targetPromise.HeapPtr].facility).wapperedObject;
+							
+							NaNBoxing errorValue = default;
+							errorValue.SetHeapPtr(error.error_ptr);
+							targetWapper.Reject(context, errorValue);
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					// 捕获任何异常并拒绝Promise
+					if (statePtr > 0)
+					{
+						var state = (ThenableCallbackState)context.GC.Heap[statePtr].facility;
+						if (!state.alreadyCalled)
+						{
+							state.alreadyCalled = true;
+							var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[targetPromise.HeapPtr].facility).wapperedObject;
+							
+							// 创建错误对象
+							context.player.RaiseError(ref error, ex.Message);
+							NaNBoxing errorValue = default;
+							errorValue.SetHeapPtr(error.error_ptr);
+							targetWapper.Reject(context, errorValue);
+						}
+					}
+				}
+				finally
+				{
+					context.StackPosition = basePos;
+				}
+			}
+
+			// Thenable Resolve回调
+			private void ThenableResolveCallback(
+				Context context,
+				int statePtr,
+				int stackStPos,
+				ref ReceiveError error)
+			{
+				var state = (ThenableCallbackState)context.GC.Heap[statePtr].facility;
+				
+				// 检查是否已经被调用
+				if (state.alreadyCalled)
+				{
+					return;
+				}
+				
+				state.alreadyCalled = true;
+
+				// 获取传入的值（第一个参数）
+				NaNBoxing value = context.StackSlots[stackStPos];
+
+				// 递归调用ResolvePromise
+				state.queue.ResolvePromise(context, state.targetPromise, value);
+			}
+
+			// Thenable Reject回调
+			private void ThenableRejectCallback(
+				Context context,
+				int statePtr,
+				int stackStPos,
+				ref ReceiveError error)
+			{
+				var state = (ThenableCallbackState)context.GC.Heap[statePtr].facility;
+				
+				// 检查是否已经被调用
+				if (state.alreadyCalled)
+				{
+					return;
+				}
+				
+				state.alreadyCalled = true;
+
+				// 获取传入的原因（第一个参数）
+				NaNBoxing reason = context.StackSlots[stackStPos];
+
+				// 拒绝目标Promise
+				var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[state.targetPromise.HeapPtr].facility).wapperedObject;
+				targetWapper.Reject(context, reason);
+			}
+
+			internal void OnGCMark(Context context)
+			{
+				var h = _head;
+				var c = _count;
+
+				while (c >0)
+				{
+					var task = _taskBuffer[h];
+					h = (h + 1) % _taskBuffer.Length;
+					c--;
+					
+
+					if(task.NextPromiseInstance.ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						context.GC.mark( context.GC.Heap[ task.NextPromiseInstance.HeapPtr] );
+					}
+					if(task.Value.ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						context.GC.mark( context.GC.Heap[ task.Value.HeapPtr] );
+					}
+					if(task.CallbackFunction.ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						context.GC.mark( context.GC.Heap[ task.CallbackFunction.HeapPtr] );
+					}
+
+
+				}
+
+				
+			}
 		}
 
 
 		enum PromiseState
-		{ 
+		{
 			pending,
 			fulfilled,
 			rejected
@@ -644,7 +1326,7 @@ namespace juicescript.runtime.buildin
 			internal List<Reaction> reactions;
 
 
-			public void Reject(Context context,NaNBoxing error)
+			public void Reject(Context context, NaNBoxing error)
 			{
 				_state = PromiseState.rejected;
 				_reason = error;
@@ -710,7 +1392,7 @@ namespace juicescript.runtime.buildin
 			{
 				if (_value.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					context.GC.mark( context.GC.Heap[ _value.HeapPtr]);
+					context.GC.mark(context.GC.Heap[_value.HeapPtr]);
 				}
 
 				if (_reason.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -739,9 +1421,30 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			
+
 		}
 
+		// Thenable回调状态类 - 用于存储thenable解析时的回调状态
+		class ThenableCallbackState : RtWapperBase
+		{
+			internal bool alreadyCalled;
+			internal NaNBoxing targetPromise;
+			internal PromiseMicroTaskQueue queue;
+
+			public override void OnGCMark(Context context)
+			{
+				if (targetPromise.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					context.GC.mark(context.GC.Heap[targetPromise.HeapPtr]);
+				}
+			}
+
+			public override void OnDelete()
+			{
+				
+			}
+
+		}
 
 	}
 }

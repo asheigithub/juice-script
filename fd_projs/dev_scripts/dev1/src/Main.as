@@ -26,7 +26,8 @@ var p:Promise = new Promise( function (resolve):void
 } );
 
 
-p.then( null  ).catch (null).then(null);
+
+p.then( function(){ trace("haha" );   return {  then:444 }; }).catch ( function( e){ trace(e); }   ).then(null);
 
 //class Test262Error extends Error
 //{
