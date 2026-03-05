@@ -14,7 +14,7 @@ namespace juicescript.runtime.buildin
 		
 
 
-		[NativeFunction("__AS3__.toplevel$public::isNaN")]
+		[NativeFunction("$__AS3__.toplevel$public::isNaN")]
 		public static void TopLevel_IsNaN(Context context,
 			ASMethod method,
 			int scope_ptr, 
@@ -33,7 +33,7 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex].SetBoolean( double.IsNaN(arg0.Number) );
 		}
 
-		[NativeFunction("__AS3__.toplevel$public::isFinite")]
+		[NativeFunction("$__AS3__.toplevel$public::isFinite")]
 		public static void TopLevel_IsFinite(Context context,
 			ASMethod method,
 			int scope_ptr,
@@ -303,7 +303,7 @@ namespace juicescript.runtime.buildin
 		}
 
 
-		[NativeFunction("__AS3__.toplevel$public::trace")]
+		[NativeFunction("$__AS3__.toplevel$public::trace")]
 		public static void Trace(Context context,
 			ASMethod method,
 			int scope_ptr,

@@ -11,7 +11,7 @@ namespace juicescript.runtime.buildin
 	internal class MathImpl
 	{
 		//.Math$public::floor
-		[NativeFunction(".Math$public::floor")]
+		[NativeFunction("$.Math$public::floor")]
 		public static void Math_floor(Context context,
 			ASMethod method,
 			int scope_ptr,
@@ -31,7 +31,7 @@ namespace juicescript.runtime.buildin
 		}
 
 		//.Math$public::ceil 
-		[NativeFunction(".Math$public::ceil")]
+		[NativeFunction("$.Math$public::ceil")]
 		public static void Math_ceil(Context context,
 			ASMethod method,
 			int scope_ptr,

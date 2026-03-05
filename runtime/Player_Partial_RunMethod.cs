@@ -666,7 +666,7 @@ namespace juicescript.runtime
 						method.__is_vector_method ?
 						$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
 						:
-						$"{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
+						$"{ ( method.Trait !=null && method.Trait.IsStatic ? "$":"" ) }{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
 
 					var m = NativeFunctionRegistry.GetFunction(key);
 					if (m != null)

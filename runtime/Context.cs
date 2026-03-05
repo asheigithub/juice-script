@@ -151,8 +151,7 @@ namespace juicescript.runtime
         {
             this.player = player;
 
-            MicroTaskQueue = new PromiseMicroTaskQueue();
-
+            
             link_const_class = new List<ASClass>();
             link_const_methods = new List<ASMethod>();
             link_const_vtableitems = new List<VTableItem>();
@@ -248,10 +247,12 @@ namespace juicescript.runtime
 
             errorStack = new ErrorStackTrace();
 
-        }
+			MicroTaskQueue = new PromiseMicroTaskQueue();
+
+		}
 
 
-    }
+	}
 
 
 

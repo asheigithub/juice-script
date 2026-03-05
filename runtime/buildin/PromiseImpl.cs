@@ -474,7 +474,98 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex].SetHeapPtr(nextPromise_ptr);
 		}
 
+		[NativeFunction("$.Promise$public::resolve")]
+		public static void Promise_static_resolve(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var value = scope.ReadSlot(0, context.player);
 
+			if(value.ValueType == NaNBoxing.BoxType.HeapPtr)
+			{
+				var heapobj = context.GC.Heap[value.HeapPtr];
+				if(heapobj.TypeKind == RtHeapTypeKind.INSTANCE && heapobj.Type == context.PROMISE.Instance)
+				{
+					context.StackSlots[returnSlotIndex] = value;
+					return;
+				}
+			}
+
+			RtHeapInstance promise;
+			var p = context.GC.AllocInstance(context.PROMISE.Instance, out promise);
+			if(p == 0)
+			{
+				context.player.RaiseOutOfMemory(ref error);
+				return;
+			}
+
+			value = context.player.GetSaveValue(value, ref error);
+			if(error.raised)
+			{
+				return;
+			}
+
+			PromiseWapper wapper = new PromiseWapper();
+
+			((RtPayloadInstance)promise.facility).wapperedObject = wapper;
+			wapper._state = PromiseState.pending;
+
+			NaNBoxing promise_store = default;
+			promise_store.SetHeapPtr(p);
+
+
+			context.StackSlots[returnSlotIndex] = promise_store;
+
+			context.MicroTaskQueue.ResolvePromise(context, promise_store, value, ref error);
+			if (error.raised)
+			{
+				context.StackSlots[returnSlotIndex].SetUndefined();
+			}
+			else
+			{
+				context.StackSlots[returnSlotIndex] = promise_store;
+			}
+		}
+
+
+		[NativeFunction("$.Promise$public::reject")]
+		public static void Promise_static_reject(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var reason = scope.ReadSlot(0, context.player);
+
+			// 提升 reason 到堆
+			reason = context.player.GetSaveValue(reason, ref error);
+			if (error.raised)
+			{
+				return;
+			}
+
+			// 创建一个新的 Promise
+			RtHeapInstance pInstance;
+			int pPtr = context.GC.AllocInstance(context.PROMISE.Instance, out pInstance);
+			if (pPtr == 0)
+			{
+				context.player.RaiseOutOfMemory(ref error);
+				return;
+			}
+
+			PromiseWapper w = new PromiseWapper();
+			((RtPayloadInstance)pInstance.facility).wapperedObject = w;
+
+			// 直接 reject
+			w.Reject(context, reason);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(pPtr);
+
+
+		}
 
 
 		static bool IsCallable(NaNBoxing value, Context context, out RtHeapInstance closure)
@@ -523,6 +614,61 @@ namespace juicescript.runtime.buildin
 			public PromiseMicroTaskQueue()
 			{
 				_taskBuffer = new PromiseMicroTask[DefaultCapacity];
+			}
+
+			internal void InitMethods(Context context)
+			{
+				Debug.Assert( context.PROMISE !=null );
+
+				thenableResolve = new ASMethod(context.PROMISE._link_codescope.Container, context.PROMISE.Token);
+				thenableResolve.ReturnTypeKind = TypeKind.Fun_Void;
+				thenableResolve.__ismethod = true;
+				thenableResolve.Flags = MethodFlags.Native;
+				thenableResolve.Name = "@thenableResolve";
+				thenableResolve.Body = new ASMethodBody(thenableResolve);
+				thenableResolve.Body.ByteCode = new byte[12];
+				thenableResolve.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = context.PROMISE._link_codescope.Parent };
+				thenableResolve.IsAnonymous = true;
+				thenableResolve.Parameters.Add(new ASParameter(thenableResolve) { IsOptional = false, Name = "value", IsRest = false, TypeKind = TypeKind.Any });
+				thenableResolve.Body._link_codescope.Members.Add(new ScopeMember(thenableResolve.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "value",
+					Type = thenableResolve.Parameters[0].Type,
+					TypeKind = TypeKind.Any
+				});
+
+				// 注册 ThenableResolve native function
+				//var resolveNativeFunc = NativeFunctionRegistry.GetFunction("__ThenableResolve__");
+				//if (resolveNativeFunc != null)
+				{
+					thenableResolve.nativefunction_delegate = (NativeFun)ThenableResolve; //Delegate.CreateDelegate(typeof(NativeFun), resolveNativeFunc);
+				}
+
+				thenableReject = new ASMethod(context.PROMISE._link_codescope.Container, context.PROMISE.Token);
+				thenableReject.ReturnTypeKind = TypeKind.Fun_Void;
+				thenableReject.__ismethod = true;
+				thenableReject.Flags = MethodFlags.Native;
+				thenableReject.Name = "@thenableReject";
+				thenableReject.Body = new ASMethodBody(thenableReject);
+				thenableReject.Body.ByteCode = new byte[12];
+				thenableReject.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = context.PROMISE._link_codescope.Parent };
+				thenableReject.IsAnonymous = true;
+				thenableReject.Parameters.Add(new ASParameter(thenableReject) { IsOptional = false, Name = "reason", IsRest = false, TypeKind = TypeKind.Any });
+				thenableReject.Body._link_codescope.Members.Add(new ScopeMember(thenableReject.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "value",
+					Type = thenableReject.Parameters[0].Type,
+					TypeKind = TypeKind.Any
+				});
+
+				// 注册 ThenableReject native function
+				//var rejectNativeFunc = NativeFunctionRegistry.GetFunction("__ThenableReject__");
+				//if (rejectNativeFunc != null)
+				{
+					thenableReject.nativefunction_delegate = (NativeFun)ThenableReject; //Delegate.CreateDelegate(typeof(NativeFun), rejectNativeFunc);
+				}
 			}
 
 			public void Enqueue(PromiseMicroTask task)
@@ -575,16 +721,58 @@ namespace juicescript.runtime.buildin
 						{
 							if (task.CallbackFunction.ValueType != NaNBoxing.BoxType.HeapPtr)
 							{
+								if (context.StackPosition + 4 >= Context.STACK_LENGTH)
+								{
+									ReceiveError tempErr = default;
+									context.player.RaiseStackOverflow(ref tempErr);
+									if (tempErr.error.ValueType == NaNBoxing.BoxType.Fault)
+									{
+										task_fault = tempErr;
+										return;
+									}
+								}
+								int _bpos = context.StackPosition;
+								context.StackSlots[_bpos] = task.Value;
+								context.StackSlots[_bpos + 1].SetUndefined();
+								context.StackSlots[_bpos + 2] = task.NextPromiseInstance;
+								context.StackSlots[_bpos + 3] = task.CallbackFunction;
+								context.StackPosition += 4;
+
 								// onFulfilled 未提供，直接透传
-								ResolvePromise(context, task.NextPromiseInstance, task.Value);
+								ResolvePromise(context, task.NextPromiseInstance, task.Value,ref task_fault);
+
+								context.StackPosition = _bpos;
+
+
 								continue;
 							}
 
 							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
 							if (cbInstance.TypeKind != RtHeapTypeKind.CLOSURE)
 							{
+								if (context.StackPosition + 4 >= Context.STACK_LENGTH)
+								{
+									ReceiveError tempErr = default;
+									context.player.RaiseStackOverflow(ref tempErr);
+									if (tempErr.error.ValueType == NaNBoxing.BoxType.Fault)
+									{
+										task_fault = tempErr;
+										return;
+									}
+								}
+								int _bpos = context.StackPosition;
+								context.StackSlots[_bpos] = task.Value;
+								context.StackSlots[_bpos + 1].SetUndefined();
+								context.StackSlots[_bpos + 2] = task.NextPromiseInstance;
+								context.StackSlots[_bpos + 3] = task.CallbackFunction;
+								context.StackPosition += 4;
+
 								// 理论上不会发生；降级为透传
-								ResolvePromise(context, task.NextPromiseInstance, task.Value);
+								ResolvePromise(context, task.NextPromiseInstance, task.Value,ref task_fault);
+
+								context.StackPosition = _bpos;
+
+
 								continue;
 							}
 
@@ -670,7 +858,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 
-							ResolvePromise(context, task.NextPromiseInstance, ret);
+							ResolvePromise(context, task.NextPromiseInstance, ret, ref error);
 						}
 						else
 						{
@@ -776,14 +964,14 @@ namespace juicescript.runtime.buildin
 							}
 
 							// onRejected 返回值会使 nextPromise 走 resolve 流程（通常转为 fulfilled）
-							ResolvePromise(context, task.NextPromiseInstance, ret);
+							ResolvePromise(context, task.NextPromiseInstance, ret,ref error);
 						}
 
 					}
 				}
 			}
 
-			private void ResolvePromise(Context context, NaNBoxing nextPromiseInstance, NaNBoxing value)
+			internal void ResolvePromise(Context context, NaNBoxing nextPromiseInstance, NaNBoxing value,ref ReceiveError resolve_falut)
 			{
 				var p = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[nextPromiseInstance.HeapPtr].facility).wapperedObject;
 
@@ -794,6 +982,7 @@ namespace juicescript.runtime.buildin
 					context.player.RaiseError(ref tempErr, "Chaining cycle");
 					if (tempErr.error.ValueType == NaNBoxing.BoxType.Fault)
 					{
+						resolve_falut = tempErr;
 						return;
 					}
 					p.Reject(context, tempErr.error);
@@ -846,7 +1035,8 @@ namespace juicescript.runtime.buildin
 				}
 				//考虑then able
 				Debug.Assert(context.player.nsSetIncludingPublicAndAS3 != null); //必须的命名空间已经准备好。globalswc里就有，不可能没有。
-																				 // Step 6: Try to get "then" property
+				
+				// Step 6: Try to get "then" property
 				ReceiveError thenErr = default;
 				NaNBoxing thenValue;
 				if (!TryGetThenProperty(context, value, out thenValue, ref thenErr))
@@ -854,9 +1044,20 @@ namespace juicescript.runtime.buildin
 					// Error accessing "then" property
 					if (thenErr.error.ValueType == NaNBoxing.BoxType.Fault)
 					{
+						resolve_falut = thenErr;
 						return; // Unrecoverable fault
 					}
-					p.Reject(context, thenErr.error);
+
+					ReceiveError err2 = default;
+					NaNBoxing reason = context.player.GetSaveValue(thenErr.error, ref err2);
+					if (err2.raised)
+					{
+						err2.error.setFault();
+						resolve_falut = err2;
+						return; // Unrecoverable fault
+					}
+
+					p.Reject(context,reason);
 					return;
 				}
 
@@ -877,9 +1078,21 @@ namespace juicescript.runtime.buildin
 				{
 					if (callErr.error.ValueType == NaNBoxing.BoxType.Fault)
 					{
+						resolve_falut = callErr;
 						return; // Unrecoverable fault
 					}
-					p.Reject(context, callErr.error);
+					
+					// 提升 error 到堆
+					ReceiveError err2= default;
+					NaNBoxing reason = context.player.GetSaveValue(callErr.error, ref err2);
+					if (err2.raised)
+					{
+						err2.error.setFault();
+						resolve_falut = err2;
+						return; // Unrecoverable fault
+					}
+					
+					p.Reject(context, reason);
 					return;
 				}
 
@@ -1100,6 +1313,8 @@ namespace juicescript.runtime.buildin
 					return false;
 				}
 			}
+			ASMethod thenableResolve;
+			ASMethod thenableReject;
 
 			// CallThenable - 调用thenable的then方法
 			private void CallThenable(
@@ -1109,19 +1324,26 @@ namespace juicescript.runtime.buildin
 				NaNBoxing targetPromise,
 				ref ReceiveError error)
 			{
-				// 创建共享状态对象
-				int statePtr = context.GC.AllocHeapInstance(context.OBJECT, out var stateHeap);
-				stateHeap.TypeKind = RtHeapTypeKind.WAPPER;
+				// 确保 thenableResolve 和 thenableReject 已初始化
+				Debug.Assert(thenableResolve != null);
+				Debug.Assert(thenableReject != null);
 				
+
+				// 创建共享状态对象
+				RtHeapInstance stateObj;
+				int statePtr = context.GC.AllocInstance(context.OBJECT.Instance, out stateObj);
+				if (statePtr == 0)
+				{
+					context.player.RaiseOutOfMemory(ref error);
+					return;
+				}
+
 				var callbackState = new ThenableCallbackState
 				{
 					alreadyCalled = false,
 					targetPromise = targetPromise,
-					queue = this
 				};
-				
-				stateHeap.facility = callbackState;
-				((RtPayloadInstance)stateHeap.facility).wapperedObject = callbackState;
+				((RtPayloadInstance)stateObj.facility).wapperedObject = callbackState;
 
 				// 检查栈空间
 				if (context.StackPosition + 2 >= Context.STACK_LENGTH)
@@ -1133,147 +1355,94 @@ namespace juicescript.runtime.buildin
 				int basePos = context.StackPosition;
 				context.StackPosition += 2;
 
-				try
+
+
+				// 创建 resolve 回调闭包
+				int resolveCb = context.M_ClosurePtr + basePos;
+
+				RtPayloadClosure resolveClosure = (RtPayloadClosure)context.GC.Heap[resolveCb].facility;
+				context.GC.Heap[resolveCb].Type = thenableResolve.Body;
+				resolveClosure.This.SetHeapPtr(statePtr);
+				resolveClosure.ScopePtr = statePtr;
+				resolveClosure.ScopeType = stateObj.Type;
+				resolveClosure._ref_as_type = context.PROMISE ;
+				resolveClosure.methodscopeslot_ref_state = 0; resolveClosure.HEAPINSTANCE_PTR = 0;
+
+				NaNBoxing resolveCallback = default;
+				resolveCallback.SetHeapPtr(resolveCb);
+
+				// 创建 reject 回调闭包
+				int rejectCb = context.M_ClosurePtr + basePos + 1;
+
+				RtPayloadClosure rejectClosure = (RtPayloadClosure)context.GC.Heap[rejectCb].facility;
+				context.GC.Heap[rejectCb].Type = thenableReject.Body;
+				rejectClosure.This.SetHeapPtr(statePtr);
+				rejectClosure.ScopePtr = statePtr;
+				rejectClosure.ScopeType = stateObj.Type;
+				rejectClosure._ref_as_type = context.PROMISE;
+				rejectClosure.methodscopeslot_ref_state = 0; rejectClosure.HEAPINSTANCE_PTR = 0;
+
+				NaNBoxing rejectCallback = default;
+				rejectCallback.SetHeapPtr(rejectCb);
+
+
+				// 将回调放到栈上
+				context.StackSlots[basePos] = resolveCallback;
+				context.StackSlots[basePos + 1] = rejectCallback;
+
+				// 调用 thenable.then(resolveCallback, rejectCallback)
+				var thenClosure = context.GC.Heap[thenFunction.HeapPtr];
+				var thenMethod = ((ASMethodBody)thenClosure.Type).Method;
+				var thenPayload = (RtPayloadClosure)thenClosure.facility;
+
+				unsafe
 				{
-					// 创建resolve回调闭包
-					int resolveClosurePtr = context.GC.AllocHeapInstance(context.FUNCTION, out var resolveHeap);
-					resolveHeap.TypeKind = RtHeapTypeKind.CLOSURE;
-					
-					var resolveClosure = new RtPayloadClosure();
-					resolveClosure.NativeCallback = (ctx, method, scope_ptr, thisPtr, stackStPos, ref err, returnSlotIndex) =>
+					StackLocater* args = stackalloc StackLocater[2];
+					args[0].index = 0;
+					args[1].index = 1;
+
+					var slots = context.StackSlots.AsSpan(basePos, 2);
+
+					context.player.RunMethod(
+						thenMethod,
+						thenableObject,  // this 指向 thenable 对象
+						thenPayload.ScopePtr,
+						thenPayload.ScopeType,
+						2,  // 两个参数
+						(byte*)args,
+						slots,
+						ref error,
+						-1  // 不需要返回值
+					);
+				}
+
+				
+
+				if (error.raised)
+				{
+					// 调用 then 时发生错误，拒绝 Promise
+					if (!callbackState.alreadyCalled)
 					{
-						ThenableResolveCallback(ctx, statePtr, stackStPos, ref err);
-					};
-					
-					resolveHeap.facility = resolveClosure;
-					context.StackSlots[basePos].SetHeapPtr(resolveClosurePtr);
+						callbackState.alreadyCalled = true;
 
-					// 创建reject回调闭包
-					int rejectClosurePtr = context.GC.AllocHeapInstance(context.FUNCTION, out var rejectHeap);
-					rejectHeap.TypeKind = RtHeapTypeKind.CLOSURE;
-					
-					var rejectClosure = new RtPayloadClosure();
-					rejectClosure.NativeCallback = (ctx, method, scope_ptr, thisPtr, stackStPos, ref err, returnSlotIndex) =>
-					{
-						ThenableRejectCallback(ctx, statePtr, stackStPos, ref err);
-					};
-					
-					rejectHeap.facility = rejectClosure;
-					context.StackSlots[basePos + 1].SetHeapPtr(rejectClosurePtr);
-
-					// 调用thenable.then(resolveCallback, rejectCallback)
-					var thenClosure = context.GC.Heap[thenFunction.HeapPtr];
-					var thenMethod = ((ASMethodBody)thenClosure.Type).Method;
-					var thenPayload = (RtPayloadClosure)thenClosure.facility;
-
-					unsafe
-					{
-						StackLocater* args = stackalloc StackLocater[2];
-						args[0].index = 0;
-						args[1].index = 1;
-
-						var slots = context.StackSlots.AsSpan(basePos, 2);
-
-						context.player.RunMethod(
-							thenMethod,
-							thenableObject,  // this指向thenable对象
-							thenPayload.ScopePtr,
-							thenPayload.ScopeType,
-							2,  // 两个参数
-							(byte*)args,
-							slots,
-							ref error,
-							-1  // 不需要返回值
-						);
-					}
-
-					if (error.raised)
-					{
-						// 调用then时发生错误，拒绝Promise
-						if (!callbackState.alreadyCalled)
+						// 提升 error 到堆
+						ReceiveError err2=default;
+						NaNBoxing reason = context.player.GetSaveValue(error.error, ref err2);
+						if (err2.raised)
 						{
-							callbackState.alreadyCalled = true;
-							var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[targetPromise.HeapPtr].facility).wapperedObject;
-							
-							NaNBoxing errorValue = default;
-							errorValue.SetHeapPtr(error.error_ptr);
-							targetWapper.Reject(context, errorValue);
+							context.StackPosition = basePos;
+							return; // Unrecoverable fault
 						}
+						
+						var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[targetPromise.HeapPtr].facility).wapperedObject;
+						targetWapper.Reject(context, reason);
 					}
 				}
-				catch (Exception ex)
-				{
-					// 捕获任何异常并拒绝Promise
-					if (statePtr > 0)
-					{
-						var state = (ThenableCallbackState)context.GC.Heap[statePtr].facility;
-						if (!state.alreadyCalled)
-						{
-							state.alreadyCalled = true;
-							var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[targetPromise.HeapPtr].facility).wapperedObject;
-							
-							// 创建错误对象
-							context.player.RaiseError(ref error, ex.Message);
-							NaNBoxing errorValue = default;
-							errorValue.SetHeapPtr(error.error_ptr);
-							targetWapper.Reject(context, errorValue);
-						}
-					}
-				}
-				finally
-				{
-					context.StackPosition = basePos;
-				}
+
+				context.StackPosition = basePos;
+
 			}
 
-			// Thenable Resolve回调
-			private void ThenableResolveCallback(
-				Context context,
-				int statePtr,
-				int stackStPos,
-				ref ReceiveError error)
-			{
-				var state = (ThenableCallbackState)context.GC.Heap[statePtr].facility;
-				
-				// 检查是否已经被调用
-				if (state.alreadyCalled)
-				{
-					return;
-				}
-				
-				state.alreadyCalled = true;
-
-				// 获取传入的值（第一个参数）
-				NaNBoxing value = context.StackSlots[stackStPos];
-
-				// 递归调用ResolvePromise
-				state.queue.ResolvePromise(context, state.targetPromise, value);
-			}
-
-			// Thenable Reject回调
-			private void ThenableRejectCallback(
-				Context context,
-				int statePtr,
-				int stackStPos,
-				ref ReceiveError error)
-			{
-				var state = (ThenableCallbackState)context.GC.Heap[statePtr].facility;
-				
-				// 检查是否已经被调用
-				if (state.alreadyCalled)
-				{
-					return;
-				}
-				
-				state.alreadyCalled = true;
-
-				// 获取传入的原因（第一个参数）
-				NaNBoxing reason = context.StackSlots[stackStPos];
-
-				// 拒绝目标Promise
-				var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[state.targetPromise.HeapPtr].facility).wapperedObject;
-				targetWapper.Reject(context, reason);
-			}
 
 			internal void OnGCMark(Context context)
 			{
@@ -1429,8 +1598,7 @@ namespace juicescript.runtime.buildin
 		{
 			internal bool alreadyCalled;
 			internal NaNBoxing targetPromise;
-			internal PromiseMicroTaskQueue queue;
-
+			
 			public override void OnGCMark(Context context)
 			{
 				if (targetPromise.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -1444,6 +1612,77 @@ namespace juicescript.runtime.buildin
 				
 			}
 
+		}
+
+		// Thenable Resolve 回调 - 作为 native function 被 ActionScript 调用
+		public static void ThenableResolve(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			// thisPtr 指向包含 ThenableCallbackState 的对象
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr)
+			{
+				return;
+			}
+
+			var stateObj = context.GC.Heap[thisPtr.HeapPtr];
+			var state = ((RtPayloadInstance)stateObj.facility).wapperedObject as ThenableCallbackState;
+		
+			if (state == null || state.alreadyCalled)
+			{
+				return;
+			}
+
+			state.alreadyCalled = true;
+
+			// 从 scope 读取参数
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var value = scope.ReadSlot(0, context.player);
+
+			// 递归调用 ResolvePromise
+			context.MicroTaskQueue.ResolvePromise(context, state.targetPromise, value,ref error);
+		}
+
+		// Thenable Reject 回调 - 作为 native function 被 ActionScript 调用
+		public static void ThenableReject(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			// thisPtr 指向包含 ThenableCallbackState 的对象
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr)
+			{
+				return;
+			}
+
+			var stateObj = context.GC.Heap[thisPtr.HeapPtr];
+			var state = ((RtPayloadInstance)stateObj.facility).wapperedObject as ThenableCallbackState;
+		
+			if (state == null || state.alreadyCalled)
+			{
+				return;
+			}
+
+			state.alreadyCalled = true;
+
+			// 从 scope 读取参数
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var reason = scope.ReadSlot(0, context.player);
+
+			// reason 提升到堆
+			reason = context.player.GetSaveValue(reason, ref error);
+			if (error.raised)
+			{
+				error.error.setFault(); // 无法恢复的异常
+				return;
+			}
+
+			// 拒绝目标 Promise
+			var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[state.targetPromise.HeapPtr].facility).wapperedObject;
+			targetWapper.Reject(context, reason);
 		}
 
 	}

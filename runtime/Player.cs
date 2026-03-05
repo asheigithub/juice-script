@@ -3676,6 +3676,9 @@ namespace juicescript.runtime
 			cache_ILLEGALOPERATION_ERROR_NAME = Context.GC.AllocString("IllegalOperationError"); if (cache_ILLEGALOPERATION_ERROR_NAME == 0) { throw new LoaderException("cache_ILLEGALOPERATION_ERROR_NAME alloc failed"); }
 			Context.GC.Root.Add(Context.GC.Heap[cache_ILLEGALOPERATION_ERROR_NAME]);
 
+			Context.MicroTaskQueue.InitMethods(Context);
+
+
 			ASClass documentCls = null;
 			foreach (var swc in Context.libs)
 			{

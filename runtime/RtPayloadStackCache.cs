@@ -31,7 +31,7 @@ namespace juicescript.runtime
         public int s_index;
 
 
-public override int Size
+        public override int Size
         {
             get
             {
