@@ -2069,6 +2069,37 @@ namespace juicescript.compiler.IL.Generator
 
 				compileEnv.instructions.Add(bitnot);
 			}
+			else if (step.OpCode == "await")
+			{
+				// await is only valid in async functions
+
+				var m = ((ASMethodBody)compileEnv.Scope.Container).Method;
+				
+				if (!m.Flags.HasFlag(MethodFlags.ASYNC))
+				{
+					throw new ResolverException(step.token, "await is only valid in async functions");
+				}
+
+				var trycatchState = compileEnv.stack_trycatchctx.Peek();
+				if (trycatchState.Any((t) =>
+					//t.state == TryCatchContext.State.Catch || 
+					t.state == TryCatchContext.State.Finally))
+				{
+					throw new ResolverException(m.Token, "Can't await in catch block or finally block");
+				}
+
+				StackLocater rightvalue = LoadRightValue(step.Arg2, compileEnv, step.token);
+				INS_Await_Return iNS_Await = new INS_Await_Return(step.token);
+				iNS_Await.dst = rightvalue;
+
+				compileEnv.instructions.Add(iNS_Await);
+
+				StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg);
+				INS_Await_Resume _Await_Resume = new INS_Await_Resume(step.token);
+				_Await_Resume.dst = dst;
+
+				compileEnv.instructions.Add(_Await_Resume);
+			}
 			else
 			{
 				throw new NotImplementedException();

@@ -73,7 +73,7 @@ namespace juicescript.compiler.parse
 
 <ACCESS_DEF>   ::=<ACCESS_KEYWORD><ACCESS_DEF>| <DefClass> | <DefInterface>|<Function>| <NameSpace> | <Const>|<Variable>;
 
-<ACCESS_KEYWORD> ::=""public"" |""private""   | ""internal"" |""final"" |""dynamic"" | ""static"" |""override"" | ""native"";//|<ClassMetaProperty> ;
+<ACCESS_KEYWORD> ::=""public"" |""private""   | ""internal"" |""final"" |""dynamic"" | ""static"" |""override"" | ""native"" | ""async"" ;//|<ClassMetaProperty> ;
 
 
 
@@ -110,7 +110,7 @@ namespace juicescript.compiler.parse
 					| <Const> 
 					| <ExpressionList>
 					 ; //function和Expression间的二义性，见到function就是定义一个function
-<ACCESS_MEMBER_KEYWORD> ::=""public"" |""private""| ""internal""|""protected"" |""final"" |""static"" |""override"" |""dynamic"" | ""native"" | ""virtual"";
+<ACCESS_MEMBER_KEYWORD> ::=""public"" |""private""| ""internal""|""protected"" |""final"" |""static"" |""override"" |""dynamic"" | ""native"" | ""virtual"" | ""async"";
 
 
 <K_ExpressionList>   ::=<K_Expression><K_CommaOpt> ;
@@ -391,7 +391,7 @@ namespace juicescript.compiler.parse
 <MultiplyOpt> ::= ""*"" <Unary><MultiplyOpt> | ""/"" <Unary><MultiplyOpt> | ""%"" <Unary><MultiplyOpt> | null;    
 
 <Unary>    ::=  ""+"" <Unary> | ""-"" <Unary> | ""~"" <Unary>| ""!"" <Unary>| ""delete""<Access> | ""typeof""<Unary> /*| ""void"" <Access> void会和返回值冲突.. */ //单目运算
-                | ""++"" <Access> | ""--"" <Access>| ""void"" <Access> |<Access>  ;                        
+                | ""++"" <Access> | ""--"" <Access>| ""void"" <Access> |  ""await"" <Access> | <Access>  ;                        
 
 
 

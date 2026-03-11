@@ -205,6 +205,16 @@ namespace juicescript.runtime
 		}
 
 		/// <summary>
+		/// 在直接调用player.Execute时，没有用RunMethod生成methodscope。需要用这个把当前BackTraceIndex 指向的缓存MethocScope的槽清理掉
+		/// 否则GC会去查找错误的引用。
+		/// </summary>
+		internal void EmptyStackSlot()
+		{
+			Slots = new Memory<NaNBoxing>();
+		}
+
+
+		/// <summary>
 		/// 当加载到堆后，把槽位更新到使用new出来的堆对象的槽位
 		/// </summary>
 		/// <param name="newHeapScope"></param>

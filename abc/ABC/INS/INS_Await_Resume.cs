@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 namespace juicescript.ABC.INS
 {
 	/// <summary>
-	/// yield return 指令
-	/// dst: 要yield的返回值的栈位置
+	/// await return 指令
+	/// dst: 要await的返回值的栈位置
 	/// </summary>
-	public sealed class INS_Yield_Return : Instruction
+	public sealed class INS_Await_Resume : Instruction
 	{
-		public INS_Yield_Return(Token token) : base(token)
+		public INS_Await_Resume(Token token) : base(token)
 		{
 		}
 
-		public override INS_Code INS_Code => INS_Code.yield_return;
+		public override INS_Code INS_Code => INS_Code.await_resume;
 
 		public override int Size => 4;
 
@@ -35,7 +35,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"Yield_Return [{dst}]";
+			return $"await remuse[{dst}]";
 		}
 	}
 }

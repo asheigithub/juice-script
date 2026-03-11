@@ -61,6 +61,6 @@ namespace juicescript.ABC
 
         Generator = 2048,
 
-
+        ASYNC =4096,
     }
 }

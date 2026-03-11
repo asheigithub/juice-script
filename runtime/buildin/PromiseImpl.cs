@@ -8,7 +8,9 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.runtime.buildin.GeneratorImpl;
 using static juicescript.runtime.Player;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace juicescript.runtime.buildin
 {
@@ -484,10 +486,10 @@ namespace juicescript.runtime.buildin
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
 			var value = scope.ReadSlot(0, context.player);
 
-			if(value.ValueType == NaNBoxing.BoxType.HeapPtr)
+			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				var heapobj = context.GC.Heap[value.HeapPtr];
-				if(heapobj.TypeKind == RtHeapTypeKind.INSTANCE && heapobj.Type == context.PROMISE.Instance)
+				if (heapobj.TypeKind == RtHeapTypeKind.INSTANCE && heapobj.Type == context.PROMISE.Instance)
 				{
 					context.StackSlots[returnSlotIndex] = value;
 					return;
@@ -496,14 +498,14 @@ namespace juicescript.runtime.buildin
 
 			RtHeapInstance promise;
 			var p = context.GC.AllocInstance(context.PROMISE.Instance, out promise);
-			if(p == 0)
+			if (p == 0)
 			{
 				context.player.RaiseOutOfMemory(ref error);
 				return;
 			}
 
 			value = context.player.GetSaveValue(value, ref error);
-			if(error.raised)
+			if (error.raised)
 			{
 				return;
 			}
@@ -618,7 +620,7 @@ namespace juicescript.runtime.buildin
 
 			internal void InitMethods(Context context)
 			{
-				Debug.Assert( context.PROMISE !=null );
+				Debug.Assert(context.PROMISE != null);
 
 				thenableResolve = new ASMethod(context.PROMISE._link_codescope.Container, context.PROMISE.Token);
 				thenableResolve.ReturnTypeKind = TypeKind.Fun_Void;
@@ -669,6 +671,78 @@ namespace juicescript.runtime.buildin
 				{
 					thenableReject.nativefunction_delegate = (NativeFun)ThenableReject; //Delegate.CreateDelegate(typeof(NativeFun), rejectNativeFunc);
 				}
+
+
+				async_template_ctor = new ASMethod(context.PROMISE._link_codescope.Container, context.PROMISE.Token);
+				async_template_ctor.ReturnTypeKind = TypeKind.Fun_Void;
+				async_template_ctor.__ismethod = true;
+				async_template_ctor.Flags = MethodFlags.Native;
+				async_template_ctor.Name = "@async_template_ctor";
+				async_template_ctor.Body = new ASMethodBody(async_template_ctor);
+				async_template_ctor.Body.ByteCode = new byte[12];
+				async_template_ctor.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = context.PROMISE._link_codescope.Parent };
+				async_template_ctor.IsAnonymous = true;
+				async_template_ctor.Parameters.Add(new ASParameter(async_template_ctor) { IsOptional = false, Name = "resolve", IsRest = false, TypeKind = TypeKind.Any });
+				async_template_ctor.Parameters.Add(new ASParameter(async_template_ctor) { IsOptional = false, Name = "reject", IsRest = false, TypeKind = TypeKind.Any });
+				async_template_ctor.Body._link_codescope.Members.Add(new ScopeMember(async_template_ctor.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "resolve",
+					Type = async_template_ctor.Parameters[0].Type,
+					TypeKind = TypeKind.Any
+				});
+				async_template_ctor.Body._link_codescope.Members.Add(new ScopeMember(async_template_ctor.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "reject",
+					Type = async_template_ctor.Parameters[1].Type,
+					TypeKind = TypeKind.Any
+				});
+				async_template_ctor.nativefunction_delegate = (NativeFun)AsyncTemplate_Ctor; //Delegate.CreateDelegate(typeof(NativeFun), rejectNativeFunc);
+
+
+
+				async_then_onfulfilled = new ASMethod(context.PROMISE._link_codescope.Container, context.PROMISE.Token);
+				async_then_onfulfilled.ReturnTypeKind = TypeKind.Fun_Void;
+				async_then_onfulfilled.__ismethod = true;
+				async_then_onfulfilled.Flags = MethodFlags.Native;
+				async_then_onfulfilled.Name = "@async_template_then_onfulfilled";
+				async_then_onfulfilled.Body = new ASMethodBody(async_then_onfulfilled);
+				async_then_onfulfilled.Body.ByteCode = new byte[12];
+				async_then_onfulfilled.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = context.PROMISE._link_codescope.Parent };
+				async_then_onfulfilled.IsAnonymous = true;
+				async_then_onfulfilled.Parameters.Add(new ASParameter(async_then_onfulfilled) { IsOptional = false, Name = "onFulfilled", IsRest = false, TypeKind = TypeKind.Any });
+				async_then_onfulfilled.Body._link_codescope.Members.Add(new ScopeMember(async_then_onfulfilled.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "onFulfilled",
+					Type = async_then_onfulfilled.Parameters[0].Type,
+					TypeKind = TypeKind.Any
+				});
+				async_then_onfulfilled.nativefunction_delegate = (NativeFun)AsyncTemplate_ThenOnfulfilled;
+
+
+
+				async_then_onrejected = new ASMethod(context.PROMISE._link_codescope.Container, context.PROMISE.Token);
+				async_then_onrejected.ReturnTypeKind = TypeKind.Fun_Void;
+				async_then_onrejected.__ismethod = true;
+				async_then_onrejected.Flags = MethodFlags.Native;
+				async_then_onrejected.Name = "@async_template_then_onrejected";
+				async_then_onrejected.Body = new ASMethodBody(async_then_onrejected);
+				async_then_onrejected.Body.ByteCode = new byte[12];
+				async_then_onrejected.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = context.PROMISE._link_codescope.Parent };
+				async_then_onrejected.IsAnonymous = true;
+				async_then_onrejected.Parameters.Add(new ASParameter(async_then_onrejected) { IsOptional = false, Name = "onRejected", IsRest = false, TypeKind = TypeKind.Any });
+				async_then_onrejected.Body._link_codescope.Members.Add(new ScopeMember(async_then_onrejected.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "onRejected",
+					Type = async_then_onrejected.Parameters[0].Type,
+					TypeKind = TypeKind.Any
+				});
+				async_then_onrejected.nativefunction_delegate = (NativeFun)AsyncTemplate_ThenOnRejected	;
+
+
 			}
 
 			public void Enqueue(PromiseMicroTask task)
@@ -707,8 +781,9 @@ namespace juicescript.runtime.buildin
 				_count = 0;
 			}
 
-			internal void RunMicrotasks(Context context,ref ReceiveError task_fault)
+			internal void RunMicrotasks(Context context, ref ReceiveError task_fault)
 			{
+				
 				PromiseMicroTask task;
 				unsafe
 				{
@@ -739,7 +814,7 @@ namespace juicescript.runtime.buildin
 								context.StackPosition += 4;
 
 								// onFulfilled 未提供，直接透传
-								ResolvePromise(context, task.NextPromiseInstance, task.Value,ref task_fault);
+								ResolvePromise(context, task.NextPromiseInstance, task.Value, ref task_fault);
 
 								context.StackPosition = _bpos;
 
@@ -768,7 +843,7 @@ namespace juicescript.runtime.buildin
 								context.StackPosition += 4;
 
 								// 理论上不会发生；降级为透传
-								ResolvePromise(context, task.NextPromiseInstance, task.Value,ref task_fault);
+								ResolvePromise(context, task.NextPromiseInstance, task.Value, ref task_fault);
 
 								context.StackPosition = _bpos;
 
@@ -964,14 +1039,14 @@ namespace juicescript.runtime.buildin
 							}
 
 							// onRejected 返回值会使 nextPromise 走 resolve 流程（通常转为 fulfilled）
-							ResolvePromise(context, task.NextPromiseInstance, ret,ref error);
+							ResolvePromise(context, task.NextPromiseInstance, ret, ref error);
 						}
 
 					}
 				}
 			}
 
-			internal void ResolvePromise(Context context, NaNBoxing nextPromiseInstance, NaNBoxing value,ref ReceiveError resolve_falut)
+			internal void ResolvePromise(Context context, NaNBoxing nextPromiseInstance, NaNBoxing value, ref ReceiveError resolve_falut)
 			{
 				var p = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[nextPromiseInstance.HeapPtr].facility).wapperedObject;
 
@@ -1035,7 +1110,7 @@ namespace juicescript.runtime.buildin
 				}
 				//考虑then able
 				Debug.Assert(context.player.nsSetIncludingPublicAndAS3 != null); //必须的命名空间已经准备好。globalswc里就有，不可能没有。
-				
+
 				// Step 6: Try to get "then" property
 				ReceiveError thenErr = default;
 				NaNBoxing thenValue;
@@ -1057,7 +1132,7 @@ namespace juicescript.runtime.buildin
 						return; // Unrecoverable fault
 					}
 
-					p.Reject(context,reason);
+					p.Reject(context, reason);
 					return;
 				}
 
@@ -1081,9 +1156,9 @@ namespace juicescript.runtime.buildin
 						resolve_falut = callErr;
 						return; // Unrecoverable fault
 					}
-					
+
 					// 提升 error 到堆
-					ReceiveError err2= default;
+					ReceiveError err2 = default;
 					NaNBoxing reason = context.player.GetSaveValue(callErr.error, ref err2);
 					if (err2.raised)
 					{
@@ -1091,7 +1166,7 @@ namespace juicescript.runtime.buildin
 						resolve_falut = err2;
 						return; // Unrecoverable fault
 					}
-					
+
 					p.Reject(context, reason);
 					return;
 				}
@@ -1126,7 +1201,7 @@ namespace juicescript.runtime.buildin
 
 				// Get namespace set for property resolution
 				ASNamespaceSet ns_set = context.player.nsSetIncludingPublicAndAS3;
-				
+
 				// Check stack space
 				if (context.StackPosition + 4 >= Context.STACK_LENGTH)
 				{
@@ -1137,7 +1212,7 @@ namespace juicescript.runtime.buildin
 				int basePos = context.StackPosition;
 				context.StackPosition += 4; // Reserve space for property lookup
 
-				
+
 				// Use MultiNameLSearch to find "then" property
 				StackLocater stack = new StackLocater { index = 0 };
 				var stackslots = context.StackSlots.AsSpan(basePos, 4);
@@ -1316,6 +1391,10 @@ namespace juicescript.runtime.buildin
 			ASMethod thenableResolve;
 			ASMethod thenableReject;
 
+			internal ASMethod async_template_ctor;
+			internal ASMethod async_then_onfulfilled;
+			internal ASMethod async_then_onrejected;
+
 			// CallThenable - 调用thenable的then方法
 			private void CallThenable(
 				Context context,
@@ -1327,7 +1406,7 @@ namespace juicescript.runtime.buildin
 				// 确保 thenableResolve 和 thenableReject 已初始化
 				Debug.Assert(thenableResolve != null);
 				Debug.Assert(thenableReject != null);
-				
+
 
 				// 创建共享状态对象
 				RtHeapInstance stateObj;
@@ -1365,7 +1444,7 @@ namespace juicescript.runtime.buildin
 				resolveClosure.This.SetHeapPtr(statePtr);
 				resolveClosure.ScopePtr = statePtr;
 				resolveClosure.ScopeType = stateObj.Type;
-				resolveClosure._ref_as_type = context.PROMISE ;
+				resolveClosure._ref_as_type = context.PROMISE;
 				resolveClosure.methodscopeslot_ref_state = 0; resolveClosure.HEAPINSTANCE_PTR = 0;
 
 				NaNBoxing resolveCallback = default;
@@ -1416,7 +1495,7 @@ namespace juicescript.runtime.buildin
 					);
 				}
 
-				
+
 
 				if (error.raised)
 				{
@@ -1426,14 +1505,14 @@ namespace juicescript.runtime.buildin
 						callbackState.alreadyCalled = true;
 
 						// 提升 error 到堆
-						ReceiveError err2=default;
+						ReceiveError err2 = default;
 						NaNBoxing reason = context.player.GetSaveValue(error.error, ref err2);
 						if (err2.raised)
 						{
 							context.StackPosition = basePos;
 							return; // Unrecoverable fault
 						}
-						
+
 						var targetWapper = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[targetPromise.HeapPtr].facility).wapperedObject;
 						targetWapper.Reject(context, reason);
 					}
@@ -1449,30 +1528,30 @@ namespace juicescript.runtime.buildin
 				var h = _head;
 				var c = _count;
 
-				while (c >0)
+				while (c > 0)
 				{
 					var task = _taskBuffer[h];
 					h = (h + 1) % _taskBuffer.Length;
 					c--;
-					
 
-					if(task.NextPromiseInstance.ValueType == NaNBoxing.BoxType.HeapPtr)
+
+					if (task.NextPromiseInstance.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						context.GC.mark( context.GC.Heap[ task.NextPromiseInstance.HeapPtr] );
+						context.GC.mark(context.GC.Heap[task.NextPromiseInstance.HeapPtr]);
 					}
-					if(task.Value.ValueType == NaNBoxing.BoxType.HeapPtr)
+					if (task.Value.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						context.GC.mark( context.GC.Heap[ task.Value.HeapPtr] );
+						context.GC.mark(context.GC.Heap[task.Value.HeapPtr]);
 					}
-					if(task.CallbackFunction.ValueType == NaNBoxing.BoxType.HeapPtr)
+					if (task.CallbackFunction.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						context.GC.mark( context.GC.Heap[ task.CallbackFunction.HeapPtr] );
+						context.GC.mark(context.GC.Heap[task.CallbackFunction.HeapPtr]);
 					}
 
 
 				}
 
-				
+
 			}
 		}
 
@@ -1598,7 +1677,7 @@ namespace juicescript.runtime.buildin
 		{
 			internal bool alreadyCalled;
 			internal NaNBoxing targetPromise;
-			
+
 			public override void OnGCMark(Context context)
 			{
 				if (targetPromise.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -1609,7 +1688,7 @@ namespace juicescript.runtime.buildin
 
 			public override void OnDelete()
 			{
-				
+
 			}
 
 		}
@@ -1629,7 +1708,7 @@ namespace juicescript.runtime.buildin
 
 			var stateObj = context.GC.Heap[thisPtr.HeapPtr];
 			var state = ((RtPayloadInstance)stateObj.facility).wapperedObject as ThenableCallbackState;
-		
+
 			if (state == null || state.alreadyCalled)
 			{
 				return;
@@ -1642,7 +1721,7 @@ namespace juicescript.runtime.buildin
 			var value = scope.ReadSlot(0, context.player);
 
 			// 递归调用 ResolvePromise
-			context.MicroTaskQueue.ResolvePromise(context, state.targetPromise, value,ref error);
+			context.MicroTaskQueue.ResolvePromise(context, state.targetPromise, value, ref error);
 		}
 
 		// Thenable Reject 回调 - 作为 native function 被 ActionScript 调用
@@ -1660,7 +1739,7 @@ namespace juicescript.runtime.buildin
 
 			var stateObj = context.GC.Heap[thisPtr.HeapPtr];
 			var state = ((RtPayloadInstance)stateObj.facility).wapperedObject as ThenableCallbackState;
-		
+
 			if (state == null || state.alreadyCalled)
 			{
 				return;
@@ -1685,5 +1764,384 @@ namespace juicescript.runtime.buildin
 			targetWapper.Reject(context, reason);
 		}
 
+
+
+		internal class AsyncGenWapper : RtWapperBase, Player.IResume_State
+		{
+			public int async_body;
+
+			/// <summary>
+			/// 0 -- 刚初始化，未执行next
+			/// 1 -- 已执行一次await,
+			/// 2 -- 结束，运行完成            
+			/// </summary>
+			public int state;
+			internal NaNBoxing thisPtr;
+			internal ASContainer scopeType;
+
+			internal Player.ExceptionContext[] exceptionContext;
+			internal int exception_ctx_at;
+
+			internal int RESUME_PC;
+
+
+			internal NaNBoxing resolved_value;
+			internal bool isrejected;
+			internal NaNBoxing rejected_value;
+
+#if DEBUG
+			private int _iter_ctx_index_;
+			public unsafe void Debug_SaveOrLoadIterCtxIndex(int* iter_ctx_index)
+			{
+				if (state == 0)
+				{
+					_iter_ctx_index_ = *iter_ctx_index;
+				}
+				else
+				{
+					*iter_ctx_index = _iter_ctx_index_;
+				}
+			}
+#endif
+			public void End()
+			{
+				state = 2;
+			}
+
+			public bool IsCallClose()
+			{
+				return false;
+			}
+
+			public override void OnDelete()
+			{
+				async_body = 0;
+			}
+
+			public override void OnGCMark(Context context)
+			{
+				context.GC.mark(context.GC.Heap[async_body]);
+
+				if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					context.GC.mark(context.GC.Heap[thisPtr.HeapPtr]);
+				}
+
+			}
+
+			public unsafe void Resume(ExceptionContext* e_ctx, ExceptionContext** current_e_ctx, byte* PC_START, byte** PC, Span<NaNBoxing> stackslots)
+			{
+				if (state == 0)
+					return;
+				*PC = PC_START + RESUME_PC;
+
+				for (int i = 1; i < exception_ctx_at + 1; i++)
+				{
+					*(e_ctx + i) = exceptionContext[i];
+
+					stackslots[exceptionContext[i].hold_error.index].setFault();
+
+				}
+
+				*current_e_ctx = e_ctx + exception_ctx_at;
+
+			}
+		}
+
+
+		internal static void AsyncTemplate_ThenOnRejected(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseFacility = (RtPayloadInstance)promiseInstance.facility;
+			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
+
+			Debug.Assert(promiseWapper._state == PromiseState.pending);
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var v = scope.ReadSlot(0, context.player);
+			int genwapper_ptr = scope.ParentPtr;
+
+			var genwapper = (PromiseImpl.AsyncGenWapper)((RtPayloadInstance)context.GC.Heap[genwapper_ptr].facility).wapperedObject;
+			genwapper.rejected_value = v;
+			genwapper.isrejected = true;
+
+			AsyncTemplate_Step(context, genwapper_ptr, thisPtr, ref error);
+
+		}
+
+		internal static void AsyncTemplate_ThenOnfulfilled(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseFacility = (RtPayloadInstance)promiseInstance.facility;
+			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
+
+			Debug.Assert(promiseWapper._state == PromiseState.pending);
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var v = scope.ReadSlot(0, context.player);
+			int genwapper_ptr = scope.ParentPtr;
+
+			var genwapper = (PromiseImpl.AsyncGenWapper)((RtPayloadInstance)context.GC.Heap[genwapper_ptr].facility).wapperedObject;
+			genwapper.resolved_value = v;
+			genwapper.isrejected = false;
+
+			AsyncTemplate_Step(context,  genwapper_ptr, thisPtr, ref error);
+			
+		}
+
+
+		private static void AsyncTemplate_Step(Context context,
+			
+			int genwapper_ptr,
+			NaNBoxing promisePtr,
+			ref ReceiveError error)
+		{
+			var genwapper = (PromiseImpl.AsyncGenWapper)((RtPayloadInstance)context.GC.Heap[genwapper_ptr].facility).wapperedObject;
+
+			var m = context.GC.Heap[genwapper.async_body];
+			ASMethod g_method = ((ASMethodBody)m.Type).Method;
+
+			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
+			g_method.Body.GetInfo(ref info);
+			int calleelastpos = context.StackPosition;
+
+
+			if (context.StackPosition + info.useSlots
+				+ 1 //retslot
+				+ 1 //_reject|_resolve|resolve  arg
+				+ 1 //resolve ret
+				+ 1 //then_result
+				+ 1 //then_onfullfiled
+				+ 1 //then_onrejected
+
+
+				>= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+
+
+			int stPos = context.StackPosition;
+			context.StackPosition += info.useSlots;
+			context.BackTraceIndex++; ;
+
+			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots + 1);
+			slots.Clear(); //栈清空 -- 防止GC时错误访问
+			int P_PC;
+
+			ReceiveError asyncErr = default;
+
+			int retslot = context.StackPosition;
+			context.StackPosition += 1;
+			context.StackSlots[retslot].SetUndefined();
+
+			if (!g_method.Flags.HasFlag(MethodFlags.Native))
+			{
+				((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
+
+				context.player.Execute(ref info, m, genwapper.thisPtr, genwapper.async_body,
+					genwapper.scopeType, slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+
+
+
+			if (asyncErr.raised)
+			{
+				if (asyncErr.error.ValueType == NaNBoxing.BoxType.Fault)
+				{
+					context.StackPosition = stPos;
+					context.BackTraceIndex--;
+
+					error = asyncErr;
+					return;
+				}
+
+				//invoke reject
+				ASMethod private_reject = context.PROMISE.Instance._vtable.Items[3].Trait.Method;
+				Debug.Assert(private_reject.Name == "_reject");
+
+				ReceiveError reject_err = default;
+
+				StackLocater arg = default; arg.index = 0;
+
+				context.StackSlots[context.StackPosition] = asyncErr.error;
+				slots = context.StackSlots.AsSpan(context.StackPosition, 1);
+				unsafe
+				{
+					context.StackPosition++;
+					context.player.RunMethod(private_reject, promisePtr, 0, context.PROMISE.Instance, 1, (byte*)&arg, slots, ref reject_err, -1);
+					context.StackPosition--;
+				}
+
+				context.StackPosition = stPos;
+				context.BackTraceIndex--;
+
+				if (reject_err.raised)
+				{
+
+					error = reject_err;
+					error.error.setFault();
+					return;
+				}
+			}
+			else
+			{
+				context.BackTraceIndex--;
+
+				if (genwapper.state == 2 || g_method.Flags.HasFlag(MethodFlags.Native))
+				{
+					ASMethod private_resolve = context.PROMISE.Instance._vtable.Items[2].Trait.Method;
+					Debug.Assert(private_resolve.Name == "_resolve");
+
+					NaNBoxing v = context.StackSlots[retslot];
+
+					ReceiveError resolve_err = default;
+
+					StackLocater arg = default; arg.index = 0;
+
+					context.StackSlots[context.StackPosition] = v;
+					slots = context.StackSlots.AsSpan(context.StackPosition, 1);
+					unsafe
+					{
+						context.StackPosition++;
+						context.player.RunMethod(private_resolve, promisePtr, 0, context.PROMISE.Instance, 1, (byte*)&arg, slots, ref resolve_err, -1);
+						context.StackPosition--;
+					}
+
+					context.StackPosition = stPos;
+
+					if (resolve_err.raised)
+					{
+						error = resolve_err;
+						error.error.setFault();
+						return;
+					}
+
+				}
+				else
+				{
+					ASMethod static_resolve = context.PROMISE._vtable.Items[1].Trait.Method;
+					Debug.Assert(static_resolve.Name == "resolve");
+
+					NaNBoxing v = context.StackSlots[retslot];
+					ReceiveError resolve_err = default;
+
+					int resolved_promise = context.StackPosition;
+					
+					slots = context.StackSlots.AsSpan(context.StackPosition, 2);
+					slots[0].SetUndefined();
+					slots[1] = v;
+					context.StackPosition +=2;
+
+					StackLocater arg = default; arg.index = 1;
+
+					unsafe
+					{
+						context.player.RunMethod(static_resolve, promisePtr, 0, context.PROMISE, 1, (byte*)&arg, slots, ref resolve_err, resolved_promise);
+					}
+
+					if (resolve_err.raised)
+					{
+						context.StackPosition = stPos;
+						error = resolve_err;
+						return;
+					}
+					NaNBoxing resolved = context.StackSlots[resolved_promise];
+					PromiseWapper resolvedPromise = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[resolved.HeapPtr].facility).wapperedObject;
+
+					ASMethod private_then = context.PROMISE.Instance._vtable.Items[0].Trait.Method;
+					Debug.Assert(private_then.Name == "then");
+
+					int then_result = context.StackPosition;
+					context.StackPosition++;
+
+					int onfulfilled = context.M_ClosurePtr + context.StackPosition;
+
+					RtPayloadClosure onfulfilledClosure = (RtPayloadClosure)context.GC.Heap[onfulfilled].facility;
+					context.GC.Heap[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
+					onfulfilledClosure.This= promisePtr;
+					onfulfilledClosure.ScopePtr = genwapper_ptr;
+					onfulfilledClosure.ScopeType = genwapper.scopeType;
+					onfulfilledClosure._ref_as_type = context.PROMISE;
+					onfulfilledClosure.methodscopeslot_ref_state = 0; onfulfilledClosure.HEAPINSTANCE_PTR = 0;
+
+					
+					slots = context.StackSlots.AsSpan(context.StackPosition, 2);
+					slots[0].SetHeapPtr(onfulfilled);
+					
+
+					int onrejected = context.M_ClosurePtr + context.StackPosition + 1;
+					RtPayloadClosure onrejectedClosure = (RtPayloadClosure)context.GC.Heap[onrejected].facility;
+					context.GC.Heap[onrejected].Type = context.MicroTaskQueue.async_then_onrejected.Body;
+					onrejectedClosure.This = promisePtr;
+					onrejectedClosure.ScopePtr = genwapper_ptr;
+					onrejectedClosure.ScopeType = genwapper.scopeType;
+					onrejectedClosure._ref_as_type = context.PROMISE;
+					onrejectedClosure.methodscopeslot_ref_state = 0; onrejectedClosure.HEAPINSTANCE_PTR = 0;
+
+					slots[1].SetHeapPtr(onrejected);
+
+					context.StackPosition+=2;
+
+					ReceiveError then_err = default;
+					unsafe
+					{
+						StackLocater* passthrough = stackalloc StackLocater[2];
+						passthrough->index = 0;
+						(passthrough + 1)->index = 1;
+
+						context.player.RunMethod(private_then, resolved, 0, context.PROMISE.Instance, 2, (byte*)passthrough, slots, ref then_err, then_result);
+					}
+
+					context.StackPosition = stPos;
+
+					if (then_err.raised)
+					{
+						then_err.error.setFault();
+						error = then_err;
+						return;
+					}
+
+
+					//throw new NotImplementedException();
+				}
+			}
+		}
+
+
+		public static void AsyncTemplate_Ctor(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseFacility = (RtPayloadInstance)promiseInstance.facility;
+			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
+
+			Debug.Assert(promiseWapper._state == PromiseState.pending);
+
+			var mscope = context.GC.Heap[scope_ptr];
+			var gen =  context.GC.Heap[ ((RtPayloadMethodScope)mscope.facility).ParentPtr];
+			var genwapper = (AsyncGenWapper)((RtPayloadInstance)gen.facility).wapperedObject;
+
+			AsyncTemplate_Step(context, ((RtPayloadMethodScope)mscope.facility).ParentPtr, thisPtr, ref error);
+		}
 	}
 }

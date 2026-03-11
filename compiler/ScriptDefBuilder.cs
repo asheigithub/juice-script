@@ -1793,6 +1793,12 @@ namespace juicescript.compiler
                 method.Flags |= MethodFlags.MarkOverride;
             }
 
+            if(function.Access.IsAsync)
+            {
+                method.Flags |= MethodFlags.ASYNC;
+                method.Flags |= MethodFlags.NeedActivation; //ASYNC函数必然需要创建上下文
+            }
+
             for (int j = 0; j < function.Parameters.Count; j++)
             {
                 var p = function.Parameters[j];

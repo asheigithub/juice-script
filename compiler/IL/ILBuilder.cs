@@ -72,11 +72,15 @@ namespace juicescript.compiler.IL
 				{
 					compileEnv.stack_loaded_heapunit.Push(new Dictionary<object, StackLocater>());
 
+					compileEnv.stack_trycatchctx.Push(trycatchState);
+
 					AST.IAS3SyntaxNode code = compileEnv.Codes[i];
 					BuildAS3SyntaxNode(compileEnv, code, trycatchState, blockcontexts, ref flagseed);
 				}
 				finally
 				{
+					compileEnv.stack_trycatchctx.Pop();
+
 					compileEnv.stack_loaded_heapunit.Pop();
 				}
 
@@ -575,6 +579,11 @@ namespace juicescript.compiler.IL
 					throw new ResolverException(m.Token, "generator must return *");
 				}
 
+				if (m.Flags.HasFlag(MethodFlags.ASYNC))
+				{
+					throw new ResolverException(m.Token, "The yield statement cannot be used in async code");
+				}
+
 				//yield 不能在 catch和finally块中发起。
 
 				if (trycatchState.Any((t) => t.state == TryCatchContext.State.Catch || t.state == TryCatchContext.State.Finally))
@@ -582,6 +591,7 @@ namespace juicescript.compiler.IL
 					throw new ResolverException(m.Token, "Can't yield in catch block or finally block");
 				}
 
+				//这个关系不大，只是仿照C#的限制。只要保证不在 catch,finally块里发动 yield即可。
 				if (trycatchState.Any((t) => t.tryStatement != null && t.tryStatement.CatchList.Count > 0))
 				{
 					throw new ResolverException(m.Token, "Can't yield in [try_catch_finally] that have [catch] blocks");
@@ -633,6 +643,11 @@ namespace juicescript.compiler.IL
 					throw new ResolverException(m.Token, "generator must return *");
 				}
 
+				if (m.Flags.HasFlag(MethodFlags.ASYNC))
+				{
+					throw new ResolverException(m.Token, "The yield statement cannot be used in async code");
+				}
+
 				//yield 不能在 catch和finally块中发起。
 
 				if (trycatchState.Any((t) => t.state == TryCatchContext.State.Catch || t.state == TryCatchContext.State.Finally))
@@ -640,6 +655,7 @@ namespace juicescript.compiler.IL
 					throw new ResolverException(m.Token, "Can't yield in catch block or finally block");
 				}
 
+				//这个关系不大，只是仿照C#的限制。只要保证不在 catch,finally块里发动 yield即可。
 				if (trycatchState.Any((t) => t.tryStatement != null && t.tryStatement.CatchList.Count > 0))
 				{
 					throw new ResolverException(m.Token, "Can't yield in [try_catch_finally] that have [catch] blocks");
@@ -679,6 +695,34 @@ namespace juicescript.compiler.IL
 						throw new ResolverException(code.Token, "A return value is not allowed because the return type of this function is 'void'.");
 					}
 
+					//if (m.Flags.HasFlag(MethodFlags.ASYNC))
+					//{
+					//	if (@return.ReturnValue.Count > 0)
+					//	{
+					//		for (int r = 0; r < @return.ReturnValue.Count; r++)
+					//		{
+					//			ret = BuildExpression(compileEnv, (AS3Expression)@return.ReturnValue[r], ref flagseed);
+					//		}
+					//	}
+					//	else
+					//	{
+					//		var ld_undefined = new INS_Ld_Undefined(@return.Token);
+					//		ld_undefined.dst = ret;
+
+					//		compileEnv.instructions.Add(ld_undefined);
+					//	}
+
+					//	INS_Return_Promise return_Promise = new INS_Return_Promise(@return.Token);
+					//	return_Promise.dst = ret;
+					//	compileEnv.instructions.Add(return_Promise);
+					//}
+					//else
+
+					if (m.Flags.HasFlag(MethodFlags.ASYNC))
+					{ 
+						//插入一条指令，表示已结束
+					}
+
 					if (@return.ReturnValue.Count > 0)
 					{
 						//ExpressionIL expressionIL = new ExpressionIL();
@@ -693,14 +737,7 @@ namespace juicescript.compiler.IL
 					{
 						throw new ResolverException(code.Token, "Function does not return a value.");
 					}
-				}
 
-				//if (trycatchState.Count > 0)
-				//{
-				//	throw new NotImplementedException();//需考虑try catch的情况，暂时没做
-				//}
-				//else
-				{
 					if (ret.index == int.MinValue && @return.ReturnValue.Count > 0)
 					{
 						throw new InvalidOperationException();
@@ -716,7 +753,12 @@ namespace juicescript.compiler.IL
 						return_Value.dst = ret;
 						compileEnv.instructions.Add(return_Value);
 					}
+
+					
 				}
+
+				
+				
 			}
 			else if (code is AS3Break)
 			{

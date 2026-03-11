@@ -21,6 +21,7 @@ namespace juicescript.compiler.AST
         public bool IsOverride;
         public bool IsProtected;
         public bool IsNative;
+        public bool IsAsync;
 
         public string NameSpace;
         public Token NameSpaceToken;
@@ -36,6 +37,7 @@ namespace juicescript.compiler.AST
             IsOverride = false;
             IsProtected = false;
             IsNative = false;
+            IsAsync = false;
 
             int c = 0;
             Token token = null;
@@ -134,6 +136,16 @@ namespace juicescript.compiler.AST
                         throw new parse.SyntaxException(s.Item2.MatchedToken, "Attribute native was specified multiple times.");
                     }
                 }
+                else if (s.Item1 == "async")
+                {
+                    if (!IsAsync)
+                        IsAsync = true;
+                    else
+                    {
+                        throw new parse.SyntaxException(s.Item2.MatchedToken, "Attribute async was specified multiple times.");
+                    }
+                }
+
                 else if (s.Item1 == "virtual")
                 { 
                     
@@ -186,6 +198,8 @@ namespace juicescript.compiler.AST
                 result += "protected ";
             if (IsNative)
                 result += "native ";
+            if (IsAsync)
+                result += "async";
 
             if (!string.IsNullOrEmpty(NameSpace))
                 result += NameSpace + " ";

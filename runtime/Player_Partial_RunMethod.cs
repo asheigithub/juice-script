@@ -3,9 +3,11 @@ using juicescript.ABC.Locaters;
 using juicescript.runtime.buildin;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
@@ -319,6 +321,11 @@ namespace juicescript.runtime
 				m_scopePayload.isCompiling = false;
 				if (IsComputeConstExpr)
 				{
+					if(method.Flags.HasFlag( MethodFlags.ASYNC))
+					{
+						throw new EvalConstException();
+					}
+
 					m_scopePayload.isCompiling = true;
 					goto lbl_arguments_pass;
 				}
@@ -503,8 +510,6 @@ namespace juicescript.runtime
 
 				if (method.Flags.HasFlag(MethodFlags.Generator))
 				{
-					
-
 					if (Context.StackPosition + 2
 					//+ 1 
 					>= Context.STACK_LENGTH)
@@ -526,13 +531,13 @@ namespace juicescript.runtime
 					mScope = Context.GC.Heap[g_scope.HeapPtr];
 
 
-					Context.StackPosition+=2;
+					Context.StackPosition += 2;
 					Context.StackSlots[Context.StackPosition - 2].SetHeapPtr(g_scope.HeapPtr); //保存防止被GC
 
 					NaNBoxing _this = GetSaveValue(thisPtr, ref error);
 					if (error.raised)
 					{
-						Context.StackPosition-=2;
+						Context.StackPosition -= 2;
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
 					}
@@ -549,13 +554,13 @@ namespace juicescript.runtime
 
 					if (generator_ptr == 0)
 					{
-						Context.StackPosition-=2;
+						Context.StackPosition -= 2;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
 						goto lbl_handle_arg_err;
 					}
 
-					
+
 					GeneratorImpl.GeneratorWapper wapper = new GeneratorImpl.GeneratorWapper();
 					if (!method.Flags.HasFlag(MethodFlags.NoTry))
 					{
@@ -568,10 +573,10 @@ namespace juicescript.runtime
 					wapper.thisPtr = _this;
 					wapper.scopeType = scopeType;
 
-					
+
 					((RtPayloadInstance)gen.facility).wapperedObject = wapper;
 
-					Context.StackPosition-=2;
+					Context.StackPosition -= 2;
 					Context.StackPosition -= para_argcount;
 
 
@@ -586,6 +591,159 @@ namespace juicescript.runtime
 					return result;
 
 				}
+				else if (method.Flags.HasFlag(MethodFlags.ASYNC))
+				{
+					//if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
+					//{
+					//	throw new NotImplementedException();
+					//}
+
+					/*
+					 function foo():Promise {
+						var gen = foo$gen();
+						return new Promise(function(resolve, reject) {
+							var r = new IteratorResult();
+
+							function step(input) {
+								try {
+									gen.next(input, r);
+								} catch (e) {
+									reject(e);
+									return;
+								}
+
+								if (r.done) {
+									resolve(r.value);
+								} else {
+									Promise.resolve(r.value).then(
+										function(v) { step(v); },
+										function(e) {
+											try { gen.throw(e, r); step(undefined); }
+											catch (e2) { reject(e2); }
+										}
+									);
+								}
+							}
+
+							step(undefined);
+						});
+					}
+
+					 */
+
+					if (Context.StackPosition + 4
+						+ scopeMembers + info.useSlots
+					>= Context.STACK_LENGTH)
+					{
+						Context.StackPosition -= para_argcount;
+						break;
+					}
+
+					NaNBoxing g_scope = default;
+					g_scope.SetHeapPtr(mScopeId);
+					g_scope = GetSaveValue(g_scope, ref error);
+					if (error.raised)
+					{
+						Context.StackPosition -= para_argcount;
+						goto lbl_handle_arg_err;
+					}
+
+					mScope = Context.GC.Heap[g_scope.HeapPtr];
+
+					int basePos = Context.StackPosition;
+
+					Context.StackPosition += 4;
+					Context.StackSlots[ basePos ].SetHeapPtr(g_scope.HeapPtr); //保存防止被GC
+
+					NaNBoxing _this = GetSaveValue(thisPtr, ref error);
+					if (error.raised)
+					{
+						Context.StackPosition = basePos;
+						Context.StackPosition -= para_argcount;
+						goto lbl_handle_arg_err;
+					}
+
+					Context.StackSlots[basePos + 1].SetHeapPtr(_this.HeapPtr); //保存防止被GC
+
+					//构造async::gen
+					RtHeapInstance gen;
+					int generator_ptr = Context.GC.AllocInstance(Context.OBJECT.Instance, out gen);
+
+					if (generator_ptr == 0)
+					{
+						Context.StackPosition = basePos;
+						Context.StackPosition -= para_argcount;
+						RaiseOutOfMemory(ref error);
+						goto lbl_handle_arg_err;
+					}
+
+					PromiseImpl.AsyncGenWapper wapper = new PromiseImpl.AsyncGenWapper();
+					if (!method.Flags.HasFlag(MethodFlags.NoTry))
+					{
+						wapper.exceptionContext = new ExceptionContext[Context.MAX_TRY_NESTED + 2];
+					}
+					wapper.exception_ctx_at = 0;
+
+					wapper.async_body = g_scope.HeapPtr;
+					wapper.state = 0;
+					wapper.thisPtr = _this;
+					wapper.scopeType = scopeType;
+					((RtPayloadInstance)gen.facility).wapperedObject = wapper;
+
+					//构造promise
+					RtHeapInstance promise;
+					int promise_ptr = Context.GC.AllocInstance(Context.PROMISE.Instance, out promise);
+					if(promise_ptr == 0)
+					{
+						Context.StackPosition = basePos;
+						Context.StackPosition -= para_argcount;
+						RaiseOutOfMemory(ref error);
+						goto lbl_handle_arg_err;
+					}
+
+					Context.StackSlots[basePos + 2].SetHeapPtr(promise_ptr); //保存防止被GC
+
+					//创建构造函数闭包
+					int template_ctor = Context.M_ClosurePtr + basePos + 3;
+
+					RtPayloadClosure ctorClosure = (RtPayloadClosure)Context.GC.Heap[template_ctor].facility;
+					Context.GC.Heap[template_ctor].Type = Context.MicroTaskQueue.async_template_ctor.Body;
+					ctorClosure.This.SetHeapPtr(promise_ptr);
+					ctorClosure.ScopePtr = generator_ptr;
+					ctorClosure.ScopeType = null;
+					ctorClosure._ref_as_type = Context.PROMISE;
+					ctorClosure.methodscopeslot_ref_state = 0; ctorClosure.HEAPINSTANCE_PTR = 0;
+
+					Context.StackSlots[basePos + 3].SetHeapPtr(template_ctor);
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(basePos + 3, 1);
+					
+					StackLocater stackLocater = default;stackLocater.index = 0;
+					RunMethod( Context.PROMISE.Instance.Constructor, Context.StackSlots[basePos + 2], promise_ptr, 
+						Context.PROMISE.Instance, 1, (byte*)&stackLocater, slots, ref error, -1, 0, true);
+
+
+					Context.StackPosition = basePos;
+					Context.StackPosition -= para_argcount;
+
+					if (error.raised)
+					{
+						goto lbl_handle_arg_err;
+					}
+
+
+	
+					NaNBoxing result = default;
+					if (returnSlotIndex > -1)
+					{ 
+						result.SetHeapPtr(promise_ptr);
+						Context.StackSlots[returnSlotIndex] = result;
+					}
+
+					return result;
+
+					//throw new NotImplementedException();
+				}
 				else if (info.instructions > 0)
 				{
 					int calleelastpos = Context.StackPosition;
@@ -593,14 +751,14 @@ namespace juicescript.runtime
 
 					int stPos = Context.StackPosition;
 					Context.StackPosition += info.useSlots;
-					
+
 					//Context.BackTrace[Context.BackTraceIndex].Method = method;
 					Context.BackTraceIndex++; ;
 
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
 					slots.Clear(); //栈清空 -- 防止GC时错误访问
 					int P_PC;
-					Execute(ref info,mScope, thisPtr, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex,calleelastpos,null);
+					Execute(ref info, mScope, thisPtr, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
 
 					Context.BackTraceIndex--;
 					//Context.BackTrace[Context.BackTraceIndex].Method = null;

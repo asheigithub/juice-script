@@ -261,9 +261,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.if_logicOp_goto:
 					instruction = new INS_If_LogicOp_Goto(token);
 					break;
-				case INS_Code.return_op:
-					instruction = new INS_Return_Oper(token);
-					break;
+				//case INS_Code.return_op:
+				//	instruction = new INS_Return_Oper(token);
+				//	break;
 
 				//case INS_Code.short_ld_const:
 				//	instruction = new INS_Short_Ld_Const(token);
@@ -304,6 +304,15 @@ namespace juicescript.compiler.IL
 				case INS_Code.return_value:
 					instruction = new INS_Return_Value(token);
 					break;
+				case INS_Code.await_return:
+					instruction = new INS_Await_Return(token);
+					break;
+				case INS_Code.await_resume:
+					instruction = new INS_Await_Resume(token);
+					break;
+				//case INS_Code.return_async_promise:
+				//	instruction = new INS_Return_Promise(token);
+				//	break;
 				case INS_Code.throw_error:
 					instruction = new INS_Throw(token);
 					break;

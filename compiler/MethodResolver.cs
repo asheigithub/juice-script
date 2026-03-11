@@ -2474,24 +2474,59 @@ namespace juicescript.compiler
 						}
 
 
-						if (instructions.Any(i => i.INS_Code == INS_Code.return_op || i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void))
+						if (instructions.Any(
+							i =>
+							//i.INS_Code == INS_Code.return_op ||
+							i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void))
 						{
 							throw new ResolverException(new Token()
 							{
 								sourceFile = method.Token.sourceFile,
 								sourceFileFullPath = method.Token.sourceFileFullPath,
-								line = instructions.First(i => i.INS_Code == INS_Code.return_op || i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void).token.line,
-								ptr = instructions.First(i => i.INS_Code == INS_Code.return_op || i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void).token.ptr
+								line = instructions.First(i => //i.INS_Code == INS_Code.return_op ||
+															   i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void).token.line,
+								ptr = instructions.First(i => //i.INS_Code == INS_Code.return_op || 
+																i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void).token.ptr
 							},
 
 							"return not allow in generator function");
 						}
+					}
+
+					if(method.Flags.HasFlag( MethodFlags.ASYNC))
+					{
+						int useslotcount; NaNBoxing[] constants; Instruction[] instructions;
+						Disassembler.Disassemble(method.Body.ByteCode, out useslotcount, out constants, out instructions);
+
+						if (method.Flags.HasFlag(MethodFlags.NeedArguments))
+						{
+							throw new ResolverException(new Token()
+							{
+								sourceFile = method.Token.sourceFile,
+								sourceFileFullPath = method.Token.sourceFileFullPath,
+								line = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.line,
+								ptr = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.ptr
+							},
+
+							"arguments not allow in async function");
+						}
 
 
-						
+						//if (instructions.Any(
+						//	i =>
+						//	//i.INS_Code == INS_Code.return_op ||
+						//	i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void))
+						//{
+						//	throw new InvalidOperationException();
+						//}
+
+						//**todo 检查是否所有路径都有return_promise返回值。
+
+
 					}
 				}
 
+				
 
 
 

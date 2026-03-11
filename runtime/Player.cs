@@ -3583,8 +3583,8 @@ namespace juicescript.runtime
 			InitScript((ASScript)Context.REFERENCE_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("REFERENCE_ERROR instance init failed"); }
 			InitScript((ASScript)Context.ARGEMENT_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("ARGEMENT_ERROR instance init failed"); }
 			InitScript((ASScript)Context.IITERATOR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("IITERATOR instance init failed"); }
-
-
+			InitScript((ASScript)Context.PROMISE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
+			
 
 
 			//InitScript((ASScript)Context.SBYTE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException(" instance init failed"); }
@@ -12271,7 +12271,7 @@ namespace juicescript.runtime
 			internal byte* FINALLY_JUMPTO_PTR;
 
 			internal StackLocater hold_error;
-			internal ScopeHeapLocater catched_error;
+			//internal ScopeHeapLocater catched_error;
 		}
 
 		internal interface IResume_State
@@ -18347,6 +18347,13 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 								InstructionProfiler.Profile_ActionEnd(opcode);
 #endif
+
+								if (resume_state != null)
+								{
+									Debug.Assert(resume_state is PromiseImpl.AsyncGenWapper);
+									resume_state.End();
+								}	
+								
 								goto flag_end;
 							}
 						case INS_Code.return_value:
@@ -18424,9 +18431,99 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 									InstructionProfiler.Profile_ActionEnd(opcode);
 #endif
+									if (resume_state != null) 
+									{
+										Debug.Assert(resume_state is PromiseImpl.AsyncGenWapper);
+										resume_state.End();
+									}
 									goto flag_end;
 								}
 							}
+
+//						case INS_Code.return_async_promise:
+//							{
+//								InitScript((ASScript)Context.PROMISE._link_codescope.Parent.Container, ref error);
+//								if (error.raised)
+//								{
+//									goto flag_handle_error;
+//								}
+//#if DEBUG
+//								if (returnSlotIndex < 0)
+//								{
+//									throw new InvalidOperationException();
+//								}
+//#endif
+
+//								if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+//								{
+//									RaiseStackOverflow(ref error);
+//									goto flag_handle_error;
+//								}
+
+//								int basePos = Context.StackPosition;
+
+//								Context.GC.CheckGC(ref error);
+
+//								StackLocater value;
+//								value.index = dst_index;
+
+//								var lv = LoadValue(stackslots[value.index],
+//									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
+//								if (error.raised)
+//								{
+//									goto flag_handle_error;
+//								}
+
+//								var m = Context.PROMISE._vtable.Items[1].Trait.Method;
+
+//								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 1);
+//								argSpan[0] = lv;
+//								StackLocater argLoc = new StackLocater() { index = 0 };
+
+//								NaNBoxing _this = default;
+//								_this.SetHeapPtr( Context.PROMISE.__instance_index__ );
+
+//								Context.StackPosition++;
+
+//								RunMethod(m, _this, scope_ptr, Context.PROMISE, 1, (byte*)&argLoc, argSpan, ref error, returnSlotIndex, calleelastPos);
+
+//								Context.StackPosition = basePos;
+
+//								if (error.raised)
+//								{
+//									Context.StackSlots[returnSlotIndex].SetUndefined();
+//									goto flag_handle_error;
+//								}
+
+//								if (exception_ctx != NO_TRY)
+//								{
+//									stackslots[exception_ctx->hold_error.index].setFault();//return 会吃掉异常
+
+//									ExceptionContext* ctx = NO_TRY + 1;
+//									ctx->FINALLY_JUMPTO_PTR = PC_END;
+//									do
+//									{
+//										var finally_p = ctx->state == 2 ? ctx->FINALLY_EXIT_PTR : ctx->FINALLY_PTR;
+//										++ctx;
+//										ctx->FINALLY_JUMPTO_PTR = finally_p;
+
+//									} while (ctx < exception_ctx);
+
+//									PC = exception_ctx->state == 2 ? exception_ctx->FINALLY_EXIT_PTR : exception_ctx->FINALLY_PTR;
+
+//									break;
+//								}
+//								else
+//								{
+//#if PROFILEPLAYER
+//									InstructionProfiler.Profile_ActionEnd(opcode);
+//#endif
+//									goto flag_end;
+//								}
+
+
+//							}
+							
 						case INS_Code.goto_flag:
 							{
 								int flag_id = dst_index; //LoadInt32(&flag_id, &PC);
@@ -18786,7 +18883,7 @@ namespace juicescript.runtime
 #if DEBUG
 										if (stackslots[generatorWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
 										{
-											//yield禁止在有catch的try结构内使用，所以不可能有hold的异常。
+											//yield禁止在catch块内使用，所以不可能有hold的异常。
 											throw new InvalidOperationException();
 										}
 #endif
@@ -18800,7 +18897,103 @@ namespace juicescript.runtime
 								//中断运行
 								return;
 							}
-							
+
+						case INS_Code.await_return:
+							{
+#if DEBUG
+								if (returnSlotIndex < 0)
+								{
+									throw new InvalidOperationException();
+								}
+#endif
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+#endif
+
+								Context.GC.CheckGC(ref error);
+
+								StackLocater value;
+								value.index = dst_index;
+
+								var lv = LoadValue(stackslots[value.index],
+									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
+								if (error.raised)
+								{
+									//如果有异常，那就不会保存上下文
+									goto flag_handle_error;
+								}
+
+								if (lv.ValueType == BoxType.HeapPtr)
+								{
+									StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
+									if (error.raised)
+									{
+										Context.StackSlots[returnSlotIndex].SetUndefined();
+										goto flag_handle_error;
+									}
+								}
+								else
+								{
+									Context.StackSlots[returnSlotIndex] = lv;
+								}
+
+
+								//保存上下文状态
+								int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
+								int exception_at = (int)(exception_ctx - exception_ctx_stack);
+
+								PromiseImpl.AsyncGenWapper asyncGenWapper = (PromiseImpl.AsyncGenWapper)resume_state;
+								asyncGenWapper.exception_ctx_at = exception_at;
+								if (exception_ctx_count > 0)
+								{
+									for (int i = 1; i < exception_at + 1; i++)
+									{
+										asyncGenWapper.exceptionContext[i] = *(NO_TRY + i);
+#if DEBUG
+										if (stackslots[asyncGenWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
+										{
+											//await禁止在finally块内使用，所以不可能有hold的异常。
+											throw new InvalidOperationException();
+										}
+#endif
+									}
+								}
+
+								asyncGenWapper.state = 1;
+								asyncGenWapper.RESUME_PC = (int)(PC - PC_START);
+
+								PC_PTR = asyncGenWapper.RESUME_PC;
+								//中断运行
+								return;
+
+
+							}
+						case INS_Code.await_resume:
+							{
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+#endif
+								PromiseImpl.AsyncGenWapper state = (PromiseImpl.AsyncGenWapper)resume_state;
+
+								if (state.isrejected)
+								{
+									error.raised = true;
+									error.error = state.rejected_value;
+									goto flag_handle_error;
+
+								}
+								else
+								{
+									stackslots[dst_index] = state.resolved_value;
+								}
+							}
+							break;
 						case INS_Code.iter_initctx:
 							{
 								InitScript((ASScript)Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__._link_codescope.Parent.Container, ref error);
@@ -19750,7 +19943,7 @@ namespace juicescript.runtime
 								if (match)
 								{
 
-									exception_ctx->catched_error = heapLocater;
+									//exception_ctx->catched_error = heapLocater;
 									RtPayloadMethodScope heap = (RtPayloadMethodScope)s.facility;
 									NaNBoxing value = default;
 

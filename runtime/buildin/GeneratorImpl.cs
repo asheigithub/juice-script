@@ -127,6 +127,7 @@ namespace juicescript.runtime.buildin
 				context.StackPosition += info.useSlots;
 
 				context.BackTraceIndex++; ;
+				((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
 
 				Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 				slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -197,6 +198,8 @@ namespace juicescript.runtime.buildin
 
 		
 			context.BackTraceIndex++; ;
+
+			((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
 
 			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 			slots.Clear(); //栈清空 -- 防止GC时错误访问

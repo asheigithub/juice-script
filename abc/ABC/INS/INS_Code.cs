@@ -253,7 +253,7 @@ namespace juicescript.ABC.INS
         if_logicOp_goto =112,
 
         //返回操作结果
-        return_op = 114,
+        //return_op = 114,
 
 
 
@@ -270,6 +270,9 @@ namespace juicescript.ABC.INS
         iter_close = 232,
         iter_next =234,
 
+        await_return =236,
+        await_resume =237,
+
 		yield_return = 238,
 		yield_break = 239,
 
@@ -281,6 +284,11 @@ namespace juicescript.ABC.INS
         /// 函数返回，将returnSlot赋值
         /// </summary>
         return_value = 242,
+
+        ///// <summary>
+        ///// 在async function中返回，任何返回值都包装为promise.
+        ///// </summary>
+        //return_async_promise = 243,
 
 		
 		throw_error =244,

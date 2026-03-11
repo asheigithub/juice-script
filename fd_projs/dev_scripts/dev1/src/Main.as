@@ -15,18 +15,58 @@ package
 		
 	}
 }
+  
+async function TTT()
+{
+	throw 'fuck';
+}
 
-var obj = {
-    then: function(res) {
-        res(Promise.resolve(7));
-    }
-};
+async function ABC(i=1+1)
+{
+    //var x = await i;
+    
+	//x = await x + 1;
 
-Promise.resolve(obj).then(function(x) {
-    trace(x);
-});
+	try
+	{
+		await TTT();
+	}
+	catch(e)
+	{
+		await e;
+		throw e;
+		
+		//x = await e;
+	}
+	finally 
+	{
+		return 7;
+	}
+	
+	
+	//return x + 1;
+}
 
+async function Test()
+{
+	
+	var x = await ABC(4);	
+	trace(x);
+	
+	x = await 6;
+	
+	trace(x);
+	
+	x = await ABC(x);
+	
+	trace(x);
+		
+	
+}
 
+Test().catch( function(e){ trace(e) } ) ;
+
+ 
 //class Test262Error extends Error
 //{
 	//public function Test262Error(t)

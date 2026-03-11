@@ -184,7 +184,7 @@ namespace juicescript.compiler.IL
          */
 		internal Stack<Dictionary<object, StackLocater>> stack_loaded_heapunit = new Stack<Dictionary<object, StackLocater>>(); 
 
-
+        internal Stack<Stack<TryCatchContext>> stack_trycatchctx = new Stack<Stack<TryCatchContext>>();
 
 
 

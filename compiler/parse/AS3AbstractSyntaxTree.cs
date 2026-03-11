@@ -410,17 +410,21 @@ namespace juicescript.compiler.parse
             {
                 throw new SyntaxException(node.MatchedToken, "The native attribute can only be used with function definitions.");
             }
+			if (access.IsAsync)
+			{
+				throw new SyntaxException(node.MatchedToken, "The async attribute can only be used with function definitions.");
+			}
 
-            //if (access.IsStatic)
-            //{
-            //    throw new SyntaxException(node.MatchedToken, "The static attribute may be used only on definitions inside a class.");
-            //}
-            //if (access.IsOverride)
-            //{
-            //    throw new SyntaxException(node.MatchedToken, "The override attribute may be used only on class property definitions.");
-            //}
+			//if (access.IsStatic)
+			//{
+			//    throw new SyntaxException(node.MatchedToken, "The static attribute may be used only on definitions inside a class.");
+			//}
+			//if (access.IsOverride)
+			//{
+			//    throw new SyntaxException(node.MatchedToken, "The override attribute may be used only on class property definitions.");
+			//}
 
-            var cls = new AS3Class(node.MatchedToken, srcFile);
+			var cls = new AS3Class(node.MatchedToken, srcFile);
             memberscope.Push(cls);
 
             cls.Access = access;
@@ -486,7 +490,11 @@ namespace juicescript.compiler.parse
             {
                 throw new SyntaxException(node.MatchedToken, "The native attribute can only be used with function definitions.");
             }
-
+			if (access.IsAsync)
+			{
+				throw new SyntaxException(node.MatchedToken, "The async attribute can only be used with function definitions.");
+			}
+			
             var _interface_ = new AS3Interface(node.MatchedToken, srcFile);
             memberscope.Push(_interface_);
 
@@ -660,8 +668,12 @@ namespace juicescript.compiler.parse
             {
                 throw new SyntaxException(node.MatchedToken, "The native attribute can only be used with function definitions.");
             }
+			if (access.IsAsync)
+			{
+				throw new SyntaxException(node.MatchedToken, "The async attribute can only be used with function definitions.");
+			}
 
-            AS3NameSpace ns = new AS3NameSpace(node.MatchedToken);
+			AS3NameSpace ns = new AS3NameSpace(node.MatchedToken);
             ns.Access = access;
             ns.Name = ParseExpr.getNodeValue(node.Nodes[1]);
 
@@ -1562,9 +1574,13 @@ namespace juicescript.compiler.parse
                 throw new SyntaxException(node.MatchedToken, "Variables cannot be NATIVE.");
             }
 
-           
+			if (access.IsAsync)
+			{
+				throw new SyntaxException(node.MatchedToken, "The async attribute can only be used with function definitions.");
+			}
 
-            AS3Variable variable = new AS3Variable(node.MatchedToken);
+
+			AS3Variable variable = new AS3Variable(node.MatchedToken);
             variable.Access = access;
             variable.Name = ParseExpr.getNodeValue(node.Nodes[0]);
 
@@ -1809,8 +1825,13 @@ namespace juicescript.compiler.parse
             {
                 throw new SyntaxException(node.MatchedToken, "Variables cannot be NATIVE.");
             }
+			if (access.IsAsync)
+			{
+				throw new SyntaxException(node.MatchedToken, "The async attribute can only be used with function definitions.");
+			}
 
-            AS3Const @const = new AS3Const(node.MatchedToken);
+
+			AS3Const @const = new AS3Const(node.MatchedToken);
             @const.Access = access;
             @const.Name = ParseExpr.getNodeValue(node.Nodes[0]);
 
@@ -2642,6 +2663,8 @@ namespace juicescript.compiler.parse
 					node.SelectGrammerLine.Derivation[0].Name == "typeof"
                     ||
 					node.SelectGrammerLine.Derivation[0].Name == "void"
+					||
+					node.SelectGrammerLine.Derivation[0].Name == "await"
 					)
                 {
                     enter_events.Add(node.Nodes[1], (n) => {
