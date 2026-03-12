@@ -2,6 +2,7 @@
 using juicescript.ABC.Locaters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -346,8 +347,128 @@ namespace juicescript.runtime.buildin
 		
 		}
 
-		
 
+		[NativeFunction("$__AS3__.toplevel$public::fetch")]
+		public static void HttpFetch(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			RtHeapInstance promise;
+			int ptr = context.MicroTaskQueue.CreateNativePromise( context, out promise);
+			if (ptr == 0)
+			{
+				context.player.RaiseOutOfMemory(ref error);
+				return;
+			}
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			NaNBoxing url = scope.ReadSlot(0, context.player);
+			if (url.ValueType == NaNBoxing.BoxType.Null || url.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseError(ref error, "url is null");
+				return;
+			}
+
+
+			string uri;
+			if (url.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> buffers = stackalloc char[16];
+				int l = url.GetLocalStringChars(buffers);
+				uri = buffers.Slice(0, l).ToString();
+			}
+			else
+			{
+				Debug.Assert(url.ValueType == NaNBoxing.BoxType.HeapPtr);
+				uri = ((RtPayloadString)context.GC.Heap[url.HeapPtr].facility).Str;
+			}
+
+			
+			HttpClient httpClient = new HttpClient();
+			context.AsyncCallbackQueue.OnAsyncBegin(ptr);
+
+			try
+			{
+				
+				httpClient.GetAsync(uri).ContinueWith(
+
+					task =>
+					{
+						// 这在线程池线程执行
+						if (task.IsFaulted)
+						{
+							//result = CreateError(context, task.Exception);
+							// 调度 reject
+							//context.Player.OnAsyncComplete(promisePtr, result, isReject: true);
+							context.AsyncCallbackQueue.OnAsyncComplete(ptr,
+										(AysncGetResult r) => {
+											context.player.TryCreateStringValue(task.Exception.Message, out r.value, ref r.error);
+										}
+										, false);
+							httpClient.Dispose();
+						}
+						else
+						{
+							try
+							{
+								task.Result.Content.ReadAsStringAsync().ContinueWith(
+								str =>
+								{
+									if (str.IsFaulted)
+									{
+										context.AsyncCallbackQueue.OnAsyncComplete(ptr,
+										(AysncGetResult r) => {
+											context.player.TryCreateStringValue(str.Exception.Message, out r.value, ref r.error);
+										}
+										, false);
+									}
+									else
+									{
+
+										context.AsyncCallbackQueue.OnAsyncComplete(ptr,
+										(AysncGetResult r) => {
+											context.player.TryCreateStringValue(str.Result, out r.value, ref r.error);
+										}
+										, true);
+
+									}
+
+									httpClient.Dispose();
+								}
+							);
+							}
+							catch (AggregateException ex)
+							{
+								httpClient.Dispose();
+
+								context.AsyncCallbackQueue.OnAsyncComplete(ptr,
+										(AysncGetResult r) => {
+											context.player.TryCreateStringValue(ex.Message, out r.value, ref r.error);
+										}
+										, false);
+
+							}
+
+							
+						}
+					}
+					);
+			}
+			catch (Exception ex)
+			{
+				context.AsyncCallbackQueue.OnAsyncComplete(ptr,
+					(AysncGetResult r) => {
+						context.player.TryCreateStringValue(ex.Message, out r.value, ref r.error);
+					}
+					, false);
+				httpClient.Dispose();
+			}
+
+			context.StackSlots[returnSlotIndex].SetHeapPtr(ptr);
+
+		}
 
 	}
 }

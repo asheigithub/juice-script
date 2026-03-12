@@ -17,6 +17,9 @@ package __AS3__
 		native public static function parseFloat (str:String="NaN") : Number;
 		
 		native public static function parseInt (s:String="NaN", radix:int=0) : Number;
+		
+		native public static function fetch(url:String) : Promise;
+		
 	}
 }
 

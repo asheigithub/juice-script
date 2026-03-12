@@ -1553,10 +1553,22 @@ namespace juicescript.runtime.buildin
 
 
 			}
+
+			internal int CreateNativePromise(Context context,out RtHeapInstance promise)
+			{
+				int ptr = context.GC.AllocInstance(context.PROMISE.Instance, out promise);
+				if (ptr != 0)
+				{
+					PromiseWapper wapper = new PromiseWapper();
+					((RtPayloadInstance)promise.facility).wapperedObject = wapper;
+				}
+
+				return ptr;
+			}
 		}
 
 
-		enum PromiseState
+		internal enum PromiseState
 		{
 			pending,
 			fulfilled,
@@ -1564,9 +1576,9 @@ namespace juicescript.runtime.buildin
 		}
 
 
-		class Reaction { public NaNBoxing onFulfilled; public NaNBoxing onRejected; public NaNBoxing nextPromise; }
+		internal class Reaction { public NaNBoxing onFulfilled; public NaNBoxing onRejected; public NaNBoxing nextPromise; }
 
-		class PromiseWapper : RtWapperBase
+		internal class PromiseWapper : RtWapperBase
 		{
 			internal PromiseState _state = PromiseState.pending;
 			internal NaNBoxing _value;
@@ -1911,6 +1923,9 @@ namespace juicescript.runtime.buildin
 			var m = context.GC.Heap[genwapper.async_body];
 			ASMethod g_method = ((ASMethodBody)m.Type).Method;
 
+			Debug.Assert(!g_method.Flags.HasFlag( MethodFlags.Native) );
+
+
 			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			g_method.Body.GetInfo(ref info);
 			int calleelastpos = context.StackPosition;
@@ -2010,7 +2025,9 @@ namespace juicescript.runtime.buildin
 			{
 				context.BackTraceIndex--;
 
-				if (genwapper.state == 2 || g_method.Flags.HasFlag(MethodFlags.Native))
+				if (genwapper.state == 2
+					//|| g_method.Flags.HasFlag(MethodFlags.Native)
+					)
 				{
 					ASMethod private_resolve = context.PROMISE.Instance._vtable.Items[2].Trait.Method;
 					Debug.Assert(private_resolve.Name == "_resolve");
@@ -2049,11 +2066,11 @@ namespace juicescript.runtime.buildin
 					ReceiveError resolve_err = default;
 
 					int resolved_promise = context.StackPosition;
-					
+
 					slots = context.StackSlots.AsSpan(context.StackPosition, 2);
 					slots[0].SetUndefined();
 					slots[1] = v;
-					context.StackPosition +=2;
+					context.StackPosition += 2;
 
 					StackLocater arg = default; arg.index = 1;
 
@@ -2081,16 +2098,16 @@ namespace juicescript.runtime.buildin
 
 					RtPayloadClosure onfulfilledClosure = (RtPayloadClosure)context.GC.Heap[onfulfilled].facility;
 					context.GC.Heap[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
-					onfulfilledClosure.This= promisePtr;
+					onfulfilledClosure.This = promisePtr;
 					onfulfilledClosure.ScopePtr = genwapper_ptr;
 					onfulfilledClosure.ScopeType = genwapper.scopeType;
 					onfulfilledClosure._ref_as_type = context.PROMISE;
 					onfulfilledClosure.methodscopeslot_ref_state = 0; onfulfilledClosure.HEAPINSTANCE_PTR = 0;
 
-					
+
 					slots = context.StackSlots.AsSpan(context.StackPosition, 2);
 					slots[0].SetHeapPtr(onfulfilled);
-					
+
 
 					int onrejected = context.M_ClosurePtr + context.StackPosition + 1;
 					RtPayloadClosure onrejectedClosure = (RtPayloadClosure)context.GC.Heap[onrejected].facility;
@@ -2103,7 +2120,7 @@ namespace juicescript.runtime.buildin
 
 					slots[1].SetHeapPtr(onrejected);
 
-					context.StackPosition+=2;
+					context.StackPosition += 2;
 
 					ReceiveError then_err = default;
 					unsafe
@@ -2149,5 +2166,7 @@ namespace juicescript.runtime.buildin
 
 			AsyncTemplate_Step(context, ((RtPayloadMethodScope)mscope.facility).ParentPtr, thisPtr, ref error);
 		}
+
+		
 	}
 }

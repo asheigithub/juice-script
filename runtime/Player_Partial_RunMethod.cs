@@ -616,8 +616,11 @@ namespace juicescript.runtime
 					return result;
 
 				}
-				else if (method.Flags.HasFlag(MethodFlags.ASYNC))
+				else if (method.Flags.HasFlag(MethodFlags.ASYNC) )
 				{
+					Debug.Assert(!method.Flags.HasFlag(MethodFlags.Native));
+					//native方法只需要返回Promise即可，它里面没有await!
+
 					//if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
 					//{
 					//	throw new NotImplementedException();

@@ -16,33 +16,25 @@ package
 	}
 }
   
-var log = [];
 
-async function foo() {
-    log.push("A");
-    try {
-        log.push("B");
-        var x = await Promise.resolve(10);
-        log.push("C");
-        await Promise.reject("ERR");
-        log.push("D"); // 不会执行
-    } catch (e) {
-        log.push("E:" + e);
-    } finally {
-        log.push("F");
-    }
-    log.push("G");
-    return log;// .join(",");
+
+async function Go()
+{
+	try
+	{
+		trace( await fetch("https://r.wxyfamily.duckdns.org") );	
+		trace(2);
+	
+	}
+	catch (e)
+	{
+		trace(e);
+		
+		trace( await fetch("http://oa.ofilm.com") );
+		
+	}
 }
-
-foo().then(function(v) {
-    trace("T10", v);
-    // 期望：
-    // T10 A,B,C,E:ERR,F,G
-});
-
-
-
+Go();
 
 
 

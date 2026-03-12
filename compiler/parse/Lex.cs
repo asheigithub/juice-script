@@ -625,7 +625,7 @@ namespace juicescript.compiler.parse
 		internal static readonly HashSet<string> ExpressionContextTokens = new HashSet<string> 
         { 
             "+", "-", "*", "/", "%", "|","&" ,"^", "~" ,"=", "==", "!=", "<", "<=", ">=", ",", "(", "return",
-            "throw", //"yield", "await",  "=>",
+            "throw", "await" ,//"yield", "await",  "=>",
 			"++", "--", "||", "||=" 
             , "?"
 		    , "&&", "&&=", "<<", ">>", ">>>", "<=", ">="
