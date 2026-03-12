@@ -1237,6 +1237,12 @@ namespace juicescript.compiler.parse
             {
                 throw new SyntaxException(node.MatchedToken, "native is not allowed here.");
             }
+            if (access.IsAsync && memberscope.Peek() is AS3Function.AS3FunctionScope)
+            {
+                throw new SyntaxException(node.MatchedToken, "async is not allowed here.");
+            }
+
+
             if (accesslist.Count > 0 && memberscope.Peek() is AS3Function.AS3FunctionScope)
             {
                 throw new SyntaxException(node.MatchedToken, "Access modifier not allowed on declarations inside a function.");

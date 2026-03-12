@@ -3584,6 +3584,8 @@ namespace juicescript.runtime
 			InitScript((ASScript)Context.ARGEMENT_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("ARGEMENT_ERROR instance init failed"); }
 			InitScript((ASScript)Context.IITERATOR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("IITERATOR instance init failed"); }
 			InitScript((ASScript)Context.PROMISE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
+			InitScript((ASScript)Context.ILLEGALOPERATION_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
+			InitScript((ASScript)Context.RANGE_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
 			
 
 
@@ -18382,10 +18384,16 @@ namespace juicescript.runtime
 
 								ref var v = ref stackslots[value.index];
 
-								ConvertValueType(ref error, v, method.ReturnTypeKind, method.__return_type_class__, ref v);
-								if (error.raised)
+								if (method.Flags.HasFlag(MethodFlags.ASYNC))
 								{
-									goto flag_handle_error;
+								}
+								else
+								{
+									ConvertValueType(ref error, v, method.ReturnTypeKind, method.__return_type_class__, ref v);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
 								}
 
 								//v = GetSaveValue(v, ref error);/* 这里应该改造为返回缓存 cache_object.  */
@@ -18900,18 +18908,19 @@ namespace juicescript.runtime
 
 						case INS_Code.await_return:
 							{
-#if DEBUG
-								if (returnSlotIndex < 0)
-								{
-									throw new InvalidOperationException();
-								}
-#endif
 #if FORCOMPILER
 								if (IsComputeConstExpr)
 								{
 									throw new EvalConstException();
 								}
 #endif
+#if DEBUG
+								if (returnSlotIndex < 0)
+								{
+									throw new InvalidOperationException();
+								}
+#endif
+
 
 								Context.GC.CheckGC(ref error);
 

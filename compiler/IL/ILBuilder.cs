@@ -718,11 +718,6 @@ namespace juicescript.compiler.IL
 					//}
 					//else
 
-					if (m.Flags.HasFlag(MethodFlags.ASYNC))
-					{ 
-						//插入一条指令，表示已结束
-					}
-
 					if (@return.ReturnValue.Count > 0)
 					{
 						//ExpressionIL expressionIL = new ExpressionIL();
@@ -731,11 +726,17 @@ namespace juicescript.compiler.IL
 							ret = BuildExpression(compileEnv, (AS3Expression)@return.ReturnValue[r], ref flagseed);
 						}
 
-						ret = ExpressionIL.TestTypeConvert(compileEnv, ret, new CompileTypeKind() { Maj = m.ReturnTypeKind }, @return.Token);
+						if (!m.Flags.HasFlag(MethodFlags.ASYNC)) //asyn函数会走特殊处理，不必检查返回类型
+						{
+							ret = ExpressionIL.TestTypeConvert(compileEnv, ret, new CompileTypeKind() { Maj = m.ReturnTypeKind }, @return.Token);
+						}
 					}
 					else if (m.ReturnTypeKind != TypeKind.Fun_Void && m.ReturnTypeKind != TypeKind.Any)
 					{
-						throw new ResolverException(code.Token, "Function does not return a value.");
+						if (!m.Flags.HasFlag(MethodFlags.ASYNC)) //asyn函数会走特殊处理，不必检查返回
+						{
+							throw new ResolverException(code.Token, "Function does not return a value.");
+						}
 					}
 
 					if (ret.index == int.MinValue && @return.ReturnValue.Count > 0)

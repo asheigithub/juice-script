@@ -19,6 +19,31 @@ namespace juicescript.runtime
 	public partial class Player
 	{
 
+		internal void SetNativeDelegate(ASMethod method,ref ReceiveError error)
+		{
+			if (method.nativefunction_delegate == null)
+			{
+				string key =
+					method.__is_vector_method ?
+					$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
+					:
+					$"{(method.Trait != null && method.Trait.IsStatic ? "$" : "")}{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
+
+				var m = NativeFunctionRegistry.GetFunction(key);
+				if (m != null)
+				{
+					method.nativefunction_delegate = (NativeFun)Delegate.CreateDelegate(typeof(NativeFun), m);
+				}
+				else
+				{
+					RaiseIllegaloperationError(ref error, key);
+					
+				}
+
+			}
+		}
+
+
 
 		/// <summary>
 		/// 特别注意在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
@@ -815,28 +840,13 @@ namespace juicescript.runtime
 					return new NaNBoxing();
 				}
 
-				
+
 			run_native:
 
-				if (method.nativefunction_delegate == null)
+				SetNativeDelegate(method, ref error);
+				if (error.raised)
 				{
-					string key =
-						method.__is_vector_method ?
-						$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
-						:
-						$"{ ( method.Trait !=null && method.Trait.IsStatic ? "$":"" ) }{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
-
-					var m = NativeFunctionRegistry.GetFunction(key);
-					if (m != null)
-					{
-						method.nativefunction_delegate = (NativeFun)Delegate.CreateDelegate(typeof(NativeFun), m);
-					}
-					else
-					{
-						RaiseIllegaloperationError(ref error, key);
-						goto lbl_native_called;
-					}
-
+					goto lbl_native_called;
 				}
 
 				//Context.BackTrace[Context.BackTraceIndex].Method = method;

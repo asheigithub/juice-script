@@ -16,55 +16,35 @@ package
 	}
 }
   
-async function TTT()
-{
-	throw 'fuck';
+var log = [];
+
+async function foo() {
+    log.push("A");
+    try {
+        log.push("B");
+        var x = await Promise.resolve(10);
+        log.push("C");
+        await Promise.reject("ERR");
+        log.push("D"); // 不会执行
+    } catch (e) {
+        log.push("E:" + e);
+    } finally {
+        log.push("F");
+    }
+    log.push("G");
+    return log;// .join(",");
 }
 
-async function ABC(i=1+1)
-{
-    //var x = await i;
-    
-	//x = await x + 1;
+foo().then(function(v) {
+    trace("T10", v);
+    // 期望：
+    // T10 A,B,C,E:ERR,F,G
+});
 
-	try
-	{
-		await TTT();
-	}
-	catch(e)
-	{
-		await e;
-		throw e;
-		
-		//x = await e;
-	}
-	finally 
-	{
-		return 7;
-	}
-	
-	
-	//return x + 1;
-}
 
-async function Test()
-{
-	
-	var x = await ABC(4);	
-	trace(x);
-	
-	x = await 6;
-	
-	trace(x);
-	
-	x = await ABC(x);
-	
-	trace(x);
-		
-	
-}
 
-Test().catch( function(e){ trace(e) } ) ;
+
+
 
  
 //class Test262Error extends Error

@@ -16,7 +16,7 @@ namespace juicescript.runtime.buildin
 {
 	internal class PromiseImpl
 	{
-
+		
 		[NativeFunction(".Promise$public::Promise")]
 		public static void Promise_Constructor(Context context,
 			ASMethod method,
@@ -1947,16 +1947,22 @@ namespace juicescript.runtime.buildin
 			context.StackPosition += 1;
 			context.StackSlots[retslot].SetUndefined();
 
+			((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
 			if (!g_method.Flags.HasFlag(MethodFlags.Native))
 			{
-				((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
-
 				context.player.Execute(ref info, m, genwapper.thisPtr, genwapper.async_body,
 					genwapper.scopeType, slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
 			}
 			else
 			{
-				throw new NotImplementedException();
+				context.player.SetNativeDelegate(g_method, ref asyncErr);
+
+				if (!asyncErr.raised)
+				{
+					((NativeFun)g_method.nativefunction_delegate)(context, g_method, genwapper.async_body , genwapper.thisPtr, context.StackPosition,
+						ref asyncErr, retslot);
+				}
+				
 			}
 
 
