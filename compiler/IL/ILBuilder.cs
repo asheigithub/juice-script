@@ -296,6 +296,8 @@ namespace juicescript.compiler.IL
 				//tryCatchContext.Finally_Enter = finally_Enter;
 
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(@try.finally_exit_token);
+				finally_Exit.dst = try_Enter.dst;
+
 				//tryCatchContext.Finally_Exit = finally_Exit;
 
 
@@ -334,6 +336,7 @@ namespace juicescript.compiler.IL
 					catch_Enter.catch_exception = heapLocater;
 
 					INS_Catch_Exit catch_Exit = new INS_Catch_Exit(@try.catch_exit_tokens[i]);
+					
 					//tryCatchContext.CatchList.Add(new Tuple<Instruction, Instruction>( catch_Enter,catch_Exit));
 
 					compileEnv.instructions.Add(catch_Enter);

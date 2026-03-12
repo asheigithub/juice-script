@@ -1011,10 +1011,6 @@ namespace juicescript.compiler
 
 
 
-			//Generator函数顶部插入恢复状态指令
-
-
-
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{

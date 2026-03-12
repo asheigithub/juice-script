@@ -1036,9 +1036,11 @@ namespace juicescript.runtime.gc
                 mark(iterctx);
             }
 
-            //遍历微任务循环
-            context.MicroTaskQueue.OnGCMark(context);
+            //遍历回调
+			context.AsyncCallbackQueue.OnGCMark(context);
 
+			//遍历微任务循环
+			context.MicroTaskQueue.OnGCMark(context);
 
 
 			//遍历Root。

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static juicescript.runtime.buildin.PromiseImpl;
+using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
@@ -145,7 +146,9 @@ namespace juicescript.runtime
         /// </summary>
         internal int CacheVectorPtr;
 
-		internal PromiseMicroTaskQueue MicroTaskQueue { get; set; }
+		internal PromiseMicroTaskQueue MicroTaskQueue { get;private set; }
+
+        internal AsyncCallbackQueue AsyncCallbackQueue { get;private set; }
 
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
@@ -248,6 +251,8 @@ namespace juicescript.runtime
             errorStack = new ErrorStackTrace();
 
 			MicroTaskQueue = new PromiseMicroTaskQueue();
+
+            AsyncCallbackQueue = new AsyncCallbackQueue();
 
 		}
 

@@ -1794,6 +1794,12 @@ namespace juicescript.compiler
 
 			if (function.Access.IsAsync)
 			{
+				if (function.Access.IsNative)
+				{
+					throw new SyntaxException(function.Token, "native function return Promise,not async");
+				}
+
+
 				method.Flags |= MethodFlags.ASYNC;
 				method.Flags |= MethodFlags.NeedActivation; //ASYNC函数必然需要创建上下文
 

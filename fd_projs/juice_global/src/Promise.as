@@ -21,7 +21,7 @@ package
         
         // 私有的reject方法  
         private native function _reject(reason:*):void;
-        
+	
         // 静态方法
         public native static function resolve(value:*):Promise ;
         
