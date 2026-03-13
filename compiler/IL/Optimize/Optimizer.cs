@@ -451,5 +451,17 @@ namespace juicescript.compiler.IL.Optimize
 			method.Body.ByteCode = Assembler.Assemble(useslotcount, constants, instructions.ToArray());
 
 		}
+
+		internal static void Optimize(ASMethod method)
+		{
+			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
+
+			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
+
+			
+			var optimizedInstructions = cfg.FlattenInstructions();
+
+			method.Body.ByteCode = Assembler.Assemble(slotCount, constants, optimizedInstructions);
+		}
 	}
 }

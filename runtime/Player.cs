@@ -19382,8 +19382,15 @@ namespace juicescript.runtime
 								}
 							}
 
-							//未找到,进入finally块。						
-							stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							//未找到,进入finally块。	
+							if (error.error.ValueType != BoxType.HeapPtr)
+							{
+								stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							}
+							else
+							{
+								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr, error.error, ref error,true);
+							}
 
 							error.raised = false;
 							error.error = default;
@@ -19396,7 +19403,14 @@ namespace juicescript.runtime
 						else if (exception_ctx->state == 1)
 						{
 							//无法catch,跳转到finally.
-							stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							if (error.error.ValueType != BoxType.HeapPtr)
+							{
+								stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							}
+							else
+							{
+								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr, error.error, ref error,true);
+							}
 
 							error.raised = false;
 							error.error = default;

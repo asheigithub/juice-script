@@ -1018,7 +1018,7 @@ namespace juicescript.compiler
 				{
 					ASMethod method = script.scriptMethods[i];
 
-					Optimizer.FastPeephole(method);
+					Optimizer.Optimize(method);
 
 					ComputeJump(method,true);
 				}
