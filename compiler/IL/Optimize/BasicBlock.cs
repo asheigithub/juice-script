@@ -18,10 +18,9 @@ namespace juicescript.compiler.IL.Optimize
         public int? JumpTargetFlagId { get; set; }
         public bool HasFallThrough { get; set; }
         
+        public ExceptionBlockInfo ExceptionInfo { get; set; }
         
         public bool IsReachable { get; set; }
-
-        public ExceptionBlockInfo ExceptionInfo { get; set; }
 
         public BasicBlock()
         {
@@ -31,7 +30,7 @@ namespace juicescript.compiler.IL.Optimize
             IsReachable = false;
             HasFallThrough = false;
             JumpTargetFlagId = null;
-           
+            ExceptionInfo = null;
         }
 
         public override string ToString()
@@ -40,5 +39,25 @@ namespace juicescript.compiler.IL.Optimize
         }
     }
 
-    
+    public class ExceptionBlockInfo
+    {
+        public ExceptionBlockType BlockType { get; set; }
+        public int TryEnterIndex { get; set; }
+        public int[] CatchPc { get; set; }
+        public int FinallyPc { get; set; }
+        public int FinallyExitPc { get; set; }
+        public int TryExitIndex { get; set; }
+        public int CatchEnterIndex { get; set; }
+        public int CatchExitIndex { get; set; }
+        public int FinallyEnterIndex { get; set; }
+        public int FinallyExitIndex { get; set; }
+    }
+
+    public enum ExceptionBlockType
+    {
+        None,
+        TryBlock,
+        CatchBlock,
+        FinallyBlock
+    }
 }

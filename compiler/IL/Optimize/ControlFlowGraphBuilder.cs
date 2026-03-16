@@ -6,391 +6,639 @@ using System.Linq;
 
 namespace juicescript.compiler.IL.Optimize
 {
-	/// <summary>
-	/// 控制流图(Control Flow Graph, CFG)构建器
-	/// 算法说明:
-	/// 1 分割基本块。
-	///   编译器确保除非没有任何指令，否则最后一条指令肯定是 END.
-	///   这条END指令是唯一的退出指令，它作为独立的最后一个基本块。先检查指令序列是否符合此约束，不符合就抛出异常。
-	///   基本块分割：跳转指令有：goto,if_true_goto,if_false_goto, throw error, return [value].
-	///              先确定它们的跳转目标。goto类指令的跳转目标是查找某个 INS_flag的 flagid.
-	///              throw error的跳转目标是：如果不在 try catch finally 结构内，则直接跳转到 END。
-	///                                      如果在 try catch finally内,则跳转到每一个对应的catch_enter.如果没有catch,则跳转到finally_enter.
-	///              return 类指令的跳转目标是：如果不在 try catch finally 结构内，直接跳到 END。
-	///                                      如果在 try catch finally内,则跳转到每一个对应的catch_enter.如果没有catch,则跳转到finally_enter.
-	///              基本块的入口，包括编号为0的第一条指令，跳转类指令的跳转目标，跳转类指令的下一条指令,和 try_enter,catch_enter,finally_enter.
-	///              确定入口后，按照指令序列，从入口指令开始（含入口指令）到下一条入口指令（不含下一条入口指令）之间的指令序列归为一个基本块。
-	///              特殊情况：END指令自己就是最后一个基本块.finally_enter到对应的finally_exit(包含finally_exit)之间的指令是一个基本块.              
-	///              
-	/// 
-	/// </summary>
-	public class ExceptionBlockInfo
-	{
-		public string BlockType { get; set; }
-		public int TryEnterIndex { get; set; }
-		public int TryExitIndex { get; set; }
-		public int CatchEnterIndex { get; set; }
-		public int CatchExitIndex { get; set; }
-		public int FinallyEnterIndex { get; set; }
-		public int FinallyExitIndex { get; set; }
-		public int[] CatchPcList { get; set; }
-	}
-
-	public class ControlFlowGraphBuilder
+    /// <summary>
+    /// 控制流图(Control Flow Graph, CFG)构建器
+    /// 
+    /// 算法概述:
+    /// 1. 识别所有基本块的入口点(Entry Points)
+    ///    - 方法入口(指令索引0)
+    ///    - flag标签位置(跳转目标)
+    ///    - try/catch/finally块入口
+    /// 
+    /// 2. 根据入口点分割基本块
+    ///    - 每个基本块从入口点开始,到下一个入口点前一条指令结束
+    ///    - 基本块内不包含控制流跳转指令(作为块的最后一 条指令)
+    /// 
+    /// 3. 构建控制流边(Control Flow Edges)
+    ///    - 分析每个基本块的最后一条指令
+    ///    - 根据指令类型确定后继块(goto/条件跳转/返回/异常退出等)
+    ///    - 特殊处理try-catch-finally的异常流
+    /// 
+    /// 4. 计算可达性
+    ///    - 从入口块开始进行BFS,标记所有可达块
+    /// </summary>
+    public class ControlFlowGraphBuilder
     {
+        /// <summary>
+        /// 从指令序列构建控制流图
+        /// </summary>
+        /// <param name="instructions">原始指令序列</param>
+        /// <param name="method">AS方法,包含方法元数据</param>
+        /// <returns>构建完成的控制流图</returns>
         public static ControlFlowGraph Build(Instruction[] instructions, ASMethod method)
         {
-			if (instructions == null || instructions.Length == 0)
-			{
-				return new ControlFlowGraph(method);
-			}
+            var cfg = new ControlFlowGraph(method);
 
-			if (!(instructions[instructions.Length - 1] is INS_END))
-			{
-				throw new InvalidOperationException("最后一条指令必须是END指令");
-			}
+            if (instructions == null || instructions.Length == 0)
+                return cfg;
 
-			var cfg = new ControlFlowGraph(method);
-			int n = instructions.Length;
+            // 第一步:构建字节码偏移到指令索引的映射表
+            // 用于将字节码偏移(如try_enter中的finally_pc/catch_pc)转换为指令索引
+            var byteOffsetToInstructionIndex = new Dictionary<int, int>();
+            int currentOffset = 0;
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                byteOffsetToInstructionIndex[currentOffset] = i;
+                currentOffset += instructions[i].Size;
+            }
 
-			Dictionary<int, int> flagIdToIndex = new Dictionary<int, int>();
-			List<int> tryEnterIndices = new List<int>();
-			List<int> catchEnterIndices = new List<int>();
-			List<int> finallyEnterIndices = new List<int>();
-			Dictionary<int, ExceptionBlockInfo> tryEnterToInfo = new Dictionary<int, ExceptionBlockInfo>();
+            // 构建指令索引到字节码偏移的反向映射(用于异常信息收集)
+            var instructionIndexToByteOffset = new int[instructions.Length];
+            currentOffset = 0;
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                instructionIndexToByteOffset[i] = currentOffset;
+                currentOffset += instructions[i].Size;
+            }
 
-			for (int i = 0; i < n; i++)
-			{
-				var ins = instructions[i];
-				if (ins is INS_Flag flag)
-				{
-					flagIdToIndex[flag.flag_id] = i;
-				}
-			else if (ins is INS_Try_Enter tryEnter)
-			{
-				tryEnterIndices.Add(i);
-				var info = new ExceptionBlockInfo
-				{
-					TryEnterIndex = i,
-					FinallyEnterIndex = tryEnter.finally_pc,
-					FinallyExitIndex = tryEnter.finally_exit_pc,
-					CatchPcList = tryEnter.catch_pc
-				};
-				tryEnterToInfo[i] = info;
-			}
-				else if (ins is INS_Try_Exit)
-				{
-					foreach (var kvp in tryEnterToInfo)
-					{
-						if (kvp.Value.TryEnterIndex < i && kvp.Value.TryExitIndex == 0)
-						{
-							kvp.Value.TryExitIndex = i;
-						}
-					}
-				}
-				else if (ins is INS_Catch_Enter)
-				{
-					catchEnterIndices.Add(i);
-					int tryEnterIdx = FindEnclosingTryEnter(i, tryEnterToInfo);
-					if (tryEnterIdx >= 0 && tryEnterToInfo.TryGetValue(tryEnterIdx, out var info))
-					{
-						info.CatchEnterIndex = i;
-					}
-				}
-				else if (ins is INS_Finally_Enter)
-				{
-					finallyEnterIndices.Add(i);
-					int tryEnterIdx = FindEnclosingTryEnter(i, tryEnterToInfo);
-					if (tryEnterIdx >= 0 && tryEnterToInfo.TryGetValue(tryEnterIdx, out var info))
-					{
-						info.FinallyEnterIndex = i;
-					}
-				}
-				else if (ins is INS_Finally_Exit)
-				{
-					int tryEnterIdx = FindEnclosingTryEnter(i, tryEnterToInfo);
-					if (tryEnterIdx >= 0 && tryEnterToInfo.TryGetValue(tryEnterIdx, out var info))
-					{
-						info.FinallyExitIndex = i;
-					}
-				}
-			}
+            // 第二步:识别所有基本块的入口点
+            // 入口点是控制流可能转移到的新位置,每个入口点都是一个新基本块的开始
+            
+            // 首先收集所有被跳转指令引用的flag_id
+            // 只有被引用的flag才是有效的跳转目标
+            var referencedFlagIds = new HashSet<int>();
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                var ins = instructions[i];
+                if (ins.INS_Code == INS_Code.goto_flag)
+                {
+                    referencedFlagIds.Add(((INS_Goto)ins).flag_id);
+                }
+                else if (ins.INS_Code == INS_Code.if_true_goto)
+                {
+                    referencedFlagIds.Add(((INS_If_True_Goto)ins).flag_id);
+                }
+                else if (ins.INS_Code == INS_Code.if_false_goto)
+                {
+                    referencedFlagIds.Add(((INS_If_False_Goto)ins).flag_id);
+                }
+            }
 
-			HashSet<int> entryPoints = new HashSet<int>();
-			entryPoints.Add(0);
+            var entryPoints = new HashSet<int>();
+            
+            // 方法的第一条指令始终是一个入口点
+            entryPoints.Add(0);
 
-			Dictionary<int, List<int>> tryEnterJumps = new Dictionary<int, List<int>>();
-			foreach (var kvp in tryEnterToInfo)
-			{
-				tryEnterJumps[kvp.Key] = new List<int>();
-			}
+            // 遍历所有指令,识别各类入口点
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                var ins = instructions[i];
+                
+                // flag标签:只有被跳转指令引用的flag才作为入口点
+                // 空的flag标签(如未使用的代码块标记)不作为入口点
+                if (ins.INS_Code == INS_Code.flag)
+                {
+                    var flag = (INS_Flag)ins;
+                    if (referencedFlagIds.Contains(flag.flag_id))
+                    {
+                        entryPoints.Add(i);
+                    }
+                }
+                // try_enter:try块的入口,同时处理finally和catch的目标
+                else if (ins.INS_Code == INS_Code.try_enter)
+                {
+                    var tryEnter = (INS_Try_Enter)ins;
+                    // finally块入口(如果存在)
+                    if (tryEnter.finally_pc > 0 && byteOffsetToInstructionIndex.TryGetValue(tryEnter.finally_pc, out int finallyIdx))
+                    {
+                        entryPoints.Add(finallyIdx);
+                    }
+                    // catch块入口(如果存在)
+                    if (tryEnter.catch_pc != null)
+                    {
+                        for (int j = 0; j < tryEnter.catch_pc.Length; j++)
+                        {
+                            if (byteOffsetToInstructionIndex.TryGetValue(tryEnter.catch_pc[j], out int catchIdx))
+                            {
+                                entryPoints.Add(catchIdx);
+                            }
+                        }
+                    }
+                }
+                // catch_enter:catch块入口
+                else if (ins.INS_Code == INS_Code.catch_enter)
+                {
+                    entryPoints.Add(i);
+                }
+                // finally_enter:finally块入口
+                else if (ins.INS_Code == INS_Code.finally_enter)
+                {
+                    entryPoints.Add(i);
+                }
+            }
 
-			for (int i = 0; i < n; i++)
-			{
-				var ins = instructions[i];
-				int? jumpTarget = GetJumpTarget(ins, flagIdToIndex, i, tryEnterToInfo, instructions);
+            // 第三步:根据入口点创建基本块
+            // 入口点按索引排序后,每个入口点到下一个入口点前一条指令构成一个基本块
+            var sortedEntries = entryPoints.OrderBy(e => e).ToList();
+            var blockStarts = new List<int>();
+            
+            foreach (var entry in sortedEntries)
+            {
+                if (entry >= 0 && entry < instructions.Length)
+                {
+                    if (!blockStarts.Contains(entry))
+                    {
+                        blockStarts.Add(entry);
+                    }
+                }
+            }
+            blockStarts.Sort();
 
-				if (jumpTarget.HasValue)
-				{
-					entryPoints.Add(jumpTarget.Value);
+            // 遍历所有入口点,为每个入口点创建一个基本块
+            for (int i = 0; i < blockStarts.Count; i++)
+            {
+                int startIdx = blockStarts[i];
+                int endIdx;
 
-					int enclosingTryEnter = FindEnclosingTryEnter(i, tryEnterToInfo);
-					if (enclosingTryEnter >= 0 && tryEnterJumps.ContainsKey(enclosingTryEnter))
-					{
-						if (ins is INS_Throw || ins is INS_Return_Value || ins is INS_Return_Void)
-						{
-							var info = tryEnterToInfo[enclosingTryEnter];
-							if (info.CatchPcList != null && info.CatchPcList.Length > 0)
-							{
-								foreach (var catchPc in info.CatchPcList)
-								{
-									int catchIdx = FindCatchEnterIndex(catchPc, catchEnterIndices);
-									if (catchIdx >= 0)
-									{
-										tryEnterJumps[enclosingTryEnter].Add(catchIdx);
-										entryPoints.Add(catchIdx);
-									}
-								}
-							}
-							else if (info.FinallyEnterIndex > 0)
-							{
-								tryEnterJumps[enclosingTryEnter].Add(info.FinallyEnterIndex);
-								entryPoints.Add(info.FinallyEnterIndex);
-							}
-						}
-					}
-				}
+                // 基本块从startIdx开始,到下一个入口点前一条指令结束
+                if (i + 1 < blockStarts.Count)
+                {
+                    endIdx = blockStarts[i + 1] - 1;
+                }
+                else
+                {
+                    // 最后一个基本块延伸到方法末尾
+                    endIdx = instructions.Length - 1;
+                }
 
-				if (IsJumpInstruction(ins))
-				{
-					if (i + 1 < n)
-					{
-						entryPoints.Add(i + 1);
-					}
-				}
-			}
+                // 创建基本块并建立指令到块的映射
+                if (endIdx >= startIdx && endIdx < instructions.Length)
+                {
+                    var block = new BasicBlock
+                    {
+                        BlockId = cfg.Blocks.Count,
+                        OriginalIndex = cfg.Blocks.Count,
+                        StartIndex = startIdx,
+                        EndIndex = endIdx
+                    };
 
-			foreach (var info in tryEnterToInfo.Values)
-			{
-				if (info.TryEnterIndex >= 0)
-					entryPoints.Add(info.TryEnterIndex);
-				if (info.CatchEnterIndex > 0)
-					entryPoints.Add(info.CatchEnterIndex);
-				if (info.FinallyEnterIndex > 0)
-					entryPoints.Add(info.FinallyEnterIndex);
-			}
+                    for (int j = startIdx; j <= endIdx; j++)
+                    {
+                        block.Instructions.Add(instructions[j]);
+                        // 建立指令索引到基本块ID的映射,便于后续查找
+                        cfg.InstructionToBlock[j] = block.BlockId;
+                    }
 
-			foreach (var idx in tryEnterIndices)
-			{
-				entryPoints.Add(idx);
-			}
+                    cfg.Blocks.Add(block);
+                }
+            }
 
-			foreach (var idx in catchEnterIndices)
-			{
-				entryPoints.Add(idx);
-			}
+            // 边界情况:如果没有识别到任何入口点(如空方法),创建一个包含所有指令的默认块
+            if (cfg.Blocks.Count == 0 && instructions.Length > 0)
+            {
+                var block = new BasicBlock
+                {
+                    BlockId = 0,
+                    OriginalIndex = 0,
+                    StartIndex = 0,
+                    EndIndex = instructions.Length - 1
+                };
 
-			foreach (var idx in finallyEnterIndices)
-			{
-				entryPoints.Add(idx);
-			}
+                for (int j = 0; j < instructions.Length; j++)
+                {
+                    block.Instructions.Add(instructions[j]);
+                    cfg.InstructionToBlock[j] = 0;
+                }
 
-			if (n > 0)
-			{
-				entryPoints.Add(n - 1);
-			}
+                cfg.Blocks.Add(block);
+            }
 
-			List<int> sortedEntries = entryPoints.OrderBy(x => x).ToList();
+            // 第四步:收集异常处理信息
+            CollectExceptionInfo(instructions, cfg, instructionIndexToByteOffset);
+            
+            // 第五步:构建控制流边
+            BuildControlFlowEdges(instructions, cfg);
+            
+            // 第六步:计算可达性(从入口块开始遍历所有可达块)
+            cfg.ComputeReachability();
 
-			for (int i = 0; i < sortedEntries.Count; i++)
-			{
-				int startIdx = sortedEntries[i];
-				int endIdx = (i + 1 < sortedEntries.Count) ? sortedEntries[i + 1] : n;
-
-				if (startIdx >= n)
-					continue;
-				if (endIdx > n)
-					endIdx = n;
-
-				bool isFinallyBlock = false;
-				ExceptionBlockInfo enclosingInfo = null;
-				int enclosingTryEnter = FindEnclosingTryEnter(startIdx, tryEnterToInfo);
-				if (enclosingTryEnter >= 0 && tryEnterToInfo.TryGetValue(enclosingTryEnter, out enclosingInfo))
-				{
-					if (enclosingInfo.FinallyEnterIndex > 0 && enclosingInfo.FinallyExitIndex > 0)
-					{
-						if (startIdx >= enclosingInfo.FinallyEnterIndex && startIdx <= enclosingInfo.FinallyExitIndex)
-						{
-							isFinallyBlock = true;
-							endIdx = enclosingInfo.FinallyExitIndex + 1;
-						}
-					}
-				}
-
-				var block = new BasicBlock
-				{
-					BlockId = cfg.Blocks.Count,
-					OriginalIndex = cfg.Blocks.Count,
-					StartIndex = startIdx,
-					EndIndex = endIdx - 1,
-					ExceptionInfo = isFinallyBlock ? enclosingInfo : null
-				};
-
-				for (int j = startIdx; j < endIdx && j < n; j++)
-				{
-					block.Instructions.Add(instructions[j]);
-				}
-
-				cfg.Blocks.Add(block);
-			}
-
-			cfg.TryEnterToInfo = tryEnterToInfo;
-
-			for (int i = 0; i < n; i++)
-			{
-				int blockIdx = FindBlockContaining(cfg.Blocks, i);
-				if (blockIdx >= 0)
-				{
-					cfg.InstructionToBlock[i] = blockIdx;
-				}
-			}
-
-			return cfg;
+            return cfg;
         }
 
-		private static bool IsJumpInstruction(Instruction ins)
-		{
-			return ins is INS_Goto ||
-				   ins is INS_If_True_Goto ||
-				   ins is INS_If_False_Goto ||
-				   ins is INS_If_LogicOp_Goto ||
-				   ins is INS_Throw ||
-				   ins is INS_Return_Value ||
-				   ins is INS_Return_Void;
-		}
+        
+        /// <summary>
+        /// 收集异常处理块的信息
+        /// 
+        /// 使用栈来跟踪嵌套的try块:
+        /// - 遇到try_enter时,将try块的索引压栈
+        /// - 遇到catch_enter/finally_enter时,栈顶的try块就是对应的外层try
+        /// - 遇到try_exit/catch_exit时,不弹出栈(因为正常执行流会继续)
+        /// - 遇到finally_exit时,弹出栈(表示这个try-catch-finally结构结束)
+        /// </summary>
+        private static void CollectExceptionInfo(Instruction[] instructions, ControlFlowGraph cfg, int[] instructionIndexToByteOffset)
+        {
+            // 使用栈来跟踪当前嵌套的try块
+            var tryEnterStack = new Stack<int>();
 
-		private static int? GetJumpTarget(Instruction ins, Dictionary<int, int> flagIdToIndex, int currentIndex, Dictionary<int, ExceptionBlockInfo> tryEnterToInfo, Instruction[] instructions)
-		{
-			if (ins is INS_Goto gotoIns)
-			{
-				if (flagIdToIndex.TryGetValue(gotoIns.flag_id, out int targetIdx))
-				{
-					return targetIdx;
-				}
-			}
-			else if (ins is INS_If_True_Goto ifTrueGoto)
-			{
-				if (flagIdToIndex.TryGetValue(ifTrueGoto.flag_id, out int targetIdx))
-				{
-					return targetIdx;
-				}
-			}
-			else if (ins is INS_If_False_Goto ifFalseGoto)
-			{
-				if (flagIdToIndex.TryGetValue(ifFalseGoto.flag_id, out int targetIdx))
-				{
-					return targetIdx;
-				}
-			}
-			else if (ins is INS_If_LogicOp_Goto ifLogicOpGoto)
-			{
-				if (flagIdToIndex.TryGetValue(ifLogicOpGoto.flag_id, out int targetIdx))
-				{
-					return targetIdx;
-				}
-			}
-			else if (ins is INS_Throw || ins is INS_Return_Value || ins is INS_Return_Void)
-			{
-				int enclosingTry = FindEnclosingTryEnter(currentIndex, tryEnterToInfo);
-				if (enclosingTry >= 0 && tryEnterToInfo.TryGetValue(enclosingTry, out var info))
-				{
-					if (info.CatchPcList != null && info.CatchPcList.Length > 0 && info.CatchEnterIndex > 0)
-					{
-						return info.CatchEnterIndex;
-					}
-					else if (info.FinallyEnterIndex > 0)
-					{
-						return info.FinallyEnterIndex;
-					}
-				}
-				return instructions.Length - 1;
-			}
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                var ins = instructions[i];
 
-			return null;
-		}
+                // try块入口:创建异常信息并压栈
+                if (ins.INS_Code == INS_Code.try_enter)
+                {
+                    var tryEnter = (INS_Try_Enter)ins;
+                    var excInfo = new ExceptionBlockInfo
+                    {
+                        BlockType = ExceptionBlockType.TryBlock,
+                        TryEnterIndex = i,
+                        CatchPc = tryEnter.catch_pc,
+                        FinallyPc = tryEnter.finally_pc,
+                        FinallyExitPc = tryEnter.finally_exit_pc
+                    };
+                    cfg.TryEnterToInfo[i] = excInfo;
+                    tryEnterStack.Push(i);
+                }
+                // catch块入口:关联到栈顶的try块
+                else if (ins.INS_Code == INS_Code.catch_enter)
+                {
+                    if (tryEnterStack.Count > 0)
+                    {
+                        int tryIdx = tryEnterStack.Peek();
+                        if (cfg.TryEnterToInfo.TryGetValue(tryIdx, out var tryInfo))
+                        {
+                            tryInfo.CatchEnterIndex = i;
+                        }
+                    }
+                }
+                // finally块入口:关联到栈顶的try块
+                else if (ins.INS_Code == INS_Code.finally_enter)
+                {
+                    if (tryEnterStack.Count > 0)
+                    {
+                        int tryIdx = tryEnterStack.Peek();
+                        if (cfg.TryEnterToInfo.TryGetValue(tryIdx, out var tryInfo))
+                        {
+                            tryInfo.FinallyEnterIndex = i;
+                        }
+                    }
+                }
+                // try块退出:标记退出位置
+                else if (ins.INS_Code == INS_Code.try_exit)
+                {
+                    if (tryEnterStack.Count > 0)
+                    {
+                        int tryIdx = tryEnterStack.Peek();
+                        if (cfg.TryEnterToInfo.TryGetValue(tryIdx, out var tryInfo))
+                        {
+                            tryInfo.TryExitIndex = i;
+                        }
+                    }
+                }
+                // catch块退出:标记退出位置
+                else if (ins.INS_Code == INS_Code.catch_exit)
+                {
+                    if (tryEnterStack.Count > 0)
+                    {
+                        int tryIdx = tryEnterStack.Peek();
+                        if (cfg.TryEnterToInfo.TryGetValue(tryIdx, out var tryInfo))
+                        {
+                            tryInfo.CatchExitIndex = i;
+                        }
+                    }
+                }
+                // finally块退出:弹出栈(该try-catch-finally结构结束)
+                else if (ins.INS_Code == INS_Code.finally_exit)
+                {
+                    if (tryEnterStack.Count > 0)
+                    {
+                        int tryIdx = tryEnterStack.Pop();
+                        if (cfg.TryEnterToInfo.TryGetValue(tryIdx, out var tryInfo))
+                        {
+                            tryInfo.FinallyExitIndex = i;
+                        }
+                    }
+                }
+            }
+        }
 
-		private static int? GetFlagId(Instruction ins)
-		{
-			if (ins is INS_Goto gotoIns)
-				return gotoIns.flag_id;
-			if (ins is INS_If_True_Goto ifTrueGoto)
-				return ifTrueGoto.flag_id;
-			if (ins is INS_If_False_Goto ifFalseGoto)
-				return ifFalseGoto.flag_id;
-			if (ins is INS_If_LogicOp_Goto ifLogicOpGoto)
-				return ifLogicOpGoto.flag_id;
-			return null;
-		}
+        /// <summary>
+        /// 构建控制流边
+        /// 
+        /// 分析每个基本块的最后一条指令,确定该块的执行后继:
+        /// - goto_flag:无条件跳转到flag目标
+        /// - if_true_goto/if_false_goto:条件跳转 + 可能存在fall-through
+        /// - return_void/return_value:方法返回,无后继
+        /// - throw_error:异常抛出,无后继
+        /// - try_exit:try块退出,可能跳转到catch或finally
+        /// - catch_exit:catch块退出,可能跳转到finally
+        /// - finally_exit:finally块退出,无额外后继
+        /// - 其他指令:默认有fall-through到下一块
+        /// </summary>
+        private static void BuildControlFlowEdges(Instruction[] instructions, ControlFlowGraph cfg)
+        {
+            // 构建flag_id到指令索引的映射,用于跳转目标查找
+            var flagToInstructionIndex = new Dictionary<int, int>();
 
-		private static int FindEnclosingTryEnter(int index, Dictionary<int, ExceptionBlockInfo> tryEnterToInfo)
-		{
-			int enclosingTry = -1;
-			int bestStart = -1;
-			foreach (var kvp in tryEnterToInfo)
-			{
-				int tryStart = kvp.Value.TryEnterIndex;
-				int tryEnd = kvp.Value.TryExitIndex;
-				int catchStart = kvp.Value.CatchEnterIndex;
-				int finallyStart = kvp.Value.FinallyEnterIndex;
-				int finallyEnd = kvp.Value.FinallyExitIndex;
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                if (instructions[i].INS_Code == INS_Code.flag)
+                {
+                    var flag = (INS_Flag)instructions[i];
+                    flagToInstructionIndex[flag.flag_id] = i;
+                }
+            }
 
-				bool isInTry = tryStart >= 0 && tryStart <= index && (tryEnd == 0 || tryEnd >= index);
-				bool isInCatch = catchStart > 0 && catchStart <= index && (kvp.Value.CatchExitIndex == 0 || kvp.Value.CatchExitIndex >= index);
-				bool isInFinally = finallyStart > 0 && finallyStart <= index && (finallyEnd == 0 || (kvp.Value.TryExitIndex > 0 && index <= GetOuterTryEnd(kvp.Key, tryEnterToInfo)));
+            // 构建入口索引到基本块的映射,用于快速查找fall-through块
+            var blocksByStartIndex = new Dictionary<int, BasicBlock>();
+            foreach (var block in cfg.Blocks)
+            {
+                blocksByStartIndex[block.StartIndex] = block;
+            }
 
-				if (isInTry || isInCatch || isInFinally)
-				{
-					if (tryStart > bestStart)
-					{
-						bestStart = tryStart;
-						enclosingTry = kvp.Key;
-					}
-				}
-			}
-			return enclosingTry;
-		}
+            // 遍历每个基本块,根据最后一条指令类型构建控制流边
+            for (int i = 0; i < cfg.Blocks.Count; i++)
+            {
+                var block = cfg.Blocks[i];
+                
+                // 跳过空块
+                if (block.Instructions.Count == 0)
+                    continue;
 
-		private static int GetOuterTryEnd(int tryEnterIndex, Dictionary<int, ExceptionBlockInfo> tryEnterToInfo)
-		{
-			if (!tryEnterToInfo.TryGetValue(tryEnterIndex, out var info))
-				return 0;
-			if (info.TryExitIndex > 0)
-				return info.TryExitIndex;
-			if (info.FinallyExitIndex > 0)
-				return info.FinallyExitIndex;
-			return 0;
-		}
+                // 获取块的终止指令(最后一条指令)
+                var lastIns = block.Instructions[block.Instructions.Count - 1];
 
-		private static int FindCatchEnterIndex(int catchPc, List<int> catchEnterIndices)
-		{
-			foreach (var idx in catchEnterIndices)
-			{
-				if (idx == catchPc)
-					return idx;
-			}
-			return -1;
-		}
+                switch (lastIns.INS_Code)
+                {
+                    // 无条件跳转:只跳转到目标块,无fall-through
+                    case INS_Code.goto_flag:
+                        {
+                            var gotoIns = (INS_Goto)lastIns;
+                            int targetIdx;
+                            if (flagToInstructionIndex.TryGetValue(gotoIns.flag_id, out targetIdx))
+                            {
+                                if (cfg.InstructionToBlock.TryGetValue(targetIdx, out int targetBlockId))
+                                {
+                                    var targetBlock = cfg.Blocks[targetBlockId];
+                                    block.Successors.Add(targetBlock);
+                                    targetBlock.Predecessors.Add(block);
+                                    block.JumpTargetFlagId = gotoIns.flag_id;
+                                }
+                            }
+                        }
+                        break;
 
-		private static int FindBlockContaining(List<BasicBlock> blocks, int instructionIndex)
-		{
-			for (int i = 0; i < blocks.Count; i++)
-			{
-				if (instructionIndex >= blocks[i].StartIndex && instructionIndex <= blocks[i].EndIndex)
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-	}
+                    // 条件为真时跳转:有跳转目标 + fall-through(如果存在)
+                    case INS_Code.if_true_goto:
+                        {
+                            var ifIns = (INS_If_True_Goto)lastIns;
+                            int targetIdx;
+                            if (flagToInstructionIndex.TryGetValue(ifIns.flag_id, out targetIdx))
+                            {
+                                if (cfg.InstructionToBlock.TryGetValue(targetIdx, out int targetBlockId))
+                                {
+                                    var targetBlock = cfg.Blocks[targetBlockId];
+                                    block.Successors.Add(targetBlock);
+                                    targetBlock.Predecessors.Add(block);
+                                    block.JumpTargetFlagId = ifIns.flag_id;
+                                }
+                            }
+
+                            // 尝试添加fall-through边(条件为假时继续执行下一块)
+                            var fallThroughBlock = FindFallThroughBlock(block, cfg, blocksByStartIndex);
+                            if (fallThroughBlock != null)
+                            {
+                                block.Successors.Add(fallThroughBlock);
+                                fallThroughBlock.Predecessors.Add(block);
+                                block.HasFallThrough = true;
+                            }
+                        }
+                        break;
+
+                    // 条件为假时跳转:有跳转目标 + fall-through(如果存在)
+                    case INS_Code.if_false_goto:
+                        {
+                            var ifIns = (INS_If_False_Goto)lastIns;
+                            int targetIdx;
+                            if (flagToInstructionIndex.TryGetValue(ifIns.flag_id, out targetIdx))
+                            {
+                                if (cfg.InstructionToBlock.TryGetValue(targetIdx, out int targetBlockId))
+                                {
+                                    var targetBlock = cfg.Blocks[targetBlockId];
+                                    block.Successors.Add(targetBlock);
+                                    targetBlock.Predecessors.Add(block);
+                                    block.JumpTargetFlagId = ifIns.flag_id;
+                                }
+                            }
+
+                            // 尝试添加fall-through边(条件为真时继续执行下一块)
+                            var fallThroughBlock = FindFallThroughBlock(block, cfg, blocksByStartIndex);
+                            if (fallThroughBlock != null)
+                            {
+                                block.Successors.Add(fallThroughBlock);
+                                fallThroughBlock.Predecessors.Add(block);
+                                block.HasFallThrough = true;
+                            }
+                        }
+                        break;
+
+                    // 返回/异常/finally退出:控制流终止,无后继块
+                    case INS_Code.return_void:
+                    case INS_Code.return_value:
+                    case INS_Code.throw_error:
+                    case INS_Code.finally_exit:
+                        break;
+
+                    // try块退出:可能跳转到catch或finally
+                    case INS_Code.try_exit:
+                        {
+                            ProcessTryExit(block, cfg);
+                        }
+                        break;
+
+                    // catch块退出:可能跳转到finally
+                    case INS_Code.catch_exit:
+                        {
+                            ProcessCatchExit(block, cfg);
+                        }
+                        break;
+
+                    // 默认情况:非终止指令,存在fall-through到下一块
+                    default:
+                        var fallThroughBlock2 = FindFallThroughBlock(block, cfg, blocksByStartIndex);
+                        if (fallThroughBlock2 != null)
+                        {
+                            block.Successors.Add(fallThroughBlock2);
+                            fallThroughBlock2.Predecessors.Add(block);
+                            block.HasFallThrough = true;
+                        }
+                        break;
+                }
+            }
+
+            // 为异常块设置异常信息
+            FixUpExceptionBlocks(cfg);
+        }
+
+        /// <summary>
+        /// 查找块的fall-through后继
+        /// 
+        /// Fall-through块是指令序列中当前块结束后立即执行的下一个块。
+        /// 通过检查当前块 EndIndex + 1 位置是否存在基本块入口来确定。
+        /// </summary>
+        /// <param name="block">当前基本块</param>
+        /// <param name="cfg">控制流图</param>
+        /// <param name="blocksByStartIndex">入口索引到块的映射</param>
+        /// <returns>fall-through块,如果没有则返回null</returns>
+        private static BasicBlock FindFallThroughBlock(BasicBlock block, ControlFlowGraph cfg, Dictionary<int, BasicBlock> blocksByStartIndex)
+        {
+            // 下一条指令的索引 = 当前块最后一条指令索引 + 1
+            int nextInstructionIndex = block.EndIndex + 1;
+            if (nextInstructionIndex >= cfg.InstructionToBlock.Count)
+                return null;
+
+            // 查找是否存在以该索引为入口的基本块
+            if (blocksByStartIndex.TryGetValue(nextInstructionIndex, out var fallThroughBlock))
+                return fallThroughBlock;
+
+            return null;
+        }
+
+        /// <summary>
+        /// 处理try块退出时的控制流
+        /// 
+        /// 当try块正常退出(exit)时:
+        /// - 如果存在finally块,跳转到finally
+        /// - 如果存在catch块,跳转到catch
+        /// </summary>
+        private static void ProcessTryExit(BasicBlock block, ControlFlowGraph cfg)
+        {
+            var tryExit = (INS_Try_Exit)block.Instructions[block.Instructions.Count - 1];
+
+            // 查找包含此块的try-catch-finally结构
+            var tryEnterInfo = FindEnclosingTryInfo(block, cfg);
+            if (tryEnterInfo == null)
+                return;
+
+            // 添加到finally块的边
+            if (tryEnterInfo.FinallyEnterIndex > 0 && cfg.InstructionToBlock.TryGetValue(tryEnterInfo.FinallyEnterIndex, out int finallyBlockId))
+            {
+                var finallyBlock = cfg.Blocks[finallyBlockId];
+                block.Successors.Add(finallyBlock);
+                finallyBlock.Predecessors.Add(block);
+            }
+
+            // 添加到catch块的边
+            if (tryEnterInfo.CatchEnterIndex > 0 && cfg.InstructionToBlock.TryGetValue(tryEnterInfo.CatchEnterIndex, out int catchBlockId))
+            {
+                var catchBlock = cfg.Blocks[catchBlockId];
+                block.Successors.Add(catchBlock);
+                catchBlock.Predecessors.Add(block);
+            }
+        }
+
+        /// <summary>
+        /// 处理catch块退出时的控制流
+        /// 
+        /// 当catch块退出(exit)时:
+        /// - 如果存在finally块,跳转到finally
+        /// </summary>
+        private static void ProcessCatchExit(BasicBlock block, ControlFlowGraph cfg)
+        {
+            // 查找包含此块的try-catch-finally结构
+            var tryEnterInfo = FindEnclosingTryInfo(block, cfg);
+            if (tryEnterInfo == null)
+                return;
+
+            // 添加到finally块的边
+            if (tryEnterInfo.FinallyEnterIndex > 0 && cfg.InstructionToBlock.TryGetValue(tryEnterInfo.FinallyEnterIndex, out int finallyBlockId))
+            {
+                var finallyBlock = cfg.Blocks[finallyBlockId];
+                block.Successors.Add(finallyBlock);
+                finallyBlock.Predecessors.Add(block);
+            }
+        }
+
+        /// <summary>
+        /// 查找包围给定块的最内层try信息
+        /// 
+        /// 对于嵌套的try-catch-finally,需要返回最内层的try块。
+        /// 通过以下条件筛选候选:
+        /// - 块的起始索引 >= try入口索引
+        /// - 块的结束索引 <= try退出索引
+        /// 
+        /// 返回时按TryEnterIndex降序排序,确保返回最内层的try块。
+        /// </summary>
+        /// <param name="block">要查找的基本块</param>
+        /// <param name="cfg">控制流图</param>
+        /// <returns>最内层的ExceptionBlockInfo,如果未找到则返回null</returns>
+        private static ExceptionBlockInfo FindEnclosingTryInfo(BasicBlock block, ControlFlowGraph cfg)
+        {
+            var candidates = new List<ExceptionBlockInfo>();
+            
+            // 收集所有可能的候选try块
+            foreach (var kvp in cfg.TryEnterToInfo)
+            {
+                var tryInfo = kvp.Value;
+                if (block.StartIndex >= tryInfo.TryEnterIndex && 
+                    (tryInfo.TryExitIndex == 0 || block.EndIndex <= tryInfo.TryExitIndex))
+                {
+                    candidates.Add(tryInfo);
+                }
+            }
+
+            if (candidates.Count == 0)
+                return null;
+
+            // 按TryEnterIndex降序排序,返回最内层的try块
+            candidates.Sort((a, b) => b.TryEnterIndex.CompareTo(a.TryEnterIndex));
+            return candidates[0];
+        }
+
+        /// <summary>
+        /// 为基本块设置异常信息
+        /// 
+        /// 遍历所有try-catch-finally结构,
+        /// 为对应的try块、catch块、finally块设置ExceptionInfo。
+        /// </summary>
+        private static void FixUpExceptionBlocks(ControlFlowGraph cfg)
+        {
+            foreach (var kvp in cfg.TryEnterToInfo)
+            {
+                var tryInfo = kvp.Value;
+
+                // 为try块设置异常信息
+                if (tryInfo.TryEnterIndex >= 0 && cfg.InstructionToBlock.TryGetValue(tryInfo.TryEnterIndex, out int tryBlockId))
+                {
+                    cfg.Blocks[tryBlockId].ExceptionInfo = tryInfo;
+                }
+
+                // 为catch块创建并设置异常信息
+                if (tryInfo.CatchEnterIndex > 0 && cfg.InstructionToBlock.TryGetValue(tryInfo.CatchEnterIndex, out int catchBlockId))
+                {
+                    var catchExcInfo = new ExceptionBlockInfo
+                    {
+                        BlockType = ExceptionBlockType.CatchBlock,
+                        TryEnterIndex = tryInfo.TryEnterIndex,
+                        CatchPc = tryInfo.CatchPc,
+                        FinallyPc = tryInfo.FinallyPc
+                    };
+                    cfg.Blocks[catchBlockId].ExceptionInfo = catchExcInfo;
+                }
+
+                // 为finally块创建并设置异常信息
+                if (tryInfo.FinallyEnterIndex > 0 && cfg.InstructionToBlock.TryGetValue(tryInfo.FinallyEnterIndex, out int finallyBlockId))
+                {
+                    var finallyExcInfo = new ExceptionBlockInfo
+                    {
+                        BlockType = ExceptionBlockType.FinallyBlock,
+                        TryEnterIndex = tryInfo.TryEnterIndex,
+                        CatchPc = tryInfo.CatchPc,
+                        FinallyPc = tryInfo.FinallyPc
+                    };
+                    cfg.Blocks[finallyBlockId].ExceptionInfo = finallyExcInfo;
+                }
+            }
+        }
+    }
 }
