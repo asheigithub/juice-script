@@ -22,6 +22,35 @@ namespace juicescript.compiler.IL.Optimize
 	///              确定入口后，按照指令序列，从入口指令开始（含入口指令）到下一条入口指令（不含下一条入口指令）之间的指令序列归为一个基本块。
 	///              特殊情况：END指令自己就是最后一个基本块.finally_enter到对应的finally_exit(包含finally_exit)之间的指令是一个基本块.              
 	///              
+	/// 2 计算控制流
+	///    编译器确保任何try_enter,try_exit都有一个匹配的finally_enter,finally_exit.即使脚本代码没有finally块，也会生成一个空的finally_enter,finally_exit对。
+	///    由于有END块存在，控制流图一定有唯一的出口就是END块。
+	///    常规goto,if_XX_goto的跳转算法和经典算法一致，每个基本块都会连接到它每个可能的后续块。
+	///    按如下描述处理指令队列：
+	///        首先查找指令队列中没有嵌套其他try catch finally 结构的 try catch finally 基本块序列，即从 try_enter开始，到finally_exit结束的基本块序列，它们作为一个子控制流
+	///        这个子控制流也满足唯一入口(try_enter),唯一出口(finally_exit)。对这个子控制流计算控制流图。
+	///         不可能出现if_XX_goto的目标不在子控制流的情况。如出现抛出编译异常。
+	///         goto 指令，如果跳出子控制流，则连接到finally_enter.
+	///         if_XX_goto 连接跳转目标块和直接后续块。
+	///         throw error,连接到每个catch_enter. 如果没有catch块，直接连接到finally_enter.
+	///         return 指令，连接到每个catch_enter. 如果没有catch块，直接连接到finally_enter.
+	///         每个catch_exit连接到finally_enter.
+	///         如果遇到前一次获取的子控制流，
+	///             如果子控制流必然抛出异常，当作throw error处理
+	///             否则，连接每个catch_enter,再连接finally_enter.  然后对每个子控制流的目标，当作goto指令的目标处理。
+	///             
+	/// 
+	///         子控制流确定后，从子控制流入口运行所有执行路径的遍历。
+	///             如果途中有goto ,并且跳出了子控制流， 添加 子控制流的目标为 goto 的目标块.
+	///             如果所有路径都有throw error,且没有catch块，标记 子控制流 必然抛出异常。
+	///             如果中途有return , 添加子控制流的目标为 END块。
+	///             如果存在一条路径没有修改子控制流的目标，则添加子控制流目标为下一个基本块。
+	///         
+	/// 
+	/// 
+	///		   将子控制流当作一个整体考虑，重新查找令队列中没有嵌套其他try catch finally 结构,(子控制流)现在不算try 结构了。重复执行入上算法，直到找不到try结构。最后进行一轮控制流处理。
+	///		   然后再展开子控制流，得到最终结果。
+	/// 
 	/// 
 	/// </summary>
 	public class ExceptionBlockInfo
