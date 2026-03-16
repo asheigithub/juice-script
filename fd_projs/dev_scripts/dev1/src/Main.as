@@ -20,18 +20,22 @@ package
 
 async function Go()
 {
-	try
+	try 
 	{
-		trace( await fetch("https://r.wxyfamily.duckdns.org") );	
-		trace(2);
-	
+		
 	}
-	catch (e)
+	finally
 	{
-		trace(e);
-		
-		trace( await fetch("http://oa.ofilm.com") );
-		
+		try  
+		{
+			throw 2;
+			trace(3);
+		}
+		catch (e)
+		{
+			
+			
+		}	
 	}
 }
 Go();

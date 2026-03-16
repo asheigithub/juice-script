@@ -1019,7 +1019,7 @@ namespace juicescript.compiler
 					ASMethod method = script.scriptMethods[i];
 
 					Optimizer.Optimize(method);
-
+					
 					ComputeJump(method,true);
 				}
 			}
