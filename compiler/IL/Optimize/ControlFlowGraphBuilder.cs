@@ -13,7 +13,7 @@ namespace juicescript.compiler.IL.Optimize
 	/// 1 分割基本块。
 	///   编译器确保除非没有任何指令，否则最后一条指令肯定是 END.
 	///   这条END指令是唯一的退出指令，它作为独立的最后一个基本块。先检查指令序列是否符合此约束，不符合就抛出异常。
-	///   基本块分割：跳转指令有：goto,if_true_goto,if_false_goto, throw error, return [value].
+	///   基本块分割：跳转指令有：goto,if_true_goto,if_false_goto,iter_get,iter_next, throw error, return [value].
 	///              先确定它们的跳转目标。goto类指令的跳转目标是查找某个 INS_flag的 flagid.
 	///              throw error的跳转目标是：如果不在 try catch finally 结构内，则直接跳转到 END。
 	///                                      如果在 try catch 内,则跳转到每一个对应的catch_enter.如果没有catch,则跳转到finally_enter.
@@ -28,13 +28,13 @@ namespace juicescript.compiler.IL.Optimize
 	/// 2 计算控制流
 	///    编译器确保任何try_enter,try_exit都有一个匹配的finally_enter,finally_exit.即使脚本代码没有finally块，也会生成一个空的finally_enter,finally_exit对。
 	///    由于有END块存在，控制流图一定有唯一的出口就是END块。
-	///    常规goto,if_XX_goto的跳转算法和经典算法一致，每个基本块都会连接到它每个可能的后续块。
+	///    常规goto,if_XX_goto,iter_get,iter_next的跳转算法和经典算法一致，每个基本块都会连接到它每个可能的后续块。
 	///    按如下描述处理指令队列：
 	///        首先查找指令队列中没有嵌套其他try catch finally 结构的 try catch finally 基本块序列，即从 try_enter开始，到finally_exit结束的基本块序列，它们作为一个子控制流
 	///        这个子控制流也满足唯一入口(try_enter),唯一出口(finally_exit)。对这个子控制流计算控制流图。
 	///         不可能出现if_XX_goto的目标不在子控制流的情况。如出现抛出编译异常。
 	///         goto 指令，如果跳出子控制流，则 如果在try ,catch内，连接到finally_enter,如果在finally内，连接到 finally_exit.
-	///         if_XX_goto 连接跳转目标块和直接后续块。它不可能跨try,catch,finally块。
+	///         if_XX_goto,iter_get,iter_next,  连接跳转目标块和直接后续块。它不可能跨try,catch,finally块。
 	///         throw error, 如果在try内,连接到每个catch_enter. 如果没有catch块，或者就在catch内，直接连接到finally_enter. 如果在finally块内，直接跳到finally_exit指令。
 	///         return 指令, 如果在try内,连接到每个catch_enter. 如果没有catch块，或者就在catch内，直接连接到finally_enter. 如果在finally块内，直接跳到finally_exit指令。
 	///         特例!!!在try ,catch内return,但是finally里出现了throw,则此throw会覆盖return!
@@ -81,7 +81,10 @@ namespace juicescript.compiler.IL.Optimize
 			{
 				if (instructions[i].INS_Code == INS_Code.flag)
 				{
-					flagid_index.Add(((INS_Flag)instructions[i]).flag_id, i);
+					if (((INS_Flag)instructions[i]).flag_id != 0xffffff)
+					{
+						flagid_index.Add(((INS_Flag)instructions[i]).flag_id, i);
+					}
 				}
 			}
 
@@ -93,7 +96,9 @@ namespace juicescript.compiler.IL.Optimize
 				Instruction instruction = instructions[i];
 				if (instruction.INS_Code == INS_Code.goto_flag ||
 					instruction.INS_Code == INS_Code.if_false_goto ||
-					instruction.INS_Code == INS_Code.if_true_goto
+					instruction.INS_Code == INS_Code.if_true_goto ||
+					instruction.INS_Code == INS_Code.iter_get ||
+					instruction.INS_Code == INS_Code.iter_next
 					)
 				{
 					enterIndices.Add(i + 1);
@@ -103,7 +108,11 @@ namespace juicescript.compiler.IL.Optimize
 						flagid_index[flagid]
 						);
 				}
-				else if (instruction.INS_Code == INS_Code.throw_error || instruction.INS_Code == INS_Code.return_value || instruction.INS_Code == INS_Code.return_void)
+				else if (instruction.INS_Code == INS_Code.throw_error 
+					|| instruction.INS_Code == INS_Code.return_value || instruction.INS_Code == INS_Code.return_void
+					
+					|| (instruction.INS_Code == INS_Code.flag && ((INS_Flag)(instruction)).flag_id == 0xffffff)
+					)
 				{
 					enterIndices.Add(i + 1);
 				}
@@ -164,6 +173,11 @@ namespace juicescript.compiler.IL.Optimize
 				return ifTrueGoto.flag_id;
 			if (ins is INS_If_False_Goto ifFalseGoto)
 				return ifFalseGoto.flag_id;
+			if (ins is INS_Iter_Get iterGet)
+				return iterGet.flag_end_id;
+			if (ins is INS_Iter_Next iterNext)
+				return iterNext.flag_next_end_id;
+
 			throw new InvalidOperationException();
 		}
 
@@ -455,7 +469,7 @@ namespace juicescript.compiler.IL.Optimize
 
 					}
 				}
-				else if (lastOpCode == INS_Code.if_true_goto || lastOpCode == INS_Code.if_false_goto)
+				else if (lastOpCode == INS_Code.if_true_goto || lastOpCode == INS_Code.if_false_goto || lastOpCode == INS_Code.iter_get || lastOpCode == INS_Code.iter_next)
 				{
 					blocks[i].JumpTargetFlagId = GetFlagId(ins_last);
 
@@ -467,6 +481,46 @@ namespace juicescript.compiler.IL.Optimize
 					blocks[i].HasFallThrough = true;
 
 				}
+				else if (lastOpCode == INS_Code.flag && ((INS_Flag)(ins_last)).flag_id == 0xffffff)
+				{
+					blocks[i].Successors.Add(blocks[i + 1]);//直接后续
+
+					//连接一个throw，和它的下一条。
+					if (try_States.Count > 0)
+					{
+						var try_state = try_States.Peek();
+						if (try_state.state == ControlFlowGraphBuilder.try_state.Try)
+						{
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);
+							blocks[i].Successors.Add(f);
+							for (int j = i + 1; j < blocks.Length - 1; j++)
+							{
+								if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryBlockId == try_state.tryid)
+								{
+									blocks[i].Successors.Add(blocks[j]);
+								}
+							}
+
+						}
+						else if (try_state.state == ControlFlowGraphBuilder.try_state.Catch)
+						{
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);
+							blocks[i].Successors.Add(f);
+						}
+						else
+						{
+							Debug.Assert(try_state.state == ControlFlowGraphBuilder.try_state.Finally);
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+							blocks[i].Successors.Add(f);
+						}
+
+					}
+					else
+					{
+						blocks[i].Successors.Add(blocks.First(b => b.Instructions[0].INS_Code == INS_Code.END)); //跳到结束
+					}
+				}
+
 				else if (lastOpCode == INS_Code.throw_error || lastOpCode == INS_Code.return_value || lastOpCode == INS_Code.return_void)
 				{
 					if (try_States.Count > 0)
@@ -578,7 +632,10 @@ namespace juicescript.compiler.IL.Optimize
 				}
 
 				var paths = pathFinder.FindAllPaths(0, finallypass.Length - 1);
-				Debug.Assert(paths.Count > 0);
+				//Debug.Assert(paths.Count > 0);
+				//paths.Count == 0 说明有死循环! 
+
+
 
 				int throwpath = 0;
 				int returnpath = 0;
@@ -610,8 +667,11 @@ namespace juicescript.compiler.IL.Optimize
 							else if (!dict_childcfg[b].may_normal_exit)
 							{
 								Debug.Assert(dict_childcfg[b].successors.Contains(int.MaxValue));
-								early_return = true;
-								goto lbl_nextpath;
+								if (dict_childcfg[b].successors.All(i => i == int.MaxValue)) //全部都是退出指令
+								{
+									early_return = true;
+									goto lbl_nextpath;
+								}
 							}
 						}
 						else
@@ -725,7 +785,9 @@ namespace juicescript.compiler.IL.Optimize
 				}
 
 				var paths = pathFinder.FindAllPaths(0, try_catch_pass.Length - 1);
-				Debug.Assert(paths.Count > 0);
+
+				//Debug.Assert(paths.Count > 0);
+				//paths.Count == 0 说明有死循环！
 
 				int throwpath = 0;
 				int returnpath = 0;
@@ -774,8 +836,13 @@ namespace juicescript.compiler.IL.Optimize
 							else if (!dict_childcfg[b].may_normal_exit)
 							{
 								Debug.Assert(dict_childcfg[b].successors.Count>0);
-								early_return = true;
-								goto lbl_nextpath;
+
+								if (dict_childcfg[b].successors.All(i => i == int.MaxValue))
+								{
+									early_return = true;
+									goto lbl_nextpath;
+								}
+
 							}
 						}
 						else
@@ -889,6 +956,13 @@ namespace juicescript.compiler.IL.Optimize
 
 
 			}
+
+
+			foreach (var item in tryctx.finally_exit_goto)
+			{
+				tryctx.successors.Add(item.Item1);
+			}
+			
 			//tryctx.successors.Add(int.MaxValue);
 			//tryctx.may_normal_exit = true;
 
@@ -1004,5 +1078,99 @@ namespace juicescript.compiler.IL.Optimize
 
 			return allPaths;
 		}
+
+
+		/// <summary>
+		/// 查找从指定起点出发的所有可能路径
+		/// 终止条件：1. 走到无后续节点的点；2. 绕回起点
+		/// </summary>
+		/// <param name="start">起点</param>
+		/// <returns>所有符合条件的路径列表</returns>
+		public List<List<int>> FindAllPathsFromStart(int start)
+		{
+			List<List<int>> allPaths = new List<List<int>>();
+			Stack<DfsState> stack = new Stack<DfsState>();
+
+			// 初始化栈，压入起点状态（注意：此处Visited不包含起点，允许后续绕回起点）
+			stack.Push(new DfsState
+			{
+				CurrentNode = start,
+				Visited = new HashSet<int>(), // 初始不标记起点为已访问，允许绕回
+				CurrentPath = new List<int> { start },
+				NeighborIndex = 0
+			});
+
+			while (stack.Count > 0)
+			{
+				DfsState currentState = stack.Peek();
+				int currentNode = currentState.CurrentNode;
+				List<int> currentPath = currentState.CurrentPath;
+
+				// 核心终止条件判断
+				bool isTerminated = false;
+				// 条件1：当前节点是起点（且路径长度>1，避免仅包含起点的空路径）
+				if (currentNode == start && currentPath.Count > 1)
+				{
+					allPaths.Add(new List<int>(currentPath));
+					isTerminated = true;
+				}
+				// 条件2：当前节点无后续邻接节点
+				else if (!_adjacencyList.ContainsKey(currentNode) || _adjacencyList[currentNode].Count == 0)
+				{
+					allPaths.Add(new List<int>(currentPath));
+					isTerminated = true;
+				}
+
+				// 满足终止条件则弹出栈顶，继续回溯
+				if (isTerminated)
+				{
+					stack.Pop();
+					continue;
+				}
+
+				List<int> neighbors = _adjacencyList[currentNode];
+				// 遍历当前节点的邻接节点
+				if (currentState.NeighborIndex < neighbors.Count)
+				{
+					int nextNeighbor = neighbors[currentState.NeighborIndex];
+					currentState.NeighborIndex++; // 标记下一个要遍历的邻接节点索引
+
+					// 关键逻辑：仅跳过除起点外的已访问节点（允许绕回起点）
+					if (nextNeighbor != start && currentState.Visited.Contains(nextNeighbor))
+					{
+						continue; // 跳过已访问的非起点节点，避免无限循环
+					}
+
+					// 复制状态（避免分支干扰）
+					HashSet<int> newVisited = new HashSet<int>(currentState.Visited);
+					// 仅将非起点节点加入已访问集合（起点允许重复访问）
+					if (nextNeighbor != start)
+					{
+						newVisited.Add(nextNeighbor);
+					}
+
+					List<int> newPath = new List<int>(currentPath);
+					newPath.Add(nextNeighbor);
+
+					// 压入新状态继续遍历
+					stack.Push(new DfsState
+					{
+						CurrentNode = nextNeighbor,
+						Visited = newVisited,
+						CurrentPath = newPath,
+						NeighborIndex = 0
+					});
+				}
+				else
+				{
+					// 所有邻接节点遍历完毕，回溯
+					stack.Pop();
+				}
+			}
+
+			return allPaths;
+		}
 	}
+
+	
 }

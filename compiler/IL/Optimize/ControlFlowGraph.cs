@@ -3,6 +3,7 @@ using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,78 @@ namespace juicescript.compiler.IL.Optimize
             
         }
 
-        public Instruction[] FlattenInstructions()
+		internal void DeathCodeErase()
+		{
+            //return;
+            HashSet<int> unReachableTry = new HashSet<int>();
+
+            foreach (BasicBlock block in Blocks.OrderBy(b => b.OriginalIndex)) 
+            {
+                if (!block.IsReachable)
+                {
+                    if (block.Instructions[0].INS_Code == INS_Code.END)
+                    {
+                        continue;
+                    }
+
+                    if (block.Instructions[0].INS_Code == INS_Code.try_enter)
+                    {
+                        unReachableTry.Add(block.TryBlockId);
+                        
+                    }
+
+                    if (unReachableTry.Contains(block.TryBlockId))
+                    {
+                        block.Instructions.Clear();
+                    }
+                    else
+                    {
+                        var newinstructions = block.Instructions.Where(
+                            b=>b.INS_Code == INS_Code.try_enter ||
+                                b.INS_Code == INS_Code.try_exit ||
+                                b.INS_Code == INS_Code.catch_enter ||
+                                b.INS_Code == INS_Code.catch_exit ||
+                                b.INS_Code == INS_Code.finally_enter ||
+                                b.INS_Code == INS_Code.finally_exit
+                            ).ToList();
+
+                        block.Instructions = newinstructions;
+
+                    }
+
+                }
+            }
+		}
+
+		internal void ReuseSlot()
+		{
+			var sortedBlocks = Blocks.OrderBy(b => b.OriginalIndex).ToArray();
+            if (sortedBlocks.Length == 0)
+                return;
+
+			GraphPathFinder pathFinder = new GraphPathFinder();
+			for (int i = 0; i < sortedBlocks.Length; i++)
+			{
+				var b = sortedBlocks[i];
+				List<BasicBlock> successors;
+				
+				successors = b.Successors;
+				
+				for (int j = 0; j < successors.Count; j++)
+				{
+					var s = successors[j];
+					pathFinder.AddEdge(i, Array.IndexOf(sortedBlocks, s));
+				}
+			}
+
+
+            var pathlist = pathFinder.FindAllPathsFromStart(0);
+            
+
+		}
+
+
+		public Instruction[] FlattenInstructions()
         {
             var sortedBlocks = Blocks.OrderBy(b => b.OriginalIndex).ToList();
             var result = new List<Instruction>();
@@ -59,7 +131,7 @@ namespace juicescript.compiler.IL.Optimize
             sb.AppendLine("        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }");
             sb.AppendLine("        h1 { color: #333; }");
             sb.AppendLine("        .info { background: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; }");
-            sb.AppendLine("        .mermaid { background: white; padding: 20px; border-radius: 5px; }");
+            sb.AppendLine("        .mermaid { background: white; padding: 20px; border-radius: 5px; overflow: auto; resize: both; position: relative;}");
             sb.AppendLine("        table { border-collapse: collapse; width: 100%; margin-top: 20px; }");
             sb.AppendLine("        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
             sb.AppendLine("        th { background: #4CAF50; color: white; }");
@@ -78,7 +150,7 @@ namespace juicescript.compiler.IL.Optimize
 
             // Mermaid diagram
             sb.AppendLine("    <div class=\"mermaid\">");
-            sb.AppendLine("    flowchart LR");
+            sb.AppendLine("    flowchart TB");
             sb.AppendLine("    classDef reachable fill:#90EE90,stroke:#333,stroke-width:2px;");
             sb.AppendLine("    classDef unreachable fill:#ffcccc,stroke:#999,stroke-width:1px,stroke-dasharray:5 5;");
 
@@ -181,5 +253,6 @@ namespace juicescript.compiler.IL.Optimize
             return name;
         }
 
-    }
+		
+	}
 }

@@ -457,10 +457,13 @@ namespace juicescript.compiler.IL.Optimize
 			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
 
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
-			cfg.Print();
-			
-			var optimizedInstructions = cfg.FlattenInstructions();
 
+			//cfg.Print();
+			cfg.DeathCodeErase();
+
+			cfg.ReuseSlot();
+
+			var optimizedInstructions = cfg.FlattenInstructions();		
 			method.Body.ByteCode = Assembler.Assemble(slotCount, constants, optimizedInstructions);
 		}
 	}

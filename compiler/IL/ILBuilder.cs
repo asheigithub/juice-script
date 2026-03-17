@@ -1271,10 +1271,36 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(continue_body.continueFlag);
 				blockcontexts.Pop();
 
+				int searchSt = compileEnv.instructions.Count;
+
 				for (int i = 0; i < as3For.Part3.Count; i++)
 				{
 					BuildAS3SyntaxNode(compileEnv, as3For.Part3[i], trycatchState, blockcontexts, ref flagseed);
 				}
+				if (as3For.Part3.Count > 0)
+				{
+					//这是最特殊的 for(;;[update]) 部分，实际上需要检查新增的指令，是否有抛出异常的可能。
+					//如果可能抛出，追加一个flag,flagid为0xffffff，构造cfg时，遇到他，就添加一个当作throw的处理
+
+					for (int i = searchSt; i < compileEnv.instructions.Count; i++)
+					{
+						var op = compileEnv.instructions[i];
+
+
+						//todo 需要逐个指令确认会不会抛异常
+						//这里先当作会抛再说
+
+						INS_Flag flag = new INS_Flag(as3For.Token);
+						flag.flag_id = 0xffffff;
+						compileEnv.instructions.Add(flag);
+
+						break;
+
+					}
+
+
+				}
+
 
 				INS_Goto @goto = new INS_Goto(as3For.Token);
 				@goto.flag_id = _flag.flag_id;

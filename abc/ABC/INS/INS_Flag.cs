@@ -37,7 +37,14 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"FLAG_{flag_id}";
+			if (flag_id == 0xffffff)
+			{
+				return $"virtual jump_to_end";
+			}
+			else
+			{
+				return $"FLAG_{flag_id}";
+			}
 		}
 
 	}

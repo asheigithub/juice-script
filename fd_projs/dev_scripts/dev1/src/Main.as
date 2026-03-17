@@ -18,39 +18,35 @@ package
   
 
 
-async function Go()
-{
-	
-c:{
+//async function Go()
+//{
+	//
+//}
+//Go();
 
-	try 
-	{
-		a:try 
-		{
-			break c;	
-		}
-		catch(e)
-		{
-			b:{}
-		}
-		finally 
-		{
-			trace(1);
-		}
-		
-		trace("hhh");
-		
-	}
-	finally 
-	{
-		trace("t2");
-	}      
+function foo(){};
+function bar(){};
+function baz(){};
 
+
+	function test(x) {
+    try {
+        if (x == 0)
+            return foo();
+        else if (x == 1)
+            throw 2;
+        else
+            bar();
+    } catch(e) {
+        if (e == 2)
+            return 3;
+    } finally {
+        baz();
+    }
+    return 4;
 }
-}
-Go();
 
-
+trace(test(1));
 
  
 //class Test262Error extends Error
