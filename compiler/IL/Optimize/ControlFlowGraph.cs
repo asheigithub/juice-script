@@ -16,82 +16,13 @@ namespace juicescript.compiler.IL.Optimize
         public ASMethod Method { get; set; }
         public List<BasicBlock> Blocks { get; set; }
         
-        public Dictionary<int, int> InstructionToBlock { get; set; }
-        public Dictionary<int, ExceptionBlockInfo> TryEnterToInfo { get; set; }
-
-        
+       
         public ControlFlowGraph(ASMethod method)
         {
             Method = method;
             Blocks = new List<BasicBlock>();
             
-            InstructionToBlock = new Dictionary<int, int>();
-            TryEnterToInfo = new Dictionary<int, ExceptionBlockInfo>();
             
-        }
-
-        public List<BasicBlock> GetPredecessors(int blockId)
-        {
-            if (blockId >= 0 && blockId < Blocks.Count)
-                return Blocks[blockId].Predecessors;
-            return new List<BasicBlock>();
-        }
-
-        public List<BasicBlock> GetSuccessors(int blockId)
-        {
-            if (blockId >= 0 && blockId < Blocks.Count)
-                return Blocks[blockId].Successors;
-            return new List<BasicBlock>();
-        }
-
-        public bool IsReachable(int blockId)
-        {
-            if (blockId >= 0 && blockId < Blocks.Count)
-                return Blocks[blockId].IsReachable;
-            return false;
-        }
-
-        public void ComputeReachability()
-        {
-            if (Blocks.Count == 0)
-                return;
-
-            var queue = new Queue<int>();
-            for (int i = 0; i < Blocks.Count; i++)
-            {
-                Blocks[i].IsReachable = false;
-            }
-
-            Blocks[0].IsReachable = true;
-            queue.Enqueue(0);
-
-            while (queue.Count > 0)
-            {
-                int blockId = queue.Dequeue();
-                var block = Blocks[blockId];
-
-                foreach (var succ in block.Successors)
-                {
-                    if (!succ.IsReachable)
-                    {
-                        succ.IsReachable = true;
-                        queue.Enqueue(succ.BlockId);
-                    }
-                }
-            }
-        }
-
-        public void RemoveUnreachableBlocks()
-        {
-            var reachableBlocks = Blocks.Where(b => b.IsReachable).ToList();
-            Blocks.Clear();
-            Blocks.AddRange(reachableBlocks);
-
-            for (int i = 0; i < Blocks.Count; i++)
-            {
-                Blocks[i].BlockId = i;
-                InstructionToBlock[Blocks[i].StartIndex] = i;
-            }
         }
 
         public Instruction[] FlattenInstructions()
@@ -180,9 +111,9 @@ namespace juicescript.compiler.IL.Optimize
             {
                 string preds = block.Predecessors.Count == 0 ? "(none)" : string.Join(", ", block.Predecessors.Select(p => $"BB{p.BlockId}"));
                 string succs = block.Successors.Count == 0 ? "(none)" : string.Join(", ", block.Successors.Select(s => $"BB{s.BlockId}"));
-                string instructions = string.Join("<br>", block.Instructions.Take(10).Select((ins, idx) => $"{block.StartIndex + idx}: {ins.INS_Code}"));
-                if (block.Instructions.Count > 10)
-                    instructions += "<br>...";
+                string instructions = string.Join("<br>", block.Instructions.Select((ins, idx) => $"{block.StartIndex + idx}: {ins}"));
+                //if (block.Instructions.Count > 10)
+                //    instructions += "<br>...";
 
                 sb.AppendLine($"        <tr>");
                 sb.AppendLine($"            <td>BB{block.BlockId}</td>");
@@ -195,19 +126,7 @@ namespace juicescript.compiler.IL.Optimize
 
             sb.AppendLine("    </table>");
 
-            // Exception info
-            if (TryEnterToInfo.Count > 0)
-            {
-                sb.AppendLine("    <h2>Exception Info</h2>");
-                sb.AppendLine("    <table>");
-                sb.AppendLine("        <tr><th>Try Index</th><th>TryExit</th><th>Catch</th><th>CatchExit</th><th>Finally</th><th>FinallyExit</th></tr>");
-                foreach (var kvp in TryEnterToInfo)
-                {
-                    sb.AppendLine($"        <tr><td>@{kvp.Key}</td><td>{kvp.Value.TryExitIndex}</td><td>{kvp.Value.CatchEnterIndex}</td><td>{kvp.Value.CatchExitIndex}</td><td>{kvp.Value.FinallyEnterIndex}</td><td>{kvp.Value.FinallyExitIndex}</td></tr>");
-                }
-                sb.AppendLine("    </table>");
-            }
-
+           
             sb.AppendLine("    <script>");
             sb.AppendLine("        mermaid.initialize({ startOnLoad: true });");
             sb.AppendLine("    </script>");
@@ -223,12 +142,15 @@ namespace juicescript.compiler.IL.Optimize
             var sb = new StringBuilder();
             sb.Append($"BB{block.BlockId}\\n");
 
-            if (block.ExceptionInfo != null)
+            if (block.Instructions.Count > 1)
             {
-                sb.Append($"[{block.ExceptionInfo.BlockType}]\\n");
-            }
-
-            if (block.Instructions.Count > 0)
+				sb.Append(block.Instructions[0].INS_Code.ToString() + "\\n");
+			}
+            if (block.Instructions.Count > 2)
+            {
+				sb.Append("...\\n");
+			}
+			if (block.Instructions.Count > 0)
             {
                 var lastIns = block.Instructions[block.Instructions.Count - 1];
                 sb.Append(lastIns.INS_Code.ToString());

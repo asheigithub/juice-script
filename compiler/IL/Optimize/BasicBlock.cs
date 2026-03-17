@@ -17,11 +17,11 @@ namespace juicescript.compiler.IL.Optimize
         
         public int? JumpTargetFlagId { get; set; }
         public bool HasFallThrough { get; set; }
-        
+
+
+        internal int TryBlockId;
         
         public bool IsReachable { get; set; }
-
-        public ExceptionBlockInfo ExceptionInfo { get; set; }
 
         public BasicBlock()
         {
@@ -31,6 +31,8 @@ namespace juicescript.compiler.IL.Optimize
             IsReachable = false;
             HasFallThrough = false;
             JumpTargetFlagId = null;
+
+            TryBlockId = 0;
            
         }
 
