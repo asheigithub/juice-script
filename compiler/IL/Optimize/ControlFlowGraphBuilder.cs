@@ -240,6 +240,14 @@ namespace juicescript.compiler.IL.Optimize
 					block.Successors.RemoveAll( s =>s.IsReachable ) ; //如果块不可达，删除所有它连接可达块的连接。
 				}
 			}
+
+			//计算前驱块。
+			foreach (var block in sortedblocks)
+			{
+				block.Predecessors.AddRange( sortedblocks.Where( b=>b.Successors.Contains(block) )  );
+			}
+
+
 		}
 
 		/// <summary>
@@ -581,8 +589,7 @@ namespace juicescript.compiler.IL.Optimize
 				{
 					var path = paths[i];
 
-					try_state? try_ = null;
-
+					
 					bool mustthrow_path = false;
 					bool early_return = false;
 					bool jump_out = false;
@@ -595,23 +602,9 @@ namespace juicescript.compiler.IL.Optimize
 							//throw new NotImplementedException();
 							if (dict_childcfg[b].must_throw)
 							{
-								if (try_ == null || try_ == try_state.Catch || try_ == try_state.Finally)
-								{
-									mustthrow_path = true;
-									goto lbl_nextpath;
-								}
-								else if (try_ == try_state.Try)
-								{
-									if (finallypass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
-									{
-
-									}
-									else
-									{
-										mustthrow_path = true;
-										goto lbl_nextpath;
-									}
-								}
+								
+								mustthrow_path = true;
+									
 							}
 
 							else if (!dict_childcfg[b].may_normal_exit)
@@ -627,42 +620,14 @@ namespace juicescript.compiler.IL.Optimize
 							for (int ii = 0; ii < b.Instructions.Count; ii++)
 							{
 								var ins = b.Instructions[ii];
-								if (ins.INS_Code == INS_Code.try_enter)
-								{
-									try_ = try_state.Try;
-								}
-								if (ins.INS_Code == INS_Code.catch_enter)
-								{
-									try_ = try_state.Catch;
-								}
-								if (ins.INS_Code == INS_Code.finally_enter)
-								{
-									try_ = try_state.Finally;
-								}
-								if (ins.INS_Code == INS_Code.finally_exit)
-								{
-									try_ = null;
-								}
+								
 
 								if (ins.INS_Code == INS_Code.throw_error)
 								{
-									if (try_ == null || try_ == try_state.Catch || try_ == try_state.Finally)
-									{
-										mustthrow_path = true;
-										goto lbl_nextpath;
-									}
-									else if (try_ == try_state.Try)
-									{
-										if (finallypass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
-										{
-
-										}
-										else
-										{
-											mustthrow_path = true;
-											goto lbl_nextpath;
-										}
-									}
+									
+									mustthrow_path = true;
+									goto lbl_nextpath;
+									
 								}
 
 								if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
@@ -709,11 +674,9 @@ namespace juicescript.compiler.IL.Optimize
 						normalpath++;
 					}
 
-					Debug.Assert(try_ == null);
 				}
 
 				Debug.Assert(throwpath + returnpath + normalpath + gotopath == paths.Count);
-
 
 				if (returnpath > 0)
 				{
@@ -787,7 +750,9 @@ namespace juicescript.compiler.IL.Optimize
 							//throw new NotImplementedException();
 							if (dict_childcfg[b].must_throw)
 							{
-								if (try_ == null || try_ == try_state.Catch || try_ == try_state.Finally)
+								Debug.Assert(try_state.Finally != try_);
+
+								if (try_ == null || try_ == try_state.Catch )
 								{
 									mustthrow_path = true;
 									goto lbl_nextpath;
@@ -808,7 +773,7 @@ namespace juicescript.compiler.IL.Optimize
 
 							else if (!dict_childcfg[b].may_normal_exit)
 							{
-								Debug.Assert(dict_childcfg[b].successors.Contains(int.MaxValue));
+								Debug.Assert(dict_childcfg[b].successors.Count>0);
 								early_return = true;
 								goto lbl_nextpath;
 							}
@@ -831,14 +796,13 @@ namespace juicescript.compiler.IL.Optimize
 								{
 									try_ = try_state.Finally;
 								}
-								if (ins.INS_Code == INS_Code.finally_exit)
-								{
-									try_ = null;
-								}
+								Debug.Assert(ins.INS_Code != INS_Code.finally_exit);
+								
 
 								if (ins.INS_Code == INS_Code.throw_error)
 								{
-									if (try_ == null || try_ == try_state.Catch || try_ == try_state.Finally)
+									Debug.Assert(try_state.Finally != try_);
+									if (try_ == null || try_ == try_state.Catch )
 									{
 										mustthrow_path = true;
 										goto lbl_nextpath;
@@ -901,7 +865,6 @@ namespace juicescript.compiler.IL.Optimize
 						normalpath++;
 					}
 
-					Debug.Assert(try_ == null);
 				}
 
 				Debug.Assert(throwpath + returnpath + normalpath + gotopath == paths.Count);

@@ -20,37 +20,33 @@ package
 
 async function Go()
 {
-	c:{
-		b:{
-			a:while (true) 
-			{
-				trace("u");
-				try 
-				{
-					throw 1;
-				}
-				catch(a)
-				{
-					break c;
-					
-				}
-				catch (b)
-				{
-					break b;
-				}
-				finally
-				{
-					continue a;
-				}
-				
-				for (var i:int = 0; i < 5; i++) 
-				{
-					
-				}
-				
-			}
+	
+c:{
+
+	try 
+	{
+		a:try 
+		{
+			break c;	
 		}
+		catch(e)
+		{
+			b:{}
+		}
+		finally 
+		{
+			trace(1);
+		}
+		
+		trace("hhh");
+		
 	}
+	finally 
+	{
+		trace("t2");
+	}      
+
+}
 }
 Go();
 

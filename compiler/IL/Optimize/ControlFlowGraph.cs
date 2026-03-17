@@ -64,6 +64,8 @@ namespace juicescript.compiler.IL.Optimize
             sb.AppendLine("        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
             sb.AppendLine("        th { background: #4CAF50; color: white; }");
             sb.AppendLine("        tr:nth-child(even) { background: #f2f2f2; }");
+            sb.AppendLine("        .unreachable { background: #ffcccc; color: #999; text-decoration: line-through; }");
+            sb.AppendLine("        .unreachable-cell { background: #fff0f0; }");
             sb.AppendLine("    </style>");
             sb.AppendLine("</head>");
             sb.AppendLine("<body>");
@@ -71,16 +73,25 @@ namespace juicescript.compiler.IL.Optimize
             sb.AppendLine($"    <div class=\"info\">");
             sb.AppendLine($"        <p><strong>Method:</strong> {Method?.Name ?? "Unknown"}</p>");
             sb.AppendLine($"        <p><strong>Total Blocks:</strong> {Blocks.Count}</p>");
+            sb.AppendLine($"        <p><strong>Reachable Blocks:</strong> {Blocks.Count(b => b.IsReachable)}</p>");
             sb.AppendLine($"    </div>");
 
             // Mermaid diagram
             sb.AppendLine("    <div class=\"mermaid\">");
             sb.AppendLine("    flowchart LR");
+            sb.AppendLine("    classDef reachable fill:#90EE90,stroke:#333,stroke-width:2px;");
+            sb.AppendLine("    classDef unreachable fill:#ffcccc,stroke:#999,stroke-width:1px,stroke-dasharray:5 5;");
 
             foreach (var block in Blocks)
             {
                 string label = GetBlockLabel(block);
                 sb.AppendLine($"        BB{block.BlockId}[\"{label}\"]");
+            }
+
+            foreach (var block in Blocks)
+            {
+                string classDef = block.IsReachable ? "reachable" : "unreachable";
+                sb.AppendLine($"        class BB{block.BlockId} {classDef};");
             }
 
             foreach (var block in Blocks)
@@ -115,8 +126,9 @@ namespace juicescript.compiler.IL.Optimize
                 //if (block.Instructions.Count > 10)
                 //    instructions += "<br>...";
 
-                sb.AppendLine($"        <tr>");
-                sb.AppendLine($"            <td>BB{block.BlockId}</td>");
+                string rowClass = block.IsReachable ? "" : "class=\"unreachable-cell\"";
+                sb.AppendLine($"        <tr {rowClass}>");
+                sb.AppendLine($"            <td>BB{block.BlockId}{(block.IsReachable ? "" : " (unreachable)")}</td>");
                 sb.AppendLine($"            <td>{block.StartIndex}-{block.EndIndex}</td>");
                 sb.AppendLine($"            <td>{preds}</td>");
                 sb.AppendLine($"            <td>{succs}</td>");
