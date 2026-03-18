@@ -19,16 +19,23 @@ namespace juicescript.runtime
 	public partial class Player
 	{
 
-		internal void SetNativeDelegate(ASMethod method,ref ReceiveError error)
+		public static string GetMethodKey(ASMethod method)
 		{
-			if (method.nativefunction_delegate == null)
-			{
-				string key =
+			string key =
 					method.__is_vector_method ?
 					$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
 					:
 					$"{(method.Trait != null && method.Trait.IsStatic ? "$" : "")}{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
 
+			return key;
+		}
+
+		internal void SetNativeDelegate(ASMethod method,ref ReceiveError error)
+		{
+			if (method.nativefunction_delegate == null)
+			{
+				string key = GetMethodKey(method);
+					
 				var m = NativeFunctionRegistry.GetFunction(key);
 				if (m != null)
 				{

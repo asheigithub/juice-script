@@ -43,6 +43,22 @@ namespace juicescript.ABC.INS
             return $"Ld_MethodVar   [{dst}] <- [{heap}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            // 从方法变量读取，不使用栈位置
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
     }
 
 }

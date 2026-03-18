@@ -48,6 +48,22 @@ namespace juicescript.ABC.INS
             return $"strict_Eq(===)   [{dst}]<- [{v1}] === [{v2}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { v1, v2 };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中strict_eq没有goto flag_handle_error，不会抛出异常
+            return false;
+        }
+
 		
 	}
 }

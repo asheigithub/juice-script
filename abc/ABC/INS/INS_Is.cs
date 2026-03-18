@@ -39,5 +39,21 @@ namespace juicescript.ABC.INS
 		{
 			return $"Is   [{dst}]<- [{v1}] is [{v2}]";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { v1, v2 };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中get_is会调用RaiseTypeError，可能抛出异常
+            return true;
+        }
 	}
 }

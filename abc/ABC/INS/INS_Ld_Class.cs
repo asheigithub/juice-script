@@ -43,5 +43,20 @@ namespace juicescript.ABC.INS
             return $"Ld_Class   [{dst}] <- [classid_index: {classid_index}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
     }
 }

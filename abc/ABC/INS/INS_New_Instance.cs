@@ -57,5 +57,22 @@ namespace juicescript.ABC.INS
             return $"New_Instance [{dst}] <-  class:[{typeLocator}]({ string.Join(",", args)})";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            var use = new List<StackLocater> { typeLocator };
+            use.AddRange(args);
+            return use;
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
     }
 }

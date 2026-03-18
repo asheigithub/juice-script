@@ -37,5 +37,21 @@ namespace juicescript.ABC.INS
 		{
 			return $"Yield_Return [{dst}]";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中yield_return调用LoadValue和StoreReturnSlot可能抛出异常
+            return true;
+        }
 	}
 }

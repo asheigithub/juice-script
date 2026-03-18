@@ -44,5 +44,20 @@ namespace juicescript.ABC.INS
             return $"Ld_ValueRef   [{dst}]<-[{source}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { source };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
     }
 }

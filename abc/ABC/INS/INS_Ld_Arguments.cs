@@ -41,5 +41,20 @@ namespace juicescript.ABC.INS
             return $"INS_Ld_Arguments   [{dst}] <- arguments";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
     }
 }

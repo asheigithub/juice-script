@@ -45,5 +45,20 @@ namespace juicescript.ABC.INS
             return $"Ld_Namespace   [{dst}] <- [namespace_index: {namespace_index}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
     }
 }

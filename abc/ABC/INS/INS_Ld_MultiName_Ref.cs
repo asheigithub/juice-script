@@ -47,6 +47,21 @@ namespace juicescript.ABC.INS
             return $"Ld_MultiName_Ref [{dst}] <- [{instance}.(name_index:{name_index})]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { instance };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
 
     }
 }

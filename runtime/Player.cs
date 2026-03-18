@@ -28,7 +28,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
-using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
+//using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
 
 

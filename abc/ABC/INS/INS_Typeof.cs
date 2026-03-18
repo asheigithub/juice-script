@@ -46,6 +46,21 @@ namespace juicescript.ABC.INS
 			return $"typeof  [{dst}] <- [{src}]";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { src };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
 
 	}
 }

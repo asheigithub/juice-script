@@ -56,6 +56,21 @@ namespace juicescript.ABC.INS
             return $"Ld_function_call [{dst}] <-  function:[{const_index}]({string.Join(",", args)})";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>(args);
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
 
     }
 }

@@ -74,5 +74,20 @@ namespace juicescript.ABC.INS
 			return $"ITER_Get {iterVar}<-{iterSrcObj_HoldInHeap}.[iterator]  if failed GOTO Flag_{flag_end_id} ";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { iterSrcobj };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
 	}
 }

@@ -37,5 +37,21 @@ namespace juicescript.ABC.INS
 		{
 			return $"await remuse[{dst}]";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中await_resume检测到rejected状态时会设置error并跳转
+            return true;
+        }
 	}
 }

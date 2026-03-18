@@ -48,5 +48,21 @@ namespace juicescript.ABC.INS
             return $"Store_Heap   [{heap}] <- [{dst}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中storeScopeH调用ConvertValueType和GetSaveValue可能抛出异常
+            return true;
+        }
+
     }
 }

@@ -255,9 +255,9 @@ namespace juicescript.compiler.IL
 					instruction = new INS_writeProperty_Interface(token);
 					break;
 
-				case INS_Code.op_stack_Variable_ldconst:
-					instruction = new INS_Op_stack_Var_ldConst(token);
-					break;
+				//case INS_Code.op_stack_Variable_ldconst:
+				//	instruction = new INS_Op_stack_Var_ldConst(token);
+				//	break;
 				case INS_Code.if_logicOp_goto:
 					instruction = new INS_If_LogicOp_Goto(token);
 					break;

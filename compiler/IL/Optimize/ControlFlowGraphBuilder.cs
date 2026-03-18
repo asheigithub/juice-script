@@ -1081,6 +1081,9 @@ namespace juicescript.compiler.IL.Optimize
 
 
 		/// <summary>
+		/// 
+		/// 图大了卡！
+		/// 
 		/// 查找从指定起点出发的所有可能路径
 		/// 终止条件：1. 走到无后续节点的点；2. 绕回起点
 		/// </summary>

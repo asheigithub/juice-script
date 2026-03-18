@@ -37,5 +37,20 @@ namespace juicescript.ABC.INS
 		{
 			return $"await [{dst}]";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
 	}
 }

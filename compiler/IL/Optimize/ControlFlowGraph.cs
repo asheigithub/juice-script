@@ -12,8 +12,7 @@ namespace juicescript.compiler.IL.Optimize
 {
     public class ControlFlowGraph
     {
-        private static int _printCounter = 0;
-
+        
         public ASMethod Method { get; set; }
         public List<BasicBlock> Blocks { get; set; }
         
@@ -75,24 +74,7 @@ namespace juicescript.compiler.IL.Optimize
             if (sortedBlocks.Length == 0)
                 return;
 
-			GraphPathFinder pathFinder = new GraphPathFinder();
-			for (int i = 0; i < sortedBlocks.Length; i++)
-			{
-				var b = sortedBlocks[i];
-				List<BasicBlock> successors;
-				
-				successors = b.Successors;
-				
-				for (int j = 0; j < successors.Count; j++)
-				{
-					var s = successors[j];
-					pathFinder.AddEdge(i, Array.IndexOf(sortedBlocks, s));
-				}
-			}
-
-
-            var pathlist = pathFinder.FindAllPathsFromStart(0);
-            
+			
 
 		}
 
@@ -108,18 +90,16 @@ namespace juicescript.compiler.IL.Optimize
             return result.ToArray();
         }
 
-        public void Print()
+        public string GetMermaid(string methodName)
         {
-            _printCounter++;
+            
             string outputDir = @"G:\temp";
             if (!Directory.Exists(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
 
-            string methodName = string.IsNullOrEmpty(Method?.Name) ? $"method_{_printCounter}" : SanitizeFileName(Method.Name);
-            string filePath = Path.Combine(outputDir, $"cfg_{methodName}_{_printCounter}.html");
-
+           
             var sb = new StringBuilder();
             sb.AppendLine("<!DOCTYPE html>");
             sb.AppendLine("<html>");
@@ -217,8 +197,7 @@ namespace juicescript.compiler.IL.Optimize
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");
 
-            File.WriteAllText(filePath, sb.ToString());
-            Console.WriteLine($"CFG HTML generated: {filePath}");
+            return sb.ToString();
         }
 
         private string GetBlockLabel(BasicBlock block)

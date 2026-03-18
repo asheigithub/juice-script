@@ -296,7 +296,7 @@ namespace juicescript.compiler.IL
 				//tryCatchContext.Finally_Enter = finally_Enter;
 
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(@try.finally_exit_token);
-				finally_Exit.dst = try_Enter.dst;
+				finally_Exit.HoldError = try_Enter.dst;
 
 				//tryCatchContext.Finally_Exit = finally_Exit;
 
@@ -1185,6 +1185,7 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(iter_Close);
 
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(compileEnv.instructions.Where(i => i.token != null).GroupBy(i => i.token.line).OrderByDescending(g => g.Key).First().OrderByDescending(i => i.token.ptr).First().token.nextToken);
+				finally_Exit.HoldError = try_Enter.dst;
 				compileEnv.instructions.Add(finally_Exit);
 
 				compileEnv.instructions.Add(for_body.breakFlag);
@@ -1287,15 +1288,14 @@ namespace juicescript.compiler.IL
 						var op = compileEnv.instructions[i];
 
 
-						//todo 需要逐个指令确认会不会抛异常
-						//这里先当作会抛再说
+						if (op.MaybeRaiseError())
+						{
+							INS_Flag flag = new INS_Flag(as3For.Token);
+							flag.flag_id = 0xffffff;
+							compileEnv.instructions.Add(flag);
 
-						INS_Flag flag = new INS_Flag(as3For.Token);
-						flag.flag_id = 0xffffff;
-						compileEnv.instructions.Add(flag);
-
-						break;
-
+							break;
+						}
 					}
 
 

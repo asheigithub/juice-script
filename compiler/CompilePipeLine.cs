@@ -4,6 +4,7 @@ using juicescript.runtime;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace juicescript.compiler
 {
     public class CompilePipeLine
     {
-        public int Build(List<string> list, string workDir, List<string> libs, string out_swc_file , bool force_rebuild_bcode)
+        public int Build(List<string> list, string workDir, List<string> libs, string out_swc_file , bool force_rebuild_bcode,List<string> displaycfg_files)
         {
             CompileContext context = new CompileContext();
             //context.libs = new List<SWCFile>();
@@ -47,7 +48,7 @@ namespace juicescript.compiler
 
 
             context.scriptDefs = new List<ScriptDef>();
-            var code = ScriptDefBuilder.BuildDefines(list, workDir, false, context.scriptDefs,context, true, false);
+            var code = ScriptDefBuilder.BuildDefines(list, workDir,false, context.scriptDefs,context, true, false);
             if (code != 0)
                 return code;
 
@@ -82,7 +83,7 @@ namespace juicescript.compiler
 				}
 			}
 
-			code = MethodResolver.BuildMethod( context,workDir , libs, force_rebuild_bcode , out_swc_file);
+			code = MethodResolver.BuildMethod( context,workDir , libs, force_rebuild_bcode , out_swc_file , displaycfg_files );
             if(code !=0)
                 return code;
 
@@ -93,5 +94,6 @@ namespace juicescript.compiler
         }
 
 
-    }
+
+	}
 }

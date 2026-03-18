@@ -27,7 +27,7 @@ namespace juicescript.compiler
 {
 	public class MethodResolver
 	{
-		internal static int BuildMethod(CompileContext context, string workDir, List<string> libs, bool force_rebuild_bcode, string outswcfile)
+		internal static int BuildMethod(CompileContext context, string workDir, List<string> libs, bool force_rebuild_bcode, string outswcfile, List<string> displaycfg_files)
 		{
 			var lex = new Lex(null);
 			var tokens = lex.GetWords(AS3_LL1_GRAMMAR.GRAMMAR, false);
@@ -1014,11 +1014,15 @@ namespace juicescript.compiler
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{
+				string proj = context.scriptInProj[script];
+				string outfile_base = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length));
+
 				for (int i = 1; i < script.scriptMethods.Count; i++)
 				{
 					ASMethod method = script.scriptMethods[i];
+					
 
-					Optimizer.Optimize(method);
+					Optimizer.Optimize(method ,displaycfg_files,script.fullPath,outfile_base );
 					
 					ComputeJump(method,true);
 				}

@@ -48,5 +48,20 @@ namespace juicescript.ABC.INS
             return $"Ld_InstanceOrSocpe_MemberRef   [{dst}] <- [{instance} . scopemember: {scopemember_index}]&";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { instance };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
     }
 }

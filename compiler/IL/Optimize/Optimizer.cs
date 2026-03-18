@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC;
 using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
+using juicescript.runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -452,13 +453,33 @@ namespace juicescript.compiler.IL.Optimize
 
 		}
 
-		internal static void Optimize(ASMethod method)
+		internal static void Optimize(ASMethod method, List<string> displaycfg_files, string fullPath, string outfile_base)
 		{
 			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
 
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
 
-			//cfg.Print();
+			string key = CompileContext.CleanInvalidPathChars( Player.GetMethodKey(method));
+
+			if (displaycfg_files != null && displaycfg_files.Any(f => key.IndexOf(f) >= 0))
+			{
+				string cfg_display = cfg.GetMermaid(key);
+
+				string opath = System.IO.Path.GetDirectoryName(outfile_base);
+				System.IO.Directory.CreateDirectory(opath);
+
+				System.IO.File.WriteAllText( outfile_base + "_CFG_" + key +".html" , cfg_display);
+
+				Console.WriteLine($"CFG HTML generated: {outfile_base + "." + key + ".html"}");
+
+				Console.WriteLine(cfg_display);
+				Console.WriteLine();
+
+			}
+
+
+
+
 			cfg.DeathCodeErase();
 
 			cfg.ReuseSlot();

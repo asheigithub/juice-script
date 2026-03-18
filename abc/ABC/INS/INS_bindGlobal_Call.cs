@@ -55,5 +55,22 @@ namespace juicescript.ABC.INS
         {
             return $"INS_bindGlobal_Call [{dst}] <-  call function:[{function}](this:global,{string.Join(",", args)})";
         }
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            var use = new List<StackLocater> { function };
+            use.AddRange(args);
+            return use;
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
     }
 }

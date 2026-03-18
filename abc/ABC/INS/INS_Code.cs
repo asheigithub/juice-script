@@ -247,7 +247,7 @@ namespace juicescript.ABC.INS
 
 
         //组合指令优化
-        op_stack_Variable_ldconst = 110,
+        //op_stack_Variable_ldconst = 110,
 
         //根据逻辑指令结果跳转
         if_logicOp_goto =112,

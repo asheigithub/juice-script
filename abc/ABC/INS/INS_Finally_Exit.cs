@@ -22,6 +22,10 @@ namespace juicescript.ABC.INS
 			{
 				return dst;
 			}
+			set
+			{ 
+				dst = value;
+			}
 		}
 
 		public override INS_Code INS_Code => INS_Code.finally_exit;
@@ -42,6 +46,21 @@ namespace juicescript.ABC.INS
 		{
 			return "FINALLY_EXIT";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { HoldError };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
 
 	}
 }

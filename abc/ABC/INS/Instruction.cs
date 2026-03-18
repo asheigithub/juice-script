@@ -37,6 +37,23 @@ namespace juicescript.ABC.INS
             this.token = token;
         }
 
+        /// <summary>
+        /// 返回本指令对StackSlot槽的赋值目标(如果有)
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<StackLocater> GetDef();
+
+        /// <summary>
+        /// 返回本指令使用了栈上的哪些槽。
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<StackLocater> GetUse();
+
+        /// <summary>
+        /// 返回本指令是否有引发异常的可能。
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool MaybeRaiseError();
 
 
         protected abstract void WriteByte(BinaryWriter bw);

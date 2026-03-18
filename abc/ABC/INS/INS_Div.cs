@@ -47,5 +47,20 @@ namespace juicescript.ABC.INS
             return $"Div(/)   [{dst}]<- [{v1}],[{v2}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { v1, v2 };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
     }
 }

@@ -54,5 +54,20 @@ namespace juicescript.ABC.INS
 			return $"Write_Property_interface   [(interface:{class_id})[instance:{instance}].vtable_setter[{const_index}] <-[{dst}]";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { instance, dst };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
 	}
 }

@@ -43,5 +43,20 @@ namespace juicescript.ABC.INS
 			return $"Create_Prop  {dst}.{key} = {value}"; 
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { dst , key, value };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
 	}
 }

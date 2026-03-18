@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using juicescript.ABC.Locaters;
 
 namespace juicescript.ABC.INS
 {
@@ -46,6 +47,21 @@ namespace juicescript.ABC.INS
 				return $"FLAG_{flag_id}";
 			}
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
 
 	}
 }

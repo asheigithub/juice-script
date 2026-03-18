@@ -73,5 +73,20 @@ namespace juicescript.ABC.INS
 			return $"ITER_Next { iterSrcObjSaveInVar }.{iterator}.next( in {result} mode:{(mode == 0 ? "key" : "value")})  if {result}->false GOTO Flag_{flag_next_end_id} ";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { result };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>() { result };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
 	}
 }
