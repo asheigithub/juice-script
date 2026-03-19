@@ -24,7 +24,7 @@ namespace juicescript.compiler
             {
                 foreach (string lib in libs)
                 {
-                    var libData = System.IO.File.ReadAllBytes( System.IO.Path.Combine( workDir, lib));
+                    var libData = System.IO.File.ReadAllBytes(  lib);
                     context.player_for_compiler.LoadLib(libData);
                 }
 

@@ -211,9 +211,10 @@ namespace asc
                         bool force_rebuild_bcode = force.HasValue();
 
                         
-                        return new CompilePipeLine().Build( optionPackDir.Values.ToList(),
-                            workDir.Value(), libs.Values.Distinct().ToList() ,System.IO.Path.Combine( workDir.Value(),
-                            out_swc),
+                        return new CompilePipeLine().Build( optionPackDir.Values.Select(p=>Path.GetFullPath(p)).ToList(),
+                            Path.GetFullPath( workDir.Value()),
+                            libs.Values.Distinct().Select( l=> System.IO.Path.GetFullPath(l) ).ToList(),
+                            Path.GetFullPath(  System.IO.Path.Combine( workDir.Value(),out_swc) ),
                             force_rebuild_bcode, cfgs.Values.ToList()
 							);
                     }
