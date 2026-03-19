@@ -2168,6 +2168,7 @@ namespace juicescript.compiler
 				{
 					if (def.Script.QName.Name != System.IO.Path.GetFileNameWithoutExtension(src))
 					{
+						Console.WriteLine($"文件名 {Path.GetFileName(src)} 与Script的主类型名 { def.Script.QName.Name } 不匹配。这个Script将被跳过!");
 						continue;
 					}
 

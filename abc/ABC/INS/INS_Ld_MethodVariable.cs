@@ -50,7 +50,6 @@ namespace juicescript.ABC.INS
 
         public override List<StackLocater> GetUse()
         {
-            // 从方法变量读取，不使用栈位置
             return new List<StackLocater>();
         }
 

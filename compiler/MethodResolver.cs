@@ -29,6 +29,7 @@ namespace juicescript.compiler
 	{
 		internal static int BuildMethod(CompileContext context, string workDir, List<string> libs, bool force_rebuild_bcode, string outswcfile, List<string> displaycfg_files)
 		{
+			
 			var lex = new Lex(null);
 			var tokens = lex.GetWords(AS3_LL1_GRAMMAR.GRAMMAR, false);
 			Parser parser = new Parser(tokens);
@@ -43,7 +44,7 @@ namespace juicescript.compiler
 				{
 					throw new InvalidOperationException($"内部异常,源文件没有找到{fullpath}");
 				}
-
+				
 				try
 				{
 					ASNamespace as3ns = new ASNamespace()
@@ -1014,6 +1015,8 @@ namespace juicescript.compiler
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{
+				
+
 				string proj = context.scriptInProj[script];
 				string outfile_base = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length));
 

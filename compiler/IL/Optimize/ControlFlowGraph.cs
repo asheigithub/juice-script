@@ -68,14 +68,647 @@ namespace juicescript.compiler.IL.Optimize
             }
 		}
 
-		internal void ReuseSlot()
+		internal int ReuseSlot()
 		{
-			var sortedBlocks = Blocks.OrderBy(b => b.OriginalIndex).ToArray();
+			var sortedBlocks = Blocks.OrderByDescending(b => b.OriginalIndex).ToArray();
             if (sortedBlocks.Length == 0)
-                return;
+                return 0;
 
+			//ComputeLiveness(sortedBlocks);
+			BuildInterferenceGraph();
+			ColorGraph();
+
+			for (int i = 0; i < sortedBlocks.Length; i++)
+			{
+				var block = sortedBlocks[i];
+				for (int j = 0; j < block.Instructions.Count; j++)
+				{
+					block.Instructions[j].RemappingSlots(allocation);
+				}
+			}
+
+			return allocation.Values.Max() + 1;
+
+		}
+
+		private void BuildInterferenceGraph()
+		{
+			interferenceGraph = new Dictionary<int, HashSet<int>>();
+
+			var tempCFG = BuildTemporaryCFGForInstructionLevel();
+
+			tempCFG.ComputeLivenessForAllBlocks();
+
+			foreach (var block in tempCFG.Blocks.Where(b => b.IsReachable))
+			{
+				var ins = block.Instructions[0];
+				var defs = ins.GetDef();
+
+				if (defs != null)
+				{
+					foreach (var d in defs)
+					{
+						foreach (var l in block.LiveIn)
+						{
+							if (d.index != l)
+							{
+								AddInterferenceEdge(d.index, l);
+							}
+						}
+					}
+				}
+			}
+
+			HashSet<int> allUsedSlots = new HashSet<int>();
+			foreach (var block in Blocks.Where(b => b.IsReachable))
+			{
+				foreach (var ins in block.Instructions)
+				{
+					var defs = ins.GetDef();
+					if (defs != null)
+					{
+						foreach (var d in defs)
+							allUsedSlots.Add(d.index);
+					}
+					var uses = ins.GetUse();
+					if (uses != null)
+					{
+						foreach (var u in uses)
+							allUsedSlots.Add(u.index);
+					}
+				}
+			}
+
+			foreach (var slot in allUsedSlots)
+			{
+				if (!interferenceGraph.ContainsKey(slot))
+					interferenceGraph[slot] = new HashSet<int>();
+			}
+		}
+
+		internal void ComputeLivenessForAllBlocks()
+		{
+			if (Blocks.Count == 0)
+				return;
+
+			var sortedBlocks = Blocks.OrderByDescending(b => b.OriginalIndex).ToArray();
+			ComputeLivenessStatic(sortedBlocks);
+		}
+
+		internal static void ComputeLivenessStatic(BasicBlock[] sortedBlocks)
+		{
+			Dictionary<BasicBlock, HashSet<int>> liveInAnalysis = new Dictionary<BasicBlock, HashSet<int>>();
+			Dictionary<BasicBlock, HashSet<int>> liveOutAnalysis = new Dictionary<BasicBlock, HashSet<int>>();
 			
+			foreach (var block in sortedBlocks)
+			{
+				liveInAnalysis[block] = new HashSet<int>();
+				liveOutAnalysis[block] = new HashSet<int>();
+			}
+			
+			bool changed;
+			int iterations = 0;
+			const int maxIterations = 1000;
+			
+			do
+			{
+				changed = false;
+				iterations++;
+				
+				foreach (var block in sortedBlocks)
+				{
+					if (!block.IsReachable)
+						continue;
+					
+					HashSet<int> newLiveOut = new HashSet<int>();
+					foreach (var succ in block.Successors)
+					{
+						if (liveInAnalysis.ContainsKey(succ))
+						{
+							foreach (var slot in liveInAnalysis[succ])
+							{
+								newLiveOut.Add(slot);
+							}
+						}
+					}
+					
+					HashSet<int> use = new HashSet<int>();
+					HashSet<int> def = new HashSet<int>();
+					HashSet<int> onlyUse = new HashSet<int>();
+					ComputeBlockUseDef(block, use, def, onlyUse);
+					
+					foreach (var d in def)
+					{
+						if (use.Contains(d))
+						{
+							newLiveOut.Add(d);
+						}
+					}
+					
+					HashSet<int> newLiveIn = new HashSet<int>(onlyUse);
+					foreach (var slot in newLiveOut)
+					{
+						if (!def.Contains(slot))
+						{
+							newLiveIn.Add(slot);
+						}
+					}
+					
+					if (!SetsEqual(liveInAnalysis[block], newLiveIn))
+					{
+						liveInAnalysis[block] = newLiveIn;
+						changed = true;
+					}
+					if (!SetsEqual(liveOutAnalysis[block], newLiveOut))
+					{
+						liveOutAnalysis[block] = newLiveOut;
+						changed = true;
+					}
+				}
+			} while (changed && iterations < maxIterations);
 
+			iterations = 0;
+			bool changed2 = true;
+			while (changed2 && iterations < maxIterations)
+			{
+				changed2 = false;
+				iterations++;
+				
+				foreach (var block in sortedBlocks)
+				{
+					if (!block.IsReachable)
+						continue;
+					
+					HashSet<int> use = new HashSet<int>();
+					HashSet<int> def = new HashSet<int>();
+					HashSet<int> onlyUse = new HashSet<int>();
+					ComputeBlockUseDef(block, use, def, onlyUse);
+					
+					HashSet<int> newLiveOut = new HashSet<int>();
+					foreach (var succ in block.Successors)
+					{
+						if (liveInAnalysis.ContainsKey(succ))
+						{
+							foreach (var slot in liveInAnalysis[succ])
+							{
+								newLiveOut.Add(slot);
+							}
+						}
+					}
+					
+					foreach (var d in def)
+					{
+						if (use.Contains(d))
+						{
+							newLiveOut.Add(d);
+						}
+					}
+					
+					HashSet<int> newLiveIn = new HashSet<int>(onlyUse);
+					foreach (var slot in newLiveOut)
+					{
+						if (!def.Contains(slot))
+						{
+							newLiveIn.Add(slot);
+						}
+					}
+					
+					if (!SetsEqual(liveInAnalysis[block], newLiveIn))
+					{
+						liveInAnalysis[block] = newLiveIn;
+						changed2 = true;
+					}
+					if (!SetsEqual(liveOutAnalysis[block], newLiveOut))
+					{
+						liveOutAnalysis[block] = newLiveOut;
+						changed2 = true;
+					}
+				}
+			}
+
+			foreach (var block in sortedBlocks)
+			{
+				block.LiveIn = liveInAnalysis[block];
+				block.LiveOut = liveOutAnalysis[block];
+			}
+		}
+
+		private ControlFlowGraph BuildTemporaryCFGForInstructionLevel()
+		{
+			var tempCFG = new ControlFlowGraph(Method);
+
+			Dictionary<BasicBlock, BasicBlock> blockMapping = new Dictionary<BasicBlock, BasicBlock>();
+
+			foreach (var block in Blocks)
+			{
+				var newBlock = new BasicBlock
+				{
+					BlockId = tempCFG.Blocks.Count,
+					OriginalIndex = block.OriginalIndex,
+					IsReachable = block.IsReachable,
+					Instructions = new List<Instruction>(block.Instructions),
+					Predecessors = new List<BasicBlock>(),
+					Successors = new List<BasicBlock>()
+				};
+				newBlock.LiveIn = new HashSet<int>();
+				newBlock.LiveOut = new HashSet<int>();
+				tempCFG.Blocks.Add(newBlock);
+				blockMapping[block] = newBlock;
+			}
+
+			foreach (var block in Blocks)
+			{
+				var newBlock = blockMapping[block];
+
+				foreach (var pred in block.Predecessors)
+				{
+					if (blockMapping.TryGetValue(pred, out var newPred))
+					{
+						if (!newBlock.Predecessors.Contains(newPred))
+							newBlock.Predecessors.Add(newPred);
+						if (!newPred.Successors.Contains(newBlock))
+							newPred.Successors.Add(newBlock);
+					}
+				}
+				foreach (var succ in block.Successors)
+				{
+					if (blockMapping.TryGetValue(succ, out var newSucc))
+					{
+						if (!newBlock.Successors.Contains(newSucc))
+							newBlock.Successors.Add(newSucc);
+						if (!newSucc.Predecessors.Contains(newBlock))
+							newSucc.Predecessors.Add(newBlock);
+					}
+				}
+			}
+
+			var blocksToSplit = tempCFG.Blocks.Where(b => b.IsReachable && b.Instructions.Count > 2).ToList();
+
+			foreach (var block in blocksToSplit)
+			{
+				int idx = tempCFG.Blocks.IndexOf(block);
+				tempCFG.Blocks.RemoveAt(idx);
+
+				var preds = block.Predecessors.ToList();
+				var succs = block.Successors.ToList();
+
+				foreach (var pred in preds)
+				{
+					pred.Successors.Remove(block);
+				}
+				foreach (var succ in succs)
+				{
+					succ.Predecessors.Remove(block);
+				}
+
+				BasicBlock prevBlock = null;
+				for (int i = 0; i < block.Instructions.Count; i++)
+				{
+					var newB = new BasicBlock
+					{
+						BlockId = tempCFG.Blocks.Count,
+						OriginalIndex = block.OriginalIndex * 1000 + i,
+						IsReachable = block.IsReachable,
+						Instructions = new List<Instruction> { block.Instructions[i] },
+						Predecessors = new List<BasicBlock>(),
+						Successors = new List<BasicBlock>()
+					};
+					newB.LiveIn = new HashSet<int>();
+					newB.LiveOut = new HashSet<int>();
+
+					if (i == 0)
+					{
+						foreach (var pred in preds)
+						{
+							pred.Successors.Add(newB);
+							newB.Predecessors.Add(pred);
+						}
+					}
+					else
+					{
+						prevBlock.Successors.Add(newB);
+						newB.Predecessors.Add(prevBlock);
+					}
+
+					if (i == block.Instructions.Count - 1)
+					{
+						foreach (var succ in succs)
+						{
+							succ.Predecessors.Add(newB);
+							newB.Successors.Add(succ);
+						}
+					}
+
+					prevBlock = newB;
+					tempCFG.Blocks.Add(newB);
+				}
+			}
+
+			return tempCFG;
+		}
+
+
+		private void AddInterferenceEdge(int a, int b)
+		{
+			if (!interferenceGraph.ContainsKey(a))
+				interferenceGraph[a] = new HashSet<int>();
+			if (!interferenceGraph.ContainsKey(b))
+				interferenceGraph[b] = new HashSet<int>();
+
+			interferenceGraph[a].Add(b);
+			interferenceGraph[b].Add(a);
+		}
+
+		private int GetMaxSlotIndex()
+		{
+			int max = 0;
+			foreach (var block in Blocks.Where(b => b.IsReachable))
+			{
+				foreach (var ins in block.Instructions)
+				{
+					var defs = ins.GetDef();
+					if (defs != null)
+					{
+						foreach (var d in defs)
+						{
+							if (d.index > max) max = d.index;
+						}
+					}
+					var uses = ins.GetUse();
+					if (uses != null)
+					{
+						foreach (var u in uses)
+						{
+							if (u.index > max) max = u.index;
+						}
+					}
+				}
+			}
+			return max;
+		}
+
+		private void ColorGraph()
+		{
+			int maxSlot = GetMaxSlotIndex();
+			coloringK = maxSlot + 1;
+			int K = coloringK;
+
+			allocation = new Dictionary<int, int>();
+			var remaining = new HashSet<int>(interferenceGraph.Keys);
+			var stack = new Stack<int>();
+
+			while (remaining.Count > 0)
+			{
+				var node = SelectNode(remaining, K);
+				if (node == -1)
+				{
+					node = remaining.First();
+				}
+				stack.Push(node);
+				remaining.Remove(node);
+			}
+
+			while (stack.Count > 0)
+			{
+				var node = stack.Pop();
+				var usedColors = new HashSet<int>();
+				if (interferenceGraph.ContainsKey(node))
+				{
+					foreach (var neighbor in interferenceGraph[node])
+					{
+						if (allocation.ContainsKey(neighbor))
+						{
+							usedColors.Add(allocation[neighbor]);
+						}
+					}
+				}
+
+				int color = 0;
+				while (usedColors.Contains(color))
+				{
+					color++;
+				}
+				allocation[node] = color;
+				if (color >= K)
+				{
+					K = color + 1;
+				}
+			}
+		}
+
+		private int SelectNode(HashSet<int> remaining, int K)
+		{
+			int bestNode = -1;
+			int bestDegree = int.MaxValue;
+			
+			foreach (var node in remaining)
+			{
+				int degree = interferenceGraph.ContainsKey(node) 
+					? interferenceGraph[node].Count(n => remaining.Contains(n)) 
+					: 0;
+				if (degree < bestDegree)
+				{
+					bestDegree = degree;
+					bestNode = node;
+					if (degree < K)
+					{
+						return node;
+					}
+				}
+			}
+			return bestNode;
+		}
+
+		//private Dictionary<BasicBlock, HashSet<int>> liveInAnalysis;
+		//private Dictionary<BasicBlock, HashSet<int>> liveOutAnalysis;
+
+		private Dictionary<int, HashSet<int>> interferenceGraph;
+		private Dictionary<int, int> allocation;
+		private int coloringK;
+
+		//private void ComputeLiveness(BasicBlock[] sortedBlocks)
+		//{
+		//	// 初始化每个 block 的 LiveIn 和 LiveOut
+		//	liveInAnalysis = new Dictionary<BasicBlock, HashSet<int>>();
+		//	liveOutAnalysis = new Dictionary<BasicBlock, HashSet<int>>();
+			
+		//	foreach (var block in sortedBlocks)
+		//	{
+		//		liveInAnalysis[block] = new HashSet<int>();
+		//		liveOutAnalysis[block] = new HashSet<int>();
+		//	}
+			
+		//	// 迭代直到收敛
+		//	bool changed;
+		//	int iterations = 0;
+		//	const int maxIterations = 100;
+			
+		//	// 第一次迭代计算基本的 LiveOut（基于后继的 LiveIn）
+		//	do
+		//	{
+		//		changed = false;
+		//		iterations++;
+				
+		//		foreach (var block in sortedBlocks)
+		//		{
+		//			if (!block.IsReachable)
+		//				continue;
+					
+		//			HashSet<int> newLiveOut = new HashSet<int>();
+		//			foreach (var succ in block.Successors)
+		//			{
+		//				if (liveInAnalysis.ContainsKey(succ))
+		//				{
+		//					foreach (var slot in liveInAnalysis[succ])
+		//					{
+		//						newLiveOut.Add(slot);
+		//					}
+		//				}
+		//			}
+					
+		//			HashSet<int> use = new HashSet<int>();
+		//			HashSet<int> def = new HashSet<int>();
+		//			HashSet<int> onlyUse = new HashSet<int>();
+		//			ComputeBlockUseDef(block, use, def, onlyUse);
+					
+		//			// Also add def slots that are also used within the block
+		//			foreach (var d in def)
+		//			{
+		//				if (use.Contains(d))
+		//				{
+		//					newLiveOut.Add(d);
+		//				}
+		//			}
+					
+		//			HashSet<int> newLiveIn = new HashSet<int>(onlyUse);
+		//			foreach (var slot in newLiveOut)
+		//			{
+		//				if (!def.Contains(slot))
+		//				{
+		//					newLiveIn.Add(slot);
+		//				}
+		//			}
+					
+		//			if (!SetsEqual(liveInAnalysis[block], newLiveIn))
+		//			{
+		//				liveInAnalysis[block] = newLiveIn;
+		//				changed = true;
+		//			}
+		//			if (!SetsEqual(liveOutAnalysis[block], newLiveOut))
+		//			{
+		//				liveOutAnalysis[block] = newLiveOut;
+		//				changed = true;
+		//			}
+		//		}
+		//	} while (changed && iterations < maxIterations);
+
+		//	iterations = 0;
+		//	bool changed2 = true;
+		//	while (changed2 && iterations < maxIterations)
+		//	{
+		//		changed2 = false;
+		//		iterations++;
+				
+		//		foreach (var block in sortedBlocks)
+		//		{
+		//			if (!block.IsReachable)
+		//				continue;
+					
+		//			HashSet<int> use = new HashSet<int>();
+		//			HashSet<int> def = new HashSet<int>();
+		//			HashSet<int> onlyUse = new HashSet<int>();
+		//			ComputeBlockUseDef(block, use, def, onlyUse);
+					
+		//			HashSet<int> newLiveOut = new HashSet<int>();
+		//			foreach (var succ in block.Successors)
+		//			{
+		//				if (liveInAnalysis.ContainsKey(succ))
+		//				{
+		//					foreach (var slot in liveInAnalysis[succ])
+		//					{
+		//						newLiveOut.Add(slot);
+		//					}
+		//				}
+		//			}
+					
+		//			foreach (var d in def)
+		//			{
+		//				if (use.Contains(d))
+		//				{
+		//					newLiveOut.Add(d);
+		//				}
+		//			}
+					
+		//			HashSet<int> newLiveIn = new HashSet<int>(onlyUse);
+		//			foreach (var slot in newLiveOut)
+		//			{
+		//				if (!def.Contains(slot))
+		//				{
+		//					newLiveIn.Add(slot);
+		//				}
+		//			}
+					
+		//			if (!SetsEqual(liveInAnalysis[block], newLiveIn))
+		//			{
+		//				liveInAnalysis[block] = newLiveIn;
+		//				changed2 = true;
+		//			}
+		//			if (!SetsEqual(liveOutAnalysis[block], newLiveOut))
+		//			{
+		//				liveOutAnalysis[block] = newLiveOut;
+		//				changed2 = true;
+		//			}
+		//		}
+		//	}
+
+		//	foreach (var block in sortedBlocks)
+		//	{
+		//		block.LiveIn = liveInAnalysis[block];
+		//		block.LiveOut = liveOutAnalysis[block];
+		//	}
+		//}
+
+		private static void ComputeBlockUseDef(BasicBlock block, HashSet<int> use, HashSet<int> def, HashSet<int> onlyUse)
+		{
+			// 对于每条指令：Use 是操作数，Def 是结果
+			foreach (var ins in block.Instructions)
+			{
+				// 添加 Use
+				var uses = ins.GetUse();
+				if (uses != null)
+				{
+					foreach (var u in uses)
+					{
+						use.Add(u.index);
+						onlyUse.Add(u.index);
+					}
+				}
+				
+				// 添加 Def
+				var defs = ins.GetDef();
+				if (defs != null)
+				{
+					foreach (var d in defs)
+					{
+						def.Add(d.index);
+					}
+				}
+			}
+			
+			// OnlyUse = Use - Def (在块中使用但不在块中定义的 slot)
+			onlyUse.ExceptWith(def);
+		}
+
+		private static bool SetsEqual(HashSet<int> a, HashSet<int> b)
+		{
+			if (a.Count != b.Count)
+				return false;
+			foreach (var item in a)
+			{
+				if (!b.Contains(item))
+					return false;
+			}
+			return true;
 		}
 
 
@@ -93,13 +726,6 @@ namespace juicescript.compiler.IL.Optimize
         public string GetMermaid(string methodName)
         {
             
-            string outputDir = @"G:\temp";
-            if (!Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-           
             var sb = new StringBuilder();
             sb.AppendLine("<!DOCTYPE html>");
             sb.AppendLine("<html>");
@@ -174,9 +800,13 @@ namespace juicescript.compiler.IL.Optimize
             {
                 string preds = block.Predecessors.Count == 0 ? "(none)" : string.Join(", ", block.Predecessors.Select(p => $"BB{p.BlockId}"));
                 string succs = block.Successors.Count == 0 ? "(none)" : string.Join(", ", block.Successors.Select(s => $"BB{s.BlockId}"));
-                string instructions = string.Join("<br>", block.Instructions.Select((ins, idx) => $"{block.StartIndex + idx}: {ins}"));
-                //if (block.Instructions.Count > 10)
-                //    instructions += "<br>...";
+
+                string instructions = "";
+                for (int idx = 0; idx < block.Instructions.Count; idx++)
+                {
+                    var ins = block.Instructions[idx];
+                    instructions += $"{block.StartIndex + idx}: {ins}<br>";
+                }
 
                 string rowClass = block.IsReachable ? "" : "class=\"unreachable-cell\"";
                 sb.AppendLine($"        <tr {rowClass}>");
@@ -189,6 +819,90 @@ namespace juicescript.compiler.IL.Optimize
             }
 
             sb.AppendLine("    </table>");
+
+            if (interferenceGraph != null && interferenceGraph.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("    <h2>Interference Graph & Coloring</h2>");
+
+                bool graphSymmetric = true;
+                foreach (var node in interferenceGraph.Keys)
+                {
+                    foreach (var neighbor in interferenceGraph[node])
+                    {
+                        if (!interferenceGraph.ContainsKey(neighbor) || !interferenceGraph[neighbor].Contains(node))
+                        {
+                            graphSymmetric = false;
+                            break;
+                        }
+                    }
+                    if (!graphSymmetric) break;
+                }
+
+                sb.AppendLine($"    <p><strong>Graph symmetric:</strong> {(graphSymmetric ? "YES" : "NO - ERROR!")}</p>");
+
+                sb.AppendLine("    <table>");
+                sb.AppendLine("        <tr><th>Original Slot</th><th>Conflicts With</th><th>New Slot</th><th>Degree</th></tr>");
+
+                var sortedSlots = interferenceGraph.Keys.OrderBy(x => x);
+                bool coloringValid = true;
+                foreach (var slot in sortedSlots)
+                {
+                    var conflicts = interferenceGraph[slot].OrderBy(x => x);
+                    string conflictStr = "{" + string.Join(",", conflicts) + "}";
+                    int degree = interferenceGraph[slot].Count;
+                    int newSlot = allocation != null && allocation.ContainsKey(slot) ? allocation[slot] : slot;
+                    sb.AppendLine($"        <tr>");
+                    sb.AppendLine($"            <td>{slot}</td>");
+                    sb.AppendLine($"            <td>{conflictStr}</td>");
+                    sb.AppendLine($"            <td>{newSlot}</td>");
+                    sb.AppendLine($"            <td>{degree}</td>");
+                    sb.AppendLine($"        </tr>");
+
+                    if (allocation != null)
+                    {
+                        int slotColor = allocation[slot];
+                        foreach (var conflict in conflicts)
+                        {
+                            if (allocation.ContainsKey(conflict) && allocation[conflict] == slotColor)
+                            {
+                                coloringValid = false;
+                            }
+                        }
+                    }
+                }
+                sb.AppendLine("    </table>");
+
+                sb.AppendLine("    <h3>Summary</h3>");
+                sb.AppendLine($"    <p><strong>K (colors available):</strong> {coloringK}</p>");
+                sb.AppendLine($"    <p><strong>Total slots used:</strong> {interferenceGraph.Keys.Count}</p>");
+                if (allocation != null && allocation.Count > 0)
+                {
+                    int maxUsed = allocation.Values.Max();
+                    int origMax = interferenceGraph.Keys.Count > 0 ? interferenceGraph.Keys.Max() : 0;
+                    sb.AppendLine($"    <p><strong>Max slot index after coloring:</strong> {maxUsed}</p>");
+                    sb.AppendLine($"    <p><strong>Reduction:</strong> Original max: {origMax}, New max: {maxUsed}</p>");
+                    sb.AppendLine($"    <p><strong>Coloring valid:</strong> <span style=\"color:{(coloringValid ? "green" : "red")}\">{(coloringValid ? "YES" : "NO - CONFLICT DETECTED!")}</span></p>");
+
+                if (!coloringValid)
+                {
+                    sb.AppendLine("    <h4>Conflicts Found:</h4>");
+                    sb.AppendLine("    <ul>");
+                    foreach (var slot in sortedSlots)
+                    {
+                        int slotColor = allocation[slot];
+                        foreach (var conflict in interferenceGraph[slot])
+                        {
+                            if (allocation.ContainsKey(conflict) && allocation[conflict] == slotColor)
+                            {
+                                sb.AppendLine($"        <li>Slot {slot} (color {slotColor}) conflicts with Slot {conflict}</li>");
+                            }
+                        }
+                    }
+                    sb.AppendLine("    </ul>");
+                }
+                }
+            }
 
            
             sb.AppendLine("    <script>");

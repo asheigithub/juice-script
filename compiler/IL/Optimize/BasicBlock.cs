@@ -23,6 +23,11 @@ namespace juicescript.compiler.IL.Optimize
         
         public bool IsReachable { get; set; }
 
+        public HashSet<int> LiveIn { get; set; }
+        public HashSet<int> LiveOut { get; set; }
+
+        public Dictionary<int, HashSet<int>> InstructionLive { get; set; }
+
         public BasicBlock()
         {
             Instructions = new List<Instruction>();
@@ -31,8 +36,10 @@ namespace juicescript.compiler.IL.Optimize
             IsReachable = false;
             HasFallThrough = false;
             JumpTargetFlagId = null;
-
             TryBlockId = 0;
+            LiveIn = new HashSet<int>();
+            LiveOut = new HashSet<int>();
+            InstructionLive = new Dictionary<int, HashSet<int>>();
            
         }
 

@@ -461,6 +461,10 @@ namespace juicescript.compiler.IL.Optimize
 
 			string key = CompileContext.CleanInvalidPathChars( Player.GetMethodKey(method));
 
+			cfg.DeathCodeErase();
+
+			int maxslots = cfg.ReuseSlot();
+			
 			if (displaycfg_files != null && displaycfg_files.Any(f => key.IndexOf(f) >= 0))
 			{
 				string cfg_display = cfg.GetMermaid(key);
@@ -478,14 +482,8 @@ namespace juicescript.compiler.IL.Optimize
 			}
 
 
-
-
-			cfg.DeathCodeErase();
-
-			cfg.ReuseSlot();
-
 			var optimizedInstructions = cfg.FlattenInstructions();		
-			method.Body.ByteCode = Assembler.Assemble(slotCount, constants, optimizedInstructions);
+			method.Body.ByteCode = Assembler.Assemble(maxslots, constants, optimizedInstructions);
 		}
 	}
 }

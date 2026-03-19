@@ -55,6 +55,12 @@ namespace juicescript.ABC.INS
         /// <returns></returns>
         public abstract bool MaybeRaiseError();
 
+        /// <summary>
+        /// 根据传入的映射表，重新分配槽编号
+        /// </summary>
+        /// <param name="mapping"></param>
+        public abstract void RemappingSlots(Dictionary<int,int> mapping);
+
 
         protected abstract void WriteByte(BinaryWriter bw);
         
