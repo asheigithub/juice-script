@@ -13,6 +13,8 @@ namespace juicescript.compiler
 {
     public class CompileContext
     {
+		internal bool islibmode=false;
+
         //internal List<SWCFile> libs;
         internal Dictionary<ASTrait,SWCFile> import_trait_at = new Dictionary<ASTrait, SWCFile> ();
 

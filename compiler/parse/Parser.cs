@@ -495,7 +495,7 @@ namespace juicescript.compiler.parse
             { 
                 srcfileFullPath = srcfile;
             }
-
+            hasError = false;
             var key = new MyMD5.MyMD5().Hash(input);
             var tree = new ParseTree( ref key  );
 
