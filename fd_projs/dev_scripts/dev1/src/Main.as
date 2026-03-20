@@ -10,32 +10,34 @@ package
 	 */
 	public class Main extends BaseM
 	{
-		 var a;
-		
+		public function Main()
+		{
+			var x = 1 +
+		}
 		
 	}
 }
   
-
-
-async function Go()
-{
-	try
-	{
-		trace( await fetch("https://r.wxyfamily.duckdns.org") );	
-		trace(2);
-	
-	}
-	catch (e)
-	{
-		trace(e);
-		
-		trace( await fetch("http://oa.ofilm.com") );
-		
-	}
-}
-Go();
-
+//
+//
+//async function Go()
+//{
+	//try
+	//{
+		//trace( await fetch("https://r.wxyfamily.duckdns.org") );	
+		//trace(2);
+	//
+	//}
+	//catch (e)
+	//{
+		//trace(e);
+		//
+		//trace( await fetch("http://oa.ofilm.com") );
+		//
+	//}
+//}
+//Go();
+//
 
 
  
@@ -202,4 +204,4 @@ Go();
 
 
 
-trace("OK");
+//trace("OK");

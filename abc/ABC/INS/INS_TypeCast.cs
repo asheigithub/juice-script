@@ -37,5 +37,28 @@ namespace juicescript.ABC.INS
 			return $"Cast {dst} <- class_id:({class_id}){value} ";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { value };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(value.index, out int newIndex1))
+                value.index = newIndex1;
+        }
+
 	}
 }

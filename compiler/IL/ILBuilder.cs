@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection.Emit;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading;
@@ -296,6 +297,8 @@ namespace juicescript.compiler.IL
 				//tryCatchContext.Finally_Enter = finally_Enter;
 
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(@try.finally_exit_token);
+				finally_Exit.HoldError = try_Enter.dst;
+
 				//tryCatchContext.Finally_Exit = finally_Exit;
 
 
@@ -334,6 +337,7 @@ namespace juicescript.compiler.IL
 					catch_Enter.catch_exception = heapLocater;
 
 					INS_Catch_Exit catch_Exit = new INS_Catch_Exit(@try.catch_exit_tokens[i]);
+					
 					//tryCatchContext.CatchList.Add(new Tuple<Instruction, Instruction>( catch_Enter,catch_Exit));
 
 					compileEnv.instructions.Add(catch_Enter);
@@ -1182,6 +1186,7 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(iter_Close);
 
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(compileEnv.instructions.Where(i => i.token != null).GroupBy(i => i.token.line).OrderByDescending(g => g.Key).First().OrderByDescending(i => i.token.ptr).First().token.nextToken);
+				finally_Exit.HoldError = try_Enter.dst;
 				compileEnv.instructions.Add(finally_Exit);
 
 				compileEnv.instructions.Add(for_body.breakFlag);
@@ -1268,10 +1273,35 @@ namespace juicescript.compiler.IL
 				compileEnv.instructions.Add(continue_body.continueFlag);
 				blockcontexts.Pop();
 
+				int searchSt = compileEnv.instructions.Count;
+
 				for (int i = 0; i < as3For.Part3.Count; i++)
 				{
 					BuildAS3SyntaxNode(compileEnv, as3For.Part3[i], trycatchState, blockcontexts, ref flagseed);
 				}
+				if (as3For.Part3.Count > 0)
+				{
+					//这是最特殊的 for(;;[update]) 部分，实际上需要检查新增的指令，是否有抛出异常的可能。
+					//如果可能抛出，追加一个flag,flagid为0xffffff，构造cfg时，遇到他，就添加一个当作throw的处理
+
+					for (int i = searchSt; i < compileEnv.instructions.Count; i++)
+					{
+						var op = compileEnv.instructions[i];
+
+
+						if (op.MaybeRaiseError())
+						{
+							INS_Flag flag = new INS_Flag(as3For.Token);
+							flag.flag_id = 0xffffff;
+							compileEnv.instructions.Add(flag);
+
+							break;
+						}
+					}
+
+
+				}
+
 
 				INS_Goto @goto = new INS_Goto(as3For.Token);
 				@goto.flag_id = _flag.flag_id;
@@ -1617,7 +1647,48 @@ namespace juicescript.compiler.IL
         {
 			compileEnv.BeginCollectRef();
 			ExpressionIL expressionIL = new ExpressionIL();
+
+			int start = compileEnv.instructions.Count;
+
 			var ret = expressionIL.Build(expression, compileEnv,ref flag_seed);
+
+			List<StackLocater> expression_defs = new List<StackLocater>();
+			int end = compileEnv.instructions.Count; //新增指令
+			for (int i = start; i < end; i++)   
+			{
+				var ins = compileEnv.instructions[i];
+
+				//这些指令的加载目标都在安全的地方（比如methodScope,const pool）等,或者它们将目标设置为非heap的值
+				if (ins.INS_Code != INS_Code.ld_array_hole &&
+					ins.INS_Code != INS_Code.ld_arguments &&
+					ins.INS_Code != INS_Code.ld_class &&
+					ins.INS_Code != INS_Code.ld_const &&
+					ins.INS_Code != INS_Code.ld_false &&
+					ins.INS_Code != INS_Code.ld_true &&
+					ins.INS_Code != INS_Code.ld_undefined &&
+					ins.INS_Code != INS_Code.ld_This &&
+					ins.INS_Code != INS_Code.ld_null &&
+					ins.INS_Code != INS_Code.ld_namespace &&
+					ins.INS_Code != INS_Code.ld_memberInitValue  &&
+					ins.INS_Code != INS_Code.ld_methodVariable	&&
+					ins.INS_Code != INS_Code.ld_ScopeH
+					)
+				{
+					expression_defs.AddRange(ins.GetDef());
+				}
+			}
+
+			if (expression_defs.Count > 1 && 
+				compileEnv.instructions[end-1].INS_Code != INS_Code.storeScopeH &&
+				compileEnv.instructions[end-1].INS_Code != INS_Code.storeMethodVariable
+				)
+			{
+				INS_Barrier barrier = new INS_Barrier(expression.Token);
+				barrier.uselist = expression_defs.ToArray();
+
+				compileEnv.instructions.Add(barrier);
+			}
+
 
 			var memberRefs = compileEnv.EndCollectRef();
 			foreach (var memberRef in memberRefs)

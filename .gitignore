@@ -26,3 +26,5 @@ packages/
 /.kiro/specs/array-push-function
 /AGENTS.md
 /.kiro/specs/promise-completion
+/script_workspace
+/nul

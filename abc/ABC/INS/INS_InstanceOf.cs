@@ -45,6 +45,32 @@ namespace juicescript.ABC.INS
 			return $"instanceof  [{dst}] <- [{src} instanceof {type}]";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { src, type };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(src.index, out int newIndex1))
+                src.index = newIndex1;
+            if (mapping.TryGetValue(type.index, out int newIndex2))
+                type.index = newIndex2;
+        }
+
 
 	}
 }

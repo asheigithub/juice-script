@@ -495,7 +495,7 @@ namespace juicescript.compiler.parse
             { 
                 srcfileFullPath = srcfile;
             }
-
+            hasError = false;
             var key = new MyMD5.MyMD5().Hash(input);
             var tree = new ParseTree( ref key  );
 
@@ -1713,7 +1713,7 @@ namespace juicescript.compiler.parse
             hasError = true;
 
             ErrorOut.WriteLine(token.sourceFileFullPath + ":" + (token.line + 1) + ":Error:" + msg);
-            ErrorOut.WriteLine(lines[token.line]);
+            ErrorOut.WriteLine(lines[token.line].Replace("\t","    "));
             ErrorOut.WriteLine("^".PadLeft(token.ptr));
             ErrorOut.WriteLine();
         }

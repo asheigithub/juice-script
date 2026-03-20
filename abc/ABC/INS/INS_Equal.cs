@@ -46,6 +46,30 @@ namespace juicescript.ABC.INS
             return $"Equal(==)   [{dst}]<- [{v1}] == [{v2}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { v1, v2 };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(v1.index, out int newIndex1))
+                v1.index = newIndex1;
+            if (mapping.TryGetValue(v2.index, out int newIndex2))
+                v2.index = newIndex2;
+        }
 		
 	}
 }

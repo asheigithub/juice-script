@@ -28,7 +28,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
-using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
+//using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
 
 
@@ -7723,6 +7723,7 @@ namespace juicescript.runtime
 
 				((RtPayloadArray)instance.facility).array_len = 0;
 				((RtPayloadArray)instance.facility).methodscopeslot_ref_state = 0;
+				((RtPayloadArray)instance.facility).HEAPINSTANCE_PTR = 0;
 
 				//Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
 				//Context.StackPosition += 2;
@@ -7818,6 +7819,7 @@ namespace juicescript.runtime
 					((RtPayloadVector)instance.facility).element_asclass = totype_class.Instance._element_class;
 					((RtPayloadVector)instance.facility).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
 					((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
+					((RtPayloadVector)instance.facility).GetStore(this).length = 0;
 
 					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr);
 
@@ -15975,6 +15977,7 @@ namespace juicescript.runtime
 											((RtPayloadVector)instance.facility).element_asclass = @class.Instance._element_class  ;
 											((RtPayloadVector)instance.facility).element_type = @class.Instance._element_class == null? TypeKind.Any: (TypeKind)@class.Instance._element_class.Type_identifier;
 											((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
+											((RtPayloadVector)instance.facility).GetStore(this).length = 0;
 
 											stackslots[target.index].SetHeapPtr(instancePtr);
 
@@ -16040,6 +16043,8 @@ namespace juicescript.runtime
 
 													((RtPayloadArray)instance.facility).array_len = 0;
 													((RtPayloadArray)instance.facility).methodscopeslot_ref_state = 0;
+													((RtPayloadArray)instance.facility).HEAPINSTANCE_PTR = 0;
+													
 
 												}
 												else
@@ -19041,6 +19046,15 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+
+						case INS_Code.expression_barrier:
+							{
+								int argsCount;
+								LoadInt32(&argsCount, &PC);
+								PC += argsCount * 4;
+							}
+
+							break;
 						case INS_Code.END:
 #if PROFILEPLAYER
 							InstructionProfiler.Profile_ActionEnd(opcode);
@@ -19382,8 +19396,15 @@ namespace juicescript.runtime
 								}
 							}
 
-							//未找到,进入finally块。						
-							stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							//未找到,进入finally块。	
+							if (error.error.ValueType != BoxType.HeapPtr)
+							{
+								stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							}
+							else
+							{
+								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr, error.error, ref error,true);
+							}
 
 							error.raised = false;
 							error.error = default;
@@ -19396,7 +19417,14 @@ namespace juicescript.runtime
 						else if (exception_ctx->state == 1)
 						{
 							//无法catch,跳转到finally.
-							stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							if (error.error.ValueType != BoxType.HeapPtr)
+							{
+								stackslots[exception_ctx->hold_error.index] = error.error; //异常信息暂存入hold_error;
+							}
+							else
+							{
+								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr, error.error, ref error,true);
+							}
 
 							error.raised = false;
 							error.error = default;

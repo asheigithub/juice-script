@@ -49,6 +49,31 @@ namespace juicescript.ABC.INS
             return $"Ld_MultiNameL_Ref [{dst}] <- [(({super_type_index}){instance}).{name}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { instance, name };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(instance.index, out int newIndex1))
+                instance.index = newIndex1;
+            if (mapping.TryGetValue(name.index, out int newIndex2))
+                name.index = newIndex2;
+        }
+
 
 
     }

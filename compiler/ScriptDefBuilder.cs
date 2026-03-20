@@ -2065,11 +2065,19 @@ namespace juicescript.compiler
 
 								if (result == ScriptDef.ReadResult.Success)
 								{
-									disk_encoding = script1.Encode();
-
-									if (!validate)
+									if (!outfile.StartsWith(script1.fullPath))
 									{
-										return script1;
+										//Console.WriteLine($"原始文件变化{ script1.fullPath },{ outfile.Substring(0,outfile.Length -2) }，重新生成");
+									}
+									else
+									{
+										
+										disk_encoding = script1.Encode();
+
+										if (!validate)
+										{
+											return script1;
+										}
 									}
 								}
 							}
@@ -2141,12 +2149,12 @@ namespace juicescript.compiler
 			var tokens = lex.GetWords(AS3_LL1_GRAMMAR.GRAMMAR, false);
 			Parser parser = new Parser(tokens);
 
+			bool hasErrors = false;
+
 			foreach (var item in src_proj)
 			{
 				var src = item.Key;
 				var proj = item.Value;
-
-				//特殊处理***排除airglobal中的顶级包对象：Infinity,isFinite,isNaN,parseFloat,parseInt,NaN,undefined,trace,flash.util.getDefinitionByName,flash.util.getQualifiedClassName
 
 				string[] exclude =
 					{ "Infinity.as", "isFinite.as",
@@ -2161,31 +2169,49 @@ namespace juicescript.compiler
 					continue;
 				}
 
-
-
-				var def = BuildDef(parser, src, proj, workDir, skipASTExpression, validate, verbose);
-				if (def != null)
+				try
 				{
-					if (def.Script.QName.Name != System.IO.Path.GetFileNameWithoutExtension(src))
+					var def = BuildDef(parser, src, proj, workDir, skipASTExpression, validate, verbose);
+					if (def != null)
 					{
-						continue;
+						if (def.Script.QName.Name != System.IO.Path.GetFileNameWithoutExtension(src))
+						{
+							Console.WriteLine($"文件名 {Path.GetFileName(src)} 与Script的主类型名 { def.Script.QName.Name } 不匹配。这个Script将被跳过!");
+							continue;
+						}
+
+
+						if (scriptDefs != null)
+						{
+							scriptDefs.Add(def);
+						}
+
+						if (context != null)
+						{
+							context.scriptInProj.Add(def, proj);
+						}
 					}
+				}
+				catch (CompilerException ex)
+				{
+					hasErrors = true;
 
-
-					if (scriptDefs != null)
+					if (context.islibmode)
 					{
-						scriptDefs.Add(def);
+						throw;
 					}
-
-					if (context != null)
+					else
 					{
-						context.scriptInProj.Add(def, proj);
+						Console.ForegroundColor = ConsoleColor.Red;
+						//Console.Error.WriteLine($"编译错误: {src}");
+						Console.Error.WriteLine(ex.ToString());
+						Console.ResetColor();
 					}
 				}
 			}
 
 
-			return 0;
+			return hasErrors ? 1 : 0;
 		}
 
 

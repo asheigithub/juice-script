@@ -2786,7 +2786,7 @@ trace('OK');
 		[TestMethod]
 		public void Test()
 		{
-			throw new NotSupportedException("等寄存器重用实现后再测");
+			//throw new NotSupportedException("等寄存器重用实现后再测");
 
 			Run();
 		}

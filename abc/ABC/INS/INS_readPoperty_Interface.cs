@@ -47,5 +47,28 @@ namespace juicescript.ABC.INS
 			return $"Read_Property_Interface   [{dst}] <- (interface:{class_id})[instance:{instance}].vtable_getter[{const_index}].read()";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { instance };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(instance.index, out int newIndex1))
+                instance.index = newIndex1;
+        }
+
 	}
 }

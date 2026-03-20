@@ -43,5 +43,30 @@ namespace juicescript.ABC.INS
 			return $"Create_Prop  {dst}.{key} = {value}"; 
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { dst , key, value };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(key.index, out int newIndex1))
+                key.index = newIndex1;
+            if (mapping.TryGetValue(value.index, out int newIndex2))
+                value.index = newIndex2;
+        }
+
 	}
 }

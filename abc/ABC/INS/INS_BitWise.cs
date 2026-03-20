@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
+//using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 
 namespace juicescript.ABC.INS
 {
@@ -101,6 +101,35 @@ namespace juicescript.ABC.INS
 				return $"BIT({GetWiseString()})   [{dst}]<- [{v1}] {GetWiseString()} [{v2}]";
 			}
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            if (wiseMode == BItWiseMode.bitwise_not)
+            {
+                return new List<StackLocater> { v1 };
+            }
+            return new List<StackLocater> { v1, v2 };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(v1.index, out int newIndex1))
+                v1.index = newIndex1;
+            if (mapping.TryGetValue(v2.index, out int newIndex2))
+                v2.index = newIndex2;
+        }
 
 	}
 }

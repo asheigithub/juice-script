@@ -44,5 +44,28 @@ namespace juicescript.ABC.INS
             return $"Store_HeapValueRef [{dst}] <- [{source}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { source, dst };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(source.index, out int newIndex))
+                source.index = newIndex;
+            if (mapping.TryGetValue(dst.index, out int newIndex1))
+                dst.index = newIndex1;
+        }
+
     }
 }

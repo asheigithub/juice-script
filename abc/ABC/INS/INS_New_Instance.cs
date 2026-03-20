@@ -57,5 +57,35 @@ namespace juicescript.ABC.INS
             return $"New_Instance [{dst}] <-  class:[{typeLocator}]({ string.Join(",", args)})";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            var use = new List<StackLocater> { typeLocator };
+            use.AddRange(args);
+            return use;
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(typeLocator.index, out int newIndex1))
+                typeLocator.index = newIndex1;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (mapping.TryGetValue(args[i].index, out int newIdx))
+                    args[i].index = newIdx;
+            }
+        }
+
     }
 }

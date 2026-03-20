@@ -41,6 +41,30 @@ namespace juicescript.ABC.INS
             return $"Neg(-)  [{dst}] <- [{src}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { src };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中neg调用ToPrimitive可能抛出异常
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(src.index, out int newIndex1))
+                src.index = newIndex1;
+        }
+
         
     }
 }

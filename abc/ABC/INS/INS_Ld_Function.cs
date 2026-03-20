@@ -48,5 +48,26 @@ namespace juicescript.ABC.INS
             return $"Ld_Function   [{dst}] <- [function: {const_index} at {heapLocater}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
+
     }
 }

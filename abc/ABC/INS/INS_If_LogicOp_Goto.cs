@@ -53,27 +53,52 @@ namespace juicescript.ABC.INS
 		protected override void ReadFromBinary(BinaryReader br)
 		{
 			offset = br.ReadInt32();
+			uint store = br.ReadUInt32();
 
-			compMode = (CompMode)br.ReadByte();
-			jump_mode = br.ReadBoolean();
-			v1 = br.ReadByte();
-			v2 = br.ReadByte();
+			compMode = (CompMode)(store & 0xff);
+			jump_mode = (store >> 8 & 0xff) > 0;
+			v1 = (byte)(store >> 16 & 0xff);
+			v2 = (byte)(store >> 24 & 0xff);
 		}
 
 		protected override void WriteByte(BinaryWriter bw)
 		{
 			bw.Write(offset);
-			bw.Write((byte)compMode);
-			bw.Write(jump_mode);
-			bw.Write(v1);
-			bw.Write(v2);
-			
+			uint store = (uint)compMode | ((uint)(jump_mode ? 1 : 0) << 8) | ((uint)v1 << 16) | ((uint)v2 << 24);
+			bw.Write(store);
 		}
 
 		public override string ToString()
 		{
 			return $"If_LogicOp_Goto	( if( [stack:{v1}] {GetCompModeString()} [stack:{v2}] == { jump_mode } ) goto  FLAG_{flag_id})";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> 
+            { 
+                new StackLocater { index = v1 }, 
+                new StackLocater { index = v2 } 
+            };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(v1, out int newIndex))
+                v1 = (byte)newIndex;
+            if (mapping.TryGetValue(v2, out int newIndex1))
+                v2 = (byte)newIndex1;
+        }
 
 	}
 }

@@ -64,8 +64,30 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return "TRY_ENTER";
+			return $"TRY_ENTER hold{dst}";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+			//用于保存try结构内抛出的异常。当进入finally内，需要暂存在这里。
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
 
 	}
 }

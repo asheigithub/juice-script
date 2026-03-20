@@ -39,5 +39,28 @@ namespace juicescript.ABC.INS
             return $"Ld_True   [{dst}] <- true";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            // 加载true常量到目标栈位置
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            // 不读取任何栈位置
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
+
     }
 }

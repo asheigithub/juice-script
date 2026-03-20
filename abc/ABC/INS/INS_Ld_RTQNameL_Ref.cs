@@ -49,5 +49,32 @@ namespace juicescript.ABC.INS
             return $"Ld_RTQNameL_Ref [{dst}] <- [{instance}.{ns}::{name}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { instance, ns, name };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(instance.index, out int newIndex1))
+                instance.index = newIndex1;
+            if (mapping.TryGetValue(ns.index, out int newIndex2))
+                ns.index = newIndex2;
+            if (mapping.TryGetValue(name.index, out int newIndex3))
+                name.index = newIndex3;
+        }
+
     }
 }

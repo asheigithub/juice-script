@@ -58,6 +58,32 @@ namespace juicescript.ABC.INS
             return $"Ld_function_bindglobal_call [{dst}] <-  function:[{const_index} at {heapLocater}]({string.Join(",", args)})";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>(args);
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (mapping.TryGetValue(args[i].index, out int newIdx))
+                    args[i].index = newIdx;
+            }
+        }
+
 
     }
 }

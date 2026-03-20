@@ -62,6 +62,38 @@ namespace juicescript.ABC.INS
             return $"INS_BindThis_Call [{dst}] <-  call function:[{function}](this:{_this_},{string.Join(",", args)})";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            var use = new List<StackLocater> { function, _this_ };
+            use.AddRange(args);
+            return use;
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(function.index, out int newIndex1))
+                function.index = newIndex1;
+            if (mapping.TryGetValue(_this_.index, out int newIndex2))
+                _this_.index = newIndex2;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (mapping.TryGetValue(args[i].index, out int newIdx))
+                    args[i].index = newIdx;
+            }
+        }
+
 		
 	}
 }

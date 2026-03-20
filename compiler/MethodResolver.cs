@@ -27,8 +27,9 @@ namespace juicescript.compiler
 {
 	public class MethodResolver
 	{
-		internal static int BuildMethod(CompileContext context, string workDir, List<string> libs, bool force_rebuild_bcode, string outswcfile)
+		internal static int BuildMethod(CompileContext context, string workDir, List<string> libs, bool force_rebuild_bcode, string outswcfile, List<string> displaycfg_files)
 		{
+			
 			var lex = new Lex(null);
 			var tokens = lex.GetWords(AS3_LL1_GRAMMAR.GRAMMAR, false);
 			Parser parser = new Parser(tokens);
@@ -43,7 +44,7 @@ namespace juicescript.compiler
 				{
 					throw new InvalidOperationException($"内部异常,源文件没有找到{fullpath}");
 				}
-
+				
 				try
 				{
 					ASNamespace as3ns = new ASNamespace()
@@ -619,376 +620,405 @@ namespace juicescript.compiler
 				}
 			}
 
-
+			bool hasError = false;
 			foreach (var script in context.scriptDefs)
 			{
-				var fullpath = script.fullPath;
-
-				string proj = context.scriptInProj[script];
-				string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".m";
-
-				string input = System.IO.File.ReadAllText(fullpath);
-				var origin = new MyMD5.MyMD5().Hash(input).ToString();
-
-				if (File.Exists(sfile) && !force_rebuild_bcode)
+				try
 				{
-					//Try Load
-					using (var fs = File.OpenRead(sfile))
+
+					var fullpath = script.fullPath;
+
+					string proj = context.scriptInProj[script];
+					string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".m";
+
+					string input = System.IO.File.ReadAllText(fullpath);
+					var origin = new MyMD5.MyMD5().Hash(input).ToString();
+
+					if (File.Exists(sfile) && !force_rebuild_bcode)
 					{
-						using (System.IO.BinaryReader br = new BinaryReader(fs))
+						//Try Load
+						using (var fs = File.OpenRead(sfile))
 						{
-							try
+							using (System.IO.BinaryReader br = new BinaryReader(fs))
 							{
-								var md5 = br.ReadString();
-								if (md5 == origin)
+								try
 								{
-									for (int i = 1; i < script.scriptMethods.Count; i++)
+									var md5 = br.ReadString();
+									if (md5 == origin)
 									{
-										var method = script.scriptMethods[i];
-
-										int flag = br.ReadInt32();
-										method.Flags = (MethodFlags)flag;
-
-										#region 读常量池
-
-										int count = br.ReadInt32();
-										List<NaNBoxing> constants = new List<NaNBoxing>();
-
-										var reader = (BinaryReader br) =>
+										for (int i = 1; i < script.scriptMethods.Count; i++)
 										{
-											ulong raw = br.ReadUInt64();
-											NaNBoxing box = new NaNBoxing(raw);
+											var method = script.scriptMethods[i];
 
-											if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+											int flag = br.ReadInt32();
+											method.Flags = (MethodFlags)flag;
+
+											#region 读常量池
+
+											int count = br.ReadInt32();
+											List<NaNBoxing> constants = new List<NaNBoxing>();
+
+											var reader = (BinaryReader br) =>
 											{
-												RtHeapTypeKind type = (RtHeapTypeKind)br.ReadByte();
-												if (type == RtHeapTypeKind.STRING)
-												{
-													int chars = br.ReadInt32();
-													Memory<char> str = new Memory<char>(new char[chars]);
-													for (int i = 0; i < chars; i++)
-													{
-														str.Span[i] = (char)br.ReadUInt16();
-													}
+												ulong raw = br.ReadUInt64();
+												NaNBoxing box = new NaNBoxing(raw);
 
-													//string str = br.ReadString();
-													int heap_ptr = context.player_for_compiler.Context.GC.Complie_AllocString(str.ToString());
-													if (heap_ptr == 0)
+												if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+												{
+													RtHeapTypeKind type = (RtHeapTypeKind)br.ReadByte();
+													if (type == RtHeapTypeKind.STRING)
+													{
+														int chars = br.ReadInt32();
+														Memory<char> str = new Memory<char>(new char[chars]);
+														for (int i = 0; i < chars; i++)
+														{
+															str.Span[i] = (char)br.ReadUInt16();
+														}
+
+														//string str = br.ReadString();
+														int heap_ptr = context.player_for_compiler.Context.GC.Complie_AllocString(str.ToString());
+														if (heap_ptr == 0)
+															throw new InvalidOperationException();
+
+														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+														box.SetHeapPtr(heap_ptr);
+
+													}
+													else if (type == (RtHeapTypeKind)10)
+													{
+														ulong class_id = br.ReadUInt64();
+														var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+															.Union
+															(
+																context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+															).First(c => c != null && c.Type_identifier == class_id);
+
+														int index = context.constpool_ldclass.IndexOf(class_id);
+														if (index < 0)
+														{
+															index = context.constpool_ldclass.Count;
+															context.constpool_ldclass.Add(class_id);
+														}
+
+														int heap_ptr = (index & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
+														box.SetHeapPtr(heap_ptr);
+
+													}
+													//else if (type == RtHeapTypeKind.CACHE_LD_CLASS)
+													//{
+													//	ulong class_id = br.ReadUInt64();
+
+													//	var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+													//		.Union
+													//		(
+													//			context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+													//		).First(c => c != null && c.Type_identifier == class_id);
+
+													//	int heap_ptr = context.player_for_compiler.Context.GC.AllocLD_Class(@class);
+													//	if (heap_ptr == 0)
+													//		throw new InvalidOperationException();
+
+													//	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
+
+													//	box.SetHeapPtr(heap_ptr);
+
+													//}
+													else if (type == RtHeapTypeKind.NAMESPACE)
+													{
+														int index = br.ReadInt32();
+														var ns = script.namespaces[index];
+
+														int heap_ptr = context.player_for_compiler.Context.GC.AllocNamespace(ns, 0, 0);
+														if (heap_ptr == 0)
+															throw new InvalidOperationException();
+														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24);
+
+														box.SetHeapPtr(heap_ptr);
+													}
+													else if (type == RtHeapTypeKind.VECTOR)
+													{
+														int depth = br.ReadInt32();
+														ulong ElementType = br.ReadUInt64();
+
+														VectorDef vd = VectorDef.CreateOrGet(context, (TypeKind)ElementType, depth);
+
+														int ptr = context.vectorDefs.IndexOf(vd);
+														ptr = (ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.VectorDef << 24);
+
+														box.SetHeapPtr(ptr);
+
+													}
+													else if (type == RtHeapTypeKind.MethodScope)
+													{
+														int index = br.ReadInt32();
+														ASMethod m = script.scriptMethods[index];
+
+														int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
+														if (heap_ptr == 0)
+															throw new InvalidOperationException();
+
+														context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = m.Body;
+
+														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
+														box.SetHeapPtr(heap_ptr);
+													}
+													else if (type == (RtHeapTypeKind)200)
+													{
+														ulong class_id = br.ReadUInt64();
+														int vtable_index = br.ReadInt32();
+
+														var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+															.Union
+															(
+																context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+															).First(c => c != null && c.Type_identifier == class_id);
+
+														int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
+														if (heap_ptr == 0)
+															throw new InvalidOperationException();
+
+														context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = @class;
+														((RtPayloadMethodScope)context.player_for_compiler.Context.GC.Heap[heap_ptr].facility).ParentPtr = vtable_index;
+
+
+														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
+
+														box.SetHeapPtr(heap_ptr);
+
+													}
+													else
+													{
 														throw new InvalidOperationException();
-
-													heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
-
-													box.SetHeapPtr(heap_ptr);
-
+													}
 												}
-												else if (type == (RtHeapTypeKind)10)
-												{
-													ulong class_id = br.ReadUInt64();
-													var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
-														.Union
-														(
-															context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
-														).First(c => c != null && c.Type_identifier == class_id);
+												return box;
+											};
 
-													int index = context.constpool_ldclass.IndexOf(class_id);
-													if (index < 0)
+											for (int j = 0; j < count; j++)
+											{
+												var box = reader(br);
+												constants.Add(box);
+
+											}
+
+											#endregion
+
+											int len = br.ReadInt32();
+											byte[] bytes = br.ReadBytes(len);
+
+											method.Body.ByteCode = bytes;
+
+											for (int a = 0; a < method.Parameters.Count; a++)
+											{
+												var para = method.Parameters[a];
+												if (para.IsOptional)
+												{
+													//para.compute_constants = new List<NaNBoxing>();
+
+													var compute_constants = new List<NaNBoxing>();
+
+													len = br.ReadInt32();
+													for (int j = 0; j < len; j++)
 													{
-														index = context.constpool_ldclass.Count;
-														context.constpool_ldclass.Add(class_id);
+														var box = reader(br);
+														//para.compute_constants.Add(box);
+														compute_constants.Add(box);
 													}
 
-													int heap_ptr = (index & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
-													box.SetHeapPtr(heap_ptr);
+													para.compute_result_index = br.ReadInt32();
+
+													len = br.ReadInt32();
+													bytes = br.ReadBytes(len);
+
+													para.computeDefaultValue = bytes;
+
+
+													ASMethodBody.CheckConstants(para.computeDefaultValue, compute_constants);
 
 												}
-												//else if (type == RtHeapTypeKind.CACHE_LD_CLASS)
+											}
+
+											if (script.Script.Initializer == method || method.IsConstructor)
+											{
+												//len = br.ReadInt32();
+												//bytes = br.ReadBytes(len);
+
+												//dict_scriptinit_onlyconst.Add(method, bytes);
+
+												//for (int s = 0; s < method.Container._link_codescope.Members.Count; s++)
 												//{
-												//	ulong class_id = br.ReadUInt64();
+												//	var m = method.Container._link_codescope.Members[s];
 
-												//	var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
-												//		.Union
-												//		(
-												//			context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
-												//		).First(c => c != null && c.Type_identifier == class_id);
-
-												//	int heap_ptr = context.player_for_compiler.Context.GC.AllocLD_Class(@class);
-												//	if (heap_ptr == 0)
-												//		throw new InvalidOperationException();
-
-												//	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
-
-												//	box.SetHeapPtr(heap_ptr);
-
+												//	len = br.ReadInt32();
+												//	if (len > 0)
+												//	{
+												//		bytes = br.ReadBytes(len);
+												//		m.compiler_initvalue = bytes;
+												//	}
 												//}
-												else if (type == RtHeapTypeKind.NAMESPACE)
-												{
-													int index = br.ReadInt32();
-													var ns = script.namespaces[index];
-
-													int heap_ptr = context.player_for_compiler.Context.GC.AllocNamespace(ns, 0, 0);
-													if (heap_ptr == 0)
-														throw new InvalidOperationException();
-													heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24);
-
-													box.SetHeapPtr(heap_ptr);
-												}
-												else if (type == RtHeapTypeKind.VECTOR)
-												{
-													int depth = br.ReadInt32();
-													ulong ElementType = br.ReadUInt64();
-
-													VectorDef vd = VectorDef.CreateOrGet(context, (TypeKind)ElementType, depth);
-
-													int ptr = context.vectorDefs.IndexOf(vd);
-													ptr = (ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.VectorDef << 24);
-
-													box.SetHeapPtr(ptr);
-
-												}
-												else if (type == RtHeapTypeKind.MethodScope)
-												{
-													int index = br.ReadInt32();
-													ASMethod m = script.scriptMethods[index];
-
-													int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
-													if (heap_ptr == 0)
-														throw new InvalidOperationException();
-
-													context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = m.Body;
-
-													heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
-													box.SetHeapPtr(heap_ptr);
-												}
-												else if (type == (RtHeapTypeKind)200)
-												{
-													ulong class_id = br.ReadUInt64();
-													int vtable_index = br.ReadInt32();
-
-													var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
-														.Union
-														(
-															context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
-														).First(c => c != null && c.Type_identifier == class_id);
-
-													int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
-													if (heap_ptr == 0)
-														throw new InvalidOperationException();
-
-													context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = @class;
-													((RtPayloadMethodScope)context.player_for_compiler.Context.GC.Heap[heap_ptr].facility).ParentPtr = vtable_index;
-
-
-													heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
-
-													box.SetHeapPtr(heap_ptr);
-
-												}
-												else
-												{
-													throw new InvalidOperationException();
-												}
 											}
-											return box;
-										};
 
-										for (int j = 0; j < count; j++)
-										{
-											var box = reader(br);
-											constants.Add(box);
-
-										}
-
-										#endregion
-
-										int len = br.ReadInt32();
-										byte[] bytes = br.ReadBytes(len);
-
-										method.Body.ByteCode = bytes;
-
-										for (int a = 0; a < method.Parameters.Count; a++)
-										{
-											var para = method.Parameters[a];
-											if (para.IsOptional)
+											int init_members_count = br.ReadInt32();
+											for (int j = 0; j < init_members_count; j++)
 											{
-												//para.compute_constants = new List<NaNBoxing>();
+												int c_index = br.ReadInt32();
+												int m_index = br.ReadInt32();
 
-												var compute_constants = new List<NaNBoxing>();
-
-												len = br.ReadInt32();
-												for (int j = 0; j < len; j++)
-												{
-													var box = reader(br);
-													//para.compute_constants.Add(box);
-													compute_constants.Add(box);
-												}
-
-												para.compute_result_index = br.ReadInt32();
+												var container = script.containers[c_index];
+												var smember = container._link_codescope.Members[m_index];
 
 												len = br.ReadInt32();
-												bytes = br.ReadBytes(len);
-
-												para.computeDefaultValue = bytes;
-
-
-												ASMethodBody.CheckConstants( para.computeDefaultValue , compute_constants );
+												smember.compiler_initvalue = br.ReadBytes(len);
+												smember.compiler_initvalue_stpos = br.ReadInt32();
 
 											}
-										}
 
-										if (script.Script.Initializer == method || method.IsConstructor)
-										{
-											//len = br.ReadInt32();
-											//bytes = br.ReadBytes(len);
-
-											//dict_scriptinit_onlyconst.Add(method, bytes);
-
-											//for (int s = 0; s < method.Container._link_codescope.Members.Count; s++)
-											//{
-											//	var m = method.Container._link_codescope.Members[s];
-
-											//	len = br.ReadInt32();
-											//	if (len > 0)
-											//	{
-											//		bytes = br.ReadBytes(len);
-											//		m.compiler_initvalue = bytes;
-											//	}
-											//}
-										}
-
-										int init_members_count = br.ReadInt32();
-										for (int j = 0; j < init_members_count; j++)
-										{
-											int c_index = br.ReadInt32();
-											int m_index = br.ReadInt32();
-
-											var container = script.containers[c_index];
-											var smember = container._link_codescope.Members[m_index];
-
-											len = br.ReadInt32();
-											smember.compiler_initvalue = br.ReadBytes(len);
-											smember.compiler_initvalue_stpos = br.ReadInt32();
+											context.dict_method_constants.Add(method, constants);
 
 										}
 
-										context.dict_method_constants.Add(method, constants);
 
+										continue;
 									}
-
-
-									continue;
+								}
+								catch (EndOfStreamException)
+								{
+								}
+								catch (IOException)
+								{
 								}
 							}
-							catch (EndOfStreamException)
-							{
-							}
-							catch (IOException)
-							{
-							}
 						}
 					}
-				}
 
 
-				AS3SrcFile as_srcfile = null;
-				string srcCode = input;
+					AS3SrcFile as_srcfile = null;
+					string srcCode = input;
 
-				ParseTree tree = parser.ParseTree(srcCode, AS3LexKeywords.LEXKEYWORDS, AS3LexKeywords.LEXSKIPBLANKWORDS, fullpath);
-				if (parser.hasError)
-				{
-					throw new ParseException(string.Empty);
-				}
-
-				var ast = new AS3AbstractSyntaxTree();
-				as_srcfile = ast.Analyse(tree);
-
-				if (ast.SyntaxError != null)
-				{
-					throw ast.SyntaxError;
-				}
-
-				#region 源码对应
-				if (script.scriptMethods[script.scriptMethods.Count - 1] != script.Script.Initializer)
-				{
-					throw new InvalidOperationException();
-				}
-
-
-				#region 对应源码
-
-				foreach (var c in script.containers)
-				{
-					foreach (var t in c.Traits)
+					ParseTree tree = parser.ParseTree(srcCode, AS3LexKeywords.LEXKEYWORDS, AS3LexKeywords.LEXSKIPBLANKWORDS, fullpath);
+					if (parser.hasError)
 					{
-						if (t.Value != null)
-						{
-							switch (t.Value.ValueType)
-							{
-								case ABC.ASTrait.TraitValueType.NameSpace:
-									t.Value._value = t.Value.Namespace;
-									break;
-								case ABC.ASTrait.TraitValueType.AS3Function:
-									t.Value._value = as_srcfile._functions[t.Value.FunctionOrExpression_Index];
-									break;
-								case ABC.ASTrait.TraitValueType.AS3Expression:
-									t.Value._value = as_srcfile._expressions[t.Value.FunctionOrExpression_Index];
-									break;
-								default:
-									break;
-							}
-						}
+						throw new ParseException(string.Empty);
 					}
-				}
 
-				#endregion
+					var ast = new AS3AbstractSyntaxTree();
+					as_srcfile = ast.Analyse(tree);
 
-
-
-				#region 对应源码
-				{
-					var as3_srclist = ((new AS3ClassInterfaceBase[] { as_srcfile.Package.MainClass, as_srcfile.Package.MainInterface }).Union
-							   (
-								   as_srcfile.OutPackage.outpackage_classes_interfaces
-							   )).Where((a) => a != null).ToArray();
-
-					for (int i = 1; i < script.scriptMethods.Count; i++)
+					if (ast.SyntaxError != null)
 					{
-						ASMethod method = script.scriptMethods[i];
+						throw ast.SyntaxError;
+					}
 
-						var cls = script.scriptClasses.FirstOrDefault((c) => c != null && c.Constructor == method);
-						var instance = script.scriptClasses.Where((s) => s != null).Select((s) => s.Instance).FirstOrDefault((c) => c != null && c.Constructor == method);
-						if (cls != null)
-						{
-
-						}
-						else if (instance != null)
-						{
-							if (method.ast_function_index > -1)
-							{
-								var function = as_srcfile._functions[method.ast_function_index];
-								context.dict_method_as3function.Add(function, method);
-							}
-						}
-						else if (method == script.Script.Initializer)
-						{
-
-						}
-						else
-						{
-							if (as_srcfile._functions[method.ast_function_index] == null)
-								throw new InvalidOperationException();
-							context.dict_method_as3function.Add(as_srcfile._functions[method.ast_function_index], method);
-						}
+					#region 源码对应
+					if (script.scriptMethods[script.scriptMethods.Count - 1] != script.Script.Initializer)
+					{
+						throw new InvalidOperationException();
 					}
 
 
+					#region 对应源码
+
+					foreach (var c in script.containers)
+					{
+						foreach (var t in c.Traits)
+						{
+							if (t.Value != null)
+							{
+								switch (t.Value.ValueType)
+								{
+									case ABC.ASTrait.TraitValueType.NameSpace:
+										t.Value._value = t.Value.Namespace;
+										break;
+									case ABC.ASTrait.TraitValueType.AS3Function:
+										t.Value._value = as_srcfile._functions[t.Value.FunctionOrExpression_Index];
+										break;
+									case ABC.ASTrait.TraitValueType.AS3Expression:
+										t.Value._value = as_srcfile._expressions[t.Value.FunctionOrExpression_Index];
+										break;
+									default:
+										break;
+								}
+							}
+						}
+					}
+
+					#endregion
+
+
+
+					#region 对应源码
+					{
+						var as3_srclist = ((new AS3ClassInterfaceBase[] { as_srcfile.Package.MainClass, as_srcfile.Package.MainInterface }).Union
+								   (
+									   as_srcfile.OutPackage.outpackage_classes_interfaces
+								   )).Where((a) => a != null).ToArray();
+
+						for (int i = 1; i < script.scriptMethods.Count; i++)
+						{
+							ASMethod method = script.scriptMethods[i];
+
+							var cls = script.scriptClasses.FirstOrDefault((c) => c != null && c.Constructor == method);
+							var instance = script.scriptClasses.Where((s) => s != null).Select((s) => s.Instance).FirstOrDefault((c) => c != null && c.Constructor == method);
+							if (cls != null)
+							{
+
+							}
+							else if (instance != null)
+							{
+								if (method.ast_function_index > -1)
+								{
+									var function = as_srcfile._functions[method.ast_function_index];
+									context.dict_method_as3function.Add(function, method);
+								}
+							}
+							else if (method == script.Script.Initializer)
+							{
+
+							}
+							else
+							{
+								if (as_srcfile._functions[method.ast_function_index] == null)
+									throw new InvalidOperationException();
+								context.dict_method_as3function.Add(as_srcfile._functions[method.ast_function_index], method);
+							}
+						}
+
+
+					}
+					#endregion
+
+
+					#endregion
+
+					BuildScript(script, as_srcfile, context, sfile, origin, dict_scriptinit_onlyconst);
+
+
+
 				}
-				#endregion
+				catch (CompilerException ex)
+				{
+					hasError = true;
+					if (context.islibmode)
+					{
+						throw;
+					}
+					else
+					{
+						Console.ForegroundColor = ConsoleColor.Red;
+						//Console.Error.WriteLine($"编译错误: {src}");
+						Console.Error.WriteLine(ex.ToString());
+						Console.ResetColor();
 
-
-				#endregion
-
-				BuildScript(script, as_srcfile, context, sfile, origin, dict_scriptinit_onlyconst);
+					}
+				}
 			}
+
+			if (hasError)
+			{
+				return 1;
+			}
+
 
 			var pdefaults = context.scriptDefs.SelectMany(s => s.scriptMethods).Where(m => m != null).SelectMany(m => m.Parameters).Where(p => p.IsOptional).ToArray();
 			Dictionary<ASParameter, byte[]> p_defaultcode = new Dictionary<ASParameter, byte[]>();
@@ -1014,12 +1044,18 @@ namespace juicescript.compiler
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{
+				
+
+				string proj = context.scriptInProj[script];
+				string outfile_base = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length));
+
 				for (int i = 1; i < script.scriptMethods.Count; i++)
 				{
 					ASMethod method = script.scriptMethods[i];
+					
 
-					Optimizer.FastPeephole(method);
-
+					Optimizer.Optimize(method ,displaycfg_files,script.fullPath,outfile_base );
+					
 					ComputeJump(method,true);
 				}
 			}
@@ -1167,7 +1203,7 @@ namespace juicescript.compiler
 
 							try
 							{
-								
+								ComputeJump(_temp, false);
 								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, test_method.Body.ByteCode);
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
@@ -1899,7 +1935,7 @@ namespace juicescript.compiler
 					
 				}
 
-				if (!removeflag || (instruction.INS_Code != INS_Code.flag && removeflag))
+				if (!removeflag || ( !(instruction.INS_Code == INS_Code.flag || instruction.INS_Code == INS_Code.expression_barrier) && removeflag))
 				{
 					offset += instruction.Size;
 				}
@@ -1943,7 +1979,7 @@ namespace juicescript.compiler
 							found = true;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -1972,7 +2008,7 @@ namespace juicescript.compiler
 							if_false_goto.offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2000,7 +2036,7 @@ namespace juicescript.compiler
 							if_true_goto.offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2028,7 +2064,7 @@ namespace juicescript.compiler
 							if_logicOp_goto.offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2056,7 +2092,7 @@ namespace juicescript.compiler
 							iter_Get.flag_offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2082,7 +2118,7 @@ namespace juicescript.compiler
 							iter_next.flag_offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2101,12 +2137,15 @@ namespace juicescript.compiler
 			if (removeflag)
 			{
 				var temp = instructions.ToList();
-				temp.RemoveAll(i => i.INS_Code == INS_Code.flag);
+				temp.RemoveAll(i => i.INS_Code == INS_Code.flag || i.INS_Code == INS_Code.expression_barrier);
 				instructions = temp.ToArray();
 			}
 			method.Body.ByteCode = Assembler.Assemble(useslotcount,constants,instructions);
 		
 		}
+
+		
+
 
 		private static void BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst)
 		{
@@ -2508,17 +2547,7 @@ namespace juicescript.compiler
 						}
 
 
-						//if (instructions.Any(
-						//	i =>
-						//	//i.INS_Code == INS_Code.return_op ||
-						//	i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.return_void))
-						//{
-						//	throw new InvalidOperationException();
-						//}
-
-						//**todo 检查是否所有路径都有return_promise返回值。
-
-
+						
 					}
 				}
 
@@ -2567,8 +2596,13 @@ namespace juicescript.compiler
 							context.computeConstExprState.Pop();
 						}
 
+						int tosub = 2;
+						if (compileEnv.instructions[compileEnv.instructions.Count - 2].INS_Code == INS_Code.expression_barrier)
+						{
+							tosub = 3;
+						}
 
-						para.compute_result_index = ((INS_Ld_ValueRef)compileEnv.instructions[compileEnv.instructions.Count - 2]).dst.index;
+						para.compute_result_index = ((INS_Ld_ValueRef)compileEnv.instructions[compileEnv.instructions.Count - tosub]).dst.index;
 						//para.compute_constants = compileEnv.Constants;
 						para.computeDefaultValue = compileEnv.Encode();
 

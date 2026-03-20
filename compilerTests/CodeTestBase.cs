@@ -84,10 +84,10 @@ namespace compilerTests
                 //build pass 1
                 {
 
-                    new CompilePipeLine().Build(new List<string>() { tempProjPath },
+                    new CompilePipeLine(true).Build(new List<string>() { tempProjPath },
                                 tempProjPath, proj.libs.ToList(),
 
-                                Path.Combine(tempProjPath, "o.swc"), false
+                                Path.Combine(tempProjPath, "o.swc"), false,null
                                 );
 
                     juicescript.runtime.Player player = new Player();
@@ -109,10 +109,10 @@ namespace compilerTests
                 //build pass 2
                 {
 
-                    new CompilePipeLine().Build(new List<string>() { tempProjPath },
+                    new CompilePipeLine(true).Build(new List<string>() { tempProjPath },
                                 tempProjPath, proj.libs.ToList(),
 
-                                Path.Combine(tempProjPath, "o.swc"), false
+                                Path.Combine(tempProjPath, "o.swc"), false,null
                                 );
 
                     juicescript.runtime.Player player = new Player();

@@ -40,6 +40,32 @@ namespace juicescript.ABC.INS
 			return $"Incr return [{ ( dst.index !=  result.index ? $"{source}->{result}" : $"{dst}" ) }], [{dst}] = [{source}] + ({addvalue})";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>() { source, dst, result };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { source ,result};
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // Player.cs中increment_decrement调用ToPrimitive和Exec_Add可能抛出异常
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(source.index, out int newIndex1))
+                source.index = newIndex1;
+            if (mapping.TryGetValue(result.index, out int newIndex2))
+                result.index = newIndex2;
+        }
+
 
 	}
 }

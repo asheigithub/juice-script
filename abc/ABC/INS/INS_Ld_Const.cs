@@ -46,5 +46,29 @@ namespace juicescript.ABC.INS
             return $"Ld_Const   [{dst}] <- [const id: {const_index}]";
         }
 
+        public override List<StackLocater> GetDef()
+        {
+            // 加载常量指令会将常量值写入目标栈位置
+            return new List<StackLocater> { dst };
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            // 加载常量指令不读取任何栈位置
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            // 加载常量不会引发异常
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
+
     }
 }

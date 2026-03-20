@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using juicescript.ABC.Locaters;
 
 namespace juicescript.ABC.INS
 {
@@ -37,8 +38,34 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"FLAG_{flag_id}";
+			if (flag_id == 0xffffff)
+			{
+				return $"virtual jump_to_end";
+			}
+			else
+			{
+				return $"FLAG_{flag_id}";
+			}
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+        }
 
 	}
 }

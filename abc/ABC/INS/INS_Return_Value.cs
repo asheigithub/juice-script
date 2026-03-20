@@ -44,5 +44,27 @@ namespace juicescript.ABC.INS
 			return $"Return [{dst}]";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { dst };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+			//return前会转换类型，转换类型可能会抛出错误。
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
+
 	}
 }

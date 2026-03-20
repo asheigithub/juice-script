@@ -47,5 +47,27 @@ namespace juicescript.ABC.INS
 			return $"ITER_Close {holdObj}.{iterator} ctx:{iterContextVar}";
 		}
 
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>() { dst };
+		}
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater>() { dst};
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return true;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+			if (mapping.TryGetValue(dst.index, out int newIndex))
+				dst.index = newIndex;
+
+		}
+
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using juicescript.ABC.Locaters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,21 @@ namespace juicescript.ABC.INS
 	{
 		public INS_Finally_Exit(Token token) : base(token)
 		{
+		}
+
+		/// <summary>
+		/// 这是enter_try对应的holderror,到了这里可以释放了
+		/// </summary>
+		public StackLocater HoldError
+		{
+			get 
+			{
+				return dst;
+			}
+			set
+			{ 
+				dst = value;
+			}
 		}
 
 		public override INS_Code INS_Code => INS_Code.finally_exit;
@@ -28,8 +44,29 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return "FINALLY_EXIT";
+			return $"FINALLY_EXIT hold{HoldError}";
 		}
+
+        public override List<StackLocater> GetDef()
+        {
+            return new List<StackLocater>();
+        }
+
+        public override List<StackLocater> GetUse()
+        {
+            return new List<StackLocater> { HoldError };
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
 
 	}
 }

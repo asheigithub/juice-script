@@ -37,6 +37,29 @@ namespace juicescript.ABC.INS
             this.token = token;
         }
 
+        /// <summary>
+        /// 返回本指令对StackSlot槽的赋值目标(如果有)
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<StackLocater> GetDef();
+
+        /// <summary>
+        /// 返回本指令使用了栈上的哪些槽。
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<StackLocater> GetUse();
+
+        /// <summary>
+        /// 返回本指令是否有引发异常的可能。
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool MaybeRaiseError();
+
+        /// <summary>
+        /// 根据传入的映射表，重新分配槽编号
+        /// </summary>
+        /// <param name="mapping"></param>
+        public abstract void RemappingSlots(Dictionary<int,int> mapping);
 
 
         protected abstract void WriteByte(BinaryWriter bw);

@@ -19,16 +19,32 @@ namespace juicescript.runtime
 	public partial class Player
 	{
 
+		public static string GetMethodKey(ASMethod method)
+		{
+			if (method.__is_vector_method)
+			{
+				var vecSuffix = (method.Trait?.Kind == TraitKind.Getter) ? "get#" :
+								(method.Trait?.Kind == TraitKind.Setter) ? "set#" : "";
+				return $"__AS3__.vec$Vector@{vecSuffix}{method.Name}";
+			}
+
+			var prefix = method.Trait?.IsStatic == true ? "$" : "";
+			var ns = method.Container?.QName?.Namespace?.Name ?? "closure";
+			var containerName = method.Container?.QName?.Name ?? method.Name;
+			var bodyNs = method.Body?.QName == null ? "@" :
+						 method.Body?.QName?.Namespace?.ToDebugNameSpaceString() ?? "@";
+			var methodSuffix = (method.Trait?.Kind == TraitKind.Getter) ? "get#" :
+							   (method.Trait?.Kind == TraitKind.Setter) ? "set#" : "";
+
+			return $"{prefix}{ns}.{containerName}${bodyNs}::{methodSuffix}{method.Name}";
+		}
+
 		internal void SetNativeDelegate(ASMethod method,ref ReceiveError error)
 		{
 			if (method.nativefunction_delegate == null)
 			{
-				string key =
-					method.__is_vector_method ?
-					$"__AS3__.vec$Vector@{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}"
-					:
-					$"{(method.Trait != null && method.Trait.IsStatic ? "$" : "")}{method.Container.QName.Namespace.Name}.{method.Container.QName.Name}${(method.Body.QName == null ? "@" : method.Body.QName.Namespace.ToDebugNameSpaceString())}::{((method.Trait != null && method.Trait.Kind == TraitKind.Getter) ? "get#" : ((method.Trait != null && method.Trait.Kind == TraitKind.Setter) ? "set#" : ""))}{method.Name}";
-
+				string key = GetMethodKey(method);
+					
 				var m = NativeFunctionRegistry.GetFunction(key);
 				if (m != null)
 				{

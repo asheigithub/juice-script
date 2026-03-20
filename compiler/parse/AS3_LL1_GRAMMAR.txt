@@ -409,7 +409,7 @@
 <UnitSuffix> ::="++" | "--" ;    //后缀
 
 
-<Unit> ::=  "new" <Access>|<Object>|<ID_EABLED_KEYWORD>|identifier |number | string  |"(" <AExprList> ")" | <Array> |<Vector>|"CONFIG::" identifier ;
+<Unit> ::=  "new" <Access>|<Object>|<ID_EABLED_KEYWORD>|identifier |number | string  |"(" <AExprList> ")" | <Array> |<Vector>| "async" <Function> |"CONFIG::" identifier ;
 //<F_Unit> ::= <Object>|<ID_EABLED_KEYWORD>|identifier |number | string  |"(" <AExprList> ")" | <Array> |<Vector>|"CONFIG::" identifier ;
 <K_Unit> ::= <ID_EABLED_KEYWORD>|identifier |number | string  |"(" <AExprList> ")" | <Array>;
 
