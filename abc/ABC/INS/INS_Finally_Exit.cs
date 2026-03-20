@@ -44,7 +44,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return "FINALLY_EXIT";
+			return $"FINALLY_EXIT hold{HoldError}";
 		}
 
         public override List<StackLocater> GetDef()
@@ -60,6 +60,12 @@ namespace juicescript.ABC.INS
         public override bool MaybeRaiseError()
         {
             return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
         }
 
 	}

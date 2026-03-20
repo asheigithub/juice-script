@@ -8,45 +8,12 @@ package
 	 * ...
 	 * @author 
 	 */
-	public class Main extends BaseM
+	public class Main extends Sprite
 	{
-		 var a;
-		
 		
 	}
+	
 }
-  
-
-
-//async function Go()
-//{
-	//
-//}
-//Go();
-
-function foo(){};
-function bar(){};
-function baz(){};
-
-
-	function test(x) {
-    try {
-        if (x == 0)
-            return foo();
-        else if (x == 1)
-            throw 2;
-        else
-            bar();
-    } catch(e) {
-        if (e == 2)
-            return 3;
-    } finally {
-        baz();
-    }
-    return 4;
-}
-
-trace(test(1));
 
  
 //class Test262Error extends Error
@@ -212,4 +179,4 @@ trace(test(1));
 
 
 
-trace("OK");
+//trace("OK");

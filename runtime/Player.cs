@@ -7723,6 +7723,7 @@ namespace juicescript.runtime
 
 				((RtPayloadArray)instance.facility).array_len = 0;
 				((RtPayloadArray)instance.facility).methodscopeslot_ref_state = 0;
+				((RtPayloadArray)instance.facility).HEAPINSTANCE_PTR = 0;
 
 				//Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
 				//Context.StackPosition += 2;
@@ -7818,6 +7819,7 @@ namespace juicescript.runtime
 					((RtPayloadVector)instance.facility).element_asclass = totype_class.Instance._element_class;
 					((RtPayloadVector)instance.facility).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
 					((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
+					((RtPayloadVector)instance.facility).GetStore(this).length = 0;
 
 					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr);
 
@@ -15975,6 +15977,7 @@ namespace juicescript.runtime
 											((RtPayloadVector)instance.facility).element_asclass = @class.Instance._element_class  ;
 											((RtPayloadVector)instance.facility).element_type = @class.Instance._element_class == null? TypeKind.Any: (TypeKind)@class.Instance._element_class.Type_identifier;
 											((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
+											((RtPayloadVector)instance.facility).GetStore(this).length = 0;
 
 											stackslots[target.index].SetHeapPtr(instancePtr);
 
@@ -16040,6 +16043,8 @@ namespace juicescript.runtime
 
 													((RtPayloadArray)instance.facility).array_len = 0;
 													((RtPayloadArray)instance.facility).methodscopeslot_ref_state = 0;
+													((RtPayloadArray)instance.facility).HEAPINSTANCE_PTR = 0;
+													
 
 												}
 												else
@@ -19041,6 +19046,15 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+
+						case INS_Code.expression_barrier:
+							{
+								int argsCount;
+								LoadInt32(&argsCount, &PC);
+								PC += argsCount * 4;
+							}
+
+							break;
 						case INS_Code.END:
 #if PROFILEPLAYER
 							InstructionProfiler.Profile_ActionEnd(opcode);

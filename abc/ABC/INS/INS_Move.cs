@@ -59,5 +59,13 @@ namespace juicescript.ABC.INS
             return false;
         }
 
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(source.index, out int newIndex1))
+                source.index = newIndex1;
+        }
+
     }
 }

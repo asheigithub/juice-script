@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection.Emit;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading;
@@ -1646,7 +1647,48 @@ namespace juicescript.compiler.IL
         {
 			compileEnv.BeginCollectRef();
 			ExpressionIL expressionIL = new ExpressionIL();
+
+			int start = compileEnv.instructions.Count;
+
 			var ret = expressionIL.Build(expression, compileEnv,ref flag_seed);
+
+			List<StackLocater> expression_defs = new List<StackLocater>();
+			int end = compileEnv.instructions.Count; //新增指令
+			for (int i = start; i < end; i++)   
+			{
+				var ins = compileEnv.instructions[i];
+
+				//这些指令的加载目标都在安全的地方（比如methodScope,const pool）等,或者它们将目标设置为非heap的值
+				if (ins.INS_Code != INS_Code.ld_array_hole &&
+					ins.INS_Code != INS_Code.ld_arguments &&
+					ins.INS_Code != INS_Code.ld_class &&
+					ins.INS_Code != INS_Code.ld_const &&
+					ins.INS_Code != INS_Code.ld_false &&
+					ins.INS_Code != INS_Code.ld_true &&
+					ins.INS_Code != INS_Code.ld_undefined &&
+					ins.INS_Code != INS_Code.ld_This &&
+					ins.INS_Code != INS_Code.ld_null &&
+					ins.INS_Code != INS_Code.ld_namespace &&
+					ins.INS_Code != INS_Code.ld_memberInitValue  &&
+					ins.INS_Code != INS_Code.ld_methodVariable	&&
+					ins.INS_Code != INS_Code.ld_ScopeH
+					)
+				{
+					expression_defs.AddRange(ins.GetDef());
+				}
+			}
+
+			if (expression_defs.Count > 1 && 
+				compileEnv.instructions[end-1].INS_Code != INS_Code.storeScopeH &&
+				compileEnv.instructions[end-1].INS_Code != INS_Code.storeMethodVariable
+				)
+			{
+				INS_Barrier barrier = new INS_Barrier(expression.Token);
+				barrier.uselist = expression_defs.ToArray();
+
+				compileEnv.instructions.Add(barrier);
+			}
+
 
 			var memberRefs = compileEnv.EndCollectRef();
 			foreach (var memberRef in memberRefs)

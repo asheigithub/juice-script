@@ -343,9 +343,12 @@ namespace juicescript.compiler.IL
 				case INS_Code.if_true_goto:
 					instruction = new INS_If_True_Goto(token);
 					break;
+				case INS_Code.expression_barrier:
+					instruction = new INS_Barrier(token);
+					break;
 				case INS_Code.END:
 					instruction = new INS_END();
-					break;
+					break;		
 				default:
 					throw new NotImplementedException(); 					
 			}

@@ -54,5 +54,9 @@ namespace juicescript.ABC.INS
             return false;
         }
 
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+        }
+
 	}
 }

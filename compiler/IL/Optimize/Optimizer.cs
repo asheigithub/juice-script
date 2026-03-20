@@ -463,8 +463,12 @@ namespace juicescript.compiler.IL.Optimize
 
 			cfg.DeathCodeErase();
 
-			int maxslots = cfg.ReuseSlot();
-			
+			int maxslots = slotCount;// cfg.ReuseSlot();
+			//if (key.IndexOf("closure") != -1)
+			{
+				maxslots = cfg.GraphColoring();
+				//cfg.ReuseSlot();
+			}
 			if (displaycfg_files != null && displaycfg_files.Any(f => key.IndexOf(f) >= 0))
 			{
 				string cfg_display = cfg.GetMermaid(key);
@@ -476,10 +480,12 @@ namespace juicescript.compiler.IL.Optimize
 
 				Console.WriteLine($"CFG HTML generated: {outfile_base + "." + key + ".html"}");
 
-				Console.WriteLine(cfg_display);
+				Console.WriteLine( cfg.GetConsoleOutput() );
 				Console.WriteLine();
 
 			}
+
+			cfg.ReMapping();
 
 
 			var optimizedInstructions = cfg.FlattenInstructions();		

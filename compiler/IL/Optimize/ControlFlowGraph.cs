@@ -68,7 +68,11 @@ namespace juicescript.compiler.IL.Optimize
             }
 		}
 
-		internal int ReuseSlot()
+		/// <summary>
+		/// 活跃槽分析+图着色
+		/// </summary>
+		/// <returns></returns>
+		internal int GraphColoring()
 		{
 			var sortedBlocks = Blocks.OrderByDescending(b => b.OriginalIndex).ToArray();
             if (sortedBlocks.Length == 0)
@@ -78,6 +82,15 @@ namespace juicescript.compiler.IL.Optimize
 			BuildInterferenceGraph();
 			ColorGraph();
 
+			if (allocation.Count == 0)
+                return 0;
+			return allocation.Values.Max() + 1;
+
+		}
+
+		internal void ReMapping()
+		{
+			var sortedBlocks = Blocks.OrderByDescending(b => b.OriginalIndex).ToArray();
 			for (int i = 0; i < sortedBlocks.Length; i++)
 			{
 				var block = sortedBlocks[i];
@@ -86,10 +99,8 @@ namespace juicescript.compiler.IL.Optimize
 					block.Instructions[j].RemappingSlots(allocation);
 				}
 			}
-
-			return allocation.Values.Max() + 1;
-
 		}
+
 
 		private void BuildInterferenceGraph()
 		{
@@ -103,13 +114,44 @@ namespace juicescript.compiler.IL.Optimize
 			{
 				var ins = block.Instructions[0];
 				var defs = ins.GetDef();
+				var uses = ins.GetUse();
+
+				HashSet<int> allSlotsInInstruction = new HashSet<int>();
 
 				if (defs != null)
 				{
 					foreach (var d in defs)
 					{
+						if (d.index >= 0) allSlotsInInstruction.Add(d.index);
+					}
+				}
+				if (uses != null)
+				{
+					foreach (var u in uses)
+					{
+						if (u.index >= 0) allSlotsInInstruction.Add(u.index);
+					}
+				}
+
+				foreach (var d in allSlotsInInstruction)
+				{
+					foreach (var other in allSlotsInInstruction)
+					{
+						if (d != other)
+						{
+							AddInterferenceEdge(d, other);
+						}
+					}
+				}
+
+				if (defs != null)
+				{
+					foreach (var d in defs)
+					{
+						if (d.index < 0) continue;
 						foreach (var l in block.LiveIn)
 						{
+							if (l < 0) continue;
 							if (d.index != l)
 							{
 								AddInterferenceEdge(d.index, l);
@@ -128,13 +170,19 @@ namespace juicescript.compiler.IL.Optimize
 					if (defs != null)
 					{
 						foreach (var d in defs)
-							allUsedSlots.Add(d.index);
+						{
+							if (d.index >= 0)
+								allUsedSlots.Add(d.index);
+						}
 					}
 					var uses = ins.GetUse();
 					if (uses != null)
 					{
 						foreach (var u in uses)
-							allUsedSlots.Add(u.index);
+						{
+							if (u.index >= 0)
+								allUsedSlots.Add(u.index);
+						}
 					}
 				}
 			}
@@ -342,7 +390,7 @@ namespace juicescript.compiler.IL.Optimize
 				}
 			}
 
-			var blocksToSplit = tempCFG.Blocks.Where(b => b.IsReachable && b.Instructions.Count > 2).ToList();
+			var blocksToSplit = tempCFG.Blocks.Where(b => b.IsReachable && b.Instructions.Count > 1).ToList();
 
 			foreach (var block in blocksToSplit)
 			{
@@ -914,7 +962,181 @@ namespace juicescript.compiler.IL.Optimize
             return sb.ToString();
         }
 
-        private string GetBlockLabel(BasicBlock block)
+		public string GetConsoleOutput()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine("==========================================================================");
+			sb.AppendLine(" Control Flow Graph");
+			sb.AppendLine("  Method: " + (Method?.Name ?? "Unknown"));
+			sb.AppendLine("  Total Blocks: " + Blocks.Count);
+			sb.AppendLine("  Reachable Blocks: " + Blocks.Count(b => b.IsReachable));
+			sb.AppendLine("==========================================================================");
+
+			var sortedBlocks = Blocks.OrderBy(b => b.OriginalIndex).ToList();
+
+			var edges = new List<(BasicBlock from, BasicBlock to, string label)>();
+			foreach (var block in sortedBlocks)
+			{
+				if (block.Successors.Count == 0) continue;
+				BasicBlock jumpTarget = block.JumpTargetFlagId.HasValue && block.Successors.Count >= 1
+					? block.Successors[0] : null;
+				BasicBlock fallThrough = block.HasFallThrough && block.Successors.Count >= 1
+					? (block.Successors.Count == 1 ? (block.JumpTargetFlagId.HasValue ? null : block.Successors[0])
+						: block.Successors.Last())
+					: null;
+
+				var shownSuccs = new HashSet<BasicBlock>();
+				foreach (var succ in block.Successors)
+				{
+					if (shownSuccs.Contains(succ)) continue;
+					shownSuccs.Add(succ);
+
+					string label = "";
+					if (succ == jumpTarget && block.JumpTargetFlagId.HasValue)
+						label = "(jmp)";
+					else if (succ == fallThrough)
+						label = "(ft)";
+					edges.Add((block, succ, label));
+				}
+			}
+
+			if (edges.Count > 0)
+			{
+				sb.AppendLine();
+				sb.AppendLine(" Edges:");
+				var maxFromLen = edges.Max(e => ("BB" + e.from.BlockId).Length);
+				var maxToLen = edges.Max(e => ("BB" + e.to.BlockId).Length);
+				foreach (var edge in edges)
+				{
+					string fromStr = ("BB" + edge.from.BlockId).PadRight(maxFromLen);
+					string toStr = ("BB" + edge.to.BlockId).PadRight(maxToLen);
+					string marker = edge.label.Length > 0 ? " " + edge.label : "";
+					sb.AppendLine("    " + fromStr + " ---> " + toStr + marker);
+				}
+			}
+
+			sb.AppendLine();
+			sb.AppendLine(" Block Details:");
+			sb.AppendLine();
+
+			for (int blockIdx = 0; blockIdx < sortedBlocks.Count; blockIdx++)
+			{
+				var block = sortedBlocks[blockIdx];
+				string blockName = "BB" + block.BlockId + (block.IsReachable ? "" : "*");
+				string range = block.StartIndex + "-" + block.EndIndex;
+				string preds = block.Predecessors.Count == 0 ? "(none)"
+					: string.Join(",", block.Predecessors.Select(p => "BB" + p.BlockId));
+				string succs = block.Successors.Count == 0 ? "(none)"
+					: string.Join(",", block.Successors.Select(s => "BB" + s.BlockId));
+
+				sb.AppendLine("  +" + blockName + " range=" + range + " preds=" + preds + " succs=" + succs);
+
+				if (block.Instructions.Count == 0)
+				{
+					sb.AppendLine("    (empty)");
+				}
+				else
+				{
+					for (int i = 0; i < block.Instructions.Count; i++)
+					{
+						sb.AppendLine("    [" + (block.StartIndex + i) + "] " + block.Instructions[i]);
+					}
+				}
+				if (!block.IsReachable)
+					sb.AppendLine("    (unreachable)");
+
+				if (blockIdx < sortedBlocks.Count - 1)
+					sb.AppendLine();
+			}
+
+			if (interferenceGraph != null && interferenceGraph.Count > 0)
+			{
+				sb.AppendLine();
+				sb.AppendLine(" Interference Graph & Coloring:");
+				sb.AppendLine("  " + MakeAsciiRow(
+					new string[] { "Slot", "Conflicts", "NewSlot", "Degree" },
+					new int[] { 8, 24, 10, 8 }, '-', '|'));
+				sb.AppendLine("  " + MakeAsciiRowDivider(new int[] { 8, 24, 10, 8 }, '-', '+'));
+
+				var sortedSlots = interferenceGraph.Keys.OrderBy(x => x);
+				foreach (var slot in sortedSlots)
+				{
+					var conflicts = interferenceGraph[slot].OrderBy(x => x);
+					string conflictStr = "{" + string.Join(",", conflicts) + "}";
+					int degree = interferenceGraph[slot].Count;
+					int newSlot = allocation != null && allocation.ContainsKey(slot) ? allocation[slot] : slot;
+					sb.AppendLine("  " + MakeAsciiRow(
+						new string[] { slot.ToString(), Truncate(conflictStr, 24), newSlot.ToString(), degree.ToString() },
+						new int[] { 8, 24, 10, 8 }, ' ', '|'));
+				}
+
+				sb.AppendLine();
+				sb.AppendLine("  K (colors available): " + coloringK);
+				sb.AppendLine("  Total slots: " + interferenceGraph.Keys.Count);
+				if (allocation != null && allocation.Count > 0)
+				{
+					int maxUsed = allocation.Values.Max();
+					int origMax = interferenceGraph.Keys.Count > 0 ? interferenceGraph.Keys.Max() : 0;
+					sb.AppendLine("  Max slot after coloring: " + maxUsed);
+					sb.AppendLine("  Reduction: " + origMax + " -> " + maxUsed);
+
+					bool coloringValid = true;
+					foreach (var slot in sortedSlots)
+					{
+						int slotColor = allocation[slot];
+						foreach (var conflict in interferenceGraph[slot])
+						{
+							if (allocation.ContainsKey(conflict) && allocation[conflict] == slotColor)
+							{
+								coloringValid = false;
+								sb.AppendLine("  [CONFLICT] Slot " + slot + " (color " + slotColor + ") conflicts with Slot " + conflict);
+							}
+						}
+					}
+					sb.AppendLine("  Coloring valid: " + (coloringValid ? "YES" : "NO - CONFLICT DETECTED!"));
+				}
+			}
+
+			sb.AppendLine("==========================================================================");
+			return sb.ToString();
+		}
+
+		private string MakeAsciiRow(string[] cells, int[] widths, char padChar, char sep)
+		{
+			var sb = new StringBuilder();
+			for (int i = 0; i < cells.Length; i++)
+			{
+				sb.Append(sep);
+				string cell = i < cells.Length ? cells[i] : "";
+				int w = i < widths.Length ? widths[i] : cell.Length;
+				sb.Append(cell.PadRight(w, padChar));
+			}
+			sb.Append(sep);
+			return sb.ToString();
+		}
+
+		private string MakeAsciiRowDivider(int[] widths, char h, char join)
+		{
+			var sb = new StringBuilder();
+			for (int i = 0; i < widths.Length; i++)
+			{
+				sb.Append(join);
+				int w = widths[i];
+				sb.Append(new string(h, w));
+			}
+			sb.Append(join);
+			return sb.ToString();
+		}
+
+		private string Truncate(string s, int maxLen)
+		{
+			if (string.IsNullOrEmpty(s)) return "";
+			if (s.Length <= maxLen) return s;
+			return s.Substring(0, maxLen - 1) + "~";
+		}
+
+		private string GetBlockLabel(BasicBlock block)
         {
             var sb = new StringBuilder();
             sb.Append($"BB{block.BlockId}\\n");
@@ -936,16 +1158,7 @@ namespace juicescript.compiler.IL.Optimize
             return sb.ToString();
         }
 
-        private string SanitizeFileName(string name)
-        {
-            var invalid = Path.GetInvalidFileNameChars();
-            foreach (var c in invalid)
-            {
-                name = name.Replace(c, '_');
-            }
-            return name;
-        }
-
+        
 		
 	}
 }

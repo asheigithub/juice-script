@@ -307,9 +307,11 @@ namespace juicescript.runtime.buildin
 			instance.Type = context.ARRAY.Instance;
 
 			RtPayloadArray targetArray = (RtPayloadArray)instance.facility;
-			targetArray.SetLength(0,context.player,ref error);
 			targetArray.methodscopeslot_ref_state = 0;
-
+			targetArray.HEAPINSTANCE_PTR = 0;
+			targetArray.SetLength(0,context.player,ref error);
+			
+			
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);//先保存
 

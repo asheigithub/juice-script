@@ -300,6 +300,8 @@ namespace juicescript.ABC.INS
         finally_exit = 250,
 
 
+        expression_barrier =254, //临时保持expression指令中的不安全的槽。最终优化时会被移除
+
         END = 255       //结束
     }
 }

@@ -61,5 +61,16 @@ namespace juicescript.ABC.INS
         }
 
 
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(src.index, out int newIndex1))
+                src.index = newIndex1;
+            if (mapping.TryGetValue(type.index, out int newIndex2))
+                type.index = newIndex2;
+        }
+
+
 	}
 }

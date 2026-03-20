@@ -53,5 +53,11 @@ namespace juicescript.ABC.INS
             // Player.cs中yield_return调用LoadValue和StoreReturnSlot可能抛出异常
             return true;
         }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+        }
 	}
 }

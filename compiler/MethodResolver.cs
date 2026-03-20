@@ -624,7 +624,7 @@ namespace juicescript.compiler
 			foreach (var script in context.scriptDefs)
 			{
 				var fullpath = script.fullPath;
-
+				
 				string proj = context.scriptInProj[script];
 				string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".m";
 
@@ -987,7 +987,7 @@ namespace juicescript.compiler
 
 
 				#endregion
-
+				
 				BuildScript(script, as_srcfile, context, sfile, origin, dict_scriptinit_onlyconst);
 			}
 
@@ -1174,7 +1174,7 @@ namespace juicescript.compiler
 
 							try
 							{
-								
+								ComputeJump(_temp, false);
 								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, test_method.Body.ByteCode);
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
@@ -1906,7 +1906,7 @@ namespace juicescript.compiler
 					
 				}
 
-				if (!removeflag || (instruction.INS_Code != INS_Code.flag && removeflag))
+				if (!removeflag || ( !(instruction.INS_Code == INS_Code.flag || instruction.INS_Code == INS_Code.expression_barrier) && removeflag))
 				{
 					offset += instruction.Size;
 				}
@@ -1950,7 +1950,7 @@ namespace juicescript.compiler
 							found = true;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -1979,7 +1979,7 @@ namespace juicescript.compiler
 							if_false_goto.offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2007,7 +2007,7 @@ namespace juicescript.compiler
 							if_true_goto.offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2035,7 +2035,7 @@ namespace juicescript.compiler
 							if_logicOp_goto.offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2063,7 +2063,7 @@ namespace juicescript.compiler
 							iter_Get.flag_offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2089,7 +2089,7 @@ namespace juicescript.compiler
 							iter_next.flag_offset = offset;
 							break;
 						}
-						else if (!removeflag || (instructions[j].INS_Code != INS_Code.flag && removeflag))
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
 						{
 							offset += instructions[j].Size;
 						}
@@ -2108,12 +2108,15 @@ namespace juicescript.compiler
 			if (removeflag)
 			{
 				var temp = instructions.ToList();
-				temp.RemoveAll(i => i.INS_Code == INS_Code.flag);
+				temp.RemoveAll(i => i.INS_Code == INS_Code.flag || i.INS_Code == INS_Code.expression_barrier);
 				instructions = temp.ToArray();
 			}
 			method.Body.ByteCode = Assembler.Assemble(useslotcount,constants,instructions);
 		
 		}
+
+		
+
 
 		private static void BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst)
 		{
@@ -2574,8 +2577,13 @@ namespace juicescript.compiler
 							context.computeConstExprState.Pop();
 						}
 
+						int tosub = 2;
+						if (compileEnv.instructions[compileEnv.instructions.Count - 2].INS_Code == INS_Code.expression_barrier)
+						{
+							tosub = 3;
+						}
 
-						para.compute_result_index = ((INS_Ld_ValueRef)compileEnv.instructions[compileEnv.instructions.Count - 2]).dst.index;
+						para.compute_result_index = ((INS_Ld_ValueRef)compileEnv.instructions[compileEnv.instructions.Count - tosub]).dst.index;
 						//para.compute_constants = compileEnv.Constants;
 						para.computeDefaultValue = compileEnv.Encode();
 

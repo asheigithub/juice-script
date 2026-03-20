@@ -641,6 +641,7 @@ namespace juicescript.compiler
                     {
                         if (as3.sourceFile != script.sourceFile || as3.sourceFileFullpath != script.fullPath)
                         {
+                           
                             script = null;
                             return ReadResult.Expired;
                         }

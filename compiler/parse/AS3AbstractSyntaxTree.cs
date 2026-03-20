@@ -1198,6 +1198,10 @@ namespace juicescript.compiler.parse
             function.FunctionScope.ParentScope = memberscope.Peek();
             function.Access = access;
 
+            
+
+
+
             var fprop = node.Nodes[1];
             if (fprop.Nodes.Count == 1)
             {
@@ -1980,7 +1984,12 @@ namespace juicescript.compiler.parse
 
 			}
 
-           
+
+            if (node.Nodes[0].GrammerLeftNode.Name == "async" && node.Nodes[0].GrammerLeftNode.Type == ParseNodeType.terminal)
+            {
+                throw new SyntaxException(node.MatchedToken, "async not allowed at here.");
+            }
+
         }
 
 
