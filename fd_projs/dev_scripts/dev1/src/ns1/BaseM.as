@@ -7,10 +7,10 @@ package ns1
 	 */
 	public class BaseM extends Sprite
 	{
-		public function BaseM() 
+		public function BaseM(k=3) 
 		{
 			super();
-			
+			trace(k);
 		};
 		
 		static internal  var KKF = uint.MIN_VALUE;

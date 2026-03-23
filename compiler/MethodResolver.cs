@@ -15,6 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
@@ -2276,6 +2277,105 @@ namespace juicescript.compiler
 						compileEnv.initvalue_instructions.Clear();
 						ILBuilder.Build(compileEnv);
 
+						{
+							
+							var instructions = compileEnv.instructions.ToArray();
+							if (instructions.Length > 0)
+							{
+								var cfg = ControlFlowGraphBuilder.Build(instructions, method);
+
+
+								var blocks = cfg.Blocks.OrderBy(b => b.OriginalIndex).ToList();
+								GraphPathFinder pathFinder = new GraphPathFinder();
+								for (int j = 0; j < blocks.Count; j++)
+								{
+									var b = blocks[j];
+									List<BasicBlock> successors;
+									successors = b.Successors;
+									for (int k = 0; k < successors.Count; k++)
+									{
+										var s = successors[k];
+										pathFinder.AddEdge(j, blocks.IndexOf(s));
+									}
+								}
+
+								var paths = pathFinder.FindAllPaths(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
+								int nosuper = 0;
+								for (int j = 0; j < paths.Count; j++)
+								{
+									var path = paths[j];
+
+									if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) > 1)
+									{
+										var block = blocks[path.Last(p => blocks[p].Instructions.Exists(i => i.INS_Code == INS_Code.super_ctor))];
+										var ins = block.Instructions.Last(i => i.INS_Code == INS_Code.super_ctor);
+										throw new ResolverException(
+											new Token()
+											{
+												sourceFile = method.Token.sourceFile,
+												sourceFileFullPath = method.Token.sourceFileFullPath,
+												line = ins.token.line,
+												ptr = ins.token.ptr
+											}
+
+											, $"A super statement cannot occur after a super, return, or throw statement, or a reference to super.");
+
+									}
+
+									if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) == 0)
+									{
+										nosuper++;
+									}
+								}
+								if (nosuper == paths.Count)
+								{
+									var super = ((ASInstance)method.Container)._super_class_.Instance.Constructor;
+									if (super.Parameters.Count > 0 && !super.Parameters[0].IsOptional && !super.Parameters[0].IsRest)
+									{
+										// No default constructor found in base class BaseM.
+										throw new ResolverException(
+											new Token()
+											{
+												sourceFile = method.Token.sourceFile,
+												sourceFileFullPath = method.Token.sourceFileFullPath,
+												line = method.Token.line,
+												ptr = method.Token.ptr
+											}
+
+											, $"No default constructor found in base class {super.Container.QName.ToDebugTypeName()}.");
+									}
+									else
+									{
+										
+										INS_SuperCtor superCtor = new INS_SuperCtor(method.Token);
+										superCtor.super_type =  compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
+										superCtor.args = new StackLocater[0];
+
+										compileEnv.instructions.Insert( 0, superCtor);
+
+										for (int j = 0; j < instance_initmember.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+										{
+											instance_initmember.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+										}
+
+										for (int j = 0; j < compileEnv.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+										{
+											compileEnv.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+										}
+
+									}
+
+								}
+								else if (nosuper > 0)
+								{
+									//原版AIR似乎允许这种行为，那么我这里就不管了
+								}
+
+							}
+						}
+
+
+
 						method.Body.ByteCode = compileEnv.Encode();
 						context.dict_method_constants.Add(method, compileEnv.Constants);
 
@@ -2458,12 +2558,68 @@ namespace juicescript.compiler
 						
 
 						compileEnv.parent_catching_variable = new List<AS3Variable> (catch_vars);
-						
-
 
 						ILBuilder.Build(compileEnv);
 						method.Body.ByteCode = compileEnv.Encode();
 						context.dict_method_constants.Add(method, compileEnv.Constants);
+
+						if (method.Container is ASInstance && ((ASInstance)method.Container).IsInterface)
+						{ 
+						
+						}
+						else if (method.ReturnTypeKind != TypeKind.Any && method.ReturnTypeKind != TypeKind.Fun_Void && !method.Flags.HasFlag( MethodFlags.ASYNC ))
+						{
+							var instructions = compileEnv.instructions.ToArray();
+							if (instructions.Length > 0)
+							{
+								var cfg = ControlFlowGraphBuilder.Build(instructions, method);
+
+
+								var blocks = cfg.Blocks.OrderBy(b => b.OriginalIndex).ToList();
+								GraphPathFinder pathFinder = new GraphPathFinder();
+								for (int j = 0; j < blocks.Count; j++)
+								{
+									var b = blocks[j];
+									List<BasicBlock> successors;
+									successors = b.Successors;
+									for (int k = 0; k < successors.Count; k++)
+									{
+										var s = successors[k];
+										pathFinder.AddEdge(j, blocks.IndexOf(s));
+									}
+								}
+
+								var paths = pathFinder.FindAllPaths(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
+
+								if (paths.Any(p => p.All(id => !blocks[id].Instructions.Any(i => i.INS_Code == INS_Code.return_value))))
+								{
+									throw new ResolverException(new Token()
+									{
+										sourceFile = method.Token.sourceFile,
+										sourceFileFullPath = method.Token.sourceFileFullPath,
+										line = method.Token.line,
+										ptr = method.Token.ptr
+									},
+
+									"Function does not return a value.");
+								}
+
+							}
+							else
+							{
+								//Function does not return a value.
+								throw new ResolverException(new Token()
+								{
+									sourceFile = method.Token.sourceFile,
+									sourceFileFullPath = method.Token.sourceFileFullPath,
+									line = method.Token.line,
+									ptr = method.Token.ptr
+								},
+
+								"Function does not return a value.");
+							}
+
+						}
 
 
 						for (int j = 0; j < compileEnv.initvalue_instructions.Count; j++)
@@ -2549,6 +2705,8 @@ namespace juicescript.compiler
 
 						
 					}
+
+					
 				}
 
 				
@@ -2753,29 +2911,6 @@ namespace juicescript.compiler
 								bw.Write(para.computeDefaultValue.Length);
 								bw.Write(para.computeDefaultValue);
 							}
-
-						}
-
-
-						if (script.Script.Initializer == method || method.IsConstructor)
-						{
-							//                     bw.Write(dict_scriptinit_onlyconst[method].Length);
-							//                     bw.Write(dict_scriptinit_onlyconst[method]);
-
-
-							//for (int s = 0; s < method.Container._link_codescope.Members.Count; s++)
-							//{
-							//	var m = method.Container._link_codescope.Members[s];
-							//	if (m.compiler_initvalue != null)
-							//	{
-							//		bw.Write(m.compiler_initvalue.Length);
-							//		bw.Write(m.compiler_initvalue);
-							//	}
-							//	else
-							//	{
-							//		bw.Write(0);
-							//	}
-							//}
 
 						}
 

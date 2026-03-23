@@ -12,12 +12,16 @@ package
 	{
 		public function Main()
 		{
-			var x = 1 +
+			
+			//	super();
+			
+			var a = 1+1;
 		}
 		
 	}
 }
-  
+
+
 //
 //
 //async function Go()

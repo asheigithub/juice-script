@@ -89,14 +89,7 @@ namespace juicescript.compiler.IL.Generator
                 {
                     throw new ResolverException(step.token, $"A super statement can be used only inside class instance constructors.");
                 }
-                //**todo ***改造成路径上有重复的super构造函数调用
-                if (compileEnv.instructions.Any((i) => i.INS_Code == INS_Code.super_ctor))
-                {
-                    throw new ResolverException(step.token, $"A super statement cannot occur after a super, return, or throw statement, or a reference to super.");
-                }
-                //**todo  检查没有调用构造函数 自动在第一行调用super构造函数，但如果super()有参数，则编译失败
-
-
+                
 
                 ASMethod super_ctor = instance._super_class_.Instance.Constructor;
 

@@ -127,7 +127,7 @@ internal class C extends A
 	
 	public function Tsss():String
 	{
-		
+		return null;
 	}
 	
 }

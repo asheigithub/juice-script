@@ -127,7 +127,7 @@ package
 		
 		TNS  function get B():Object
 		{
-			o = 5678;
+			o = 5678;return o;
 		}
 		
 		protected override function CCC(aa)
@@ -179,7 +179,7 @@ package
 
 		private function get B()
 		{
-			o = 1234;
+			o = 1234;return o;
 		}
 
 		protected override function CCC(aa)

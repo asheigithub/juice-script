@@ -127,7 +127,7 @@ package
 		
 		public static function get B():Object
 		{
-			o = 5678;
+			o = 5678; return o;
 		}
 		
 		protected override function CCC(aa)
