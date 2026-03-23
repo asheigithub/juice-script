@@ -6661,35 +6661,98 @@ namespace juicescript.compiler.IL.Generator
 					{
 
 						var items = (List<AS3DataStackElement>)data.Data.Value;
-						INS_Ld_Class ld_Class = new INS_Ld_Class(token);
-						ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, TypeKind.Array);
-						ld_Class.classid_index = compileEnv.AddConstClassId( (ulong)TypeKind.Array );
-						compileEnv.instructions.Add(ld_Class);
 
-
-						StackLocater dst = makeOrGetLocater(TypeKind.Array);
-
-						List<StackLocater> arguments = new List<StackLocater>();
-						arguments.Add(dst);
-
-						for (int i = 0; i < items.Count; i++)
+						if (items.Count < 4)
 						{
-							var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
-							arguments.Add(v);
+							INS_Ld_Class ld_Class = new INS_Ld_Class(token);
+							ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, TypeKind.Array);
+							ld_Class.classid_index = compileEnv.AddConstClassId((ulong)TypeKind.Array);
+							compileEnv.instructions.Add(ld_Class);
+
+							StackLocater dst = makeOrGetLocater(TypeKind.Array);
+							List<StackLocater> arguments = new List<StackLocater>();
+							arguments.Add(dst);
+
+							for (int i = 0; i < items.Count; i++)
+							{
+								var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
+								arguments.Add(v);
+							}
+
+							INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
+							new_Instance.dst = dst;
+							new_Instance.typeLocator = ld_Class.dst;
+							new_Instance.args = arguments.ToArray();
+
+							compileEnv.instructions.Add(new_Instance);
+
+
+
+							compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
+
+							return dst;
 						}
+						else
+						{
+							var firstreg = items.FirstOrDefault(i => i.IsReg);
 
-						INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
-						new_Instance.dst = dst;
-						new_Instance.typeLocator = ld_Class.dst;
-						new_Instance.args = arguments.ToArray();
+							int instance_at = 0;
 
-						compileEnv.instructions.Add(new_Instance);
+							if (firstreg == null)
+							{
+								instance_at = compileEnv.instructions.Count;
+							}
+							else
+							{
+								var stack = compileEnv.GetStackLocater(firstreg.Reg);
+								var at = compileEnv.instructions.Last(i => i.GetDef().Contains(stack));
 
+								int index = compileEnv.instructions.IndexOf(at) ;
+								instance_at = index ;
+							}
 
+							INS_Ld_Class ld_Class = new INS_Ld_Class(token);
+							ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, TypeKind.Array);
+							ld_Class.classid_index = compileEnv.AddConstClassId((ulong)TypeKind.Array);
+							compileEnv.instructions.Insert(instance_at, ld_Class);
 
-						compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
+							StackLocater dst = makeOrGetLocater(TypeKind.Array);
+							INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
+							new_Instance.dst = dst;
+							new_Instance.typeLocator = ld_Class.dst;
+							new_Instance.args = new StackLocater[0];
 
-						return dst;
+							compileEnv.instructions.Insert(instance_at + 1, new_Instance);
+
+							for (int i = 0; i < items.Count; i++)
+							{
+								var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
+
+								INS_Array_Vector_InitElement pushelement = new INS_Array_Vector_InitElement(items[i].IsReg ? data.Data.token : items[i].Data.token);
+								pushelement.dst = v;
+								pushelement.instance = dst;
+								pushelement.index = i;
+
+								if (items[i].IsReg)
+								{
+									var stack = compileEnv.GetStackLocater(items[i].Reg);
+									var at = compileEnv.instructions.Last(i => i.GetDef().Contains(stack));
+
+									int index = compileEnv.instructions.IndexOf(at) + 1;
+									compileEnv.instructions.Insert(index, pushelement);
+
+								}
+								else
+								{
+									compileEnv.instructions.Add(pushelement);
+								}
+
+							}
+
+							compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
+							return dst;
+
+						}
 					}
 				}
 				else if (data.Data.FF1Type == FF1DataValueType.const_regexp)

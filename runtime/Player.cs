@@ -18016,6 +18016,63 @@ namespace juicescript.runtime
 								}
 							}
 							break;
+						case INS_Code.array_vector_initelement:
+							{
+#if FORCOMPILER
+								if (iscomputing_initvalue)
+								{
+									throw new EvalConstException();
+								}
+#endif
+
+								StackLocater instance;
+								LoadStackLocater(&instance, &PC);
+
+								int index; LoadInt32(&index, &PC);
+
+								var arr = stackslots[instance.index];
+								Debug.Assert(arr.ValueType == BoxType.HeapPtr);
+								Debug.Assert(Context.GC.Heap[arr.HeapPtr].TypeKind == RtHeapTypeKind.VECTOR || Context.GC.Heap[arr.HeapPtr].TypeKind == RtHeapTypeKind.ARRAY);
+
+								var obj = Context.GC.Heap[arr.HeapPtr];
+								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
+								{
+									var arr_payload = (RtPayloadArray)Context.GC.Heap[arr.HeapPtr].facility;
+									if (arr_payload.StoreMode != RtPayloadArray.ArrayStoreMode.normal)
+									{
+										int heaparr = arr_payload.ChangeStoreToHeap(Context.player, ref error);
+										if (error.raised)
+										{
+											goto flag_handle_error;
+										}
+										stackslots[instance.index].SetHeapPtr(heaparr);
+									}
+
+									SetArraySlot(stackslots[dst_index], (uint)index, Context.GC.Heap[arr.HeapPtr], ref error);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+								}
+								else
+								{ 
+									var vec_payload = (RtPayloadVector)Context.GC.Heap[arr.HeapPtr].facility;
+
+									ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref stackslots[dst_index]);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+									vec_payload.SetSlot(index, this, arr.HeapPtr, stackslots[dst_index], ref error);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+								}
+							}
+
+							break;
 						//case INS_Code.op_stack_Variable_ldconst:
 						//	{
 						//		uint store;LoadUInt(&store, &PC);

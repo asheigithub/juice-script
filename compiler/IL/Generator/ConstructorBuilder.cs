@@ -39,81 +39,118 @@ namespace juicescript.compiler.IL.Generator
 
                     )
                 {
-                    List<StackLocater> arguments = new List<StackLocater>();
-                    if (step.Arg3 != null)
+                    if (type.Maj == TypeKind.Vector && ((AS3Vector)step.Arg2.Data.Value).isInitData && step.Arg3 != null && ((List<AS3DataStackElement>)step.Arg3.Data.Value).Count > 8)
                     {
-                        //读取构造函数的参数
-                        var args = (List<AS3DataStackElement>)step.Arg3.Data.Value;
-                        for (int i = 0; i < args.Count; i++)
-                        {
-                            arguments.Add(ExpressionIL.LoadRightValue(args[i], compileEnv, step.token));
-                        }
-                    }
+                        var len = compileEnv.AddConstUInt((uint)((List<AS3DataStackElement>)step.Arg3.Data.Value).Count);
+                        INS_Ld_Const ld_len = new INS_Ld_Const(step.token);
+                        ld_len.dst = compileEnv.MakeStackLocater(TypeKind.Uint);
+                        ld_len.const_index = len;
+                        compileEnv.instructions.Add(ld_len);
 
-                    bool isVectorInitData = false;
+						StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg, type.Mir == TypeKind.Unknown ? TypeKind.Any : type.Mir);
+						INS_New_Instance new_Instance = new INS_New_Instance(step.token);
+						new_Instance.dst = dst;
+						new_Instance.typeLocator = type_locater;
+                        new_Instance.args = new StackLocater[1] { ld_len.dst };
+						compileEnv.instructions.Add(new_Instance);
 
-                    if (type.Maj == TypeKind.Class)
+						VectorDef vd = compileEnv.CompileContext.vectorDefs.First(v => v.Identifier == type.Mir);
+						var args = (List<AS3DataStackElement>)step.Arg3.Data.Value;
+						for (int i = 0; i < args.Count; i++)
+						{
+							var lv =(ExpressionIL.LoadRightValue(args[i], compileEnv, step.token));
+							lv = ExpressionIL.TestTypeConvert(compileEnv, lv,
+									new CompileTypeKind() { Maj = vd.buildVector.ElementType }, step.token);
+
+                            INS_Array_Vector_InitElement arrayInitElement = new INS_Array_Vector_InitElement(step.token);
+                            arrayInitElement.instance = dst;
+                            arrayInitElement.index = i;
+                            arrayInitElement.dst = lv; 
+
+                            compileEnv.instructions.Add(arrayInitElement);
+
+						}
+
+					}
+					else
                     {
-                        if (type.Mir != TypeKind.Unknown)
+
+                        List<StackLocater> arguments = new List<StackLocater>();
+                        if (step.Arg3 != null)
                         {
-                            ASClass @class = ExpressionIL.FindClassById(compileEnv, (ulong)type.Mir);
-                            if (@class.Instance.IsInterface)
+                            //读取构造函数的参数
+                            var args = (List<AS3DataStackElement>)step.Arg3.Data.Value;
+                            for (int i = 0; i < args.Count; i++)
                             {
-                                throw new ResolverException(
-                                        step.token,
-                                        @class.QName.Name + " Interfaces cannot be instantiated with the new operator.");
+                                arguments.Add(ExpressionIL.LoadRightValue(args[i], compileEnv, step.token));
                             }
-
-                            var ctor = @class.Instance.Constructor.Body.Method;
-
-                            CallFuncBuilder.CheckMethodArgs(arguments, compileEnv, step, ctor);
-
                         }
-                    }
-                    else
-                    {
-                        if (((AS3Vector)step.Arg2.Data.Value).isInitData)
+
+                        bool isVectorInitData = false;
+
+                        if (type.Maj == TypeKind.Class)
                         {
-                            isVectorInitData = true;
+                            if (type.Mir != TypeKind.Unknown)
+                            {
+                                ASClass @class = ExpressionIL.FindClassById(compileEnv, (ulong)type.Mir);
+                                if (@class.Instance.IsInterface)
+                                {
+                                    throw new ResolverException(
+                                            step.token,
+                                            @class.QName.Name + " Interfaces cannot be instantiated with the new operator.");
+                                }
+
+                                var ctor = @class.Instance.Constructor.Body.Method;
+
+                                CallFuncBuilder.CheckMethodArgs(arguments, compileEnv, step, ctor);
+
+                            }
                         }
                         else
                         {
-                            VectorDef vd = compileEnv.CompileContext.vectorDefs.First(v => v.Identifier == type.Mir);
-                            var ctor = vd.buildVector.vector_class.Instance.Constructor.Body.Method;
-                            CallFuncBuilder.CheckMethodArgs(arguments, compileEnv, step, ctor);
+                            if (((AS3Vector)step.Arg2.Data.Value).isInitData)
+                            {
+                                isVectorInitData = true;
+                            }
+                            else
+                            {
+                                VectorDef vd = compileEnv.CompileContext.vectorDefs.First(v => v.Identifier == type.Mir);
+                                var ctor = vd.buildVector.vector_class.Instance.Constructor.Body.Method;
+                                CallFuncBuilder.CheckMethodArgs(arguments, compileEnv, step, ctor);
+                            }
+
                         }
 
+
+                        //type.Mir == Unkown会在如下代码里出现：
+                        //var t:Class = test(null);
+                        //j = (new t()).Tsss();
+
+                        StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg, type.Mir == TypeKind.Unknown ? TypeKind.Any : type.Mir);
+
+                        if (isVectorInitData == true)
+                        {
+                            VectorDef vd = compileEnv.CompileContext.vectorDefs.First(v => v.Identifier == type.Mir);
+                            for (int i = 0; i < arguments.Count; i++)
+                            {
+                                var arg = ExpressionIL.TestTypeConvert(compileEnv, arguments[i],
+                                    new CompileTypeKind() { Maj = vd.buildVector.ElementType }, step.token);
+
+                            }
+
+                            arguments.Insert(0, dst); //构造特殊参数,头两个参数绕过原本的两个参数
+                            arguments.Insert(0, dst);
+                        }
+
+                        INS_New_Instance new_Instance = new INS_New_Instance(step.token);
+                        new_Instance.dst = dst;
+                        new_Instance.typeLocator = type_locater;
+                        new_Instance.args = arguments.ToArray();
+
+
+                        compileEnv.instructions.Add(new_Instance);
+
                     }
-
-
-                    //type.Mir == Unkown会在如下代码里出现：
-                    //var t:Class = test(null);
-                    //j = (new t()).Tsss();
-
-                    StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg, type.Mir == TypeKind.Unknown ? TypeKind.Any : type.Mir);
-
-                    if (isVectorInitData == true)
-                    {
-						VectorDef vd = compileEnv.CompileContext.vectorDefs.First(v => v.Identifier == type.Mir);
-						for (int i = 0; i < arguments.Count; i++)
-						{
-							var arg = ExpressionIL.TestTypeConvert(compileEnv, arguments[i] , 
-                                new CompileTypeKind() { Maj = vd.buildVector.ElementType }, step.token );
-							
-						}
-
-						arguments.Insert(0, dst); //构造特殊参数,头两个参数绕过原本的两个参数
-                        arguments.Insert(0, dst); 
-                    }
-
-                    INS_New_Instance new_Instance = new INS_New_Instance(step.token);
-                    new_Instance.dst = dst;
-                    new_Instance.typeLocator = type_locater;
-                    new_Instance.args = arguments.ToArray();
-
-
-                    compileEnv.instructions.Add(new_Instance);
-
                 }
 
                 //           else if (type.Maj == TypeKind.Function)

@@ -13,13 +13,19 @@ package
 		public function Main()
 		{
 			
-			//	super();
-			
-			var a = 1+1;
 		}
 		
 	}
 }
+
+var arr = [ 1, 2 , [3, 4, 5, 6, 7], [6, 7, 8, 9, 10], [1, 1, 1, 1, 1] ];
+
+
+trace(arr[2]);
+trace(arr[3]);
+
+//var v:Vector.<int> = new <int>[1,2,3,4,9,9,9,9,9,10,11,0,0,0,0,0,0,0,3+3,0,0,0];
+//trace(v);
 
 
 //

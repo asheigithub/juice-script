@@ -265,6 +265,10 @@ namespace juicescript.ABC.INS
   //      short_add = 154,
 
 
+        array_vector_initelement = 120, //array push 初始值
+
+
+
         iter_initctx = 228,
 		iter_get = 230,
         iter_close = 232,

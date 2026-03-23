@@ -10,7 +10,7 @@ package ns1
 		public function BaseM(k=3) 
 		{
 			super();
-			trace(k);
+			
 		};
 		
 		static internal  var KKF = uint.MIN_VALUE;

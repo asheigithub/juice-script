@@ -29,6 +29,8 @@ namespace juicescript.compiler.AST
             }
         }
 
+
+
         public override string ToString()
         {
             

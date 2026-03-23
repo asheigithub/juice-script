@@ -1649,7 +1649,8 @@ namespace juicescript.compiler.IL
 			ExpressionIL expressionIL = new ExpressionIL();
 
 			int start = compileEnv.instructions.Count;
-
+			
+			
 			var ret = expressionIL.Build(expression, compileEnv,ref flag_seed);
 
 			List<StackLocater> expression_defs = new List<StackLocater>();
@@ -1676,6 +1677,12 @@ namespace juicescript.compiler.IL
 				{
 					expression_defs.AddRange(ins.GetDef());
 				}
+
+				if (ins.INS_Code == INS_Code.array_vector_initelement)
+				{
+					expression_defs.Remove(ins.dst); //元素插入完毕后那个stackslot就可以释放了。
+				}
+
 			}
 
 			if (expression_defs.Count > 1 && 

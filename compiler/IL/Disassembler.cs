@@ -280,6 +280,9 @@ namespace juicescript.compiler.IL
 				//case INS_Code.short_add:
 				//	instruction = new INS_Short_Add(token);
 				//	break;
+				case INS_Code.array_vector_initelement:
+					instruction = new INS_Array_Vector_InitElement(token);
+					break;
 				case INS_Code.iter_initctx:
 					instruction = new INS_Iter_GetCtx(token);
 					break;
