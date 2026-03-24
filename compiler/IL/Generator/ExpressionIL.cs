@@ -692,7 +692,7 @@ namespace juicescript.compiler.IL.Generator
 			var toTypeStr = (TypeKind t) =>
 			{
 				if (t <= TypeKind.Namespace)
-					return t.ToDebugString(env.CompileContext.player_for_compiler);
+					return TypeUtils.ToTypeString(t,env.CompileContext);
 				else
 				{
 					if (env.CompileContext.vectorDefs.Any(v => v.Identifier == t))
@@ -1606,7 +1606,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 
 
@@ -1650,7 +1650,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 
 
@@ -2052,7 +2052,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 
 				}
@@ -2325,7 +2325,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 
 			}
@@ -2339,7 +2339,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 			}
 
@@ -2371,7 +2371,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 
 			}
@@ -2385,7 +2385,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 			}
 
@@ -2415,7 +2415,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 
 			}
@@ -2429,7 +2429,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 			}
 
@@ -2459,7 +2459,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 
 			}
@@ -2473,7 +2473,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 				}
 			}
 
@@ -2523,7 +2523,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 
 				}
@@ -2537,7 +2537,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 				}
 
@@ -2587,7 +2587,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 
 				}
@@ -2601,7 +2601,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 				}
 
@@ -2656,7 +2656,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 
 				}
@@ -2670,7 +2670,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else
 					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {rvtype} to an unrelated type Number.");
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
 					}
 				}
 
@@ -2743,6 +2743,54 @@ namespace juicescript.compiler.IL.Generator
 				var t2 = compileEnv.ReadStackType(v2);
 
 				TypeKind rtype;
+
+				if ( t1.Maj != TypeKind.Any && t2.Maj != TypeKind.Any
+					)
+				{
+					var c1 = TypeUtils.FindOverrideTypeId(t1.Maj, compileEnv.CompileContext);
+					var c2 = TypeUtils.FindOverrideTypeId(t2.Maj, compileEnv.CompileContext);
+
+					if (c1 != -1 && c2 != -1)
+					{
+						var method =
+							compileEnv.CompileContext.player_for_compiler.overrideOperatorMethods[(int)Player.OverrideOperator.add]
+							[c1][c2];
+
+						if (method != null)
+						{
+							var vtableitem = method.Container._vtable.Items.Find(i => i.Trait.Method == method);
+
+							INS_Ld_Class ld_cls = new INS_Ld_Class(step.token);
+							ld_cls.dst = compileEnv.MakeStackLocater(TypeKind.Class);
+							ld_cls.classid_index = compileEnv.AddConstClassId((ASClass)method.Container);
+							compileEnv.instructions.Add(ld_cls);
+
+							INS_Ld_Method Ld_Method = new INS_Ld_Method(step.token);
+							Ld_Method.dst = compileEnv.MakeStackLocater(TypeKind.Function);
+							Ld_Method.const_index = (uint)method.Container._vtable.Items.IndexOf(vtableitem);
+							Ld_Method.instance = ld_cls.dst;
+							compileEnv.instructions.Add(Ld_Method);
+
+							INS_Method_Call method_Call = new INS_Method_Call(step.token);
+							method_Call.dst = compileEnv.GetStackLocater(step.Arg1.Reg, method.ReturnTypeKind);
+							method_Call.function = Ld_Method.dst;
+							method_Call.args = new StackLocater[2] { v1, v2 };
+
+							compileEnv.instructions.Add(method_Call);
+							goto lbl_complete;
+						}
+						else if( c1 > 10 || c2 >10 )
+						{
+							throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
+						}
+					}
+					else if (c1 > 10 || c2 > 10)
+					{
+						throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
+
+					}
+				}
+
 				if (t1.Maj == TypeKind.String || t2.Maj == TypeKind.String)
 				{
 					rtype = TypeKind.String;
@@ -2840,6 +2888,9 @@ namespace juicescript.compiler.IL.Generator
 				add.v2 = v2;
 
 				compileEnv.instructions.Add(add);
+
+			lbl_complete:
+				;
 			}
 			else if (step.OpCode == "-")
 			{
@@ -2956,7 +3007,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else
 				{
-					throw new ResolverException(step.token, $"Implicit coercion of a value of type {(t1.Maj.IsNumericType() ? t2.Maj.ToString() : t1.Maj.ToString())} to an unrelated type Number.");
+					throw new ResolverException(step.token, $"Implicit coercion of a value of type {(t1.Maj.IsNumericType() ? TypeUtils.ToTypeString( t2.Maj,compileEnv.CompileContext) : TypeUtils.ToTypeString( t1.Maj,compileEnv.CompileContext))} to an unrelated type Number.");
 					//rtype = TypeKind.Number; //减法结果一定是数字。
 				}
 
@@ -4570,7 +4621,18 @@ namespace juicescript.compiler.IL.Generator
 
 				}
 				
-				else if (ctype.Maj >= TypeKind.Object || ctype.Maj == TypeKind.SByte || ctype.Maj == TypeKind.Number || ctype.Maj == TypeKind.Boolean)
+				else if (ctype.Maj >= TypeKind.Object 
+					|| ctype.Maj == TypeKind.SByte
+					|| ctype.Maj == TypeKind.Number
+					|| ctype.Maj == TypeKind.Boolean
+					|| ctype.Maj == TypeKind.Int
+					|| ctype.Maj == TypeKind.Uint
+					|| ctype.Maj == TypeKind.Float
+					|| ctype.Maj == TypeKind.Byte
+					|| ctype.Maj == TypeKind.Short
+					|| ctype.Maj == TypeKind.UShort
+					
+					)
 				{
 					ASClass @class = FindClassById(compileEnv, (ulong)ctype.Maj);
 

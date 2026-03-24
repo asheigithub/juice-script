@@ -549,6 +549,13 @@ namespace juicescript.compiler
 					}
 
 					context.player_for_compiler.ComputeVTable(script.Script);
+
+
+					var alltypes = context.scriptDefs.SelectMany(
+						s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+					Dictionary<ulong, ASClass> typedict = new Dictionary<ulong, ASClass>( alltypes.Select( t=>new KeyValuePair<ulong, ASClass>(t.Type_identifier,t ) ) );
+					context.player_for_compiler.ComputeOperatorTable(script.Script,typedict);
+
 					//检查Setter和Getter的类型是否匹配
 					for (int i = 0; i < script.Script.codeScopes.Count; i++)
 					{

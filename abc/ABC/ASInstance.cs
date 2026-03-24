@@ -57,6 +57,11 @@ namespace juicescript.ABC
         //获取迭代器的方法
         public ASMethod iterator;
 
+
+        //用于操作符重载时，操作数类型编号，动态生成。
+        public int _operator_type_index;
+
+
         public ASInstance(ASMultiname _qname_)
         {
             this._qname_ = _qname_;
@@ -68,6 +73,8 @@ namespace juicescript.ABC
 
             _interface_impl_ = new List<interface_impl>();
 
+
+            _operator_type_index = -1;
         }
 
     }

@@ -185,9 +185,9 @@ namespace juicescript.runtime
 					}
 
 				} while (flag);
+				
 
-
-				if(nsSetIncludingPublicAndAS3 == null)
+				if (nsSetIncludingPublicAndAS3 == null)
 				{
 					var nsPublic = swc.Namespaces.FirstOrDefault(n => n !=null && n.Kind == NamespaceKind.Package && n.Name == "" && n.def_uri == null);
 					var nsAS3 = swc.Namespaces.FirstOrDefault(n => n !=null && n.Kind == NamespaceKind.PackageInternal && n.Name == ":AS3" && n.def_uri == "http://adobe.com/AS3/2006/builtin");
@@ -1641,6 +1641,11 @@ namespace juicescript.runtime
 
 					}
 				}
+			}
+
+			for (int i = 0; i < swc.Scripts.Count; i++)
+			{
+				ComputeOperatorTable(swc.Scripts[i],Context.dictTypes);
 			}
 
 		}
@@ -9595,6 +9600,46 @@ namespace juicescript.runtime
 				return;
 			}
 
+			//操作符重载
+			int op_override_id1 = GetOpOverrideTypeId(n1);
+			int op_override_id2 = GetOpOverrideTypeId(n2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.add][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+					var @class = (ASClass)method.Container;
+					InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
 
 			HINT hint; //这里还是按AIR的实现来，如果有字符串则用 string
 			if ((n1.ValueType == BoxType.HeapPtr && Context.GC.Heap[n1.HeapPtr].TypeKind == RtHeapTypeKind.STRING)

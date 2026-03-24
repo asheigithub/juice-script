@@ -18,11 +18,28 @@ package
 	}
 }
 
-var arr = [ 1, 2 , [3, 4, 5, 6, 7], [6, 7, 8, 9, 10], [1, 1, 1, 1, 1] ];
+import geom.Vector2;
+var a:Vector2 = new Vector2(0,1);
+var b:Vector2 = new Vector2(1,0);
+
+trace(a + b );
 
 
-trace(arr[2]);
-trace(arr[3]);
+final class BB
+{
+	[operator("+")]
+	static function bab(i:BB,j:int):String
+	{
+		return "BB * " + [j,j].toString() ;
+	}
+}
+
+
+var c:BB = new BB();
+
+var d = c + 3;
+trace(d);
+
 
 //var v:Vector.<int> = new <int>[1,2,3,4,9,9,9,9,9,10,11,0,0,0,0,0,0,0,3+3,0,0,0];
 //trace(v);

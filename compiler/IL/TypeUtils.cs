@@ -3,6 +3,7 @@ using juicescript.runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,131 @@ namespace juicescript.compiler.IL
 {
     internal class TypeUtils
     {
+        public static int FindOverrideTypeId(TypeKind type,CompileContext ctx)
+        {
+            switch (type)
+            {
+                case TypeKind.Any:
+                    return -1;
+                case TypeKind.Boolean:
+                    return 1;
+                case TypeKind.SByte:
+                    return 2;
+                case TypeKind.Byte:
+                    return 3;
+                case TypeKind.Short:
+                    return 4;
+                case TypeKind.UShort:
+                    return 5;
+                case TypeKind.Int:
+                    return 6;
+                case TypeKind.Uint:
+                    return 7;
+                case TypeKind.Float:
+                    return 8;
+                case TypeKind.Number:
+                    return 9;
+                case TypeKind.Fun_Void:
+                case TypeKind.TraitDataReference:
+                case TypeKind.RTQName_MultiName_DataReference:
+                case TypeKind.CParseNS_Traits:
+                case TypeKind.RTQNameRTQNameL_N:
+                case TypeKind.SearchNameSpaceFromImports:
+                case TypeKind.Unknown:
+                    return -1;
+                case TypeKind.Null:
+                    return 0;
+                case TypeKind.Object:
+                case TypeKind.Class:
+                case TypeKind.Super:
+                case TypeKind.String:
+                    return 10;
+                case TypeKind.Function:
+                case TypeKind.Array:
+                case TypeKind.Vector:
+                case TypeKind.Namespace:
+                    return -1;
+                default:
+
+					var alltypes = ctx.scriptDefs.SelectMany(
+					s => s.scriptClasses).Union(ctx.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+					var c1 = alltypes.First(t => t.Type_identifier == (ulong)type);
+
+					return c1.Instance._operator_type_index;
+            }
+		}
+
+        public static string ToTypeString(TypeKind kind, CompileContext ctx)
+        {
+			switch (kind)
+			{
+				case TypeKind.Any:
+					return "undefined";
+				case TypeKind.Boolean:
+					return "Boolean";
+				case TypeKind.SByte:
+					return "sbyte";
+				case TypeKind.Byte:
+					return "byte";
+				case TypeKind.Short:
+					return "short";
+				case TypeKind.UShort:
+					return "ushort";
+				case TypeKind.Int:
+					return "int";
+				case TypeKind.Uint:
+					return "uint";
+				case TypeKind.Float:
+					return "float";
+				case TypeKind.Number:
+					return "number";
+				case TypeKind.Fun_Void:
+					return "void";
+				case TypeKind.TraitDataReference:
+				case TypeKind.RTQName_MultiName_DataReference:
+				case TypeKind.CParseNS_Traits:
+				case TypeKind.RTQNameRTQNameL_N:
+				case TypeKind.SearchNameSpaceFromImports:
+				case TypeKind.Unknown:
+					return kind.ToString();
+				case TypeKind.Null:
+					return "null";
+				case TypeKind.Object:
+					return "Object";
+				case TypeKind.Class:
+					return "Class";
+				case TypeKind.String:
+					return "String";
+				case TypeKind.Function:
+					return "Function";
+				case TypeKind.Array:
+					return "Array";
+				case TypeKind.Vector:
+					return "__AS3__.vec.Vector";
+				case TypeKind.Namespace:
+					return "Namespace";
+				default:
+					var alltypes = ctx.scriptDefs.SelectMany(
+					s => s.scriptClasses).Union(ctx.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+					var type = alltypes.First(t => t.Type_identifier == (ulong)kind);
+
+					if (string.IsNullOrEmpty(type.QName.Namespace.Name))
+					{
+						return type.QName.Name;
+					}
+					else
+					{
+						return type.QName.Namespace.Name + "." + type.QName.Name;
+					}
+
+
+			}
+		}
+
+
+
         public static bool TestImplicitConvert(TypeKind from, TypeKind to, CompileContext ctx)
         { 
             if(from == to)

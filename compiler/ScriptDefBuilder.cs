@@ -1922,8 +1922,9 @@ namespace juicescript.compiler
 					{
 						if (meta.exprStepList[0].OpCode == "Ld_Callable")
 						{
+							var arg2 = meta.exprStepList[0].Arg2;
 							meta.exprStepList.RemoveAt(0);
-							meta.exprStepList[meta.exprStepList.Count - 1].Arg2 = meta.exprStepList[0].Arg2;
+							meta.exprStepList[meta.exprStepList.Count - 1].Arg2 = arg2;
 						}
 
 

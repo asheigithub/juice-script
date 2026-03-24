@@ -14,6 +14,11 @@ package geom
 		
 		public native function toString():String;
 		
+		
+		[operator("+")]
+		private static native function Vec2addVec2( lhs:Vector2, rhs:Vector2 ):Vector2;
+		
 	}
 
 }
+

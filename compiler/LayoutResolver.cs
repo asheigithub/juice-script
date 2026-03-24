@@ -821,6 +821,90 @@ namespace juicescript.compiler
 			}
 
 
+			//检查操作符重载代码
+			for (int i = 0; i < context.scriptDefs.Count; i++)
+			{
+				var script = context.scriptDefs[i];
+				for (int j = 0; j < script.containers.Count; j++)
+				{
+					var container = script.containers[j];
+					for (int k = 0; k < container.Traits.Count; k++)
+					{ 
+						var t = container.Traits[k];
+
+						if (t.ASMetadata.Exists(m => m.Name == "operator"))
+						{
+							if (t.Kind == TraitKind.Method)
+							{
+								var method = t.Method;
+								if (!(method.Container is ASClass))
+								{
+									throw new ResolverException(t.Token, "[operator] only can be defined on static method.");
+								}
+								ASClass cls = (ASClass) method.Container;
+								if (!cls.Instance.Flags.HasFlag(ClassFlags.Final))
+								{
+									throw new ResolverException(t.Token, "[operator] only can be defined on final class.");
+								}
+
+								if (cls.Instance.Flags.HasFlag(ClassFlags.Interface))
+								{
+									throw new ResolverException(t.Token, "[operator] only can be defined on final class.");
+								}
+
+								if (t.ASMetadata.Count( m=>m.Name == "operator" )>1)
+								{
+									throw new ResolverException(t.Token, "too many [operator] .");
+								}
+
+								var operatorMeta = t.ASMetadata.First( m=>m.Name == "operator" );
+								if (operatorMeta.Items.Count != 1)
+								{
+									throw new ResolverException(t.Token, "use [operator(\"<+|-|*|/|%>\")] .");
+								}
+								var Op = operatorMeta.Items[0].Value;
+								if (Op != "\"+\"" && Op != "\"-\"" && Op != "\"*\"" && Op != "\"/\"" && Op != "\"%\"")
+								{
+									throw new ResolverException(t.Token, "use [operator(\"<+|-|*|/|%>\")] .");
+								}
+
+								if (method.Parameters.Count != 2 || method.Parameters[0].IsOptional || method.Parameters[1].IsOptional || method.Parameters[1].IsRest)
+								{
+									throw new ResolverException(t.Token, "[operator] have two Parameters,not optional or ...rest ");
+								}
+
+								if (method.Parameters[0].TypeKind == TypeKind.Any || method.Parameters[1].TypeKind == TypeKind.Any)
+								{
+									throw new ResolverException(t.Token, "Illegal [operator] parameter type : * ");
+								}
+
+								
+								if ((ulong)method.Parameters[0].TypeKind != cls.Type_identifier && (ulong)method.Parameters[1].TypeKind != cls.Type_identifier)
+								{
+									throw new ResolverException(t.Token, "Illegal [operator] parameter type.");
+								}
+
+								if (method.ReturnTypeKind == TypeKind.Fun_Void || method.ReturnTypeKind == TypeKind.Any)
+								{
+									throw new ResolverException(t.Token, "Illegal [operator] return type.");
+								}
+
+
+
+
+							}
+							else
+							{
+								throw new ResolverException(t.Token, "[operator] only can be defined on static method.");
+							}
+						}
+					}
+				}
+
+			}
+
+
+
 			return 0;
 		}
 
