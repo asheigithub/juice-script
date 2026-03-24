@@ -36,6 +36,7 @@ namespace juicescript.compiler
 			Parser parser = new Parser(tokens);
 
 			Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst = new Dictionary<ASMethod, byte[]>();
+			HashSet<ASScript> loadfromcache = new HashSet<ASScript>();
 
 			//先计算CodeScope
 			foreach (var script in context.scriptDefs)
@@ -712,6 +713,16 @@ namespace juicescript.compiler
 														int heap_ptr = (index & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
 														box.SetHeapPtr(heap_ptr);
 
+														if (!context.dict_methodresolver_ldclass_map.ContainsKey(constants))
+														{
+															context.dict_methodresolver_ldclass_map.Add(constants,
+																new List<Tuple<int, ASClass>>() { new Tuple<int, ASClass>(index, @class) });
+														}
+														else
+														{
+															context.dict_methodresolver_ldclass_map[constants].Add(new Tuple<int, ASClass>(index, @class));
+														}
+
 													}
 													//else if (type == RtHeapTypeKind.CACHE_LD_CLASS)
 													//{
@@ -886,7 +897,7 @@ namespace juicescript.compiler
 
 										}
 
-
+										loadfromcache.Add(script.Script);
 										continue;
 									}
 								}
@@ -1037,7 +1048,7 @@ namespace juicescript.compiler
 			}
 
 
-			ComputeMemberDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst);
+			ComputeMemberDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,loadfromcache);
 
 			foreach (var p in pdefaults)
 			{
@@ -1073,7 +1084,7 @@ namespace juicescript.compiler
 
 
 
-		private static void ComputeMemberDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst)
+		private static void ComputeMemberDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst, HashSet<ASScript> loadfromcache)
 		{
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
 			juicescript.runtime.Player computeplayer = new Player(int.MaxValue, true);
@@ -1119,6 +1130,7 @@ namespace juicescript.compiler
 							!m.trait.Value.initValue.HasValue
 							))
 						{
+							List<NaNBoxing> method_const;
 
 							ASMethod _temp; ASMethod test_method;
 							ScopeMember t_member;
@@ -1126,7 +1138,7 @@ namespace juicescript.compiler
 							{
 								t_member = member;
 								
-								var method = ((ASClass)member.DefineAt).Constructor;
+								var method = ((ASClass)member.DefineAt).Constructor; method_const = context.dict_method_constants[method];
 								int method_idx = script.allContainers.IndexOf(method.Body);
 								test_method = ((ASMethodBody)testswc_script.allContainers[method_idx]).Method;
 
@@ -1145,7 +1157,7 @@ namespace juicescript.compiler
 							{
 								t_member = member;
 
-								var method = ((ASScript)member.DefineAt).Initializer;
+								var method = ((ASScript)member.DefineAt).Initializer; method_const = context.dict_method_constants[method];
 								int method_idx = script.allContainers.IndexOf(method.Body);
 								test_method = ((ASMethodBody)testswc_script.allContainers[method_idx]).Method;
 
@@ -1165,7 +1177,7 @@ namespace juicescript.compiler
 							{
 								t_member = member;
 
-								var method = ((ASInstance)member.DefineAt).Constructor;
+								var method = ((ASInstance)member.DefineAt).Constructor; method_const = context.dict_method_constants[method];
 								int method_idx = script.allContainers.IndexOf(method.Body);
 								test_method = ((ASMethodBody)testswc_script.allContainers[method_idx]).Method;
 
@@ -1182,7 +1194,7 @@ namespace juicescript.compiler
 							}
 							else if (member.DefineAt is ASMethodBody)
 							{
-								var method = ((ASMethodBody)member.DefineAt).Method;
+								var method = ((ASMethodBody)member.DefineAt).Method; method_const = context.dict_method_constants[method];
 								int method_idx = script.allContainers.IndexOf(method.Body);
 								test_method = ((ASMethodBody)testswc_script.allContainers[method_idx]).Method;
 
@@ -1212,7 +1224,14 @@ namespace juicescript.compiler
 							try
 							{
 								ComputeJump(_temp, false);
-								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, test_method.Body.ByteCode);
+								List<Tuple<int, ASClass>> mapping = null;
+								
+								if (context.dict_methodresolver_ldclass_map.ContainsKey(method_const))
+								{
+									mapping = context.dict_methodresolver_ldclass_map[method_const];
+								}
+								
+								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone() , method_const , mapping, loadfromcache.Contains(script));
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 									var obj = computeplayer.Context.GC.Heap[v.HeapPtr];
