@@ -2734,6 +2734,7 @@ namespace juicescript.compiler.IL.Generator
 
 		private void BuildPlus(AS3ExprStep step, CompileEnv compileEnv)
 		{
+			
 			if (step.OpCode == "+")
 			{
 				StackLocater v1 = LoadRightValue(step.Arg2, compileEnv, step.token);
@@ -2742,54 +2743,12 @@ namespace juicescript.compiler.IL.Generator
 				var t1 = compileEnv.ReadStackType(v1);
 				var t2 = compileEnv.ReadStackType(v2);
 
-				TypeKind rtype;
-
-				if ( t1.Maj != TypeKind.Any && t2.Maj != TypeKind.Any
-					)
+				if (build_operator_override(Player.OverrideOperator.add, t1, t2,v1,v2,compileEnv,step))
 				{
-					var c1 = TypeUtils.FindOverrideTypeId(t1.Maj, compileEnv.CompileContext);
-					var c2 = TypeUtils.FindOverrideTypeId(t2.Maj, compileEnv.CompileContext);
-
-					if (c1 != -1 && c2 != -1)
-					{
-						var method =
-							compileEnv.CompileContext.player_for_compiler.overrideOperatorMethods[(int)Player.OverrideOperator.add]
-							[c1][c2];
-
-						if (method != null)
-						{
-							var vtableitem = method.Container._vtable.Items.Find(i => i.Trait.Method == method);
-
-							INS_Ld_Class ld_cls = new INS_Ld_Class(step.token);
-							ld_cls.dst = compileEnv.MakeStackLocater(TypeKind.Class);
-							ld_cls.classid_index = compileEnv.AddConstClassId((ASClass)method.Container);
-							compileEnv.instructions.Add(ld_cls);
-
-							INS_Ld_Method Ld_Method = new INS_Ld_Method(step.token);
-							Ld_Method.dst = compileEnv.MakeStackLocater(TypeKind.Function);
-							Ld_Method.const_index = (uint)method.Container._vtable.Items.IndexOf(vtableitem);
-							Ld_Method.instance = ld_cls.dst;
-							compileEnv.instructions.Add(Ld_Method);
-
-							INS_Method_Call method_Call = new INS_Method_Call(step.token);
-							method_Call.dst = compileEnv.GetStackLocater(step.Arg1.Reg, method.ReturnTypeKind);
-							method_Call.function = Ld_Method.dst;
-							method_Call.args = new StackLocater[2] { v1, v2 };
-
-							compileEnv.instructions.Add(method_Call);
-							goto lbl_complete;
-						}
-						else if( c1 > 10 || c2 >10 )
-						{
-							throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
-						}
-					}
-					else if (c1 > 10 || c2 > 10)
-					{
-						throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
-
-					}
+					goto lbl_complete;
 				}
+
+				TypeKind rtype;
 
 				if (t1.Maj == TypeKind.String || t2.Maj == TypeKind.String)
 				{
@@ -2900,10 +2859,12 @@ namespace juicescript.compiler.IL.Generator
 				var t1 = compileEnv.ReadStackType(v1);
 				var t2 = compileEnv.ReadStackType(v2);
 
+				if (build_operator_override(Player.OverrideOperator.sub, t1, t2, v1, v2, compileEnv, step))
+				{
+					goto lbl_complete;
+				}
+
 				TypeKind rtype;
-
-
-
 
 				if (t1.Maj == TypeKind.Object || t2.Maj == TypeKind.Object)
 				{
@@ -3018,12 +2979,80 @@ namespace juicescript.compiler.IL.Generator
 				sub.v2 = v2;
 
 				compileEnv.instructions.Add(sub);
+			lbl_complete:
+				;
 			}
 			else
 			{
 				throw new NotImplementedException();
 			}
 		}
+
+
+		private static bool build_operator_override(Player.OverrideOperator op, CompileTypeKind t1, CompileTypeKind t2, StackLocater v1, StackLocater v2,CompileEnv compileEnv,AS3ExprStep step)
+		{
+			if (t1.Maj != TypeKind.Any && t2.Maj != TypeKind.Any
+						)
+			{
+				var c1 = TypeUtils.FindOverrideTypeId(t1.Maj, compileEnv.CompileContext);
+				var c2 = TypeUtils.FindOverrideTypeId(t2.Maj, compileEnv.CompileContext);
+
+				if (c1 != -1 && c2 != -1)
+				{
+					var method =
+						compileEnv.CompileContext.player_for_compiler.overrideOperatorMethods[(int)op]
+						[c1][c2];
+
+					if (method != null)
+					{
+						var vtableitem = method.Container._vtable.Items.Find(i => i.Trait.Method == method);
+
+						INS_Ld_Class ld_cls = new INS_Ld_Class(step.token);
+						ld_cls.dst = compileEnv.MakeStackLocater(TypeKind.Class);
+						ld_cls.classid_index = compileEnv.AddConstClassId((ASClass)method.Container);
+						compileEnv.instructions.Add(ld_cls);
+
+						INS_Ld_Method Ld_Method = new INS_Ld_Method(step.token);
+						Ld_Method.dst = compileEnv.MakeStackLocater(TypeKind.Function);
+						Ld_Method.const_index = (uint)method.Container._vtable.Items.IndexOf(vtableitem);
+						Ld_Method.instance = ld_cls.dst;
+						compileEnv.instructions.Add(Ld_Method);
+
+						INS_Method_Call method_Call = new INS_Method_Call(step.token);
+						method_Call.dst = compileEnv.GetStackLocater(step.Arg1.Reg, method.ReturnTypeKind);
+						method_Call.function = Ld_Method.dst;
+						method_Call.args = new StackLocater[2] { v1, v2 };
+
+						compileEnv.instructions.Add(method_Call);
+						return true;
+					}
+					else if (c1 > 10 || c2 > 10)
+					{
+						throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else if (c1 > 10 || c2 > 10)
+				{
+					throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
+
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+
+		}
+
+
 
 		private static StackLocater MakeContainerTraitReference(AS3Reg Reg, AS3ExprStep step, StackLocater instance, ASContainer container, ASTrait[] traits, CompileEnv compileEnv)
 		{

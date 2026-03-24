@@ -22,22 +22,29 @@ import geom.Vector2;
 var a:Vector2 = new Vector2(0,1);
 var b:Vector2 = new Vector2(1,0);
 
-trace(a + b );
+trace(a - b );
 
 
 final class BB
 {
-	[operator("+")]
-	static function bab(i:BB,j:int):String
+	[operator("-")]
+	static function bsb(i:BB,j:int):String
 	{
-		return "BB * " + [j,j].toString() ;
+		if(true)
+		{
+			return "BB - " + [j, j].toString() ;
+		}
+		else
+		{
+			throw 3;
+		}
 	}
 }
 
 
-var c:BB = new BB();
+var c = new BB();
 
-var d = c + 3;
+var d = c - 3;
 trace(d);
 
 

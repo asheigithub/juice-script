@@ -10220,6 +10220,51 @@ namespace juicescript.runtime
 				return;
 			}
 
+			//操作符重载
+			int op_override_id1 = GetOpOverrideTypeId(n1);
+			int op_override_id2 = GetOpOverrideTypeId(n2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.sub][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+					var @class = (ASClass)method.Container;
+					InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+
+
+
+
 			if (!IsPrimitive(n1))
 			{
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, tmp, dst, stackslots, stackStPos, thisPtr);

@@ -18,6 +18,11 @@ package geom
 		[operator("+")]
 		private static native function Vec2addVec2( lhs:Vector2, rhs:Vector2 ):Vector2;
 		
+		[operator("-")]
+		private static native function Vec2subVec2( lhs:Vector2, rhs:Vector2 ):Vector2;
+		
+		
+		
 	}
 
 }
