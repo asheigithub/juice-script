@@ -60,7 +60,7 @@ namespace juicescript.ABC
 
         //用于操作符重载时，操作数类型编号，动态生成。
         public int _operator_type_index;
-
+        public ASClass _operator_type;
 
         public ASInstance(ASMultiname _qname_)
         {
@@ -75,6 +75,7 @@ namespace juicescript.ABC
 
 
             _operator_type_index = -1;
+            _operator_type = null;
         }
 
     }

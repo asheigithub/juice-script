@@ -2515,34 +2515,40 @@ namespace juicescript.compiler.IL.Generator
 			if (step.OpCode == "/")
 			{
 				StackLocater v1 = LoadRightValue(step.Arg2, compileEnv, step.token);
-				{
-					TypeKind rvtype = compileEnv.ReadStackType(v1).Maj;
-					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
-					{
-
-					}
-					else
-					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
-					}
-
-				}
-
 				StackLocater v2 = LoadRightValue(step.Arg3, compileEnv, step.token);
-				{
-					TypeKind rvtype = compileEnv.ReadStackType(v2).Maj;
-					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
-					{
-
-					}
-					else
-					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
-					}
-				}
 
 				var t1 = compileEnv.ReadStackType(v1);
 				var t2 = compileEnv.ReadStackType(v2);
+
+				if (build_operator_override(Player.OverrideOperator.div, t1, t2, v1, v2, compileEnv, step))
+				{
+					return;
+				}
+
+				{
+					TypeKind rvtype = t1.Maj;
+					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
+					{
+
+					}
+					else
+					{
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
+					}
+
+				}
+
+				{
+					TypeKind rvtype = t2.Maj;
+					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
+					{
+
+					}
+					else
+					{
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
+					}
+				}
 
 				TypeKind rtype;
 				if (t1.Maj == TypeKind.Any || t2.Maj == TypeKind.Any)
@@ -2574,39 +2580,44 @@ namespace juicescript.compiler.IL.Generator
 				div.v2 = v2;
 
 				compileEnv.instructions.Add(div);
-
 			}
 			else if (step.OpCode == "*")
 			{
 				StackLocater v1 = LoadRightValue(step.Arg2, compileEnv, step.token);
-				{
-					TypeKind rvtype = compileEnv.ReadStackType(v1).Maj;
-					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
-					{
-
-					}
-					else
-					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
-					}
-
-				}
-
 				StackLocater v2 = LoadRightValue(step.Arg3, compileEnv, step.token);
-				{
-					TypeKind rvtype = compileEnv.ReadStackType(v2).Maj;
-					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
-					{
-
-					}
-					else
-					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
-					}
-				}
 
 				var t1 = compileEnv.ReadStackType(v1);
 				var t2 = compileEnv.ReadStackType(v2);
+
+				if (build_operator_override(Player.OverrideOperator.mul, t1, t2, v1, v2, compileEnv, step))
+				{
+					return;
+				}
+
+				{
+					TypeKind rvtype = t1.Maj;
+					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
+					{
+
+					}
+					else
+					{
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
+					}
+
+				}
+
+				{
+					TypeKind rvtype = t2.Maj;
+					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
+					{
+
+					}
+					else
+					{
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
+					}
+				}
 
 				TypeKind rtype;
 				if (t1.Maj == TypeKind.Any || t2.Maj == TypeKind.Any)
@@ -2648,34 +2659,40 @@ namespace juicescript.compiler.IL.Generator
 			else if (step.OpCode == "%")
 			{
 				StackLocater v1 = LoadRightValue(step.Arg2, compileEnv, step.token);
-				{
-					TypeKind rvtype = compileEnv.ReadStackType(v1).Maj;
-					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
-					{
-
-					}
-					else
-					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
-					}
-
-				}
-
 				StackLocater v2 = LoadRightValue(step.Arg3, compileEnv, step.token);
-				{
-					TypeKind rvtype = compileEnv.ReadStackType(v2).Maj;
-					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
-					{
-
-					}
-					else
-					{
-						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
-					}
-				}
 
 				var t1 = compileEnv.ReadStackType(v1);
 				var t2 = compileEnv.ReadStackType(v2);
+
+				if (build_operator_override(Player.OverrideOperator.mod, t1, t2, v1, v2, compileEnv, step))
+				{
+					return;
+				}
+
+				{
+					TypeKind rvtype = t1.Maj;
+					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
+					{
+
+					}
+					else
+					{
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
+					}
+
+				}
+
+				{
+					TypeKind rvtype = t2.Maj;
+					if (rvtype.IsNumericType() || rvtype == TypeKind.Any || rvtype == TypeKind.Null)
+					{
+
+					}
+					else
+					{
+						throw new ResolverException(step.token, $"Implicit coercion of a value of type {TypeUtils.ToTypeString(rvtype,compileEnv.CompileContext)} to an unrelated type Number.");
+					}
+				}
 
 				TypeKind rtype;
 				if (t1.Maj == TypeKind.Any || t2.Maj == TypeKind.Any)
@@ -3028,7 +3045,7 @@ namespace juicescript.compiler.IL.Generator
 					}
 					else if (c1 > 10 || c2 > 10)
 					{
-						throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
+						throw new ResolverException(step.token, $"operator override({op.ToString()}) found.But type not match.");
 					}
 					else
 					{
@@ -3037,7 +3054,7 @@ namespace juicescript.compiler.IL.Generator
 				}
 				else if (c1 > 10 || c2 > 10)
 				{
-					throw new ResolverException(step.token, $"operator override(+) found.But type not match.");
+					throw new ResolverException(step.token, $"operator override({op.ToString()}) found.But type not match.");
 
 				}
 				else

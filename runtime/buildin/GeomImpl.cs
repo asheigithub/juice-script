@@ -148,5 +148,280 @@ namespace juicescript.runtime.buildin
 			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
 
 		}
+
+		[NativeFunction("geom.Vector2$public::dot")]
+		public static void Vector2_Dot(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vector2_this = context.GC.Heap[thisPtr.HeapPtr];
+			var payload_this = (RtPayloadInstance)vector2_this.facility;
+
+			NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
+			NaNBoxing y1 = payload_this.ReadSlot(1, vector2_this.Type._link_codescope, context.player);
+
+			NaNBoxing v_arg = context.StackSlots[stackStPos];
+			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
+			var payload_arg = (RtPayloadInstance)vector2_arg.facility;
+
+			NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
+			NaNBoxing y2 = payload_arg.ReadSlot(1, vector2_arg.Type._link_codescope, context.player);
+
+			float result = x1.FloatValue * x2.FloatValue + y1.FloatValue * y2.FloatValue;
+
+			NaNBoxing nan_result = default;
+			nan_result.SetFloat(result);
+			context.StackSlots[returnSlotIndex] = nan_result;
+		}
+
+		[NativeFunction("geom.Vector2$public::cross")]
+		public static void Vector2_Cross(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vector2_this = context.GC.Heap[thisPtr.HeapPtr];
+			var payload_this = (RtPayloadInstance)vector2_this.facility;
+
+			NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
+			NaNBoxing y1 = payload_this.ReadSlot(1, vector2_this.Type._link_codescope, context.player);
+
+			NaNBoxing v_arg = context.StackSlots[stackStPos];
+			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
+			var payload_arg = (RtPayloadInstance)vector2_arg.facility;
+
+			NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
+			NaNBoxing y2 = payload_arg.ReadSlot(1, vector2_arg.Type._link_codescope, context.player);
+
+			float result = x1.FloatValue * y2.FloatValue - y1.FloatValue * x2.FloatValue;
+
+			NaNBoxing nan_result = default;
+			nan_result.SetFloat(result);
+			context.StackSlots[returnSlotIndex] = nan_result;
+		}
+
+		[NativeFunction("$geom.Vector2$private::Vec2mulFloat")]
+		public static void Vector2_Vec2mulFloat(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing v1 = scope.ReadSlot(0, context.player);
+			NaNBoxing s = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
+			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
+
+			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float scalar = s.FloatValue;
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
+			NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
+
+			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+		[NativeFunction("$geom.Vector2$private::Vec2mulNumber")]
+		public static void Vector2_Vec2mulNumber(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing v1 = scope.ReadSlot(0, context.player);
+			NaNBoxing s = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float scalar = (float)s.Number;
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
+			NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
+
+			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+		[NativeFunction("$geom.Vector2$private::Vec2divFloat")]
+		public static void Vector2_Vec2divFloat(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing v1 = scope.ReadSlot(0, context.player);
+			NaNBoxing s = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
+			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
+
+			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float scalar = s.FloatValue;
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
+			NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
+
+			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+		[NativeFunction("$geom.Vector2$private::Vec2divNumber")]
+		public static void Vector2_Vec2divNumber(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing v1 = scope.ReadSlot(0, context.player);
+			NaNBoxing s = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float scalar = (float)s.Number;
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
+			NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
+
+			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+		[NativeFunction("$geom.Vector2$private::FloatmulVec2")]
+		public static void Vector2_FloatmulVec2(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing s = scope.ReadSlot(0, context.player);
+			NaNBoxing v1 = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
+			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			float scalar = s.FloatValue;
+
+			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
+			NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
+
+			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+		[NativeFunction("$geom.Vector2$private::NumbermulVec2")]
+		public static void Vector2_NumbermulVec2(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing s = scope.ReadSlot(0, context.player);
+			NaNBoxing v1 = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			float scalar = (float)s.Number;
+
+			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
+			NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
+
+			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+		}
 	}
 }

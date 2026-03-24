@@ -65,6 +65,7 @@ namespace juicescript.runtime
 					{
 						operator_override_type_code.Add(typeDict[(ulong)mapping[i]]);
 						typeDict[(ulong)mapping[i]].Instance._operator_type_index = i;
+						typeDict[(ulong)mapping[i]].Instance._operator_type = typeDict[(ulong)mapping[i]];
 					}					
 				}
 			}
@@ -165,6 +166,7 @@ namespace juicescript.runtime
 								if (typelhs.Instance._operator_type_index == -1)
 								{
 									typelhs.Instance._operator_type_index = operator_override_type_code.Count;
+									typelhs.Instance._operator_type = typelhs;
 									bool success = operator_override_type_code.Add(typelhs);
 									Debug.Assert(success);
 								}
@@ -172,6 +174,7 @@ namespace juicescript.runtime
 								if (typerhs.Instance._operator_type_index == -1)
 								{
 									typerhs.Instance._operator_type_index = operator_override_type_code.Count;
+									typerhs.Instance._operator_type = typerhs;
 									bool success = operator_override_type_code.Add(typerhs);
 									Debug.Assert(success);
 								}
@@ -473,31 +476,42 @@ namespace juicescript.runtime
 		}
 
 
-		public int GetOpOverrideTypeId(NaNBoxing v)
+		public int GetOpOverrideTypeId(NaNBoxing v,out ASClass type)
 		{
 			switch (v.ValueType)
 			{
 				case NaNBoxing.BoxType.Number:
+					type = null;
 					return 9;
 				case NaNBoxing.BoxType.Undefined:
+					type = null;
 					return -1;
 				case NaNBoxing.BoxType.Null:
+					type = null;
 					return 0;
 				case NaNBoxing.BoxType.Boolean:
+					type = null;
 					return 1;
 				case NaNBoxing.BoxType.Int:
+					type = null;
 					return 6;
 				case NaNBoxing.BoxType.Uint:
+					type = null;
 					return 7;
 				case NaNBoxing.BoxType.Sbyte:
+					type = null;
 					return 2;
 				case NaNBoxing.BoxType.Byte:
+					type = null;
 					return 3;
 				case NaNBoxing.BoxType.Short:
+					type = null;
 					return 4;
 				case NaNBoxing.BoxType.UShort:
+					type = null;
 					return 5;
 				case NaNBoxing.BoxType.Float:
+					type = null;
 					return 8;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
@@ -506,12 +520,16 @@ namespace juicescript.runtime
 						switch (obj.TypeKind)
 						{
 							case RtHeapTypeKind.CLASS:
+								type = null;
 								return -1;
 							case RtHeapTypeKind.GLOBAL:
+								type = null;
 								return -1;
 							case RtHeapTypeKind.STRING:
+								type = null;
 								return 10;
 							case RtHeapTypeKind.INSTANCE:
+								type = ((ASInstance)obj.Type)._operator_type;
 								return ((ASInstance)obj.Type)._operator_type_index;
 							case RtHeapTypeKind.NAMESPACE:
 							case RtHeapTypeKind.ARRAY:
@@ -522,16 +540,19 @@ namespace juicescript.runtime
 							case RtHeapTypeKind.MethodScope:
 							case RtHeapTypeKind.CLOSURE:
 							default:
+								type = null;
 								return -1;
 						}
 
 					}
-					break;
+					
 				case NaNBoxing.BoxType.LocalString:
+					type = null;
 					return 10;
 				case NaNBoxing.BoxType.Fault:
 					
 				default:
+					type = null;
 					return -1;
 			}
 

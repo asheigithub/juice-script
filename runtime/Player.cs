@@ -2954,8 +2954,6 @@ namespace juicescript.runtime
 			InitScript((ASScript)Context.PROMISE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
 			InitScript((ASScript)Context.ILLEGALOPERATION_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
 			InitScript((ASScript)Context.RANGE_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
-			
-
 
 			//InitScript((ASScript)Context.SBYTE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException(" instance init failed"); }
 			EMPTY_STR = Context.GC.AllocString(""); if (EMPTY_STR == 0) { throw new LoaderException("EMPTY_STR alloc failed"); }
@@ -3075,6 +3073,9 @@ namespace juicescript.runtime
 			{
 				throw new LoaderException("Document Class not found.");
 			}
+
+			
+
 
 			ASScript sScript = (ASScript)documentCls._link_codescope.Parent.Container;
 
@@ -9600,21 +9601,42 @@ namespace juicescript.runtime
 				return;
 			}
 
+			ASClass t1;ASClass t2;
 			//操作符重载
-			int op_override_id1 = GetOpOverrideTypeId(n1);
-			int op_override_id2 = GetOpOverrideTypeId(n2);
+			int op_override_id1 = GetOpOverrideTypeId(n1,out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2,out t2);
 			if (op_override_id1 != -1 && op_override_id2 != -1)
 			{
 				var method = overrideOperatorMethods[(int)OverrideOperator.add][op_override_id1][op_override_id2];
 				if (method != null)
 				{
-					var @class = (ASClass)method.Container;
-					InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
-					if (error.raised)
+#if FORCOMPILER
+					if (IsComputeConstExpr)
 					{
-						return;
+						throw new EvalConstException();
+					}
+#endif
+
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
 					}
 
+
+					var @class = (ASClass)method.Container;
+					
 					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
@@ -10221,20 +10243,40 @@ namespace juicescript.runtime
 			}
 
 			//操作符重载
-			int op_override_id1 = GetOpOverrideTypeId(n1);
-			int op_override_id2 = GetOpOverrideTypeId(n2);
+			ASClass t1;ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1,out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2,out t2);
 			if (op_override_id1 != -1 && op_override_id2 != -1)
 			{
 				var method = overrideOperatorMethods[(int)OverrideOperator.sub][op_override_id1][op_override_id2];
 				if (method != null)
 				{
-					var @class = (ASClass)method.Container;
-					InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
-					if (error.raised)
+#if FORCOMPILER
+					if (IsComputeConstExpr)
 					{
-						return;
+						throw new EvalConstException();
+					}
+#endif
+
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
 					}
 
+					var @class = (ASClass)method.Container;
+					
 					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
@@ -10479,6 +10521,68 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void Exec_Multiply(ref ReceiveError error, NaNBoxing n1, NaNBoxing n2, StackLocater dst, int scope_ptr, StackLocater tmp, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
+
+			//操作符重载
+			ASClass t1;ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1,out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2,out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.mul][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+					
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+
 			if (!IsPrimitive(n1))
 			{
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, tmp, dst, stackslots, stackStPos, thisPtr);
@@ -10611,6 +10715,67 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void Exec_Division(ref ReceiveError error, NaNBoxing n1, NaNBoxing n2, StackLocater dst, int scope_ptr, StackLocater tmp, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
+			//操作符重载
+			ASClass t1;ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1,out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2,out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.div][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+					
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+
 			if (!IsPrimitive(n1))
 			{
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, tmp, dst, stackslots, stackStPos, thisPtr);
@@ -10713,6 +10878,66 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void Exec_Modulus(ref ReceiveError error, NaNBoxing n1, NaNBoxing n2, StackLocater dst, int scope_ptr, StackLocater tmp, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
+			//操作符重载
+			ASClass t1;ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1,out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2,out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.mod][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+					
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
 			if (!IsPrimitive(n1))
 			{
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, tmp, dst, stackslots, stackStPos, thisPtr);
