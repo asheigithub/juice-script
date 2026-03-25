@@ -50,7 +50,7 @@ namespace juicescript.compiler
             SWCFile swc = new SWCFile();
             swc.assemblyName = System.IO.Path.GetFileName(outSwcFile);
             swc.refAssemblys.AddRange(context.referenceAssembly);
-
+            swc.UID = Guid.NewGuid();
 
             swc.Methods.Add(null);
             swc.Classes.Add(null);
@@ -263,6 +263,7 @@ namespace juicescript.compiler
                     bw.Write(ver.Build);
                     bw.Write(ver.Revision);
 
+                    bw.Write(swc.UID.ToByteArray());
                     bw.Write(swc.assemblyName);
                     bw.Write(swc.refAssemblys.Count);
                     for (int i = 0; i < swc.refAssemblys.Count; i++)

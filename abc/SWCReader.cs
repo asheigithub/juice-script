@@ -40,6 +40,7 @@ namespace juicescript
                 file.Build = br.ReadInt32();
                 file.Revision = br.ReadInt32();
 
+                file.UID = new Guid(br.ReadBytes(16));
                 file.assemblyName = br.ReadString();
                 int refCount = br.ReadInt32();
                 for (int i = 0; i < refCount; i++)

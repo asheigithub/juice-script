@@ -49,6 +49,9 @@ namespace juicescript.compiler
         internal string sourceFile;
         internal string fullPath;
 
+        
+        internal string hash;
+
         private string WriteString()
         {
             System.Text.StringBuilder sb = new StringBuilder();

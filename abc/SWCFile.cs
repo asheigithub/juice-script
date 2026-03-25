@@ -13,6 +13,7 @@ namespace juicescript
         public int Minor;
         public int Build;
         public int Revision;
+        public Guid UID;
 
         public string assemblyName;
         public List<string> refAssemblys { get; }
@@ -46,7 +47,7 @@ namespace juicescript
 
         public override string ToString()
         {
-            return $"SWC:{assemblyName},Scripts:{Scripts.Count}";
+            return $"SWC:{assemblyName},Scripts:{Scripts.Count},UID:{UID}";
         }
 
     }

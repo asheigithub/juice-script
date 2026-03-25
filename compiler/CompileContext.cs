@@ -55,9 +55,6 @@ namespace juicescript.compiler
         internal Stack<object> computeConstExprState = new Stack<object> ();
 
 
-        internal ScriptDef buildingScript = null;
-
-
 		//internal Stack<EvalMemberInitValue> only_const_scriptinit = new Stack<EvalMemberInitValue> ();
 		//internal HashSet<AS3Expression> constant_init_expr = new HashSet<AS3Expression> ();
 

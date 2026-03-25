@@ -13,6 +13,8 @@ package ns1
 			
 		};
 		
+
+		
 		static internal  var KKF = uint.MIN_VALUE;
 
 		var a:Number = 4;

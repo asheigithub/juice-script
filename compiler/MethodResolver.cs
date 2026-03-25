@@ -8,6 +8,7 @@ using juicescript.compiler.IL.Optimize;
 using juicescript.compiler.parse;
 using juicescript.runtime;
 using Microsoft.VisualBasic;
+using MyMD5;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +19,9 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,6 +50,8 @@ namespace juicescript.compiler
 				{
 					throw new InvalidOperationException($"内部异常,源文件没有找到{fullpath}");
 				}
+
+				script.hash = new MyMD5.MyMD5().Hash(File.ReadAllText(fullpath)).ToString(); //计算hash
 
 				try
 				{
@@ -630,6 +635,187 @@ namespace juicescript.compiler
 				}
 			}
 
+
+			HashSet<ScriptDef> expiredScripts = new HashSet<ScriptDef>();
+
+			Dictionary<ScriptDef, HashSet<ScriptDef>> dependGraph = new Dictionary<ScriptDef, HashSet<ScriptDef>>();
+			//检查依赖关系
+			{
+				foreach (var script in context.scriptDefs)
+				{
+					if (force_rebuild_bcode)
+					{
+						expiredScripts.Add(script);
+						continue;
+					}
+
+					string proj = context.scriptInProj[script];
+					string sfile1 = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".m";
+					string sfile2 = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".mi";
+					string sfile3 = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".mp";
+					string sfile4 = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".dependencies";
+
+					if (!System.IO.File.Exists(sfile1) || !System.IO.File.Exists(sfile2) || !System.IO.File.Exists(sfile3) || !System.IO.File.Exists(sfile4))
+					{
+						expiredScripts.Add(script);
+						continue;
+					}
+
+					using (System.IO.FileStream fs = new FileStream(sfile1, FileMode.Open))
+					{
+						using (System.IO.BinaryReader br = new BinaryReader(fs))
+						{
+							try
+							{
+								string line = br.ReadString();
+								if (line == null || line != script.hash)
+								{
+									expiredScripts.Add(script); continue;
+								}
+							}
+							catch (IOException)
+							{
+								expiredScripts.Add(script); continue;
+							}
+
+						}
+					}
+
+					using (System.IO.FileStream fs = new FileStream(sfile2, FileMode.Open))
+					{
+						using (System.IO.StreamReader br = new StreamReader(fs, System.Text.Encoding.UTF8))
+						{
+							string line = br.ReadLine();
+							if (line == null || line != script.hash)
+							{
+								expiredScripts.Add(script); continue;
+							}
+						}
+					}
+
+					using (System.IO.FileStream fs = new FileStream(sfile3, FileMode.Open))
+					{
+						using (System.IO.StreamReader br = new StreamReader(fs, System.Text.Encoding.UTF8))
+						{
+							string line = br.ReadLine();
+							if (line == null || line != script.hash)
+							{
+								expiredScripts.Add(script); continue;
+							}
+						}
+					}
+
+					using (System.IO.FileStream fs = new FileStream(sfile4, FileMode.Open))
+					{
+						using (System.IO.StreamReader br = new StreamReader(fs, System.Text.Encoding.UTF8))
+						{
+							string line = br.ReadLine();
+							if (line == null || line != script.hash)
+							{
+								expiredScripts.Add(script); continue;
+							}
+
+							while (true)
+							{
+								line = br.ReadLine();
+								if (line == null)
+								{
+									break;
+								}
+
+								if (line.StartsWith("swc:"))
+								{
+									string[] field = line.Split('\t');
+									if (field.Length != 2)
+									{
+										expiredScripts.Add(script); break;
+									}
+
+									var swc = context.player_for_compiler.Context.libs.FirstOrDefault(s => s.UID.ToString() == field[1]);
+									if (swc == null || "swc:" + swc.assemblyName != field[0])
+									{
+										expiredScripts.Add(script); break;
+									}
+								}
+								else if (line.StartsWith("src:"))
+								{
+									string[] fileds = line.Split('\t');
+									if (fileds.Length < 3)
+									{
+										expiredScripts.Add(script); break;
+									}
+
+									string path = string.Join("\t", fileds.Take(1 + fileds.Length - 3)).Substring(4);
+									if (!System.IO.File.Exists(path))
+									{
+										expiredScripts.Add(script); break;
+									}
+
+									string depScript = fileds[fileds.Length - 2];
+									var target = context.scriptDefs.FirstOrDefault(s => s.Script.QName.ToDebugTypeName() == depScript);
+									if (target == null || target.hash != fileds[fileds.Length - 1])
+									{
+										expiredScripts.Add(script); break;
+									}
+
+									if (!dependGraph.ContainsKey(script))
+									{
+										dependGraph.Add(script, new HashSet<ScriptDef>() { target });
+									}
+									else
+									{
+										dependGraph[script].Add(target);
+									}
+								}
+								else
+								{
+									expiredScripts.Add(script); break;
+								}
+
+							}
+						}
+					}
+				}
+
+				foreach (var item in dependGraph)
+				{
+					var testScript = item.Key;
+					var dependencies = item.Value.ToArray();
+
+					HashSet<ScriptDef> visited = new HashSet<ScriptDef>();
+					Stack<ScriptDef> stack = new Stack<ScriptDef>();
+					foreach (var dep in dependencies)
+					{
+						if (visited.Add(dep))
+						{
+							stack.Push(dep);
+						}
+					}
+					while (stack.Count > 0)
+					{
+						var current = stack.Pop();
+						if (expiredScripts.Contains(current))
+						{
+							expiredScripts.Add(testScript);
+							break;
+						}
+						if (dependGraph.TryGetValue(current, out var transitiveDeps))
+						{
+							foreach (var dep in transitiveDeps)
+							{
+								if (visited.Add(dep))
+								{
+									stack.Push(dep);
+								}
+							}
+						}
+					}
+
+				}
+
+			}
+
+
 			bool hasError = false;
 			foreach (var script in context.scriptDefs)
 			{
@@ -642,9 +828,9 @@ namespace juicescript.compiler
 					string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".m";
 
 					string input = System.IO.File.ReadAllText(fullpath);
-					var origin = new MyMD5.MyMD5().Hash(input).ToString();
+					var origin = script.hash;
 
-					if (File.Exists(sfile) && !force_rebuild_bcode)
+					if ( ! expiredScripts.Contains(script) )//File.Exists(sfile) && !force_rebuild_bcode)
 					{
 						//Try Load
 						using (var fs = File.OpenRead(sfile))
@@ -1013,9 +1199,88 @@ namespace juicescript.compiler
 
 					#endregion
 
-					BuildScript(script, as_srcfile, context, sfile, origin, dict_scriptinit_onlyconst);
+					#region 依赖分析
+
+					HashSet<ASNamespace> dependNs = new HashSet<ASNamespace>();
+					var dependencies = BuildScript(script, as_srcfile, context, sfile, origin,dependNs);
+
+					var classlist = dependencies.Select( classid =>
+						 context.scriptDefs.SelectMany(s => s.scriptClasses)
+															.Union
+															(
+																context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+															).First(c => c != null && c.Type_identifier == classid)
+					).ToArray();
+
+					var nsdefs= context.scriptDefs.Where(s => s.Script.Traits.Any(t => t.ValueKind == ConstantKind.Namespace)).Select(s=>s.Script)
+						.Union
+						(
+							context.player_for_compiler.Context.libs.SelectMany(
+								l=>l.Scripts.Where( s=>s.Traits.Any(t=>t.ValueKind == ConstantKind.Namespace) )
+								)
+						).Where( n=>n.Traits.Any( t=>t.ValueKind == ConstantKind.Namespace && dependNs.Contains( t.Value.Namespace ) ) ).ToArray()
+						;
 
 
+					string dependencyFile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".dependencies";
+
+					using (System.IO.FileStream fs = new FileStream(dependencyFile, FileMode.Create))
+					{
+						using (System.IO.StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
+						{
+							sw.WriteLine(origin);
+
+							HashSet<SWCFile> uselibs = new HashSet<SWCFile>();
+							var global = context.player_for_compiler.Context.libs.FirstOrDefault(l => l.assemblyName == "juice_global.swc");
+							if (global != null)
+							{
+								uselibs.Add(global);
+								sw.WriteLine($"swc:{global.assemblyName}\t{global.UID.ToString()}");
+							}
+
+							foreach (var @class in classlist)
+							{
+								var swc = context.player_for_compiler.Context.libs.FirstOrDefault(l => l.Classes.Exists(c =>c !=null && c.Type_identifier == @class.Type_identifier));
+								if (swc != null && !uselibs.Contains(swc))
+								{
+									uselibs.Add(swc);
+									sw.WriteLine($"swc:{swc.assemblyName}\t{swc.UID.ToString()}");
+								}
+								else if (swc == null)
+								{
+									var defat = (ASScript)@class._link_codescope.Parent.Container;
+									var scriptDef = context.scriptDefs.First(s => s.Script == defat);
+
+									
+									sw.WriteLine($"src:{scriptDef.fullPath}\t{defat.QName.ToDebugTypeName()}\t{scriptDef.hash}");
+
+								}
+							}
+
+							foreach (var @ns in dependNs)
+							{
+								var swc = context.player_for_compiler.Context.libs.FirstOrDefault(
+									l => l.Namespaces.Contains(@ns));
+								if (swc != null && !uselibs.Contains(swc))
+								{
+									uselibs.Add(swc);
+									sw.WriteLine($"swc:{swc.assemblyName}\t{swc.UID.ToString()}");
+								}
+								else if (swc == null)
+								{
+									
+									var scriptDef = context.scriptDefs.First(s => s.Script.Traits.Any( 
+										t=>t.ValueKind == ConstantKind.Namespace && t.Value.Namespace == @ns ));
+
+
+									sw.WriteLine($"src:{scriptDef.fullPath}\t{ scriptDef.Script.QName.ToDebugTypeName() }\t{scriptDef.hash}");
+
+								}
+							}
+						}
+					}
+
+					#endregion
 
 				}
 				catch (CompilerException ex)
@@ -1051,7 +1316,7 @@ namespace juicescript.compiler
 			}
 
 
-			ComputeMemberDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst, loadfromcache, force_rebuild_bcode);
+			ComputeMemberDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst, loadfromcache, expiredScripts);
 
 			foreach (var p in pdefaults)
 			{
@@ -1059,7 +1324,7 @@ namespace juicescript.compiler
 			}
 
 
-			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,force_rebuild_bcode);
+			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,expiredScripts);
 
 
 
@@ -1087,7 +1352,7 @@ namespace juicescript.compiler
 
 
 
-		private static void ComputeMemberDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst, HashSet<ASScript> loadfromcache, bool force_rebuild)
+		private static void ComputeMemberDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst, HashSet<ASScript> loadfromcache, HashSet<ScriptDef> expired)
 		{
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
 			juicescript.runtime.Player computeplayer = new Player(int.MaxValue, true);
@@ -1130,10 +1395,10 @@ namespace juicescript.compiler
 					string proj = context.scriptInProj[scriptDef];
 					string sfile = System.IO.Path.Combine(workDir, scriptDef.fullPath.Substring(proj.Length)) + ".mi";
 
-					string input = System.IO.File.ReadAllText(fullpath);
-					var origin = new MyMD5.MyMD5().Hash(input).ToString();
+					
+					var origin = scriptDef.hash;
 
-					if (!load_init_from_mi.Contains(scriptDef) && File.Exists(sfile) && !force_rebuild)
+					if (!load_init_from_mi.Contains(scriptDef) &&  !expired.Contains(scriptDef) )//File.Exists(sfile) && !force_rebuild)
 					{
 						#region 读取缓存记录，如果成功就不用再进行下一轮
 
@@ -1550,8 +1815,8 @@ namespace juicescript.compiler
 					string proj = context.scriptInProj[scriptDef];
 					string sfile = System.IO.Path.Combine(workDir, scriptDef.fullPath.Substring(proj.Length)) + ".mi";
 
-					string input = System.IO.File.ReadAllText(fullpath);
-					var origin = new MyMD5.MyMD5().Hash(input).ToString();
+					
+					var origin = scriptDef.hash;
 
 					using (System.IO.FileStream fs = new FileStream(sfile, FileMode.Create))
 					{
@@ -1743,7 +2008,7 @@ namespace juicescript.compiler
 
 
 
-		private static void ComputeFunctionDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst,bool force_rebuild)
+		private static void ComputeFunctionDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst,HashSet<ScriptDef> expired)
 		{
 
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
@@ -1776,10 +2041,10 @@ namespace juicescript.compiler
 				string proj = context.scriptInProj[script];
 				string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".mp";
 
-				string input = System.IO.File.ReadAllText(fullpath);
-				var origin = new MyMD5.MyMD5().Hash(input).ToString();
+				
+				var origin = script.hash;
 
-				if (File.Exists(sfile) && !force_rebuild)
+				if (!expired.Contains(script) )//File.Exists(sfile) && !force_rebuild)
 				{
 					Dictionary<ASParameter, int> readedparas = new Dictionary<ASParameter, int>();
 
@@ -2542,9 +2807,9 @@ namespace juicescript.compiler
 
 
 
-		private static void BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst)
+		private static HashSet<ulong> BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash , HashSet<ASNamespace> dependnamespace)
 		{
-			context.buildingScript = script;
+			
 			//查找源码对应的AS3ClassInterfaceBase  
 			var as3_srclist = ((new AS3ClassInterfaceBase[] { as_srcfile.Package.MainClass, as_srcfile.Package.MainInterface }).Union
 				(
@@ -3165,7 +3430,8 @@ namespace juicescript.compiler
 
 			}
 
-			context.buildingScript = null;
+			HashSet<ulong> use_classes = new HashSet<ulong>();
+
 
 			using (System.IO.FileStream fs = new FileStream(sfile, FileMode.Create))
 			{
@@ -3177,6 +3443,14 @@ namespace juicescript.compiler
 					{
 
 						ASMethod method = script.scriptMethods[i];
+
+						foreach (var item in method.Body._link_codescope.NamespaceSet.Namespaces)
+						{
+							if (item.def_uri != null && item.Kind == NamespaceKind.PackageInternal && !string.IsNullOrEmpty( item.Name) )
+							{
+								dependnamespace.Add(item);
+							}
+						}
 
 
 						//写入.m文件
@@ -3211,6 +3485,8 @@ namespace juicescript.compiler
 									//bw.Write((byte)RtHeapTypeKind.CACHE_LD_CLASS);
 									bw.Write((byte)10);
 									bw.Write(context.constpool_ldclass[ptr]);
+
+									use_classes.Add(context.constpool_ldclass[ptr]);
 								}
 								else
 								{
@@ -3340,6 +3616,8 @@ namespace juicescript.compiler
 				}
 			}
 
+
+			return use_classes;
 		}
 
 
