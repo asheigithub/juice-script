@@ -18,48 +18,54 @@ package
 	}
 }
 
-
-
-import geom.Vector2;
-var a:Vector2 = new Vector2(0,1);
-var b:Vector2 = new Vector2(1,0);
-
-a += b;
-
-trace(a);
-trace( a.dot(b) );
-trace( a.cross(b) );
-trace( a * 3 );
-trace( a / 3 );
-
-trace( 6 * b );
-
-
-
-final class BB
+function A(i = int.MAX_VALUE)
 {
-	[operator("%")]
-	static function bsb(i:BB,j:int):String
-	{
-		if(true)
-		{
-			return "BB % " + [j, j].toString() ;
-		}
-		else
-		{
-			throw 3;
-		}
-	}
+	trace(i);
 }
+A();
 
-
-var c = new BB();
-
-//var d = c / 3;
-//trace(d);
-
-c %= 3;
-trace("c:",c,typeof c);
+//
+//
+//import geom.Vector2;
+//var a:Vector2 = new Vector2(0,1);
+//var b:Vector2 = new Vector2(1,0);
+//
+//a += b;
+//
+//trace(a);
+//trace( a.dot(b) );
+//trace( a.cross(b) );
+//trace( a * 3 );
+//trace( a / 3 );
+//
+//trace( 6 * b );
+//
+//
+//
+//final class BB
+//{
+	//[operator("%")]
+	//static function bsb(i:BB,j:int):String
+	//{
+		//if(true)
+		//{
+			//return "BB % " + [j, j].toString() ;
+		//}
+		//else
+		//{
+			//throw 3;
+		//}
+	//}
+//}
+//
+//
+//var c = new BB();
+//
+////var d = c / 3;
+////trace(d);
+//
+//c %= 3;
+//trace("c:",c,typeof c);
 
 
 //var v:Vector.<int> = new <int>[1,2,3,4,9,9,9,9,9,10,11,0,0,0,0,0,0,0,3+3,0,0,0];

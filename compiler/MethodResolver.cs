@@ -1116,8 +1116,10 @@ namespace juicescript.compiler
 			{
 				bool hasSuccess = false;
 
-				foreach (var script in context.scriptDefs.Select(s => s.Script))
+				foreach (var scriptDef in context.scriptDefs)
 				{
+					var script = scriptDef.Script;
+
 					var testswc_script = testswc.Scripts.Find(s => s.QName == script.QName);
 
 					foreach (var container in script.allContainers.Where(c => c != null).OrderBy(c => (int)c._link_codescope.Kind))
@@ -1507,98 +1509,7 @@ namespace juicescript.compiler
 					}
 				}
 
-				//ASMethodBody.MethodBodyInfo info_dst = new ASMethodBody.MethodBodyInfo();
-				//method.Body.GetInfo(ref info_dst);
-				//int oldsize = method.Body.ByteCode.Length;
-
-				//unsafe
-				//{
-				//	int headersize_dst = sizeof(int) * 3 + 2 * sizeof(int) * info_dst.instructions + sizeof(NaNBoxing) * info_dst.constants;
-
-				//	using (System.IO.MemoryStream ms = new MemoryStream())
-				//	{
-				//		ms.Write(method.Body.ByteCode, 0, headersize_dst); //写入头
-
-				//		int lastpos = 0;
-
-				//		foreach (var scopeMember in container._link_codescope.Members.OrderBy(m => m.compiler_initvalue_stpos)
-				//			.Where(m =>  m.DefineAt == container && m.Kind != ScopeMemberKind.Parameter && m.trait.Value != null && m.trait.Value.initValue.HasValue)
-				//			)
-				//		{
-				//			ASMethodBody.MethodBodyInfo info_src = new ASMethodBody.MethodBodyInfo();
-				//			ASMethodBody.GetInfo(ref info_src, scopeMember.compiler_initvalue);
-
-				//			int headersize_src = sizeof(int) * 3 + 2 * sizeof(int) * info_src.instructions + sizeof(NaNBoxing) * info_src.constants;
-				//			int src_bytecount = scopeMember.compiler_initvalue.Length - headersize_src - new INS_END().Size; //(减去最后一个END指令)
-
-
-				//			if (scopeMember.compiler_initvalue_stpos - shrinked > lastpos)
-				//			{
-				//				ms.Write(method.Body.ByteCode, lastpos + headersize_dst, scopeMember.compiler_initvalue_stpos - shrinked - lastpos);
-				//			}
-
-				//			if (scopeMember.Kind == ScopeMemberKind.Slot 
-				//				//|| (container._link_codescope.Kind == CodeScopeKind.Method //&& method.__ismethod
-				//				//)					
-				//				)
-				//			{
-				//				INS_Ld_MemberInitValue ld_MemberInitValue = new INS_Ld_MemberInitValue(scopeMember.trait.Token);
-
-				//				//最后一条指令肯定是store_scopeheap
-				//				fixed (byte* p = scopeMember.compiler_initvalue)
-				//				{
-				//					byte* PC = p + scopeMember.compiler_initvalue.Length
-				//						 - new INS_END().Size - new INS_Store_ScopeHeap(null).Size;
-				//					;
-
-				//					INS_Code opcode = (INS_Code)(*PC++);
-				//					if (opcode != INS_Code.storeScopeH)
-				//					{
-				//						throw new InvalidOperationException();
-				//					}
-				//					ScopeHeapLocater heapLocater;
-				//					{
-				//						byte* _p = (byte*)&heapLocater.ScopeIndex;
-				//						*_p++ = *PC++;
-				//						*_p = *PC++;
-
-				//						_p = (byte*)&heapLocater.MemberIndex;
-				//						*_p++ = *PC++;
-				//						*_p = *PC++;
-				//					}
-
-				//					ld_MemberInitValue.heap = heapLocater;
-				//				}
-				//				using (System.IO.MemoryStream tempms = new MemoryStream())
-				//				{
-				//					using (BinaryWriter bw = new BinaryWriter(tempms))
-				//					{
-				//						ld_MemberInitValue.Write(bw);
-				//					}
-
-				//					var temp = tempms.ToArray();
-				//					ms.Write(temp);
-				//				}
-
-				//			}
-
-				//			lastpos = scopeMember.compiler_initvalue_stpos - shrinked + src_bytecount;
-				//		}
-
-				//		ms.Write(method.Body.ByteCode, lastpos + headersize_dst, method.Body.ByteCode.Length - lastpos - headersize_dst);
-
-				//		method.Body.ByteCode = ms.ToArray();
-
-
-
-
-				//		if (!flag_might_shrinked)
-				//		{
-				//			bytecode_shrink.Add(method, oldsize - method.Body.ByteCode.Length);
-				//		}
-				//	}
-				//}
-
+				
 
 			}
 
@@ -1690,7 +1601,17 @@ namespace juicescript.compiler
 
 								try
 								{
+									//默认值计算 禁止使用 x?a:b.
+									{
+										int useslotcount; NaNBoxing[] _constants; Instruction[] instructions;
+										Disassembler.Disassemble(_temp.Body.ByteCode, out useslotcount, out _constants, out instructions);
 
+										if (instructions.Any(i => i.INS_Code == INS_Code.goto_flag || i.INS_Code == INS_Code.if_false_goto || i.INS_Code == INS_Code.if_true_goto))
+										{
+											throw new EvalConstException();
+										}
+
+									}
 									//默认值只考虑基本数据类型,或者String。
 									NaNBoxing value = computeplayer.ComputeConstExpr(_temp, testswc, para.compute_result_index);
 									if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
