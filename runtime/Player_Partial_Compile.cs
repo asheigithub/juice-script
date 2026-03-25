@@ -209,7 +209,7 @@ namespace juicescript.runtime
 							throw new InvalidOperationException();
 						}
 
-						for (int i = 0; i < src_count && loadfromcache; i++)
+						for (int i = 0; i < src_count && loadfromcache; i++) //scriptDef从cache中读取时，需要重新对一下LD_Class
 						{
 							if (src_count != method_const.Count)
 							{

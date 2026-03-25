@@ -16,7 +16,7 @@ namespace juicescript.runtime
     /// </summary>
     public class Context
     {
-        public const int STACK_LENGTH = 1024;
+        public const int STACK_LENGTH = 512;
 
 
 #if DEBUG

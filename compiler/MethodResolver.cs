@@ -18,6 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace juicescript.compiler
 	{
 		internal static int BuildMethod(CompileContext context, string workDir, List<string> libs, bool force_rebuild_bcode, string outswcfile, List<string> displaycfg_files)
 		{
-			
+
 			var lex = new Lex(null);
 			var tokens = lex.GetWords(AS3_LL1_GRAMMAR.GRAMMAR, false);
 			Parser parser = new Parser(tokens);
@@ -46,7 +47,7 @@ namespace juicescript.compiler
 				{
 					throw new InvalidOperationException($"内部异常,源文件没有找到{fullpath}");
 				}
-				
+
 				try
 				{
 					ASNamespace as3ns = new ASNamespace()
@@ -554,8 +555,8 @@ namespace juicescript.compiler
 
 					var alltypes = context.scriptDefs.SelectMany(
 						s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
-					Dictionary<ulong, ASClass> typedict = new Dictionary<ulong, ASClass>( alltypes.Select( t=>new KeyValuePair<ulong, ASClass>(t.Type_identifier,t ) ) );
-					context.player_for_compiler.ComputeOperatorTable(script.Script,typedict);
+					Dictionary<ulong, ASClass> typedict = new Dictionary<ulong, ASClass>(alltypes.Select(t => new KeyValuePair<ulong, ASClass>(t.Type_identifier, t)));
+					context.player_for_compiler.ComputeOperatorTable(script.Script, typedict);
 
 					//检查Setter和Getter的类型是否匹配
 					for (int i = 0; i < script.Script.codeScopes.Count; i++)
@@ -825,6 +826,28 @@ namespace juicescript.compiler
 
 											int len = br.ReadInt32();
 											byte[] bytes = br.ReadBytes(len);
+											{
+												//必须更新常量池 LD_Class可能会导致原常量池中的constpool_ldclass 索引失效
+												unsafe
+												{
+													fixed (void* ptrsrc = bytes)//handle.AddrOfPinnedObject().ToPointer();
+													{
+														int src_count = *((int*)ptrsrc + 1);
+														int src_ins_count = *((int*)ptrsrc + 2);
+
+														NaNBoxing* src_consts = (NaNBoxing*)((int*)ptrsrc + 3 + 2 * src_ins_count);
+														if (src_count != constants.Count)
+														{
+															throw new InvalidOperationException();
+														}
+														for (int j = 0; j < src_count; j++)
+														{
+															*(src_consts+j)=constants[j];
+														}
+													}
+												}
+
+											}
 
 											method.Body.ByteCode = bytes;
 
@@ -858,26 +881,6 @@ namespace juicescript.compiler
 												}
 											}
 
-											if (script.Script.Initializer == method || method.IsConstructor)
-											{
-												//len = br.ReadInt32();
-												//bytes = br.ReadBytes(len);
-
-												//dict_scriptinit_onlyconst.Add(method, bytes);
-
-												//for (int s = 0; s < method.Container._link_codescope.Members.Count; s++)
-												//{
-												//	var m = method.Container._link_codescope.Members[s];
-
-												//	len = br.ReadInt32();
-												//	if (len > 0)
-												//	{
-												//		bytes = br.ReadBytes(len);
-												//		m.compiler_initvalue = bytes;
-												//	}
-												//}
-											}
-
 											int init_members_count = br.ReadInt32();
 											for (int j = 0; j < init_members_count; j++)
 											{
@@ -892,7 +895,7 @@ namespace juicescript.compiler
 												smember.compiler_initvalue_stpos = br.ReadInt32();
 
 											}
-
+											
 											context.dict_method_constants.Add(method, constants);
 
 										}
@@ -1048,7 +1051,7 @@ namespace juicescript.compiler
 			}
 
 
-			ComputeMemberDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,loadfromcache);
+			ComputeMemberDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst, loadfromcache, force_rebuild_bcode);
 
 			foreach (var p in pdefaults)
 			{
@@ -1056,14 +1059,14 @@ namespace juicescript.compiler
 			}
 
 
-			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst);
+			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,force_rebuild_bcode);
 
 
 
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{
-				
+
 
 				string proj = context.scriptInProj[script];
 				string outfile_base = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length));
@@ -1071,11 +1074,11 @@ namespace juicescript.compiler
 				for (int i = 1; i < script.scriptMethods.Count; i++)
 				{
 					ASMethod method = script.scriptMethods[i];
-					
 
-					Optimizer.Optimize(method ,displaycfg_files,script.fullPath,outfile_base );
-					
-					ComputeJump(method,true);
+
+					Optimizer.Optimize(method, displaycfg_files, script.fullPath, outfile_base);
+
+					ComputeJump(method, true);
 				}
 			}
 
@@ -1084,7 +1087,7 @@ namespace juicescript.compiler
 
 
 
-		private static void ComputeMemberDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst, HashSet<ASScript> loadfromcache)
+		private static void ComputeMemberDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst, HashSet<ASScript> loadfromcache, bool force_rebuild)
 		{
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
 			juicescript.runtime.Player computeplayer = new Player(int.MaxValue, true);
@@ -1108,10 +1111,13 @@ namespace juicescript.compiler
 				throw new CompilerLoadLibException(e.Message);
 			}
 
-			
+
 			//任何初始值计算时如果需要读取变量则计算失败。
 			//只需要不停的迭代计算，直到没有新的成功为止。此时所有初始化都计算成功
 			Dictionary<string, NaNBoxing> dict_newstring = new Dictionary<string, NaNBoxing>();
+
+			HashSet<ScriptDef> load_init_from_mi = new HashSet<ScriptDef>();
+
 			while (true)
 			{
 				bool hasSuccess = false;
@@ -1120,6 +1126,167 @@ namespace juicescript.compiler
 				{
 					var script = scriptDef.Script;
 
+					var fullpath = scriptDef.fullPath;
+					string proj = context.scriptInProj[scriptDef];
+					string sfile = System.IO.Path.Combine(workDir, scriptDef.fullPath.Substring(proj.Length)) + ".mi";
+
+					string input = System.IO.File.ReadAllText(fullpath);
+					var origin = new MyMD5.MyMD5().Hash(input).ToString();
+
+					if (!load_init_from_mi.Contains(scriptDef) && File.Exists(sfile) && !force_rebuild)
+					{
+						#region 读取缓存记录，如果成功就不用再进行下一轮
+
+						using (System.IO.FileStream fs = new FileStream(sfile, FileMode.Open))
+						{
+							using (StreamReader reader = new StreamReader(fs, System.Text.Encoding.UTF8))
+							{
+								var hash = reader.ReadLine();
+								if (hash == origin)
+								{
+									bool readfailed = false;
+									List<Tuple<int, int, string, string>> records = new List<Tuple<int, int, string, string>>();
+									HashSet<ASTrait> seted = new HashSet<ASTrait>();
+									#region 读取记录
+									try
+									{
+										while (true)
+										{
+											string line = reader.ReadLine();
+											if (line == null)
+											{
+												break;
+											}
+											string[] fields = line.Split('\t');
+											if (fields.Length == 3)
+											{
+												string token = fields[0];
+												string[] xy = token.Split(",");
+
+												if (xy.Length == 2)
+												{
+													int token_line;
+													if (int.TryParse(xy[0], out token_line))
+													{
+														int token_ptr;
+														if (int.TryParse(xy[1], out token_ptr))
+														{
+															records.Add(new Tuple<int, int, string, string>(token_line, token_ptr, fields[1], fields[2]));
+														}
+														else
+														{
+															readfailed = false;
+														}
+													}
+													else
+													{
+														readfailed = true;
+													}
+												}
+												else
+												{
+													readfailed = true;
+												}
+											}
+											else
+											{
+												readfailed = true;
+											}
+										}
+									}
+									catch (IOException)
+									{
+										readfailed = true;
+									}
+									#endregion
+									if (!readfailed)
+									{
+										foreach (var container in script.allContainers.Where(c => c != null).OrderBy(c => (int)c._link_codescope.Kind))
+										{
+											foreach (var member in container._link_codescope.Members
+												.Where(m => m.compiler_initvalue != null
+												&&
+												m.trait.Value != null
+												&&
+												!m.trait.Value.initValue.HasValue
+												))
+											{
+												var record = records.FirstOrDefault(r => r.Item1 == member.trait.Token.line && r.Item2 == member.trait.Token.ptr);
+												if (record != null)
+												{
+													if (record.Item3 != member.trait.QName.ToDebugTypeName())
+													{
+														goto lbl_failed;
+													}
+
+													string v = record.Item4;
+
+													if (v.StartsWith("raw:"))
+													{
+														ulong raw;
+														if (ulong.TryParse(v.Substring(4), out raw))
+														{
+															NaNBoxing dv = new NaNBoxing(raw);
+															member.trait.Value.initValue = dv;
+															seted.Add(member.trait);
+														}
+														else
+														{
+															goto lbl_failed;
+														}
+													}
+													else if (v.StartsWith("str:"))
+													{
+														string str = v.Substring(4);
+														NaNBoxing dv = default;
+														if (dict_newstring.ContainsKey(str))
+														{
+															dv = dict_newstring[str];
+														}
+														else
+														{
+															int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+															if (heapptr == 0)
+																throw new InvalidOperationException();
+															if (heapptr > 0xffffff)
+															{
+																throw new ParseException("heapptr > 0xffffff");
+															}
+
+															int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+
+															dv.SetHeapPtr(ptr);
+															dict_newstring.Add(str, dv);
+														}
+														member.trait.Value.initValue = dv;
+														seted.Add(member.trait);
+													}
+													else
+													{
+														goto lbl_failed;
+													}
+													hasSuccess = true;
+												}
+											}
+										}
+										load_init_from_mi.Add(scriptDef);
+										continue;
+
+									lbl_failed:
+										foreach (var item in seted) //如果读取失败，则将以修改的还原
+										{
+											item.Value.initValue = null;
+										}
+										;
+									}
+								}
+							}
+						}
+
+						#endregion
+					}
+
 					var testswc_script = testswc.Scripts.Find(s => s.QName == script.QName);
 
 					foreach (var container in script.allContainers.Where(c => c != null).OrderBy(c => (int)c._link_codescope.Kind))
@@ -1127,7 +1294,7 @@ namespace juicescript.compiler
 						foreach (var member in container._link_codescope.Members
 							.Where(m => m.compiler_initvalue != null
 							&&
-							m.trait.Value !=null
+							m.trait.Value != null
 							&&
 							!m.trait.Value.initValue.HasValue
 							))
@@ -1139,7 +1306,7 @@ namespace juicescript.compiler
 							if (member.DefineAt is ASClass)
 							{
 								t_member = member;
-								
+
 								var method = ((ASClass)member.DefineAt).Constructor; method_const = context.dict_method_constants[method];
 								int method_idx = script.allContainers.IndexOf(method.Body);
 								test_method = ((ASMethodBody)testswc_script.allContainers[method_idx]).Method;
@@ -1215,7 +1382,7 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.Container = test_method.Body._link_codescope.Container;
 								_temp.Body._link_codescope.Parent = test_method.Body._link_codescope.Parent;
 
-								int mid= member.DefineAt._link_codescope.Members.IndexOf(member);
+								int mid = member.DefineAt._link_codescope.Members.IndexOf(member);
 								t_member = test_method.Body._link_codescope.Members[mid];
 							}
 							else
@@ -1223,17 +1390,18 @@ namespace juicescript.compiler
 								throw new InvalidOperationException();
 							}
 
+
 							try
 							{
 								ComputeJump(_temp, false);
 								List<Tuple<int, ASClass>> mapping = null;
-								
+
 								if (context.dict_methodresolver_ldclass_map.ContainsKey(method_const))
 								{
 									mapping = context.dict_methodresolver_ldclass_map[method_const];
 								}
-								
-								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone() , method_const , mapping, loadfromcache.Contains(script));
+
+								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone(), method_const, mapping, loadfromcache.Contains(script));
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 									var obj = computeplayer.Context.GC.Heap[v.HeapPtr];
@@ -1361,9 +1529,6 @@ namespace juicescript.compiler
 						}
 
 					}
-
-
-
 				}
 
 				if (!hasSuccess)
@@ -1372,14 +1537,68 @@ namespace juicescript.compiler
 				}
 			}
 
-			Dictionary<ASMethod,int> bytecode_shrink = new Dictionary<ASMethod, int>();
+			//保存初始值到文件
+			{
+				foreach (var scriptDef in context.scriptDefs)
+				{
+					if (load_init_from_mi.Contains(scriptDef))
+						continue;
 
+					var script = scriptDef.Script;
+
+					var fullpath = scriptDef.fullPath;
+					string proj = context.scriptInProj[scriptDef];
+					string sfile = System.IO.Path.Combine(workDir, scriptDef.fullPath.Substring(proj.Length)) + ".mi";
+
+					string input = System.IO.File.ReadAllText(fullpath);
+					var origin = new MyMD5.MyMD5().Hash(input).ToString();
+
+					using (System.IO.FileStream fs = new FileStream(sfile, FileMode.Create))
+					{
+						using (System.IO.StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
+						{
+							sw.WriteLine(origin);
+							foreach (var container in script.allContainers.Where(c => c != null).OrderBy(c => (int)c._link_codescope.Kind))
+							{
+								foreach (var member in container._link_codescope.Members
+									.Where(m => m.compiler_initvalue != null
+									&&
+									m.trait.Value != null
+									&&
+									m.trait.Value.initValue.HasValue
+									))
+								{
+									NaNBoxing v = member.trait.Value.initValue.Value;
+									string vStr;
+									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
+									{
+										int hptr = v.HeapPtr & 0xffffff;
+										string str = ((RtPayloadString)context.player_for_compiler.Context.GC.Heap[hptr].facility).Str;
+										vStr = "str:" + str;
+									}
+									else
+									{
+										vStr = "raw:" + v.Raw.ToString();
+									}
+
+									sw.WriteLine($"{member.trait.Token.line},{member.trait.Token.ptr}\t{member.trait.QName.ToDebugTypeName()}\t{vStr}");
+
+								}
+							}
+						}
+					}
+				}
+			}
+
+			//收缩字节码
+
+			Dictionary<ASMethod, int> bytecode_shrink = new Dictionary<ASMethod, int>();
 			foreach (var container in context.scriptDefs.SelectMany(s => s.containers)
 				.Where(c => c._link_codescope.Members.Any(m => m.Kind != ScopeMemberKind.Parameter && m.trait.Value != null && m.trait.Value.initValue.HasValue))
 				)
 			{
 				ASMethod method;
-				int shrinked = 0;bool flag_might_shrinked = false;
+				int shrinked = 0; bool flag_might_shrinked = false;
 				if (container._link_codescope.Kind == CodeScopeKind.Class)
 				{
 					method = ((ASClass)container).Constructor;
@@ -1409,11 +1628,11 @@ namespace juicescript.compiler
 
 				int oldsize = method.Body.ByteCode.Length;
 
-				int useslotcount; NaNBoxing[] constants;Instruction[] instructions;
+				int useslotcount; NaNBoxing[] constants; Instruction[] instructions;
 				Disassembler.Disassemble(method.Body.ByteCode, out useslotcount, out constants, out instructions);
 				List<Token> tokens = instructions.Select(i => i.token).ToList();
 
-				
+
 				List<Instruction> newinstructions = new List<Instruction>();
 
 				int lastindex = 0;
@@ -1421,8 +1640,8 @@ namespace juicescript.compiler
 					.Where(m => m.DefineAt == container && m.Kind != ScopeMemberKind.Parameter && m.trait.Value != null && m.trait.Value.initValue.HasValue)
 					)
 				{
-					int skipbytes = 0;int st_idx = 0;
-					while (skipbytes < scopeMember.compiler_initvalue_stpos -shrinked)
+					int skipbytes = 0; int st_idx = 0;
+					while (skipbytes < scopeMember.compiler_initvalue_stpos - shrinked)
 					{
 						skipbytes += instructions[st_idx].Size;
 						st_idx++;
@@ -1436,8 +1655,8 @@ namespace juicescript.compiler
 					{
 						for (int i = lastindex; i < st_idx; i++)
 						{
-							newinstructions.Add(instructions[i] );
-							
+							newinstructions.Add(instructions[i]);
+
 						}
 					}
 
@@ -1462,7 +1681,7 @@ namespace juicescript.compiler
 
 								int codeanddst = *(int*)PC; PC += 4;
 
-								INS_Code opcode =(INS_Code)( codeanddst & 0xff);
+								INS_Code opcode = (INS_Code)(codeanddst & 0xff);
 								if (opcode != INS_Code.storeScopeH && opcode != INS_Code.storeMethodVariable)
 								{
 									throw new InvalidOperationException();
@@ -1484,14 +1703,14 @@ namespace juicescript.compiler
 						}
 
 						newinstructions.Add(ld_MemberInitValue);
-						
+
 					}
 
-					lastindex = st_idx + info_src.instructions -1;
+					lastindex = st_idx + info_src.instructions - 1;
 				}
 				for (int i = lastindex; i < instructions.Length; i++)
 				{
-					newinstructions.Add(instructions[i]);					
+					newinstructions.Add(instructions[i]);
 				}
 
 				method.Body.ByteCode = Assembler.Assemble(useslotcount, constants, newinstructions.ToArray());
@@ -1503,20 +1722,20 @@ namespace juicescript.compiler
 						int headersize_dst = sizeof(int) * 3 + 2 * sizeof(int) * instructions.Length + sizeof(NaNBoxing) * constants.Length;
 						int headersize_new = sizeof(int) * 3 + 2 * sizeof(int) * newinstructions.Count + sizeof(NaNBoxing) * constants.Length;
 
-						bytecode_shrink.Add(method, oldsize - method.Body.ByteCode.Length 
+						bytecode_shrink.Add(method, oldsize - method.Body.ByteCode.Length
 							+ headersize_new - headersize_dst //需要补齐头部收缩							
 							);
 					}
 				}
 
-				
+
 
 			}
 
 			//由于可能收缩了bytecode,需要重新计算跳转
 			foreach (var item in bytecode_shrink.Keys)
 			{
-				ComputeJump(item,false);
+				ComputeJump(item, false);
 			}
 
 
@@ -1524,9 +1743,9 @@ namespace juicescript.compiler
 
 
 
-		private static void ComputeFunctionDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst)
+		private static void ComputeFunctionDefaultValue(CompileContext context, string workDir, List<string> libs, string outswcfile, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst,bool force_rebuild)
 		{
-			
+
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
 
 			juicescript.runtime.Player computeplayer = new Player(int.MaxValue, true);
@@ -1552,6 +1771,185 @@ namespace juicescript.compiler
 
 			foreach (var script in context.scriptDefs)
 			{
+				
+				var fullpath = script.fullPath;
+				string proj = context.scriptInProj[script];
+				string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".mp";
+
+				string input = System.IO.File.ReadAllText(fullpath);
+				var origin = new MyMD5.MyMD5().Hash(input).ToString();
+
+				if (File.Exists(sfile) && !force_rebuild)
+				{
+					Dictionary<ASParameter, int> readedparas = new Dictionary<ASParameter, int>();
+
+					using (System.IO.FileStream fs = new FileStream(sfile, FileMode.Open))
+					{
+						using (StreamReader reader = new StreamReader(fs, System.Text.Encoding.UTF8))
+						{
+							var hash = reader.ReadLine();
+							if (hash == origin)
+							{								
+								int const_count;
+								string l = reader.ReadLine();
+
+								List<NaNBoxing> constants = new List<NaNBoxing>();
+
+								if (int.TryParse(l, out const_count))
+								{
+									#region 加载常量池
+									for (int i = 0; i < const_count; i++)
+									{ 
+										string nvstr = reader.ReadLine();
+										if (nvstr == null)
+										{
+											goto lbl_failed;
+										}
+
+										if (nvstr.StartsWith("str:"))
+										{
+											string str = nvstr.Substring(4);
+											int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+											if (heapptr == 0)
+												throw new InvalidOperationException();
+											if (heapptr > 0xffffff)
+											{
+												throw new ParseException("heapptr > 0xffffff");
+											}
+
+											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+											NaNBoxing boxing = new NaNBoxing();
+											boxing.SetHeapPtr(ptr);
+
+											constants.Add(boxing);
+										}
+										else if (nvstr.StartsWith("raw:"))
+										{
+											string[] f = nvstr.Split('\t');
+											if (f.Length != 2)
+											{
+												goto lbl_failed;
+											}
+											else
+											{
+												string rawstr = f[0].Substring(4);
+												ulong raw;
+												if (ulong.TryParse(rawstr, out raw))
+												{
+													NaNBoxing c = new NaNBoxing(raw);
+													constants.Add(c);	
+												}
+												else
+												{
+													goto lbl_failed;
+												}
+											}
+										}
+
+									}
+									#endregion
+
+									List<Tuple<int, int, string, string, string, int>> records = new List<Tuple<int, int, string, string, string, int>>();
+
+									while (true)
+									{
+										string line = reader.ReadLine();
+										if (line == null)
+										{
+											break;
+										}
+
+										string[] fields = line.Split("\t");
+										if (fields.Length != 5)
+										{
+											goto lbl_failed;
+										}
+
+										int token_line;int token_ptr;string methodkey;string para_name;string para_index;int valueindex;
+										string[] xy = fields[0].Split(',');
+										if (xy.Length != 2)
+										{
+											goto lbl_failed;
+										}
+
+										if (!int.TryParse(xy[0],out token_line))
+										{
+											goto lbl_failed;
+										}
+										if (!int.TryParse(xy[1], out token_ptr))
+										{
+											goto lbl_failed;
+										}
+										methodkey = fields[1];
+										para_name = fields[2];
+										para_index = fields[3];
+										if (!int.TryParse(fields[4], out valueindex))
+										{
+											goto lbl_failed;
+										}
+
+										records.Add(new Tuple<int, int, string, string, string, int>(token_line, token_ptr, methodkey, para_name, para_index, valueindex));
+									}
+
+									for (int i = 1; i < script.scriptMethods.Count; i++)
+									{
+										ASMethod method = script.scriptMethods[i];
+										if (method.Parameters.Count > 0)
+										{
+											for (int a = 0; a < method.Parameters.Count; a++)
+											{
+												var para = method.Parameters[a];
+												if (para.IsOptional)
+												{
+													var record = records.FirstOrDefault(r => r.Item1 == method.Token.line &&
+														r.Item2 == method.Token.ptr &&
+														Player.GetMethodKey(method) == r.Item3 &&
+														para.Name == r.Item4 &&
+														"para_index:" + a == r.Item5
+													);
+
+													if (record == null)
+													{
+														goto lbl_failed;
+													}
+
+													readedparas.Add(para, para.ValueExprIndex);
+													para.ValueExprIndex = record.Item6;
+												}
+											}
+										}
+
+										foreach (var item in readedparas)
+										{
+											item.Key.computeDefaultValue = new byte[0];
+										}
+
+										if (constants.Count > 0)
+										{
+											CompileEnv compileEnv = new CompileEnv(null, null, null, context);
+											compileEnv.Constants = constants;
+											method.Body.param_defaultvalues = compileEnv.Encode();
+										}
+									}
+								}
+								else
+								{
+									goto lbl_failed;
+								}
+								continue;
+							}
+						}
+					}
+				lbl_failed:
+
+					foreach (var item in readedparas)
+					{
+						item.Key.ValueExprIndex = item.Value;
+					}
+					;
+				}
+
 				for (int i = 1; i < script.scriptMethods.Count; i++)
 				{
 					ASMethod method = script.scriptMethods[i];
@@ -1742,6 +2140,55 @@ namespace juicescript.compiler
 
 					}
 				}
+
+				#region 写入文件
+
+				using (System.IO.FileStream fs = new FileStream(sfile, FileMode.Create))
+				{
+					using (System.IO.StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
+					{
+						sw.WriteLine(origin);
+
+						for (int i = 1; i < script.scriptMethods.Count; i++)
+						{
+							ASMethod method = script.scriptMethods[i];
+							if (method.Parameters.Any(p=>p.IsOptional))
+							{
+								int scount; NaNBoxing[] cs; Instruction[] inslist;
+								Disassembler.Disassemble(method.Body.param_defaultvalues, out scount, out cs, out inslist);
+
+								sw.WriteLine(cs.Length.ToString());
+								for (int j = 0; j < cs.Length; j++)
+								{
+									NaNBoxing c = cs[j];
+									string vStr;
+									if (c.ValueType == NaNBoxing.BoxType.HeapPtr)
+									{
+										int hptr = c.HeapPtr & 0xffffff;
+										string str = ((RtPayloadString)context.player_for_compiler.Context.GC.Heap[hptr].facility).Str;
+										vStr = "str:" + str;
+									}
+									else
+									{
+										vStr = "raw:" + c.Raw.ToString() + "\t" + c.ToString();
+									}
+									sw.WriteLine(vStr);
+								}
+
+								for (int a = 0; a < method.Parameters.Count; a++)
+								{
+									var para = method.Parameters[a];
+									if (para.IsOptional)
+									{
+										sw.WriteLine($"{method.Token.line},{method.Token.ptr}\t{Player.GetMethodKey(method)}\t{para.Name}\tpara_index:{a}\t{para.ValueExprIndex}");	
+									}
+								}
+							}
+						}
+					}
+				}
+
+				#endregion
 			}
 		}
 
@@ -1791,12 +2238,12 @@ namespace juicescript.compiler
 				{
 					foreach (var item in container_def_ns)
 					{
-						if(//(item.QName.Namespace.Name == "" && item.QName.Namespace.Kind == NamespaceKind.Package)
+						if (//(item.QName.Namespace.Name == "" && item.QName.Namespace.Kind == NamespaceKind.Package)
 							//||
 							item != container.Traits[0]
 							)
 							imports.Add(item);
-						
+
 					}
 				}
 
@@ -1840,13 +2287,13 @@ namespace juicescript.compiler
 		}
 
 
-		private static void ComputeJump(ASMethod method,bool removeflag)
+		private static void ComputeJump(ASMethod method, bool removeflag)
 		{
 			//调整跳转。
 			int useslotcount; NaNBoxing[] constants; Instruction[] instructions;
 			Disassembler.Disassemble(method.Body.ByteCode, out useslotcount, out constants, out instructions);
 
-			Stack< Tuple< INS_Try_Enter, List<int>>> try_stack = new Stack<Tuple<INS_Try_Enter, List<int>>>();
+			Stack<Tuple<INS_Try_Enter, List<int>>> try_stack = new Stack<Tuple<INS_Try_Enter, List<int>>>();
 
 			bool has_try_stmt = false;
 
@@ -1880,10 +2327,10 @@ namespace juicescript.compiler
 #endif
 					try_enter.Item1.catch_pc = try_enter.Item2.ToArray();
 
-					
+
 				}
 
-				if (!removeflag || ( !(instruction.INS_Code == INS_Code.flag || instruction.INS_Code == INS_Code.expression_barrier) && removeflag))
+				if (!removeflag || (!(instruction.INS_Code == INS_Code.flag || instruction.INS_Code == INS_Code.expression_barrier) && removeflag))
 				{
 					offset += instruction.Size;
 				}
@@ -1922,7 +2369,7 @@ namespace juicescript.compiler
 
 							if (offset > 0xfffff8)
 							{
-								throw new ResolverException(instructions[j].token, "jumpoffset too large" );
+								throw new ResolverException(instructions[j].token, "jumpoffset too large");
 							}
 							found = true;
 							break;
@@ -1943,8 +2390,8 @@ namespace juicescript.compiler
 				if (instruction.INS_Code == INS_Code.if_false_goto)
 				{
 					INS_If_False_Goto if_false_goto = (INS_If_False_Goto)instruction;
-					
-					int flagid = if_false_goto.flag_id ;
+
+					int flagid = if_false_goto.flag_id;
 
 					bool found = false;
 					offset = 0;
@@ -2025,9 +2472,9 @@ namespace juicescript.compiler
 				}
 
 
-				
+
 				if (instruction.INS_Code == INS_Code.iter_get)
-				{ 
+				{
 					INS_Iter_Get iter_Get = (INS_Iter_Get)instruction;
 					int flagid = iter_Get.flag_end_id;
 					bool found = false;
@@ -2088,11 +2535,11 @@ namespace juicescript.compiler
 				temp.RemoveAll(i => i.INS_Code == INS_Code.flag || i.INS_Code == INS_Code.expression_barrier);
 				instructions = temp.ToArray();
 			}
-			method.Body.ByteCode = Assembler.Assemble(useslotcount,constants,instructions);
-		
+			method.Body.ByteCode = Assembler.Assemble(useslotcount, constants, instructions);
+
 		}
 
-		
+
 
 
 		private static void BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash, Dictionary<ASMethod, byte[]> dict_scriptinit_onlyconst)
@@ -2225,7 +2672,7 @@ namespace juicescript.compiler
 						ILBuilder.Build(compileEnv);
 
 						{
-							
+
 							var instructions = compileEnv.instructions.ToArray();
 							if (instructions.Length > 0)
 							{
@@ -2293,12 +2740,12 @@ namespace juicescript.compiler
 									}
 									else
 									{
-										
+
 										INS_SuperCtor superCtor = new INS_SuperCtor(method.Token);
-										superCtor.super_type =  compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
+										superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
 										superCtor.args = new StackLocater[0];
 
-										compileEnv.instructions.Insert( 0, superCtor);
+										compileEnv.instructions.Insert(0, superCtor);
 
 										for (int j = 0; j < instance_initmember.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
 										{
@@ -2502,19 +2949,19 @@ namespace juicescript.compiler
 							, context);
 
 						var catch_vars = as3Fscope.catch_variables;
-						
 
-						compileEnv.parent_catching_variable = new List<AS3Variable> (catch_vars);
+
+						compileEnv.parent_catching_variable = new List<AS3Variable>(catch_vars);
 
 						ILBuilder.Build(compileEnv);
 						method.Body.ByteCode = compileEnv.Encode();
 						context.dict_method_constants.Add(method, compileEnv.Constants);
 
 						if (method.Container is ASInstance && ((ASInstance)method.Container).IsInterface)
-						{ 
-						
+						{
+
 						}
-						else if (method.ReturnTypeKind != TypeKind.Any && method.ReturnTypeKind != TypeKind.Fun_Void && !method.Flags.HasFlag( MethodFlags.ASYNC ))
+						else if (method.ReturnTypeKind != TypeKind.Any && method.ReturnTypeKind != TypeKind.Fun_Void && !method.Flags.HasFlag(MethodFlags.ASYNC))
 						{
 							var instructions = compileEnv.instructions.ToArray();
 							if (instructions.Length > 0)
@@ -2601,11 +3048,12 @@ namespace juicescript.compiler
 
 						if (method.Flags.HasFlag(MethodFlags.NeedArguments))
 						{
-							throw new ResolverException(new Token() {
+							throw new ResolverException(new Token()
+							{
 								sourceFile = method.Token.sourceFile,
 								sourceFileFullPath = method.Token.sourceFileFullPath,
-								line = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.line ,
-							     ptr = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.ptr
+								line = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.line,
+								ptr = instructions.First(i => i.INS_Code == INS_Code.ld_arguments).token.ptr
 							},
 
 							"arguments not allow in generator function");
@@ -2631,7 +3079,7 @@ namespace juicescript.compiler
 						}
 					}
 
-					if(method.Flags.HasFlag( MethodFlags.ASYNC))
+					if (method.Flags.HasFlag(MethodFlags.ASYNC))
 					{
 						int useslotcount; NaNBoxing[] constants; Instruction[] instructions;
 						Disassembler.Disassemble(method.Body.ByteCode, out useslotcount, out constants, out instructions);
@@ -2650,17 +3098,17 @@ namespace juicescript.compiler
 						}
 
 
-						
+
 					}
 
-					
+
 				}
 
-				
 
 
 
-				ComputeJump(method,false);
+
+				ComputeJump(method, false);
 
 				//编译给默认参数求值的临时代码。
 				for (int a = 0; a < method.Parameters.Count; a++)
@@ -2727,7 +3175,7 @@ namespace juicescript.compiler
 
 					for (int i = 1; i < script.scriptMethods.Count; i++)
 					{
-						
+
 						ASMethod method = script.scriptMethods[i];
 
 
@@ -2762,7 +3210,7 @@ namespace juicescript.compiler
 								{
 									//bw.Write((byte)RtHeapTypeKind.CACHE_LD_CLASS);
 									bw.Write((byte)10);
-									bw.Write( context.constpool_ldclass[ptr]);
+									bw.Write(context.constpool_ldclass[ptr]);
 								}
 								else
 								{
@@ -2861,7 +3309,7 @@ namespace juicescript.compiler
 
 						}
 
-						var inited_scopeMembers = list_initedscopeMembers[i-1];
+						var inited_scopeMembers = list_initedscopeMembers[i - 1];
 
 						bw.Write(inited_scopeMembers.Count);
 						for (int j = 0; j < inited_scopeMembers.Count; j++)

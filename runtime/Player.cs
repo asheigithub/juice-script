@@ -12160,12 +12160,6 @@ namespace juicescript.runtime
 								LoadInt32(&classid_index, &PC);
 
 								var boxing = constants[classid_index];
-//#if FORCOMPILER
-//								if (boxing.ValueType != BoxType.Uint)
-//								{
-//									throw new EvalConstException();
-//								}
-//#endif
 
 
 #if DEBUG
