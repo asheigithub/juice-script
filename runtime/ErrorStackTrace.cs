@@ -78,7 +78,8 @@ namespace juicescript.runtime
 //未找到？不可能的说
                     throw new InvalidOperationException();
 #else
-                    return -1;
+					Environment.FailFast("出错了，这里跑不到");
+					return -1;
 #endif
                 }
             }
@@ -113,7 +114,11 @@ namespace juicescript.runtime
                     }
                     else if (methods[i].Container is ASScript)
                     {
+#if DEBUG
                         throw new InvalidOperationException();
+#else
+                        Environment.FailFast("出错了，这里跑不到");return default;
+#endif
                         //srcpath = methods[i].Container.Traits[0].Token.sourceFileFullPath;
                     }
                     else

@@ -181,8 +181,12 @@ namespace juicescript.runtime
                 case TypeKind.Unknown:
                 case TypeKind.Null:
 				case TypeKind.Super:
+#if DEBUG
 					throw new InvalidOperationException();
-                case TypeKind.Object:
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+				case TypeKind.Object:
                 case TypeKind.Class:
                 case TypeKind.String:
                 case TypeKind.Function:
@@ -296,7 +300,11 @@ namespace juicescript.runtime
                 case TypeKind.Unknown:
 				case TypeKind.Super:
                 case TypeKind.Null:
-                    throw new InvalidOperationException();
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 				case TypeKind.Any:
 				case TypeKind.Object:
                 case TypeKind.Class:
@@ -432,7 +440,11 @@ namespace juicescript.runtime
 				case TypeKind.SearchNameSpaceFromImports:
 				case TypeKind.Unknown:
 				case TypeKind.Null:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 				default:
 					{
 						if (element_asclass.Instance.Flags.HasFlag(ClassFlags.Struct))

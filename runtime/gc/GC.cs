@@ -250,10 +250,14 @@ namespace juicescript.runtime.gc
 
                     break;
                 default:
+#if DEBUG
                     throw new InvalidOperationException();
-            }
+#else
+					Environment.FailFast("出错了，这里跑不到"); break;
+#endif
+			}
 
-            int size = CalculMemusage(heapInstance);
+			int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
             {
                 instance = null;
@@ -732,8 +736,12 @@ namespace juicescript.runtime.gc
                                                         break;
                                                     case TypeKind.Fun_Void:
                                                     case TypeKind.Unknown:
+#if DEBUG
                                                         throw new InvalidOperationException();
-                                                    case TypeKind.Null:
+#else
+														Environment.FailFast("出错了，这里跑不到"); break;
+#endif
+													case TypeKind.Null:
                                                         break;
                                                     case TypeKind.Any:
                                                         if (((NaNBoxing*)ptr)->ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -974,11 +982,15 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.SHAPE:
                         {
-                            //RtPayloadShape rtPayload = (RtPayloadShape)obj.facility;
-                            
+							//RtPayloadShape rtPayload = (RtPayloadShape)obj.facility;
+
+#if DEBUG
                             throw new InvalidOperationException();
-                        }
-                        break;
+#else
+							Environment.FailFast("出错了，这里跑不到"); break;
+#endif
+						}
+						
                     case RtHeapTypeKind.DYNAMIC_PROPERTYS:
                         { 
                             RtPayloadDynamic rtPayload = (RtPayloadDynamic)obj.facility;
@@ -994,13 +1006,17 @@ namespace juicescript.runtime.gc
                         }
                         break;
                     default:
-                        throw new InvalidOperationException();
-                }
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); break;
+#endif
+				}
 
 
 
 
-            }
+			}
         }
 
         private void Collect(ref Player.ReceiveError receiveError)
@@ -1164,10 +1180,14 @@ namespace juicescript.runtime.gc
                         }
                         break;
                     default:
+#if DEBUG
                         throw new InvalidOperationException();
-                }
+#else
+						Environment.FailFast("出错了，这里跑不到"); break;
+#endif
+				}
 
-            }
+			}
 
 
 

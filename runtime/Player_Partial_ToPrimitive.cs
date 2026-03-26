@@ -104,7 +104,11 @@ namespace juicescript.runtime
 				case RtHeapTypeKind.MethodScope:
 				case RtHeapTypeKind.STACK_CACHE_OBJ:
 				default:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 
 			int code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "toString":"valueOf", tmp, stackslots, stackStPos, value, caller_bindthis_ptr, ref error,true);
@@ -120,7 +124,11 @@ namespace juicescript.runtime
 					RaiseTypeError_Ambiguous(ref error,  hint == HINT.h_string ? "toString" : "valueOf");
 					return default;
 				default:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 			NaNBoxing fun = LoadValue(stackslots[tmp.index], -1, ref error, stackslots, stackStPos + tmp.index);
 			
@@ -174,7 +182,11 @@ namespace juicescript.runtime
 					RaiseTypeError_Ambiguous(ref error, hint == HINT.h_string ? "valueOf" : "toString");
 					return default;
 				default:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");  return default;
+#endif
 			}
 
 			fun = LoadValue(stackslots[tmp.index], -1, ref error,  stackslots, stackStPos + tmp.index);

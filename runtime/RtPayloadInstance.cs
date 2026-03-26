@@ -449,7 +449,11 @@ namespace juicescript.runtime
 
 				case TypeKind.Fun_Void:
 				case TypeKind.Unknown:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 
 				case TypeKind.Null:
 				case TypeKind.String:
@@ -567,7 +571,11 @@ namespace juicescript.runtime
 							break;
 						case TypeKind.Fun_Void:
 						case TypeKind.Unknown:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 
 						//case TypeKind.TraitDataReference:
 						//    throw new InvalidOperationException();
@@ -720,7 +728,11 @@ namespace juicescript.runtime
 
 				case TypeKind.Fun_Void:
 				case TypeKind.Unknown:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 				case TypeKind.Null:
 				case TypeKind.String:
 				case TypeKind.Function:

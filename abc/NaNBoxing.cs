@@ -401,9 +401,13 @@ namespace juicescript
                                     result.SetNumber(0.0 + GetDouble(b));
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     case 3:
                     case 4:
@@ -434,9 +438,13 @@ namespace juicescript
                                     result.SetFloat((a.Boolean ? 1 : 0) + b.FloatValue);
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                            break;
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+							break;
                         }
                     case 5:
                         //v1 BoxType.Int;
@@ -464,9 +472,13 @@ namespace juicescript
                                     result.SetInt(a.IntValue + GetInt(b));
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                            break;
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+							break;
                         }
 
                     case 6:
@@ -503,9 +515,13 @@ namespace juicescript
                                     result.SetFloat((float)a.UIntValue + b.FloatValue);
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     case 7:
                     //v1 BoxType.Sbyte; 
@@ -537,9 +553,13 @@ namespace juicescript
                                     result.SetFloat(GetFloat(a) + b.FloatValue);
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     case 11:
                         //v1 BoxType.Float;
@@ -674,9 +694,13 @@ namespace juicescript
                                     result.SetFloat((a.Boolean ? 1 : 0) - b.FloatValue);
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
 
                         break;
                     case 5: //int
@@ -704,9 +728,13 @@ namespace juicescript
                                     result.SetInt(a.IntValue - GetInt(b));
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     case 6: //uint
                         {
@@ -742,9 +770,13 @@ namespace juicescript
                                     result.SetFloat((float)a.UIntValue - b.FloatValue);
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     case 7:
                     case 8:
@@ -772,9 +804,13 @@ namespace juicescript
                                     result.SetFloat(GetFloat(a) - b.FloatValue);
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     case 11:
                         {
@@ -796,18 +832,26 @@ namespace juicescript
                                     result.SetFloat(GetFloat(a) - GetFloat(b));
                                     break;
                                 default:
-                                    throw new InvalidOperationException();
-                            }
-                        }
+#if DEBUG
+					                throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+							}
+						}
                         break;
                     default:
-                        throw new InvalidOperationException();
-                }
+#if DEBUG
+					    throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+				}
 
 
 
 
-                return true;
+				return true;
             }
 
         }
@@ -949,7 +993,8 @@ namespace juicescript
                         throw new InvalidOperationException();
 #else
                     default:
-                        return v.IntValue;
+						Environment.FailFast("出错了，这里跑不到");
+						return 0;
 #endif
                 }
 
@@ -1521,14 +1566,9 @@ namespace juicescript
                     break;
                 
 				default:
-                    if (returnTypeKind > TypeKind.Namespace)
-                    {
-                        SetNull();
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
-                    }
+                    Debug.Assert(returnTypeKind > TypeKind.Namespace);
+                    
+                    SetNull();
                     break;
             }
 

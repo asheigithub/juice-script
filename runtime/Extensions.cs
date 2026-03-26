@@ -70,7 +70,11 @@ namespace juicescript.runtime
                 case NaNBoxing.BoxType.HeapPtr:
                 case NaNBoxing.BoxType.Fault:
                 default:
+#if DEBUG
                     throw new InvalidOperationException();
+#else
+                    Environment.FailFast("出错了，这里跑不到");return double.NaN;
+#endif
             }
         }
 
@@ -79,11 +83,15 @@ namespace juicescript.runtime
 			switch (v.ValueType)
 			{
 				case NaNBoxing.BoxType.Number:
-                    throw new InvalidOperationException();
+                    //throw new InvalidOperationException();
 				case NaNBoxing.BoxType.Undefined:
-					throw new InvalidOperationException();
+					//throw new InvalidOperationException();
 				case NaNBoxing.BoxType.Null:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 				case NaNBoxing.BoxType.Boolean:
 					return v.Boolean ? 1.0f : 0.0f;
 				case NaNBoxing.BoxType.Int:
@@ -103,7 +111,11 @@ namespace juicescript.runtime
 				case NaNBoxing.BoxType.HeapPtr:
 				case NaNBoxing.BoxType.Fault:
 				default:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return float.NaN;
+#endif
 			}
 		}
 
@@ -112,17 +124,23 @@ namespace juicescript.runtime
 			switch (v.ValueType)
 			{
 				case NaNBoxing.BoxType.Number:
-					throw new InvalidOperationException();
 				case NaNBoxing.BoxType.Undefined:
-					throw new InvalidOperationException();
 				case NaNBoxing.BoxType.Null:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return 0;
+#endif
 				case NaNBoxing.BoxType.Boolean:
 					return v.Boolean ? 1 : 0;
 				case NaNBoxing.BoxType.Int:
 					return v.IntValue;
 				case NaNBoxing.BoxType.Uint:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return 0;
+#endif
 				case NaNBoxing.BoxType.Sbyte:
 					return v.SByteValue;
 				case NaNBoxing.BoxType.Byte:
@@ -132,11 +150,14 @@ namespace juicescript.runtime
 				case NaNBoxing.BoxType.UShort:
 					return v.UShortValue;
 				case NaNBoxing.BoxType.Float:
-					throw new InvalidOperationException();
 				case NaNBoxing.BoxType.HeapPtr:
 				case NaNBoxing.BoxType.Fault:
 				default:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return 0;
+#endif
 			}
 		}
 
@@ -380,16 +401,23 @@ namespace juicescript.runtime
                                     return $"{instance.Type.QName.Name}@{value.HeapPtr.ToString("x")}";
                                 }
                             default:
-                                throw new InvalidProgramException();
-                        }
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+								Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+						}
 
-                    }
+					}
                 case NaNBoxing.BoxType.Fault:
-                    throw new InvalidOperationException();
                 default:
+#if DEBUG
                     throw new InvalidOperationException();
-            }
-        }
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+			}
+		}
 
 
         public static string ToDebugTypeName(this ASMultiname multiname)
@@ -425,8 +453,12 @@ namespace juicescript.runtime
             switch (ns.Kind)
             {
                 case NamespaceKind.TBD:
+#if DEBUG
                     throw new InvalidOperationException();
-                case NamespaceKind.Namespace:
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+				case NamespaceKind.Namespace:
                     return ns.Name;    
                 case NamespaceKind.Package:
                     return "public";
@@ -439,13 +471,21 @@ namespace juicescript.runtime
                     return "protected";
                     
                 case NamespaceKind.Explicit:
+#if DEBUG
                     throw new InvalidOperationException();
-                case NamespaceKind.Private:
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+				case NamespaceKind.Private:
                     return "private";
                 default:
+#if DEBUG
                     throw new InvalidOperationException();
-            }
-        }
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+			}
+		}
 
 
 
@@ -613,9 +653,13 @@ namespace juicescript.runtime
                         }
                         else
                         {
-                            throw new InvalidOperationException();
-                        }
-                    }
+#if DEBUG
+                             throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+						}
+					}
                 case BoxType.LocalString:
                     {
                         Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
@@ -628,7 +672,11 @@ namespace juicescript.runtime
                     }
 				case NaNBoxing.BoxType.Fault:
 				default:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 		}
 

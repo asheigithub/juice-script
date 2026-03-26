@@ -329,7 +329,11 @@ namespace juicescript.runtime
 					case RtHeapTypeKind.SHAPE:
 					case RtHeapTypeKind.STACK_CACHE_OBJ:
 					default:
+#if DEBUG
 						throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 				}
 
 			}
@@ -816,7 +820,11 @@ namespace juicescript.runtime
 											copyed_ptr = scope.StackPos + i + Context.CacheInstancePtr;
 											if (copyed_ptr == ptr)
 											{
+#if DEBUG
 												throw new InvalidOperationException();
+#else
+												Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 												//copyed_ptr = 0;
 												//continue;
 											}

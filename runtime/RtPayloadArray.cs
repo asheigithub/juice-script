@@ -262,7 +262,11 @@ namespace juicescript.runtime
 					}
 					break;
 				default:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 
 			}
 		}
@@ -478,12 +482,16 @@ namespace juicescript.runtime
 					break;
                 default:
 
-                    throw new InvalidOperationException();
-            }
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
+			}
 
 
 
-        }
+		}
 
 
 

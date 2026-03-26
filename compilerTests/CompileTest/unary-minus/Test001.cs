@@ -216,6 +216,7 @@ trace(""OK"");
 				Assert.IsNotNull(global);
 				var globalInstance = player.Context.GC.Heap[global.__global_index__];
 				Assert.IsNotNull(globalInstance);
+
 				Assert.IsNull(ex);
 
 				RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;

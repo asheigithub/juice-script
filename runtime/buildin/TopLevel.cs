@@ -317,9 +317,10 @@ namespace juicescript.runtime.buildin
 			var rest = scope.ReadSlot(0, context.player);
 			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
 
+#if DEBUG
 			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
-
+#endif
 			
 			var arguments = rest_array.stack_store.Span;
 

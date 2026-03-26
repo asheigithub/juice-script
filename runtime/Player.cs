@@ -3386,7 +3386,11 @@ namespace juicescript.runtime
 							RaiseTypeError_MustVinallaObject(ref error);
 							break;
 						default:
-							throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); break;
+#endif
 
 					}
 
@@ -3405,7 +3409,11 @@ namespace juicescript.runtime
 			if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
 				//讲道理，Number,Boolean之类好像没有属性
-				throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+				Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 			else
 			{
@@ -3604,7 +3612,11 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 				}
 			}
 		}
@@ -4305,7 +4317,11 @@ namespace juicescript.runtime
 							}
 							else
 							{
+#if DEBUG
 								throw new InvalidOperationException();
+#else
+								Environment.FailFast("出错了，这里跑不到") ; return default;
+#endif
 							}
 						}
 #if DEBUG
@@ -4385,7 +4401,11 @@ namespace juicescript.runtime
 								case BoxType.HeapPtr:
 								case BoxType.Fault:
 								default:
-									throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+									Environment.FailFast("出错了，这里跑不到"); break;
+#endif
 							}
 
 							NaNBoxing ns = new NaNBoxing();
@@ -4427,7 +4447,11 @@ namespace juicescript.runtime
 						}
 						else
 						{
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 						}
 
 						//throw new NotImplementedException("原始类型未实现");
@@ -4539,7 +4563,11 @@ namespace juicescript.runtime
 						if (o.Type._link_codescope.index != scopeid)
 						{
 							//不可能到这里
-							throw new InvalidOperationException();
+#if DEBUG
+							 throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); break;
+#endif
 						}
 						else
 						{
@@ -4551,7 +4579,11 @@ namespace juicescript.runtime
 						var codeScope = ((RtPayloadScriptClass)o.facility).Meta._link_codescope;
 						if (codeScope.index != scopeid)
 						{
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); break;
+#endif
 						}
 						else
 						{
@@ -4561,7 +4593,11 @@ namespace juicescript.runtime
 					}
 					else
 					{
+#if DEBUG
 						throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); break;
+#endif
 					}
 
 				} while (true);
@@ -4606,7 +4642,11 @@ namespace juicescript.runtime
 				case RtHeapTypeKind.STACK_CACHE_OBJ:
 				//case RtHeapTypeKind.CACHE_LD_CLASS:
 				default:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); type = null; return;
+#endif
 			}
 
 			return;// instance;
@@ -5385,7 +5425,11 @@ namespace juicescript.runtime
 						case RtHeapTypeKind.SHAPE:
 						case RtHeapTypeKind.MethodScope:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 					}
 
 					//return v1.HeapPtr == v2.HeapPtr;
@@ -5881,7 +5925,11 @@ namespace juicescript.runtime
 						case RtHeapTypeKind.SHAPE:
 						case RtHeapTypeKind.MethodScope:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 					}
 					//return key1.HeapPtr == key2.HeapPtr;
 				}
@@ -6272,7 +6320,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 				case TypeKind.SByte:
@@ -6373,7 +6425,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 
@@ -6474,7 +6530,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.Short:
 					switch (invalue.ValueType)
@@ -6572,7 +6632,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 				case TypeKind.UShort:
@@ -6673,7 +6737,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 				case TypeKind.Int:
@@ -6773,7 +6841,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.Uint:
 					switch (invalue.ValueType)
@@ -6872,7 +6944,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.Float:
 					switch (invalue.ValueType)
@@ -6959,7 +7035,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.Number:
 					switch (invalue.ValueType)
@@ -7044,7 +7124,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.Fun_Void:
 				case TypeKind.TraitDataReference:
@@ -7053,10 +7137,13 @@ namespace juicescript.runtime
 				case TypeKind.RTQNameRTQNameL_N:
 				case TypeKind.SearchNameSpaceFromImports:
 				case TypeKind.Unknown:
-					throw new InvalidOperationException();
 				case TypeKind.Null:
 					//不可能发生
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 				case TypeKind.Object:
 
 					switch (invalue.ValueType)
@@ -7084,7 +7171,11 @@ namespace juicescript.runtime
 							return;
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.String:
 					switch (invalue.ValueType)
@@ -7359,12 +7450,20 @@ namespace juicescript.runtime
 									case RtHeapTypeKind.SHAPE:
 									case RtHeapTypeKind.MethodScope:
 									default:
+#if DEBUG
 										throw new InvalidOperationException();
+#else
+										Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 								}
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 
@@ -7428,7 +7527,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				case TypeKind.Array:
 					switch (invalue.ValueType)
@@ -7472,7 +7575,11 @@ namespace juicescript.runtime
 
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 
@@ -7551,7 +7658,11 @@ namespace juicescript.runtime
 
 						case NaNBoxing.BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 
 
@@ -7939,7 +8050,11 @@ namespace juicescript.runtime
 					}
 				case NaNBoxing.BoxType.Fault:
 				default:
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 
 		}
@@ -8560,7 +8675,11 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 				}
 			}
 			else if (kind == RtHeapTypeKind.CLOSURE)
@@ -8684,7 +8803,11 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+				Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 
 
@@ -8857,7 +8980,11 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 				}
 			}
 			else
@@ -9030,7 +9157,11 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				throw new InvalidOperationException();
+#if DEBUG
+                    throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
 			}
 			return PROPERTY_PTR;
 		}
@@ -9312,7 +9443,11 @@ namespace juicescript.runtime
 					}
 					else
 					{
+#if DEBUG
 						throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); closure_instance=null; return default;
+#endif
 					}
 
 					if (c.ValueType == BoxType.Undefined)
@@ -9469,9 +9604,8 @@ namespace juicescript.runtime
 						var codeScope = ((RtPayloadScriptClass)s.facility).Meta._link_codescope;
 						if (codeScope.index != heapLocater.ScopeIndex)
 						{
-
-#if DEBUG
 							codeScope = codeScope.Parent;
+#if DEBUG
 							if (codeScope.Kind != CodeScopeKind.Script)
 								throw new InvalidOperationException();
 							if (codeScope.index != heapLocater.ScopeIndex)
@@ -9587,7 +9721,11 @@ namespace juicescript.runtime
 				//case RtHeapTypeKind.CACHE_LD_CLASS:
 				case RtHeapTypeKind.STACK_CACHE_OBJ:
 				default:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");  return default;
+#endif
 			}
 		}
 
@@ -10064,10 +10202,12 @@ namespace juicescript.runtime
 											return; // 错误已经在TryCreateStringValue中处理
 										}
 									}
+#if DEBUG
 									else
 									{
 										throw new InvalidOperationException();
 									}
+#endif
 								}
 								break;
 							case BoxType.LocalString:
@@ -10175,10 +10315,12 @@ namespace juicescript.runtime
 												return; // 错误已经在TryCreateStringValue中处理
 											}
 										}
+#if DEBUG
 										else
 										{
 											throw new InvalidOperationException();
 										}
+#endif
 									}
 									break;
 #if DEBUG
@@ -10376,10 +10518,12 @@ namespace juicescript.runtime
 						case BoxType.Float:
 							stackslots[dst.index].SetFloat((n1.Boolean ? 1 : 0) - n2.FloatValue);
 							break;
+#if DEBUG
 						case BoxType.HeapPtr:
 						case BoxType.Fault:
 						default:
 							throw new InvalidOperationException();
+#endif
 					}
 					break;
 				case BoxType.Int:
@@ -10408,9 +10552,11 @@ namespace juicescript.runtime
 						case BoxType.UShort:
 							stackslots[dst.index].SetInt(n1.IntValue - Extensions.GetIntValue(n2));
 							break;
+#if DEBUG
 						case BoxType.Fault:
 						default:
 							throw new InvalidOperationException();
+#endif
 					}
 					break;
 				case BoxType.Uint:
@@ -10447,9 +10593,11 @@ namespace juicescript.runtime
 						case BoxType.Float:
 							stackslots[dst.index].SetFloat((float)n1.UIntValue - n2.FloatValue);
 							break;
+#if DEBUG
 						case BoxType.Fault:
 						default:
 							throw new InvalidOperationException();
+#endif
 					}
 					break;
 				case BoxType.Sbyte:
@@ -10479,10 +10627,12 @@ namespace juicescript.runtime
 						case BoxType.Float:
 							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) - n2.FloatValue);
 							break;
+#if DEBUG
 						case BoxType.HeapPtr:
 						case BoxType.Fault:
 						default:
 							throw new InvalidOperationException();
+#endif
 					}
 					break;
 				case BoxType.Float:
@@ -10504,16 +10654,20 @@ namespace juicescript.runtime
 						case BoxType.Uint:
 							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) - Extensions.GetFloatValue(n2));
 							break;
+#if DEBUG
 						case BoxType.HeapPtr:
 						case BoxType.Fault:
 						default:
 							throw new InvalidOperationException();
+#endif
 					}
 					break;
+#if DEBUG
 				case BoxType.HeapPtr:
 				case BoxType.Fault:
 				default:
 					throw new InvalidOperationException();
+#endif
 			}
 
 		}
@@ -11422,6 +11576,7 @@ namespace juicescript.runtime
 #if DEBUG
 					throw new InvalidOperationException();
 #else
+					Environment.FailFast("出错了，这里跑不到");
 					break;
 #endif
 
@@ -11910,6 +12065,7 @@ namespace juicescript.runtime
 								throw new InvalidOperationException();
 #else
 							default:
+								Environment.FailFast("出错了，这里跑不到");
 								return false;
 #endif
 						}
@@ -11925,6 +12081,7 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #else
 				default:
+					Environment.FailFast("出错了，这里跑不到");
 					return false;
 #endif
 			}
@@ -11973,8 +12130,13 @@ namespace juicescript.runtime
 				case RtHeapTypeKind.NAMESPACE:
 					o_proto = ((RtPayloadScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__].facility).PROTO__PTR;
 					break;
+
 				default:
+#if DEBUG
 					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");  return default;
+#endif
 			}
 
 			return o_proto;
@@ -12929,6 +13091,8 @@ namespace juicescript.runtime
 												throw new InvalidOperationException();
 #else
 											default:
+												Environment.FailFast("出错了，这里跑不到");
+
 												error.error.setFault();
 												goto flag_handle_error;
 #endif
@@ -13808,7 +13972,7 @@ namespace juicescript.runtime
 										goto flag_handle_error;
 									case NaNBoxing.BoxType.HeapPtr:
 										break;
-
+#if DEBUG
 									case NaNBoxing.BoxType.Number:
 									case NaNBoxing.BoxType.Boolean:
 									case NaNBoxing.BoxType.Int:
@@ -13819,7 +13983,7 @@ namespace juicescript.runtime
 									case NaNBoxing.BoxType.UShort:
 									case NaNBoxing.BoxType.Float:
 										throw new InvalidOperationException(); //这些东西没有成员
-#if DEBUG
+
 									case NaNBoxing.BoxType.Undefined:
 									case NaNBoxing.BoxType.Fault:
 									default:
@@ -13904,6 +14068,7 @@ namespace juicescript.runtime
 										stackslots[target.index].SetHeapPtr(cacheobjpointer);
 
 									}
+#if DEBUG
 									else if (instance.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 									{
 										throw new InvalidOperationException();
@@ -13932,6 +14097,7 @@ namespace juicescript.runtime
 										//                                        }
 
 									}
+#endif
 #if DEBUG
 									else
 									{
@@ -14787,10 +14953,12 @@ namespace juicescript.runtime
 										((RtPayloadClosure)closure.facility).HEAPINSTANCE_PTR = 0;
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
+#if DEBUG
 									else
 									{
 										throw new InvalidOperationException();
 									}
+#endif
 								}
 
 
@@ -15117,11 +15285,13 @@ namespace juicescript.runtime
 									RaiseTypeError_AccessNull(ref error);
 									goto flag_handle_error;
 								}
+#if DEBUG
 								if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
 								{
 									throw new InvalidOperationException(); //非堆对象不可能有要写的属性
 								}
 								else
+#endif
 								{
 									BeforeWriteProperty();
 
@@ -15210,11 +15380,12 @@ namespace juicescript.runtime
 										}
 #endif
 									}
+#if DEBUG
 									else
 									{
 										throw new InvalidOperationException();//其他类型应该没有要写的属性
 									}
-
+#endif
 
 								}
 
@@ -16238,7 +16409,11 @@ namespace juicescript.runtime
 										}
 										break;
 									default:
+#if DEBUG
 										throw new InvalidOperationException();
+#else
+										Environment.FailFast("出错了，这里跑不到"); PC_PTR = 0;return;
+#endif
 								}
 							}
 
@@ -16625,7 +16800,11 @@ namespace juicescript.runtime
 
 												if (target_ins.Type._link_codescope.TypeLayout.Size != 0)
 												{
+#if DEBUG
 													throw new InvalidOperationException();
+#else
+													Environment.FailFast("出错了，这里跑不到"); PC_PTR = 0; return;
+#endif
 												}
 
 												((RtPayloadInstance)target_ins.facility).HEAPINSTANCE_PTR = 0;
@@ -17047,14 +17226,11 @@ namespace juicescript.runtime
 										break;
 									case NaNBoxing.BoxType.HeapPtr:
 										ConvertValueType(ref error, v, TypeKind.Number, Context.NUMBER, ref stackslots[dst.index]); //这里肯定是字符串
-#if DEBUG
-										if (error.raised)
-										{
-											throw new InvalidOperationException();
-										}
+
+										Debug.Assert(!error.raised);
 
 										stackslots[dst.index].SetNumber(-stackslots[dst.index].Number);
-#endif
+
 										break;
 #if DEBUG
 									case NaNBoxing.BoxType.Fault:
@@ -17706,6 +17882,7 @@ namespace juicescript.runtime
 #if DEBUG
 										throw new InvalidOperationException();
 #else
+										Environment.FailFast("出错了，这里跑不到");
 										stackslots[dst.index].SetBoolean(false);
 										break;
 #endif
@@ -19102,11 +19279,15 @@ namespace juicescript.runtime
 									}
 									else
 									{
+#if DEBUG
 										throw new InvalidOperationException();
+#else
+										Environment.FailFast("出错了，这里跑不到"); PC_PTR = 0; return;
+#endif
 									}
 
 
-									
+
 
 								}
 								else

@@ -28,8 +28,10 @@ namespace juicescript.runtime.buildin
 
 			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
 
+#if DEBUG
 			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
+#endif
 
 			var array = (RtPayloadArray)arrayinstance.facility;
 

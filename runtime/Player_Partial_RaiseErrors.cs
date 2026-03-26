@@ -217,7 +217,11 @@ namespace juicescript.runtime
 							messagePtr = Context.GC.AllocString($"Property {ns.ToDebugString(this)}{(string.IsNullOrEmpty(ns.ToDebugString(this)) ? "" : "::")}{searchName} not found on undefined and there is no default value.");
 							break;
 						case BoxType.Null:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 							break;
 						case BoxType.Boolean:
 							messagePtr = Context.GC.AllocString($"Property {ns.ToDebugString(this)}{(string.IsNullOrEmpty(ns.ToDebugString(this)) ? "" : "::")}{searchName} not found on Boolean and there is no default value.");
@@ -246,7 +250,11 @@ namespace juicescript.runtime
 						case BoxType.HeapPtr:
 						case BoxType.Fault:
 						default:
+#if DEBUG
 							throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到"); return;
+#endif
 					}
 				}
 
