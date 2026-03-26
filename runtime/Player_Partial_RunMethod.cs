@@ -802,7 +802,7 @@ namespace juicescript.runtime
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
 					slots.Clear(); //栈清空 -- 防止GC时错误访问
 					int P_PC;
-					Execute(ref info, mScope, thisPtr, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
+					Execute( ref info, mScope, thisPtr, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
 
 					Context.BackTraceIndex--;
 					//Context.BackTrace[Context.BackTraceIndex].Method = null;

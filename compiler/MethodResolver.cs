@@ -1028,7 +1028,16 @@ namespace juicescript.compiler
 														}
 														for (int j = 0; j < src_count; j++)
 														{
-															*(src_consts+j)=constants[j];
+															if ((src_consts + j)->Raw != constants[j].Raw)
+															{
+																*(src_consts + j) = constants[j];
+																//需要后续的优化pass重新执行，因为常量池发生了变化！
+																string ofile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".mo";
+																if (File.Exists(ofile))
+																{
+																	File.Delete(ofile);
+																}
+															}
 														}
 													}
 												}

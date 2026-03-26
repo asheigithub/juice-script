@@ -208,7 +208,7 @@ namespace asc
                             out_swc += ".swc";
                         }
 
-                        bool force_rebuild_bcode = force.HasValue();
+                        bool force_rebuild_bcode = force.HasValue() || cfgs.Values.Count>0 ;
 
                         
                         return new CompilePipeLine().Build( optionPackDir.Values.Select(p=>Path.GetFullPath(p)).ToList(),

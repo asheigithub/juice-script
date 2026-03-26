@@ -644,6 +644,7 @@ namespace juicescript.compiler
                 }
                 else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
                 {
+                   
                     ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
 
                     int pool_index = ld_cls.IndexOf(classid);

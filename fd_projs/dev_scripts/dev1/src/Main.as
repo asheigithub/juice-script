@@ -21,21 +21,21 @@ package
 
 
 
-import geom.Vector2;
-var a:Vector2 = new Vector2(0,1);
-var b = new Vector2(1,0);
-
-a += b;
-
-trace(a);
-trace( a.dot(b) );
-trace( a.cross(b) );
-trace( a * 3 );
-trace( a / 3 );
-
-trace( 6 * b );
-
-trace( +-b);   
+//import geom.Vector2;
+//var a:Vector2 = new Vector2(0,1);
+//var b = new Vector2(1,0);
+//
+//a += b;
+//
+//trace(a);
+//trace( a.dot(b) );
+//trace( a.cross(b) );
+//trace( a * 3 );
+//trace( a / 3 );
+//
+//trace( 6 * b );
+//
+//trace( +-b);   
 
 //final class BB
 //{
@@ -227,23 +227,23 @@ trace( +-b);
 //lbl2:
     //trace(x);
 	
-//function  fib(i:int):int 
-	//{
-		//if (i === 1 || i === 2)
-		//{
-			//return 1;
-		//}
-		//else 
-		//{
-			//
-			//return fib(i - 2) + fib(i-1);
-			//
-		//}	
-	//}
-	//
-	//
-	//
-//trace(fib(35));
+function  fib(i:int):int 
+	{
+		if (i === 1 || i === 2)
+		{
+			return 1;
+		}
+		else 
+		{
+			
+			return fib(i - 2) + fib(i-1);
+			
+		}	
+	}
+	
+	
+	
+trace(fib(35));
 
 
 

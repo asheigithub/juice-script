@@ -23,8 +23,8 @@ namespace juicescript.compiler.IL.Optimize
 
 		
 
-#if FALSE		
-
+	
+#if FALSE
 			bool flag;
 			#region remove "move"
 			do
@@ -62,7 +62,7 @@ namespace juicescript.compiler.IL.Optimize
 			} while (flag);
 			#endregion
 
-
+	
 			#region 连续if跳跃
 			if (true)
 			{
@@ -490,6 +490,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			var optimizedInstructions = cfg.FlattenInstructions();		
 			method.Body.ByteCode = Assembler.Assemble(maxslots, constants, optimizedInstructions);
+
 		}
 	}
 }

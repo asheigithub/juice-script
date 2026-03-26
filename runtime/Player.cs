@@ -12173,7 +12173,7 @@ namespace juicescript.runtime
 
 		}
 
-
+		private Memory<char> tempholdchars = new Memory<char>(new char[16]);
 		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos,IResume_State resume_state)
@@ -12190,7 +12190,7 @@ namespace juicescript.runtime
 			}
 
 #endif
-			Span<char> temp = stackalloc char[16];//用于从LocalString中提取值
+			
 
 			var method = ((ASMethodBody)methodscope.Type).Method;
 
@@ -12450,6 +12450,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
+													Span<char> temp = tempholdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
 													int l = _obj.searchPropertyName.GetLocalStringChars(temp);
 													searchName = temp.Slice(0, l);
 												}
@@ -15874,6 +15875,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
+										Span<char> temp = tempholdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
 										int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
 										searchName = temp.Slice(0, l);
 									}
@@ -15919,6 +15921,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
+											Span<char> temp = tempholdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
 											int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
 											searchName = temp.Slice(0, l);
 
