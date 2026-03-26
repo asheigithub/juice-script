@@ -31,12 +31,21 @@ namespace juicescript.runtime
 			/// <summary>
 			/// %
 			/// </summary>
-			mod =4 ,
+			mod = 4 ,
+
+			/// <summary>
+			/// - 取反
+			/// </summary>
+			neg = 5 ,
+			/// <summary>
+			/// + 一元正
+			/// </summary>
+			positive = 6,
 		}
 
 		private HashSet<ASClass> operator_override_type_code = new HashSet<ASClass>();
 
-		public ASMethod[][][] overrideOperatorMethods = new ASMethod[(int)OverrideOperator.mod + 1][][];
+		public ASMethod[][][] overrideOperatorMethods = new ASMethod[(int)OverrideOperator.positive + 1][][];
 
 		/// <summary>
 		/// 计算操作符重载表
@@ -99,16 +108,16 @@ namespace juicescript.runtime
 
 								if (!(method.Container is ASClass))
 								{
-									throw new LoaderException("[operator] only can be defined on static method.");
+									throw new LoaderException("[operator] only can be defined on static method.") { Token = t.Token };
 								}
 								ASClass cls = (ASClass)method.Container;
 								if (!cls.Instance.Flags.HasFlag(ClassFlags.Final))
 								{
-									throw new LoaderException("[operator] only can be defined on final class.");
+									throw new LoaderException("[operator] only can be defined on final class.") { Token = t.Token };
 								}
 								if (cls.Instance.Flags.HasFlag(ClassFlags.Interface))
 								{
-									throw new LoaderException("[operator] only can be defined on final class.");
+									throw new LoaderException("[operator] only can be defined on final class.") { Token = t.Token };
 								}
 
 
@@ -116,7 +125,7 @@ namespace juicescript.runtime
 								var meta = t.ASMetadata[j];
 								if (meta.Items.Count != 1)
 								{
-									throw new LoaderException($"Illegal [operator]  on t.QName.ToDebugTypeName()");
+									throw new LoaderException($"Illegal [operator]  on t.QName.ToDebugTypeName()") { Token = t.Token };
 								}
 								string optype = meta.Items[0].Value;
 								if (optype == "\"+\"")
@@ -141,25 +150,50 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									throw new LoaderException($"Illegal [operator]  on {t.QName.ToDebugTypeName()}");
+									throw new LoaderException($"Illegal [operator]  on {t.QName.ToDebugTypeName()}") { Token = t.Token };
 								}
 
-								if (method.Parameters.Count != 2 || method.Parameters[0].IsOptional || method.Parameters[1].IsOptional || method.Parameters[1].IsRest)
+								if ((op == OverrideOperator.sub || op ==  OverrideOperator.add) && method.Parameters.Count == 1
+									&&
+									!method.Parameters[0].IsOptional
+									&&
+									!method.Parameters[0].IsRest
+									)
 								{
-									throw new LoaderException($"Illegal [operator]  on {t.QName.ToDebugTypeName()}");
+									op = (op == OverrideOperator.sub ?  OverrideOperator.neg : OverrideOperator.positive);
 								}
 
-								if (method.Parameters[0].TypeKind == TypeKind.Any || method.Parameters[1].TypeKind == TypeKind.Any)
+								if (op != OverrideOperator.neg && op != OverrideOperator.positive)
 								{
-									throw new LoaderException($"Illegal [operator] parameter type : * ");
+									if (method.Parameters.Count != 2 || method.Parameters[0].IsOptional || method.Parameters[1].IsOptional || method.Parameters[1].IsRest)
+									{
+										throw new LoaderException($"Illegal [operator]  on {t.QName.ToDebugTypeName()}") { Token = t.Token };
+									}
+
+									if (method.Parameters[0].TypeKind == TypeKind.Any || method.Parameters[1].TypeKind == TypeKind.Any)
+									{
+										throw new LoaderException($"Illegal [operator] parameter type : * ") { Token = t.Token };
+									}
 								}
 
-								ASClass typelhs = typeDict[(ulong)method.Parameters[0].TypeKind];
-								ASClass typerhs = typeDict[(ulong)method.Parameters[1].TypeKind];
+
+								ASClass typelhs; 
+								ASClass typerhs;
+
+								if (op != OverrideOperator.neg && op != OverrideOperator.positive)
+								{
+									typelhs = typeDict[(ulong)method.Parameters[0].TypeKind];
+									typerhs = typeDict[(ulong)method.Parameters[1].TypeKind];
+								}
+								else
+								{
+									typelhs = typeDict[(ulong)method.Parameters[0].TypeKind];
+									typerhs = typelhs;
+								}
 
 								if (typelhs.Type_identifier != cls.Type_identifier && typerhs.Type_identifier != cls.Type_identifier)
 								{
-									throw new LoaderException("Illegal [operator] parameter type.");
+									throw new LoaderException("Illegal [operator] parameter type.") { Token = t.Token };
 								}
 
 								
@@ -217,12 +251,12 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									throw new LoaderException($"Ambiguous operator override:{overrideOperatorMethods[(int)op][typelhs.Instance._operator_type_index][typerhs.Instance._operator_type_index]} { method}");
+									throw new LoaderException($"Ambiguous operator override:{overrideOperatorMethods[(int)op][typelhs.Instance._operator_type_index][typerhs.Instance._operator_type_index]} { method}") { Token = t.Token };
 								}
 							}
 							else
 							{
-								throw new LoaderException( $"Illegal [operator]  on t.QName.ToDebugTypeName()" );
+								throw new LoaderException( $"Illegal [operator]  on t.QName.ToDebugTypeName()" ) { Token = t.Token };
 							}
 							break;
 						}

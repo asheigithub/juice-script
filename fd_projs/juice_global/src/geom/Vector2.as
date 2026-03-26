@@ -43,7 +43,11 @@ package geom
 		[operator("*")]
 		private static native function NumbermulVec2( lhs:Number, rhs:Vector2 ):Vector2;
 		
+		[operator("-")]
+		private static native function Vec2Neg(v:Vector2):Vector2;
 		
+		[operator("+")]
+		private static native function Vec2Positive(v:Vector2):Vector2;
 		
 	}
 

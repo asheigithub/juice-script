@@ -1596,6 +1596,12 @@ namespace juicescript.compiler.IL.Generator
 
 				TypeKind typeKind = TypeKind.Any;
 				TypeKind rvtype = compileEnv.ReadStackType(rightvalue).Maj;
+
+				if (build_operator_override(Player.OverrideOperator.positive, compileEnv.ReadStackType(rightvalue), compileEnv.ReadStackType(rightvalue), rightvalue, rightvalue, compileEnv, step))
+				{
+					return;
+				}
+
 				if (rvtype.IsNumericType())
 				{
 					typeKind = rvtype;
@@ -1624,6 +1630,13 @@ namespace juicescript.compiler.IL.Generator
 
 				TypeKind typeKind = TypeKind.Any;
 				TypeKind rvtype = compileEnv.ReadStackType(rightvalue).Maj;
+
+				if (build_operator_override(Player.OverrideOperator.neg, compileEnv.ReadStackType(rightvalue), compileEnv.ReadStackType(rightvalue), rightvalue, rightvalue, compileEnv, step))
+				{
+					return;
+				}
+
+
 				if (rvtype == TypeKind.Uint)
 				{
 					typeKind = TypeKind.Number;
@@ -3038,7 +3051,15 @@ namespace juicescript.compiler.IL.Generator
 						INS_Method_Call method_Call = new INS_Method_Call(step.token);
 						method_Call.dst = compileEnv.GetStackLocater(step.Arg1.Reg, method.ReturnTypeKind);
 						method_Call.function = Ld_Method.dst;
-						method_Call.args = new StackLocater[2] { v1, v2 };
+
+						if (op == Player.OverrideOperator.neg || op == Player.OverrideOperator.positive)
+						{
+							method_Call.args = new StackLocater[1] { v1 };
+						}
+						else
+						{
+							method_Call.args = new StackLocater[2] { v1, v2 };
+						}
 
 						compileEnv.instructions.Add(method_Call);
 						return true;

@@ -423,5 +423,78 @@ namespace juicescript.runtime.buildin
 			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
 			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
 		}
+
+
+		[NativeFunction("$geom.Vector2$private::Vec2Neg")]
+		public static void Vector2_Vec2Neg(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing v = scope.ReadSlot(0, context.player);
+			
+			Debug.Assert(v.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			
+			var vector2_a = context.GC.Heap[v.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			x1.SetFloat(-x1.FloatValue);
+			y1.SetFloat(-y1.FloatValue);
+
+			payload_result.SetSlot(x1, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y1, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+
+		[NativeFunction("$geom.Vector2$private::Vec2Positive")]
+		public static void Vector2_Vec2Positive(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var vec2 = (ASClass)((RtPayloadScriptClass)context.GC.Heap[thisPtr.HeapPtr].facility).Meta;
+
+			NaNBoxing v = scope.ReadSlot(0, context.player);
+			
+			Debug.Assert(v.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			
+			var vector2_a = context.GC.Heap[v.HeapPtr];
+			var payload_a = (RtPayloadInstance)vector2_a.facility;
+
+			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
+			var vector2_result = context.GC.Heap[resultptr];
+			var payload_result = (RtPayloadInstance)vector2_result.facility;
+
+			x1.SetFloat(+x1.FloatValue);
+			y1.SetFloat(+y1.FloatValue);
+
+			payload_result.SetSlot(x1, 0, vec2.Instance._link_codescope, context.player);
+			payload_result.SetSlot(y1, 1, vec2.Instance._link_codescope, context.player);
+		}
+
+
+
+
+
 	}
 }

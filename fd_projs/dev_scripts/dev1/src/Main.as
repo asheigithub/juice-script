@@ -18,30 +18,25 @@ package
 	}
 }
 
-function A(i = int.MAX_VALUE)
-{
-	trace(i);
-}
-A();
 
-//
-//
-//import geom.Vector2;
-//var a:Vector2 = new Vector2(0,1);
-//var b:Vector2 = new Vector2(1,0);
-//
-//a += b;
-//
-//trace(a);
-//trace( a.dot(b) );
-//trace( a.cross(b) );
-//trace( a * 3 );
-//trace( a / 3 );
-//
-//trace( 6 * b );
-//
-//
-//
+
+
+import geom.Vector2;
+var a:Vector2 = new Vector2(0,1);
+var b = new Vector2(1,0);
+
+a += b;
+
+trace(a);
+trace( a.dot(b) );
+trace( a.cross(b) );
+trace( a * 3 );
+trace( a / 3 );
+
+trace( 6 * b );
+
+trace( +-b);   
+
 //final class BB
 //{
 	//[operator("%")]

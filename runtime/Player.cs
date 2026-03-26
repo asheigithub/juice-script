@@ -16793,6 +16793,54 @@ namespace juicescript.runtime
 															  //{
 															  //    goto flag_handle_error;
 															  //}
+
+								{
+									//操作符重载
+									ASClass t1;
+									int op_override_id1 = GetOpOverrideTypeId(v, out t1);
+
+									if (op_override_id1 != -1)
+									{
+										var negmethod = overrideOperatorMethods[(int)OverrideOperator.positive][op_override_id1][op_override_id1];
+										if (negmethod != null)
+										{
+#if FORCOMPILER
+											if (IsComputeConstExpr)
+											{
+												throw new EvalConstException();
+											}
+#endif
+
+											var @class = (ASClass)negmethod.Container;
+											Debug.Assert(@class.__instance_index__ != -1);
+
+											if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+											{
+												RaiseStackOverflow(ref error);
+												goto flag_handle_error;
+											}
+
+											Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 1);
+											slots[0] = v;
+
+											Context.StackPosition += 1;
+
+											NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+
+											StackLocater args = default; args.index = 0;
+											RunMethod(negmethod, cls, scope_ptr, @class, 1, (byte*)&args, slots, ref error, stackStPos + dst.index);
+
+											Context.StackPosition -= 1;
+											if (error.raised)
+											{
+												goto flag_handle_error;
+											}
+											break;
+										}
+									}
+
+								}
+
 								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 								if (error.raised)
 								{
@@ -16859,6 +16907,54 @@ namespace juicescript.runtime
 															  //{
 															  //    goto flag_handle_error;
 															  //}
+
+								{
+									//操作符重载
+									ASClass t1;
+									int op_override_id1 = GetOpOverrideTypeId(v, out t1);
+									
+									if (op_override_id1 != -1)
+									{
+										var negmethod = overrideOperatorMethods[(int)OverrideOperator.neg][op_override_id1][op_override_id1];
+										if (negmethod != null)
+										{
+#if FORCOMPILER
+											if (IsComputeConstExpr)
+											{
+												throw new EvalConstException();
+											}
+#endif
+											
+											var @class = (ASClass)negmethod.Container;
+											Debug.Assert(@class.__instance_index__ != -1);
+
+											if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+											{
+												RaiseStackOverflow(ref error);
+												goto flag_handle_error;
+											}
+
+											Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 1);
+											slots[0] = v;
+											
+											Context.StackPosition += 1;
+
+											NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+
+											StackLocater args = default;args.index = 0;
+											RunMethod(negmethod, cls, scope_ptr, @class, 1, (byte*)&args, slots, ref error, stackStPos + dst.index);
+											
+											Context.StackPosition -= 1;
+											if (error.raised)
+											{
+												goto flag_handle_error;
+											}
+											break;
+										}
+									}
+
+								}
+								
 								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 								if (error.raised)
 								{

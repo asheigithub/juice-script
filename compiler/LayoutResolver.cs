@@ -868,28 +868,37 @@ namespace juicescript.compiler
 									throw new ResolverException(t.Token, "use [operator(\"<+|-|*|/|%>\")] .");
 								}
 
-								if (method.Parameters.Count != 2 || method.Parameters[0].IsOptional || method.Parameters[1].IsOptional || method.Parameters[1].IsRest)
+								if ((Op == "\"-\"" || Op == "\"+\"" ) && method.Parameters.Count == 1 && !method.Parameters[0].IsOptional
+									&& !method.Parameters[0].IsRest && (ulong)method.Parameters[0].TypeKind == cls.Type_identifier
+									)
 								{
-									throw new ResolverException(t.Token, "[operator] have two Parameters,not optional or ...rest ");
+									//一元取反
 								}
-
-								if (method.Parameters[0].TypeKind == TypeKind.Any || method.Parameters[1].TypeKind == TypeKind.Any)
+								else
 								{
-									throw new ResolverException(t.Token, "Illegal [operator] parameter type : * ");
+
+									if (method.Parameters.Count != 2 || method.Parameters[0].IsOptional || method.Parameters[1].IsOptional || method.Parameters[1].IsRest)
+									{
+										throw new ResolverException(t.Token, "[operator] have two Parameters,not optional or ...rest ");
+									}
+
+									if (method.Parameters[0].TypeKind == TypeKind.Any || method.Parameters[1].TypeKind == TypeKind.Any)
+									{
+										throw new ResolverException(t.Token, "Illegal [operator] parameter type : * ");
+									}
+
+
+									if ((ulong)method.Parameters[0].TypeKind != cls.Type_identifier && (ulong)method.Parameters[1].TypeKind != cls.Type_identifier)
+									{
+										throw new ResolverException(t.Token, "Illegal [operator] parameter type.");
+									}
+
+									if (method.ReturnTypeKind == TypeKind.Fun_Void || method.ReturnTypeKind == TypeKind.Any)
+									{
+										throw new ResolverException(t.Token, "Illegal [operator] return type.");
+									}
+
 								}
-
-								
-								if ((ulong)method.Parameters[0].TypeKind != cls.Type_identifier && (ulong)method.Parameters[1].TypeKind != cls.Type_identifier)
-								{
-									throw new ResolverException(t.Token, "Illegal [operator] parameter type.");
-								}
-
-								if (method.ReturnTypeKind == TypeKind.Fun_Void || method.ReturnTypeKind == TypeKind.Any)
-								{
-									throw new ResolverException(t.Token, "Illegal [operator] return type.");
-								}
-
-
 
 
 							}
