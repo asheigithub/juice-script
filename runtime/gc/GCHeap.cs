@@ -64,17 +64,18 @@ namespace juicescript.runtime.gc
                 throw new ArgumentNullException();
 #endif
             //此处如果不回收索引，当GC有bug时会出现null异常，便于排查
+#if RELEASEPLAYER
+            if (freeIndexes.Count > 0)
+            {
+                int index = freeIndexes[freeIndexes.Count - 1];
+                freeIndexes.RemoveAt(freeIndexes.Count - 1);
 
-            //if (freeIndexes.Count > 0)
-            //{
-            //    int index = freeIndexes[freeIndexes.Count - 1];
-            //    freeIndexes.RemoveAt(freeIndexes.Count - 1);
+                Heap[index] = instance;
 
-            //    Heap[index] = instance;
-
-            //    return index;
-            //}
-            //else
+                return index;
+            }
+            else
+#endif
             { 
                 Heap.Add(instance);
                 return Heap.Count - 1;

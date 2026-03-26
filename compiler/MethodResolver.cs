@@ -1331,20 +1331,98 @@ namespace juicescript.compiler
 			//优化Pass
 			foreach (var script in context.scriptDefs)
 			{
-
-
 				string proj = context.scriptInProj[script];
 				string outfile_base = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length));
+
+				string sfile = System.IO.Path.Combine(workDir, script.fullPath.Substring(proj.Length)) + ".mo";
+
+				if (File.Exists(sfile) && !expiredScripts.Contains(script))
+				{
+					using (FileStream fs = new FileStream(sfile,FileMode.Open))
+					{
+						using (StreamReader sr = new StreamReader(fs,System.Text.Encoding.UTF8))
+						{
+							Dictionary<string, byte[]> cache=new Dictionary<string, byte[]>();
+							string hash = sr.ReadLine();
+							if (hash == script.hash)
+							{
+								while (true)
+								{
+									string name = sr.ReadLine();
+									if (name == null)
+									{
+										break;
+									}
+									string bytecode = sr.ReadLine();
+									if (bytecode == null)
+									{
+										goto lbl_failed;
+									}
+									try
+									{
+										byte[] code = Convert.FromBase64String(bytecode);
+										cache.Add(name, code);
+									}
+									catch (Exception)
+									{
+										goto lbl_failed;
+									}
+								}
+
+								if (script.scriptMethods.Skip(1).Where(m => !m.Flags.HasFlag(MethodFlags.Native))
+									.Any(m => !cache.ContainsKey(Player.GetMethodKey(m))))
+								{
+									goto lbl_failed;
+								}
+
+								for (int i = 1; i < script.scriptMethods.Count; i++)
+								{
+									ASMethod method = script.scriptMethods[i];
+									if (!method.Flags.HasFlag(MethodFlags.Native))
+									{
+										method.Body.ByteCode = cache[Player.GetMethodKey(method)];
+									}
+								}
+
+								continue;
+							lbl_failed:
+								;
+							}
+
+						}
+					}
+				}
 
 				for (int i = 1; i < script.scriptMethods.Count; i++)
 				{
 					ASMethod method = script.scriptMethods[i];
-
-
-					Optimizer.Optimize(method, displaycfg_files, script.fullPath, outfile_base);
-
-					ComputeJump(method, true);
+					if (!method.Flags.HasFlag(MethodFlags.Native))
+					{
+						Optimizer.Optimize(method, displaycfg_files, script.fullPath, outfile_base);
+						ComputeJump(method, true);
+					}
 				}
+
+				using (System.IO.FileStream fs = new FileStream(sfile,FileMode.Create))
+				{
+					using (StreamWriter sw = new StreamWriter(fs,System.Text.Encoding.UTF8))
+					{
+						sw.WriteLine(script.hash);
+
+						for (int i = 1; i < script.scriptMethods.Count; i++)
+						{
+							ASMethod method = script.scriptMethods[i];
+							if (!method.Flags.HasFlag(MethodFlags.Native))
+							{
+								sw.WriteLine(Player.GetMethodKey(method));
+								sw.WriteLine( Convert.ToBase64String( method.Body.ByteCode) );
+							}
+						}
+
+					}
+				}
+
+
 			}
 
 			return 0;

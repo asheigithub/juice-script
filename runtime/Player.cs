@@ -11421,7 +11421,10 @@ namespace juicescript.runtime
 				default:
 #if DEBUG
 					throw new InvalidOperationException();
+#else
+					break;
 #endif
+
 			}
 
 		}
@@ -11905,6 +11908,9 @@ namespace juicescript.runtime
 							case RtHeapTypeKind.MethodScope:
 							default:
 								throw new InvalidOperationException();
+#else
+							default:
+								return false;
 #endif
 						}
 
@@ -17701,6 +17707,7 @@ namespace juicescript.runtime
 										throw new InvalidOperationException();
 #else
 										stackslots[dst.index].SetBoolean(false);
+										break;
 #endif
 								}
 
