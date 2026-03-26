@@ -19,6 +19,42 @@ package
 }
 
 
+//async function asyncAdd(a:int, b:int):int {
+    //var x:int = await Promise.resolve(a);
+    //var y:int = await Promise.resolve(b);
+    //return x + y;
+//}
+//async function asyncHello():String {
+    //var result:String = await Promise.resolve("Hello");
+    //return result + " World";
+//}
+//async function returnsPromise():* {
+    //return Promise.resolve(42);
+//}
+//async function asyncVoid():void {
+    //trace("asyncVoid executing");
+//}
+//async function asyncNest():int {
+    //var inner:* = asyncInner(5);
+    //var result:int = await inner;
+    //return result * 2;
+//}
+//async function asyncInner(n:int):int {
+    //return n + 1;
+//}
+//// Test
+//var p1:* = asyncAdd(5, 3);
+//p1.then(function(v:int) { trace("asyncAdd(5,3) = " + v); });
+//var p2:* = asyncHello();
+//p2.then(function(v:String) { trace("asyncHello: " + v); });
+//var p3:* = returnsPromise();
+//p3.then(function(v:int) { trace("returnsPromise: " + v); });
+//var p4:* = asyncVoid();
+//p4.then(function(v:*) { trace("asyncVoid done"); });
+//var p5:* = asyncNest();
+//p5.then(function(v:int) { trace("asyncNest: " + v); });
+//trace("=== Init Complete ===");
+
 
 
 //import geom.Vector2;

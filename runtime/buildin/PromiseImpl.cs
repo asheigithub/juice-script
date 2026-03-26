@@ -179,35 +179,78 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
+			context.MicroTaskQueue.ResolvePromise(context, thisPtr, value, ref error);
 
-			// 4. 更新Promise状态和值
-			promiseWapper._state = PromiseState.fulfilled;
-			promiseWapper._value = value;
+			//if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
+			//{
+			//	var heapInstance = context.GC.Heap[value.HeapPtr];
+			//	if (heapInstance.TypeKind == RtHeapTypeKind.INSTANCE &&
+			//		heapInstance.Type is ASInstance asInstance &&
+			//		asInstance._link_codescope.TypeLayout.ASType.Type_identifier == context.PROMISE.Type_identifier
+			//		)
+			//	{
+			//		var p = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility).wapperedObject;
+			//		// Value is a Promise, adopt its state
+			//		var valuePromise = (PromiseWapper)((RtPayloadInstance)heapInstance.facility).wapperedObject;
 
-			// 5. 处理onFulfilled回调队列
-			if (promiseWapper.reactions != null && promiseWapper.reactions.Count > 0)
-			{
-				// 创建微任务队列条目
-				foreach (var callback in promiseWapper.reactions)
-				{
-					var microTask = new PromiseMicroTask
-					{
-						Type = MicroTaskType.PromiseFulfill,
-						//PromiseInstance = thisPtr,
-						NextPromiseInstance = callback.nextPromise,
-						CallbackFunction = callback.onFulfilled,
-						Value = value
-					};
+			//		if (valuePromise._state == PromiseState.fulfilled)
+			//		{
+			//			p.FulFill(context, valuePromise._value);
+			//			return;
+			//		}
+			//		else if (valuePromise._state == PromiseState.rejected)
+			//		{
+			//			p.Reject(context, valuePromise._reason);
+			//			return;
+			//		}
+			//		else // pending
+			//		{
+			//			// Add reaction to wait for value Promise to settle
+			//			Reaction reaction = new Reaction();
+			//			reaction.nextPromise = thisPtr;
 
-					// 调度微任务执行
-					context.MicroTaskQueue.Enqueue(microTask);
-				}
+			//			// Create callbacks that will resolve/reject nextPromise
+			//			// when valuePromise settles
+			//			// (Implementation details in Algorithm 4)
 
-				// 清空回调列表，释放内存
-				promiseWapper.reactions.Clear();
-				promiseWapper.reactions = null;
+			//			if (valuePromise.reactions == null)
+			//			{
+			//				valuePromise.reactions = new List<Reaction>();
+			//			}
+			//			valuePromise.reactions.Add(reaction);
+			//			return;
+			//		}
+			//	}
+			//}
 
-			}
+			//// 4. 更新Promise状态和值
+			//promiseWapper._state = PromiseState.fulfilled;
+			//promiseWapper._value = value;
+
+			//// 5. 处理onFulfilled回调队列
+			//if (promiseWapper.reactions != null && promiseWapper.reactions.Count > 0)
+			//{
+			//	// 创建微任务队列条目
+			//	foreach (var callback in promiseWapper.reactions)
+			//	{
+			//		var microTask = new PromiseMicroTask
+			//		{
+			//			Type = MicroTaskType.PromiseFulfill,
+			//			//PromiseInstance = thisPtr,
+			//			NextPromiseInstance = callback.nextPromise,
+			//			CallbackFunction = callback.onFulfilled,
+			//			Value = value
+			//		};
+
+			//		// 调度微任务执行
+			//		context.MicroTaskQueue.Enqueue(microTask);
+			//	}
+
+			//	// 清空回调列表，释放内存
+			//	promiseWapper.reactions.Clear();
+			//	promiseWapper.reactions = null;
+
+			//}
 
 			// 6. 如果没有回调，Promise就保持fulfilled状态
 			// 这是正常的，后续的then()调用会立即执行
@@ -270,9 +313,12 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				// 如果没有onRejected回调，且没有catch处理，
+				// 如果没有onRejected回调(这是默认回调)，且没有catch处理，
 				// 这个rejected Promise会在未来被unhandled rejection检测到
 				// （可选实现）
+
+				//Console.Error.WriteLine($"Uncaught in {thisPtr.ToDebugString(context.player)}  ({reason.ToDebugString(context.player)})");
+
 			}
 		}
 
@@ -1216,6 +1262,7 @@ namespace juicescript.runtime.buildin
 				// Use MultiNameLSearch to find "then" property
 				StackLocater stack = new StackLocater { index = 0 };
 				var stackslots = context.StackSlots.AsSpan(basePos, 4);
+				stackslots.Clear();
 
 				int code = context.player.MultiNameLSearch(
 					ns_set,

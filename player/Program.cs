@@ -44,8 +44,9 @@ namespace player
 					if (ex != null)
 					{
 						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine(ex.ToDebugMessage());
+						Console.WriteLine(ex.errorDebugMsg);
 						Console.ResetColor();
+
 						Console.Error.WriteLine(ex.Message);
 						return 1;
 					}

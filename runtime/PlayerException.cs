@@ -13,10 +13,13 @@ namespace juicescript.runtime
 
         public NaNBoxing error;
 
+        public string errorDebugMsg;
+
         public PlayerException(Player player,NaNBoxing error, string message) : base(message)
         {
             this.player = player;
             this.error = error;
+            this.errorDebugMsg = error.ToDebugString(player);
         }
 
         
