@@ -18,6 +18,13 @@ package
 	}
 }
 
+var o = {
+	valueOf : function(){ throw "!!!"; }
+	
+};
+
+var a = Math.min(1, 2, o );
+
 
 //async function asyncAdd(a:int, b:int):int {
     //var x:int = await Promise.resolve(a);
