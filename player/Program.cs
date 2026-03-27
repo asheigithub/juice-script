@@ -39,8 +39,19 @@ namespace player
 					{
 						player.LoadLib(File.ReadAllBytes(globalPath));
 					}
+
+					//Stopwatch sw = Stopwatch.StartNew();
+
+					//sw.Start();
+
 					PlayerException ex;
 					player.Run(out ex);
+
+
+					//sw.Stop();
+
+					//Console.WriteLine(sw.ElapsedMilliseconds);
+
 					if (ex != null)
 					{
 						Console.ForegroundColor = ConsoleColor.Red;

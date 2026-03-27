@@ -12173,7 +12173,7 @@ namespace juicescript.runtime
 
 		}
 
-		private Memory<char> tempholdchars = new Memory<char>(new char[16]);
+		private Memory<char> frame_holdchars = new Memory<char>(new char[16]);
 		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos,IResume_State resume_state)
@@ -12450,7 +12450,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													Span<char> temp = tempholdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
+													Span<char> temp = frame_holdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
 													int l = _obj.searchPropertyName.GetLocalStringChars(temp);
 													searchName = temp.Slice(0, l);
 												}
@@ -15875,7 +15875,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										Span<char> temp = tempholdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
+										Span<char> temp = frame_holdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
 										int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
 										searchName = temp.Slice(0, l);
 									}
@@ -15921,7 +15921,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											Span<char> temp = tempholdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
+											Span<char> temp = frame_holdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
 											int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
 											searchName = temp.Slice(0, l);
 

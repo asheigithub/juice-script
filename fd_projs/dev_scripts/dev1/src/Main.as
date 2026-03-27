@@ -263,23 +263,23 @@ package
 //lbl2:
     //trace(x);
 	
-function  fib(i:int):int 
-	{
-		if (i === 1 || i === 2)
-		{
-			return 1;
-		}
-		else 
-		{
-			
-			return fib(i - 2) + fib(i-1);
-			
-		}	
-	}
-	
-	
-	
-trace(fib(35));
+//function  fib(i:int):int 
+	//{
+		//if (i === 1 || i === 2)
+		//{
+			//return 1;
+		//}
+		//else 
+		//{
+			//
+			//return fib(i - 2) + fib(i-1);
+			//
+		//}	
+	//}
+	//
+	//
+	//
+//trace(fib(35));
 
 
 

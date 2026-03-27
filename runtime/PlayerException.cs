@@ -19,12 +19,15 @@ namespace juicescript.runtime
         {
             this.player = player;
             this.error = error;
-            this.errorDebugMsg = error.ToDebugString(player);
+            this.errorDebugMsg = DebugMessage();
         }
 
-        
-
         public string ToDebugMessage()
+        {
+            return errorDebugMsg;
+        }
+
+        private string DebugMessage()
         {
             StringBuilder stringBuilder = new StringBuilder();
 

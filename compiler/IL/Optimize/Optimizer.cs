@@ -455,6 +455,9 @@ namespace juicescript.compiler.IL.Optimize
 
 		internal static void Optimize(ASMethod method, List<string> displaycfg_files, string fullPath, string outfile_base)
 		{
+			//FastPeephole(method);
+
+
 			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
 
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
