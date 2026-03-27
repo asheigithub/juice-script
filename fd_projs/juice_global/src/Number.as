@@ -29,11 +29,11 @@ package
 	 */
 	public final class Number extends Object
 	{
-		public static const E : Number = 2.718281828459045;
-		public static const LN10 : Number = 2.302585092994046;
-		public static const LN2 : Number = 0.6931471805599453;
-		public static const LOG10E : Number = 0.4342944819032518;
-		public static const LOG2E : Number =1.4426950408889634;
+		public static const E : Number = Math.E;
+		public static const LN10 : Number = Math.LN10;
+		public static const LN2 : Number = Math.LN2;
+		public static const LOG10E : Number = Math.LOG10E;
+		public static const LOG2E : Number = Math.LOG2E;
 
 		/**
 		 * 最大可表示数（双精度 IEEE-754）。此数字大约为 1.79e+308。

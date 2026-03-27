@@ -51,6 +51,12 @@ namespace juicescript.runtime
 							if (!_registry.ContainsKey(attr.key))
 							{
 								_registry[attr.key] = method;
+
+								if (attr.key.StartsWith("$.Math$public::"))
+								{
+									_registry[attr.key.Replace("$.Math$public::", "$.Number$public::")] = method;
+								}
+
 							}
 							else
 							{

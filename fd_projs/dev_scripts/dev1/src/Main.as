@@ -18,12 +18,8 @@ package
 	}
 }
 
-var o = {
-	valueOf : function(){ throw "!!!"; }
-	
-};
 
-var a = Math.min(1, 2, o );
+trace( Number.log(3) );
 
 
 //async function asyncAdd(a:int, b:int):int {

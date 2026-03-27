@@ -16,12 +16,12 @@ package
 	public final class Math
 	{
 		/**
-		 * 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.71828182845905。
+		 * 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.7182818284590451。
 		 * @langversion	3.0
 		 * @playerversion	Flash 9
 		 * @playerversion	Lite 4
 		 */
-		public static const E : Number = 2.71828182845905;
+		public static const E : Number = 2.7182818284590451;
 
 		/**
 		 * 10 的自然对数的数学常数，表示为 loge10，其近似值为 2.302585092994046。
