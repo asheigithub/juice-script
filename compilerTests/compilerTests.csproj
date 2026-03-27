@@ -24,4 +24,9 @@
     <ProjectReference Include="..\compiler\compiler.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CompileTest\uint\" />
+    <Folder Include="CompileTest\int\" />
+  </ItemGroup>
+
 </Project>

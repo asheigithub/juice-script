@@ -8,6 +8,29 @@ using System.Runtime.InteropServices;
 using System.IO;
 namespace player
 {
+ //                   _ooOoo_
+ //                  o8888888o
+ //                  88" . "88
+ //                  (| -_- |)
+ //                  O\  =  /O
+ //               ____/`---'\____
+ //             .'  \\|     |//  `.
+ //            /  \\|||  :  |||//  \
+ //           /  _||||| -:- |||||-  \
+ //           |   | \\\  -  /// |   |
+ //           | \_|  ''\---/''  |   |
+ //           \  .-\__  `-`  ___/-. /
+ //         ___`. .'  /--.--\  `. . __
+ //      ."" '<  `.___\_<|>_/___.'  >'"".
+ //     | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+ //     \  \ `_.   \_ __\ /__ _/   .-` /  /
+ //=====`-.____`.___ \_____/___.-`___.-'=====
+ //                   `=---='
+
+ //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ //         佛祖保佑        永无BUG
+ //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 	internal class Program
 	{
 		static int Main(string[] args)
@@ -26,7 +49,7 @@ namespace player
 				var optionLibDir = app.Option("-d|--lib-dir <directory>", "依赖库搜索目录", CommandOptionType.SingleValue);
 				optionLibDir.DefaultValue = Directory.GetCurrentDirectory();
 				var optionGlobal = app.Option("-g|--global <file>", "全局库路径", CommandOptionType.SingleValue);
-				optionGlobal.DefaultValue = Path.Combine(Directory.GetCurrentDirectory(), "asc", "bin", "Debug", "net6.0", "global_swc", "juice_global.swc");
+				optionGlobal.DefaultValue = Path.Combine(Directory.GetCurrentDirectory(), "juice_global.swc");
 				app.OnExecute(() =>
 				{
 					string scriptPath = optionScript.Value();
@@ -35,11 +58,13 @@ namespace player
 					juicescript.runtime.Player player = new juicescript.runtime.Player(1024 * 1024 * 8);
 					HashSet<string> loadedAssemblies = new HashSet<string>();
 					LoadSwcWithDeps(player, scriptPath, libDir, loadedAssemblies);
-					if (File.Exists(globalPath))
+					if (!loadedAssemblies.Contains("juice_global.swc"))
 					{
-						player.LoadLib(File.ReadAllBytes(globalPath));
+						if (File.Exists(globalPath))
+						{
+							player.LoadLib(File.ReadAllBytes(globalPath));
+						}
 					}
-
 					//Stopwatch sw = Stopwatch.StartNew();
 
 					//sw.Start();

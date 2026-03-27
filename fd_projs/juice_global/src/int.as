@@ -45,7 +45,7 @@ package
 		 * 构造函数；创建新的 int 对象。使用 int.toString() 和 int.valueOf() 时，必须使用 int 构造函数。使用 int 对象的属性时，不要使用构造函数。new int 构造函数主要用作占位符。int 对象与 int() 函数不同，后者将参数转换为原始值。
 		 * @param	num	要创建的 int 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
 		 */
-      public native function int(value:* = 0);
+      public native function int(value:int = 0);
       
       
 		/**
@@ -53,7 +53,7 @@ package
 		 * @param	radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
 		 * @return	字符串。
 		 */
-      public native function toString(radix:* = 10) : String;
+      public native function toString(radix:int = 10) : String;
      
       
 	  /**
@@ -69,7 +69,7 @@ package
 		 * @langversion	3.0
 		 * @throws ArgumentError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
 		 */
-      public native function toExponential(p:* = 0) : String;
+      public native function toExponential(p:int = 0) : String;
       
 	  
       /**
@@ -78,7 +78,7 @@ package
 		 * @langversion	3.0
 		 * @throws ArgumentError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
 		 */
-      public native function toPrecision(p:* = 0) : String;
+      public native function toPrecision(p:int = 0) : String;
       
 	  
       /**
@@ -87,7 +87,7 @@ package
 		 * @langversion	3.0
 		 * @throws ArgumentError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
 		 */
-      public native function toFixed(p:* = 0) : String;
+      public native function toFixed(p:int = 0) : String;
       
    }
 
