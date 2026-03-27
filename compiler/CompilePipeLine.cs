@@ -56,7 +56,7 @@ namespace juicescript.compiler
 			{
 				hasError = true;
 			}
-
+			
 
 			code = DependencyResolver.BuildDependency(context);
 

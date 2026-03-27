@@ -2066,19 +2066,22 @@ namespace juicescript.compiler
 
 								if (result == ScriptDef.ReadResult.Success)
 								{
-									if (!outfile.StartsWith(script1.fullPath))
+									
+									if (src != script1.fullPath)
 									{
-										//Console.WriteLine($"原始文件变化{ script1.fullPath },{ outfile.Substring(0,outfile.Length -2) }，重新生成");
+										//Console.WriteLine($"原始文件变化{ script1.fullPath },{ src }，重新生成");
 									}
 									else
 									{
 										
-										disk_encoding = script1.Encode();
-
+										
 										if (!validate)
 										{
+											
+
 											return script1;
 										}
+										disk_encoding = script1.Encode();
 									}
 								}
 							}
