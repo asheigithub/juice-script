@@ -27,6 +27,21 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex] = thisPtr;
         }
 
+        [NativeFunction(".ushort$public::valueOf")]
+        public static void UShort_valueOf_Public(Context context,
+            ASMethod method,
+            int scope_ptr,
+            NaNBoxing thisPtr,
+            int stackStPos, ref ReceiveError error, int returnSlotIndex)
+        {
+#if DEBUG
+            if (thisPtr.ValueType != NaNBoxing.BoxType.UShort)
+                throw new InvalidOperationException();
+#endif
+
+            context.StackSlots[returnSlotIndex] = thisPtr;
+        }
+
         [NativeFunction(".ushort$public::toString")]
         public static void UShort_toString(Context context,
             ASMethod method,

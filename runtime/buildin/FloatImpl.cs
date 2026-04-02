@@ -8,49 +8,34 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime.buildin
 {
-    internal class ShortImpl
+    internal class FloatImpl
     {
         private const string Digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-        [NativeFunction(".short$:AS3::valueOf")]
-        public static void Short_valueOf(Context context,
+        [NativeFunction(".float$public::valueOf")]
+        public static void Float_valueOf(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Float)
                 throw new InvalidOperationException();
 #endif
 
             context.StackSlots[returnSlotIndex] = thisPtr;
         }
 
-        [NativeFunction(".short$public::valueOf")]
-        public static void Short_valueOf_Public(Context context,
+        [NativeFunction(".float$public::toString")]
+        public static void Float_toString(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
-                throw new InvalidOperationException();
-#endif
-
-            context.StackSlots[returnSlotIndex] = thisPtr;
-        }
-
-        [NativeFunction(".short$public::toString")]
-        public static void Short_toString(Context context,
-            ASMethod method,
-            int scope_ptr,
-            NaNBoxing thisPtr,
-            int stackStPos, ref ReceiveError error, int returnSlotIndex)
-        {
-#if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Float)
                 throw new InvalidOperationException();
 #endif
 
@@ -66,9 +51,9 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            short x = thisPtr.ShortValue;
+            float x = thisPtr.FloatValue;
 
-            string str = ShortToString(x, radixValue);
+            string str = FloatToString(x, radixValue);
 
             int str_ptr = context.GC.AllocString(str);
             if (str_ptr == 0)
@@ -80,48 +65,100 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
         }
 
-        private static string ShortToString(short n, int radix)
+        private static string FloatToString(float n, int radix)
+        {
+            if (float.IsNaN(n))
+            {
+                return "NaN";
+            }
+
+            if (n == 0)
+            {
+                return "0";
+            }
+
+            if (float.IsInfinity(n))
+            {
+                return float.IsNegativeInfinity(n) ? "-Infinity" : "Infinity";
+            }
+
+            bool negative = false;
+            if (n < 0)
+            {
+                negative = true;
+                n = -n;
+            }
+
+            if (radix == 10)
+            {
+                return negative ? "-" + FloatToStringDecimal(n) : FloatToStringDecimal(n);
+            }
+
+            int intPart = (int)MathF.Truncate(n);
+            float fracPart = n - intPart;
+
+            string result = IntToString(intPart, radix);
+            if (fracPart > 0)
+            {
+                result += "." + FloatFractionToString(fracPart, radix);
+            }
+
+            return negative ? "-" + result : result;
+        }
+
+        private static string FloatToStringDecimal(float n)
+        {
+            if (n == 0) return "0";
+
+            int intPart = (int)MathF.Truncate(n);
+            float fracPart = n - intPart;
+
+            string result = intPart.ToString();
+            if (fracPart > 0)
+            {
+                var sb = new ValueStringBuilder(stackalloc char[32]);
+                for (int i = 0; i < 7 && fracPart > 0; i++)
+                {
+                    fracPart *= 10;
+                    int digit = (int)MathF.Truncate(fracPart);
+                    sb.Append(Digits[digit]);
+                    fracPart -= digit;
+                }
+                result = intPart.ToString() + "." + sb.ToString().TrimEnd('0');
+            }
+
+            return result;
+        }
+
+        private static string IntToString(int n, int radix)
         {
             if (n == 0)
             {
                 return "0";
             }
 
-            bool negative = false;
-            ushort u;
-
-            if (n < 0)
-            {
-                negative = true;
-                if (n == short.MinValue)
-                {
-                    u = 0x8000;
-                }
-                else
-                {
-                    u = (ushort)(-n);
-                }
-            }
-            else
-            {
-                u = (ushort)n;
-            }
-
             var sb = new ValueStringBuilder(stackalloc char[32]);
-
-            while (u > 0)
+            while (n > 0)
             {
-                ushort digit = (ushort)(u % (ushort)radix);
+                int digit = n % radix;
                 sb.Append(Digits[digit]);
-                u /= (ushort)radix;
-            }
-
-            if (negative)
-            {
-                sb.Append('-');
+                n /= radix;
             }
 
             sb.Reverse();
+            return sb.ToString();
+        }
+
+        private static string FloatFractionToString(float n, int radix)
+        {
+            var sb = new ValueStringBuilder(stackalloc char[32]);
+            for (int i = 0; i < 10 && n > 0; i++)
+            {
+                n *= radix;
+                int digit = (int)MathF.Truncate(n);
+                sb.Append(Digits[digit]);
+                n -= digit;
+            }
             return sb.ToString();
         }
 
@@ -159,15 +196,15 @@ namespace juicescript.runtime.buildin
             return sb.ToString();
         }
 
-        [NativeFunction(".short$public::toExponential")]
-        public static void Short_toExponential(Context context,
+        [NativeFunction(".float$public::toExponential")]
+        public static void Float_toExponential(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Float)
                 throw new InvalidOperationException();
 #endif
 
@@ -183,7 +220,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            double x = thisPtr.ShortValue;
+            double x = thisPtr.FloatValue;
 
             var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
             DtoaNumberFormatter.DoubleToAscii(
@@ -210,15 +247,15 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
         }
 
-        [NativeFunction(".short$public::toFixed")]
-        public static void Short_toFixed(Context context,
+        [NativeFunction(".float$public::toFixed")]
+        public static void Float_toFixed(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Float)
                 throw new InvalidOperationException();
 #endif
 
@@ -235,14 +272,9 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            short n = thisPtr.ShortValue;
+            float n = thisPtr.FloatValue;
 
-            string str = ShortToString(n, 10);
-
-            if (f > 0)
-            {
-                str = str + "." + new string('0', f);
-            }
+            string str = FloatToFixedString(n, f);
 
             int str_ptr = context.GC.AllocString(str);
             if (str_ptr == 0)
@@ -254,15 +286,63 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
         }
 
-        [NativeFunction(".short$public::toPrecision")]
-        public static void Short_toPrecision(Context context,
+        private static string FloatToFixedString(float n, int fractionDigits)
+        {
+            if (float.IsNaN(n))
+            {
+                return "NaN";
+            }
+
+            if (float.IsInfinity(n))
+            {
+                return float.IsNegativeInfinity(n) ? "-Infinity" : "Infinity";
+            }
+
+            bool negative = false;
+            if (n < 0)
+            {
+                negative = true;
+                n = -n;
+            }
+
+            if (fractionDigits == 0)
+            {
+                int rounded = (int)MathF.Round(n);
+                return negative ? "-" + rounded : rounded.ToString();
+            }
+
+            int intPart = (int)MathF.Truncate(n);
+            float fracPart = n - intPart;
+
+            var sb = new ValueStringBuilder(stackalloc char[32]);
+            if (negative)
+            {
+                sb.Append('-');
+            }
+
+            sb.Append(intPart);
+            sb.Append('.');
+
+            for (int i = 0; i < fractionDigits; i++)
+            {
+                fracPart *= 10;
+                int digit = (int)MathF.Truncate(fracPart);
+                sb.Append(Digits[digit]);
+                fracPart -= digit;
+            }
+
+            return sb.ToString();
+        }
+
+        [NativeFunction(".float$public::toPrecision")]
+        public static void Float_toPrecision(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Float)
                 throw new InvalidOperationException();
 #endif
 
@@ -278,7 +358,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            double x = thisPtr.ShortValue;
+            double x = thisPtr.FloatValue;
 
             var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
             DtoaNumberFormatter.DoubleToAscii(

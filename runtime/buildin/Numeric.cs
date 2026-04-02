@@ -18,20 +18,7 @@ namespace juicescript.runtime.buildin
 {
 	internal class Numeric
 	{
-		[NativeFunction(".sbyte$:AS3::valueOf")]
-		public static void SByte_ValueOf(Context context,
-			ASMethod method,
-			int scope_ptr,
-			NaNBoxing thisPtr,
-			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{
-#if DEBUG
-			if (thisPtr.ValueType != NaNBoxing.BoxType.Sbyte)
-				throw new InvalidOperationException();
-#endif
-
-			context.StackSlots[returnSlotIndex] = thisPtr;
-		}
+		
 
 		[NativeFunction(".Number$public::valueOf")]
 		public static void Number_valueOf(Context context,

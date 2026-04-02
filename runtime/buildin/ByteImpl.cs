@@ -8,49 +8,49 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime.buildin
 {
-    internal class ShortImpl
+    internal class ByteImpl
     {
         private const string Digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-        [NativeFunction(".short$:AS3::valueOf")]
-        public static void Short_valueOf(Context context,
+        [NativeFunction(".byte$:AS3::valueOf")]
+        public static void Byte_valueOf(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Byte)
                 throw new InvalidOperationException();
 #endif
 
             context.StackSlots[returnSlotIndex] = thisPtr;
         }
 
-        [NativeFunction(".short$public::valueOf")]
-        public static void Short_valueOf_Public(Context context,
+        [NativeFunction(".byte$public::valueOf")]
+        public static void Byte_valueOf_Public(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Byte)
                 throw new InvalidOperationException();
 #endif
 
             context.StackSlots[returnSlotIndex] = thisPtr;
         }
 
-        [NativeFunction(".short$public::toString")]
-        public static void Short_toString(Context context,
+        [NativeFunction(".byte$public::toString")]
+        public static void Byte_toString(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Byte)
                 throw new InvalidOperationException();
 #endif
 
@@ -66,9 +66,9 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            short x = thisPtr.ShortValue;
+            byte x = thisPtr.ByteValue;
 
-            string str = ShortToString(x, radixValue);
+            string str = ByteToString(x, radixValue);
 
             int str_ptr = context.GC.AllocString(str);
             if (str_ptr == 0)
@@ -80,45 +80,20 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
         }
 
-        private static string ShortToString(short n, int radix)
+        private static string ByteToString(byte n, int radix)
         {
             if (n == 0)
             {
                 return "0";
             }
 
-            bool negative = false;
-            ushort u;
-
-            if (n < 0)
-            {
-                negative = true;
-                if (n == short.MinValue)
-                {
-                    u = 0x8000;
-                }
-                else
-                {
-                    u = (ushort)(-n);
-                }
-            }
-            else
-            {
-                u = (ushort)n;
-            }
-
             var sb = new ValueStringBuilder(stackalloc char[32]);
 
-            while (u > 0)
+            while (n > 0)
             {
-                ushort digit = (ushort)(u % (ushort)radix);
+                byte digit = (byte)(n % (byte)radix);
                 sb.Append(Digits[digit]);
-                u /= (ushort)radix;
-            }
-
-            if (negative)
-            {
-                sb.Append('-');
+                n /= (byte)radix;
             }
 
             sb.Reverse();
@@ -159,15 +134,15 @@ namespace juicescript.runtime.buildin
             return sb.ToString();
         }
 
-        [NativeFunction(".short$public::toExponential")]
-        public static void Short_toExponential(Context context,
+        [NativeFunction(".byte$public::toExponential")]
+        public static void Byte_toExponential(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Byte)
                 throw new InvalidOperationException();
 #endif
 
@@ -183,7 +158,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            double x = thisPtr.ShortValue;
+            double x = thisPtr.ByteValue;
 
             var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
             DtoaNumberFormatter.DoubleToAscii(
@@ -198,7 +173,7 @@ namespace juicescript.runtime.buildin
             Debug.Assert(dtoaBuilder.Length <= f + 1);
 
             int exponent = decimalPoint - 1;
-            var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1);
+            var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, false, f + 1);
 
             int str_ptr = context.GC.AllocString(result);
             if (str_ptr == 0)
@@ -210,15 +185,15 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
         }
 
-        [NativeFunction(".short$public::toFixed")]
-        public static void Short_toFixed(Context context,
+        [NativeFunction(".byte$public::toFixed")]
+        public static void Byte_toFixed(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Byte)
                 throw new InvalidOperationException();
 #endif
 
@@ -235,9 +210,9 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            short n = thisPtr.ShortValue;
+            byte n = thisPtr.ByteValue;
 
-            string str = ShortToString(n, 10);
+            string str = ByteToString(n, 10);
 
             if (f > 0)
             {
@@ -254,15 +229,15 @@ namespace juicescript.runtime.buildin
             context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
         }
 
-        [NativeFunction(".short$public::toPrecision")]
-        public static void Short_toPrecision(Context context,
+        [NativeFunction(".byte$public::toPrecision")]
+        public static void Byte_toPrecision(Context context,
             ASMethod method,
             int scope_ptr,
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
 #if DEBUG
-            if (thisPtr.ValueType != NaNBoxing.BoxType.Short)
+            if (thisPtr.ValueType != NaNBoxing.BoxType.Byte)
                 throw new InvalidOperationException();
 #endif
 
@@ -278,7 +253,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            double x = thisPtr.ShortValue;
+            double x = thisPtr.ByteValue;
 
             var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
             DtoaNumberFormatter.DoubleToAscii(

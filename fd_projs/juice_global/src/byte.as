@@ -18,7 +18,10 @@ package
 		 */
 		public static const MIN_VALUE : byte =  0;
 		
-		
+		/**
+		 * @private
+		 */
+		public static const length : int = 1;
 		
 		/**
 		 * 返回指定 byte 对象的原始 byte 类型值。

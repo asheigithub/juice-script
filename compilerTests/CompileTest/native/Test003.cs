@@ -40,7 +40,7 @@ package
 	
 }
 var a = 3;
-var b = a.AS3::valueOf();
+var b = a.valueOf();
 trace( b);
 
 

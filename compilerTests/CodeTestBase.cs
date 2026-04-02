@@ -50,7 +50,7 @@ namespace compilerTests
                 var path = Assembly.GetExecutingAssembly().Location;
                 var i = path.IndexOf("compilerTests");
                 path = path.Substring(0, i);
-
+                
                 return path + "player\\bin\\Debug\\net6.0\\juice_global.swc";
 			}
         }

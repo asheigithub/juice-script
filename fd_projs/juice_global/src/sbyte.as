@@ -19,6 +19,10 @@ package
 		 */
 		public static const MIN_VALUE : sbyte =  -128;
 		
+		/**
+		 * @private
+		 */
+		public static const length : int = 1;
 		
 		/**
 		 * 返回指定 sbyte 对象的原始 sbyte 类型值。
