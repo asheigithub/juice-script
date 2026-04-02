@@ -10789,7 +10789,7 @@ namespace juicescript.runtime
 							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) * Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Float:
-							stackslots[dst.index].SetFloat(n1.FloatValue * Extensions.GetFloatValue(n2));
+							stackslots[dst.index].SetFloat( Extensions.GetFloatValue( n1) * Extensions.GetFloatValue(n2));
 							break;
 #if DEBUG
 						default:
@@ -10821,7 +10821,7 @@ namespace juicescript.runtime
 								stackslots[dst.index].SetInt(Extensions.GetIntValue(n1) * Extensions.GetIntValue(n2));
 								break;
 							case BoxType.Float:
-								stackslots[dst.index].SetFloat(n1.FloatValue * Extensions.GetFloatValue(n2));
+								stackslots[dst.index].SetFloat( Extensions.GetFloatValue( n1) * Extensions.GetFloatValue(n2));
 								break;
 #if DEBUG
 							default:

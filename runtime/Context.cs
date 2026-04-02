@@ -16,11 +16,14 @@ namespace juicescript.runtime
     /// </summary>
     public class Context
     {
+#if FORCOMPILER
+		public const int STACK_LENGTH = 2048;
+#else
         public const int STACK_LENGTH = 512;
-
+#endif
 
 #if DEBUG
-        public const int MAX_BACKTRACE = 20;
+		public const int MAX_BACKTRACE = 20;
 #else
 		public const int MAX_BACKTRACE = 40;
 #endif
