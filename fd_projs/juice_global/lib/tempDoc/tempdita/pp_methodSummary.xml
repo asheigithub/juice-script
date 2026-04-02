@@ -1,131 +1,98 @@
-<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="__AS3__:toplevel:isFinite"><apiName>isFinite</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isNaN"><apiName>isNaN</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:trace"><apiName>trace</apiName><shortdesc>
+<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="__AS3__:toplevel:fetch"><apiName>fetch</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>url</apiItemName><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isFinite"><apiName>isFinite</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiType value="any"/><apiData>unknown</apiData></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isNaN"><apiName>isNaN</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiType value="any"/><apiData>unknown</apiData></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:parseFloat"><apiName>parseFloat</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>str</apiItemName><apiData>NaN</apiData><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:parseInt"><apiName>parseInt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>s</apiItemName><apiData>NaN</apiData><apiOperationClassifier>String</apiOperationClassifier></apiParam><apiParam><apiItemName>radix</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:trace"><apiName>trace</apiName><shortdesc>
 		 调试时显示表达式或写入日志文件。单个跟踪语句可支持多个参数。如果跟踪语句中的任何参数包含 String 之外的数据类型，则跟踪函数将调用与该数据类型关联的 toString() 方法。例如，如果该参数是一个布尔值，则跟踪函数将调用 Boolean.toString() 并显示返回值。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>要计算的一个或多个（逗号分隔）表达式。对于多个表达式，输出中每个表达式之间都将插入一个空格。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 调试时显示表达式或写入日志文件。单个跟踪语句可支持多个参数。如果跟踪语句中的任何参数包含 String 之外的数据类型，则跟踪函数将调用与该数据类型关联的 toString() 方法。例如，如果该参数是一个布尔值，则跟踪函数将调用 Boolean.toString() 并显示返回值。
 		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="__AS3__:MethodClosure"><apiName>MethodClosure</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="__Global__"><apiName>__Global__</apiName><apiClassifier id="globalClassifier:ReferenceError"><apiName>ReferenceError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="ReferenceError:ReferenceError"><apiName>ReferenceError</apiName><shortdesc>
 		 创建一个新的 ReferenceError 对象。
-		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiType value="any"/><apiData/><apiDesc>包含与 ReferenceError 对象关联的消息。
-		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiType value="any"/><apiData>0</apiData></apiParam></apiConstructorDef><apiDesc>
+		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier><apiDesc>包含与 ReferenceError 对象关联的消息。
+		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiConstructorDef><apiDesc>
 		 创建一个新的 ReferenceError 对象。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:byte"><apiName>byte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="byte:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
-		 返回指定 byte 对象的原始 byte 类型值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>byte</apiOperationClassifier><apiDesc>此 byte 对象的原始 byte 类型值。
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 返回指定 byte 对象的原始 byte 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Error"><apiName>Error</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Error:getStackTrace"><apiName>getStackTrace</apiName><shortdesc>
-		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
-		 
-TypeError: Error #1009: Cannot access a property or method of a null object reference
-         at com.xyz::OrderEntry/retrieveData()[/src/com/xyz/OrderEntry.as:995]
-         at com.xyz::OrderEntry/init()[/src/com/xyz/OrderEntry.as:200]
-         at com.xyz::OrderEntry()[/src/com/xyz/OrderEntry.as:148]
-		 
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
-		 <codeblock>
-TypeError: Error #1009: Cannot access a property or method of a null object reference
-         at com.xyz::OrderEntry/retrieveData()[/src/com/xyz/OrderEntry.as:995]
-         at com.xyz::OrderEntry/init()[/src/com/xyz/OrderEntry.as:200]
-         at com.xyz::OrderEntry()[/src/com/xyz/OrderEntry.as:148]
-		 </codeblock>
-		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="Error:Error"><apiName>Error</apiName><shortdesc>
-		 创建新的 Error 对象。
-		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier><apiDesc>与 Error 对象关联的字符串；此参数为可选。
-		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>与特定错误消息关联的引用数字。
-		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
-		 创建新的 Error 对象。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:ushort"><apiName>ushort</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="ushort:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
-		 返回指定 short 对象的原始 short 类型值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>ushort</apiOperationClassifier><apiDesc>此 short 对象的原始 short 类型值。
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 返回指定 short 对象的原始 short 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:String"><apiName>String</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="String:charAt"><apiName>charAt</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:URIError"><apiName>URIError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="URIError:URIError"><apiName>URIError</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:String"><apiName>String</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="String:AS3:charAt"><apiName>charAt</apiName><shortdesc>
 		 返回由参数 index 指定的位置处的字符。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回一个空字符串。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>指定索引处的字符。或者，如果指定的索引不在该字符串的索引范围内，则为一个空字符串。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>指定索引处的字符。或者，如果指定的索引不在该字符串的索引范围内，则为一个空字符串。
 		 </apiDesc></apiReturn><apiParam><apiItemName>index</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个整数，指定字符在字符串中的位置。第一个字符由 0 表示，最后一个字符由 my_str.length - 1 表示。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回由参数 index 指定的位置处的字符。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回一个空字符串。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:charCodeAt"><apiName>charCodeAt</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:charCodeAt"><apiName>charCodeAt</apiName><shortdesc>
 		 返回指定 index 处的字符的数值 Unicode 字符代码。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回 NaN。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>指定索引处的字符的 Unicode32 字符代码。或者，如果索引不在此字符串的索引范围内，则为 NaN。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>指定索引处的字符的 Unicode32 字符代码。或者，如果索引不在此字符串的索引范围内，则为 NaN。
 		 </apiDesc></apiReturn><apiParam><apiItemName>index</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个整数，指定字符在字符串中的位置。第一个字符由 0 表示，最后一个字符由 my_str.length - 1 表示。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回指定 index 处的字符的数值 Unicode 字符代码。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回 NaN。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:concat"><apiName>concat</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:concat"><apiName>concat</apiName><shortdesc>
 		 在 String 对象末尾追加补充参数（如果需要，将它们转换为字符串）并返回结果字符串。源 String 对象的原始值保持不变。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>由该字符串与指定的参数连接而成的新字符串。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>由该字符串与指定的参数连接而成的新字符串。
 		 </apiDesc></apiReturn><apiParam><apiItemName>args</apiItemName><apiType value="restParam"/><apiDesc>args 0 个或多个要连接的值。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 在 String 对象末尾追加补充参数（如果需要，将它们转换为字符串）并返回结果字符串。源 String 对象的原始值保持不变。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:fromCharCode"><apiName>fromCharCode</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:fromCharCode"><apiName>fromCharCode</apiName><shortdesc>
 		 返回一个字符串，该字符串由参数中的 Unicode 字符代码所表示的字符组成。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>指定的 Unicode 字符代码的字符串值。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiStatic/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>指定的 Unicode 字符代码的字符串值。
 		 </apiDesc></apiReturn><apiParam><apiItemName>charCodes</apiItemName><apiType value="restParam"/><apiDesc>charCodes 一系列表示 Unicode 值的十进制整数
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回一个字符串，该字符串由参数中的 Unicode 字符代码所表示的字符组成。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:indexOf"><apiName>indexOf</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:indexOf"><apiName>indexOf</apiName><shortdesc>
 		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定子字符串的第一个匹配项的索引，或 -1。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定子字符串的第一个匹配项的索引，或 -1。
 		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要搜索的子字符串。
 		 </apiDesc></apiParam><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个可选整数，指定搜索的起始索引。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:lastIndexOf"><apiName>lastIndexOf</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:lastIndexOf"><apiName>lastIndexOf</apiName><shortdesc>
 		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定子字符串的最后一个匹配项的位置，或 -1（如果未找到）。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定子字符串的最后一个匹配项的位置，或 -1（如果未找到）。
 
 		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要搜索的字符串。
 		 </apiDesc></apiParam><apiParam><apiItemName>startIndex</apiItemName><apiData>0x7FFFFFFF</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个可选整数，指定开始搜索 val 的起始索引。默认为允许的最大索引值。如果未指定 startIndex，则从字符串中的最后一项开始搜索。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:replace"><apiName>replace</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:replace"><apiName>replace</apiName><shortdesc>
 		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
 		 </apiDesc></apiReturn><apiParam><apiItemName>pattern</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>	 </apiDesc></apiParam><apiParam><apiItemName>repl</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>	 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:slice"><apiName>slice</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:slice"><apiName>slice</apiName><shortdesc>
 		 返回一个字符串，该字符串包括从 startIndex 字符一直到 endIndex 字符（但不包括该字符）之间的所有字符。不修改原始 String 对象。如果未指定 endIndex 参数，此子字符串的结尾就是该字符串的结尾。如果按 startIndex 索引到的字符与按 endIndex 索引到的字符相同或位于后者的右侧，则该方法返回一个空字符串。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定索引的子字符串。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定索引的子字符串。
 		 </apiDesc></apiReturn><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>片段起始点的从 0 开始的索引。如果 startIndex 是一个负数，则从右到左创建片段，其中 -1 是最后一个字符。
 		 </apiDesc></apiParam><apiParam><apiItemName>endIndex</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个比片段终点的索引大 1 的整数。由 endIndex 参数索引的字符未包括在已提取的字符串中。如果 endIndex 是一个负数，则终点根据从字符串的结尾向后数确定，其中 -1 表示最后一个字符。默认为允许的最大索引值。如果省略此参数，则使用 String.length。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回一个字符串，该字符串包括从 startIndex 字符一直到 endIndex 字符（但不包括该字符）之间的所有字符。不修改原始 String 对象。如果未指定 endIndex 参数，此子字符串的结尾就是该字符串的结尾。如果按 startIndex 索引到的字符与按 endIndex 索引到的字符相同或位于后者的右侧，则该方法返回一个空字符串。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:split"><apiName>split</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:split"><apiName>split</apiName><shortdesc>
 		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个子字符串的数组。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个子字符串的数组。
 		 </apiDesc></apiReturn><apiParam><apiItemName>delimiter</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>指定拆分此字符串的位置的模式。此模式可以是任何类型的对象，但通常为字符串。如果 delimiter 不是正则表达式或字符串，则该方法在执行前会将其转换为字符串。
 		 </apiDesc></apiParam><apiParam><apiItemName>limit</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>要放入数组中的最大项数。默认为允许的最大值。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:substr"><apiName>substr</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:substr"><apiName>substr</apiName><shortdesc>
 		 返回一个子字符串，该子字符串中的字符是通过从指定的 startIndex 开始，按照 len 指定的长度截取所得的。原始字符串保持不变。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定参数的子字符串。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定参数的子字符串。
 		 </apiDesc></apiReturn><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc> 一个整数，指定用于创建子字符串的第一个字符的索引。如果 startIndex 是一个负数，则起始索引从字符串的结尾开始确定，其中 -1 表示最后一个字符。
 		 </apiDesc></apiParam><apiParam><apiItemName>len</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc> 要创建的子字符串中的字符数。默认值为所允许的最大值。如果未指定 len，则子字符串包括从 startIndex 到字符串结尾的所有字符。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回一个子字符串，该子字符串中的字符是通过从指定的 startIndex 开始，按照 len 指定的长度截取所得的。原始字符串保持不变。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:substring"><apiName>substring</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:substring"><apiName>substring</apiName><shortdesc>
 		 返回一个字符串，其中包含由 startIndex 指定的字符和一直到 endIndex - 1 的所有字符。如果未指定 endIndex，则使用 String.length。如果 startIndex 的值等于 endIndex 的值，则该方法返回一个空字符串。如果 startIndex 的值大于 endIndex 的值，则在执行函数之前会自动交换参数。原始字符串保持不变。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定参数的子字符串。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定参数的子字符串。
 		 </apiDesc></apiReturn><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个整数，指定用于创建子字符串的第一个字符的索引。startIndex 的有效值范围为从 0 到 String.length。如果 startIndex 是一个负值，则使用 0 。
 		 </apiDesc></apiParam><apiParam><apiItemName>endIndex</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个整数，它比所提取的子字符串中的最后一个字符的索引大 1。endIndex 的有效值范围为从 0 到 String.length。endIndex 处的字符不包括在子字符串中。默认为允许的最大索引值。如果省略此参数，则使用 String.length。如果此参数是一个负值，则使用 0。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回一个字符串，其中包含由 startIndex 指定的字符和一直到 endIndex - 1 的所有字符。如果未指定 endIndex，则使用 String.length。如果 startIndex 的值等于 endIndex 的值，则该方法返回一个空字符串。如果 startIndex 的值大于 endIndex 的值，则在执行函数之前会自动交换参数。原始字符串保持不变。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:toLowerCase"><apiName>toLowerCase</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:toLowerCase"><apiName>toLowerCase</apiName><shortdesc>
 		 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:toUpperCase"><apiName>toUpperCase</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:toUpperCase"><apiName>toUpperCase</apiName><shortdesc>
 		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回 String 实例的原始值。此方法旨在将 String 对象转换为原始字符串值。因为 Juice 运行时可在必要时自动调用 valueOf()，所以几乎不需要明确调用此方法。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>字符串的值。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>字符串的值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回 String 实例的原始值。此方法旨在将 String 对象转换为原始字符串值。因为 Juice 运行时可在必要时自动调用 valueOf()，所以几乎不需要明确调用此方法。
 		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="String:String"><apiName>String</apiName><shortdesc>
@@ -135,46 +102,46 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 创建已初始化为指定字符串的新 String 对象。
 		 <p><b>注意</b> 由于字符串文本比 String 对象需要的开销少且通常更易于使用，所以，除非有充分的理由要使用 String 对象而不是字符串文本，否则应该使用字符串文本而不是 String 类。</p>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:ushort"><apiName>ushort</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="ushort:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="ushort:toFixed"><apiName>toFixed</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="ushort:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="ushort:toString"><apiName>toString</apiName><shortdesc>
+		 返回 ushort 对象的字符串表示形式。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>ushort 对象的字符串表达式。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回 ushort 对象的字符串表示形式。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="ushort:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 返回指定 ushort 对象的原始 ushort 类型值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>ushort</apiOperationClassifier><apiDesc>此 ushort 对象的原始 ushort 类型值。
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 返回指定 ushort 对象的原始 ushort 类型值。
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="ushort:ushort"><apiName>ushort</apiName><shortdesc>
+		 创建新的 ushort 对象。可以创建一个 ushort 类型的变量并赋予其文本值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 ushort 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 ushort 对象。可以创建一个 ushort 类型的变量并赋予其文本值。
 		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:float"><apiName>float</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="float:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回指定 float 对象的原始 float 类型值。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>此 float 对象的原始 float 类型值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回指定 float 对象的原始 float 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:uint"><apiName>uint</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="uint:toExponential"><apiName>toExponential</apiName><shortdesc>
-		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:toFixed"><apiName>toFixed</apiName><shortdesc>
-		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:toPrecision"><apiName>toPrecision</apiName><shortdesc>
-		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:toString"><apiName>toString</apiName><shortdesc>
-		 返回 uint 对象的字符串表示形式。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>uint 对象的字符串表达式。
-		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回 uint 对象的字符串表示形式。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:valueOf"><apiName>valueOf</apiName><shortdesc>
-		 返回指定 uint 对象的原始 uint 类型值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>此 uint 对象的原始 uint 类型值。
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 返回指定 uint 对象的原始 uint 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="uint:uint"><apiName>uint</apiName><shortdesc>
-		 创建新的 uint 对象。可以创建一个 uint 类型的变量并赋予其文本值。new uint() 构造函数主要用作占位符。uint 对象与  uint() 函数不同，后者会将参数转换为原始值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 uint 对象的数值，或者要转换为数字的值。如果未提供 num，则默认值为 0。
-		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
-		 创建新的 uint 对象。可以创建一个 uint 类型的变量并赋予其文本值。new uint() 构造函数主要用作占位符。uint 对象与  uint() 函数不同，后者会将参数转换为原始值。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Math:abs"><apiName>abs</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Math:abs"><apiName>abs</apiName><shortdesc>
 		 计算并返回由参数 val 指定的数字的绝对值。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>指定参数的绝对值。
 		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>已返回绝对值的数字。
@@ -287,7 +254,136 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 </apiDesc></apiReturn><apiParam><apiItemName>angleRadians</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个数字，它表示一个以弧度为单位的角度。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 计算并返回指定角度的正切值。要计算弧度，请参阅 Math 类的概述。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:IIterator"><apiName>IIterator</apiName><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef></apiClassifierDetail><apiOperation id="IIterator:IIterator:close"><apiName>close</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="IIterator"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>obj</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="IIterator:IIterator:next"><apiName>next</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="IIterator"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>obj</apiItemName><apiType value="any"/></apiParam><apiParam><apiItemName>r</apiItemName><apiOperationClassifier>IteratorResult</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Namespace"><apiName>Namespace</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Namespace:AS3:toString"><apiName>toString</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:IIterator"><apiName>IIterator</apiName><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef></apiClassifierDetail><apiOperation id="IIterator:IIterator:close"><apiName>close</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="IIterator"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>obj</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="IIterator:IIterator:next"><apiName>next</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="IIterator"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>obj</apiItemName><apiType value="any"/></apiParam><apiParam><apiItemName>r</apiItemName><apiOperationClassifier>IteratorResult</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Function"><apiName>Function</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Function:AS3:apply"><apiName>apply</apiName><shortdesc>
+		 指定要在 ActionScript 调用的任何函数内使用的 thisObject 的值。此方法还指定要传递给任何被调用函数的参数。由于 apply() 是 Function 类的方法，所以它也是 ActionScript 中每个 Function 对象的方法。
+		 该方法将参数指定为一个 Array 对象。如果在脚本实际执行前，无法知道要传递的参数的数量，那么这种方法通常很有用。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>调用函数指定的任何值。
+		 </apiDesc></apiReturn><apiParam><apiItemName>thisArg</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>要应用该函数的对象。
+		 </apiDesc></apiParam><apiParam><apiItemName>argArray</apiItemName><apiData>null</apiData><apiOperationClassifier>Array</apiOperationClassifier><apiDesc> 其元素作为参数传递给函数的数组。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 指定要在 ActionScript 调用的任何函数内使用的 thisObject 的值。此方法还指定要传递给任何被调用函数的参数。由于 apply() 是 Function 类的方法，所以它也是 ActionScript 中每个 Function 对象的方法。
+		 <p>该方法将参数指定为一个 Array 对象。如果在脚本实际执行前，无法知道要传递的参数的数量，那么这种方法通常很有用。</p>
+		 </apiDesc></apiOperationDetail><related-links><link href="#Function/call()"><linktext>call()</linktext></link></related-links></apiOperation><apiOperation id="Function:AS3:call"><apiName>call</apiName><shortdesc>
+		 调用 Function 对象表示的函数。ActionScript 中的每个函数都由一个 Function 对象来表示，所以所有的函数都支持此方法。
+		 几乎在所有的情形下，都可以使用函数调用运算符 (()) 来代替此方法。如果需要明确控制函数调用中的 thisObject 参数，则此方法很有用。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>
+		 </apiDesc></apiReturn><apiParam><apiItemName>thisArg</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc> 指定函数体内 thisObject 值的对象。
+		 </apiDesc></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>  要传递给该函数的参数。可以指定 0 个或多个参数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 调用 Function 对象表示的函数。ActionScript 中的每个函数都由一个 Function 对象来表示，所以所有的函数都支持此方法。
+		 <p>几乎在所有的情形下，都可以使用函数调用运算符 (()) 来代替此方法。如果需要明确控制函数调用中的 thisObject 参数，则此方法很有用。</p>
+		 </apiDesc></apiOperationDetail><related-links><link href="#Function/apply()"><linktext>apply()</linktext></link></related-links></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Number:abs"><apiName>abs</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:acos"><apiName>acos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:asin"><apiName>asin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan2"><apiName>atan2</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan"><apiName>atan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:ceil"><apiName>ceil</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:cos"><apiName>cos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:exp"><apiName>exp</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:floor"><apiName>floor</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:log"><apiName>log</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:max"><apiName>max</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:min"><apiName>min</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:pow"><apiName>pow</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:random"><apiName>random</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:round"><apiName>round</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sin"><apiName>sin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sqrt"><apiName>sqrt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:tan"><apiName>tan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:toFixed"><apiName>toFixed</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:toString"><apiName>toString</apiName><shortdesc>
+		 返回指定的 Number 对象 (myNumber) 的字符串表示形式。如果 Number 对象的值是没有前导零的小数（如 .4），则 Number.toString() 将添加一个前导零 (0.4)。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>Number 对象作为字符串的数值表示形式。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回指定的 Number 对象 (myNumber) 的字符串表示形式。如果 Number 对象的值是没有前导零的小数（如 .4），则 Number.toString() 将添加一个前导零 (0.4)。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 返回指定的 Number 对象的基元值类型。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>Number 对象的基元类型的值。
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 返回指定的 Number 对象的基元值类型。
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="Number:Number"><apiName>Number</apiName><shortdesc>
+		 用指定值创建一个 Number 对象。此构造函数与 Number() 公共本机函数效果相同，后者可将其他类型的对象转换为基元数值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>已创建的 Number 实例的数值，或者转换为 Number 的值。如果未指定 num，则默认值为 0。使用此构造函数时不指定 num 参数与声明 Number 类型的变量时不赋值（如 var myNumber:Number）不同，后者的默认值为 NaN。未赋值的数字是未定义的，与 new Number(undefined) 等效。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 用指定值创建一个 Number 对象。此构造函数与 Number() 公共本机函数效果相同，后者可将其他类型的对象转换为基元数值。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:RangeError"><apiName>RangeError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="RangeError:RangeError"><apiName>RangeError</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Boolean"><apiName>Boolean</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Boolean:toString"><apiName>toString</apiName><shortdesc>
+		 返回 Boolean 对象的字符串表示形式（"true" 或 "false"）。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 返回 Boolean 对象的字符串表示形式（"true" 或 "false"）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Boolean:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 如果指定的 Boolean 对象的值为 true，则返回 true；否则返回 false。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 如果指定的 Boolean 对象的值为 true，则返回 true；否则返回 false。
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="Boolean:Boolean"><apiName>Boolean</apiName><shortdesc>
+		 创建一个具有指定值的 Boolean 对象。
+		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>false</apiData><apiDesc>任何表达式。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建一个具有指定值的 Boolean 对象。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:byte"><apiName>byte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="byte:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 返回指定 byte 对象的原始 byte 类型值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>byte</apiOperationClassifier><apiDesc>此 byte 对象的原始 byte 类型值。
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 返回指定 byte 对象的原始 byte 类型值。
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Error"><apiName>Error</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Error:getStackTrace"><apiName>getStackTrace</apiName><shortdesc>
+		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
+		 
+TypeError: Error #1009: Cannot access a property or method of a null object reference
+         at com.xyz::OrderEntry/retrieveData()[/src/com/xyz/OrderEntry.as:995]
+         at com.xyz::OrderEntry/init()[/src/com/xyz/OrderEntry.as:200]
+         at com.xyz::OrderEntry()[/src/com/xyz/OrderEntry.as:148]
+		 
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
+		 <codeblock>
+TypeError: Error #1009: Cannot access a property or method of a null object reference
+         at com.xyz::OrderEntry/retrieveData()[/src/com/xyz/OrderEntry.as:995]
+         at com.xyz::OrderEntry/init()[/src/com/xyz/OrderEntry.as:200]
+         at com.xyz::OrderEntry()[/src/com/xyz/OrderEntry.as:148]
+		 </codeblock>
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="Error:Error"><apiName>Error</apiName><shortdesc>
+		 创建新的 Error 对象。
+		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier><apiDesc>与 Error 对象关联的字符串；此参数为可选。
+		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>与特定错误消息关联的引用数字。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 Error 对象。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:EvalError"><apiName>EvalError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="EvalError:EvalError"><apiName>EvalError</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:uint"><apiName>uint</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="uint:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:toFixed"><apiName>toFixed</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:toString"><apiName>toString</apiName><shortdesc>
+		 返回 uint 对象的字符串表示形式。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>uint 对象的字符串表达式。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回 uint 对象的字符串表示形式。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="uint:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 返回指定 uint 对象的原始 uint 类型值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>此 uint 对象的原始 uint 类型值。
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 返回指定 uint 对象的原始 uint 类型值。
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="uint:uint"><apiName>uint</apiName><shortdesc>
+		 创建新的 uint 对象。可以创建一个 uint 类型的变量并赋予其文本值。new uint() 构造函数主要用作占位符。uint 对象与  uint() 函数不同，后者会将参数转换为原始值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 uint 对象的数值，或者要转换为数字的值。如果未提供 num，则默认值为 0。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 uint 对象。可以创建一个 uint 类型的变量并赋予其文本值。new uint() 构造函数主要用作占位符。uint 对象与  uint() 函数不同，后者会将参数转换为原始值。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Namespace"><apiName>Namespace</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Namespace:AS3:toString"><apiName>toString</apiName><shortdesc>
 		 等效于 Namespace.uri 属性。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>命名空间的统一资源标识符 (URI)（采用字符串形式）。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
@@ -309,25 +405,25 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 	 </example></apiClassifierDetail><apiOperation id="int:toExponential"><apiName>toExponential</apiName><shortdesc>
 		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="int:toFixed"><apiName>toFixed</apiName><shortdesc>
 		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="int:toPrecision"><apiName>toPrecision</apiName><shortdesc>
 		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="int:toString"><apiName>toString</apiName><shortdesc>
 		 返回 int 对象的字符串表示形式。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>字符串。
-		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiType value="any"/><apiData>10</apiData><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回 int 对象的字符串表示形式。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="int:valueOf"><apiName>valueOf</apiName><shortdesc>
@@ -340,15 +436,9 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 int 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 构造函数；创建新的 int 对象。使用 int.toString() 和 int.valueOf() 时，必须使用 int 构造函数。使用 int 对象的属性时，不要使用构造函数。new int 构造函数主要用作占位符。int 对象与 int() 函数不同，后者将参数转换为原始值。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Array"><apiName>Array</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Array:concat"><apiName>concat</apiName><shortdesc>
-		 将参数中指定的元素与数组中的元素连接，并创建新的数组。如果这些参数指定了一个数组，将连接该数组中的元素。如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个数组，其中包含此数组中的元素，后跟参数中的元素。
-		 </apiDesc></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>要连接到新数组中的任意数据类型的值（如数字、元素或字符串）。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 将参数中指定的元素与数组中的元素连接，并创建新的数组。如果这些参数指定了一个数组，将连接该数组中的元素。如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:every"><apiName>every</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Array"><apiName>Array</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Array:AS3:every"><apiName>every</apiName><shortdesc>
 		 对数组中的每一项执行测试函数，直到获得对指定的函数返回 false 的项。使用此方法可确定数组中的所有项是否满足某一条件，如具有的值小于某一特定数值。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>如果数组中的所有项对指定的函数都返回 true，则为布尔值 true；否则为 false。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>如果数组中的所有项对指定的函数都返回 true，则为布尔值 true；否则为 false。
 		 </apiDesc></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。该函数可以包含简单的比较操作（例如，item &lt; 20）或者更复杂的操作，并用三个参数来调用，即项值、项索引和 Array 对象： 
 		 <p>function callback(item:~~, index:int, array:Array):Boolean;</p>
 		 </apiDesc></apiParam><apiParam><apiItemName>thisObject</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>用作函数的 this 的对象。
@@ -368,10 +458,10 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 trace("isNumeric:", res2); // false
 		 </codeblock>
 		 
-		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:filter"><apiName>filter</apiName><shortdesc>
+		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:filter"><apiName>filter</apiName><shortdesc>
 		 对数组中的每一项执行测试函数，并构造一个新数组，其中的所有项都对指定的函数返回 true。如果某项返回 false，则新数组中将不包含此项。
 		 
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个新数组，它包含原始数组中返回 true 的所有项。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个新数组，它包含原始数组中返回 true 的所有项。
 		 </apiDesc></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。该函数可以包含简单的比较操作（例如，item &lt; 20）或者更复杂的操作，并用三个参数来调用，即项值、项索引和 Array 对象：function callback(item:~~, index:int, array:Array):Boolean;
 		 </apiDesc></apiParam><apiParam><apiItemName>thisObject</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>用作函数的 this 的对象。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
@@ -397,28 +487,28 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		    trace("\t" + element.name + ((element.manager) ? " (manager)" : ""));
 		 }
 		 </codeblock>
-		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:forEach"><apiName>forEach</apiName><shortdesc>
+		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:forEach"><apiName>forEach</apiName><shortdesc>
 		 对数组中的每一项执行函数。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。此函数可以包含简单的命令（如 trace() 语句）或者更复杂的操作，并用三个参数来调用，即项值、项索引和 Array 对象：
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。此函数可以包含简单的命令（如 trace() 语句）或者更复杂的操作，并用三个参数来调用，即项值、项索引和 Array 对象：
 		 <p>function callback(item:~~, index:int, array:Array):void;</p>
 		 </apiDesc></apiParam><apiParam><apiItemName>thisObject</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>用作函数的 this 的对象。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 对数组中的每一项执行函数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:indexOf"><apiName>indexOf</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:indexOf"><apiName>indexOf</apiName><shortdesc>
 		 使用 strict equality (===) 运算符搜索数组中的项，并返回项的索引位置。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>数组项的索引位置（从 0 开始）。如果未找到 searchElement 参数，则返回值为 -1。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>数组项的索引位置（从 0 开始）。如果未找到 searchElement 参数，则返回值为 -1。
 		 </apiDesc></apiReturn><apiParam><apiItemName>searchElement</apiItemName><apiType value="any"/><apiDesc>要在数组中查找的项。
 		 </apiDesc></apiParam><apiParam><apiItemName>fromIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>数组中的位置，从该位置开始搜索项。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 使用 strict equality (===) 运算符搜索数组中的项，并返回项的索引位置。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:insertAt"><apiName>insertAt</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:insertAt"><apiName>insertAt</apiName><shortdesc>
 		 将一个单独的元素插入一个数组中。此方法会修改数组但不制作副本。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>index</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整数，指定元素要插入数组中的位置。可以用一个负整数来指定相对于数组结尾的位置（例如，-1 是数组的最后一个元素）。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>index</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整数，指定元素要插入数组中的位置。可以用一个负整数来指定相对于数组结尾的位置（例如，-1 是数组的最后一个元素）。
 		 </apiDesc></apiParam><apiParam><apiItemName>element</apiItemName><apiType value="any"/><apiDesc>	 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将一个单独的元素插入一个数组中。此方法会修改数组但不制作副本。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:join"><apiName>join</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:join"><apiName>join</apiName><shortdesc>
 		 将数组中的元素转换为字符串、在元素间插入指定的分隔符、连接这些元素然后返回结果字符串。嵌套数组总是以逗号 (,) 分隔，而不使用传递给 join() 方法的分隔符分隔。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>一个字符串，由转换为字符串并由指定参数分隔的数组元素组成。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>一个字符串，由转换为字符串并由指定参数分隔的数组元素组成。
 		 </apiDesc></apiReturn><apiParam><apiItemName>sep</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>在返回字符串中分隔数组元素的字符或字符串。如果省略此参数，则使用逗号作为默认分隔符。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将数组中的元素转换为字符串、在元素间插入指定的分隔符、连接这些元素然后返回结果字符串。嵌套数组总是以逗号 (,) 分隔，而不使用传递给 join() 方法的分隔符分隔。
@@ -429,16 +519,16 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 trace(myArr); // one,two,three
 		 trace(myStr); // one and two and three
 		 </codeblock>
-		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:lastIndexOf"><apiName>lastIndexOf</apiName><shortdesc>
+		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:lastIndexOf"><apiName>lastIndexOf</apiName><shortdesc>
 		 搜索数组中的项（从最后一项开始向前搜索），并使用 strict equality (===) 运算符返回匹配项的索引位置。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>数组项的索引位置（从 0 开始）。如果未找到 searchElement 参数，则返回值为 -1。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>数组项的索引位置（从 0 开始）。如果未找到 searchElement 参数，则返回值为 -1。
 		 </apiDesc></apiReturn><apiParam><apiItemName>searchElement</apiItemName><apiType value="any"/><apiDesc>要在数组中查找的项。 
 		 </apiDesc></apiParam><apiParam><apiItemName>fromIndex</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>数组中的位置，从该位置开始搜索项。默认为允许的最大索引值。如果不指定 fromIndex，将从数组中的最后一项开始进行搜索。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 搜索数组中的项（从最后一项开始向前搜索），并使用 strict equality (===) 运算符返回匹配项的索引位置。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:map"><apiName>map</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:map"><apiName>map</apiName><shortdesc>
 		 对数组中的每一项执行函数并构造一个新数组，其中包含与原始数组中的每一项的函数结果相对应的项。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个新数组，其中包含此函数对原始数组中每一项的执行结果。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个新数组，其中包含此函数对原始数组中每一项的执行结果。
 		 </apiDesc></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。此函数可以包含简单的命令（如更改字符串数组的大小写）或更复杂的操作，并用 3 个参数来调用，即项值、项索引和 Array 对象：
 		 <p>function callback(item: index:int, array:Array):String;</p>
 		 </apiDesc></apiParam><apiParam><apiItemName>thisObject</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>用作函数的 this 的对象。
@@ -456,53 +546,47 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 
 		 
 		 </codeblock>
-		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:pop"><apiName>pop</apiName><shortdesc>
+		 </example></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:pop"><apiName>pop</apiName><shortdesc>
 		 删除数组中最后一个元素，并返回该元素的值。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="any"/><apiDesc>指定的数组中最后一个元素（可以为任意数据类型）的值。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>指定的数组中最后一个元素（可以为任意数据类型）的值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 删除数组中最后一个元素，并返回该元素的值。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:push"><apiName>push</apiName><shortdesc>
-		 将一个或多个元素添加到数组的结尾，并返回该数组的新长度。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个表示新数组长度的整数。
-		 </apiDesc></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>要追加到数组中的一个或多个值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 将一个或多个元素添加到数组的结尾，并返回该数组的新长度。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:removeAt"><apiName>removeAt</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:removeAt"><apiName>removeAt</apiName><shortdesc>
 		 从数组中删除一个单独的元素。此方法会修改数组但不制作副本。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="any"/><apiDesc>从原数组中删除的元素。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>从原数组中删除的元素。
 		 </apiDesc></apiReturn><apiParam><apiItemName>index</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整数，指定数组中要被删除元素的索引。可以用一个负整数来指定相对于数组结尾的位置（例如，-1 是数组的最后一个元素）。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 从数组中删除一个单独的元素。此方法会修改数组但不制作副本。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:reverse"><apiName>reverse</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:reverse"><apiName>reverse</apiName><shortdesc>
 		 在当前位置倒转数组。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>新数组。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>新数组。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 在当前位置倒转数组。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:shift"><apiName>shift</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:shift"><apiName>shift</apiName><shortdesc>
 		 删除数组中第一个元素，并返回该元素。其余数组元素将从其原始位置 i 移至 i-1。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="any"/><apiDesc>数组中的第一个元素（可以是任意数据类型）。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>数组中的第一个元素（可以是任意数据类型）。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 删除数组中第一个元素，并返回该元素。其余数组元素将从其原始位置 i 移至 i-1。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:slice"><apiName>slice</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:slice"><apiName>slice</apiName><shortdesc>
 		 返回由原始数组中某一范围的元素构成的新数组，而不修改原始数组。返回的数组包括 startIndex 元素以及从其开始到 endIndex 元素（但不包括该元素）的所有元素。
 		 
 		   如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个数组，由原始数组中某一范围的元素组成。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个数组，由原始数组中某一范围的元素组成。
 		 </apiDesc></apiReturn><apiParam><apiItemName>A</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个数字，指定片段起始点的索引。如果 startIndex 是负数，则起始点从数组的结尾开始，其中 -1 指的是最后一个元素。
 		 </apiDesc></apiParam><apiParam><apiItemName>B</apiItemName><apiData>16777215</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个数字，指定片段终点的索引。如果省略此参数，则片段包括数组中从开头到结尾的所有元素。如果 endIndex 是负数，则终点从数组的结尾指定，其中 -1 指的是最后一个元素。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回由原始数组中某一范围的元素构成的新数组，而不修改原始数组。返回的数组包括 startIndex 元素以及从其开始到 endIndex 元素（但不包括该元素）的所有元素。
 		 
 		   如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:some"><apiName>some</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:some"><apiName>some</apiName><shortdesc>
 		 对数组中的每一项执行测试函数，直到获得返回 true 的项。使用此方法确定数组中的所有项是否满足条件，如具有小于某一特定数值的值。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>如果数组中的所有项对于指定的函数都返回 true，则为布尔值 true，否则为 false。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>如果数组中的所有项对于指定的函数都返回 true，则为布尔值 true，否则为 false。
 		 </apiDesc></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。此函数可以包含简单的比较操作（如 item &lt; 20）或者更复杂的操作，并用三个参数来调用，即项值、项索引和 Array 对象：
 		 <p> function callback(item:~~, index:int, array:Array):Boolean;</p>
 		 </apiDesc></apiParam><apiParam><apiItemName>thisObject</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>用作函数的 this 的对象。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 对数组中的每一项执行测试函数，直到获得返回 true 的项。使用此方法确定数组中的所有项是否满足条件，如具有小于某一特定数值的值。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:sort"><apiName>sort</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:sort"><apiName>sort</apiName><shortdesc>
 		 对数组中的元素进行排序。此方法按 Unicode 值排序。
 		 默认情况下，Array.sort() 按以下方式进行排序：
 		 
@@ -512,7 +596,7 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 元素无论属于何种数据类型，都作为字符串进行排序，所以 100 在 99 之前，这是因为 "1" 的字符串值小于 "9" 的字符串值。
 		 
 		 如果要使用与默认设置不同的设置对数组进行排序，可以使用 ...args 参数说明中 sortOptions 部分所描述的某种排序选项，也可以创建自定义函数来进行排序。如果创建自定义函数，请调用 sort() 方法，并将自定义函数的名称作为第一个参数 (compareFunction)。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>不返回任何内容并修改该数组以反映排序顺序。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>不返回任何内容并修改该数组以反映排序顺序。
 		 
 		 </apiDesc></apiReturn><apiParam><apiItemName>args</apiItemName><apiType value="restParam"/><apiDesc>指定一个比较函数和确定排序行为的一个或多个值的参数。
 		 <p>此方法使用语法和参数顺序 Array.sort(compareFunction, sortOptions)，其参数定义如下：</p>
@@ -664,22 +748,17 @@ numbers.sort(Array.NUMERIC);
 trace(numbers); // 3,5,10,34,100
 
 </codeblock>
-</example></apiOperationDetail></apiOperation><apiOperation id="Array:splice"><apiName>splice</apiName><shortdesc>
+</example></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:splice"><apiName>splice</apiName><shortdesc>
 		 给数组添加元素以及从数组中删除元素。此方法会修改数组但不制作副本。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个数组，包含从原始数组中删除的元素。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个数组，包含从原始数组中删除的元素。
 		 </apiDesc></apiReturn><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整数，它指定数组中开始进行插入或删除的位置处的元素的索引。您可以用一个负整数来指定相对于数组结尾的位置（例如，-1 是数组的最后一个元素）。
 		 </apiDesc></apiParam><apiParam><apiItemName>deleteCount</apiItemName><apiData>4294967295</apiData><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个整数，它指定要删除的元素数量。该数量包括 startIndex 参数中指定的元素。如果没有为 deleteCount 参数指定值，则该方法将删除从 startIndex 元素到数组中最后一个元素的所有值。如果该参数的值为 0，则不删除任何元素。
 		 </apiDesc></apiParam><apiParam><apiItemName>values</apiItemName><apiType value="restParam"/><apiDesc>用逗号分隔的一个或多个值的可选列表，此可选列表将插入 startIndex 参数中的指定位置处的数组中。如果插入的值是数组类型，则保持此数组的原样并将其作为单个元素插入。例如，如果您将长度为 3 的现有数组与另一长度为 3 的数组结合，则生成的数组将只包含 4 个元素。但是，其中的一个元素将是长度为 3 的一个数组。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 给数组添加元素以及从数组中删除元素。此方法会修改数组但不制作副本。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:toString"><apiName>toString</apiName><shortdesc>
-		 返回一个字符串，它表示指定数组中的元素。数组中的每一个元素（从索引 0 开始到最高索引结束）均会转换为一个连接字符串，并以逗号分隔。要指定自定义的分隔符，请使用 Array.join() 方法。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>数组元素的字符串。
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 返回一个字符串，它表示指定数组中的元素。数组中的每一个元素（从索引 0 开始到最高索引结束）均会转换为一个连接字符串，并以逗号分隔。要指定自定义的分隔符，请使用 Array.join() 方法。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:unshift"><apiName>unshift</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:unshift"><apiName>unshift</apiName><shortdesc>
 		 将一个或多个元素添加到数组的开头，并返回该数组的新长度。数组中的其他元素从其原始位置 i 移到 i+1。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个整数，表示该数组的新长度。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个整数，表示该数组的新长度。
 		 </apiDesc></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>一个或多个要插入到数组开头的数字、元素或变量。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将一个或多个元素添加到数组的开头，并返回该数组的新长度。数组中的其他元素从其原始位置 i 移到 i+1。
@@ -703,69 +782,46 @@ trace(numbers); // 3,5,10,34,100
 		 
 		 <p>如果不传递任何参数，则认为创建长度为0的数组。</p>
 		 
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Function"><apiName>Function</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Function:AS3:apply"><apiName>apply</apiName><shortdesc>
-		 指定要在 ActionScript 调用的任何函数内使用的 thisObject 的值。此方法还指定要传递给任何被调用函数的参数。由于 apply() 是 Function 类的方法，所以它也是 ActionScript 中每个 Function 对象的方法。
-		 该方法将参数指定为一个 Array 对象。如果在脚本实际执行前，无法知道要传递的参数的数量，那么这种方法通常很有用。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>调用函数指定的任何值。
-		 </apiDesc></apiReturn><apiParam><apiItemName>thisArg</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>要应用该函数的对象。
-		 </apiDesc></apiParam><apiParam><apiItemName>argArray</apiItemName><apiData>null</apiData><apiOperationClassifier>Array</apiOperationClassifier><apiDesc> 其元素作为参数传递给函数的数组。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 指定要在 ActionScript 调用的任何函数内使用的 thisObject 的值。此方法还指定要传递给任何被调用函数的参数。由于 apply() 是 Function 类的方法，所以它也是 ActionScript 中每个 Function 对象的方法。
-		 <p>该方法将参数指定为一个 Array 对象。如果在脚本实际执行前，无法知道要传递的参数的数量，那么这种方法通常很有用。</p>
-		 </apiDesc></apiOperationDetail><related-links><link href="#Function/call()"><linktext>call()</linktext></link></related-links></apiOperation><apiOperation id="Function:AS3:call"><apiName>call</apiName><shortdesc>
-		 调用 Function 对象表示的函数。ActionScript 中的每个函数都由一个 Function 对象来表示，所以所有的函数都支持此方法。
-		 几乎在所有的情形下，都可以使用函数调用运算符 (()) 来代替此方法。如果需要明确控制函数调用中的 thisObject 参数，则此方法很有用。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>
-		 </apiDesc></apiReturn><apiParam><apiItemName>thisArg</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc> 指定函数体内 thisObject 值的对象。
-		 </apiDesc></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>  要传递给该函数的参数。可以指定 0 个或多个参数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 调用 Function 对象表示的函数。ActionScript 中的每个函数都由一个 Function 对象来表示，所以所有的函数都支持此方法。
-		 <p>几乎在所有的情形下，都可以使用函数调用运算符 (()) 来代替此方法。如果需要明确控制函数调用中的 thisObject 参数，则此方法很有用。</p>
-		 </apiDesc></apiOperationDetail><related-links><link href="#Function/apply()"><linktext>apply()</linktext></link></related-links></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Number:abs"><apiName>abs</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:acos"><apiName>acos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:asin"><apiName>asin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan2"><apiName>atan2</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan"><apiName>atan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:ceil"><apiName>ceil</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:cos"><apiName>cos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:exp"><apiName>exp</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:floor"><apiName>floor</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:log"><apiName>log</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:max"><apiName>max</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:min"><apiName>min</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:pow"><apiName>pow</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:random"><apiName>random</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:round"><apiName>round</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sin"><apiName>sin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sqrt"><apiName>sqrt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:tan"><apiName>tan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:toExponential"><apiName>toExponential</apiName><shortdesc>
-		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:toFixed"><apiName>toFixed</apiName><shortdesc>
-		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:toPrecision"><apiName>toPrecision</apiName><shortdesc>
-		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:toString"><apiName>toString</apiName><shortdesc>
-		 返回指定的 Number 对象 (myNumber) 的字符串表示形式。如果 Number 对象的值是没有前导零的小数（如 .4），则 Number.toString() 将添加一个前导零 (0.4)。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>Number 对象作为字符串的数值表示形式。
-		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 返回指定的 Number 对象 (myNumber) 的字符串表示形式。如果 Number 对象的值是没有前导零的小数（如 .4），则 Number.toString() 将添加一个前导零 (0.4)。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Number:valueOf"><apiName>valueOf</apiName><shortdesc>
-		 返回指定的 Number 对象的基元值类型。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>Number 对象的基元类型的值。
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 返回指定的 Number 对象的基元值类型。
-		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="Number:Number"><apiName>Number</apiName><shortdesc>
-		 用指定值创建一个 Number 对象。此构造函数与 Number() 公共本机函数效果相同，后者可将其他类型的对象转换为基元数值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>已创建的 Number 实例的数值，或者转换为 Number 的值。如果未指定 num，则默认值为 0。使用此构造函数时不指定 num 参数与声明 Number 类型的变量时不赋值（如 var myNumber:Number）不同，后者的默认值为 NaN。未赋值的数字是未定义的，与 new Number(undefined) 等效。
-		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
-		 用指定值创建一个 Number 对象。此构造函数与 Number() 公共本机函数效果相同，后者可将其他类型的对象转换为基元数值。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:IteratorResult"><apiName>IteratorResult</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:short"><apiName>short</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="short:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
-		 ����ָ�� short �����ԭʼ short ����ֵ��
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>short</apiOperationClassifier><apiDesc>�� short �����ԭʼ short ����ֵ��
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 ����ָ�� short �����ԭʼ short ����ֵ��
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:sbyte"><apiName>sbyte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="sbyte:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Promise"><apiName>Promise</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Promise:_catch"><apiName>_catch</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>onRejected</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:reject"><apiName>reject</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>reason</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:resolve"><apiName>resolve</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>value</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:then"><apiName>then</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>onFulfilled</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam><apiParam><apiItemName>onRejected</apiItemName><apiData>null</apiData><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiConstructor id="Promise:Promise"><apiName>Promise</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>executor</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:IteratorResult"><apiName>IteratorResult</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:sbyte"><apiName>sbyte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="sbyte:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回指定 sbyte 对象的原始 sbyte 类型值。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>sbyte</apiOperationClassifier><apiDesc>此 byte 对象的原始 byte 类型值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回指定 sbyte 对象的原始 sbyte 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:TypeError"><apiName>TypeError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="TypeError:TypeError"><apiName>TypeError</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:short"><apiName>short</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="short:toExponential"><apiName>toExponential</apiName><shortdesc>
+			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ�������ַ�����С����ǰ�����һλ����С������������� 20 λ���� fractionDigits ������ָ������
+			</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>��� fractionDigits �������� 0 �� 20 �ķ�Χ�ڣ���������쳣��
+			</apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>���� 0 �� 20������֮�����������ʾ�����С��λ����
+			</apiDesc></apiParam></apiOperationDef><apiDesc>
+			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ�������ַ�����С����ǰ�����һλ����С������������� 20 λ���� fractionDigits ������ָ������
+			</apiDesc></apiOperationDetail></apiOperation><apiOperation id="short:toFixed"><apiName>toFixed</apiName><shortdesc>
+			�������ֵ��ַ�����ʾ��ʽ�����ö����ʾ�����������ʾ����ָ�ַ�����С�����������ض���λ������ fractionDigits ������ָ������fractionDigits ��������Ч��ΧΪ 0 �� 20�����ָ����ֵ�ڴ˷�Χ�⣬��������쳣��
+			</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>��� fractionDigits �������� 0 �� 20 �ķ�Χ�ڣ���������쳣��
+			</apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>���� 0 �� 20������֮�����������ʾ�����С��λ����
+			</apiDesc></apiParam></apiOperationDef><apiDesc>
+			�������ֵ��ַ�����ʾ��ʽ�����ö����ʾ�����������ʾ����ָ�ַ�����С�����������ض���λ������ fractionDigits ������ָ������fractionDigits ��������Ч��ΧΪ 0 �� 20�����ָ����ֵ�ڴ˷�Χ�⣬��������쳣��
+			</apiDesc></apiOperationDetail></apiOperation><apiOperation id="short:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ���򶨵��ʾ�������ַ��������� precision ������ָ����λ����
+			</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>��� precision �������� 1 �� 21 �ķ�Χ�ڣ���������쳣��
+			</apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>���� 1 �� 21������֮�����������ʾ����ַ����������λ����
+			</apiDesc></apiParam></apiOperationDef><apiDesc>
+			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ���򶨵��ʾ�������ַ��������� precision ������ָ����λ����
+			</apiDesc></apiOperationDetail></apiOperation><apiOperation id="short:toString"><apiName>toString</apiName><shortdesc>
+		 ���� short ������ַ�����ʾ��ʽ��
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>short ������ַ������ʽ��
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>ָ��Ҫ�������ֵ��ַ�����ת���Ļ������� 2 �� 36�������δָ�� radix ��������Ĭ��ֵΪ 10��
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 ���� short ������ַ�����ʾ��ʽ��
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="short:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 ����ָ�� short �����ԭʼ short ����ֵ��
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>short</apiOperationClassifier><apiDesc>�� short �����ԭʼ short ����ֵ��
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 ����ָ�� short �����ԭʼ short ����ֵ��
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="short:short"><apiName>short</apiName><shortdesc>
+		 �����µ� short ���󡣿��Դ���һ�� short ���͵ı������������ı�ֵ��new short() ���캯����Ҫ����ռλ����
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>Ҫ������ short �������ֵ������Ҫת��Ϊ���ֵ�ֵ�����δ�ṩ value����Ĭ��ֵΪ 0��
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 �����µ� short ���󡣿��Դ���һ�� short ���͵ı������������ı�ֵ��new short() ���캯����Ҫ����ռλ����
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:TypeError"><apiName>TypeError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="TypeError:TypeError"><apiName>TypeError</apiName><shortdesc>
 		 创建新的 TypeError 对象。
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier><apiDesc> 与该错误关联的字符串。
 		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>      与该错误关联的数字
@@ -799,21 +855,6 @@ trace(classInstance);    // [object ClassB]
 		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>      与该错误关联的数字
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 创建错误的实例
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Boolean"><apiName>Boolean</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Boolean:toString"><apiName>toString</apiName><shortdesc>
-		 返回 Boolean 对象的字符串表示形式（"true" 或 "false"）。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 返回 Boolean 对象的字符串表示形式（"true" 或 "false"）。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Boolean:valueOf"><apiName>valueOf</apiName><shortdesc>
-		 如果指定的 Boolean 对象的值为 true，则返回 true；否则返回 false。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>
-		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
-		 如果指定的 Boolean 对象的值为 true，则返回 true；否则返回 false。
-		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="Boolean:Boolean"><apiName>Boolean</apiName><shortdesc>
-		 创建一个具有指定值的 Boolean 对象。
-		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>false</apiData><apiDesc>任何表达式。
-		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
-		 创建一个具有指定值的 Boolean 对象。
 		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier></apiPackage><apiPackage id="flash.errors"><apiName>flash.errors</apiName><apiClassifier id="flash.errors:IllegalOperationError"><apiName>IllegalOperationError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="flash.errors:IllegalOperationError:IllegalOperationError"><apiName>IllegalOperationError</apiName><shortdesc>
 		 创建新的 IllegalOperationError 对象。
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier><apiDesc>与此对象关联的字符串.
@@ -846,86 +887,7 @@ trace(classInstance);    // [object ClassB]
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>weakKeys</apiItemName><apiData>false</apiData><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>当前无用
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 创建新的 Dictionary 对象。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="flash.utils:IDataOutput"><apiName>IDataOutput</apiName><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef></apiClassifierDetail><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBoolean"><apiName>writeBoolean</apiName><shortdesc>
-		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>确定写入哪个字节的布尔值。如果该参数为 true，则写入 1；如果为 false，则写入 0。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeByte"><apiName>writeByte</apiName><shortdesc>
-		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBytes"><apiName>writeBytes</apiName><shortdesc>
-		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
-		 
-		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>bytes</apiItemName><apiOperationClassifier>flash.utils:ByteArray</apiOperationClassifier><apiDesc>要写入的字节数组。
-		 </apiDesc></apiParam><apiParam><apiItemName>offset</apiItemName><apiData>0</apiData><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>从零开始的索引，指定在数组中开始写入的位置。
-		 </apiDesc></apiParam><apiParam><apiItemName>length</apiItemName><apiData>0</apiData><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个无符号整数，指定在缓冲区中的写入范围。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
-		 
-		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeDouble"><apiName>writeDouble</apiName><shortdesc>
-		 写入 IEEE 754 双精度（64 位）浮点数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>双精度（64 位）浮点数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入 IEEE 754 双精度（64 位）浮点数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeFloat"><apiName>writeFloat</apiName><shortdesc>
-		 写入 IEEE 754 单精度（32 位）浮点数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>单精度（32 位）浮点数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入 IEEE 754 单精度（32 位）浮点数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeInt"><apiName>writeInt</apiName><shortdesc>
-		 写入一个带符号的 32 位整数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个带符号的整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个带符号的 32 位整数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeMultiByte"><apiName>writeMultiByte</apiName><shortdesc>
-		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
-		 </apiDesc></apiParam><apiParam><apiItemName>charSet</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>表示要使用的字符集的字符串。可能的字符集字符串包括 "shift-jis"、"cn-gb"、"iso-8859-1"”等。有关完整列表，请参阅支持的字符集。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeObject"><apiName>writeObject</apiName><shortdesc>
-		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>object</apiItemName><apiType value="any"/><apiDesc>要进行序列化处理的对象。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeShort"><apiName>writeShort</apiName><shortdesc>
-		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTFBytes"><apiName>writeUTFBytes</apiName><shortdesc>
-		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTF"><apiName>writeUTF</apiName><shortdesc>
-		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果长度大于 65535。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUnsignedInt"><apiName>writeUnsignedInt</apiName><shortdesc>
-		 写入一个无符号的 32 位整数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个无符号的整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个无符号的 32 位整数。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="flash.utils:IDataInput"><apiName>IDataInput</apiName><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef></apiClassifierDetail><apiOperation id="flash.utils:IDataInput:flash.utils:IDataInput:readBoolean"><apiName>readBoolean</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="flash.utils:IDataInput"><apiName>IDataInput</apiName><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef></apiClassifierDetail><apiOperation id="flash.utils:IDataInput:flash.utils:IDataInput:readBoolean"><apiName>readBoolean</apiName><shortdesc>
 		 从文件流、字节流或字节数组中读取布尔值。读取单个字节，如果字节非零，则返回 true，否则返回 false。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>没有足够的数据可供读取。
 		 </apiDesc><apiItemName>EOFError</apiItemName><apiOperationClassifier>flash.errors:EOFError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>一个布尔值，如果字节不为零，则为 true，否则为 false。
@@ -1020,6 +982,85 @@ trace(classInstance);    // [object ClassB]
 		 </apiDesc><apiItemName>EOFError</apiItemName><apiOperationClassifier>flash.errors:EOFError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>返回值的范围是从 0 到 65535。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 从文件流、字节流或字节数组中读取无符号的 16 位整数。
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="flash.utils:IDataOutput"><apiName>IDataOutput</apiName><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef></apiClassifierDetail><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBoolean"><apiName>writeBoolean</apiName><shortdesc>
+		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>确定写入哪个字节的布尔值。如果该参数为 true，则写入 1；如果为 false，则写入 0。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeByte"><apiName>writeByte</apiName><shortdesc>
+		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBytes"><apiName>writeBytes</apiName><shortdesc>
+		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
+		 
+		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>bytes</apiItemName><apiOperationClassifier>flash.utils:ByteArray</apiOperationClassifier><apiDesc>要写入的字节数组。
+		 </apiDesc></apiParam><apiParam><apiItemName>offset</apiItemName><apiData>0</apiData><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>从零开始的索引，指定在数组中开始写入的位置。
+		 </apiDesc></apiParam><apiParam><apiItemName>length</apiItemName><apiData>0</apiData><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个无符号整数，指定在缓冲区中的写入范围。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
+		 
+		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeDouble"><apiName>writeDouble</apiName><shortdesc>
+		 写入 IEEE 754 双精度（64 位）浮点数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>双精度（64 位）浮点数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入 IEEE 754 双精度（64 位）浮点数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeFloat"><apiName>writeFloat</apiName><shortdesc>
+		 写入 IEEE 754 单精度（32 位）浮点数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>单精度（32 位）浮点数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入 IEEE 754 单精度（32 位）浮点数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeInt"><apiName>writeInt</apiName><shortdesc>
+		 写入一个带符号的 32 位整数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个带符号的整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个带符号的 32 位整数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeMultiByte"><apiName>writeMultiByte</apiName><shortdesc>
+		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc></apiParam><apiParam><apiItemName>charSet</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>表示要使用的字符集的字符串。可能的字符集字符串包括 "shift-jis"、"cn-gb"、"iso-8859-1"”等。有关完整列表，请参阅支持的字符集。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeObject"><apiName>writeObject</apiName><shortdesc>
+		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>object</apiItemName><apiType value="any"/><apiDesc>要进行序列化处理的对象。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeShort"><apiName>writeShort</apiName><shortdesc>
+		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTFBytes"><apiName>writeUTFBytes</apiName><shortdesc>
+		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTF"><apiName>writeUTF</apiName><shortdesc>
+		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果长度大于 65535。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUnsignedInt"><apiName>writeUnsignedInt</apiName><shortdesc>
+		 写入一个无符号的 32 位整数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个无符号的整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个无符号的 32 位整数。
 		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="flash.utils:ByteArray"><apiName>ByteArray</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiBaseInterface>flash.utils:IDataInput2</apiBaseInterface><apiBaseInterface>flash.utils:IDataOutput2</apiBaseInterface><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><example>以下示例将布尔值和 pi 的双精度浮点表示形式写入字节数组。
 	 <p><b>注意：</b>在字节上调用 trace() 时，它将输出存储于字节数组中的字节的十进制等效值。</p>
 	 <p>注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p>
@@ -1261,7 +1302,7 @@ catch(e:EOFError) {
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:ByteArray:writeUTF"><apiName>writeUTF</apiName><shortdesc>
 		 将 UTF-8 字符串写入字节流。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果长度大于 65535。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将 UTF-8 字符串写入字节流。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:ByteArray:writeUnsignedInt"><apiName>writeUnsignedInt</apiName><shortdesc>
@@ -1269,4 +1310,4 @@ catch(e:EOFError) {
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>要写入字节流的无符号整数。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 在字节流中写入一个无符号的 32 位整数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="flash.utils:ByteArray:ByteArray"><apiName>ByteArray</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier></apiPackage></allClasses>
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="flash.utils:ByteArray:ByteArray"><apiName>ByteArray</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier></apiPackage><apiPackage id="geom"><apiName>geom</apiName><apiClassifier id="geom:Vector2"><apiName>Vector2</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="geom:Vector2:cross"><apiName>cross</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>float</apiOperationClassifier></apiReturn><apiParam><apiItemName>v</apiItemName><apiOperationClassifier>geom:Vector2</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="geom:Vector2:dot"><apiName>dot</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>float</apiOperationClassifier></apiReturn><apiParam><apiItemName>v</apiItemName><apiOperationClassifier>geom:Vector2</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="geom:Vector2:toString"><apiName>toString</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn></apiOperationDef></apiOperationDetail></apiOperation><apiConstructor id="geom:Vector2:Vector2"><apiName>Vector2</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>x</apiItemName><apiData>0</apiData><apiOperationClassifier>float</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>0</apiData><apiOperationClassifier>float</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier></apiPackage></allClasses>

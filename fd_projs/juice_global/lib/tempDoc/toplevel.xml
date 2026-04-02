@@ -128,7 +128,7 @@ trace("Hello World");
 
 	 ]]></description>
 </field>
-<classRec name='Object' fullname='Object' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Object.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
+<classRec name='Object' fullname='Object' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Object.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
 	 Object 类位于 ActionScript 类层次结构的根处。Object 由构造函数使用 new 运算符语法创建，并且可以具有动态赋予其的属性。也可通过赋予对象文字值来创建 Object，如下所示：
@@ -155,7 +155,596 @@ trace("Hello World");
 
 	 ]]></description>
 </classRec>
-<classRec name='Array' fullname='Array' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Array.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
+<classRec name='String' fullname='String' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\String.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 String 类为表示一串字符的数据类型。String 类提供了处理原始字符串值类型的方法和属性。可以使用 String() 函数将任意对象的值转换为 String 数据类型的对象。
+
+	 
+
+	 ]]></description>
+</classRec>
+<method name='String' fullname='String/String' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='' result_type='*'>
+<description><![CDATA[
+
+		 创建已初始化为指定字符串的新 String 对象。
+
+		 <p><b>注意</b> 由于字符串文本比 String 对象需要的开销少且通常更易于使用，所以，除非有充分的理由要使用 String 对象而不是字符串文本，否则应该使用字符串文本而不是 String 类。</p>
+
+		 ]]></description>
+<param><![CDATA[value 新 String 对象的初始值。
+
+		 ]]></param>
+</method>
+<method name='charAt' fullname='String/AS3:charAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='Number' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回由参数 index 指定的位置处的字符。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回一个空字符串。
+
+		 ]]></description>
+<param><![CDATA[index 一个整数，指定字符在字符串中的位置。第一个字符由 0 表示，最后一个字符由 my_str.length - 1 表示。
+
+		 ]]></param>
+<return><![CDATA[指定索引处的字符。或者，如果指定的索引不在该字符串的索引范围内，则为一个空字符串。
+
+		 ]]></return>
+</method>
+<method name='charCodeAt' fullname='String/AS3:charCodeAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='Number' param_defaults='0' result_type='Number'>
+<description><![CDATA[
+
+		 返回指定 index 处的字符的数值 Unicode 字符代码。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回 NaN。
+
+		 ]]></description>
+<param><![CDATA[index 一个整数，指定字符在字符串中的位置。第一个字符由 0 表示，最后一个字符由 my_str.length - 1 表示。
+
+		 ]]></param>
+<return><![CDATA[指定索引处的字符的 Unicode32 字符代码。或者，如果索引不在此字符串的索引范围内，则为 NaN。
+
+		 ]]></return>
+</method>
+<method name='concat' fullname='String/AS3:concat' isStatic='false' isFinal='false' isOverride='false'  param_names='args' param_types='restParam' param_defaults='undefined' result_type='String'>
+<description><![CDATA[
+
+		 在 String 对象末尾追加补充参数（如果需要，将它们转换为字符串）并返回结果字符串。源 String 对象的原始值保持不变。
+
+		 ]]></description>
+<param><![CDATA[... args 0 个或多个要连接的值。
+
+		 ]]></param>
+<return><![CDATA[由该字符串与指定的参数连接而成的新字符串。
+
+		 ]]></return>
+</method>
+<method name='fromCharCode' fullname='String/AS3:fromCharCode' isStatic='true' isFinal='false' isOverride='false'  param_names='charCodes' param_types='restParam' param_defaults='undefined' result_type='String'>
+<description><![CDATA[
+
+		 返回一个字符串，该字符串由参数中的 Unicode 字符代码所表示的字符组成。
+
+		 ]]></description>
+<param><![CDATA[... charCodes 一系列表示 Unicode 值的十进制整数
+
+		 ]]></param>
+<return><![CDATA[指定的 Unicode 字符代码的字符串值。
+
+		 ]]></return>
+</method>
+<method name='indexOf' fullname='String/AS3:indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='undefined;0' result_type='int'>
+<description><![CDATA[
+
+		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
+
+		 ]]></description>
+<param><![CDATA[val 要搜索的子字符串。
+
+		 ]]></param>
+<param><![CDATA[startIndex 一个可选整数，指定搜索的起始索引。
+
+		 ]]></param>
+<return><![CDATA[指定子字符串的第一个匹配项的索引，或 -1。
+
+		 ]]></return>
+</method>
+<method name='lastIndexOf' fullname='String/AS3:lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='undefined;0x7FFFFFFF' result_type='int'>
+<description><![CDATA[
+
+		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
+
+		 ]]></description>
+<param><![CDATA[val 要搜索的字符串。
+
+		 ]]></param>
+<param><![CDATA[startIndex 一个可选整数，指定开始搜索 val 的起始索引。默认为允许的最大索引值。如果未指定 startIndex，则从字符串中的最后一项开始搜索。
+
+		 ]]></param>
+<return><![CDATA[指定子字符串的最后一个匹配项的位置，或 -1（如果未找到）。
+
+
+
+		 ]]></return>
+</method>
+<method name='replace' fullname='String/AS3:replace' isStatic='false' isFinal='false' isOverride='false'  param_names='pattern;repl' param_types='String;String' param_defaults='undefined;undefined' result_type='String'>
+<description><![CDATA[
+
+		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
+
+		 ]]></description>
+<param><![CDATA[pattern
+
+		 ]]></param>
+<param><![CDATA[repl
+
+		 ]]></param>
+<return><![CDATA[
+		 ]]></return>
+</method>
+<method name='slice' fullname='String/AS3:slice' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;endIndex' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
+<description><![CDATA[
+
+		 返回一个字符串，该字符串包括从 startIndex 字符一直到 endIndex 字符（但不包括该字符）之间的所有字符。不修改原始 String 对象。如果未指定 endIndex 参数，此子字符串的结尾就是该字符串的结尾。如果按 startIndex 索引到的字符与按 endIndex 索引到的字符相同或位于后者的右侧，则该方法返回一个空字符串。
+
+		 ]]></description>
+<param><![CDATA[startIndex 片段起始点的从 0 开始的索引。如果 startIndex 是一个负数，则从右到左创建片段，其中 -1 是最后一个字符。
+
+		 ]]></param>
+<param><![CDATA[endIndex 一个比片段终点的索引大 1 的整数。由 endIndex 参数索引的字符未包括在已提取的字符串中。如果 endIndex 是一个负数，则终点根据从字符串的结尾向后数确定，其中 -1 表示最后一个字符。默认为允许的最大索引值。如果省略此参数，则使用 String.length。
+
+		 ]]></param>
+<return><![CDATA[基于指定索引的子字符串。
+
+		 ]]></return>
+</method>
+<method name='split' fullname='String/AS3:split' isStatic='false' isFinal='false' isOverride='false'  param_names='delimiter;limit' param_types='String;Number' param_defaults='undefined;0x7fffffff' result_type='Array'>
+<description><![CDATA[
+
+		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
+
+		 ]]></description>
+<param><![CDATA[delimiter 指定拆分此字符串的位置的模式。此模式可以是任何类型的对象，但通常为字符串。如果 delimiter 不是正则表达式或字符串，则该方法在执行前会将其转换为字符串。
+
+		 ]]></param>
+<param><![CDATA[limit 要放入数组中的最大项数。默认为允许的最大值。
+
+		 ]]></param>
+<return><![CDATA[一个子字符串的数组。
+
+		 ]]></return>
+</method>
+<method name='substr' fullname='String/AS3:substr' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;len' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
+<description><![CDATA[
+
+		 返回一个子字符串，该子字符串中的字符是通过从指定的 startIndex 开始，按照 len 指定的长度截取所得的。原始字符串保持不变。
+
+		 ]]></description>
+<param><![CDATA[startIndex  一个整数，指定用于创建子字符串的第一个字符的索引。如果 startIndex 是一个负数，则起始索引从字符串的结尾开始确定，其中 -1 表示最后一个字符。
+
+		 ]]></param>
+<param><![CDATA[len  要创建的子字符串中的字符数。默认值为所允许的最大值。如果未指定 len，则子字符串包括从 startIndex 到字符串结尾的所有字符。
+
+		 ]]></param>
+<return><![CDATA[基于指定参数的子字符串。
+
+		 ]]></return>
+</method>
+<method name='substring' fullname='String/AS3:substring' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;endIndex' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
+<description><![CDATA[
+
+		 返回一个字符串，其中包含由 startIndex 指定的字符和一直到 endIndex - 1 的所有字符。如果未指定 endIndex，则使用 String.length。如果 startIndex 的值等于 endIndex 的值，则该方法返回一个空字符串。如果 startIndex 的值大于 endIndex 的值，则在执行函数之前会自动交换参数。原始字符串保持不变。
+
+		 ]]></description>
+<param><![CDATA[startIndex 一个整数，指定用于创建子字符串的第一个字符的索引。startIndex 的有效值范围为从 0 到 String.length。如果 startIndex 是一个负值，则使用 0 。
+
+		 ]]></param>
+<param><![CDATA[endIndex 一个整数，它比所提取的子字符串中的最后一个字符的索引大 1。endIndex 的有效值范围为从 0 到 String.length。endIndex 处的字符不包括在子字符串中。默认为允许的最大索引值。如果省略此参数，则使用 String.length。如果此参数是一个负值，则使用 0。
+
+		 ]]></param>
+<return><![CDATA[基于指定参数的子字符串。
+
+		 ]]></return>
+</method>
+<method name='toLowerCase' fullname='String/AS3:toLowerCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。
+
+		 ]]></description>
+<return><![CDATA[
+		 ]]></return>
+</method>
+<method name='toString' fullname='String/AS3:toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 ]]></description>
+<return><![CDATA[
+		 ]]></return>
+<private><![CDATA[]]></private>
+</method>
+<method name='toUpperCase' fullname='String/AS3:toUpperCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。
+
+		 ]]></description>
+<return><![CDATA[
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='String/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 返回 String 实例的原始值。此方法旨在将 String 对象转换为原始字符串值。因为 Juice 运行时可在必要时自动调用 valueOf()，所以几乎不需要明确调用此方法。
+
+		 ]]></description>
+<return><![CDATA[字符串的值。
+
+		 ]]></return>
+</method>
+<method name='length' fullname='String/length/get' isStatic='false' isFinal='false' isOverride='false'  result_type='int'>
+<description><![CDATA[
+
+		 一个整数，它指定在所指定的 String 对象中的字符数。
+
+		 ]]></description>
+</method>
+<classRec name='Namespace' fullname='Namespace' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Namespace.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+</classRec>
+<method name='Namespace' fullname='Namespace/Namespace' isStatic='false' isFinal='false' isOverride='false'  param_names='prefix;uri' param_types='*;*' param_defaults='null;null' result_type='*'>
+</method>
+<method name='toString' fullname='Namespace/AS3:toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 等效于 Namespace.uri 属性。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<return><![CDATA[命名空间的统一资源标识符 (URI)（采用字符串形式）。
+
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='Namespace/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 返回指定对象的 URI 值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<return><![CDATA[命名空间的统一资源标识符 (URI)（采用字符串形式）。
+
+		 ]]></return>
+</method>
+<method name='prefix' fullname='Namespace/prefix/get' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 命名空间的前缀。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+</method>
+<method name='uri' fullname='Namespace/uri/get' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 命名空间的统一资源标识符 (URI)。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+</method>
+<classRec name='sbyte' fullname='sbyte' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\sbyte.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 juice扩展的类型，八位有符号整数
+
+	 ]]></description>
+<author><![CDATA[
+
+	 ]]></author>
+</classRec>
+<method name='valueOf' fullname='sbyte/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='sbyte'>
+<description><![CDATA[
+
+		 返回指定 sbyte 对象的原始 sbyte 类型值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<return><![CDATA[此 byte 对象的原始 byte 类型值。
+
+		 ]]></return>
+</method>
+<field name='MAX_VALUE' fullname='sbyte/MAX_VALUE' type='sbyte' isStatic='true' isConst='true' defaultValue='127' >
+<description><![CDATA[
+
+		 可表示的最大 8 位有符号整数为 127。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+</field>
+<field name='MIN_VALUE' fullname='sbyte/MIN_VALUE' type='sbyte' isStatic='true' isConst='true' defaultValue='-128' >
+<description><![CDATA[
+
+		 可表示的最小 8 位有符号整数为 -128。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+</field>
+<classRec name='uint' fullname='uint' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\uint.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
+
+	 <p class="- topic/p ">由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。</p><p class="- topic/p ">可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">0</codeph>。</p><p class="- topic/p ">uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。</p><p class="- topic/p ">下例将创建一个 uint 对象并调用 <codeph class="+ topic/ph pr-d/codeph "> toString()</codeph> 方法：</p><pre xml:space="preserve" class="- topic/pre ">
+
+	 var myuint:uint = 1234;
+
+	 trace(myuint.toString()); // 1234
+
+	 </pre><p class="- topic/p ">下面的示例在不使用构造函数的情况下，将 <codeph class="+ topic/ph pr-d/codeph ">MIN_VALUE</codeph> 属性的值赋予一个变量：</p><pre xml:space="preserve" class="- topic/pre ">
+
+	 var smallest:uint = uint.MIN_VALUE;
+
+	 trace(smallest.toString()); // 0
+
+	 </pre>
+
+	 
+
+	   EXAMPLE:
+
+	 
+
+	   下面的示例声明 uint <codeph class="+ topic/ph pr-d/codeph ">i</codeph>（在 <codeph class="+ topic/ph pr-d/codeph ">for</codeph> 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
+
+	 <codeblock xml:space="preserve" class="+ topic/pre pr-d/codeblock ">
+
+	 
+
+	   package {
+
+	 import flash.display.Sprite;
+
+	 
+
+	   public class UintExample extends Sprite {
+
+	 public function UintExample() {
+
+	 for(var i:uint; i &lt; 10; i++) {
+
+	 trace(i);
+
+	 }
+
+	 }
+
+	 }
+
+	 }
+
+	 </codeblock>
+
+	 ]]></description>
+<langversion><![CDATA[3.0
+
+	 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+	 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+	 ]]></playerversion>
+</classRec>
+<method name='toExponential' fullname='uint/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[AIR 1.0
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toFixed' fullname='uint/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[AIR 1.0
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toPrecision' fullname='uint/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[AIR 1.0
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+<throws><![CDATA[RangeError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toString' fullname='uint/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
+<description><![CDATA[
+
+		 返回 uint 对象的字符串表示形式。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+<return><![CDATA[uint 对象的字符串表达式。
+
+		 ]]></return>
+</method>
+<method name='uint' fullname='uint/uint' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
+<description><![CDATA[
+
+		 创建新的 uint 对象。可以创建一个 uint 类型的变量并赋予其文本值。new uint() 构造函数主要用作占位符。uint 对象与  uint() 函数不同，后者会将参数转换为原始值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[num	要创建的 uint 对象的数值，或者要转换为数字的值。如果未提供 num，则默认值为 0。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='valueOf' fullname='uint/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='uint'>
+<description><![CDATA[
+
+		 返回指定 uint 对象的原始 uint 类型值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+<return><![CDATA[此 uint 对象的原始 uint 类型值。
+
+		 ]]></return>
+</method>
+<field name='MAX_VALUE' fullname='uint/MAX_VALUE' type='uint' isStatic='true' isConst='true' defaultValue='4294967295' >
+<description><![CDATA[
+
+		 可表示的最大 32 位无符号整数为 4,294,967,295。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</field>
+<field name='MIN_VALUE' fullname='uint/MIN_VALUE' type='uint' isStatic='true' isConst='true' defaultValue='0' >
+<description><![CDATA[
+
+		 可表示的最小无符号整数为 0。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</field>
+<classRec name='float' fullname='float' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\float.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 juice的扩展类型，32位浮点数
+
+	 ]]></description>
+<author><![CDATA[
+
+	 ]]></author>
+</classRec>
+<method name='valueOf' fullname='float/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='float'>
+<description><![CDATA[
+
+		 返回指定 float 对象的原始 float 类型值。
+
+		 ]]></description>
+<return><![CDATA[此 float 对象的原始 float 类型值。
+
+		 ]]></return>
+</method>
+<field name='Epsilon' fullname='float/Epsilon' type='float' isStatic='true' isConst='true' defaultValue='1.4e-45' >
+</field>
+<classRec name='Array' fullname='Array' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Array.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
 	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
@@ -188,20 +777,7 @@ trace("Hello World");
 
 		 ]]></param>
 </method>
-<method name='concat' fullname='Array/concat' isStatic='false' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='Array'>
-<description><![CDATA[
-
-		 将参数中指定的元素与数组中的元素连接，并创建新的数组。如果这些参数指定了一个数组，将连接该数组中的元素。如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
-
-		 ]]></description>
-<param><![CDATA[args	要连接到新数组中的任意数据类型的值（如数字、元素或字符串）。
-
-		 ]]></param>
-<return><![CDATA[一个数组，其中包含此数组中的元素，后跟参数中的元素。
-
-		 ]]></return>
-</method>
-<method name='every' fullname='Array/every' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Boolean'>
+<method name='every' fullname='Array/AS3:every' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Boolean'>
 <description><![CDATA[
 
 		 对数组中的每一项执行测试函数，直到获得对指定的函数返回 false 的项。使用此方法可确定数组中的所有项是否满足某一条件，如具有的值小于某一特定数值。
@@ -248,7 +824,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='filter' fullname='Array/filter' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Array'>
+<method name='filter' fullname='Array/AS3:filter' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Array'>
 <description><![CDATA[
 
 		 对数组中的每一项执行测试函数，并构造一个新数组，其中的所有项都对指定的函数返回 true。如果某项返回 false，则新数组中将不包含此项。
@@ -307,7 +883,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='forEach' fullname='Array/forEach' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='void'>
+<method name='forEach' fullname='Array/AS3:forEach' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='void'>
 <description><![CDATA[
 
 		 对数组中的每一项执行函数。
@@ -322,7 +898,7 @@ trace("Hello World");
 
 		 ]]></param>
 </method>
-<method name='indexOf' fullname='Array/indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='searchElement;fromIndex' param_types='*;uint' param_defaults='undefined;0' result_type='int'>
+<method name='indexOf' fullname='Array/AS3:indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='searchElement;fromIndex' param_types='*;uint' param_defaults='undefined;0' result_type='int'>
 <description><![CDATA[
 
 		 使用 strict equality (===) 运算符搜索数组中的项，并返回项的索引位置。
@@ -338,7 +914,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='insertAt' fullname='Array/insertAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index;element' param_types='int;*' param_defaults='undefined;undefined' result_type='void'>
+<method name='insertAt' fullname='Array/AS3:insertAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index;element' param_types='int;*' param_defaults='undefined;undefined' result_type='void'>
 <description><![CDATA[
 
 		 将一个单独的元素插入一个数组中。此方法会修改数组但不制作副本。
@@ -351,7 +927,7 @@ trace("Hello World");
 
 		 ]]></param>
 </method>
-<method name='join' fullname='Array/join' isStatic='false' isFinal='false' isOverride='false'  param_names='sep' param_types='*' param_defaults='null' result_type='String'>
+<method name='join' fullname='Array/AS3:join' isStatic='false' isFinal='false' isOverride='false'  param_names='sep' param_types='*' param_defaults='null' result_type='String'>
 <description><![CDATA[
 
 		 将数组中的元素转换为字符串、在元素间插入指定的分隔符、连接这些元素然后返回结果字符串。嵌套数组总是以逗号 (,) 分隔，而不使用传递给 join() 方法的分隔符分隔。
@@ -379,7 +955,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='lastIndexOf' fullname='Array/lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='searchElement;fromIndex' param_types='*;int' param_defaults='undefined;0x7fffffff' result_type='int'>
+<method name='lastIndexOf' fullname='Array/AS3:lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='searchElement;fromIndex' param_types='*;int' param_defaults='undefined;0x7fffffff' result_type='int'>
 <description><![CDATA[
 
 		 搜索数组中的项（从最后一项开始向前搜索），并使用 strict equality (===) 运算符返回匹配项的索引位置。
@@ -395,7 +971,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='map' fullname='Array/map' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Array'>
+<method name='map' fullname='Array/AS3:map' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Array'>
 <description><![CDATA[
 
 		 对数组中的每一项执行函数并构造一个新数组，其中包含与原始数组中的每一项的函数结果相对应的项。
@@ -438,7 +1014,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='pop' fullname='Array/pop' isStatic='false' isFinal='false' isOverride='false'  result_type='*'>
+<method name='pop' fullname='Array/AS3:pop' isStatic='false' isFinal='false' isOverride='false'  result_type='*'>
 <description><![CDATA[
 
 		 删除数组中最后一个元素，并返回该元素的值。
@@ -448,20 +1024,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='push' fullname='Array/push' isStatic='false' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='uint'>
-<description><![CDATA[
-
-		 将一个或多个元素添加到数组的结尾，并返回该数组的新长度。
-
-		 ]]></description>
-<param><![CDATA[args	要追加到数组中的一个或多个值。
-
-		 ]]></param>
-<return><![CDATA[一个表示新数组长度的整数。
-
-		 ]]></return>
-</method>
-<method name='removeAt' fullname='Array/removeAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='int' param_defaults='undefined' result_type='*'>
+<method name='removeAt' fullname='Array/AS3:removeAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='int' param_defaults='undefined' result_type='*'>
 <description><![CDATA[
 
 		 从数组中删除一个单独的元素。此方法会修改数组但不制作副本。
@@ -474,7 +1037,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='reverse' fullname='Array/reverse' isStatic='false' isFinal='false' isOverride='false'  result_type='Array'>
+<method name='reverse' fullname='Array/AS3:reverse' isStatic='false' isFinal='false' isOverride='false'  result_type='Array'>
 <description><![CDATA[
 
 		 在当前位置倒转数组。
@@ -484,7 +1047,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='shift' fullname='Array/shift' isStatic='false' isFinal='false' isOverride='false'  result_type='*'>
+<method name='shift' fullname='Array/AS3:shift' isStatic='false' isFinal='false' isOverride='false'  result_type='*'>
 <description><![CDATA[
 
 		 删除数组中第一个元素，并返回该元素。其余数组元素将从其原始位置 i 移至 i-1。
@@ -494,7 +1057,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='slice' fullname='Array/slice' isStatic='false' isFinal='false' isOverride='false'  param_names='A;B' param_types='int;int' param_defaults='0;16777215' result_type='Array'>
+<method name='slice' fullname='Array/AS3:slice' isStatic='false' isFinal='false' isOverride='false'  param_names='A;B' param_types='int;int' param_defaults='0;16777215' result_type='Array'>
 <description><![CDATA[
 
 		 返回由原始数组中某一范围的元素构成的新数组，而不修改原始数组。返回的数组包括 startIndex 元素以及从其开始到 endIndex 元素（但不包括该元素）的所有元素。
@@ -514,7 +1077,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='some' fullname='Array/some' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Boolean'>
+<method name='some' fullname='Array/AS3:some' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Boolean'>
 <description><![CDATA[
 
 		 对数组中的每一项执行测试函数，直到获得返回 true 的项。使用此方法确定数组中的所有项是否满足条件，如具有小于某一特定数值的值。
@@ -532,7 +1095,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='sort' fullname='Array/sort' isStatic='false' isFinal='false' isOverride='false'  param_names='args' param_types='restParam' param_defaults='undefined' result_type='Array'>
+<method name='sort' fullname='Array/AS3:sort' isStatic='false' isFinal='false' isOverride='false'  param_names='args' param_types='restParam' param_defaults='undefined' result_type='Array'>
 <description><![CDATA[
 
 		 对数组中的元素进行排序。此方法按 Unicode 值排序。
@@ -841,7 +1404,7 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 
 		 ]]></return>
 </method>
-<method name='splice' fullname='Array/splice' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;deleteCount;values' param_types='int;uint;restParam' param_defaults='0;4294967295;undefined' result_type='Array'>
+<method name='splice' fullname='Array/AS3:splice' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;deleteCount;values' param_types='int;uint;restParam' param_defaults='0;4294967295;undefined' result_type='Array'>
 <description><![CDATA[
 
 		 给数组添加元素以及从数组中删除元素。此方法会修改数组但不制作副本。
@@ -860,17 +1423,7 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 
 		 ]]></return>
 </method>
-<method name='toString' fullname='Array/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 返回一个字符串，它表示指定数组中的元素。数组中的每一个元素（从索引 0 开始到最高索引结束）均会转换为一个连接字符串，并以逗号分隔。要指定自定义的分隔符，请使用 Array.join() 方法。
-
-		 ]]></description>
-<return><![CDATA[数组元素的字符串。
-
-		 ]]></return>
-</method>
-<method name='unshift' fullname='Array/unshift' isStatic='false' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='uint'>
+<method name='unshift' fullname='Array/AS3:unshift' isStatic='false' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='uint'>
 <description><![CDATA[
 
 		 将一个或多个元素添加到数组的开头，并返回该数组的新长度。数组中的其他元素从其原始位置 i 移到 i+1。
@@ -923,7 +1476,239 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 
 		 ]]></description>
 </field>
-<classRec name='Number' fullname='Number' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Number.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<interfaceRec name='IIterator' fullname='IIterator' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\IIterator.as' namespace='' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
+<description><![CDATA[
+
+	 迭代器接口。
+
+	 如果某个类 指定了 [iterator] 方法，
+
+	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
+
+	 如果成功返回一个IIterator接口，则开始迭代工作。
+
+	 ]]></description>
+<author><![CDATA[
+
+	 ]]></author>
+</interfaceRec>
+<method name='close' fullname='IIterator/IIterator:close' isStatic='false' isFinal='false' isOverride='false'  param_names='obj' param_types='*' param_defaults='undefined' result_type='void'>
+</method>
+<method name='next' fullname='IIterator/IIterator:next' isStatic='false' isFinal='false' isOverride='false'  param_names='obj;r' param_types='*;IteratorResult' param_defaults='undefined;undefined' result_type='void'>
+</method>
+<classRec name='Class' fullname='Class' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Class.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
+<description><![CDATA[
+
+	 为程序中的每个类定义创建一个 Class 对象。每个 Class 对象都是 Class 类的一个实例。Class 对象包含该类的静态属性和方法。在使用 new 运算符进行调用时，Class 对象会创建该类的实例。
+
+	 <p>这是一种反射技术，用来区分类型，或者延迟决定实例化哪种类型</p>
+
+	 ]]></description>
+<example><![CDATA[下例演示如何通过下列步骤使用 Class 对象推迟有关实例化哪种类的决定，直到运行时为止：
+
+	 <p>1.声明两个类为 ClassA 和 ClassB。</p>
+
+	 <p>2.声明一个 Class 类型变量，名为 classToConstruct,根据此变量动态决定实例化类型</p>
+
+	 <listing>
+
+class ClassA {
+
+}
+
+    
+
+class ClassB {
+
+}
+
+
+
+var classToConstruct:Class;            
+
+var classInstance:Object;
+
+
+
+classToConstruct = ClassA;
+
+classInstance = new classToConstruct();
+
+trace(classInstance);    // [object ClassA]
+
+
+
+classToConstruct = ClassB;
+
+classInstance = new classToConstruct();
+
+trace(classInstance);    // [object ClassB]
+
+
+
+	 </listing>
+
+	 ]]></example>
+</classRec>
+<method name='prototype' fullname='Class/AS3:prototype/get' isStatic='false' isFinal='false' isOverride='false'  result_type='*'>
+<description><![CDATA[
+
+		 ]]></description>
+<private><![CDATA[]]></private>
+</method>
+<classRec name='int' fullname='int' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\int.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
+
+	 
+
+	 <span>
+
+	 <p>
+
+	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
+
+	 </p>
+
+	 <p>
+
+	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
+
+	 </p>
+
+	 <p>
+
+	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
+
+	 </p>
+
+	 </span>
+
+	 ]]></description>
+<example><![CDATA[以下示例调用 int 类的 toString() 方法，以返回字符串 1234：
+
+	 <listing>
+
+	 var myint:int = 1234;
+
+	 t.toString();
+
+	 </listing>
+
+	 ]]></example>
+<example><![CDATA[以下示例将 MIN_VALUE 属性的值分配给一个无需使用构造函数进行声明的变量：
+
+	 <listing>
+
+	 var smallest:int = int.MIN_VALUE;
+
+	 </listing>
+
+	 ]]></example>
+</classRec>
+<method name='int' fullname='int/int' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
+<description><![CDATA[
+
+		 构造函数；创建新的 int 对象。使用 int.toString() 和 int.valueOf() 时，必须使用 int 构造函数。使用 int 对象的属性时，不要使用构造函数。new int 构造函数主要用作占位符。int 对象与 int() 函数不同，后者将参数转换为原始值。
+
+		 ]]></description>
+<param><![CDATA[num	要创建的 int 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+
+		 ]]></param>
+</method>
+<method name='toExponential' fullname='int/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[ArgumentError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toFixed' fullname='int/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[ArgumentError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toPrecision' fullname='int/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+
+		 ]]></param>
+<throws><![CDATA[ArgumentError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toString' fullname='int/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
+<description><![CDATA[
+
+		 返回 int 对象的字符串表示形式。
+
+		 ]]></description>
+<param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+
+		 ]]></param>
+<return><![CDATA[字符串。
+
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='int/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='int'>
+<description><![CDATA[
+
+		 返回指定 int 对象的原始值。
+
+		 ]]></description>
+<return><![CDATA[int 值。
+
+		 ]]></return>
+</method>
+<field name='MAX_VALUE' fullname='int/MAX_VALUE' type='int' isStatic='true' isConst='true' defaultValue='2147483647' >
+<description><![CDATA[
+
+		 可表示的最小 32 位带符号整数为 -2,147,483,648。
+
+		 ]]></description>
+</field>
+<field name='MIN_VALUE' fullname='int/MIN_VALUE' type='int' isStatic='true' isConst='true' defaultValue='-2147483648' >
+<description><![CDATA[
+
+		 可表示的最大 32 位带符号整数为 2,147,483,647。
+
+		 ]]></description>
+</field>
+<field name='length' fullname='int/length' type='int' isStatic='true' isConst='true' defaultValue='1' >
+<description><![CDATA[
+
+	   ]]></description>
+<private><![CDATA[]]></private>
+</field>
+<classRec name='Number' fullname='Number' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Number.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
 	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
@@ -1150,7 +1935,7 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 
 		 ]]></return>
 </method>
-<field name='E' fullname='Number/E' type='Number' isStatic='true' isConst='true' defaultValue='2.718281828459045' >
+<field name='E' fullname='Number/E' type='Number' isStatic='true' isConst='true' defaultValue='2.7182818284590451' >
 </field>
 <field name='LN10' fullname='Number/LN10' type='Number' isStatic='true' isConst='true' defaultValue='2.302585092994046' >
 </field>
@@ -1158,7 +1943,7 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 </field>
 <field name='LOG10E' fullname='Number/LOG10E' type='Number' isStatic='true' isConst='true' defaultValue='0.4342944819032518' >
 </field>
-<field name='LOG2E' fullname='Number/LOG2E' type='Number' isStatic='true' isConst='true' defaultValue='1.4426950408889634' >
+<field name='LOG2E' fullname='Number/LOG2E' type='Number' isStatic='true' isConst='true' defaultValue='1.442695040888963387' >
 </field>
 <field name='MAX_VALUE' fullname='Number/MAX_VALUE' type='Number' isStatic='true' isConst='true' defaultValue='1.79769313486231e+308' >
 <description><![CDATA[
@@ -1254,546 +2039,7 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 </field>
 <field name='SQRT2' fullname='Number/SQRT2' type='Number' isStatic='true' isConst='true' defaultValue='1.4142135623730951' >
 </field>
-<classRec name='float' fullname='float' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\float.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 juice的扩展类型，32位浮点数
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</classRec>
-<method name='valueOf' fullname='float/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='float'>
-<description><![CDATA[
-
-		 返回指定 float 对象的原始 float 类型值。
-
-		 ]]></description>
-<return><![CDATA[此 float 对象的原始 float 类型值。
-
-		 ]]></return>
-</method>
-<field name='Epsilon' fullname='float/Epsilon' type='float' isStatic='true' isConst='true' defaultValue='1.4e-45' >
-</field>
-<classRec name='Error' fullname='Error' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Error.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
-<description><![CDATA[
-
-	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
-
-	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
-
-	 ]]></description>
-</classRec>
-<method name='Error' fullname='Error/Error' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
-<description><![CDATA[
-
-		 创建新的 Error 对象。
-
-		 ]]></description>
-<param><![CDATA[message 与 Error 对象关联的字符串；此参数为可选。
-
-		 ]]></param>
-<param><![CDATA[id 与特定错误消息关联的引用数字。
-
-		 ]]></param>
-</method>
-<method name='getStackTrace' fullname='Error/getStackTrace' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
-
-		 <listing>
-
-TypeError: Error #1009: Cannot access a property or method of a null object reference
-
-         at com.xyz::OrderEntry/retrieveData()[/src/com/xyz/OrderEntry.as:995]
-
-         at com.xyz::OrderEntry/init()[/src/com/xyz/OrderEntry.as:200]
-
-         at com.xyz::OrderEntry()[/src/com/xyz/OrderEntry.as:148]
-
-		 </listing>
-
-		 ]]></description>
-<return><![CDATA[
-		 ]]></return>
-</method>
-<method name='errorID' fullname='Error/errorID/get' isStatic='false' isFinal='false' isOverride='false'  result_type='int'>
-</method>
-<field name='id' fullname='Error/private:id' type='int' isStatic='false' isConst='false' >
-</field>
-<field name='message' fullname='Error/message' type='String' isStatic='false' isConst='false' >
-<description><![CDATA[
-
-		 包含与 Error 对象关联的消息。
-
-		 ]]></description>
-</field>
-<field name='name' fullname='Error/name' type='String' isStatic='false' isConst='false' >
-<description><![CDATA[
-
-		 包含 Error 对象的名称。
-
-		 ]]></description>
-</field>
-<classRec name='IteratorResult' fullname='IteratorResult' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\IteratorResult.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 迭代器返回对象。
-
-	 done表示迭代是否结束
-
-	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</classRec>
-<field name='done' fullname='IteratorResult/done' type='Boolean' isStatic='false' isConst='false' >
-</field>
-<field name='key' fullname='IteratorResult/key' type='' isStatic='false' isConst='false' >
-</field>
-<field name='value' fullname='IteratorResult/value' type='' isStatic='false' isConst='false' >
-</field>
-<classRec name='Namespace' fullname='Namespace' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Namespace.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-</classRec>
-<method name='Namespace' fullname='Namespace/Namespace' isStatic='false' isFinal='false' isOverride='false'  param_names='prefix;uri' param_types='*;*' param_defaults='null;null' result_type='*'>
-</method>
-<method name='toString' fullname='Namespace/AS3:toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 等效于 Namespace.uri 属性。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<return><![CDATA[命名空间的统一资源标识符 (URI)（采用字符串形式）。
-
-		 ]]></return>
-</method>
-<method name='valueOf' fullname='Namespace/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 返回指定对象的 URI 值。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<return><![CDATA[命名空间的统一资源标识符 (URI)（采用字符串形式）。
-
-		 ]]></return>
-</method>
-<method name='prefix' fullname='Namespace/prefix/get' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 命名空间的前缀。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-</method>
-<method name='uri' fullname='Namespace/uri/get' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 命名空间的统一资源标识符 (URI)。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-</method>
-<classRec name='ushort' fullname='ushort' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\ushort.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 juice扩展的类型，十六位无符号整数
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</classRec>
-<method name='valueOf' fullname='ushort/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='ushort'>
-<description><![CDATA[
-
-		 返回指定 short 对象的原始 short 类型值。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<return><![CDATA[此 short 对象的原始 short 类型值。
-
-		 ]]></return>
-</method>
-<field name='MAX_VALUE' fullname='ushort/MAX_VALUE' type='ushort' isStatic='true' isConst='true' defaultValue='65535' >
-<description><![CDATA[
-
-		 可表示的最大 16 位无符号整数为 65535。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-</field>
-<field name='MIN_VALUE' fullname='ushort/MIN_VALUE' type='ushort' isStatic='true' isConst='true' defaultValue='0' >
-<description><![CDATA[
-
-		 可表示的最小 16 位无符号整数为 0。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-</field>
-<classRec name='Boolean' fullname='Boolean' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Boolean.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
-
-	 ]]></description>
-</classRec>
-<method name='Boolean' fullname='Boolean/Boolean' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='false' result_type='*'>
-<description><![CDATA[
-
-		 创建一个具有指定值的 Boolean 对象。
-
-		 ]]></description>
-<param><![CDATA[value 任何表达式。
-
-		 ]]></param>
-</method>
-<method name='toString' fullname='Boolean/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 返回 Boolean 对象的字符串表示形式（"true" 或 "false"）。
-
-		 ]]></description>
-<return><![CDATA[
-		 ]]></return>
-</method>
-<method name='valueOf' fullname='Boolean/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='Boolean'>
-<description><![CDATA[
-
-		 如果指定的 Boolean 对象的值为 true，则返回 true；否则返回 false。
-
-		 ]]></description>
-<return><![CDATA[
-		 ]]></return>
-</method>
-<classRec name='short' fullname='short' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\short.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 juice��չ�����ͣ�ʮ��λ�з�������
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</classRec>
-<method name='valueOf' fullname='short/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='short'>
-<description><![CDATA[
-
-		 ����ָ�� short �����ԭʼ short ����ֵ��
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<return><![CDATA[�� short �����ԭʼ short ����ֵ��
-
-		 ]]></return>
-</method>
-<field name='MAX_VALUE' fullname='short/MAX_VALUE' type='short' isStatic='true' isConst='true' defaultValue='32767' >
-<description><![CDATA[
-
-		 �ɱ�ʾ����� 16 λ�޷�������Ϊ 32767��
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-</field>
-<field name='MIN_VALUE' fullname='short/MIN_VALUE' type='short' isStatic='true' isConst='true' defaultValue='-32768' >
-<description><![CDATA[
-
-		 �ɱ�ʾ����С 16 λ�޷�������Ϊ -32768��
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-</field>
-<interfaceRec name='IIterator' fullname='IIterator' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\IIterator.as' namespace='' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
-<description><![CDATA[
-
-	 迭代器接口。
-
-	 如果某个类 指定了 [iterator] 方法，
-
-	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
-
-	 如果成功返回一个IIterator接口，则开始迭代工作。
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</interfaceRec>
-<method name='close' fullname='IIterator/IIterator:close' isStatic='false' isFinal='false' isOverride='false'  param_names='obj' param_types='*' param_defaults='undefined' result_type='void'>
-</method>
-<method name='next' fullname='IIterator/IIterator:next' isStatic='false' isFinal='false' isOverride='false'  param_names='obj;r' param_types='*;IteratorResult' param_defaults='undefined;undefined' result_type='void'>
-</method>
-<classRec name='uint' fullname='uint' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\uint.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
-
-	 <p class="- topic/p ">由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。</p><p class="- topic/p ">可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">0</codeph>。</p><p class="- topic/p ">uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。</p><p class="- topic/p ">下例将创建一个 uint 对象并调用 <codeph class="+ topic/ph pr-d/codeph "> toString()</codeph> 方法：</p><pre xml:space="preserve" class="- topic/pre ">
-
-	 var myuint:uint = 1234;
-
-	 trace(myuint.toString()); // 1234
-
-	 </pre><p class="- topic/p ">下面的示例在不使用构造函数的情况下，将 <codeph class="+ topic/ph pr-d/codeph ">MIN_VALUE</codeph> 属性的值赋予一个变量：</p><pre xml:space="preserve" class="- topic/pre ">
-
-	 var smallest:uint = uint.MIN_VALUE;
-
-	 trace(smallest.toString()); // 0
-
-	 </pre>
-
-	 
-
-	   EXAMPLE:
-
-	 
-
-	   下面的示例声明 uint <codeph class="+ topic/ph pr-d/codeph ">i</codeph>（在 <codeph class="+ topic/ph pr-d/codeph ">for</codeph> 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
-
-	 <codeblock xml:space="preserve" class="+ topic/pre pr-d/codeblock ">
-
-	 
-
-	   package {
-
-	 import flash.display.Sprite;
-
-	 
-
-	   public class UintExample extends Sprite {
-
-	 public function UintExample() {
-
-	 for(var i:uint; i &lt; 10; i++) {
-
-	 trace(i);
-
-	 }
-
-	 }
-
-	 }
-
-	 }
-
-	 </codeblock>
-
-	 ]]></description>
-<langversion><![CDATA[3.0
-
-	 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-	 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-	 ]]></playerversion>
-</classRec>
-<method name='toExponential' fullname='uint/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
-<description><![CDATA[
-
-		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[AIR 1.0
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-
-		 ]]></throws>
-</method>
-<method name='toFixed' fullname='uint/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
-<description><![CDATA[
-
-		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[AIR 1.0
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
-
-		 ]]></throws>
-</method>
-<method name='toPrecision' fullname='uint/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
-<description><![CDATA[
-
-		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[AIR 1.0
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-<throws><![CDATA[RangeError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
-
-		 ]]></throws>
-</method>
-<method name='toString' fullname='uint/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
-<description><![CDATA[
-
-		 返回 uint 对象的字符串表示形式。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-<return><![CDATA[uint 对象的字符串表达式。
-
-		 ]]></return>
-</method>
-<method name='uint' fullname='uint/uint' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
-<description><![CDATA[
-
-		 创建新的 uint 对象。可以创建一个 uint 类型的变量并赋予其文本值。new uint() 构造函数主要用作占位符。uint 对象与  uint() 函数不同，后者会将参数转换为原始值。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[num	要创建的 uint 对象的数值，或者要转换为数字的值。如果未提供 num，则默认值为 0。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='valueOf' fullname='uint/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='uint'>
-<description><![CDATA[
-
-		 返回指定 uint 对象的原始 uint 类型值。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-<return><![CDATA[此 uint 对象的原始 uint 类型值。
-
-		 ]]></return>
-</method>
-<field name='MAX_VALUE' fullname='uint/MAX_VALUE' type='uint' isStatic='true' isConst='true' defaultValue='4294967295' >
-<description><![CDATA[
-
-		 可表示的最大 32 位无符号整数为 4,294,967,295。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</field>
-<field name='MIN_VALUE' fullname='uint/MIN_VALUE' type='uint' isStatic='true' isConst='true' defaultValue='0' >
-<description><![CDATA[
-
-		 可表示的最小无符号整数为 0。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</field>
-<classRec name='Function' fullname='Function' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Function.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='true' >
+<classRec name='Function' fullname='Function' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Function.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='true' >
 <description><![CDATA[
 
 	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
@@ -1867,297 +2113,68 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 ]]></description>
 <private><![CDATA[]]></private>
 </method>
-<classRec name='String' fullname='String' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\String.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<classRec name='Boolean' fullname='Boolean' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Boolean.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
-	 String 类为表示一串字符的数据类型。String 类提供了处理原始字符串值类型的方法和属性。可以使用 String() 函数将任意对象的值转换为 String 数据类型的对象。
-
-	 
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
 
 	 ]]></description>
 </classRec>
-<method name='String' fullname='String/String' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='' result_type='*'>
+<method name='Boolean' fullname='Boolean/Boolean' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='false' result_type='*'>
 <description><![CDATA[
 
-		 创建已初始化为指定字符串的新 String 对象。
-
-		 <p><b>注意</b> 由于字符串文本比 String 对象需要的开销少且通常更易于使用，所以，除非有充分的理由要使用 String 对象而不是字符串文本，否则应该使用字符串文本而不是 String 类。</p>
+		 创建一个具有指定值的 Boolean 对象。
 
 		 ]]></description>
-<param><![CDATA[value 新 String 对象的初始值。
+<param><![CDATA[value 任何表达式。
 
 		 ]]></param>
 </method>
-<method name='charAt' fullname='String/charAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='Number' param_defaults='0' result_type='String'>
+<method name='toString' fullname='Boolean/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
 <description><![CDATA[
 
-		 返回由参数 index 指定的位置处的字符。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回一个空字符串。
-
-		 ]]></description>
-<param><![CDATA[index 一个整数，指定字符在字符串中的位置。第一个字符由 0 表示，最后一个字符由 my_str.length - 1 表示。
-
-		 ]]></param>
-<return><![CDATA[指定索引处的字符。或者，如果指定的索引不在该字符串的索引范围内，则为一个空字符串。
-
-		 ]]></return>
-</method>
-<method name='charCodeAt' fullname='String/charCodeAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='Number' param_defaults='0' result_type='Number'>
-<description><![CDATA[
-
-		 返回指定 index 处的字符的数值 Unicode 字符代码。如果 index 不是从 0 到 string.length - 1 之间的数字，则返回 NaN。
-
-		 ]]></description>
-<param><![CDATA[index 一个整数，指定字符在字符串中的位置。第一个字符由 0 表示，最后一个字符由 my_str.length - 1 表示。
-
-		 ]]></param>
-<return><![CDATA[指定索引处的字符的 Unicode32 字符代码。或者，如果索引不在此字符串的索引范围内，则为 NaN。
-
-		 ]]></return>
-</method>
-<method name='concat' fullname='String/concat' isStatic='false' isFinal='false' isOverride='false'  param_names='args' param_types='restParam' param_defaults='undefined' result_type='String'>
-<description><![CDATA[
-
-		 在 String 对象末尾追加补充参数（如果需要，将它们转换为字符串）并返回结果字符串。源 String 对象的原始值保持不变。
-
-		 ]]></description>
-<param><![CDATA[... args 0 个或多个要连接的值。
-
-		 ]]></param>
-<return><![CDATA[由该字符串与指定的参数连接而成的新字符串。
-
-		 ]]></return>
-</method>
-<method name='fromCharCode' fullname='String/fromCharCode' isStatic='true' isFinal='false' isOverride='false'  param_names='charCodes' param_types='restParam' param_defaults='undefined' result_type='String'>
-<description><![CDATA[
-
-		 返回一个字符串，该字符串由参数中的 Unicode 字符代码所表示的字符组成。
-
-		 ]]></description>
-<param><![CDATA[... charCodes 一系列表示 Unicode 值的十进制整数
-
-		 ]]></param>
-<return><![CDATA[指定的 Unicode 字符代码的字符串值。
-
-		 ]]></return>
-</method>
-<method name='indexOf' fullname='String/indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='undefined;0' result_type='int'>
-<description><![CDATA[
-
-		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
-
-		 ]]></description>
-<param><![CDATA[val 要搜索的子字符串。
-
-		 ]]></param>
-<param><![CDATA[startIndex 一个可选整数，指定搜索的起始索引。
-
-		 ]]></param>
-<return><![CDATA[指定子字符串的第一个匹配项的索引，或 -1。
-
-		 ]]></return>
-</method>
-<method name='lastIndexOf' fullname='String/lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='undefined;0x7FFFFFFF' result_type='int'>
-<description><![CDATA[
-
-		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
-
-		 ]]></description>
-<param><![CDATA[val 要搜索的字符串。
-
-		 ]]></param>
-<param><![CDATA[startIndex 一个可选整数，指定开始搜索 val 的起始索引。默认为允许的最大索引值。如果未指定 startIndex，则从字符串中的最后一项开始搜索。
-
-		 ]]></param>
-<return><![CDATA[指定子字符串的最后一个匹配项的位置，或 -1（如果未找到）。
-
-
-
-		 ]]></return>
-</method>
-<method name='replace' fullname='String/replace' isStatic='false' isFinal='false' isOverride='false'  param_names='pattern;repl' param_types='String;String' param_defaults='undefined;undefined' result_type='String'>
-<description><![CDATA[
-
-		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
-
-		 ]]></description>
-<param><![CDATA[pattern
-
-		 ]]></param>
-<param><![CDATA[repl
-
-		 ]]></param>
-<return><![CDATA[
-		 ]]></return>
-</method>
-<method name='slice' fullname='String/slice' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;endIndex' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
-<description><![CDATA[
-
-		 返回一个字符串，该字符串包括从 startIndex 字符一直到 endIndex 字符（但不包括该字符）之间的所有字符。不修改原始 String 对象。如果未指定 endIndex 参数，此子字符串的结尾就是该字符串的结尾。如果按 startIndex 索引到的字符与按 endIndex 索引到的字符相同或位于后者的右侧，则该方法返回一个空字符串。
-
-		 ]]></description>
-<param><![CDATA[startIndex 片段起始点的从 0 开始的索引。如果 startIndex 是一个负数，则从右到左创建片段，其中 -1 是最后一个字符。
-
-		 ]]></param>
-<param><![CDATA[endIndex 一个比片段终点的索引大 1 的整数。由 endIndex 参数索引的字符未包括在已提取的字符串中。如果 endIndex 是一个负数，则终点根据从字符串的结尾向后数确定，其中 -1 表示最后一个字符。默认为允许的最大索引值。如果省略此参数，则使用 String.length。
-
-		 ]]></param>
-<return><![CDATA[基于指定索引的子字符串。
-
-		 ]]></return>
-</method>
-<method name='split' fullname='String/split' isStatic='false' isFinal='false' isOverride='false'  param_names='delimiter;limit' param_types='String;Number' param_defaults='undefined;0x7fffffff' result_type='Array'>
-<description><![CDATA[
-
-		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
-
-		 ]]></description>
-<param><![CDATA[delimiter 指定拆分此字符串的位置的模式。此模式可以是任何类型的对象，但通常为字符串。如果 delimiter 不是正则表达式或字符串，则该方法在执行前会将其转换为字符串。
-
-		 ]]></param>
-<param><![CDATA[limit 要放入数组中的最大项数。默认为允许的最大值。
-
-		 ]]></param>
-<return><![CDATA[一个子字符串的数组。
-
-		 ]]></return>
-</method>
-<method name='substr' fullname='String/substr' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;len' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
-<description><![CDATA[
-
-		 返回一个子字符串，该子字符串中的字符是通过从指定的 startIndex 开始，按照 len 指定的长度截取所得的。原始字符串保持不变。
-
-		 ]]></description>
-<param><![CDATA[startIndex  一个整数，指定用于创建子字符串的第一个字符的索引。如果 startIndex 是一个负数，则起始索引从字符串的结尾开始确定，其中 -1 表示最后一个字符。
-
-		 ]]></param>
-<param><![CDATA[len  要创建的子字符串中的字符数。默认值为所允许的最大值。如果未指定 len，则子字符串包括从 startIndex 到字符串结尾的所有字符。
-
-		 ]]></param>
-<return><![CDATA[基于指定参数的子字符串。
-
-		 ]]></return>
-</method>
-<method name='substring' fullname='String/substring' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;endIndex' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
-<description><![CDATA[
-
-		 返回一个字符串，其中包含由 startIndex 指定的字符和一直到 endIndex - 1 的所有字符。如果未指定 endIndex，则使用 String.length。如果 startIndex 的值等于 endIndex 的值，则该方法返回一个空字符串。如果 startIndex 的值大于 endIndex 的值，则在执行函数之前会自动交换参数。原始字符串保持不变。
-
-		 ]]></description>
-<param><![CDATA[startIndex 一个整数，指定用于创建子字符串的第一个字符的索引。startIndex 的有效值范围为从 0 到 String.length。如果 startIndex 是一个负值，则使用 0 。
-
-		 ]]></param>
-<param><![CDATA[endIndex 一个整数，它比所提取的子字符串中的最后一个字符的索引大 1。endIndex 的有效值范围为从 0 到 String.length。endIndex 处的字符不包括在子字符串中。默认为允许的最大索引值。如果省略此参数，则使用 String.length。如果此参数是一个负值，则使用 0。
-
-		 ]]></param>
-<return><![CDATA[基于指定参数的子字符串。
-
-		 ]]></return>
-</method>
-<method name='toLowerCase' fullname='String/toLowerCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。
+		 返回 Boolean 对象的字符串表示形式（"true" 或 "false"）。
 
 		 ]]></description>
 <return><![CDATA[
 		 ]]></return>
 </method>
-<method name='toString' fullname='String/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<method name='valueOf' fullname='Boolean/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='Boolean'>
 <description><![CDATA[
 
-		 ]]></description>
-<return><![CDATA[
-		 ]]></return>
-<private><![CDATA[]]></private>
-</method>
-<method name='toUpperCase' fullname='String/toUpperCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。
+		 如果指定的 Boolean 对象的值为 true，则返回 true；否则返回 false。
 
 		 ]]></description>
 <return><![CDATA[
 		 ]]></return>
 </method>
-<method name='valueOf' fullname='String/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 返回 String 实例的原始值。此方法旨在将 String 对象转换为原始字符串值。因为 Juice 运行时可在必要时自动调用 valueOf()，所以几乎不需要明确调用此方法。
-
-		 ]]></description>
-<return><![CDATA[字符串的值。
-
-		 ]]></return>
+<classRec name='Promise' fullname='Promise' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Promise.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+</classRec>
+<method name='Promise' fullname='Promise/Promise' isStatic='false' isFinal='false' isOverride='false'  param_names='executor' param_types='Function' param_defaults='undefined' result_type='*'>
 </method>
-<method name='length' fullname='String/length/get' isStatic='false' isFinal='false' isOverride='false'  result_type='int'>
-<description><![CDATA[
-
-		 一个整数，它指定在所指定的 String 对象中的字符数。
-
-		 ]]></description>
+<method name='_catch' fullname='Promise/_catch' isStatic='false' isFinal='false' isOverride='false'  param_names='onRejected' param_types='Function' param_defaults='undefined' result_type='Promise'>
 </method>
-<classRec name='int' fullname='int' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\int.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<method name='_reject' fullname='Promise/private:_reject' isStatic='false' isFinal='false' isOverride='false'  param_names='reason' param_types='*' param_defaults='undefined' result_type='void'>
+</method>
+<method name='_resolve' fullname='Promise/private:_resolve' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='undefined' result_type='void'>
+</method>
+<method name='reject' fullname='Promise/reject' isStatic='true' isFinal='false' isOverride='false'  param_names='reason' param_types='*' param_defaults='undefined' result_type='Promise'>
+</method>
+<method name='resolve' fullname='Promise/resolve' isStatic='true' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='undefined' result_type='Promise'>
+</method>
+<method name='then' fullname='Promise/then' isStatic='false' isFinal='false' isOverride='false'  param_names='onFulfilled;onRejected' param_types='Function;Function' param_defaults='undefined;null' result_type='Promise'>
+</method>
+<classRec name='ushort' fullname='ushort' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\ushort.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
-	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
-
-	 
-
-	 <span>
-
-	 <p>
-
-	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
-
-	 </p>
-
-	 <p>
-
-	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
-
-	 </p>
-
-	 <p>
-
-	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
-
-	 </p>
-
-	 </span>
+	 juice扩展的类型，十六位无符号整数
 
 	 ]]></description>
-<example><![CDATA[以下示例调用 int 类的 toString() 方法，以返回字符串 1234：
+<author><![CDATA[
 
-	 <listing>
-
-	 var myint:int = 1234;
-
-	 t.toString();
-
-	 </listing>
-
-	 ]]></example>
-<example><![CDATA[以下示例将 MIN_VALUE 属性的值分配给一个无需使用构造函数进行声明的变量：
-
-	 <listing>
-
-	 var smallest:int = int.MIN_VALUE;
-
-	 </listing>
-
-	 ]]></example>
+	 ]]></author>
 </classRec>
-<method name='int' fullname='int/int' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
-<description><![CDATA[
-
-		 构造函数；创建新的 int 对象。使用 int.toString() 和 int.valueOf() 时，必须使用 int 构造函数。使用 int 对象的属性时，不要使用构造函数。new int 构造函数主要用作占位符。int 对象与 int() 函数不同，后者将参数转换为原始值。
-
-		 ]]></description>
-<param><![CDATA[num	要创建的 int 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
-
-		 ]]></param>
-</method>
-<method name='toExponential' fullname='int/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='*' param_defaults='0' result_type='String'>
+<method name='toExponential' fullname='ushort/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
 <description><![CDATA[
 
 		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
@@ -2169,11 +2186,11 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 <param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
 
 		 ]]></param>
-<throws><![CDATA[ArgumentError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
 
 		 ]]></throws>
 </method>
-<method name='toFixed' fullname='int/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='*' param_defaults='0' result_type='String'>
+<method name='toFixed' fullname='ushort/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
 <description><![CDATA[
 
 		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
@@ -2185,11 +2202,11 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 <param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
 
 		 ]]></param>
-<throws><![CDATA[ArgumentError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
 
 		 ]]></throws>
 </method>
-<method name='toPrecision' fullname='int/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='*' param_defaults='0' result_type='String'>
+<method name='toPrecision' fullname='ushort/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
 <description><![CDATA[
 
 		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
@@ -2201,54 +2218,134 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 <param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
 
 		 ]]></param>
-<throws><![CDATA[ArgumentError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+<throws><![CDATA[RangeError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
 
 		 ]]></throws>
 </method>
-<method name='toString' fullname='int/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='*' param_defaults='10' result_type='String'>
+<method name='toString' fullname='ushort/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
 <description><![CDATA[
 
-		 返回 int 对象的字符串表示形式。
+		 返回 ushort 对象的字符串表示形式。
 
 		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
 <param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
 
 		 ]]></param>
-<return><![CDATA[字符串。
+<return><![CDATA[ushort 对象的字符串表达式。
 
 		 ]]></return>
 </method>
-<method name='valueOf' fullname='int/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='int'>
+<method name='ushort' fullname='ushort/ushort' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
 <description><![CDATA[
 
-		 返回指定 int 对象的原始值。
+		 创建新的 ushort 对象。可以创建一个 ushort 类型的变量并赋予其文本值。
 
 		 ]]></description>
-<return><![CDATA[int 值。
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	要创建的 ushort 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+
+		 ]]></param>
+</method>
+<method name='valueOf' fullname='ushort/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='ushort'>
+<description><![CDATA[
+
+		 返回指定 ushort 对象的原始 ushort 类型值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<return><![CDATA[此 ushort 对象的原始 ushort 类型值。
 
 		 ]]></return>
 </method>
-<field name='MAX_VALUE' fullname='int/MAX_VALUE' type='int' isStatic='true' isConst='true' defaultValue='2147483647' >
+<field name='MAX_VALUE' fullname='ushort/MAX_VALUE' type='ushort' isStatic='true' isConst='true' defaultValue='65535' >
 <description><![CDATA[
 
-		 可表示的最小 32 位带符号整数为 -2,147,483,648。
+		 可表示的最大 16 位无符号整数为 65535。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+</field>
+<field name='MIN_VALUE' fullname='ushort/MIN_VALUE' type='ushort' isStatic='true' isConst='true' defaultValue='0' >
+<description><![CDATA[
+
+		 可表示的最小 16 位无符号整数为 0。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+</field>
+<classRec name='Error' fullname='Error' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Error.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
+<description><![CDATA[
+
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+
+	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
+
+	 ]]></description>
+</classRec>
+<method name='Error' fullname='Error/Error' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
+<description><![CDATA[
+
+		 创建新的 Error 对象。
+
+		 ]]></description>
+<param><![CDATA[message 与 Error 对象关联的字符串；此参数为可选。
+
+		 ]]></param>
+<param><![CDATA[id 与特定错误消息关联的引用数字。
+
+		 ]]></param>
+</method>
+<method name='getStackTrace' fullname='Error/getStackTrace' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
+
+		 <listing>
+
+TypeError: Error #1009: Cannot access a property or method of a null object reference
+
+         at com.xyz::OrderEntry/retrieveData()[/src/com/xyz/OrderEntry.as:995]
+
+         at com.xyz::OrderEntry/init()[/src/com/xyz/OrderEntry.as:200]
+
+         at com.xyz::OrderEntry()[/src/com/xyz/OrderEntry.as:148]
+
+		 </listing>
+
+		 ]]></description>
+<return><![CDATA[
+		 ]]></return>
+</method>
+<method name='errorID' fullname='Error/errorID/get' isStatic='false' isFinal='false' isOverride='false'  result_type='int'>
+</method>
+<field name='id' fullname='Error/private:id' type='int' isStatic='false' isConst='false' >
+</field>
+<field name='message' fullname='Error/message' type='String' isStatic='false' isConst='false' >
+<description><![CDATA[
+
+		 包含与 Error 对象关联的消息。
 
 		 ]]></description>
 </field>
-<field name='MIN_VALUE' fullname='int/MIN_VALUE' type='int' isStatic='true' isConst='true' defaultValue='-2147483648' >
+<field name='name' fullname='Error/name' type='String' isStatic='false' isConst='false' >
 <description><![CDATA[
 
-		 可表示的最大 32 位带符号整数为 2,147,483,647。
+		 包含 Error 对象的名称。
 
 		 ]]></description>
 </field>
-<field name='length' fullname='int/length' type='int' isStatic='true' isConst='true' defaultValue='1' >
-<description><![CDATA[
-
-	   ]]></description>
-<private><![CDATA[]]></private>
-</field>
-<classRec name='byte' fullname='byte' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\byte.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<classRec name='byte' fullname='byte' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\byte.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
 	 juice扩展的类型，八位无符号整数
@@ -2291,110 +2388,15 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 
 		 ]]></langversion>
 </field>
-<classRec name='Class' fullname='Class' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Class.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
-<description><![CDATA[
-
-	 为程序中的每个类定义创建一个 Class 对象。每个 Class 对象都是 Class 类的一个实例。Class 对象包含该类的静态属性和方法。在使用 new 运算符进行调用时，Class 对象会创建该类的实例。
-
-	 <p>这是一种反射技术，用来区分类型，或者延迟决定实例化哪种类型</p>
-
-	 ]]></description>
-<example><![CDATA[下例演示如何通过下列步骤使用 Class 对象推迟有关实例化哪种类的决定，直到运行时为止：
-
-	 <p>1.声明两个类为 ClassA 和 ClassB。</p>
-
-	 <p>2.声明一个 Class 类型变量，名为 classToConstruct,根据此变量动态决定实例化类型</p>
-
-	 <listing>
-
-class ClassA {
-
-}
-
-    
-
-class ClassB {
-
-}
-
-
-
-var classToConstruct:Class;            
-
-var classInstance:Object;
-
-
-
-classToConstruct = ClassA;
-
-classInstance = new classToConstruct();
-
-trace(classInstance);    // [object ClassA]
-
-
-
-classToConstruct = ClassB;
-
-classInstance = new classToConstruct();
-
-trace(classInstance);    // [object ClassB]
-
-
-
-	 </listing>
-
-	 ]]></example>
+<classRec name='IteratorResult' fullname='IteratorResult' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\IteratorResult.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 </classRec>
-<method name='prototype' fullname='Class/AS3:prototype/get' isStatic='false' isFinal='false' isOverride='false'  result_type='*'>
-<description><![CDATA[
-
-		 ]]></description>
-<private><![CDATA[]]></private>
-</method>
-<classRec name='sbyte' fullname='sbyte' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\sbyte.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 juice扩展的类型，八位有符号整数
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</classRec>
-<method name='valueOf' fullname='sbyte/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='sbyte'>
-<description><![CDATA[
-
-		 返回指定 sbyte 对象的原始 sbyte 类型值。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<return><![CDATA[此 byte 对象的原始 byte 类型值。
-
-		 ]]></return>
-</method>
-<field name='MAX_VALUE' fullname='sbyte/MAX_VALUE' type='sbyte' isStatic='true' isConst='true' defaultValue='127' >
-<description><![CDATA[
-
-		 可表示的最大 8 位有符号整数为 127。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
+<field name='done' fullname='IteratorResult/done' type='Boolean' isStatic='false' isConst='false' >
 </field>
-<field name='MIN_VALUE' fullname='sbyte/MIN_VALUE' type='sbyte' isStatic='true' isConst='true' defaultValue='-128' >
-<description><![CDATA[
-
-		 可表示的最小 8 位有符号整数为 -128。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
+<field name='key' fullname='IteratorResult/key' type='' isStatic='false' isConst='false' >
 </field>
-<classRec name='Math' fullname='Math' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Math.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<field name='value' fullname='IteratorResult/value' type='' isStatic='false' isConst='false' >
+</field>
+<classRec name='Math' fullname='Math' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Math.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 </classRec>
 <method name='abs' fullname='Math/abs' isStatic='true' isFinal='false' isOverride='false'  param_names='val' param_types='Number' param_defaults='undefined' result_type='Number'>
 <description><![CDATA[
@@ -2807,10 +2809,10 @@ trace(classInstance);    // [object ClassB]
 
 		 ]]></return>
 </method>
-<field name='E' fullname='Math/E' type='Number' isStatic='true' isConst='true' defaultValue='2.71828182845905' >
+<field name='E' fullname='Math/E' type='Number' isStatic='true' isConst='true' defaultValue='2.7182818284590451' >
 <description><![CDATA[
 
-		 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.71828182845905。
+		 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.7182818284590451。
 
 		 ]]></description>
 <langversion><![CDATA[3.0
@@ -2941,34 +2943,152 @@ trace(classInstance);    // [object ClassB]
 
 		 ]]></playerversion>
 </field>
-<classRec name='TypeError' fullname='TypeError' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\TypeError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
+<classRec name='short' fullname='short' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\short.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
-	 表示发生了类型错误
+	 juice��չ�����ͣ�ʮ��λ�з�������
 
 	 ]]></description>
+<author><![CDATA[
+
+	 ]]></author>
 </classRec>
-<method name='TypeError' fullname='TypeError/TypeError' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
+<method name='short' fullname='short/short' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
 <description><![CDATA[
 
-		 创建新的 TypeError 对象。
+		 �����µ� short ���󡣿��Դ���һ�� short ���͵ı������������ı�ֵ��new short() ���캯����Ҫ����ռλ����
 
 		 ]]></description>
-<param><![CDATA[message  与该错误关联的字符串。
+<langversion><![CDATA[3.0
 
-		 ]]></param>
-<param><![CDATA[id       与该错误关联的数字
+		 ]]></langversion>
+<param><![CDATA[value	Ҫ������ short �������ֵ������Ҫת��Ϊ���ֵ�ֵ�����δ�ṩ value����Ĭ��ֵΪ 0��
 
 		 ]]></param>
 </method>
-<classRec name='ReferenceError' fullname='ReferenceError' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\ReferenceError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
+<method name='toExponential' fullname='short/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ�������ַ�����С����ǰ�����һλ����С������������� 20 λ���� fractionDigits ������ָ������
+
+			]]></description>
+<langversion><![CDATA[3.0
+
+			]]></langversion>
+<param><![CDATA[fractionDigits	���� 0 �� 20������֮�����������ʾ�����С��λ����
+
+			]]></param>
+<throws><![CDATA[ArgumentError ��� fractionDigits �������� 0 �� 20 �ķ�Χ�ڣ���������쳣��
+
+			]]></throws>
+</method>
+<method name='toFixed' fullname='short/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+			�������ֵ��ַ�����ʾ��ʽ�����ö����ʾ�����������ʾ����ָ�ַ�����С�����������ض���λ������ fractionDigits ������ָ������fractionDigits ��������Ч��ΧΪ 0 �� 20�����ָ����ֵ�ڴ˷�Χ�⣬��������쳣��
+
+			]]></description>
+<langversion><![CDATA[3.0
+
+			]]></langversion>
+<param><![CDATA[fractionDigits	���� 0 �� 20������֮�����������ʾ�����С��λ����
+
+			]]></param>
+<throws><![CDATA[ArgumentError ��� fractionDigits �������� 0 �� 20 �ķ�Χ�ڣ���������쳣��
+
+			]]></throws>
+</method>
+<method name='toPrecision' fullname='short/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ���򶨵��ʾ�������ַ��������� precision ������ָ����λ����
+
+			]]></description>
+<langversion><![CDATA[3.0
+
+			]]></langversion>
+<param><![CDATA[precision	���� 1 �� 21������֮�����������ʾ����ַ����������λ����
+
+			]]></param>
+<throws><![CDATA[ArgumentError ��� precision �������� 1 �� 21 �ķ�Χ�ڣ���������쳣��
+
+			]]></throws>
+</method>
+<method name='toString' fullname='short/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
+<description><![CDATA[
+
+		 ���� short ������ַ�����ʾ��ʽ��
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[radix	ָ��Ҫ�������ֵ��ַ�����ת���Ļ������� 2 �� 36�������δָ�� radix ��������Ĭ��ֵΪ 10��
+
+		 ]]></param>
+<return><![CDATA[short ������ַ������ʽ��
+
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='short/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='short'>
+<description><![CDATA[
+
+		 ����ָ�� short �����ԭʼ short ����ֵ��
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<return><![CDATA[�� short �����ԭʼ short ����ֵ��
+
+		 ]]></return>
+</method>
+<field name='MAX_VALUE' fullname='short/MAX_VALUE' type='short' isStatic='true' isConst='true' defaultValue='32767' >
+<description><![CDATA[
+
+		 �ɱ�ʾ����� 16 λ�޷�������Ϊ 32767��
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+</field>
+<field name='MIN_VALUE' fullname='short/MIN_VALUE' type='short' isStatic='true' isConst='true' defaultValue='-32768' >
+<description><![CDATA[
+
+		 �ɱ�ʾ����С 16 λ�޷�������Ϊ -32768��
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+</field>
+<classRec name='URIError' fullname='URIError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\URIError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
+<description><![CDATA[
+
+	  ���������ĳ��ȫ�� URI �������Ķ�����ì�ܵķ�ʽʹ�øú������������ URIError �쳣�����Ϊ��Ҫ��Ч URI���� Socket.connect() �������ĺ���ָ����Ч URI������������쳣��
+
+	 ]]></description>
+</classRec>
+<method name='URIError' fullname='URIError/URIError' isStatic='false' isFinal='false' isOverride='false'  param_names='message' param_types='String' param_defaults='' result_type='*'>
+</method>
+<classRec name='EvalError' fullname='EvalError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\EvalError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
+<description><![CDATA[
+
+	  EvalError 类表示一种错误，如果用户代码调用 <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> 函数或试图将 <codeph class="+ topic/ph pr-d/codeph ">new</codeph> 运算符用于 Function 对象，则会出现该错误。不支持调用 <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> 和使用 Function 对象调用 <codeph class="+ topic/ph pr-d/codeph ">new</codeph>。
+
+	 ]]></description>
+</classRec>
+<method name='EvalError' fullname='EvalError/EvalError' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
+</method>
+<classRec name='ReferenceError' fullname='ReferenceError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\ReferenceError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
 	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
 
 	 ]]></description>
 </classRec>
-<method name='ReferenceError' fullname='ReferenceError/ReferenceError' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='*;*' param_defaults=';0' result_type='*'>
+<method name='ReferenceError' fullname='ReferenceError/ReferenceError' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
 <description><![CDATA[
 
 		 创建一个新的 ReferenceError 对象。
@@ -2978,7 +3098,16 @@ trace(classInstance);    // [object ClassB]
 
 		 ]]></param>
 </method>
-<classRec name='ArgumentError' fullname='ArgumentError' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\ArgumentError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
+<classRec name='RangeError' fullname='RangeError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\RangeError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
+<description><![CDATA[
+
+	 �����ֵ���ڿɽ��ܵķ�Χ�ڣ�������� RangeError �쳣��ʹ������ʱ�����ò����ڵ������������λ�ý������� RangeError �쳣������������ڿɽ��ܵ����ַ�Χ�ڣ���ʹ�� <codeph class="+ topic/ph pr-d/codeph ">Number.toExponential()</codeph>��<codeph class="+ topic/ph pr-d/codeph ">Number.toPrecision()</codeph> �� <codeph class="+ topic/ph pr-d/codeph ">Number.toFixed()</codeph> ���������� RangeError �쳣��������չ <codeph class="+ topic/ph pr-d/codeph ">Number.toExponential()</codeph>��<codeph class="+ topic/ph pr-d/codeph ">Number.toPrecision()</codeph> �� <codeph class="+ topic/ph pr-d/codeph ">Number.toFixed()</codeph> �Ա������� RangeError��	
+
+	 ]]></description>
+</classRec>
+<method name='RangeError' fullname='RangeError/RangeError' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
+</method>
+<classRec name='ArgumentError' fullname='ArgumentError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\ArgumentError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
 	 表示参数错误的类
@@ -2998,21 +3127,23 @@ trace(classInstance);    // [object ClassB]
 
 		 ]]></param>
 </method>
-<classRec name='MethodClosure' fullname='__AS3__:MethodClosure' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\MethodClosure.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-</classRec>
-<classRec name='toplevel' fullname='__AS3__:toplevel' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\toplevel.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-</classRec>
-<method name='isFinite' fullname='__AS3__:toplevel/isFinite' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='undefined' result_type='Boolean'>
-</method>
-<method name='isNaN' fullname='__AS3__:toplevel/isNaN' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='undefined' result_type='Boolean'>
-</method>
-<method name='trace' fullname='__AS3__:toplevel/trace' isStatic='true' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='void'>
+<classRec name='TypeError' fullname='TypeError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\TypeError.as' namespace='' access='public' baseclass='Error' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
-		 调试时显示表达式或写入日志文件。单个跟踪语句可支持多个参数。如果跟踪语句中的任何参数包含 String 之外的数据类型，则跟踪函数将调用与该数据类型关联的 toString() 方法。例如，如果该参数是一个布尔值，则跟踪函数将调用 Boolean.toString() 并显示返回值。
+	 表示发生了类型错误
+
+	 ]]></description>
+</classRec>
+<method name='TypeError' fullname='TypeError/TypeError' isStatic='false' isFinal='false' isOverride='false'  param_names='message;id' param_types='String;int' param_defaults=';0' result_type='*'>
+<description><![CDATA[
+
+		 创建新的 TypeError 对象。
 
 		 ]]></description>
-<param><![CDATA[arguments	要计算的一个或多个（逗号分隔）表达式。对于多个表达式，输出中每个表达式之间都将插入一个空格。
+<param><![CDATA[message  与该错误关联的字符串。
+
+		 ]]></param>
+<param><![CDATA[id       与该错误关联的数字
 
 		 ]]></param>
 </method>
@@ -3059,7 +3190,7 @@ trace( b.length );  // 1.414
 
 	 ]]></return>
 </method>
-<classRec name='Endian' fullname='flash.utils:Endian' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\Endian.as' namespace='flash.utils' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<classRec name='Endian' fullname='flash.utils:Endian' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\Endian.as' namespace='flash.utils' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
 	 Endian 类中包含一些值，它们表示用于表示多字节数字的字节顺序。字节顺序为 bigEndian（最高有效字节位于最前）或 littleEndian（最低有效字节位于最前）。
@@ -3096,7 +3227,7 @@ trace( b.length );  // 1.414
 
 		 ]]></description>
 </field>
-<classRec name='Dictionary' fullname='flash.utils:Dictionary' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\Dictionary.as' namespace='flash.utils' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
+<classRec name='Dictionary' fullname='flash.utils:Dictionary' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\Dictionary.as' namespace='flash.utils' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
 	 Dictionary 类用于创建属性的动态集合，该集合使用 strict equality (===) 运算符进行键比较。将对象用作键时，会使用对象的标识来查找对象，而不是使用在对象上调用 toString() 所返回的值。
@@ -3154,7 +3285,7 @@ trace( b.length );  // 1.414
 </method>
 <method name='indexer_set' fullname='flash.utils:Dictionary/private:indexer_set' isStatic='false' isFinal='false' isOverride='false'  param_names='key;value' param_types='*;*' param_defaults='undefined;undefined' result_type='void'>
 </method>
-<interfaceRec name='IExternalizable' fullname='flash.utils:IExternalizable' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IExternalizable.as' namespace='flash.utils' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
+<interfaceRec name='IExternalizable' fullname='flash.utils:IExternalizable' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IExternalizable.as' namespace='flash.utils' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
 <description><![CDATA[
 
 	 ]]></description>
@@ -3164,424 +3295,7 @@ trace( b.length );  // 1.414
 </method>
 <method name='writeExternal' fullname='flash.utils:IExternalizable/flash.utils:IExternalizable:writeExternal' isStatic='false' isFinal='false' isOverride='false'  param_names='output' param_types='flash.utils:IDataOutput' param_defaults='undefined' result_type='void'>
 </method>
-<interfaceRec name='IDataOutput' fullname='flash.utils:IDataOutput' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataOutput.as' namespace='flash.utils' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
-<description><![CDATA[
-
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-
-	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p><p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p><ul class="- topic/ul "><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li></ul>
-
-	 
-
-	   EXAMPLE:
-
-	 
-
-	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-
-	 <ol class="- topic/ol "><li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li><li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li><li class="- topic/li ">重新读取布尔值和双精度浮点数。</li></ol><p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p><codeblock xml:space="preserve" class="+ topic/pre pr-d/codeblock ">
-
-	 package {
-
-	 import flash.display.Sprite;
-
-	 import flash.utils.ByteArray;
-
-	 import flash.errors.EOFError;
-
-	 
-
-	   public class DataOutputExample extends Sprite {        
-
-	 public function DataOutputExample() {
-
-	 var byteArr:ByteArray = new ByteArray();
-
-	 
-
-	   byteArr.writeBoolean(false);
-
-	 byteArr.writeDouble(Math.PI);
-
-	 
-
-	   byteArr.position = 0;
-
-	 
-
-	   try {
-
-	 trace(byteArr.readBoolean()); // false
-
-	 } 
-
-	 catch(e:EOFError) {
-
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-
-	 }
-
-	 
-
-	   try {
-
-	 trace(byteArr.readDouble());    // 3.141592653589793
-
-	 } 
-
-	 catch(e:EOFError) {
-
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-
-	 }
-
-	 
-
-	   try {
-
-	 trace(byteArr.readDouble());
-
-	 } 
-
-	 catch(e:EOFError) {
-
-	 trace(e);        // EOFError: Error #2030: End of file was encountered.
-
-	 }
-
-	 }
-
-	 }
-
-	 }
-
-	 </codeblock>
-
-	 ]]></description>
-<langversion><![CDATA[3.0
-
-	 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-	 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-	 ]]></playerversion>
-</interfaceRec>
-<method name='writeBoolean' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeBoolean' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='Boolean' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	确定写入哪个字节的布尔值。如果该参数为 true，则写入 1；如果为 false，则写入 0。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeByte' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeByte' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	一个整型字节值。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeBytes' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeBytes' isStatic='false' isFinal='false' isOverride='false'  param_names='bytes;offset;length' param_types='flash.utils:ByteArray;uint;uint' param_defaults='undefined;0;0' result_type='void'>
-<description><![CDATA[
-
-		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
-
-		 
-
-		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[bytes	要写入的字节数组。
-
-		 ]]></param>
-<param><![CDATA[offset	从零开始的索引，指定在数组中开始写入的位置。
-
-		 ]]></param>
-<param><![CDATA[length	一个无符号整数，指定在缓冲区中的写入范围。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeDouble' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeDouble' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='Number' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入 IEEE 754 双精度（64 位）浮点数。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	双精度（64 位）浮点数。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeFloat' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeFloat' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='Number' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入 IEEE 754 单精度（32 位）浮点数。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	单精度（32 位）浮点数。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeInt' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeInt' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入一个带符号的 32 位整数。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	一个带符号的整型字节值。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeMultiByte' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeMultiByte' isStatic='false' isFinal='false' isOverride='false'  param_names='value;charSet' param_types='String;String' param_defaults='undefined;undefined' result_type='void'>
-<description><![CDATA[
-
-		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	要写入的字符串值。
-
-		 ]]></param>
-<param><![CDATA[charSet	表示要使用的字符集的字符串。可能的字符集字符串包括 "shift-jis"、"cn-gb"、"iso-8859-1"”等。有关完整列表，请参阅支持的字符集。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeObject' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeObject' isStatic='false' isFinal='false' isOverride='false'  param_names='object' param_types='*' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[object	要进行序列化处理的对象。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeShort' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeShort' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	一个整型字节值。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeUTFBytes' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeUTFBytes' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='String' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	要写入的字符串值。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='writeUTF' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeUTF' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='String' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	要写入的字符串值。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-<throws><![CDATA[RangeError 如果长度大于 65535。
-
-		 ]]></throws>
-</method>
-<method name='writeUnsignedInt' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeUnsignedInt' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='uint' param_defaults='undefined' result_type='void'>
-<description><![CDATA[
-
-		 写入一个无符号的 32 位整数。
-
-		 ]]></description>
-<internal><![CDATA[throws IOError An I/O error occurred?
-
-		 ]]></internal>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<param><![CDATA[value	一个无符号的整型字节值。
-
-		 ]]></param>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='endian' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:endian/get' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-<description><![CDATA[
-
-		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='objectEncoding' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:objectEncoding/get' isStatic='false' isFinal='false' isOverride='false'  result_type='uint'>
-<description><![CDATA[
-
-		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
-
-		 ]]></description>
-<langversion><![CDATA[3.0
-
-		 ]]></langversion>
-<playerversion><![CDATA[Flash 9
-
-		 ]]></playerversion>
-<playerversion><![CDATA[Lite 4
-
-		 ]]></playerversion>
-</method>
-<method name='endian' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:endian/set' isStatic='false' isFinal='false' isOverride='false'  param_names='type' param_types='String' param_defaults='undefined' result_type='void'>
-</method>
-<method name='objectEncoding' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:objectEncoding/set' isStatic='false' isFinal='false' isOverride='false'  param_names='version' param_types='uint' param_defaults='undefined' result_type='void'>
-</method>
-<interfaceRec name='IDataInput' fullname='flash.utils:IDataInput' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataInput.as' namespace='flash.utils' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
+<interfaceRec name='IDataInput' fullname='flash.utils:IDataInput' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataInput.as' namespace='flash.utils' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
 <description><![CDATA[
 
 	 IDataInput 接口提供一组用于读取二进制数据的方法。此接口是写入二进制数据的 IDataOutput 接口的 I/O 对应接口。
@@ -4068,19 +3782,436 @@ trace( b.length );  // 1.414
 </method>
 <method name='objectEncoding' fullname='flash.utils:IDataInput/flash.utils:IDataInput:objectEncoding/set' isStatic='false' isFinal='false' isOverride='false'  param_names='version' param_types='uint' param_defaults='undefined' result_type='void'>
 </method>
-<interfaceRec name='IDataInput2' fullname='flash.utils:IDataInput2' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataInput2.as' namespace='flash.utils' access='public' baseClasses='flash.utils:IDataInput' isFinal='false' isDynamic='false' >
+<interfaceRec name='IDataOutput' fullname='flash.utils:IDataOutput' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataOutput.as' namespace='flash.utils' access='public' baseClasses='Object' isFinal='false' isDynamic='false' >
+<description><![CDATA[
+
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+
+	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p><p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p><ul class="- topic/ul "><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li></ul>
+
+	 
+
+	   EXAMPLE:
+
+	 
+
+	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+
+	 <ol class="- topic/ol "><li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li><li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li><li class="- topic/li ">重新读取布尔值和双精度浮点数。</li></ol><p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p><codeblock xml:space="preserve" class="+ topic/pre pr-d/codeblock ">
+
+	 package {
+
+	 import flash.display.Sprite;
+
+	 import flash.utils.ByteArray;
+
+	 import flash.errors.EOFError;
+
+	 
+
+	   public class DataOutputExample extends Sprite {        
+
+	 public function DataOutputExample() {
+
+	 var byteArr:ByteArray = new ByteArray();
+
+	 
+
+	   byteArr.writeBoolean(false);
+
+	 byteArr.writeDouble(Math.PI);
+
+	 
+
+	   byteArr.position = 0;
+
+	 
+
+	   try {
+
+	 trace(byteArr.readBoolean()); // false
+
+	 } 
+
+	 catch(e:EOFError) {
+
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+
+	 }
+
+	 
+
+	   try {
+
+	 trace(byteArr.readDouble());    // 3.141592653589793
+
+	 } 
+
+	 catch(e:EOFError) {
+
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+
+	 }
+
+	 
+
+	   try {
+
+	 trace(byteArr.readDouble());
+
+	 } 
+
+	 catch(e:EOFError) {
+
+	 trace(e);        // EOFError: Error #2030: End of file was encountered.
+
+	 }
+
+	 }
+
+	 }
+
+	 }
+
+	 </codeblock>
+
+	 ]]></description>
+<langversion><![CDATA[3.0
+
+	 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+	 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+	 ]]></playerversion>
+</interfaceRec>
+<method name='writeBoolean' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeBoolean' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='Boolean' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	确定写入哪个字节的布尔值。如果该参数为 true，则写入 1；如果为 false，则写入 0。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeByte' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeByte' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	一个整型字节值。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeBytes' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeBytes' isStatic='false' isFinal='false' isOverride='false'  param_names='bytes;offset;length' param_types='flash.utils:ByteArray;uint;uint' param_defaults='undefined;0;0' result_type='void'>
+<description><![CDATA[
+
+		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
+
+		 
+
+		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[bytes	要写入的字节数组。
+
+		 ]]></param>
+<param><![CDATA[offset	从零开始的索引，指定在数组中开始写入的位置。
+
+		 ]]></param>
+<param><![CDATA[length	一个无符号整数，指定在缓冲区中的写入范围。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeDouble' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeDouble' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='Number' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入 IEEE 754 双精度（64 位）浮点数。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	双精度（64 位）浮点数。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeFloat' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeFloat' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='Number' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入 IEEE 754 单精度（32 位）浮点数。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	单精度（32 位）浮点数。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeInt' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeInt' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入一个带符号的 32 位整数。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	一个带符号的整型字节值。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeMultiByte' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeMultiByte' isStatic='false' isFinal='false' isOverride='false'  param_names='value;charSet' param_types='String;String' param_defaults='undefined;undefined' result_type='void'>
+<description><![CDATA[
+
+		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	要写入的字符串值。
+
+		 ]]></param>
+<param><![CDATA[charSet	表示要使用的字符集的字符串。可能的字符集字符串包括 "shift-jis"、"cn-gb"、"iso-8859-1"”等。有关完整列表，请参阅支持的字符集。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeObject' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeObject' isStatic='false' isFinal='false' isOverride='false'  param_names='object' param_types='*' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[object	要进行序列化处理的对象。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeShort' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeShort' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	一个整型字节值。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeUTFBytes' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeUTFBytes' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='String' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	要写入的字符串值。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='writeUTF' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeUTF' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='String' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	要写入的字符串值。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+<throws><![CDATA[RangeError 如果长度大于 65535。
+
+		 ]]></throws>
+</method>
+<method name='writeUnsignedInt' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:writeUnsignedInt' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='uint' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 写入一个无符号的 32 位整数。
+
+		 ]]></description>
+<internal><![CDATA[throws IOError An I/O error occurred?
+
+		 ]]></internal>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	一个无符号的整型字节值。
+
+		 ]]></param>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='endian' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:endian/get' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='objectEncoding' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:objectEncoding/get' isStatic='false' isFinal='false' isOverride='false'  result_type='uint'>
+<description><![CDATA[
+
+		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<playerversion><![CDATA[Flash 9
+
+		 ]]></playerversion>
+<playerversion><![CDATA[Lite 4
+
+		 ]]></playerversion>
+</method>
+<method name='endian' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:endian/set' isStatic='false' isFinal='false' isOverride='false'  param_names='type' param_types='String' param_defaults='undefined' result_type='void'>
+</method>
+<method name='objectEncoding' fullname='flash.utils:IDataOutput/flash.utils:IDataOutput:objectEncoding/set' isStatic='false' isFinal='false' isOverride='false'  param_names='version' param_types='uint' param_defaults='undefined' result_type='void'>
+</method>
+<interfaceRec name='IDataOutput2' fullname='flash.utils:IDataOutput2' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataOutput2.as' namespace='flash.utils' access='public' baseClasses='flash.utils:IDataOutput' isFinal='false' isDynamic='false' >
 <description><![CDATA[
 
 	 ]]></description>
 <private><![CDATA[]]></private>
 </interfaceRec>
-<interfaceRec name='IDataOutput2' fullname='flash.utils:IDataOutput2' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataOutput2.as' namespace='flash.utils' access='public' baseClasses='flash.utils:IDataOutput' isFinal='false' isDynamic='false' >
+<interfaceRec name='IDataInput2' fullname='flash.utils:IDataInput2' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\IDataInput2.as' namespace='flash.utils' access='public' baseClasses='flash.utils:IDataInput' isFinal='false' isDynamic='false' >
 <description><![CDATA[
 
 	 ]]></description>
 <private><![CDATA[]]></private>
 </interfaceRec>
-<classRec name='ByteArray' fullname='flash.utils:ByteArray' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\ByteArray.as' namespace='flash.utils' access='public' baseclass='Object' interfaces='flash.utils:IDataInput2;flash.utils:IDataOutput2' isFinal='false' isDynamic='false' >
+<classRec name='ByteArray' fullname='flash.utils:ByteArray' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\utils\ByteArray.as' namespace='flash.utils' access='public' baseclass='Object' interfaces='flash.utils:IDataInput2;flash.utils:IDataOutput2' isFinal='false' isDynamic='false' >
 <description><![CDATA[
 
 	 ByteArray 类提供用于优化读取、写入以及处理二进制数据的方法和属性。
@@ -4665,7 +4796,73 @@ catch(e:EOFError) {
 		 ]]></description>
 <private><![CDATA[]]></private>
 </method>
-<classRec name='EOFError' fullname='flash.errors:EOFError' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\errors\EOFError.as' namespace='flash.errors' access='public' baseclass='Error' isFinal='true' isDynamic='false' >
+<classRec name='MethodClosure' fullname='__AS3__:MethodClosure' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\MethodClosure.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+</classRec>
+<classRec name='toplevel' fullname='__AS3__:toplevel' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\toplevel.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+</classRec>
+<method name='fetch' fullname='__AS3__:toplevel/fetch' isStatic='true' isFinal='false' isOverride='false'  param_names='url' param_types='String' param_defaults='undefined' result_type='Promise'>
+</method>
+<method name='isFinite' fullname='__AS3__:toplevel/isFinite' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='*' param_defaults='unknown' result_type='Boolean'>
+</method>
+<method name='isNaN' fullname='__AS3__:toplevel/isNaN' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='*' param_defaults='unknown' result_type='Boolean'>
+</method>
+<method name='parseFloat' fullname='__AS3__:toplevel/parseFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='str' param_types='String' param_defaults='NaN' result_type='Number'>
+</method>
+<method name='parseInt' fullname='__AS3__:toplevel/parseInt' isStatic='true' isFinal='false' isOverride='false'  param_names='s;radix' param_types='String;int' param_defaults='NaN;0' result_type='Number'>
+</method>
+<method name='trace' fullname='__AS3__:toplevel/trace' isStatic='true' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='void'>
+<description><![CDATA[
+
+		 调试时显示表达式或写入日志文件。单个跟踪语句可支持多个参数。如果跟踪语句中的任何参数包含 String 之外的数据类型，则跟踪函数将调用与该数据类型关联的 toString() 方法。例如，如果该参数是一个布尔值，则跟踪函数将调用 Boolean.toString() 并显示返回值。
+
+		 ]]></description>
+<param><![CDATA[arguments	要计算的一个或多个（逗号分隔）表达式。对于多个表达式，输出中每个表达式之间都将插入一个空格。
+
+		 ]]></param>
+</method>
+<classRec name='Vector2' fullname='geom:Vector2' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\geom\Vector2.as' namespace='geom' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 二维向量
+
+	 ]]></description>
+<author><![CDATA[
+
+	 ]]></author>
+</classRec>
+<method name='FloatmulVec2' fullname='geom:Vector2/private:FloatmulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='float;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='NumbermulVec2' fullname='geom:Vector2/private:NumbermulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='Number;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2Neg' fullname='geom:Vector2/private:Vec2Neg' isStatic='true' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2Positive' fullname='geom:Vector2/private:Vec2Positive' isStatic='true' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2addVec2' fullname='geom:Vector2/private:Vec2addVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2divFloat' fullname='geom:Vector2/private:Vec2divFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;float' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2divNumber' fullname='geom:Vector2/private:Vec2divNumber' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;Number' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2mulFloat' fullname='geom:Vector2/private:Vec2mulFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;float' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2mulNumber' fullname='geom:Vector2/private:Vec2mulNumber' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;Number' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2subVec2' fullname='geom:Vector2/private:Vec2subVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vector2' fullname='geom:Vector2/Vector2' isStatic='false' isFinal='false' isOverride='false'  param_names='x;y' param_types='float;float' param_defaults='0;0' result_type='*'>
+</method>
+<method name='cross' fullname='geom:Vector2/cross' isStatic='false' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='float'>
+</method>
+<method name='dot' fullname='geom:Vector2/dot' isStatic='false' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='float'>
+</method>
+<method name='toString' fullname='geom:Vector2/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+</method>
+<field name='x' fullname='geom:Vector2/x' type='float' isStatic='false' isConst='false' >
+</field>
+<field name='y' fullname='geom:Vector2/y' type='float' isStatic='false' isConst='false' >
+</field>
+<classRec name='EOFError' fullname='flash.errors:EOFError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\errors\EOFError.as' namespace='flash.errors' access='public' baseclass='Error' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
 	 如果尝试读取的内容超出可用数据的末尾，则会引发 EOFError 异常。例如，当调用 IDataInput 接口中的一个读取方法，而数据不足以满足读取请求时，将引发 EOFError。
@@ -4688,7 +4885,7 @@ catch(e:EOFError) {
 
 		 ]]></param>
 </method>
-<classRec name='IllegalOperationError' fullname='flash.errors:IllegalOperationError' sourcefile='E:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\errors\IllegalOperationError.as' namespace='flash.errors' access='public' baseclass='Error' isFinal='true' isDynamic='true' >
+<classRec name='IllegalOperationError' fullname='flash.errors:IllegalOperationError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\errors\IllegalOperationError.as' namespace='flash.errors' access='public' baseclass='Error' isFinal='true' isDynamic='true' >
 <description><![CDATA[
 
 	 当方法未实现或者实现中未涉及当前用法时，将引发 IllegalOperationError 异常。

@@ -1,7 +1,7 @@
 package
 {
 	/**
-	 *  EvalError Àà±íÊ¾Ò»ÖÖ´íÎó£¬Èç¹ûÓÃ»§´úÂëµ÷ÓÃ <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> º¯Êý»òÊÔÍ¼½« <codeph class="+ topic/ph pr-d/codeph ">new</codeph> ÔËËã·ûÓÃÓÚ Function ¶ÔÏó£¬Ôò»á³öÏÖ¸Ã´íÎó¡£²»Ö§³Öµ÷ÓÃ <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> ºÍÊ¹ÓÃ Function ¶ÔÏóµ÷ÓÃ <codeph class="+ topic/ph pr-d/codeph ">new</codeph>¡£
+	 *  EvalError ç±»è¡¨ç¤ºä¸€ç§é”™è¯¯ï¼Œå¦‚æžœç”¨æˆ·ä»£ç è°ƒç”¨ <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> å‡½æ•°æˆ–è¯•å›¾å°† <codeph class="+ topic/ph pr-d/codeph ">new</codeph> è¿ç®—ç¬¦ç”¨äºŽ Function å¯¹è±¡ï¼Œåˆ™ä¼šå‡ºçŽ°è¯¥é”™è¯¯ã€‚ä¸æ”¯æŒè°ƒç”¨ <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> å’Œä½¿ç”¨ Function å¯¹è±¡è°ƒç”¨ <codeph class="+ topic/ph pr-d/codeph ">new</codeph>ã€‚
 	 */
 	public dynamic class EvalError extends Error
 	{

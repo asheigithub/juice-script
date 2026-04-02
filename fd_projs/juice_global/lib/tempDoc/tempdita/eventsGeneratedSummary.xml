@@ -45,56 +45,20 @@
 	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
 	 </apiDesc>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:byte">
-         <apiName>byte</apiName>
+      <apiClassifier id="globalClassifier:URIError">
+         <apiName>URIError</apiName>
          <shortdesc>
-	 juice扩展的类型，八位无符号整数
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 juice扩展的类型，八位无符号整数
-	 </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Error">
-         <apiName>Error</apiName>
-         <shortdesc>
-	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
-	 您也可以创建 Error 类的子类，然后引发该子类的实例。
+	  ���������ĳ��ȫ�� URI �������Ķ�����ì�ܵķ�ʽʹ�øú������������ URIError �쳣�����Ϊ��Ҫ��Ч URI���� Socket.connect() �������ĺ���ָ����Ч URI������������쳣��
 	 </shortdesc>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
                <apiDynamic/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
+               <apiBaseClassifier>Error</apiBaseClassifier>
             </apiClassifierDef>
          </apiClassifierDetail>
          <apiDesc>
-	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
-	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
-	        </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:ushort">
-         <apiName>ushort</apiName>
-         <shortdesc>
-	 juice扩展的类型，十六位无符号整数
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 juice扩展的类型，十六位无符号整数
+	  ���������ĳ��ȫ�� URI �������Ķ�����ì�ܵķ�ʽʹ�øú������������ URIError �쳣�����Ϊ��Ҫ��Ч URI���� Socket.connect() �������ĺ���ָ����Ч URI������������쳣��
 	 </apiDesc>
       </apiClassifier>
       <apiClassifier id="globalClassifier:String">
@@ -116,6 +80,23 @@
 	 
 	 </apiDesc>
       </apiClassifier>
+      <apiClassifier id="globalClassifier:ushort">
+         <apiName>ushort</apiName>
+         <shortdesc>
+	 juice扩展的类型，十六位无符号整数
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 juice扩展的类型，十六位无符号整数
+	 </apiDesc>
+      </apiClassifier>
       <apiClassifier id="globalClassifier:float">
          <apiName>float</apiName>
          <shortdesc>
@@ -132,79 +113,6 @@
          <apiDesc>
 	 juice的扩展类型，32位浮点数
 	 </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:uint">
-         <apiName>uint</apiName>
-         <shortdesc>
-	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
-	 由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 0。uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。下例将创建一个 uint 对象并调用  toString() 方法：
-	 var myuint:uint = 1234;
-	 trace(myuint.toString()); // 1234
-	 下面的示例在不使用构造函数的情况下，将 MIN_VALUE 属性的值赋予一个变量：
-	 var smallest:uint = uint.MIN_VALUE;
-	 trace(smallest.toString()); // 0
-	 
-	 
-	   EXAMPLE:
-	 
-	   下面的示例声明 uint i（在 for 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
-	 
-	 
-	   package {
-	 import flash.display.Sprite;
-	 
-	   public class UintExample extends Sprite {
-	 public function UintExample() {
-	 for(var i:uint; i &amp;lt; 10; i++) {
-	 trace(i);
-	 }
-	 }
-	 }
-	 }
-	 
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
-	 <p class="- topic/p ">由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。</p>
-            <p class="- topic/p ">可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">0</codeph>。</p>
-            <p class="- topic/p ">uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。</p>
-            <p class="- topic/p ">下例将创建一个 uint 对象并调用 <codeph class="+ topic/ph pr-d/codeph "> toString()</codeph> 方法：</p>
-            <pre class="- topic/pre " xml:space="preserve">
-	 var myuint:uint = 1234;
-	 trace(myuint.toString()); // 1234
-	 </pre>
-            <p class="- topic/p ">下面的示例在不使用构造函数的情况下，将 <codeph class="+ topic/ph pr-d/codeph ">MIN_VALUE</codeph> 属性的值赋予一个变量：</p>
-            <pre class="- topic/pre " xml:space="preserve">
-	 var smallest:uint = uint.MIN_VALUE;
-	 trace(smallest.toString()); // 0
-	 </pre>
-	 
-	   EXAMPLE:
-	 
-	   下面的示例声明 uint <codeph class="+ topic/ph pr-d/codeph ">i</codeph>（在 <codeph class="+ topic/ph pr-d/codeph ">for</codeph> 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
-	 <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
-	 
-	   package {
-	 import flash.display.Sprite;
-	 
-	   public class UintExample extends Sprite {
-	 public function UintExample() {
-	 for(var i:uint; i &lt; 10; i++) {
-	 trace(i);
-	 }
-	 }
-	 }
-	 }
-	 </codeblock>
-	        </apiDesc>
       </apiClassifier>
       <apiClassifier id="globalClassifier:Math">
          <apiName>Math</apiName>
@@ -239,75 +147,6 @@
 	 如果某个类 指定了 [iterator] 方法，
 	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
 	 如果成功返回一个IIterator接口，则开始迭代工作。
-	 </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Namespace">
-         <apiName>Namespace</apiName>
-         <shortdesc/>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:int">
-         <apiName>int</apiName>
-         <shortdesc>
-	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
-	 
-	 
-	 
-	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
-	 
-	 
-	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
-	 
-	 
-	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
-	 
-	 
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
-	 
-	 <ph>
-	              <p>
-	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
-	 </p>
-	              <p>
-	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
-	 </p>
-	              <p>
-	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
-	 </p>
-	           </ph>
-	        </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Array">
-         <apiName>Array</apiName>
-         <shortdesc>
-	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiDynamic/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
 	 </apiDesc>
       </apiClassifier>
       <apiClassifier id="globalClassifier:Function">
@@ -388,12 +227,27 @@
 	 </codeblock>
 	        </apiDesc>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:IteratorResult">
-         <apiName>IteratorResult</apiName>
+      <apiClassifier id="globalClassifier:RangeError">
+         <apiName>RangeError</apiName>
          <shortdesc>
-	 迭代器返回对象。
-	 done表示迭代是否结束
-	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.</shortdesc>
+	 �����ֵ���ڿɽ��ܵķ�Χ�ڣ�������� RangeError �쳣��ʹ������ʱ�����ò����ڵ������������λ�ý������� RangeError �쳣������������ڿɽ��ܵ����ַ�Χ�ڣ���ʹ�� Number.toExponential()��Number.toPrecision() �� Number.toFixed() ���������� RangeError �쳣��������չ Number.toExponential()��Number.toPrecision() �� Number.toFixed() �Ա������� RangeError��	
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 �����ֵ���ڿɽ��ܵķ�Χ�ڣ�������� RangeError �쳣��ʹ������ʱ�����ò����ڵ������������λ�ý������� RangeError �쳣������������ڿɽ��ܵ����ַ�Χ�ڣ���ʹ�� <codeph class="+ topic/ph pr-d/codeph ">Number.toExponential()</codeph>��<codeph class="+ topic/ph pr-d/codeph ">Number.toPrecision()</codeph> �� <codeph class="+ topic/ph pr-d/codeph ">Number.toFixed()</codeph> ���������� RangeError �쳣��������չ <codeph class="+ topic/ph pr-d/codeph ">Number.toExponential()</codeph>��<codeph class="+ topic/ph pr-d/codeph ">Number.toPrecision()</codeph> �� <codeph class="+ topic/ph pr-d/codeph ">Number.toFixed()</codeph> �Ա������� RangeError��	
+	 </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Boolean">
+         <apiName>Boolean</apiName>
+         <shortdesc>
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
+	 </shortdesc>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
@@ -403,9 +257,241 @@
             </apiClassifierDef>
          </apiClassifierDetail>
          <apiDesc>
-	 迭代器返回对象。
-	 done表示迭代是否结束
-	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
+	 </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:byte">
+         <apiName>byte</apiName>
+         <shortdesc>
+	 juice扩展的类型，八位无符号整数
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 juice扩展的类型，八位无符号整数
+	 </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Error">
+         <apiName>Error</apiName>
+         <shortdesc>
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+	 您也可以创建 Error 类的子类，然后引发该子类的实例。
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
+	        </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:EvalError">
+         <apiName>EvalError</apiName>
+         <shortdesc>
+	  EvalError 类表示一种错误，如果用户代码调用 eval() 函数或试图将 new 运算符用于 Function 对象，则会出现该错误。不支持调用 eval() 和使用 Function 对象调用 new。
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	  EvalError 类表示一种错误，如果用户代码调用 <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> 函数或试图将 <codeph class="+ topic/ph pr-d/codeph ">new</codeph> 运算符用于 Function 对象，则会出现该错误。不支持调用 <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> 和使用 Function 对象调用 <codeph class="+ topic/ph pr-d/codeph ">new</codeph>。
+	 </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:uint">
+         <apiName>uint</apiName>
+         <shortdesc>
+	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
+	 由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 0。uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。下例将创建一个 uint 对象并调用  toString() 方法：
+	 var myuint:uint = 1234;
+	 trace(myuint.toString()); // 1234
+	 下面的示例在不使用构造函数的情况下，将 MIN_VALUE 属性的值赋予一个变量：
+	 var smallest:uint = uint.MIN_VALUE;
+	 trace(smallest.toString()); // 0
+	 
+	 
+	   EXAMPLE:
+	 
+	   下面的示例声明 uint i（在 for 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
+	 
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class UintExample extends Sprite {
+	 public function UintExample() {
+	 for(var i:uint; i &amp;lt; 10; i++) {
+	 trace(i);
+	 }
+	 }
+	 }
+	 }
+	 
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
+	 <p class="- topic/p ">由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。</p>
+            <p class="- topic/p ">可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">0</codeph>。</p>
+            <p class="- topic/p ">uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。</p>
+            <p class="- topic/p ">下例将创建一个 uint 对象并调用 <codeph class="+ topic/ph pr-d/codeph "> toString()</codeph> 方法：</p>
+            <pre class="- topic/pre " xml:space="preserve">
+	 var myuint:uint = 1234;
+	 trace(myuint.toString()); // 1234
+	 </pre>
+            <p class="- topic/p ">下面的示例在不使用构造函数的情况下，将 <codeph class="+ topic/ph pr-d/codeph ">MIN_VALUE</codeph> 属性的值赋予一个变量：</p>
+            <pre class="- topic/pre " xml:space="preserve">
+	 var smallest:uint = uint.MIN_VALUE;
+	 trace(smallest.toString()); // 0
+	 </pre>
+	 
+	   EXAMPLE:
+	 
+	   下面的示例声明 uint <codeph class="+ topic/ph pr-d/codeph ">i</codeph>（在 <codeph class="+ topic/ph pr-d/codeph ">for</codeph> 循环内），这将输出介于 0 和 9 之间的数字（因为 uint 默认为 0）。
+	 <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class UintExample extends Sprite {
+	 public function UintExample() {
+	 for(var i:uint; i &lt; 10; i++) {
+	 trace(i);
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	        </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Namespace">
+         <apiName>Namespace</apiName>
+         <shortdesc/>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:int">
+         <apiName>int</apiName>
+         <shortdesc>
+	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
+	 
+	 
+	 
+	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
+	 
+	 
+	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
+	 
+	 
+	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
+	 
+	 
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
+	 
+	 <ph>
+	              <p>
+	 int 类的常数属性 MAX_VALUE 和 MIN_VALUE 为静态的，这意味着无需对象就可使用这些属性，因而不需要使用构造函数。而方法却不是静态的，这意味着需要对象才能使用它们。可以通过使用 int 类构造函数，或者声明一个 int 类型的变量并赋予该变量一个文字值来创建 int 对象。
+	 </p>
+	              <p>
+	 int 数据类型用于循环计数器和不需要浮点数的其他情况，且该数据类型类似于 Java 和 C++ 中的 int 数据类型。int 类型变量的默认值为 0
+	 </p>
+	              <p>
+	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
+	 </p>
+	           </ph>
+	        </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Array">
+         <apiName>Array</apiName>
+         <shortdesc>
+	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 使用 Array 类可以访问和操作数组。Array 索引从零开始，这意味着数组中的第一个元素为 [0]，第二个元素为 [1]，依此类推。要创建 Array 对象，可以使用 new Array() 构造函数。Array() 还可以作为函数调用。此外，还可以使用数组访问 ([]) 运算符初始化数组或访问数组元素。
+	 </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Promise">
+         <apiName>Promise</apiName>
+         <shortdesc/>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:IteratorResult">
+         <apiName>IteratorResult</apiName>
+         <shortdesc/>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:sbyte">
+         <apiName>sbyte</apiName>
+         <shortdesc>
+	 juice扩展的类型，八位有符号整数
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 juice扩展的类型，八位有符号整数
 	 </apiDesc>
       </apiClassifier>
       <apiClassifier id="globalClassifier:short">
@@ -423,23 +509,6 @@
          </apiClassifierDetail>
          <apiDesc>
 	 juice��չ�����ͣ�ʮ��λ�з�������
-	 </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:sbyte">
-         <apiName>sbyte</apiName>
-         <shortdesc>
-	 juice扩展的类型，八位有符号整数
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 juice扩展的类型，八位有符号整数
 	 </apiDesc>
       </apiClassifier>
       <apiClassifier id="globalClassifier:TypeError">
@@ -527,23 +596,6 @@
 	 表示参数错误的类
 	 </apiDesc>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:Boolean">
-         <apiName>Boolean</apiName>
-         <shortdesc>
-	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
-	 </shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
-	 </apiDesc>
-      </apiClassifier>
    </apiPackage>
    <apiPackage id="flash.errors">
       <apiName>flash.errors</apiName>
@@ -618,102 +670,6 @@
          <apiDesc>
 	 Dictionary 类用于创建属性的动态集合，该集合使用 strict equality (===) 运算符进行键比较。将对象用作键时，会使用对象的标识来查找对象，而不是使用在对象上调用 toString() 所返回的值。
 	 </apiDesc>
-      </apiClassifier>
-      <apiClassifier id="flash.utils:IDataOutput">
-         <apiName>IDataOutput</apiName>
-         <shortdesc>
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
-	 
-	   EXAMPLE:
-	 
-	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
-	 package {
-	 import flash.display.Sprite;
-	 import flash.utils.ByteArray;
-	 import flash.errors.EOFError;
-	 
-	   public class DataOutputExample extends Sprite {        
-	 public function DataOutputExample() {
-	 var byteArr:ByteArray = new ByteArray();
-	 
-	   byteArr.writeBoolean(false);
-	 byteArr.writeDouble(Math.PI);
-	 
-	   byteArr.position = 0;
-	 
-	   try {
-	 trace(byteArr.readBoolean()); // false
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiInterface/>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiBaseClassifier/>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <apiDesc>
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p>
-            <p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p>
-            <ul class="- topic/ul ">
-               <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li>
-               <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li>
-            </ul>
-	 
-	   EXAMPLE:
-	 
-	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-	 <ol class="- topic/ol ">
-               <li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li>
-               <li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li>
-               <li class="- topic/li ">重新读取布尔值和双精度浮点数。</li>
-            </ol>
-            <p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p>
-            <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
-	 package {
-	 import flash.display.Sprite;
-	 import flash.utils.ByteArray;
-	 import flash.errors.EOFError;
-	 
-	   public class DataOutputExample extends Sprite {        
-	 public function DataOutputExample() {
-	 var byteArr:ByteArray = new ByteArray();
-	 
-	   byteArr.writeBoolean(false);
-	 byteArr.writeDouble(Math.PI);
-	 
-	   byteArr.position = 0;
-	 
-	   try {
-	 trace(byteArr.readBoolean()); // false
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-	 }
-	 
-	   try {
-	 trace(byteArr.readDouble());    // 3.141592653589793
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-	 }
-	 
-	   try {
-	 trace(byteArr.readDouble());
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);        // EOFError: Error #2030: End of file was encountered.
-	 }
-	 }
-	 }
-	 }
-	 </codeblock>
-	        </apiDesc>
       </apiClassifier>
       <apiClassifier id="flash.utils:IDataInput">
          <apiName>IDataInput</apiName>
@@ -811,6 +767,102 @@
 	 </codeblock>
 	        </apiDesc>
       </apiClassifier>
+      <apiClassifier id="flash.utils:IDataOutput">
+         <apiName>IDataOutput</apiName>
+         <shortdesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiInterface/>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiBaseClassifier/>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p>
+            <p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p>
+            <ul class="- topic/ul ">
+               <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li>
+               <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li>
+            </ul>
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 <ol class="- topic/ol ">
+               <li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li>
+               <li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li>
+               <li class="- topic/li ">重新读取布尔值和双精度浮点数。</li>
+            </ol>
+            <p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p>
+            <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());    // 3.141592653589793
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);        // EOFError: Error #2030: End of file was encountered.
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	        </apiDesc>
+      </apiClassifier>
       <apiClassifier id="flash.utils:ByteArray">
          <apiName>ByteArray</apiName>
          <shortdesc>
@@ -841,6 +893,26 @@
             </p>
 	 
 	        </apiDesc>
+      </apiClassifier>
+   </apiPackage>
+   <apiPackage id="geom">
+      <apiName>geom</apiName>
+      <apiClassifier id="geom:Vector2">
+         <apiName>Vector2</apiName>
+         <shortdesc>
+	 二维向量
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 二维向量
+	 </apiDesc>
       </apiClassifier>
    </apiPackage>
 </allClasses>

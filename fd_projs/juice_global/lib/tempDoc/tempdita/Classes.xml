@@ -18,7 +18,8 @@
             </apiClassifierDef>
          </apiClassifierDetail>
          <Keywords>
-            <meta name="keywords" content="toplevel,__AS3__.toplevel,isFinite,isNaN,trace"/>
+            <meta name="keywords"
+                  content="toplevel,__AS3__.toplevel,fetch,isFinite,isNaN,parseFloat,parseInt,trace"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="__AS3__:MethodClosure">
@@ -65,37 +66,10 @@
             <meta name="keywords" content="ReferenceError,globalClassifier.ReferenceError"/>
          </Keywords>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:byte">
-         <apiName>byte</apiName>
+      <apiClassifier id="globalClassifier:URIError">
+         <apiName>URIError</apiName>
          <shortdesc>
-	 juice扩展的类型，八位无符号整数
-	 </shortdesc>
-         <prolog>
-            <author>
-	 </author>
-            <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-            <apiDesc>
-	 juice扩展的类型，八位无符号整数
-	 </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="byte,globalClassifier.byte,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
-         </Keywords>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Error">
-         <apiName>Error</apiName>
-         <shortdesc>
-	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
-	 您也可以创建 Error 类的子类，然后引发该子类的实例。
+	  ���������ĳ��ȫ�� URI �������Ķ�����ì�ܵķ�ʽʹ�øú������������ URIError �쳣�����Ϊ��Ҫ��Ч URI���� Socket.connect() �������ĺ���ָ����Ч URI������������쳣��
 	 </shortdesc>
          <prolog>
             <asMetadata/>
@@ -104,42 +78,14 @@
             <apiClassifierDef>
                <apiAccess value="public"/>
                <apiDynamic/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
+               <apiBaseClassifier>Error</apiBaseClassifier>
             </apiClassifierDef>
             <apiDesc>
-	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
-	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
-	           </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="Error,globalClassifier.Error,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
-         </Keywords>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:ushort">
-         <apiName>ushort</apiName>
-         <shortdesc>
-	 juice扩展的类型，十六位无符号整数
-	 </shortdesc>
-         <prolog>
-            <author>
-	 </author>
-            <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-            <apiDesc>
-	 juice扩展的类型，十六位无符号整数
+	  ���������ĳ��ȫ�� URI �������Ķ�����ì�ܵķ�ʽʹ�øú������������ URIError �쳣�����Ϊ��Ҫ��Ч URI���� Socket.connect() �������ĺ���ָ����Ч URI������������쳣��
 	 </apiDesc>
          </apiClassifierDetail>
          <Keywords>
-            <meta name="keywords"
-                  content="ushort,globalClassifier.ushort,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+            <meta name="keywords" content="URIError,globalClassifier.URIError"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:String">
@@ -165,7 +111,33 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="String,globalClassifier.String,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="String,globalClassifier.String,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:ushort">
+         <apiName>ushort</apiName>
+         <shortdesc>
+	 juice扩展的类型，十六位无符号整数
+	 </shortdesc>
+         <prolog>
+            <author>
+	 </author>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 juice扩展的类型，十六位无符号整数
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="ushort,globalClassifier.ushort,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:float">
@@ -191,7 +163,275 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="float,globalClassifier.float,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="float,globalClassifier.float,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Math">
+         <apiName>Math</apiName>
+         <shortdesc/>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="Math,globalClassifier.Math,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:IIterator">
+         <apiName>IIterator</apiName>
+         <shortdesc>
+	 迭代器接口。
+	 如果某个类 指定了 [iterator] 方法，
+	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
+	 如果成功返回一个IIterator接口，则开始迭代工作。
+	 </shortdesc>
+         <prolog>
+            <author>
+	 </author>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiInterface/>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiBaseClassifier/>
+            </apiClassifierDef>
+            <apiDesc>
+	 迭代器接口。
+	 如果某个类 指定了 [iterator] 方法，
+	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
+	 如果成功返回一个IIterator接口，则开始迭代工作。
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="IIterator,globalClassifier.IIterator,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Function">
+         <apiName>Function</apiName>
+         <shortdesc>
+	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
+	 类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
+	 <p>类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。</p>
+	           </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="Function,globalClassifier.Function,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Number">
+         <apiName>Number</apiName>
+         <shortdesc>
+	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
+	 但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。Number 数据类型符合双精度 IEEE-754 标准。 需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 NaN（非数字）。
+	 
+	   EXAMPLE:
+	 
+	   下面的示例说明如何将一个具有六位小数的数字截断（使用舍入）为一个具有两位小数的数字。
+	 
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class NumberExample extends Sprite {
+	 public function NumberExample() {
+	 var num:Number = new Number(10.456345);
+	 var str:String = num.toFixed(2);
+	 trace(num); // 10.456345
+	 trace(str); // 10.46
+	 }
+	 }
+	 }
+	 
+	 </shortdesc>
+         <prolog>
+            <asMetadata>
+               <apiVersion>
+                  <apiLanguage version="3.0"/>
+                  <apiPlatform description="" name="Flash" version="9"/>
+                  <apiPlatform description="" name="Lite" version="4"/>
+               </apiVersion>
+            </asMetadata>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
+	 <p class="- topic/p ">但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。</p>
+               <p class="- topic/p ">Number 数据类型符合双精度 IEEE-754 标准。 </p>
+               <p class="- topic/p ">需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">NaN</codeph>（非数字）。</p>
+	 
+	   EXAMPLE:
+	 
+	   下面的示例说明如何将一个具有六位小数的数字截断（使用舍入）为一个具有两位小数的数字。
+	 <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 
+	   package {
+	 import flash.display.Sprite;
+	 
+	   public class NumberExample extends Sprite {
+	 public function NumberExample() {
+	 var num:Number = new Number(10.456345);
+	 var str:String = num.toFixed(2);
+	 trace(num); // 10.456345
+	 trace(str); // 10.46
+	 }
+	 }
+	 }
+	 </codeblock>
+	           </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="Number,globalClassifier.Number,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:RangeError">
+         <apiName>RangeError</apiName>
+         <shortdesc>
+	 �����ֵ���ڿɽ��ܵķ�Χ�ڣ�������� RangeError �쳣��ʹ������ʱ�����ò����ڵ������������λ�ý������� RangeError �쳣������������ڿɽ��ܵ����ַ�Χ�ڣ���ʹ�� Number.toExponential()��Number.toPrecision() �� Number.toFixed() ���������� RangeError �쳣��������չ Number.toExponential()��Number.toPrecision() �� Number.toFixed() �Ա������� RangeError��	
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 �����ֵ���ڿɽ��ܵķ�Χ�ڣ�������� RangeError �쳣��ʹ������ʱ�����ò����ڵ������������λ�ý������� RangeError �쳣������������ڿɽ��ܵ����ַ�Χ�ڣ���ʹ�� <codeph class="+ topic/ph pr-d/codeph ">Number.toExponential()</codeph>��<codeph class="+ topic/ph pr-d/codeph ">Number.toPrecision()</codeph> �� <codeph class="+ topic/ph pr-d/codeph ">Number.toFixed()</codeph> ���������� RangeError �쳣��������չ <codeph class="+ topic/ph pr-d/codeph ">Number.toExponential()</codeph>��<codeph class="+ topic/ph pr-d/codeph ">Number.toPrecision()</codeph> �� <codeph class="+ topic/ph pr-d/codeph ">Number.toFixed()</codeph> �Ա������� RangeError��	
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords" content="RangeError,globalClassifier.RangeError"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Boolean">
+         <apiName>Boolean</apiName>
+         <shortdesc>
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="Boolean,globalClassifier.Boolean,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:byte">
+         <apiName>byte</apiName>
+         <shortdesc>
+	 juice扩展的类型，八位无符号整数
+	 </shortdesc>
+         <prolog>
+            <author>
+	 </author>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 juice扩展的类型，八位无符号整数
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="byte,globalClassifier.byte,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Error">
+         <apiName>Error</apiName>
+         <shortdesc>
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+	 您也可以创建 Error 类的子类，然后引发该子类的实例。
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
+	 <p>您也可以创建 Error 类的子类，然后引发该子类的实例。</p>
+	           </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="Error,globalClassifier.Error,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:EvalError">
+         <apiName>EvalError</apiName>
+         <shortdesc>
+	  EvalError 类表示一种错误，如果用户代码调用 eval() 函数或试图将 new 运算符用于 Function 对象，则会出现该错误。不支持调用 eval() 和使用 Function 对象调用 new。
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	  EvalError 类表示一种错误，如果用户代码调用 <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> 函数或试图将 <codeph class="+ topic/ph pr-d/codeph ">new</codeph> 运算符用于 Function 对象，则会出现该错误。不支持调用 <codeph class="+ topic/ph pr-d/codeph ">eval()</codeph> 和使用 Function 对象调用 <codeph class="+ topic/ph pr-d/codeph ">new</codeph>。
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords" content="EvalError,globalClassifier.EvalError"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:uint">
@@ -277,58 +517,7 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="uint,globalClassifier.uint,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
-         </Keywords>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Math">
-         <apiName>Math</apiName>
-         <shortdesc/>
-         <prolog>
-            <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="Math,globalClassifier.Math,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
-         </Keywords>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:IIterator">
-         <apiName>IIterator</apiName>
-         <shortdesc>
-	 迭代器接口。
-	 如果某个类 指定了 [iterator] 方法，
-	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
-	 如果成功返回一个IIterator接口，则开始迭代工作。
-	 </shortdesc>
-         <prolog>
-            <author>
-	 </author>
-            <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiInterface/>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiBaseClassifier/>
-            </apiClassifierDef>
-            <apiDesc>
-	 迭代器接口。
-	 如果某个类 指定了 [iterator] 方法，
-	 则运行时在执行 foreach ，for in 时，尝试对对象调用这个方法，
-	 如果成功返回一个IIterator接口，则开始迭代工作。
-	 </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="IIterator,globalClassifier.IIterator,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="uint,globalClassifier.uint,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:Namespace">
@@ -347,7 +536,7 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="Namespace,globalClassifier.Namespace,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="Namespace,globalClassifier.Namespace,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:int">
@@ -406,7 +595,7 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="int,globalClassifier.int,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="int,globalClassifier.int,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:Array">
@@ -429,68 +618,14 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="Array,globalClassifier.Array,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="Array,globalClassifier.Array,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:Function">
-         <apiName>Function</apiName>
-         <shortdesc>
-	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
-	 类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。
-	 </shortdesc>
+      <apiClassifier id="globalClassifier:Promise">
+         <apiName>Promise</apiName>
+         <shortdesc/>
          <prolog>
             <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiDynamic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-            <apiDesc>
-	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
-	 <p>类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。</p>
-	           </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="Function,globalClassifier.Function,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
-         </Keywords>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Number">
-         <apiName>Number</apiName>
-         <shortdesc>
-	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
-	 但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。Number 数据类型符合双精度 IEEE-754 标准。 需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 NaN（非数字）。
-	 
-	   EXAMPLE:
-	 
-	   下面的示例说明如何将一个具有六位小数的数字截断（使用舍入）为一个具有两位小数的数字。
-	 
-	 
-	   package {
-	 import flash.display.Sprite;
-	 
-	   public class NumberExample extends Sprite {
-	 public function NumberExample() {
-	 var num:Number = new Number(10.456345);
-	 var str:String = num.toFixed(2);
-	 trace(num); // 10.456345
-	 trace(str); // 10.46
-	 }
-	 }
-	 }
-	 
-	 </shortdesc>
-         <prolog>
-            <asMetadata>
-               <apiVersion>
-                  <apiLanguage version="3.0"/>
-                  <apiPlatform description="" name="Flash" version="9"/>
-                  <apiPlatform description="" name="Lite" version="4"/>
-               </apiVersion>
-            </asMetadata>
          </prolog>
          <apiClassifierDetail>
             <apiClassifierDef>
@@ -499,46 +634,16 @@
                <apiFinal/>
                <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>
-            <apiDesc>
-	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
-	 <p class="- topic/p ">但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。</p>
-               <p class="- topic/p ">Number 数据类型符合双精度 IEEE-754 标准。 </p>
-               <p class="- topic/p ">需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 <codeph class="+ topic/ph pr-d/codeph ">NaN</codeph>（非数字）。</p>
-	 
-	   EXAMPLE:
-	 
-	   下面的示例说明如何将一个具有六位小数的数字截断（使用舍入）为一个具有两位小数的数字。
-	 <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
-	 
-	   package {
-	 import flash.display.Sprite;
-	 
-	   public class NumberExample extends Sprite {
-	 public function NumberExample() {
-	 var num:Number = new Number(10.456345);
-	 var str:String = num.toFixed(2);
-	 trace(num); // 10.456345
-	 trace(str); // 10.46
-	 }
-	 }
-	 }
-	 </codeblock>
-	           </apiDesc>
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="Number,globalClassifier.Number,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="Promise,globalClassifier.Promise,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:IteratorResult">
          <apiName>IteratorResult</apiName>
-         <shortdesc>
-	 迭代器返回对象。
-	 done表示迭代是否结束
-	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.</shortdesc>
+         <shortdesc/>
          <prolog>
-            <author>
-	 </author>
             <asMetadata/>
          </prolog>
          <apiClassifierDetail>
@@ -548,41 +653,10 @@
                <apiFinal/>
                <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>
-            <apiDesc>
-	 迭代器返回对象。
-	 done表示迭代是否结束
-	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.
-	 </apiDesc>
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
                   content="IteratorResult,globalClassifier.IteratorResult,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value"/>
-         </Keywords>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:short">
-         <apiName>short</apiName>
-         <shortdesc>
-	 juice��չ�����ͣ�ʮ��λ�з�������
-	 </shortdesc>
-         <prolog>
-            <author>
-	 </author>
-            <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-            <apiDesc>
-	 juice��չ�����ͣ�ʮ��λ�з�������
-	 </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="short,globalClassifier.short,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:sbyte">
@@ -608,7 +682,33 @@
          </apiClassifierDetail>
          <Keywords>
             <meta name="keywords"
-                  content="sbyte,globalClassifier.sbyte,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+                  content="sbyte,globalClassifier.sbyte,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:short">
+         <apiName>short</apiName>
+         <shortdesc>
+	 juice��չ�����ͣ�ʮ��λ�з�������
+	 </shortdesc>
+         <prolog>
+            <author>
+	 </author>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 juice��չ�����ͣ�ʮ��λ�з�������
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="short,globalClassifier.short,CASEINSENSITIVE,DESCENDING,E,E,Epsilon,Infinity,LN10,LN10,LN2,LN2,LOG10E,LOG10E,LOG2E,LOG2E,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MAX_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,MIN_VALUE,NEGATIVE_INFINITY,NUMERIC,NaN,NaN,PI,PI,POSITIVE_INFINITY,SQRT1_2,SQRT1_2,SQRT2,SQRT2,done,errorID,key,length,length,message,name,prefix,undefined,uri,value,_catch,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,random,random,reject,removeAt,replace,resolve,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,then,toExponential,toExponential,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
          </Keywords>
       </apiClassifier>
       <apiClassifier id="globalClassifier:TypeError">
@@ -743,30 +843,6 @@ trace(classInstance);    // [object ClassB]
             <meta name="keywords" content="ArgumentError,globalClassifier.ArgumentError"/>
          </Keywords>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:Boolean">
-         <apiName>Boolean</apiName>
-         <shortdesc>
-	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
-	 </shortdesc>
-         <prolog>
-            <asMetadata/>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-            <apiDesc>
-	 Boolean 对象是一种数据类型，它可以使用 true 或 false（用于进行逻辑运算）两个值中一个值。使用 Boolean 类可检索 Boolean 对象的基元数据类型或字符串表示形式。要创建 Boolean 对象，可以使用构造函数、全局函数，或赋予文字值。
-	 </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="Boolean,globalClassifier.Boolean,abs,abs,acos,acos,apply,asin,asin,atan,atan2,atan2,atan,call,ceil,ceil,charAt,charCodeAt,close,concat,concat,cos,cos,every,exp,exp,filter,floor,floor,forEach,fromCharCode,getStackTrace,indexOf,indexOf,insertAt,isFinite,isNaN,join,lastIndexOf,lastIndexOf,log,log,map,max,max,min,min,next,parseFloat,parseInt,pop,pow,pow,push,random,random,removeAt,replace,reverse,round,round,shift,sin,sin,slice,slice,some,sort,splice,split,sqrt,sqrt,substr,substring,tan,tan,toExponential,toExponential,toExponential,toFixed,toFixed,toFixed,toLowerCase,toPrecision,toPrecision,toPrecision,toString,toString,toString,toString,toString,toString,toUpperCase,trace,unshift,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf,valueOf"/>
-         </Keywords>
-      </apiClassifier>
    </apiPackage>
    <apiPackage id="flash.errors">
       <apiName>flash.errors</apiName>
@@ -891,115 +967,6 @@ trace(classInstance);    // [object ClassB]
             <meta name="keywords" content="Dictionary,flash.utils.Dictionary"/>
          </Keywords>
       </apiClassifier>
-      <apiClassifier id="flash.utils:IDataOutput">
-         <apiName>IDataOutput</apiName>
-         <shortdesc>
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
-	 
-	   EXAMPLE:
-	 
-	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
-	 package {
-	 import flash.display.Sprite;
-	 import flash.utils.ByteArray;
-	 import flash.errors.EOFError;
-	 
-	   public class DataOutputExample extends Sprite {        
-	 public function DataOutputExample() {
-	 var byteArr:ByteArray = new ByteArray();
-	 
-	   byteArr.writeBoolean(false);
-	 byteArr.writeDouble(Math.PI);
-	 
-	   byteArr.position = 0;
-	 
-	   try {
-	 trace(byteArr.readBoolean()); // false
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc>
-         <prolog>
-            <asMetadata>
-               <apiVersion>
-                  <apiLanguage version="3.0"/>
-                  <apiPlatform description="" name="Flash" version="9"/>
-                  <apiPlatform description="" name="Lite" version="4"/>
-               </apiVersion>
-            </asMetadata>
-         </prolog>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiInterface/>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiBaseClassifier/>
-            </apiClassifierDef>
-            <apiDesc>
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p>
-               <p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p>
-               <ul class="- topic/ul ">
-                  <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li>
-                  <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li>
-               </ul>
-	 
-	   EXAMPLE:
-	 
-	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-	 <ol class="- topic/ol ">
-                  <li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li>
-                  <li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li>
-                  <li class="- topic/li ">重新读取布尔值和双精度浮点数。</li>
-               </ol>
-               <p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p>
-               <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
-	 package {
-	 import flash.display.Sprite;
-	 import flash.utils.ByteArray;
-	 import flash.errors.EOFError;
-	 
-	   public class DataOutputExample extends Sprite {        
-	 public function DataOutputExample() {
-	 var byteArr:ByteArray = new ByteArray();
-	 
-	   byteArr.writeBoolean(false);
-	 byteArr.writeDouble(Math.PI);
-	 
-	   byteArr.position = 0;
-	 
-	   try {
-	 trace(byteArr.readBoolean()); // false
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-	 }
-	 
-	   try {
-	 trace(byteArr.readDouble());    // 3.141592653589793
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-	 }
-	 
-	   try {
-	 trace(byteArr.readDouble());
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);        // EOFError: Error #2030: End of file was encountered.
-	 }
-	 }
-	 }
-	 }
-	 </codeblock>
-	           </apiDesc>
-         </apiClassifierDetail>
-         <Keywords>
-            <meta name="keywords"
-                  content="IDataOutput,flash.utils.IDataOutput,BIG_ENDIAN,LITTLE_ENDIAN,bytesAvailable,bytesAvailable,endian,endian,endian,length,objectEncoding,objectEncoding,objectEncoding,position,clear,compress,deflate,getDefinitionByName,getQualifiedClassName,inflate,readBoolean,readBoolean,readByte,readByte,readBytes,readBytes,readDouble,readDouble,readFloat,readFloat,readInt,readInt,readMultiByte,readMultiByte,readObject,readObject,readShort,readShort,readUTF,readUTF,readUTFBytes,readUTFBytes,readUnsignedByte,readUnsignedByte,readUnsignedInt,readUnsignedInt,readUnsignedShort,readUnsignedShort,toString,uncompress,writeBoolean,writeBoolean,writeByte,writeByte,writeBytes,writeBytes,writeDouble,writeDouble,writeFloat,writeFloat,writeInt,writeInt,writeMultiByte,writeMultiByte,writeObject,writeObject,writeShort,writeShort,writeUTF,writeUTF,writeUTFBytes,writeUTFBytes,writeUnsignedInt,writeUnsignedInt"/>
-         </Keywords>
-      </apiClassifier>
       <apiClassifier id="flash.utils:IDataInput">
          <apiName>IDataInput</apiName>
          <shortdesc>
@@ -1109,6 +1076,115 @@ trace(classInstance);    // [object ClassB]
                   content="IDataInput,flash.utils.IDataInput,BIG_ENDIAN,LITTLE_ENDIAN,bytesAvailable,bytesAvailable,endian,endian,endian,length,objectEncoding,objectEncoding,objectEncoding,position,clear,compress,deflate,getDefinitionByName,getQualifiedClassName,inflate,readBoolean,readBoolean,readByte,readByte,readBytes,readBytes,readDouble,readDouble,readFloat,readFloat,readInt,readInt,readMultiByte,readMultiByte,readObject,readObject,readShort,readShort,readUTF,readUTF,readUTFBytes,readUTFBytes,readUnsignedByte,readUnsignedByte,readUnsignedInt,readUnsignedInt,readUnsignedShort,readUnsignedShort,toString,uncompress,writeBoolean,writeBoolean,writeByte,writeByte,writeBytes,writeBytes,writeDouble,writeDouble,writeFloat,writeFloat,writeInt,writeInt,writeMultiByte,writeMultiByte,writeObject,writeObject,writeShort,writeShort,writeUTF,writeUTF,writeUTFBytes,writeUTFBytes,writeUnsignedInt,writeUnsignedInt"/>
          </Keywords>
       </apiClassifier>
+      <apiClassifier id="flash.utils:IDataOutput">
+         <apiName>IDataOutput</apiName>
+         <shortdesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc>
+         <prolog>
+            <asMetadata>
+               <apiVersion>
+                  <apiLanguage version="3.0"/>
+                  <apiPlatform description="" name="Flash" version="9"/>
+                  <apiPlatform description="" name="Lite" version="4"/>
+               </apiVersion>
+            </asMetadata>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiInterface/>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiBaseClassifier/>
+            </apiClassifierDef>
+            <apiDesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p>
+               <p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p>
+               <ul class="- topic/ul ">
+                  <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li>
+                  <li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li>
+               </ul>
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 <ol class="- topic/ol ">
+                  <li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li>
+                  <li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li>
+                  <li class="- topic/li ">重新读取布尔值和双精度浮点数。</li>
+               </ol>
+               <p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p>
+               <codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());    // 3.141592653589793
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);        // EOFError: Error #2030: End of file was encountered.
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	           </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="IDataOutput,flash.utils.IDataOutput,BIG_ENDIAN,LITTLE_ENDIAN,bytesAvailable,bytesAvailable,endian,endian,endian,length,objectEncoding,objectEncoding,objectEncoding,position,clear,compress,deflate,getDefinitionByName,getQualifiedClassName,inflate,readBoolean,readBoolean,readByte,readByte,readBytes,readBytes,readDouble,readDouble,readFloat,readFloat,readInt,readInt,readMultiByte,readMultiByte,readObject,readObject,readShort,readShort,readUTF,readUTF,readUTFBytes,readUTFBytes,readUnsignedByte,readUnsignedByte,readUnsignedInt,readUnsignedInt,readUnsignedShort,readUnsignedShort,toString,uncompress,writeBoolean,writeBoolean,writeByte,writeByte,writeBytes,writeBytes,writeDouble,writeDouble,writeFloat,writeFloat,writeInt,writeInt,writeMultiByte,writeMultiByte,writeObject,writeObject,writeShort,writeShort,writeUTF,writeUTF,writeUTFBytes,writeUTFBytes,writeUnsignedInt,writeUnsignedInt"/>
+         </Keywords>
+      </apiClassifier>
       <apiClassifier id="flash.utils:ByteArray">
          <apiName>ByteArray</apiName>
          <shortdesc>
@@ -1192,6 +1268,35 @@ catch(e:EOFError) {
          <Keywords>
             <meta name="keywords"
                   content="ByteArray,flash.utils.ByteArray,BIG_ENDIAN,LITTLE_ENDIAN,bytesAvailable,bytesAvailable,endian,endian,endian,length,objectEncoding,objectEncoding,objectEncoding,position,clear,compress,deflate,getDefinitionByName,getQualifiedClassName,inflate,readBoolean,readBoolean,readByte,readByte,readBytes,readBytes,readDouble,readDouble,readFloat,readFloat,readInt,readInt,readMultiByte,readMultiByte,readObject,readObject,readShort,readShort,readUTF,readUTF,readUTFBytes,readUTFBytes,readUnsignedByte,readUnsignedByte,readUnsignedInt,readUnsignedInt,readUnsignedShort,readUnsignedShort,toString,uncompress,writeBoolean,writeBoolean,writeByte,writeByte,writeBytes,writeBytes,writeDouble,writeDouble,writeFloat,writeFloat,writeInt,writeInt,writeMultiByte,writeMultiByte,writeObject,writeObject,writeShort,writeShort,writeUTF,writeUTF,writeUTFBytes,writeUTFBytes,writeUnsignedInt,writeUnsignedInt"/>
+         </Keywords>
+      </apiClassifier>
+   </apiPackage>
+   <apiPackage id="geom">
+      <apiName>geom</apiName>
+      <apiDetail/>
+      <apiClassifier id="geom:Vector2">
+         <apiName>Vector2</apiName>
+         <shortdesc>
+	 二维向量
+	 </shortdesc>
+         <prolog>
+            <author>
+	 </author>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 二维向量
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords" content="Vector2,geom.Vector2,x,y,cross,dot,toString"/>
          </Keywords>
       </apiClassifier>
    </apiPackage>

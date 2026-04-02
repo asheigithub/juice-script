@@ -65,166 +65,7 @@ trace( b.length );  // 1.414
 	 </apiDesc><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiDesc>需要完全限定类名称的对象。可以将任何 ActionScript 值传递给此方法，包括所有可用的 ActionScript 类型、对象实例、原始类型（如 uint）和类对象。
 	 </apiDesc></apiParam></apiOperationDef><apiDesc>
 	 返回对象的完全限定类名。
-	 </apiDesc></apiOperationDetail></apiOperation><apiClassifier id="flash.utils:IDataOutput"><apiName>IDataOutput</apiName><shortdesc>
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
-	 
-	   EXAMPLE:
-	 
-	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
-	 package {
-	 import flash.display.Sprite;
-	 import flash.utils.ByteArray;
-	 import flash.errors.EOFError;
-	 
-	   public class DataOutputExample extends Sprite {        
-	 public function DataOutputExample() {
-	 var byteArr:ByteArray = new ByteArray();
-	 
-	   byteArr.writeBoolean(false);
-	 byteArr.writeDouble(Math.PI);
-	 
-	   byteArr.position = 0;
-	 
-	   try {
-	 trace(byteArr.readBoolean()); // false
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef><apiDesc>
-	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
-	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p><p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p><ul class="- topic/ul "><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li></ul>
-	 
-	   EXAMPLE:
-	 
-	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
-	 <ol class="- topic/ol "><li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li><li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li><li class="- topic/li ">重新读取布尔值和双精度浮点数。</li></ol><p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p><codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
-	 package {
-	 import flash.display.Sprite;
-	 import flash.utils.ByteArray;
-	 import flash.errors.EOFError;
-	 
-	   public class DataOutputExample extends Sprite {        
-	 public function DataOutputExample() {
-	 var byteArr:ByteArray = new ByteArray();
-	 
-	   byteArr.writeBoolean(false);
-	 byteArr.writeDouble(Math.PI);
-	 
-	   byteArr.position = 0;
-	 
-	   try {
-	 trace(byteArr.readBoolean()); // false
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-	 }
-	 
-	   try {
-	 trace(byteArr.readDouble());    // 3.141592653589793
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);           // EOFError: Error #2030: End of file was encountered.
-	 }
-	 
-	   try {
-	 trace(byteArr.readDouble());
-	 } 
-	 catch(e:EOFError) {
-	 trace(e);        // EOFError: Error #2030: End of file was encountered.
-	 }
-	 }
-	 }
-	 }
-	 </codeblock>
-	 </apiDesc></apiClassifierDetail><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBoolean"><apiName>writeBoolean</apiName><shortdesc>
-		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>确定写入哪个字节的布尔值。如果该参数为 true，则写入 1；如果为 false，则写入 0。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeByte"><apiName>writeByte</apiName><shortdesc>
-		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBytes"><apiName>writeBytes</apiName><shortdesc>
-		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
-		 
-		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>bytes</apiItemName><apiOperationClassifier>flash.utils:ByteArray</apiOperationClassifier><apiDesc>要写入的字节数组。
-		 </apiDesc></apiParam><apiParam><apiItemName>offset</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiData>0</apiData><apiDesc>从零开始的索引，指定在数组中开始写入的位置。
-		 </apiDesc></apiParam><apiParam><apiItemName>length</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiData>0</apiData><apiDesc>一个无符号整数，指定在缓冲区中的写入范围。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
-		 
-		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeDouble"><apiName>writeDouble</apiName><shortdesc>
-		 写入 IEEE 754 双精度（64 位）浮点数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>双精度（64 位）浮点数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入 IEEE 754 双精度（64 位）浮点数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeFloat"><apiName>writeFloat</apiName><shortdesc>
-		 写入 IEEE 754 单精度（32 位）浮点数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>单精度（32 位）浮点数。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入 IEEE 754 单精度（32 位）浮点数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeInt"><apiName>writeInt</apiName><shortdesc>
-		 写入一个带符号的 32 位整数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个带符号的整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个带符号的 32 位整数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeMultiByte"><apiName>writeMultiByte</apiName><shortdesc>
-		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
-		 </apiDesc></apiParam><apiParam><apiItemName>charSet</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>表示要使用的字符集的字符串。可能的字符集字符串包括 "shift-jis"、"cn-gb"、"iso-8859-1"”等。有关完整列表，请参阅支持的字符集。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeObject"><apiName>writeObject</apiName><shortdesc>
-		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>object</apiItemName><apiType value="any"/><apiDesc>要进行序列化处理的对象。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeShort"><apiName>writeShort</apiName><shortdesc>
-		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTFBytes"><apiName>writeUTFBytes</apiName><shortdesc>
-		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTF"><apiName>writeUTF</apiName><shortdesc>
-		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果长度大于 65535。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUnsignedInt"><apiName>writeUnsignedInt</apiName><shortdesc>
-		 写入一个无符号的 32 位整数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
-		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个无符号的整型字节值。
-		 </apiDesc></apiParam></apiOperationDef><apiDesc>
-		 写入一个无符号的 32 位整数。
-		 </apiDesc></apiOperationDetail></apiOperation><apiValue id="flash.utils:IDataOutput:flash.utils:IDataOutput:endian:get"><apiName>endian</apiName><shortdesc>
-		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
-		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
-		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:IDataOutput:flash.utils:IDataOutput:objectEncoding:get"><apiName>objectEncoding</apiName><shortdesc>
-		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
-		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
-		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="flash.utils:IDataInput"><apiName>IDataInput</apiName><shortdesc>
+	 </apiDesc></apiOperationDetail></apiOperation><apiClassifier id="flash.utils:IDataInput"><apiName>IDataInput</apiName><shortdesc>
 	 IDataInput 接口提供一组用于读取二进制数据的方法。此接口是写入二进制数据的 IDataOutput 接口的 I/O 对应接口。
 	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。如果可用数据不足，则会引发 EOFError 异常。使用 IDataInput.bytesAvailable 属性来确定可供读取的数据有多少。符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
 	 
@@ -403,6 +244,165 @@ trace( b.length );  // 1.414
 		 用于确定在使用 readObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
 		 用于确定在使用 readObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="flash.utils:IDataOutput"><apiName>IDataOutput</apiName><shortdesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 IDataInput.readUnsignedByte() 和 IDataInput.readUnsignedShort()。换言之：将 IDataOutput.writeByte() 与 IDataInput.readUnsignedByte() 和 IDataInput.readByte() 一起使用。将 IDataOutput.writeShort() 与 IDataInput.readUnsignedShort() 和 IDataInput.readShort() 一起使用。
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 DataOutputExample 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 声明新的 ByteArray 对象实例 byteArr。写入布尔值 false 的字节等效值和数学值 pi 的双精度浮点等效值。重新读取布尔值和双精度浮点数。注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiClassifierDetail><apiClassifierDef><apiInterface/><apiAccess value="public"/><apiStatic/><apiBaseClassifier/></apiClassifierDef><apiDesc>
+	 IDataOutput 接口提供一组用于写入二进制数据的方法。此接口是读取二进制数据的 IDataInput 接口的 I/O 对应接口。IDataOutput 接口是由 FileStream、Socket 和 ByteArray 类实现的。
+	 <p class="- topic/p ">默认情况下，所有 IDataInput 和 IDataOutput 操作均为“bigEndian”（序列中的最高有效字节存储在最低或第一个存储地址），而且都不分块。 </p><p class="- topic/p ">符号扩展名仅在读取数据时有效，写入数据时无效。因此，无需单独的写入方法就可以使用 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph>。换言之：</p><ul class="- topic/ul "><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeByte()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedByte()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readByte()</codeph> 一起使用。</li><li class="- topic/li ">将 <codeph class="+ topic/ph pr-d/codeph ">IDataOutput.writeShort()</codeph> 与 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readUnsignedShort()</codeph> 和 <codeph class="+ topic/ph pr-d/codeph ">IDataInput.readShort()</codeph> 一起使用。</li></ul>
+	 
+	   EXAMPLE:
+	 
+	   以下示例使用 <codeph class="+ topic/ph pr-d/codeph ">DataOutputExample</codeph> 类将布尔值和 pi 的双精度浮点表示形式写入字节数组。这是使用以下步骤完成的：
+	 <ol class="- topic/ol "><li class="- topic/li ">声明新的 ByteArray 对象实例 <codeph class="+ topic/ph pr-d/codeph ">byteArr</codeph>。</li><li class="- topic/li ">写入布尔值 <codeph class="+ topic/ph pr-d/codeph ">false</codeph> 的字节等效值和数学值 pi 的双精度浮点等效值。</li><li class="- topic/li ">重新读取布尔值和双精度浮点数。</li></ol><p class="- topic/p ">注意如何在末尾添加一段代码以检查文件结尾错误，确保读取的字节流没有超出文件结尾。</p><codeblock class="+ topic/pre pr-d/codeblock " xml:space="preserve">
+	 package {
+	 import flash.display.Sprite;
+	 import flash.utils.ByteArray;
+	 import flash.errors.EOFError;
+	 
+	   public class DataOutputExample extends Sprite {        
+	 public function DataOutputExample() {
+	 var byteArr:ByteArray = new ByteArray();
+	 
+	   byteArr.writeBoolean(false);
+	 byteArr.writeDouble(Math.PI);
+	 
+	   byteArr.position = 0;
+	 
+	   try {
+	 trace(byteArr.readBoolean()); // false
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());    // 3.141592653589793
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);           // EOFError: Error #2030: End of file was encountered.
+	 }
+	 
+	   try {
+	 trace(byteArr.readDouble());
+	 } 
+	 catch(e:EOFError) {
+	 trace(e);        // EOFError: Error #2030: End of file was encountered.
+	 }
+	 }
+	 }
+	 }
+	 </codeblock>
+	 </apiDesc></apiClassifierDetail><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBoolean"><apiName>writeBoolean</apiName><shortdesc>
+		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>确定写入哪个字节的布尔值。如果该参数为 true，则写入 1；如果为 false，则写入 0。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入布尔值。根据 value 参数写入单个字节。如果为 true，则写入 1，如果为 false，则写入 0。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeByte"><apiName>writeByte</apiName><shortdesc>
+		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个字节。使用了该参数的低 8 位；忽略了高 24 位。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeBytes"><apiName>writeBytes</apiName><shortdesc>
+		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
+		 
+		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>bytes</apiItemName><apiOperationClassifier>flash.utils:ByteArray</apiOperationClassifier><apiDesc>要写入的字节数组。
+		 </apiDesc></apiParam><apiParam><apiItemName>offset</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiData>0</apiData><apiDesc>从零开始的索引，指定在数组中开始写入的位置。
+		 </apiDesc></apiParam><apiParam><apiItemName>length</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiData>0</apiData><apiDesc>一个无符号整数，指定在缓冲区中的写入范围。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 在指定的字节数组 bytes 中，从 offset（使用从零开始的索引）指定的字节开始，向文件流、字节流或字节数组中写入一个长度由 length 指定的字节序列。
+		 
+		   如果省略 length 参数，则使用默认长度 0 并从 offset 开始写入整个缓冲区。如果还省略了 offset 参数，则写入整个缓冲区。 如果 offset 或 length 参数超出范围，它们将被锁定到 bytes 数组的开头和结尾。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeDouble"><apiName>writeDouble</apiName><shortdesc>
+		 写入 IEEE 754 双精度（64 位）浮点数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>双精度（64 位）浮点数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入 IEEE 754 双精度（64 位）浮点数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeFloat"><apiName>writeFloat</apiName><shortdesc>
+		 写入 IEEE 754 单精度（32 位）浮点数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>单精度（32 位）浮点数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入 IEEE 754 单精度（32 位）浮点数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeInt"><apiName>writeInt</apiName><shortdesc>
+		 写入一个带符号的 32 位整数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个带符号的整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个带符号的 32 位整数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeMultiByte"><apiName>writeMultiByte</apiName><shortdesc>
+		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc></apiParam><apiParam><apiItemName>charSet</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>表示要使用的字符集的字符串。可能的字符集字符串包括 "shift-jis"、"cn-gb"、"iso-8859-1"”等。有关完整列表，请参阅支持的字符集。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 使用指定的字符集将多字节字符串写入文件流、字节流或字节数组中。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeObject"><apiName>writeObject</apiName><shortdesc>
+		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>object</apiItemName><apiType value="any"/><apiDesc>要进行序列化处理的对象。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 以 AMF 序列化格式将对象写入文件流、字节流或字节数组中。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeShort"><apiName>writeShort</apiName><shortdesc>
+		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>一个整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个 16 位整数。使用了该参数的低 16 位；忽略了高 16 位。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTFBytes"><apiName>writeUTFBytes</apiName><shortdesc>
+		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个 UTF-8 字符串。类似于 writeUTF()，但不使用 16 位长度的词为字符串添加前缀。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUTF"><apiName>writeUTF</apiName><shortdesc>
+		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果长度大于 65535。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 将 UTF-8 字符串写入文件流、字节流或字节数组中。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:IDataOutput:flash.utils:IDataOutput:writeUnsignedInt"><apiName>writeUnsignedInt</apiName><shortdesc>
+		 写入一个无符号的 32 位整数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata><asCustoms><internal>throws IOError An I/O error occurred?
+		 </internal></asCustoms></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个无符号的整型字节值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 写入一个无符号的 32 位整数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiValue id="flash.utils:IDataOutput:flash.utils:IDataOutput:endian:get"><apiName>endian</apiName><shortdesc>
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>String</apiValueClassifier></apiValueDef><apiDesc>
+		 数据的字节顺序：为 Endian 类中的 BIG_ENDIAN 或 LITTLE_ENDIAN 常量。
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="flash.utils:IDataOutput:flash.utils:IDataOutput:objectEncoding:get"><apiName>objectEncoding</apiName><shortdesc>
+		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueAccess value="readwrite"/><apiValueClassifier>uint</apiValueClassifier></apiValueDef><apiDesc>
+		 用于确定在使用 writeObject() 方法写入或读取二进制数据时是使用 AMF3 格式还是 AMF0 格式。该值为 ObjectEncoding 类中的常数。
 		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="flash.utils:ByteArray"><apiName>ByteArray</apiName><shortdesc>
 	 ByteArray 类提供用于优化读取、写入以及处理二进制数据的方法和属性。
 	 内存中的数据是一个压缩字节数组（数据类型的最紧凑表示形式），但可以使用标准 []（数组访问）运算符来操作 ByteArray 类的实例。
@@ -660,7 +660,7 @@ catch(e:EOFError) {
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:ByteArray:writeUTF"><apiName>writeUTF</apiName><shortdesc>
 		 将 UTF-8 字符串写入字节流。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果长度大于 65535。
-		 </apiDesc><apiItemName>Error</apiItemName><apiOperationClassifier>Error</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要写入的字符串值。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将 UTF-8 字符串写入字节流。先写入以字节表示的 UTF-8 字符串长度（作为 16 位整数），然后写入表示字符串字符的字节。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="flash.utils:ByteArray:writeUnsignedInt"><apiName>writeUnsignedInt</apiName><shortdesc>

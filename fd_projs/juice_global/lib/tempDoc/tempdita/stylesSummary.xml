@@ -46,26 +46,26 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:byte">
-         <apiName>byte</apiName>
+      <apiClassifier id="globalClassifier:URIError">
+         <apiName>URIError</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
             </apiClassifierDef>
          </apiClassifierDetail>
          <prolog>
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:Error">
-         <apiName>Error</apiName>
+      <apiClassifier id="globalClassifier:String">
+         <apiName>String</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
-               <apiDynamic/>
+               <apiStatic/>
+               <apiFinal/>
                <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>
          </apiClassifierDetail>
@@ -87,36 +87,8 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:String">
-         <apiName>String</apiName>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <prolog>
-            <asMetadata/>
-         </prolog>
-      </apiClassifier>
       <apiClassifier id="globalClassifier:float">
          <apiName>float</apiName>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <prolog>
-            <asMetadata/>
-         </prolog>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:uint">
-         <apiName>uint</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
@@ -151,6 +123,115 @@
                <apiAccess value="public"/>
                <apiStatic/>
                <apiBaseClassifier/>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Function">
+         <apiName>Function</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Number">
+         <apiName>Number</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:RangeError">
+         <apiName>RangeError</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Boolean">
+         <apiName>Boolean</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:byte">
+         <apiName>byte</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Error">
+         <apiName>Error</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:EvalError">
+         <apiName>EvalError</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiDynamic/>
+               <apiBaseClassifier>Error</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:uint">
+         <apiName>uint</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>
          </apiClassifierDetail>
          <prolog>
@@ -198,22 +279,8 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:Function">
-         <apiName>Function</apiName>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiDynamic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <prolog>
-            <asMetadata/>
-         </prolog>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Number">
-         <apiName>Number</apiName>
+      <apiClassifier id="globalClassifier:Promise">
+         <apiName>Promise</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
@@ -240,8 +307,8 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:short">
-         <apiName>short</apiName>
+      <apiClassifier id="globalClassifier:sbyte">
+         <apiName>sbyte</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
@@ -254,8 +321,8 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="globalClassifier:sbyte">
-         <apiName>sbyte</apiName>
+      <apiClassifier id="globalClassifier:short">
+         <apiName>short</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
@@ -313,20 +380,6 @@
                <apiAccess value="public"/>
                <apiDynamic/>
                <apiBaseClassifier>Error</apiBaseClassifier>
-            </apiClassifierDef>
-         </apiClassifierDetail>
-         <prolog>
-            <asMetadata/>
-         </prolog>
-      </apiClassifier>
-      <apiClassifier id="globalClassifier:Boolean">
-         <apiName>Boolean</apiName>
-         <apiClassifierDetail>
-            <apiClassifierDef>
-               <apiAccess value="public"/>
-               <apiStatic/>
-               <apiFinal/>
-               <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>
          </apiClassifierDetail>
          <prolog>
@@ -394,8 +447,8 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="flash.utils:IDataOutput">
-         <apiName>IDataOutput</apiName>
+      <apiClassifier id="flash.utils:IDataInput">
+         <apiName>IDataInput</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiInterface/>
@@ -408,8 +461,8 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
-      <apiClassifier id="flash.utils:IDataInput">
-         <apiName>IDataInput</apiName>
+      <apiClassifier id="flash.utils:IDataOutput">
+         <apiName>IDataOutput</apiName>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiInterface/>
@@ -430,6 +483,23 @@
                <apiStatic/>
                <apiBaseInterface>flash.utils:IDataInput2</apiBaseInterface>
                <apiBaseInterface>flash.utils:IDataOutput2</apiBaseInterface>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+   </apiPackage>
+   <apiPackage id="geom">
+      <apiName>geom</apiName>
+      <apiClassifier id="geom:Vector2">
+         <apiName>Vector2</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
                <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>
          </apiClassifierDetail>

@@ -51,7 +51,7 @@ namespace compilerTests
                 var i = path.IndexOf("compilerTests");
                 path = path.Substring(0, i);
 
-                return path + "asc\\bin\\Debug\\net6.0\\global_swc\\juice_global.swc";
+                return path + "player\\bin\\Debug\\net6.0\\juice_global.swc";
 			}
         }
 

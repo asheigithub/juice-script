@@ -17,11 +17,7 @@ package
 		
 	}
 }
-
-
-trace( Number.log(3) );
-
-
+ 
 //async function asyncAdd(a:int, b:int):int {
     //var x:int = await Promise.resolve(a);
     //var y:int = await Promise.resolve(b);
@@ -266,23 +262,23 @@ trace( Number.log(3) );
 //lbl2:
     //trace(x);
 	
-//function  fib(i:int):int 
-	//{
-		//if (i === 1 || i === 2)
-		//{
-			//return 1;
-		//}
-		//else 
-		//{
-			//
-			//return fib(i - 2) + fib(i-1);
-			//
-		//}	
-	//}
-	//
-	//
-	//
-//trace(fib(35));
+function  fib(i:int):int 
+	{
+		if (i === 1 || i === 2)
+		{
+			return 1;
+		}
+		else 
+		{
+			
+			return fib(i - 2) + fib(i-1);
+			
+		}	
+	}
+	
+	
+	
+trace(fib(35));
 
 
 

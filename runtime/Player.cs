@@ -16545,7 +16545,7 @@ namespace juicescript.runtime
 													((RtPayloadArray)instance.facility).array_len = 0;
 													((RtPayloadArray)instance.facility).methodscopeslot_ref_state = 0;
 													((RtPayloadArray)instance.facility).HEAPINSTANCE_PTR = 0;
-													
+
 
 												}
 												else
@@ -16602,6 +16602,99 @@ namespace juicescript.runtime
 												}
 
 												break;
+											}
+											else if (@class.Type_identifier <= 7)
+											{
+												Debug.Assert(@class.Type_identifier > 0);
+
+												if (argsCount == 0)
+												{
+													switch ((TypeKind)@class.Type_identifier)
+													{
+														case TypeKind.SByte:
+															stackslots[target.index].SetSByte(0);
+															break;
+														case TypeKind.Byte:
+															stackslots[target.index].SetByte(0);
+															break;
+														case TypeKind.Short:
+															stackslots[target.index].SetShort(0);
+															break;
+														case TypeKind.UShort:
+															stackslots[target.index].SetUShort(0);
+															break;
+														case TypeKind.Int:
+															stackslots[target.index].SetInt(0);
+															break;
+														case TypeKind.Uint:
+															stackslots[target.index].SetUInt(0);
+															break;
+														default:
+#if DEBUG
+															throw new InvalidOperationException();
+#else
+													Environment.FailFast("出错了，这里跑不到"); PC_PTR = 0; return;
+#endif
+													}
+
+													
+												}
+												else if (argsCount >= 1)
+												{
+													byte* P = argementsPtr + sizeof(StackLocater) * (Context.NUMBER.Instance.Constructor.Parameters.Count - 1);
+													StackLocater argLocater;
+													LoadStackLocater(&argLocater, &P);
+
+													NaNBoxing box = stackslots[argLocater.index];
+
+													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, thisPtr);
+													if (error.raised)
+													{
+														goto flag_handle_error;
+													}
+
+													//ConvertValueType(ref error, box, TypeKind.Number, Context.NUMBER, ref stackslots[target.index]);
+
+													switch ((TypeKind)@class.Type_identifier)
+													{
+														case TypeKind.SByte:
+															ConvertValueType(ref error, box, TypeKind.SByte, Context.SBYTE, ref stackslots[target.index]);
+															break;
+														case TypeKind.Byte:
+															ConvertValueType(ref error, box, TypeKind.Byte, Context.BYTE, ref stackslots[target.index]);
+															break;
+														case TypeKind.Short:
+															ConvertValueType(ref error, box, TypeKind.Short, Context.SHORT, ref stackslots[target.index]);
+															break;
+														case TypeKind.UShort:
+															ConvertValueType(ref error, box, TypeKind.UShort, Context.USHORT, ref stackslots[target.index]);
+															break;
+														case TypeKind.Int:
+															ConvertValueType(ref error, box, TypeKind.Int, Context.INT, ref stackslots[target.index]);
+															break;
+														case TypeKind.Uint:
+															ConvertValueType(ref error, box, TypeKind.Uint, Context.UINT, ref stackslots[target.index]);
+															break;
+														default:
+#if DEBUG
+															throw new InvalidOperationException();
+#else
+													Environment.FailFast("出错了，这里跑不到"); PC_PTR = 0; return;
+#endif
+													}
+
+
+													if (error.raised)
+													{
+														goto flag_handle_error;
+													}
+
+												}
+
+												break;
+
+
+
 											}
 											else if (@class.Type_identifier == (ulong)TypeKind.Number)
 											{

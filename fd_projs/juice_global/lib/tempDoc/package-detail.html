@@ -48,12 +48,14 @@
 	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Error.html">Error</a></td><td class="summaryTableLastCol">
 	 Error 类包含有关脚本中出现的错误的信息。可以使用 Error 构造函数来创建 Error 对象。通常，从 try 代码块内部引发一个新 Error 对象，该对象随后被 catch 代码块捕获。
 	 您也可以创建 Error 类的子类，然后引发该子类的实例。
-	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="float.html">float</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="EvalError.html">EvalError</a></td><td class="summaryTableLastCol">
+	  EvalError 类表示一种错误，如果用户代码调用 eval() 函数或试图将 new 运算符用于 Function 对象，则会出现该错误。不支持调用 eval() 和使用 Function 对象调用 new。
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="float.html">float</a></td><td class="summaryTableLastCol">
 	 juice的扩展类型，32位浮点数
-	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Function.html">Function</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Function.html">Function</a></td><td class="summaryTableLastCol">
 	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
 	 类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。
-	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="int.html">int</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="int.html">int</a></td><td class="summaryTableLastCol">
 	 通过 int 类可使用表示为 32 位带符号整数的数据类型。int 类表示的值的范围是：-2,147,483,648 (-2^31) 到 2,147,483,647 (2^31-1)。
 	 
 	 
@@ -67,10 +69,7 @@
 	 如果您正在处理超过 int.MAX_VALUE 的数值，可考虑使用 Number。
 	 
 	 
-	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="IteratorResult.html">IteratorResult</a></td><td class="summaryTableLastCol">
-	 迭代器返回对象。
-	 done表示迭代是否结束
-	 key和value分别保存本次迭代返回的key和value,如果没有key只有value,可以让key保留为undefined.</td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Math.html">Math</a></td><td class="summaryTableLastCol">&nbsp;</td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Namespace.html">Namespace</a></td><td class="summaryTableLastCol">&nbsp;</td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Number.html">Number</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="IteratorResult.html">IteratorResult</a></td><td class="summaryTableLastCol">&nbsp;</td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Math.html">Math</a></td><td class="summaryTableLastCol">&nbsp;</td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Namespace.html">Namespace</a></td><td class="summaryTableLastCol">&nbsp;</td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Number.html">Number</a></td><td class="summaryTableLastCol">
 	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
 	 但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。Number 数据类型符合双精度 IEEE-754 标准。 需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 NaN（非数字）。
 	 
@@ -92,7 +91,7 @@
 	 }
 	 }
 	 
-	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Object.html">Object</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Object.html">Object</a></td><td class="summaryTableLastCol">
 	 Object 类位于 ActionScript 类层次结构的根处。Object 由构造函数使用 new 运算符语法创建，并且可以具有动态赋予其的属性。也可通过赋予对象文字值来创建 Object，如下所示：
 	 var obj:Object = {a:"foo", b:"bar"};
 	 不声明显式基类的所有类均可扩展内置 Object 类。
@@ -104,18 +103,20 @@
  myAssocArray.initial = "Q";
  trace(myAssocArray.initial);   // Q
 	 
-	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ReferenceError.html">ReferenceError</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="Promise.html">Promise</a></td><td class="summaryTableLastCol">&nbsp;</td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="RangeError.html">RangeError</a></td><td class="summaryTableLastCol">
+	 �����ֵ���ڿɽ��ܵķ�Χ�ڣ�������� RangeError �쳣��ʹ������ʱ�����ò����ڵ������������λ�ý������� RangeError �쳣������������ڿɽ��ܵ����ַ�Χ�ڣ���ʹ�� Number.toExponential()��Number.toPrecision() �� Number.toFixed() ���������� RangeError �쳣��������չ Number.toExponential()��Number.toPrecision() �� Number.toFixed() �Ա������� RangeError��	
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ReferenceError.html">ReferenceError</a></td><td class="summaryTableLastCol">
 	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
-	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="sbyte.html">sbyte</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="sbyte.html">sbyte</a></td><td class="summaryTableLastCol">
 	 juice扩展的类型，八位有符号整数
-	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="short.html">short</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="short.html">short</a></td><td class="summaryTableLastCol">
 	 juice��չ�����ͣ�ʮ��λ�з�������
-	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="String.html">String</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="String.html">String</a></td><td class="summaryTableLastCol">
 	 String 类为表示一串字符的数据类型。String 类提供了处理原始字符串值类型的方法和属性。可以使用 String() 函数将任意对象的值转换为 String 数据类型的对象。
 	 
-	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="TypeError.html">TypeError</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="TypeError.html">TypeError</a></td><td class="summaryTableLastCol">
 	 表示发生了类型错误
-	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="uint.html">uint</a></td><td class="summaryTableLastCol">
+	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="uint.html">uint</a></td><td class="summaryTableLastCol">
 	 uint 类提供使用表示 32 位无符号整数的数据类型的方法。因为无符号整数只能为正，所以其最大值是 int 类最大值的两倍。
 	 由 uint 类表示的值的范围介于 0 到 4,294,967,295 (2^32-1) 之间。可以通过声明 uint 类型的变量并为变量赋予文本值来创建 uint 对象。uint 类型变量的默认值为 0。uint 类主要用于像素颜色值（ARGB 和 RGBA）和 int 数据类型无法正常运行的其它情况。例如，数字 0xFFFFFFFF 表示 Alpha 值为 255 的白色颜色值，它无法用 int 数据类型表示，因为它不在有效的 int 值范围内。下例将创建一个 uint 对象并调用  toString() 方法：
 	 var myuint:uint = 1234;
@@ -142,6 +143,8 @@
 	 }
 	 }
 	 
+	 </td></tr><tr class="prow0"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="URIError.html">URIError</a></td><td class="summaryTableLastCol">
+	  ���������ĳ��ȫ�� URI �������Ķ�����ì�ܵķ�ʽʹ�øú������������ URIError �쳣�����Ϊ��Ҫ��Ч URI���� Socket.connect() �������ĺ���ָ����Ч URI������������쳣��
 	 </td></tr><tr class="prow1"><td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableSecondCol"><a href="ushort.html">ushort</a></td><td class="summaryTableLastCol">
 	 juice扩展的类型，十六位无符号整数
-	 </td></tr></table><p></p><div><p></p><center class="copyright"><footer> 用于Juice 的 ActionScript3参考 </footer><br/>Wed Nov 19 2025, 10:32 AM +08:00  </center></div></div></body></html><!-- 用于Juice 的 ActionScript3参考 <br/>Wed Nov 19 2025, 10:32 AM +08:00  -->
+	 </td></tr></table><p></p><div><p></p><center class="copyright"><footer> 用于Juice 的 ActionScript3参考 </footer><br/>Wed Apr 1 2026, 01:23 PM +08:00  </center></div></div></body></html><!-- 用于Juice 的 ActionScript3参考 <br/>Wed Apr 1 2026, 01:23 PM +08:00  -->
