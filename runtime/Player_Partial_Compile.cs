@@ -188,6 +188,7 @@ namespace juicescript.runtime
 				computermember_cachemethodscope = new Dictionary<ASContainer, int>();
 			}
 
+
 			unsafe
 			{
 				fixed (void* ptrsrc = constpoolbytecode)//handle.AddrOfPinnedObject().ToPointer();
@@ -488,7 +489,10 @@ namespace juicescript.runtime
 							var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
 							thisP.SetHeapPtr(((ASScript)scope.Container).__global_index__);
 
-
+							if (info.useSlots > Context.StackSlots.Length)
+							{
+								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
+							}
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -539,6 +543,11 @@ namespace juicescript.runtime
 							thisP.SetNull();
 
 							var @class = Context.GC.Heap[((ASClass)scope.Container).__instance_index__];
+
+							if (info.useSlots > Context.StackSlots.Length)
+							{
+								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
+							}
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -637,6 +646,11 @@ namespace juicescript.runtime
 							else
 							{
 								thisP.setFault();
+							}
+
+							if (info.useSlots > Context.StackSlots.Length)
+							{
+								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 							}
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
@@ -831,6 +845,11 @@ namespace juicescript.runtime
 
 						var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
 
+						if (info.useSlots > Context.StackSlots.Length)
+						{
+							throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
+						}
+
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
 						int P_PC;
@@ -857,6 +876,11 @@ namespace juicescript.runtime
 						thisP.SetNull();
 
 						var @class = Context.GC.Heap[((ASClass)scope.Container).__instance_index__];
+
+						if (info.useSlots > Context.StackSlots.Length)
+						{
+							throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
+						}
 
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -938,6 +962,11 @@ namespace juicescript.runtime
 						else
 						{
 							thisP.SetNull();
+						}
+
+						if (info.useSlots > Context.StackSlots.Length)
+						{
+							throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 						}
 
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);

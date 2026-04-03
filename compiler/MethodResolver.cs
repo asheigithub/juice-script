@@ -1483,6 +1483,8 @@ namespace juicescript.compiler
 
 			HashSet<ScriptDef> load_init_from_mi = new HashSet<ScriptDef>();
 
+			Dictionary<ScopeMember, byte[]> reuseslotbytecodes = new Dictionary<ScopeMember, byte[]>();
+
 			while (true)
 			{
 				bool hasSuccess = false;
@@ -1766,6 +1768,19 @@ namespace juicescript.compiler
 									mapping = context.dict_methodresolver_ldclass_map[method_const];
 								}
 
+								byte[] bytecode;
+								if (!reuseslotbytecodes.TryGetValue(member, out bytecode))
+								{
+									//避免槽溢出，这里还需要先做栈槽复用									
+									bytecode = Optimizer.ReUseSlots(_temp.Body.ByteCode);
+									reuseslotbytecodes.Add(member, bytecode);
+								}
+								else
+								{ 
+								
+								}
+								_temp.Body.ByteCode = (byte[])bytecode.Clone();
+
 								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone(), method_const, mapping, loadfromcache.Contains(script));
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
@@ -1886,6 +1901,10 @@ namespace juicescript.compiler
 							catch (EvalConstException)
 							{
 
+							}
+							catch (EvalConstOutOfStackException e)
+							{
+								throw new ResolverException(test_method.Token,e.Message);
 							}
 							finally
 							{

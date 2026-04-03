@@ -12,7 +12,7 @@ package
 	{
 		public function Main()
 		{
-			var i:int = 10;
+			 var i:int = 10;
             var u:uint = 5;
             var s:short = 2;
             var sb:sbyte = 2;
@@ -133,7 +133,40 @@ package
             trace("=== float literal <op> int literal ===");
             trace(10.0 + 3, 10.0 - 3, 10.0 * 3, 10.0 / 3, 10.0 % 3);
             
+            trace("=== NaN ops ===");
+            var nan:float = 0.0 / 0.0;
+            trace("NaN + int:", nan + 5);
+            trace("NaN - int:", nan - 5);
+            trace("NaN * int:", nan * 5);
+            trace("NaN / int:", nan / 5);
+            trace("int + NaN:", 5 + nan);
+            trace("int * NaN:", 5 * nan);
+            
+            trace("=== Infinity ops ===");
+            var inf:float = 1.0 / 0.0;
+            var negInf:float = -1.0 / 0.0;
+            trace("Inf + int:", inf + 5);
+            trace("Inf - int:", inf - 5);
+            trace("Inf * int:", inf * 5);
+            trace("Inf / int:", inf / 5);
+            trace("Inf + Inf:", inf + inf);
+            trace("Inf - Inf:", inf - inf);
+            trace("Inf * Inf:", inf * inf);
+            trace("Inf / Inf:", inf / inf);
+            trace("Inf + NegInf:", inf + negInf);
+            trace("NegInf * 2:", negInf * 2);
+            trace("NegInf / 2:", negInf / 2);
+            trace("5 / 0:", 5.0 / 0.0);
+            trace("-5 / 0:", -5.0 / 0.0);
+            
+            trace("=== NaN/Inf with other types ===");
+            trace("NaN + float:", nan + f);
+            trace("Inf * float(2):", inf * 2.0);
+            trace("float(5) / 0:", float(5) / 0.0);
+            trace("NaN * float:", nan * f);
+            
             trace("All tests completed!");
+  
 		}
 		
 	}
