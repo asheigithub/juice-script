@@ -18,7 +18,19 @@ package __AS3__
 		
 		native public static function parseInt (s:String="NaN", radix:int=0) : Number;
 		
+		
+		
+		
+		native public static function setTimeout(closure:Function, delay:Number, ... arguments):uint;
+		
+		native public static function clearTimeout(id:uint):void;
+		
+		
 		native public static function fetch(url:String) : Promise;
+		
+		
+		
+		
 		
 	}
 }

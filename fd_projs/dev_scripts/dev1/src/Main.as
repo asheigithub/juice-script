@@ -166,7 +166,7 @@ package
             trace("NaN * float:", nan * f);
             
             trace("All tests completed!");
-  
+
 		}
 		
 	}

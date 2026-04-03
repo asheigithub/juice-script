@@ -148,6 +148,8 @@ namespace juicescript.runtime
 
 		internal PromiseMicroTaskQueue MicroTaskQueue { get;private set; }
 
+        internal TimerTaskImpl.TimerTaskList TimerTaskQueue { get; private set; }
+
         internal AsyncCallbackQueue AsyncCallbackQueue { get;private set; }
 
 		public Context(Player player, int gc_limit = int.MaxValue)
@@ -251,6 +253,8 @@ namespace juicescript.runtime
             errorStack = new ErrorStackTrace();
 
 			MicroTaskQueue = new PromiseMicroTaskQueue();
+
+            TimerTaskQueue = new TimerTaskImpl.TimerTaskList();
 
             AsyncCallbackQueue = new AsyncCallbackQueue();
 

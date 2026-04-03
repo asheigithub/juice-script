@@ -28,3 +28,4 @@ packages/
 /.kiro/specs/promise-completion
 /script_workspace
 /nul
+/test_output.txt

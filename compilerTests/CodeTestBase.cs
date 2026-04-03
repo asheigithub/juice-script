@@ -100,8 +100,8 @@ namespace compilerTests
                         player.LoadLib(System.IO.File.ReadAllBytes(item));
                     }
 
-                    PlayerException ex;
-                    player.Run(out ex);
+                    PlayerException? ex = null;
+                    player.Run((e) => { ex = e; });
 
 
                     TestIsPass(player, ex);
@@ -124,8 +124,8 @@ namespace compilerTests
                         player.LoadLib(System.IO.File.ReadAllBytes(item));
                     }
 
-                    PlayerException ex;
-                    player.Run(out ex);
+                    PlayerException? ex = null;
+                    player.Run((e) => { ex = e; });
 
 
                     TestIsPass(player, ex);

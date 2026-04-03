@@ -69,27 +69,27 @@ namespace player
 
 					//sw.Start();
 
-					PlayerException ex;
-					player.Run(out ex);
+					int code = 0;
+					player.Run((ex) => {
+						Console.ForegroundColor = ConsoleColor.Red;
+						Console.WriteLine(ex.errorDebugMsg);
+						Console.ResetColor();
+
+						Console.Error.WriteLine(ex.Message);
+
+						code = 1;
+
+					} );
 
 
 					//sw.Stop();
 
 					//Console.WriteLine(sw.ElapsedMilliseconds);
 
-					if (ex != null)
-					{
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine(ex.errorDebugMsg);
-						Console.ResetColor();
-
-						Console.Error.WriteLine(ex.Message);
-						return 1;
-					}
 #if PROFILEPLAYER
                     InstructionProfiler.OutPutProfile();
 #endif
-					return 0;
+					return code;
 				});
 				return app.Execute(args);
 			}

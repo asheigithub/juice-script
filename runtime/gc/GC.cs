@@ -1058,6 +1058,9 @@ namespace juicescript.runtime.gc
 			//遍历微任务循环
 			context.MicroTaskQueue.OnGCMark(context);
 
+            //定时器任务回调
+            context.TimerTaskQueue.OnGCMark(context);
+
 
 			//遍历Root。
 			for (int i = 0; i < Root.Count; i++)

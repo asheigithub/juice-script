@@ -2903,7 +2903,7 @@ namespace juicescript.runtime
 		}
 
 
-		public void Run(out PlayerException ex)
+		public void Run(Action<PlayerException> onErrorRaised)
 		{
 
 			CheckRequires();
@@ -3096,8 +3096,13 @@ namespace juicescript.runtime
 				}
 
 
-				ex = new PlayerException(this, error.error, Context.errorStack.ToString());
+				var ex = new PlayerException(this, error.error, Context.errorStack.ToString());
 				Context.errorStack.Clear();
+
+				if (onErrorRaised != null)
+				{
+					onErrorRaised(ex);
+				}
 			}
 			else
 			{
@@ -3106,11 +3111,10 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #endif
 
-				ex = null;
+				
 			}
 
-
-
+			
 			while (true)
 			{
 				ReceiveError queueError = default;
@@ -3119,41 +3123,52 @@ namespace juicescript.runtime
 				{
 					Debug.Assert(queueError.error.ValueType == BoxType.Fault);
 
-					if (ex == null)
-					{
-						ex = new PlayerException(this, queueError.error, " AsyncCallbackQueue Fault.");
-					}
-					else
-					{
-						ex = new PlayerException(this, error.error, ex.Message + "\n\nAsyncCallbackQueue Fault.");
-					}
-
+					
+					var	ex = new PlayerException(this, queueError.error, " AsyncCallbackQueue Fault.");
+				
 					Context.errorStack.Clear();
+
+					if (onErrorRaised != null)
+					{
+						onErrorRaised(ex);
+					}
 
 					break;
 				}
+
+				
+				ReceiveError timertask_fault = default;
+				Context.TimerTaskQueue.RunTimerTasks(Context, DateTime.UtcNow.Ticks, onErrorRaised, ref timertask_fault);
+				if (timertask_fault.raised)
+				{
+					Debug.Assert(timertask_fault.error.ValueType == BoxType.Fault);
+
+					Context.errorStack.Clear();
+					break;
+				}
+				
 
 				ReceiveError microtask_fault = default;
 				Context.MicroTaskQueue.RunMicrotasks(Context, ref microtask_fault);
 				if (microtask_fault.raised)
 				{
 					Debug.Assert(microtask_fault.error.ValueType == BoxType.Fault); //微任务循环会吃掉异常，除非是oom这种。
-					if (ex == null)
+					
+					var	ex = new PlayerException(this, microtask_fault.error, "Run Microtask Fault.");
+					Context.errorStack.Clear();
+
+					if (onErrorRaised != null)
 					{
-						ex = new PlayerException(this, microtask_fault.error, "Run Microtask Fault.");
-					}
-					else
-					{
-						ex = new PlayerException(this, error.error, ex.Message + "\n\nRun Microtask Fault.");
+						onErrorRaised(ex);
 					}
 
-					Context.errorStack.Clear();
 					break;
 				}
 
-				if (Context.AsyncCallbackQueue.HasPending)
+
+				if (Context.AsyncCallbackQueue.HasPending || Context.TimerTaskQueue.HasWaitingTasks || Context.AsyncCallbackQueue.HasPending)
 				{
-					Context.AsyncCallbackQueue._wakeEvent.WaitOne();
+					Context.AsyncCallbackQueue._wakeEvent.WaitOne(16); //16毫秒检查一次计时器是否过期
 				}
 				else
 				{
