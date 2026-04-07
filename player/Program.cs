@@ -52,6 +52,7 @@ namespace player
 				optionGlobal.DefaultValue = Path.Combine(Directory.GetCurrentDirectory(), "juice_global.swc");
 				app.OnExecute(() =>
 				{
+
 					string scriptPath = optionScript.Value();
 					string libDir = optionLibDir.Value();
 					string globalPath = optionGlobal.Value();
@@ -68,6 +69,12 @@ namespace player
 					//Stopwatch sw = Stopwatch.StartNew();
 
 					//sw.Start();
+
+					Console.CancelKeyPress += (sender, e) => {
+						player.RequestShutdown();
+						e.Cancel = true; // 阻止程序立即退出
+					};
+
 
 					int code = 0;
 					player.Run((ex) => {

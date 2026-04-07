@@ -2902,6 +2902,11 @@ namespace juicescript.runtime
 
 		}
 
+		private bool _shutdownEvent = false;
+		public void RequestShutdown()
+		{
+			_shutdownEvent = true;
+		}
 
 		public void Run(Action<PlayerException> onErrorRaised)
 		{
@@ -3165,8 +3170,9 @@ namespace juicescript.runtime
 					break;
 				}
 
+				
 
-				if (Context.AsyncCallbackQueue.HasPending || Context.TimerTaskQueue.HasWaitingTasks || Context.AsyncCallbackQueue.HasPending)
+				if (!_shutdownEvent && ( Context.AsyncCallbackQueue.HasPending || Context.TimerTaskQueue.HasWaitingTasks || Context.AsyncCallbackQueue.HasPending))
 				{
 					Context.AsyncCallbackQueue._wakeEvent.WaitOne(16); //16毫秒检查一次计时器是否过期
 				}

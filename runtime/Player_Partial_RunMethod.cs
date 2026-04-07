@@ -105,7 +105,7 @@ namespace juicescript.runtime
 
 				int para_argcount = 0;
 
-				if ( method.IsAnonymous || skipcheckargscount )//method.Trait == null && method.Parameters.Count == 0)
+				if ( method.IsAnonymous  || skipcheckargscount )//method.Trait == null && method.Parameters.Count == 0)
 				{
 					//不检查参数个数
 				}				
@@ -114,7 +114,7 @@ namespace juicescript.runtime
 					//检查参数个数
 					if (args > method.Parameters.Count)
 					{
-						if (method.Parameters.Count == 0 || !method.Parameters[method.Parameters.Count - 1].IsRest)
+						if ((method.Parameters.Count == 0 || !method.Parameters[method.Parameters.Count - 1].IsRest) && !(method.Flags.HasFlag(MethodFlags.NeedArguments)))
 						{
 							//throw new NotImplementedException("参数过多");
 

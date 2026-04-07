@@ -1,6 +1,8 @@
 package 
 {
 	import flash.display.Sprite;
+	import flash.utils.clearInterval;
+	import flash.utils.setInterval;
 	import ns1.BaseM;
 	
 	[Doc]
@@ -10,164 +12,20 @@ package
 	 */
 	public class Main extends BaseM
 	{
-		public function Main()
-		{
-			 var i:int = 10;
-            var u:uint = 5;
-            var s:short = 2;
-            var sb:sbyte = 2;
-            var b:byte = 3;
-            var f:float = 3.0;
-            
-            trace("=== int <op> int ===");
-            trace(i + i, i - i, i * i, i / i, i % i);
-            
-            trace("=== int <op> uint ===");
-            trace(i + u, i - u, i * u, i / u, i % u);
-            
-            trace("=== int <op> short ===");
-            trace(i + s, i - s, i * s, i / s, i % s);
-            
-            trace("=== int <op> sbyte ===");
-            trace(i + sb, i - sb, i * sb, i / sb, i % sb);
-            
-            trace("=== int <op> byte ===");
-            trace(i + b, i - b, i * b, i / b, i % b);
-            
-            trace("=== int <op> float ===");
-            trace(i + f, i - f, i * f, i / f, i % f);
-            
-            trace("=== uint <op> uint ===");
-            trace(u + u, u - u, u * u, u / u, u % u);
-            
-            trace("=== uint <op> int ===");
-            trace(u + i, u - i, u * i, u / i, u % i);
-            
-            trace("=== uint <op> short ===");
-            trace(u + s, u - s, u * s, u / s, u % s);
-            
-            trace("=== uint <op> sbyte ===");
-            trace(u + sb, u - sb, u * sb, u / sb, u % sb);
-            
-            trace("=== uint <op> byte ===");
-            trace(u + b, u - b, u * b, u / b, u % b);
-            
-            trace("=== uint <op> float ===");
-            trace(u + f, u - f, u * f, u / f, u % f);
-            
-            trace("=== short <op> short ===");
-            trace(s + s, s - s, s * s, s / s, s % s);
-            
-            trace("=== short <op> int ===");
-            trace(s + i, s - i, s * i, s / i, s % i);
-            
-            trace("=== short <op> uint ===");
-            trace(s + u, s - u, s * u, s / u, s % u);
-            
-            trace("=== short <op> sbyte ===");
-            trace(s + sb, s - sb, s * sb, s / sb, s % sb);
-            
-            trace("=== short <op> byte ===");
-            trace(s + b, s - b, s * b, s / b, s % b);
-            
-            trace("=== short <op> float ===");
-            trace(s + f, s - f, s * f, s / f, s % f);
-            
-            trace("=== sbyte <op> sbyte ===");
-            trace(sb + sb, sb - sb, sb * sb, sb / sb, sb % sb);
-            
-            trace("=== sbyte <op> int ===");
-            trace(sb + i, sb - i, sb * i, sb / i, sb % i);
-            
-            trace("=== sbyte <op> uint ===");
-            trace(sb + u, sb - u, sb * u, sb / u, sb % u);
-            
-            trace("=== sbyte <op> short ===");
-            trace(sb + s, sb - s, sb * s, sb / s, sb % s);
-            
-            trace("=== sbyte <op> byte ===");
-            trace(sb + b, sb - b, sb * b, sb / b, sb % b);
-            
-            trace("=== sbyte <op> float ===");
-            trace(sb + f, sb - f, sb * f, sb / f, sb % f);
-            
-            trace("=== byte <op> byte ===");
-            trace(b + b, b - b, b * b, b / b, b % b);
-            
-            trace("=== byte <op> int ===");
-            trace(b + i, b - i, b * i, b / i, b % i);
-            
-            trace("=== byte <op> uint ===");
-            trace(b + u, b - u, b * u, b / u, b % u);
-            
-            trace("=== byte <op> short ===");
-            trace(b + s, b - s, b * s, b / s, b % s);
-            
-            trace("=== byte <op> sbyte ===");
-            trace(b + sb, b - sb, b * sb, b / sb, b % sb);
-            
-            trace("=== byte <op> float ===");
-            trace(b + f, b - f, b * f, b / f, b % f);
-            
-            trace("=== float <op> float ===");
-            trace(f + f, f - f, f * f, f / f, f % f);
-            
-            trace("=== float <op> int ===");
-            trace(f + i, f - i, f * i, f / i, f % i);
-            
-            trace("=== float <op> uint ===");
-            trace(f + u, f - u, f * u, f / u, f % u);
-            
-            trace("=== float <op> short ===");
-            trace(f + s, f - s, f * s, f / s, f % s);
-            
-            trace("=== float <op> sbyte ===");
-            trace(f + sb, f - sb, f * sb, f / sb, f % sb);
-            
-            trace("=== float <op> byte ===");
-            trace(f + b, f - b, f * b, f / b, f % b);
-            
-            trace("=== int literal <op> float literal ===");
-            trace(10 + 3.0, 10 - 3.0, 10 * 3.0, 10 / 3.0, 10 % 3.0);
-            
-            trace("=== float literal <op> int literal ===");
-            trace(10.0 + 3, 10.0 - 3, 10.0 * 3, 10.0 / 3, 10.0 % 3);
-            
-            trace("=== NaN ops ===");
-            var nan:float = 0.0 / 0.0;
-            trace("NaN + int:", nan + 5);
-            trace("NaN - int:", nan - 5);
-            trace("NaN * int:", nan * 5);
-            trace("NaN / int:", nan / 5);
-            trace("int + NaN:", 5 + nan);
-            trace("int * NaN:", 5 * nan);
-            
-            trace("=== Infinity ops ===");
-            var inf:float = 1.0 / 0.0;
-            var negInf:float = -1.0 / 0.0;
-            trace("Inf + int:", inf + 5);
-            trace("Inf - int:", inf - 5);
-            trace("Inf * int:", inf * 5);
-            trace("Inf / int:", inf / 5);
-            trace("Inf + Inf:", inf + inf);
-            trace("Inf - Inf:", inf - inf);
-            trace("Inf * Inf:", inf * inf);
-            trace("Inf / Inf:", inf / inf);
-            trace("Inf + NegInf:", inf + negInf);
-            trace("NegInf * 2:", negInf * 2);
-            trace("NegInf / 2:", negInf / 2);
-            trace("5 / 0:", 5.0 / 0.0);
-            trace("-5 / 0:", -5.0 / 0.0);
-            
-            trace("=== NaN/Inf with other types ===");
-            trace("NaN + float:", nan + f);
-            trace("Inf * float(2):", inf * 2.0);
-            trace("float(5) / 0:", float(5) / 0.0);
-            trace("NaN * float:", nan * f);
-            
-            trace("All tests completed!");
+		
+		
+		private var intervalDuration:Number = 1000; // duration between intervals, in milliseconds
+        
+        public function Main() {
+            var intervalId:uint = setInterval(myRepeatingFunction, intervalDuration, "Hello", "World");
+			
+			//clearInterval(intervalId);
+			
+        }
 
-		}
+        public function myRepeatingFunction():void { 
+            trace(arguments[0] + " " + arguments[1]);
+        }
 		
 	}
 }

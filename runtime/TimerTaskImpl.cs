@@ -13,7 +13,7 @@ namespace juicescript.runtime
 			public long TimeToRun;
 			public int CallbackFunctionPtr;
 			public int argumentsPtr;
-
+			public int interval;
 		}
 
 
@@ -87,22 +87,30 @@ namespace juicescript.runtime
 
 					if (task.TimeToRun < nowticks)
 					{
-						//将后面的task移动覆盖当前task
-						//如果后面没有，正好将callbackfunctionptr清0.
-
-						_taskBuffer[i].CallbackFunctionPtr = 0;
-						_taskBuffer[i].argumentsPtr = 0;
-
-						int j = i + 1;
-						while (j < _count)
+						
+						if (task.interval !=0)
 						{
-							_taskBuffer[j - 1] = _taskBuffer[j];
-							j++;
+							_taskBuffer[i].TimeToRun += task.interval;
 						}
+						else
+						{
+							//将后面的task移动覆盖当前task
+							//如果后面没有，正好将callbackfunctionptr清0.
 
-						_count--;
-						i--;
+							_taskBuffer[i].CallbackFunctionPtr = 0;
+							_taskBuffer[i].argumentsPtr = 0;
 
+							int j = i + 1;
+							while (j < _count)
+							{
+								_taskBuffer[j - 1] = _taskBuffer[j];
+								j++;
+							}
+
+							_count--;
+							i--;
+
+						}
 						//运行函数
 						var closureinstance = context.GC.Heap[task.CallbackFunctionPtr];
 
@@ -140,7 +148,10 @@ namespace juicescript.runtime
 							continue;
 						}
 
+						int returnslot = context.StackPosition;
+						context.StackSlots[context.StackPosition].SetUndefined();
 
+						context.StackPosition += 1;
 
 						for (int k = 0; k < len; k++)
 						{
@@ -151,7 +162,7 @@ namespace juicescript.runtime
 
 						var slots = context.StackSlots.AsSpan(context.StackPosition, len);
 
-						context.StackPosition += len + 1;
+						context.StackPosition += len ;
 
 						ReceiveError error = default;
 
@@ -161,7 +172,7 @@ namespace juicescript.runtime
 							(ushort)len, (byte*)args,
 							slots,
 							ref error,
-							context.StackPosition + len
+							returnslot
 							);
 
 						context.StackPosition -= len + 1;
@@ -246,6 +257,23 @@ namespace juicescript.runtime
 
 		}
 
+
+		[NativeFunction("$__AS3__.toplevel$public::clearInterval")]
+		public static void TimerTask_clearInterval(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var id = scope.ReadSlot(0, context.player).UIntValue;
+
+			context.TimerTaskQueue.clearTimeOut(id);
+
+		}
+
+
+
 		[NativeFunction("$__AS3__.toplevel$public::setTimeout")]
 		public static void TimerTask_setTimeout(Context context,
 			ASMethod method,
@@ -296,6 +324,7 @@ namespace juicescript.runtime
 			task.argumentsPtr = argumentPtr;
 			task.CallbackFunctionPtr = heap_closure.HeapPtr;
 			task.TimeToRun = DateTime.UtcNow.Ticks + (int)(delay.Number * 10000);
+			task.interval = 0;
 
 			uint id = context.TimerTaskQueue.Insert(task);
 
@@ -307,5 +336,75 @@ namespace juicescript.runtime
 
 
 		}
+
+
+
+		//
+		[NativeFunction("$__AS3__.toplevel$public::setInterval")]
+		public static void TimerTask_setInterval(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+			int basePos = context.StackPosition;
+
+
+			var closure = scope.ReadSlot(0, context.player);
+			var delay = scope.ReadSlot(1, context.player);
+			var rest = scope.ReadSlot(2, context.player);
+
+			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			var restArray = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+			if (restArray.GetLength(context.player) > 16)
+			{
+				context.player.RaiseError(ref error, "setTimeout(closure:Function, delay:Number, ... arguments),arguments.length must less 16.");
+				return;
+			}
+
+			NaNBoxing heap_closure = context.player.GetSaveValue(closure, ref error);
+			if (error.raised)
+			{
+				return;
+			}
+			context.StackSlots[context.StackPosition] = heap_closure;
+			context.StackPosition += 1;
+
+			int argumentPtr = restArray.ChangeStoreToHeap(context.player, ref error);
+			if (error.raised)
+			{
+				context.StackPosition = basePos;
+				return;
+			}
+
+			TimerTask task = new TimerTask();
+			task.argumentsPtr = argumentPtr;
+			task.CallbackFunctionPtr = heap_closure.HeapPtr;
+			task.TimeToRun = DateTime.UtcNow.Ticks + (int)(delay.Number * 10000);
+			task.interval = (int)(delay.Number * 10000);
+
+			uint id = context.TimerTaskQueue.Insert(task);
+
+			context.StackSlots[returnSlotIndex].SetUInt(id);
+
+			context.StackPosition = basePos;
+
+
+
+
+		}
+
+
+
+
 	}
 }

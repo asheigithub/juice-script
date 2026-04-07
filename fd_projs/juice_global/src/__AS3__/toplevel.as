@@ -25,6 +25,9 @@ package __AS3__
 		
 		native public static function clearTimeout(id:uint):void;
 		
+		native public static function setInterval(closure:Function, delay:Number, ... arguments):uint;
+		
+		native public static function clearInterval(id:uint):void;
 		
 		native public static function fetch(url:String) : Promise;
 		
