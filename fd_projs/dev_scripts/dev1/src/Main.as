@@ -5,8 +5,7 @@ package
 	import flash.utils.setInterval;
 	import ns1.BaseM;
 	
-
-	[Doc]
+    [Doc]
     public class Main extends Sprite {
         public function Main() {
             var lines:int = 15;
@@ -37,6 +36,46 @@ package
             var currentPiece:Array;
             var currentX:int;
             var currentY:int;
+            
+            function rotatePiece():void {
+                var rows:int = currentPiece.length;
+                var cols2:int = currentPiece[0].length;
+                var rotated:Array = [];
+                for (var c:int = 0; c < cols2; c++) {
+                    var newRow:Array = [];
+                    for (var r:int = rows - 1; r >= 0; r--) {
+                        newRow.push(currentPiece[r][c]);
+                    }
+                    rotated.push(newRow);
+                }
+                if (canMove(rotated, currentX, currentY)) {
+                    currentPiece = rotated;
+                } else if (canMove(rotated, currentX - 1, currentY)) {
+                    currentPiece = rotated;
+                    currentX--;
+                } else if (canMove(rotated, currentX + 1, currentY)) {
+                    currentPiece = rotated;
+                    currentX++;
+                } else if (canMove(rotated, currentX - 2, currentY)) {
+                    currentPiece = rotated;
+                    currentX -= 2;
+                } else if (canMove(rotated, currentX + 2, currentY)) {
+                    currentPiece = rotated;
+                    currentX += 2;
+                }
+            }
+            
+            function movePieceLeft():void {
+                if (canMove(currentPiece, currentX - 1, currentY)) {
+                    currentX--;
+                }
+            }
+            
+            function movePieceRight():void {
+                if (canMove(currentPiece, currentX + 1, currentY)) {
+                    currentX++;
+                }
+            }
             
             function spawnPiece():void {
                 var idx:int = Math.floor(Math.random() * tetrominoes.length);
@@ -161,6 +200,15 @@ package
                 
                 if (canMove(currentPiece, currentX, currentY + 1)) {
                     currentY++;
+                    
+                    var r:int = Math.floor(Math.random() * 100);
+                    if (r < 15) {
+                        rotatePiece();
+                    } else if (r < 30) {
+                        movePieceLeft();
+                    } else if (r < 45) {
+                        movePieceRight();
+                    }
                 } else {
                     mergePiece();
                     var cleared:int = clearLines();
@@ -175,7 +223,7 @@ package
                 trace("Score: " + score);
                 
                 count++;
-                if (count >= 30) {
+                if (count >= 200) {
                     clearInterval(gameLoop);
                     trace("Demo ended");
                 }

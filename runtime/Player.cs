@@ -6791,7 +6791,7 @@ namespace juicescript.runtime
 							outvalue = invalue;
 							return;
 						case NaNBoxing.BoxType.Uint:
-							outvalue.SetInt((int)outvalue.UIntValue);
+							outvalue.SetInt((int)invalue.UIntValue);
 							return;
 						case NaNBoxing.BoxType.Sbyte:
 							outvalue.SetInt(invalue.SByteValue);

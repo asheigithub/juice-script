@@ -1691,7 +1691,12 @@ namespace juicescript.compiler.IL
 				(compileEnv.instructions[end-1].INS_Code != INS_Code.storeScopeH &&
 				compileEnv.instructions[end-1].INS_Code != INS_Code.storeMethodVariable
 				)
-				
+				//||
+				//(!expression.Value.IsReg && expression.Value.Data.FF1Type == FF1DataValueType.as3_array ) 
+				//||
+				//(!expression.Value.IsReg && expression.Value.Data.FF1Type == FF1DataValueType.as3_vector)
+				//||
+				//(!expression.Value.IsReg && expression.Value.Data.FF1Type == FF1DataValueType.dynamicobj)
 				)
 				)
 			{
