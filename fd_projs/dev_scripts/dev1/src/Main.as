@@ -5,29 +5,173 @@ package
 	import flash.utils.setInterval;
 	import ns1.BaseM;
 	
-	[Doc]
-	/**
-	 * ...
-	 * @author 
-	 */
-	public class Main extends BaseM
-	{
-		
-		
-		private var intervalDuration:Number = 1000; // duration between intervals, in milliseconds
-        
+	 [Doc]
+    public class Main extends Sprite {
         public function Main() {
-            var intervalId:uint = setInterval(myRepeatingFunction, intervalDuration, "Hello", "World");
-			
-			//clearInterval(intervalId);
-			
+            var lines:int = 15;
+            var cols:int = 10;
+            var cell:String = "█";
+            var empty:String = " ";
+            
+            var board:Array = [];
+            for (var i:int = 0; i < lines; i++) {
+                board.push([]);
+                for (var j:int = 0; j < cols; j++) {
+                    board[i][j] = 0;
+                }
+            }
+            
+            var tetrominoes:Array = [
+                [[1,1,1,1]],                               
+                [[1,1],[1,1]],                              
+                [[0,1,0],[1,1,1]],                         
+                [[1,0,0],[1,1,1]],                         
+                [[0,0,1],[1,1,1]],                         
+                [[0,1,1],[1,1,0]],                         
+                [[1,1,0],[0,1,1]]                           
+            ];
+            
+            var currentPiece:Array;
+            var currentX:int;
+            var currentY:int;
+            var currentColor:int;
+            
+            function spawnPiece():void {
+                var idx:int = Math.floor(Math.random() * tetrominoes.length);
+                currentPiece = tetrominoes[idx];
+                currentX = Math.floor((cols - currentPiece[0].length) / 2);
+                currentY = 0;
+                currentColor = idx + 1;
+            }
+            
+            function canMove(piece:Array, x:int, y:int):Boolean {
+                for (var py:int = 0; py < piece.length; py++) {
+                    for (var px:int = 0; px < piece[py].length; px++) {
+                        if (piece[py][px]) {
+                            var nx:int = x + px;
+                            var ny:int = y + py;
+                            if (nx < 0 || nx >= cols || ny >= lines) return false;
+                            if (ny >= 0 && board[ny][nx]) return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            function mergePiece():void {
+                for (var py:int = 0; py < currentPiece.length; py++) {
+                    for (var px:int = 0; px < currentPiece[py].length; px++) {
+                        if (currentPiece[py][px]) {
+                            var ny:int = currentY + py;
+                            if (ny >= 0) {
+                                board[ny][currentX + px] = currentColor;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function clearLines():int {
+                var linesCleared:int = 0;
+                for (var y:int = lines - 1; y >= 0; y--) {
+                    var full:Boolean = true;
+                    for (var x:int = 0; x < cols; x++) {
+                        if (!board[y][x]) {
+                            full = false;
+                            break;
+                        }
+                    }
+                    if (full) {
+                        for (var ry:int = y; ry > 0; ry--) {
+                            for (x = 0; x < cols; x++) {
+                                board[ry][x] = board[ry - 1][x];
+                            }
+                        }
+                        for (x = 0; x < cols; x++) {
+                            board[0][x] = 0;
+                        }
+                        linesCleared++;
+                        y++;
+                    }
+                }
+                return linesCleared;
+            }
+            
+            function render():void {
+                var colors:Array = [" ", "34", "35", "36", "32", "33", "31", "37"];
+                var output:String = "\x1b[2J\x1b[H";
+                
+                var border:String = "+" + "---+".split('').join('') + "+";
+                
+                var displayBoard:Array = [];
+                for (var r:int = 0; r < lines; r++) {
+                    displayBoard.push(board[r].concat());
+                }
+                
+                if (currentPiece) {
+                    for (var py:int = 0; py < currentPiece.length; py++) {
+                        for (var px:int = 0; px < currentPiece[py].length; px++) {
+                            if (currentPiece[py][px]) {
+                                var dy:int = currentY + py;
+                                var dx:int = currentX + px;
+                                if (dy >= 0 && dy < lines && dx >= 0 && dx < cols) {
+                                    displayBoard[dy][dx] = currentColor;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                output += border + "\n";
+                for (r = 0; r < lines; r++) {
+                    output += "|";
+                    for (var c2:int = 0; c2 < cols; c2++) {
+                        var val:int = displayBoard[r][c2];
+                        if (val > 0) {
+                            var color:String = colors[val % colors.length];
+                            output += "\x1b[" + color + ";1m" + cell + "\x1b[0m";
+                        } else {
+                            output += empty;
+                        }
+                    }
+                    output += "|\n";
+                }
+                output += border + "\n";
+                trace(output);
+            }
+            
+            var score:int = 0;
+            var gameOver:Boolean = false;
+            var gameSpeed:int = 300;
+            
+            spawnPiece();
+            
+            var gameLoop:uint = setInterval(function():void {
+                if (gameOver) {
+                    clearInterval(gameLoop);
+                    trace("\x1b[2J\x1b[H");
+                    trace("=== GAME OVER ===");
+                    trace("Final Score: " + score);
+                    return;
+                }
+                
+                if (canMove(currentPiece, currentX, currentY + 1)) {
+                    currentY++;
+                } else {
+                    mergePiece();
+                    var cleared:int = clearLines();
+                    score += cleared * 100;
+                    spawnPiece();
+                    if (!canMove(currentPiece, currentX, currentY)) {
+                        gameOver = true;
+                    }
+                }
+                
+                render();
+                trace("Score: " + score);
+            }, gameSpeed);
         }
-
-        public function myRepeatingFunction():void { 
-            trace(arguments[0] + " " + arguments[1]);
-        }
-		
-	}
+    }
 }
  
 var main:Main = new Main();

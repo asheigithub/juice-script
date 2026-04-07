@@ -3166,7 +3166,7 @@ namespace juicescript.runtime
 					{
 						onErrorRaised(ex);
 					}
-
+					
 					break;
 				}
 

@@ -3369,7 +3369,13 @@ namespace juicescript.compiler
 
 								var paths = pathFinder.FindAllPaths(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
 
-								if (paths.Any(p => p.All(id => !blocks[id].Instructions.Any(i => i.INS_Code == INS_Code.return_value || i.INS_Code == INS_Code.throw_error))))
+								
+								
+								if (paths.Any(p => p.All(id => !blocks[id].Instructions.Any(
+									i => i.INS_Code == INS_Code.return_value 
+									|| i.INS_Code == INS_Code.throw_error
+									|| (i.INS_Code == INS_Code.flag && ((INS_Flag)i).flag_id == 0xffffff)
+									))))
 								{
 									throw new ResolverException(new Token()
 									{
