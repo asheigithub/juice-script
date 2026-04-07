@@ -5,12 +5,13 @@ package
 	import flash.utils.setInterval;
 	import ns1.BaseM;
 	
-	 [Doc]
+
+	[Doc]
     public class Main extends Sprite {
         public function Main() {
             var lines:int = 15;
             var cols:int = 10;
-            var cell:String = "█";
+            var cell:String = "\u2588";
             var empty:String = " ";
             
             var board:Array = [];
@@ -23,48 +24,50 @@ package
             
             var tetrominoes:Array = [
                 [[1,1,1,1]],                               
-                [[1,1],[1,1]],                              
-                [[0,1,0],[1,1,1]],                         
-                [[1,0,0],[1,1,1]],                         
-                [[0,0,1],[1,1,1]],                         
-                [[0,1,1],[1,1,0]],                         
-                [[1,1,0],[0,1,1]]                           
+                [[2,2],[2,2]],                              
+                [[3,3,3],[0,3,0]],                         
+                [[4,0,0],[4,4,4]],                         
+                [[5,5,5],[5,0,0]],                         
+                [[0,6,6],[6,6,0]],                         
+                [[7,7,0],[0,7,7]]                           
             ];
+            
+            var tetrominoColors:Array = ["31", "32", "33", "34", "35", "36", "37"];
             
             var currentPiece:Array;
             var currentX:int;
             var currentY:int;
-            var currentColor:int;
             
             function spawnPiece():void {
                 var idx:int = Math.floor(Math.random() * tetrominoes.length);
+                trace("Spawn piece type=" + (idx + 1));
                 currentPiece = tetrominoes[idx];
                 currentX = Math.floor((cols - currentPiece[0].length) / 2);
                 currentY = 0;
-                currentColor = idx + 1;
             }
             
             function canMove(piece:Array, x:int, y:int):Boolean {
+                var ok:Boolean = true;
                 for (var py:int = 0; py < piece.length; py++) {
                     for (var px:int = 0; px < piece[py].length; px++) {
-                        if (piece[py][px]) {
+                        if (piece[py][px] != 0) {
                             var nx:int = x + px;
                             var ny:int = y + py;
-                            if (nx < 0 || nx >= cols || ny >= lines) return false;
-                            if (ny >= 0 && board[ny][nx]) return false;
+                            if (nx < 0 || nx >= cols || ny >= lines) ok = false;
+                            else if (ny >= 0 && board[ny][nx]) ok = false;
                         }
                     }
                 }
-                return true;
+                return ok;
             }
             
             function mergePiece():void {
                 for (var py:int = 0; py < currentPiece.length; py++) {
                     for (var px:int = 0; px < currentPiece[py].length; px++) {
-                        if (currentPiece[py][px]) {
+                        if (currentPiece[py][px] != 0) {
                             var ny:int = currentY + py;
                             if (ny >= 0) {
-                                board[ny][currentX + px] = currentColor;
+                                board[ny][currentX + px] = currentPiece[py][px];
                             }
                         }
                     }
@@ -98,38 +101,38 @@ package
             }
             
             function render():void {
-                var colors:Array = [" ", "34", "35", "36", "32", "33", "31", "37"];
-                var output:String = "\x1b[2J\x1b[H";
+                var output:String = "\u001B[2J\u001B[H";
                 
-                var border:String = "+" + "---+".split('').join('') + "+";
+                var border:String = "+";
+                for (var bi:int = 0; bi < cols; bi++) border += "---+";
+                border += "+";
                 
-                var displayBoard:Array = [];
+                output += border + "\n";
                 for (var r:int = 0; r < lines; r++) {
-                    displayBoard.push(board[r].concat());
-                }
-                
-                if (currentPiece) {
-                    for (var py:int = 0; py < currentPiece.length; py++) {
-                        for (var px:int = 0; px < currentPiece[py].length; px++) {
-                            if (currentPiece[py][px]) {
-                                var dy:int = currentY + py;
-                                var dx:int = currentX + px;
-                                if (dy >= 0 && dy < lines && dx >= 0 && dx < cols) {
-                                    displayBoard[dy][dx] = currentColor;
+                    output += "|";
+                    for (var c2:int = 0; c2 < cols; c2++) {
+                        var val:int = 0;
+                        var hasPiece:Boolean = false;
+                        if (currentPiece) {
+                            for (var py:int = 0; py < currentPiece.length && !hasPiece; py++) {
+                                for (var px:int = 0; px < currentPiece[py].length && !hasPiece; px++) {
+                                    if (currentPiece[py][px] != 0) {
+                                        var dy:int = currentY + py;
+                                        var dx:int = currentX + px;
+                                        if (dy == r && dx == c2) {
+                                            val = currentPiece[py][px];
+                                            hasPiece = true;
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                }
-                
-                output += border + "\n";
-                for (r = 0; r < lines; r++) {
-                    output += "|";
-                    for (var c2:int = 0; c2 < cols; c2++) {
-                        var val:int = displayBoard[r][c2];
-                        if (val > 0) {
-                            var color:String = colors[val % colors.length];
-                            output += "\x1b[" + color + ";1m" + cell + "\x1b[0m";
+                        if (!hasPiece) {
+                            val = board[r][c2];
+                        }
+                        if (val >= 1 && val <= 7) {
+                            var color:String = tetrominoColors[val - 1];
+                            output += "\u001B[" + color + ";1m" + cell + "\u001B[0m";
                         } else {
                             output += empty;
                         }
@@ -146,10 +149,11 @@ package
             
             spawnPiece();
             
+            var count:int = 0;
             var gameLoop:uint = setInterval(function():void {
                 if (gameOver) {
                     clearInterval(gameLoop);
-                    trace("\x1b[2J\x1b[H");
+                    trace("\u001B[2J\u001B[H");
                     trace("=== GAME OVER ===");
                     trace("Final Score: " + score);
                     return;
@@ -169,9 +173,16 @@ package
                 
                 render();
                 trace("Score: " + score);
+                
+                count++;
+                if (count >= 30) {
+                    clearInterval(gameLoop);
+                    trace("Demo ended");
+                }
             }, gameSpeed);
         }
     }
+
 }
  
 var main:Main = new Main();

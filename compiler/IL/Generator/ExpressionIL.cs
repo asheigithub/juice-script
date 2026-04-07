@@ -6791,37 +6791,47 @@ namespace juicescript.compiler.IL.Generator
 
 						var items = (List<AS3DataStackElement>)data.Data.Value;
 
-						if (items.Count < 4)
-						{
-							INS_Ld_Class ld_Class = new INS_Ld_Class(token);
-							ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, TypeKind.Array);
-							ld_Class.classid_index = compileEnv.AddConstClassId((ulong)TypeKind.Array);
-							compileEnv.instructions.Add(ld_Class);
 
-							StackLocater dst = makeOrGetLocater(TypeKind.Array);
-							List<StackLocater> arguments = new List<StackLocater>();
-							arguments.Add(dst);
+						/**
+						 var tetrominoes:Array = [
+                [[1,1,1,1]],                               
+                [[2,2],[2,2]],                              
+                [[3,3,3],[0,3,0]],                         
+                [[4,0,0],[4,4,4]],                         
+                [[5,5,5],[5,0,0]],                         
+                [[0,6,6],[6,6,0]],                         
+                [[7,7,0],[0,7,7]]      遇到这种代码会出现栈槽复用问题，全部改成逐个插入                     
+            ];
+						 */
+						//if (items.Count < 4)
+						//{
+						//	INS_Ld_Class ld_Class = new INS_Ld_Class(token);
+						//	ld_Class.dst = compileEnv.MakeStackLocater(TypeKind.Class, TypeKind.Array);
+						//	ld_Class.classid_index = compileEnv.AddConstClassId((ulong)TypeKind.Array);
+						//	compileEnv.instructions.Add(ld_Class);
 
-							for (int i = 0; i < items.Count; i++)
-							{
-								var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
-								arguments.Add(v);
-							}
+						//	StackLocater dst = makeOrGetLocater(TypeKind.Array);
+						//	List<StackLocater> arguments = new List<StackLocater>();
+						//	arguments.Add(dst);
 
-							INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
-							new_Instance.dst = dst;
-							new_Instance.typeLocator = ld_Class.dst;
-							new_Instance.args = arguments.ToArray();
+						//	for (int i = 0; i < items.Count; i++)
+						//	{
+						//		var v = LoadRightValue(items[i], compileEnv, items[i].IsReg ? data.Data.token : items[i].Data.token);
+						//		arguments.Add(v);
+						//	}
 
-							compileEnv.instructions.Add(new_Instance);
+						//	INS_New_Instance new_Instance = new INS_New_Instance(data.Data.token);
+						//	new_Instance.dst = dst;
+						//	new_Instance.typeLocator = ld_Class.dst;
+						//	new_Instance.args = arguments.ToArray();
 
+						//	compileEnv.instructions.Add(new_Instance);
 
+						//	compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
 
-							compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, dst);
-
-							return dst;
-						}
-						else
+						//	return dst;
+						//}
+						//else
 						{
 							var firstreg = items.FirstOrDefault(i => i.IsReg);
 

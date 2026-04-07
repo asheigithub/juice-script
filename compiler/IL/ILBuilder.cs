@@ -236,7 +236,7 @@ namespace juicescript.compiler.IL
 
 						compileEnv.initvalue_instructions[initmember_index].setValueInstructions.AddRange(compileEnv.instructions.Skip(count));
 					}
-
+					
 				}
 
 			}
@@ -1660,7 +1660,8 @@ namespace juicescript.compiler.IL
 				var ins = compileEnv.instructions[i];
 
 				//这些指令的加载目标都在安全的地方（比如methodScope,const pool）等,或者它们将目标设置为非heap的值
-				if (ins.INS_Code != INS_Code.ld_array_hole &&
+				if (
+					ins.INS_Code != INS_Code.ld_array_hole &&
 					ins.INS_Code != INS_Code.ld_arguments &&
 					ins.INS_Code != INS_Code.ld_class &&
 					ins.INS_Code != INS_Code.ld_const &&
@@ -1686,8 +1687,12 @@ namespace juicescript.compiler.IL
 			}
 
 			if (expression_defs.Count > 1 && 
-				compileEnv.instructions[end-1].INS_Code != INS_Code.storeScopeH &&
+				(
+				(compileEnv.instructions[end-1].INS_Code != INS_Code.storeScopeH &&
 				compileEnv.instructions[end-1].INS_Code != INS_Code.storeMethodVariable
+				)
+				
+				)
 				)
 			{
 				INS_Barrier barrier = new INS_Barrier(expression.Token);
