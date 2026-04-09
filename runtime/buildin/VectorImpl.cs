@@ -159,6 +159,37 @@ namespace juicescript.runtime.buildin
 			}
 		}
 
+		//__AS3__.vec$Vector@set#fixed
+		[NativeFunction("__AS3__.vec$Vector@set#fixed")]
+		public static void Vector_set_fixed(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			var isfixed = scope.ReadSlot(0, context.player);
+			Debug.Assert(isfixed.ValueType == NaNBoxing.BoxType.Boolean);
+
+			((RtPayloadVector)vecinstance.facility).GetStore(context.player).isFixed = isfixed.Boolean;
+			
+		}
+		//__AS3__.vec$Vector@get#fixed
+		[NativeFunction("__AS3__.vec$Vector@get#fixed")]
+		public static void Vector_get_fixed(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+		    context.StackSlots[returnSlotIndex].SetBoolean(  	((RtPayloadVector)vecinstance.facility).GetStore(context.player).isFixed );
+
+		}
+
 		//function __AS3__.vec$Vector@length
 		[NativeFunction("__AS3__.vec$Vector@get#length")]
 		public static void Vector_get_length(Context context,
@@ -344,6 +375,130 @@ namespace juicescript.runtime.buildin
 		}
 
 
+
+		//__AS3__.vec$Vector@push
+		[NativeFunction("__AS3__.vec$Vector@push")]
+		public static void Vector_push(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			var rest = scope.ReadSlot(0, context.player);
+			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+
+#if DEBUG
+			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+				throw new InvalidOperationException();
+#endif
+
+			var vector = ((RtPayloadVector)vecinstance.facility);
+
+			if (vector.GetStore(context.player).isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+			int len = vector.GetStore(context.player).length;
+
+			var arguments = rest_array.stack_store.Span;
+
+			vector.Resize(len + arguments.Length , ref error, context.player, (ASInstance)vecinstance.Type);
+			if (error.raised)
+			{
+				return;
+			}
+
+			for (int i = 0; i < arguments.Length; i++)
+			{
+				NaNBoxing a = arguments[i];
+
+				context.player.ConvertValueType(ref error, a,
+					 ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
+					  ((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex],scope_ptr
+					);
+
+				if (error.raised)
+				{
+					return;
+				}
+				
+				int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+				vector.SetSlot(len + i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
+
+				if (error.raised)
+				{
+					return;
+				}
+
+
+			}
+
+
+			context.StackSlots[returnSlotIndex].SetUInt( (uint)(len + arguments.Length) );
+		}
+
+
+
+
+		//__AS3__.vec$Vector@pop
+		[NativeFunction("__AS3__.vec$Vector@pop")]
+		public static void Vector_pop(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			if (vector.GetStore(context.player).isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+			int len = vector.GetStore(context.player).length;
+			if (len == 0)
+			{
+				if (((ASInstance)vecinstance.Type)._element_class == null)
+				{
+					context.StackSlots[returnSlotIndex].SetUndefined();
+				}
+				else
+				{
+					vector.Resize(1, ref error, context.player, (ASInstance)vecinstance.Type);
+					if (error.raised) //虽然这不太可能发生
+					{
+						return;
+					}
+
+					NaNBoxing v = vector.ReadSlot(0, context.player, returnSlotIndex, vecptr);
+					context.StackSlots[returnSlotIndex] = v;
+					vector.Resize(0, ref error, context.player, (ASInstance)vecinstance.Type);
+
+					Debug.Assert(!error.raised); // 这里不可能发生
+
+				}
+			}
+			else
+			{
+				NaNBoxing v = vector.ReadSlot(len-1, context.player, returnSlotIndex, vecptr);
+				context.StackSlots[returnSlotIndex] = v;
+				vector.Resize(len-1, ref error, context.player, (ASInstance)vecinstance.Type);
+				Debug.Assert(!error.raised); // 这里不可能发生
+			}
+
+		}
 
 
 

@@ -17,7 +17,27 @@ package
 
 }
  
-var main:Main = new Main();
+function testConcat():void {
+    var v:Vector.<int> = new Vector.<int>();
+	
+	v.push(3, 4, 5);	
+
+	trace(v);
+	
+	trace( v.pop());
+	trace( v.pop());
+	trace( v.pop());
+	trace( v.pop());
+	trace( v.pop());
+	trace( v.pop());
+	trace( v.pop());
+	
+	trace(v);
+	
+}
+
+
+testConcat();
 
 
 //async function asyncAdd(a:int, b:int):int {

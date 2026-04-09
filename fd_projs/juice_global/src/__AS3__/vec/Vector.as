@@ -25,9 +25,9 @@ package __AS3__.vec
 		
 		public native function concat(... args):Vector;
 		
+		public native function push(... args):uint;
 		
-		
-		
+		public native function pop():*;
 		
 		
 	}
