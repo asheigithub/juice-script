@@ -2063,6 +2063,31 @@ namespace juicescript.runtime
 					instance.Traits.Add(trait);
 					vScript.allContainers.Add(trait.Method.Body);
 				}
+				//shift
+				{
+					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "shift" && t.Kind == TraitKind.Method);
+					ASTrait trait = new ASTrait(t.Token);
+					trait.Kind = t.Kind;
+					trait.Method = new ASMethod(instance, t.Token);
+					trait.Method.Body = new ASMethodBody(trait.Method);
+					trait.Method.Body.ByteCode = t.Method.Body.ByteCode;
+					trait.Method.Flags = t.Method.Flags;
+					trait.Method.__is_vector_method = true;
+					trait.Method.Name = t.Method.Name;
+					trait.Method.Parameters.AddRange(t.Method.Parameters);
+
+					trait.Method.ReturnTypeKind = vector.ElementType;
+					trait.Method.ReturnType = null;
+					trait.Method.__ismethod = t.Method.__ismethod;
+					trait.Method.Body.param_defaultvalues = t.Method.Body.param_defaultvalues;
+					trait.Method.__return_type_class__ = instance._element_class;
+					trait.Method.Trait = trait;
+
+					trait.QName = t.QName;
+
+					instance.Traits.Add(trait);
+					vScript.allContainers.Add(trait.Method.Body);
+				}
 
 				ComputeLayout(@class, Context.global_swc);
 				ComputeCodeScope(vScript, Context.global_swc.NamespaceSets);
@@ -19614,7 +19639,9 @@ namespace juicescript.runtime
 								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 2);
 								Context.StackPosition += 3;
 
-								Context.StackSlots[Context.StackPosition - 1].SetUndefined();
+								int reseveSlot = Context.StackPosition - 1;
+
+								Context.StackSlots[reseveSlot].SetUndefined();
 
 								argSpan[0] = obj_h; //stackslots[insLoc.index]; //obj
 								argSpan[1] = stackslots[resultLoc.index];//result
@@ -19623,7 +19650,7 @@ namespace juicescript.runtime
 								tmpArgLoc[0].index = 0;
 								tmpArgLoc[1].index = 1;
 
-								RunMethod(function, iter_v, iter_v.HeapPtr, iter.Type, 2, (byte*)tmpArgLoc, argSpan, ref error,Context.StackPosition-1 );
+								RunMethod(function, iter_v, iter_v.HeapPtr, iter.Type, 2, (byte*)tmpArgLoc, argSpan, ref error,reseveSlot );
 
 								Context.StackPosition -= 3;
 								if (error.raised)
@@ -19652,6 +19679,7 @@ namespace juicescript.runtime
 											var check = Context.GC.Heap[key.HeapPtr];
 											if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 											{
+												Debug.Assert(reseveSlot != stackStPos + resultLoc.index);
 												//clone结构体
 												int clonedptr = stackStPos + resultLoc.index + Context.CacheInstancePtr;
 												var cacheObj = Context.GC.Heap[clonedptr];

@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -503,7 +504,15 @@ namespace juicescript.runtime
                 return 0;
             }
 
-            ((RtPayloadVector)heap_vector.facility).SetStore ( new VectorImpl.VectorStore(GetStore(player)));
+            Debug.Assert(store == GetStore(player));
+
+			if (player.Context.GC.MemUsage +  store.length * store.elementSize > player.Context.GC.USAGE_LIMIT)
+			{
+				player.RaiseOutOfMemory(ref error);
+				return 0;
+			}
+
+			((RtPayloadVector)heap_vector.facility).SetStore ( new VectorImpl.VectorStore(store));
 
             //链接到堆对象, 堆对象此时被此对象链接
             HEAPINSTANCE_PTR = heap_ptr;
@@ -517,6 +526,12 @@ namespace juicescript.runtime
             if (newlen <= store.length)
             {
                 store.buffer.RemoveRange(newlen * store.elementSize, (store.length - newlen) * store.elementSize);
+
+                if (store.IsCache)
+                {
+					player.Context.GC.MemUsage += (newlen - store.length) * store.elementSize; //更新内存占用计数
+				}
+
                 store.length = newlen;
             }
             else if (store.IsCache)
@@ -563,9 +578,13 @@ namespace juicescript.runtime
             }
 
 			store.buffer.AddRange(Enumerable.Repeat<byte>(0, (newlen - store.length) * store.elementSize));
+			player.Context.GC.MemUsage += (newlen - store.length) * store.elementSize; //更新内存占用计数
+
 
 			store.SetDefault(element_type, element_asclass, store.length, newlen - store.length);
 			store.length = newlen;
+
+            
 
 		}
 	}

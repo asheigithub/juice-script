@@ -29,6 +29,7 @@ package __AS3__.vec
 		
 		public native function pop():*;
 		
+		public native function shift():*;
 		
 	}
 }

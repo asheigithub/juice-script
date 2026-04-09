@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -134,6 +135,12 @@ namespace juicescript.runtime.buildin
 
 			if (element_size * initLen > RtPayloadVector.MAX_CACHE_SIZE) //超出缓存限制，要保存到堆
 			{
+				if (context.GC.MemUsage + element_size * initLen > context.GC.USAGE_LIMIT)
+				{
+					context.player.RaiseOutOfMemory(ref error);
+					return;
+				}
+
 				vector.ChangeStoreToHeap((ASInstance)vecinstance.Type, context.player, ref error);
 				if (error.raised)
 				{
@@ -474,26 +481,60 @@ namespace juicescript.runtime.buildin
 				{
 					context.StackSlots[returnSlotIndex].SetUndefined();
 				}
+				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
+				{					
+					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr);
+				}
 				else
 				{
-					vector.Resize(1, ref error, context.player, (ASInstance)vecinstance.Type);
-					if (error.raised) //虽然这不太可能发生
-					{
-						return;
-					}
+					context.StackSlots[returnSlotIndex].setDefault(
+						((ASInstance)vecinstance.Type)._element_class != null ?
+						(TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier :
 
-					NaNBoxing v = vector.ReadSlot(0, context.player, returnSlotIndex, vecptr);
-					context.StackSlots[returnSlotIndex] = v;
-					vector.Resize(0, ref error, context.player, (ASInstance)vecinstance.Type);
+						TypeKind.Any
 
-					Debug.Assert(!error.raised); // 这里不可能发生
+						);
+
+					
 
 				}
 			}
 			else
 			{
-				NaNBoxing v = vector.ReadSlot(len-1, context.player, returnSlotIndex, vecptr);
+				if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+				{
+					context.player.RaiseStackOverflow(ref error);
+					return;
+				}
+				context.StackPosition++;
+
+				Debug.Assert(context.StackPosition - 1 != returnSlotIndex);
+
+				NaNBoxing v = vector.ReadSlot(len-1, context.player, context.StackPosition-1, vecptr);
 				context.StackSlots[returnSlotIndex] = v;
+
+				context.StackPosition--;
+
+				if (v.ValueType == BoxType.HeapPtr)
+				{
+					var check = context.GC.Heap[v.HeapPtr];
+					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						//clone结构体
+						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						var cacheObj = context.GC.Heap[clonedptr];
+						cacheObj.Type = check.Type;
+
+						((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+						((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+						((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+
+					}
+				}
+
 				vector.Resize(len-1, ref error, context.player, (ASInstance)vecinstance.Type);
 				Debug.Assert(!error.raised); // 这里不可能发生
 			}
@@ -501,7 +542,16 @@ namespace juicescript.runtime.buildin
 		}
 
 
-
+		//__AS3__.vec$Vector@shift
+		[NativeFunction("__AS3__.vec$Vector@shift")]
+		public static void Vector_shift(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			
+		}
 
 		class JoinPrinter : IPrint
 		{
@@ -697,6 +747,7 @@ namespace juicescript.runtime.buildin
 						case TypeKind.SByte:
 						case TypeKind.Byte:
 							{
+								slice.Clear();
 								//byte v = 0;
 								//MemoryMarshal.Write(slice, ref v);
 							}
@@ -704,6 +755,7 @@ namespace juicescript.runtime.buildin
 						case TypeKind.Short:
 						case TypeKind.UShort:
 							{
+								slice.Clear();
 								//buffer.Add(0);
 								//buffer.Add(0);
 							}
@@ -712,6 +764,7 @@ namespace juicescript.runtime.buildin
 						case TypeKind.Uint:
 						case TypeKind.Float:
 							{
+								slice.Clear();
 								//buffer.Add(0);
 								//buffer.Add(0);
 								//buffer.Add(0);
@@ -720,6 +773,7 @@ namespace juicescript.runtime.buildin
 							break;
 						case TypeKind.Number:
 							{
+								slice.Clear();
 								//buffer.Add(0);
 								//buffer.Add(0);
 								//buffer.Add(0);
@@ -1027,6 +1081,8 @@ namespace juicescript.runtime.buildin
 
 			internal void GCMarkAllElements(Context context)
 			{
+
+
 				var span = CollectionsMarshal.AsSpan(buffer);
 
 				for (int i = 0; i <length; i++)

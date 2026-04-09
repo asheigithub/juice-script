@@ -17,28 +17,26 @@ package
 
 }
  
-function testConcat():void {
-    var v:Vector.<int> = new Vector.<int>();
+[struct]
+final class Point {
+    public var x:int;
+    public var y:int;
+}
+function runTest():void {
+   
+	var v:Vector.<int> = new <int>[1,2,3];
 	
-	v.push(3, 4, 5);	
-
-	trace(v);
-	
-	trace( v.pop());
-	trace( v.pop());
-	trace( v.pop());
-	trace( v.pop());
-	trace( v.pop());
-	trace( v.pop());
-	trace( v.pop());
+	trace(v.shift());
+	trace(v.shift());
+	trace(v.shift());
+	trace(v.shift());
+	trace(v.shift());
+	trace(v.shift());
 	
 	trace(v);
 	
 }
-
-
-testConcat();
-
+runTest();
 
 //async function asyncAdd(a:int, b:int):int {
     //var x:int = await Promise.resolve(a);
