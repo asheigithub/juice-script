@@ -549,8 +549,92 @@ namespace juicescript.runtime.buildin
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{ 
-			
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			if (vector.GetStore(context.player).isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+			int len = vector.GetStore(context.player).length;
+			if (len == 0)
+			{
+				if (((ASInstance)vecinstance.Type)._element_class == null)
+				{
+					context.StackSlots[returnSlotIndex].SetUndefined();
+				}
+				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
+				{
+					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr);
+				}
+				else
+				{
+					context.StackSlots[returnSlotIndex].setDefault(
+						((ASInstance)vecinstance.Type)._element_class != null ?
+						(TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier :
+
+						TypeKind.Any
+
+						);
+				}
+			}
+			else
+			{
+				if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+				{
+					context.player.RaiseStackOverflow(ref error);
+					return;
+				}
+				context.StackPosition++;
+
+				Debug.Assert(context.StackPosition - 1 != returnSlotIndex);
+
+				NaNBoxing v = vector.ReadSlot(0, context.player, context.StackPosition - 1, vecptr);
+				context.StackSlots[returnSlotIndex] = v;
+
+				context.StackPosition--;
+
+				if (v.ValueType == BoxType.HeapPtr)
+				{
+					var check = context.GC.Heap[v.HeapPtr];
+					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						var cacheObj = context.GC.Heap[clonedptr];
+						cacheObj.Type = check.Type;
+
+						((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+						((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+						((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+					}
+				}
+
+				var store = vector.GetStore(context.player);
+				if (len > 1)
+				{
+					var span = CollectionsMarshal.AsSpan(store.buffer);
+					int elementSize = store.elementSize;
+					for (int i = 1; i < len; i++)
+					{
+						var srcSlice = span.Slice(i * elementSize, elementSize);
+						var dstSlice = span.Slice((i - 1) * elementSize, elementSize);
+						srcSlice.CopyTo(dstSlice);
+					}
+				}
+
+				vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
+				Debug.Assert(!error.raised);
+			}
+
 		}
 
 		class JoinPrinter : IPrint
