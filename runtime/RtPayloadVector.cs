@@ -132,10 +132,18 @@ namespace juicescript.runtime
             return bytes;
 		}
 
-
-		internal NaNBoxing ReadSlot(int validid, Player player, int returnSlotIndex , int vector_ptr)
+        /// <summary>
+        /// reseveSlot需要外部保留一个槽，用于保存读取出的Vector中的struct结构体.
+        /// </summary>
+        /// <param name="validid"></param>
+        /// <param name="player"></param>
+        /// <param name="reseveSlot"></param>
+        /// <param name="vector_ptr"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+		internal NaNBoxing ReadSlot(int validid, Player player, int reseveSlot , int vector_ptr)
 		{
-            NaNBoxing result = player.Context.StackSlots[returnSlotIndex];
+            NaNBoxing result = player.Context.StackSlots[reseveSlot]; //需要更新引用槽
 
             var bytes = ReadStoreAt(validid, player);
 
@@ -202,7 +210,7 @@ namespace juicescript.runtime
                         if (element_asclass.Instance.Flags.HasFlag(ClassFlags.Struct))
                         {
                             //在returnslot位置上
-                            int cache_ptr = player.Context.CacheInstancePtr + returnSlotIndex;
+                            int cache_ptr = player.Context.CacheInstancePtr + reseveSlot;
                             var cache = player.Context.GC.Heap[cache_ptr];
 
                             cache.Type = element_asclass.Instance;

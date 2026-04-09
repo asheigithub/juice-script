@@ -1986,7 +1986,32 @@ namespace juicescript.runtime
 					instance.Traits.Add(trait);
 					vScript.allContainers.Add(trait.Method.Body);
 				}
+				//concat
+				{
+					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "concat" && t.Kind == TraitKind.Method);
+					ASTrait trait = new ASTrait(t.Token);
+					trait.Kind = t.Kind;
+					trait.Method = new ASMethod(instance, t.Token);
+					trait.Method.Body = new ASMethodBody(trait.Method);
+					trait.Method.Body.ByteCode = t.Method.Body.ByteCode;
+					trait.Method.Flags = t.Method.Flags;
+					trait.Method.__is_vector_method = true;
+					trait.Method.Name = t.Method.Name;
+					trait.Method.Parameters.AddRange(t.Method.Parameters);
 
+					trait.Method.ReturnTypeKind = (TypeKind)@class.Type_identifier ;
+					trait.Method.ReturnType = @class.QName;
+					trait.Method.__ismethod = t.Method.__ismethod;
+					trait.Method.Body.param_defaultvalues = t.Method.Body.param_defaultvalues;
+					trait.Method.__return_type_class__ = @class;
+					trait.Method.Trait = trait;
+
+					trait.QName = t.QName;
+
+					instance.Traits.Add(trait);
+					vScript.allContainers.Add(trait.Method.Body);
+
+				}
 
 
 				ComputeLayout(@class, Context.global_swc);
@@ -3733,7 +3758,7 @@ namespace juicescript.runtime
 		/// 从操作数中提取实际值。
 		/// 由于有成员引用类型存在，必须先进行判断和解码
 		/// 
-		/// returnSlotIndex 仅用于某些ReadSlot()时必须的传入参数，并不是会对槽赋值！注意注意
+		/// returnSlotIndex 用于某些ReadSlot()时必须的传入参数,和InvokeReadProperty
 		/// </summary>
 		/// <param name="box"></param>
 		/// <returns></returns>
@@ -7956,7 +7981,7 @@ namespace juicescript.runtime
 					((RtPayloadVector)instance.facility).HEAPINSTANCE_PTR = 0;
 					((RtPayloadVector)instance.facility).element_asclass = totype_class.Instance._element_class;
 					((RtPayloadVector)instance.facility).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
-					((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
+					//((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
 					((RtPayloadVector)instance.facility).GetStore(this).length = 0;
 
 					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr);
@@ -15114,7 +15139,44 @@ namespace juicescript.runtime
 
 							}
 							break;
+						case INS_Code.ld_length:
+							{
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+#endif
 
+								StackLocater target;
+								target.index = dst_index;
+
+								StackLocater instance;
+								LoadStackLocater(&instance, &PC);
+
+								NaNBoxing thisValue = stackslots[instance.index];
+								if (thisValue.ValueType == NaNBoxing.BoxType.Null)
+								{
+									RaiseTypeError_AccessNull(ref error);
+									goto flag_handle_error;
+								}
+
+								var obj = Context.GC.Heap[thisValue.HeapPtr];
+								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
+								{
+									uint len = ((RtPayloadArray)obj.facility).GetLength(this);
+									stackslots[target.index].SetUInt(len);
+
+								}
+								else
+								{
+									Debug.Assert(obj.TypeKind == RtHeapTypeKind.VECTOR);
+									int len = ((RtPayloadVector)obj.facility).GetStore(this).length;
+									stackslots[target.index].SetInt(len);
+								}
+
+							}
+							break;
 						case INS_Code.read_property:
 							{
 
@@ -16498,7 +16560,7 @@ namespace juicescript.runtime
 											((RtPayloadVector)instance.facility).HEAPINSTANCE_PTR = 0;
 											((RtPayloadVector)instance.facility).element_asclass = @class.Instance._element_class  ;
 											((RtPayloadVector)instance.facility).element_type = @class.Instance._element_class == null? TypeKind.Any: (TypeKind)@class.Instance._element_class.Type_identifier;
-											((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
+											//((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
 											((RtPayloadVector)instance.facility).GetStore(this).length = 0;
 
 											stackslots[target.index].SetHeapPtr(instancePtr);
@@ -19502,6 +19564,8 @@ namespace juicescript.runtime
 								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 2);
 								Context.StackPosition += 3;
 
+								Context.StackSlots[Context.StackPosition - 1].SetUndefined();
+
 								argSpan[0] = obj_h; //stackslots[insLoc.index]; //obj
 								argSpan[1] = stackslots[resultLoc.index];//result
 								
@@ -19532,12 +19596,55 @@ namespace juicescript.runtime
 									if (mode == 0)
 									{
 										var key = result_payload.ReadSlot(1, result.Type._link_codescope, this);
+										//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
+										if (key.ValueType == BoxType.HeapPtr)
+										{
+											var check = Context.GC.Heap[key.HeapPtr];
+											if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+											{
+												//clone结构体
+												int clonedptr = stackStPos + resultLoc.index + Context.CacheInstancePtr;
+												var cacheObj = Context.GC.Heap[clonedptr];
+												cacheObj.Type = check.Type;
+
+												((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+												((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+												((RtPayloadInstance)cacheObj.facility).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+
+												key.SetHeapPtr(clonedptr);
+
+											}
+										}
+
+
+
 										stackslots[resultLoc.index] = key;
 									}
 									else
 									{
 										var value = result_payload.ReadSlot(2, result.Type._link_codescope, this);
+										//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
+										if (value.ValueType == BoxType.HeapPtr)
+										{
+											var check = Context.GC.Heap[value.HeapPtr];
+											if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag( ClassFlags.Struct  ))
+											{
+												//clone结构体
+												int clonedptr = stackStPos + resultLoc.index + Context.CacheInstancePtr;
+												var cacheObj = Context.GC.Heap[clonedptr];
+												cacheObj.Type = check.Type;
+
+												((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+												((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+												((RtPayloadInstance)cacheObj.facility).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+
+												value.SetHeapPtr(clonedptr);
+
+											}
+										}
+
 										stackslots[resultLoc.index] = value;
+
 									}
 								}
 

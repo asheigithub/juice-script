@@ -372,7 +372,7 @@ namespace juicescript.runtime.buildin
 			ASMethod method,
 			int scope_ptr,
 			NaNBoxing thisPtr,
-			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+			int stackStPos, ref ReceiveError error, int reseveSlot)
 		{
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
 			var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
@@ -449,7 +449,7 @@ namespace juicescript.runtime.buildin
 				int validid;int maxid;
 				if (vector.IsValidIndexRange(_index,out validid,out maxid,context.player))
 				{					
-					var _value = vector.ReadSlot(validid, context.player, returnSlotIndex , _obj.HeapPtr);
+					var _value = vector.ReadSlot(validid, context.player, reseveSlot , _obj.HeapPtr);
 
 					_index.SetInt(validid + 1);
 					iter.SetSlot(_index, 0, iter_ins.Type._link_codescope, context.player);

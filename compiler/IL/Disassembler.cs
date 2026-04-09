@@ -227,6 +227,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.super_ctor:
 					instruction = new INS_SuperCtor(token);
 					break;
+				case INS_Code.ld_length:
+					instruction = new INS_Ld_Length(token);
+					break;
 				case INS_Code.ld_function_call:
 					instruction = new INS_Ld_Function_Call(token);
 					break;

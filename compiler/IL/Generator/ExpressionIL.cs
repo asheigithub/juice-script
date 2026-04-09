@@ -6054,7 +6054,7 @@ namespace juicescript.compiler.IL.Generator
 					{
 						VectorDef vd = compileEnv.CompileContext.vectorDefs.Find(v => v.Identifier == instancetype.Mir);
 
-						var type = vd.buildVector.vector_class; 
+						var type = vd.buildVector.vector_class;
 						int t_index = type._vtable.Items.FindIndex(t => t.Trait == traitRef.Item1[0]);
 						if (t_index < 0)
 							throw new InvalidOperationException();
@@ -6072,6 +6072,25 @@ namespace juicescript.compiler.IL.Generator
 
 						compileEnv.SetCallResult(stacklocator);
 						compileEnv.instructions.Add(readPoperty);
+
+						return stacklocator;
+					}
+					else if (instancetype.Maj == TypeKind.Array)
+					{
+						Debug.Assert(instance.index >= 0);
+
+						ASClass ttype = FindClassById(compileEnv, (ulong)instancetype.Maj);
+						var type = ttype.Instance;
+						Debug.Assert(traitRef.Item1[0].QName.Name == "length");
+						
+						var stacklocator = makeOrGetLocater(traitRef.Item1[0].Method.ReturnTypeKind);
+
+						INS_Ld_Length ld_Length = new INS_Ld_Length(token);
+						ld_Length.instacnce = instance;
+						ld_Length.dst = stacklocator;
+
+						compileEnv.instructions.Add(ld_Length);
+
 
 						return stacklocator;
 					}
@@ -6093,7 +6112,20 @@ namespace juicescript.compiler.IL.Generator
 
 							var stacklocator = makeOrGetLocater(traitRef.Item1[0].Method.ReturnTypeKind);
 
-							if (type.IsInterface)
+							if (ttype.Instance.Flags.HasFlag(ClassFlags.Vector) && traitRef.Item1[0].QName.Name == "length")
+							{
+								Debug.Assert(instance.index >= 0);
+								
+								INS_Ld_Length ld_Length = new INS_Ld_Length(token);
+								ld_Length.instacnce = instance;
+								ld_Length.dst = stacklocator;
+
+								compileEnv.instructions.Add(ld_Length);
+
+
+								return stacklocator;
+							}
+							else if (type.IsInterface)
 							{
 								//throw new NotImplementedException();
 
@@ -6139,7 +6171,7 @@ namespace juicescript.compiler.IL.Generator
 							int mid = compileEnv.AddSuperMethod(ttype, t_index);
 
 							INS_Ld_SuperMethod ld_SuperMethod = new INS_Ld_SuperMethod(token);
-							ld_SuperMethod.dst = compileEnv.MakeStackLocater( TypeKind.Function) ;
+							ld_SuperMethod.dst = compileEnv.MakeStackLocater(TypeKind.Function);
 							ld_SuperMethod.instance = instance;
 							ld_SuperMethod.const_index = mid;
 

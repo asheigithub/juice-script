@@ -187,7 +187,10 @@ namespace juicescript.ABC.INS
         /// </summary>
         super_ctor =70,
 
-
+        /// <summary>
+        /// 从Array或Vector中读length属性。
+        /// </summary>
+        ld_length = 75,
 
 		/// <summary>
 		/// 从常量池中加载function定义并调用

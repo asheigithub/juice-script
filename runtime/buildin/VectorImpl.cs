@@ -2,11 +2,13 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -92,7 +94,13 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				vector.SetStore(new VectorStore(vector.element_type, vector.element_asclass, (int)initLen, isfixed));
+				var store = vector.GetStore(context.player);
+				store.SetBuffer(element_size * (int)initLen);
+				store.length = (int)initLen;
+				store.elementSize = element_size;
+				store.SetDefault(vector.element_type, vector.element_asclass, 0, (int)initLen);
+
+				//vector.SetStore(new VectorStore(vector.element_type, vector.element_asclass, (int)initLen, isfixed));
 				return;
 			}
 		flag_initdata:
@@ -142,7 +150,12 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				vector.SetStore(new VectorStore(vector.element_type, vector.element_asclass, rest_span, context));
+				var store = vector.GetStore(context.player);
+				store.SetBuffer(element_size * (int)initLen);
+				store.length = (int)initLen;
+				store.elementSize = element_size;
+				store.CopySpan(vector.element_type, vector.element_asclass, rest_span, context);
+				//vector.SetStore(new VectorStore(vector.element_type, vector.element_asclass, rest_span, context));
 			}
 		}
 
@@ -189,6 +202,151 @@ namespace juicescript.runtime.buildin
 				//throw new NotImplementedException();
 			
 		}
+
+
+		
+		[NativeFunction("__AS3__.vec$Vector@concat")]
+		public static void Vector_concat(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			//在目标槽初始化vector
+			int ptrIndex = returnSlotIndex;
+
+			int instancePtr = context.CacheVectorPtr + ptrIndex;
+			var instance = context.GC.Heap[instancePtr];
+
+			
+			instance.Type = (ASInstance)vecinstance.Type;
+			((RtPayloadVector)instance.facility).HEAPINSTANCE_PTR = 0;
+			((RtPayloadVector)instance.facility).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
+			((RtPayloadVector)instance.facility).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
+			((RtPayloadVector)instance.facility).GetStore(context.player).SetBuffer(0);
+			((RtPayloadVector)instance.facility).GetStore(context.player).length = 0;
+
+			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
+
+			
+
+
+
+
+			var rest = scope.ReadSlot(0, context.player);
+			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+
+#if DEBUG
+			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+				throw new InvalidOperationException();
+#endif
+
+			int len = 0;
+
+			var arguments = rest_array.stack_store.Span;
+			for (var i = -1; i < arguments.Length; i++)
+			{
+				RtPayloadVector srcVec;
+				int srcVecPtr;
+				if (i >= 0)
+				{
+					NaNBoxing a = arguments[i];
+					if (a.ValueType == NaNBoxing.BoxType.Null || a.ValueType == NaNBoxing.BoxType.Undefined)
+					{
+						context.player.RaiseTypeError_AccessNull(ref error);
+						return;
+					}
+
+					if (a.ValueType != NaNBoxing.BoxType.HeapPtr)
+					{
+						context.player.RaiseTypeError(ref error, a, (TypeKind)((ASInstance)instance.Type)._link_codescope.TypeLayout.ASType.Type_identifier);
+						return;
+					}
+
+					var obj = context.GC.Heap[a.HeapPtr];
+					if (obj.TypeKind != RtHeapTypeKind.VECTOR)
+					{
+						context.player.RaiseTypeError(ref error, a, (TypeKind)((ASInstance)instance.Type)._link_codescope.TypeLayout.ASType.Type_identifier);
+						return;
+					}
+
+					srcVec = (RtPayloadVector)obj.facility;
+					srcVecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(a.HeapPtr, context.player, out srcVec);
+
+					if (((ASInstance)vecinstance.Type)._element_class != null)
+					{
+						if (srcVec.element_asclass == null)
+						{
+							context.player.RaiseTypeError(ref error, a, (TypeKind)((ASInstance)instance.Type)._link_codescope.TypeLayout.ASType.Type_identifier);
+							return;
+						}
+
+						if (!srcVec.element_asclass.Instance.IsExtend(((ASInstance)vecinstance.Type)._element_class.Instance)
+							&&
+							!srcVec.element_asclass.Instance.IsImplements(((ASInstance)vecinstance.Type)._element_class.Instance)
+							)
+						{
+							context.player.RaiseTypeError(ref error, a, (TypeKind)((ASInstance)instance.Type)._link_codescope.TypeLayout.ASType.Type_identifier);
+							return;
+						}
+					}
+				}
+				else
+				{
+					srcVec = (RtPayloadVector)vecinstance.facility;
+					srcVecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out srcVec);
+				}
+
+				//pass
+
+				var dstVec = (RtPayloadVector)instance.facility;
+				int count = srcVec.GetStore(context.player).length;
+				dstVec.Resize( len + count, ref error, context.player, (ASInstance)instance.Type);
+				if (error.raised)
+				{
+					return;
+				}				
+				int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out dstVec);
+
+				int sindex = context.StackPosition;
+				context.StackPosition++;
+
+				context.StackSlots[sindex].SetUndefined();
+
+				for (int j = 0; j < count; j++)
+				{
+
+					NaNBoxing value = srcVec.ReadSlot(j, context.player, sindex, srcVecPtr);
+					dstVec.SetSlot(len + j, context.player, vptr, value, ref error); //里面可能有分配内存的操作
+					if (error.raised)
+					{
+						context.StackPosition--;
+						return;
+					}
+				}
+
+				context.StackPosition--;
+
+				len += count;
+			}
+
+
+		}
+
+
+
+
+
 
 		class JoinPrinter : IPrint
 		{
@@ -317,15 +475,19 @@ namespace juicescript.runtime.buildin
 					
 				}
 				else
-				{ 
-					buffer.Clear();
+				{
+					//throw new InvalidOperationException();
+					Debug.Assert(size < RtPayloadVector.MAX_CACHE_SIZE);
+					buffer.AddRange(Enumerable.Repeat<byte>(0, size));
+
+					//buffer.Clear();
 				}
 			}
 
 			public VectorStore()
 			{
 				IsCache = true;
-				buffer = new List<byte>( RtPayloadVector.MAX_CACHE_SIZE );
+				buffer = new List<byte>( RtPayloadVector.MAX_CACHE_SIZE );//这里只是保留了内存，而不是实际元素个数！
 				
 			}
 
@@ -342,18 +504,18 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			public VectorStore(TypeKind elementkind, ASClass element , int len,bool isfixed)
-			{ 
-				
-				isFixed = isfixed;
-				elementSize = GetElementSize(elementkind, element);
+			//public VectorStore(TypeKind elementkind, ASClass element , int len,bool isfixed)
+			//{
+			//	IsCache = true;
+			//	isFixed = isfixed;
+			//	elementSize = GetElementSize(elementkind, element);
 
-				SetBuffer(len * elementSize);
+			//	SetBuffer(len * elementSize);
 
-				this.length = len;
+			//	this.length = len;
 
-				SetDefault(elementkind, element,0,len);
-			}
+			//	SetDefault(elementkind, element,0,len);
+			//}
 
 			internal void SetDefault(TypeKind elementkind, ASClass element,int start ,int len)
 			{
@@ -456,18 +618,17 @@ namespace juicescript.runtime.buildin
 
 			}
 
+			//public VectorStore(TypeKind element_type, ASClass element, Span<NaNBoxing> rest_span,Context context)
+			//{
+			//	IsCache = true;
+			//	isFixed = false;
+			//	length = rest_span.Length;
+			//	elementSize = GetElementSize(element_type, element);
 
+			//	SetBuffer(rest_span.Length * elementSize);
 
-			public VectorStore(TypeKind element_type, ASClass element, Span<NaNBoxing> rest_span,Context context)
-			{
-				isFixed = false;
-				length = rest_span.Length;
-				elementSize = GetElementSize(element_type, element);
-
-				SetBuffer(rest_span.Length * elementSize);
-
-				CopySpan(element_type, element, rest_span, context);
-			}
+			//	CopySpan(element_type, element, rest_span, context);
+			//}
 
 			internal void CopySpan(TypeKind element_type, ASClass element , Span<NaNBoxing> rest_span, Context context)
 			{

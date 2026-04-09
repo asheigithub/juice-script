@@ -19,5 +19,16 @@ package __AS3__.vec
 		private native function indexer_get(key:int):*;
 		private native function indexer_delete(key:int):Boolean;
 		
+		
+		
+		
+		
+		public native function concat(... args):Vector;
+		
+		
+		
+		
+		
+		
 	}
 }
