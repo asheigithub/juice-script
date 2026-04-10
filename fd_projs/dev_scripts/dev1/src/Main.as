@@ -24,17 +24,10 @@ final class Point {
 }
 function runTest():void {
    
-	var v:Vector.<int> = new <int>[1,2,3];
+	var v:Vector.<int> = new <int>[];
+	v.unshift(4, 5, 6);
 	
-	trace(v.shift());
-	trace(v.shift());
-	trace(v.shift());
-	trace(v.shift());
-	trace(v.shift());
-	trace(v.shift());
-	
-	trace(v);
-	
+	trace(v.indexOf(5));
 }
 runTest();
 

@@ -542,6 +542,95 @@ namespace juicescript.runtime.buildin
 		}
 
 
+		//
+		[NativeFunction("__AS3__.vec$Vector@unshift")]
+		public static void Vector_unshift(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			var rest = scope.ReadSlot(0, context.player);
+			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+
+#if DEBUG
+			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+				throw new InvalidOperationException();
+#endif
+
+			var vector = ((RtPayloadVector)vecinstance.facility);
+
+			if (vector.GetStore(context.player).isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+			int len = vector.GetStore(context.player).length;
+			var arguments = rest_array.stack_store.Span;
+			int newElements = arguments.Length;
+
+			if (newElements == 0)
+			{
+				context.StackSlots[returnSlotIndex].SetUInt((uint)len);
+				return;
+			}
+
+			vector.Resize(len + newElements, ref error, context.player, (ASInstance)vecinstance.Type);
+			if (error.raised)
+			{
+				return;
+			}
+
+			RtPayloadVector vectorAfterResize;
+			int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
+
+			var store = vectorAfterResize.GetStore(context.player);
+			var span = CollectionsMarshal.AsSpan(store.buffer);
+			int elementSize = store.elementSize;
+
+			if (len > 0)
+			{
+				for (int i = len - 1; i >= 0; i--)
+				{
+					var srcSlice = span.Slice(i * elementSize, elementSize);
+					var dstSlice = span.Slice((i + newElements) * elementSize, elementSize);
+					srcSlice.CopyTo(dstSlice);
+				}
+			}
+
+			for (int i = 0; i < newElements; i++)
+			{
+				NaNBoxing a = arguments[i];
+
+				context.player.ConvertValueType(ref error, a,
+					((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
+					((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+				);
+
+				if (error.raised)
+				{
+					return;
+				}
+
+				vectorAfterResize.SetSlot(i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
+
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			context.StackSlots[returnSlotIndex].SetUInt((uint)(len + newElements));
+		}
+
+
+
+
+
 		//__AS3__.vec$Vector@shift
 		[NativeFunction("__AS3__.vec$Vector@shift")]
 		public static void Vector_shift(Context context,

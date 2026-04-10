@@ -2063,6 +2063,32 @@ namespace juicescript.runtime
 					instance.Traits.Add(trait);
 					vScript.allContainers.Add(trait.Method.Body);
 				}
+				//unshift
+				{
+					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "unshift" && t.Kind == TraitKind.Method);
+					ASTrait trait = new ASTrait(t.Token);
+					trait.Kind = t.Kind;
+					trait.Method = new ASMethod(instance, t.Token);
+					trait.Method.Body = new ASMethodBody(trait.Method);
+					trait.Method.Body.ByteCode = t.Method.Body.ByteCode;
+					trait.Method.Flags = t.Method.Flags;
+					trait.Method.__is_vector_method = true;
+					trait.Method.Name = t.Method.Name;
+					trait.Method.Parameters.AddRange(t.Method.Parameters);
+
+					trait.Method.ReturnTypeKind = t.Method.ReturnTypeKind;
+					trait.Method.ReturnType = t.Method.ReturnType;
+					trait.Method.__ismethod = t.Method.__ismethod;
+					trait.Method.Body.param_defaultvalues = t.Method.Body.param_defaultvalues;
+					trait.Method.__return_type_class__ = t.Method.__return_type_class__;
+					trait.Method.Trait = trait;
+
+					trait.QName = t.QName;
+
+					instance.Traits.Add(trait);
+					vScript.allContainers.Add(trait.Method.Body);
+				}
+
 				//shift
 				{
 					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "shift" && t.Kind == TraitKind.Method);
@@ -19652,9 +19678,10 @@ namespace juicescript.runtime
 
 								RunMethod(function, iter_v, iter_v.HeapPtr, iter.Type, 2, (byte*)tmpArgLoc, argSpan, ref error,reseveSlot );
 
-								Context.StackPosition -= 3;
+								
 								if (error.raised)
 								{
+									Context.StackPosition -= 3;
 									goto flag_handle_error;
 								}
 
@@ -19725,6 +19752,9 @@ namespace juicescript.runtime
 
 									}
 								}
+
+
+								Context.StackPosition -= 3; //将可能从Vector中读取的struct保留到拷贝之后
 
 								break;
 							}

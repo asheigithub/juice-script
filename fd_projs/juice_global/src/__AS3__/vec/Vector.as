@@ -29,7 +29,13 @@ package __AS3__.vec
 		
 		public native function pop():*;
 		
+		public native function unshift(... args):uint;
+		
 		public native function shift():*;
+				
+		public native function indexOf(searchElement:*, fromIndex:int = 0):int;
+		
+		
 		
 	}
 }
