@@ -726,6 +726,155 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		//__AS3__.vec$Vector@indexOf
+		[NativeFunction("__AS3__.vec$Vector@indexOf")]
+		public static void Vector_indexOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+			var store = vector.GetStore(context.player);
+			int len = store.length;
+
+			if (len == 0)
+			{
+				context.StackSlots[returnSlotIndex].SetInt(-1);
+				return;
+			}
+
+			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+			NaNBoxing searchElement = scope.ReadSlot(0, context.player);
+			NaNBoxing fromIndexBox = scope.ReadSlot(1, context.player);
+
+			int startIndex;
+			if (fromIndexBox.ValueType == BoxType.Undefined || fromIndexBox.ValueType == BoxType.Null)
+			{
+				startIndex = 0;
+			}
+			else
+			{
+				Debug.Assert(fromIndexBox.ValueType == BoxType.Int);
+				int fromIndex = fromIndexBox.IntValue;
+				if (fromIndex < 0)
+				{
+					startIndex = len + fromIndex;
+					if (startIndex < 0) startIndex = 0;
+				}
+				else
+				{
+					startIndex = fromIndex;
+				}
+			}
+			
+
+			int sindex = context.StackPosition;
+			context.StackPosition++;
+			context.StackSlots[sindex].SetUndefined();
+
+			for (int i = startIndex; i < len; i++)
+			{
+				NaNBoxing element = vector.ReadSlot(i, context.player, sindex, vecPtr);
+				if (context.player.IsStrictlyEqual(searchElement, element))
+				{
+					context.StackPosition--;
+					context.StackSlots[returnSlotIndex].SetInt(i);
+					return;
+				}
+			}
+
+			context.StackPosition--;
+			context.StackSlots[returnSlotIndex].SetInt(-1);
+		}
+
+
+		[NativeFunction("__AS3__.vec$Vector@lastIndexOf")]
+		public static void Vector_lastIndexOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+			var store = vector.GetStore(context.player);
+			int len = store.length;
+
+			if (len == 0)
+			{
+				context.StackSlots[returnSlotIndex].SetInt(-1);
+				return;
+			}
+
+			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+			NaNBoxing searchElement = scope.ReadSlot(0, context.player);
+			NaNBoxing fromIndexBox = scope.ReadSlot(1, context.player);
+
+			int startIndex;
+			
+			Debug.Assert(fromIndexBox.ValueType == BoxType.Int);
+			int fromIndex = fromIndexBox.IntValue;
+			if (fromIndex < 0)
+			{
+				startIndex = len + fromIndex;
+				if (startIndex < 0) startIndex = -1;
+			}
+			else
+			{
+				startIndex = fromIndex;
+				if (startIndex >= len) startIndex = len - 1;
+			}
+			
+
+			int sindex = context.StackPosition;
+			context.StackPosition++;
+			context.StackSlots[sindex].SetUndefined();
+
+			for (int i = startIndex; i >= 0; i--)
+			{
+				NaNBoxing element = vector.ReadSlot(i, context.player, sindex, vecPtr);
+				if (context.player.IsStrictlyEqual(searchElement, element))
+				{
+					context.StackPosition--;
+					context.StackSlots[returnSlotIndex].SetInt(i);
+					return;
+				}
+			}
+
+			context.StackPosition--;
+			context.StackSlots[returnSlotIndex].SetInt(-1);
+		}
+
+
+		//__AS3__.vec$Vector@removeAt
+		[NativeFunction("__AS3__.vec$Vector@removeAt")]
+		public static void Vector_removeAt(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			
+		}
+
 		class JoinPrinter : IPrint
 		{
 			public StringBuilder stringBuilder;

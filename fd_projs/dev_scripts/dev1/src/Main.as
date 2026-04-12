@@ -9,27 +9,21 @@ package
     public class Main extends Sprite {
         public function Main() {
             
-			
-			
-			
         }
     }
 
 }
- 
-[struct]
-final class Point {
-    public var x:int;
-    public var y:int;
-}
+var testMain:Main = new Main();
+
+var testMain:Main = new Main();
+
 function runTest():void {
-   
-	var v:Vector.<int> = new <int>[];
-	v.unshift(4, 5, 6);
+    var v:Vector.<int> = new <int>[1,2];
+	v.removeAt(0);
 	
-	trace(v.indexOf(5));
 }
 runTest();
+
 
 //async function asyncAdd(a:int, b:int):int {
     //var x:int = await Promise.resolve(a);

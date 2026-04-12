@@ -35,7 +35,9 @@ package __AS3__.vec
 				
 		public native function indexOf(searchElement:*, fromIndex:int = 0):int;
 		
+		public native function lastIndexOf(searchElement:*, fromIndex:int = 0x7fffffff):int;
 		
+		public native function removeAt(index:int):*;
 		
 	}
 }
