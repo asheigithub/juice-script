@@ -871,8 +871,76 @@ namespace juicescript.runtime.buildin
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{ 
-			
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			if (vector.GetStore(context.player).isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+			int len = vector.GetStore(context.player).length;
+			int index = scope.ReadSlot(0, context.player).IntValue;
+
+			if (index < 0)
+			{
+				index = len + index;
+			}
+
+			if (index < 0 || index >= len)
+			{
+				context.player.RaiseRangeError(ref error, "Index out of range.");
+				return;
+			}
+
+			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+			context.StackPosition++;
+
+			NaNBoxing v = vector.ReadSlot(index, context.player, context.StackPosition - 1, vecPtr);
+			context.StackSlots[returnSlotIndex] = v;
+			context.StackPosition--;
+
+			if (v.ValueType == BoxType.HeapPtr)
+			{
+				var check = context.GC.Heap[v.HeapPtr];
+				if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+				{
+					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+					var cacheObj = context.GC.Heap[clonedptr];
+					cacheObj.Type = check.Type;
+
+					((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+					((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+					((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+				}
+			}
+
+			if (index < len - 1)
+			{
+				var store = vector.GetStore(context.player);
+				var span = CollectionsMarshal.AsSpan(store.buffer);
+				int elementSize = store.elementSize;
+				for (int i = index; i < len - 1; i++)
+				{
+					var srcSlice = span.Slice((i + 1) * elementSize, elementSize);
+					var dstSlice = span.Slice(i * elementSize, elementSize);
+					srcSlice.CopyTo(dstSlice);
+				}
+			}
+
+			vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
+			Debug.Assert(!error.raised);
 		}
 
 		class JoinPrinter : IPrint

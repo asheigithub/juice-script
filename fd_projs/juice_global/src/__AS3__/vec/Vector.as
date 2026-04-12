@@ -39,5 +39,7 @@ package __AS3__.vec
 		
 		public native function removeAt(index:int):*;
 		
+		public native function reverse():Vector;
+		
 	}
 }
