@@ -41,5 +41,7 @@ package __AS3__.vec
 		
 		public native function reverse():Vector;
 		
+		public native function insertAt(index:int, element:*):void;
+		
 	}
 }

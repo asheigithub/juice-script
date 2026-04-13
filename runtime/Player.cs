@@ -2221,6 +2221,72 @@ namespace juicescript.runtime
 					instance.Traits.Add(trait);
 					vScript.allContainers.Add(trait.Method.Body);
 				}
+				//reverse
+				{
+					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "reverse" && t.Kind == TraitKind.Method);
+					ASTrait trait = new ASTrait(t.Token);
+					trait.Kind = t.Kind;
+					trait.Method = new ASMethod(instance, t.Token);
+					trait.Method.Body = new ASMethodBody(trait.Method);
+					trait.Method.Body.ByteCode = t.Method.Body.ByteCode;
+					trait.Method.Flags = t.Method.Flags;
+					trait.Method.__is_vector_method = true;
+					trait.Method.Name = t.Method.Name;
+					trait.Method.Parameters.AddRange(t.Method.Parameters);
+
+					trait.Method.ReturnTypeKind = (TypeKind)@class.Type_identifier;
+					trait.Method.ReturnType = @class.QName;
+					trait.Method.__ismethod = t.Method.__ismethod;
+					trait.Method.Body.param_defaultvalues = t.Method.Body.param_defaultvalues;
+					trait.Method.__return_type_class__ = @class;
+					trait.Method.Trait = trait;
+
+					trait.QName = t.QName;
+
+					instance.Traits.Add(trait);
+					vScript.allContainers.Add(trait.Method.Body);
+				}
+				//insertAt
+				{
+					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "insertAt" && t.Kind == TraitKind.Method);
+					ASTrait trait = new ASTrait(t.Token);
+					trait.Kind = t.Kind;
+					trait.Method = new ASMethod(instance, t.Token);
+					trait.Method.Body = new ASMethodBody(trait.Method);
+					trait.Method.Body.ByteCode = t.Method.Body.ByteCode;
+					trait.Method.Flags = t.Method.Flags;
+					trait.Method.__is_vector_method = true;
+					trait.Method.Name = t.Method.Name;
+
+					trait.Method.Parameters.AddRange(t.Method.Parameters);
+
+					trait.Method.Parameters[1] = new ASParameter(trait.Method)
+					{
+						IsOptional = t.Method.Parameters[1].IsOptional,
+						IsRest = t.Method.Parameters[1].IsRest,
+						Name = t.Method.Parameters[1].Name,
+						ValueKind = t.Method.Parameters[1].ValueKind,
+						ValueExprIndex = t.Method.Parameters[1].ValueExprIndex,
+						computeDefaultValue = t.Method.Parameters[1].computeDefaultValue,
+						compute_result_index = t.Method.Parameters[1].compute_result_index,
+						Type = null,
+						TypeKind = vector.ElementType
+					};
+
+
+					trait.Method.ReturnTypeKind = t.Method.ReturnTypeKind;
+					trait.Method.ReturnType = t.Method.ReturnType;
+					trait.Method.__ismethod = t.Method.__ismethod;
+					trait.Method.Body.param_defaultvalues = t.Method.Body.param_defaultvalues;
+					trait.Method.__return_type_class__ = t.Method.__return_type_class__;
+					trait.Method.Trait = trait;
+
+
+					trait.QName = t.QName;
+
+					instance.Traits.Add(trait);
+					vScript.allContainers.Add(trait.Method.Body);
+				}
 
 
 				ComputeLayout(@class, Context.global_swc);

@@ -19,7 +19,9 @@ var testMain:Main = new Main();
 
 function runTest():void {
     var v:Vector.<int> = new <int>[1,2];
-	v.removeAt(0);
+	v.insertAt(1, 3);
+	
+	trace(v);
 	
 }
 runTest();

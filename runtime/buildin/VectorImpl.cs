@@ -943,6 +943,150 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(!error.raised);
 		}
 
+		//__AS3__.vec$Vector@insertAt
+		[NativeFunction("__AS3__.vec$Vector@insertAt")]
+		public static void Vector_insertAt(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			if (vector.GetStore(context.player).isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+			int len = vector.GetStore(context.player).length;
+			int index = scope.ReadSlot(0, context.player).IntValue;
+			NaNBoxing element = scope.ReadSlot(1, context.player);
+
+			if (index < 0)
+			{
+				index = len + index;
+			}
+
+			if (index < 0 || index > len)
+			{
+				context.player.RaiseRangeError(ref error, "Index out of range.");
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, element,
+				((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
+				((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+			);
+
+			if (error.raised)
+			{
+				return;
+			}
+
+			vector.Resize(len + 1, ref error, context.player, (ASInstance)vecinstance.Type);
+			if (error.raised)
+			{
+				return;
+			}
+
+			RtPayloadVector vectorAfterResize;
+			int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
+
+			var store = vectorAfterResize.GetStore(context.player);
+			var span = CollectionsMarshal.AsSpan(store.buffer);
+			int elementSize = store.elementSize;
+
+			if (index < len)
+			{
+				for (int i = len - 1; i >= index; i--)
+				{
+					var srcSlice = span.Slice(i * elementSize, elementSize);
+					var dstSlice = span.Slice((i + 1) * elementSize, elementSize);
+					srcSlice.CopyTo(dstSlice);
+				}
+			}
+
+			var slice = span.Slice(index * elementSize, elementSize);
+			NaNBoxing value = context.StackSlots[returnSlotIndex];
+
+			context.player.ConvertValueType(ref error, value,
+				((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
+				((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+			);
+
+			if (error.raised) //但是这里肯定不会失败的,因为传参时已经做过类型转换了
+			{
+				return;
+			}
+
+			vectorAfterResize.SetSlot(index, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
+		}
+
+
+
+
+
+		//__AS3__.vec$Vector@reverse
+		[NativeFunction("__AS3__.vec$Vector@reverse")]
+		public static void Vector_reverse(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			int last = vector.GetStore(context.player).length - 1;
+			int st = 0;
+
+
+			var store = vector.GetStore(context.player);
+			var span = CollectionsMarshal.AsSpan(store.buffer);
+			int elementSize = store.elementSize;
+
+			Span<byte> temp = stackalloc byte[elementSize];
+
+			while (st<last)
+			{
+				var a = span.Slice(st * elementSize, elementSize);
+				var b = span.Slice(last * elementSize, elementSize);
+
+				a.CopyTo(temp);
+				b.CopyTo(a);
+				temp.CopyTo(b);
+
+				st++;
+				last--;
+			}
+
+			//if (index < len - 1)
+			//{
+			//	var store = vector.GetStore(context.player);
+			//	var span = CollectionsMarshal.AsSpan(store.buffer);
+			//	int elementSize = store.elementSize;
+			//	for (int i = index; i < len - 1; i++)
+			//	{
+			//		var srcSlice = span.Slice((i + 1) * elementSize, elementSize);
+			//		var dstSlice = span.Slice(i * elementSize, elementSize);
+			//		srcSlice.CopyTo(dstSlice);
+			//	}
+			//}
+
+			//vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
+			//Debug.Assert(!error.raised);
+		}
+
+
+
 		class JoinPrinter : IPrint
 		{
 			public StringBuilder stringBuilder;
