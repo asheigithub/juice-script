@@ -1734,7 +1734,7 @@ namespace juicescript.compiler.IL
 						(s.Arg3 != null && s.Arg3.Reg == memberRef) ||
 						(s.Arg1 != null && s.Arg1.Reg == memberRef && genStep != s) ||
 						(
-							s.Arg3 != null && s.Arg3.Data.FF1Type == AST.Expr.FF1DataValueType.as3_array
+							s.Arg3 != null && s.Arg3.Data !=null && s.Arg3.Data.FF1Type == AST.Expr.FF1DataValueType.as3_array
 							&&
 							((List<AS3DataStackElement>)s.Arg3.Data.Value).Any(a => a.Reg == memberRef)
 						)

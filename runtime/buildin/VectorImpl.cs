@@ -1,6 +1,8 @@
 ﻿using juicescript.ABC;
+using juicescript.ABC.Locaters;
 using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -8,6 +10,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -1089,11 +1092,323 @@ namespace juicescript.runtime.buildin
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{ 
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			var store = vector.GetStore(context.player);
+
+			if (context.StackPosition + 3 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+			NaNBoxing sortBehavior = scope.ReadSlot(0, context.player);
+
+			if (sortBehavior.ValueType == BoxType.LocalString || sortBehavior.ValueType == BoxType.Null || sortBehavior.ValueType == BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, sortBehavior, TypeKind.Function);
+				return;
+			}
+
+			int basePos = context.StackPosition;
+			context.StackPosition += 1;
+
+			context.StackSlots[basePos].SetUndefined();
+			
+			if (sortBehavior.ValueType == BoxType.HeapPtr)
+			{
+				context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[basePos]);
+				if (error.raised)
+				{
+					context.StackPosition = basePos;
+					return;
+				}
+			}
+
+			SortHelper.QuickSort(vector, store, scope_ptr, vecPtr, context, ref error,sortBehavior);
+
+			context.StackPosition = basePos;
+
+
+		}
+
+		private static int comparer(NaNBoxing a,NaNBoxing b, NaNBoxing sortBehavior,  Context context, int scope_ptr, ref ReceiveError error)
+		{
+			if (sortBehavior.ValueType == BoxType.HeapPtr)
+			{
+				RtHeapInstance func = context.GC.Heap[sortBehavior.HeapPtr];
+				RtPayloadClosure closure = (RtPayloadClosure)func.facility;
+
+				ASMethod method = ((ASMethodBody)func.Type).Method;
+
+				if (context.StackPosition + 3 >= Context.STACK_LENGTH)
+				{
+					context.player.RaiseStackOverflow(ref error);
+					return 0;
+				}
+
+				unsafe
+				{
+					StackLocater* args = stackalloc StackLocater[2];
+					args->index = 0;
+					(args + 1)->index = 1;
+
+					var slots = context.StackSlots.AsSpan(context.StackPosition+1, 2);
+					slots.Clear();
+
+					slots[0] = a;
+					slots[1] = b;
+
+					int basePos = context.StackPosition;
+
+					context.StackPosition += 3;
+
+					context.player.RunMethod(method, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref error, basePos);
+					
+					if (error.raised)
+					{
+						context.StackPosition = basePos;
+						return 0;
+					}
+
+					context.player.ConvertValueType(ref error, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0] ,scope_ptr);
+					context.StackPosition = basePos;
+
+					double v = slots[0].Number;
+					if (v > 0)
+						return 1;
+					else if (v == 0 || double.IsNaN(v))
+						return 0;
+					else
+						return -1;
+
+				}
+				
+			}
+			else
+			{
+				context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+				int option = sortBehavior.IntValue;
+
+				if ((option & 16) == 16)
+				{
+					//转数字
+					context.StackPosition++;
+					context.StackSlots[context.StackPosition - 1].SetUndefined();
+					context.player.ConvertValueType(ref error, a, TypeKind.Number, context.NUMBER, ref context.StackSlots[context.StackPosition - 1], scope_ptr);
+					if (error.raised)
+					{
+						context.StackPosition--;
+						return 0;
+					}
+
+					double v1 = context.StackSlots[context.StackPosition - 1].Number;
+
+					context.player.ConvertValueType(ref error, b, TypeKind.Number, context.NUMBER, ref context.StackSlots[context.StackPosition - 1], scope_ptr);
+					if (error.raised)
+					{
+						context.StackPosition--;
+						return 0;
+					}
+
+					double v2 = context.StackSlots[context.StackPosition - 1].Number;
+					if (error.raised)
+					{
+						context.StackPosition--;
+						return 0;
+					}
+
+					context.StackPosition--;
+
+					if ((option & 2) == 2)
+					{
+						if (v1 == v2)
+							return 0;
+						else if (v1 < v2)
+							return 1;
+						else
+							return -1;
+					}
+					else
+					{
+						if (v1 == v2)
+							return 0;
+						else if (v1 > v2)
+							return 1;
+						else
+							return -1;
+					}
+				}
+				else
+				{
+					//字符串比较
+
+					
+					context.StackSlots[context.StackPosition].SetUndefined();
+					context.StackSlots[context.StackPosition + 1].SetUndefined();
+
+					context.StackPosition += 2;
+					context.GC.CheckGC(ref error);
+
+					context.player.ConvertValueType(ref error, a, TypeKind.String, context.STRING, ref context.StackSlots[context.StackPosition - 2], scope_ptr);
+					if (error.raised)
+					{
+						context.StackPosition-=2;
+						return 0;
+					}
+
+					context.player.ConvertValueType(ref error, b, TypeKind.String, context.STRING, ref context.StackSlots[context.StackPosition - 1], scope_ptr);
+					if (error.raised)
+					{
+						context.StackPosition -= 2;
+						return 0;
+					}
+
+					unsafe
+					{
+
+						ReadOnlySpan<char> chars1;
+						Span<char> temp1 = stackalloc char[16];
+
+						NaNBoxing box1 = context.StackSlots[context.StackPosition - 2];
+						if (box1.ValueType == BoxType.HeapPtr)
+						{
+							string v1 = ((RtPayloadString)context.GC.Heap[box1.HeapPtr].facility).Str;
+							chars1 = v1.AsSpan();
+						}
+						else
+						{
+							Debug.Assert(box1.ValueType == BoxType.LocalString);
+							int len = box1.GetLocalStringChars(temp1);
+							chars1 = temp1.Slice(0, len);
+						}
+
+
+						ReadOnlySpan<char> chars2;
+						Span<char> temp2 = stackalloc char[16];
+
+						ref NaNBoxing box2 = ref context.StackSlots[context.StackPosition - 1];
+						if (box2.ValueType == BoxType.HeapPtr)
+						{
+							string v = ((RtPayloadString)context.GC.Heap[box2.HeapPtr].facility).Str;
+							chars2 = v.AsSpan();
+						}
+						else
+						{
+							Debug.Assert(box2.ValueType == BoxType.LocalString);
+							int len = box2.GetLocalStringChars(temp2);
+							chars2 = temp2.Slice(0, len);
+						}
+
+
+						int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+						if ((option & 2) == 2)
+							return -comp;
+						else
+							return comp;
+
+					}
+				}
+
+
+				//throw new NotImplementedException();
+			}
+
 			
 		}
 
+		static class SortHelper
+		{
+			public static void QuickSort(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr ,Context context, ref ReceiveError error ,NaNBoxing sortBehavior) 
+			{
+				if (store == null || store.length <= 1) return;
+				QuickSort( vector ,store, scope_ptr, vecptr, 0, store.length - 1, context, ref error,sortBehavior);
+			}
 
+			private static void QuickSort(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr, int left, int right, Context context, ref ReceiveError error,NaNBoxing sortBehavior)
+			{
+				if (left >= right) return;
+
+				int pivotIndex = Partition( vector, store, scope_ptr, vecptr, left, right, context, ref error, sortBehavior);
+				if (error.raised)
+				{
+					return;
+				}
+
+				QuickSort( vector ,store, scope_ptr, vecptr, left, pivotIndex - 1, context, ref error, sortBehavior);
+				if (error.raised)
+				{
+					return;
+				}
+
+				QuickSort( vector ,store, scope_ptr, vecptr, pivotIndex + 1, right,context, ref error, sortBehavior);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			private static int Partition(RtPayloadVector vector, VectorStore store,int scope_ptr ,int vecptr, int left, int right , 
+				Context context, ref ReceiveError error ,NaNBoxing sortBehavior)
+			{
+				if (context.StackPosition + 2 >= Context.STACK_LENGTH)
+				{ 
+					context.player.RaiseStackOverflow(ref error);
+					return 0;
+				}
+
+				int basePos = context.StackPosition;
+
+				context.StackPosition+=2;
+				//T pivot = arr[right];
+				NaNBoxing pivot = vector.ReadSlot(right, context.player, basePos,vecptr);
+
+				int i = left - 1;
+				for (int j = left; j < right; j++)
+				{
+					NaNBoxing test = vector.ReadSlot(j, context.player, basePos + 1, vecptr);
+
+					int comp = VectorImpl.comparer(test,pivot, sortBehavior ,context,scope_ptr,ref error);
+					if (error.raised)
+					{
+						return 0;
+					}
+
+					if(comp<0)
+					{
+						i++;
+						Swap(store, i, j);
+					}
+				}
+
+				Swap(store, i + 1, right);
+
+				context.StackPosition-=2;
+
+				return i + 1;
+			}
+
+			private static void Swap(VectorStore store, int a, int b)
+			{
+				var span = CollectionsMarshal.AsSpan(store.buffer);
+				int elementSize = store.elementSize;
+
+				Span<byte> temp = stackalloc byte[elementSize];
+
+				var v1 = span.Slice(a * elementSize, elementSize);
+				var v2 = span.Slice(b * elementSize, elementSize);
+
+				v1.CopyTo(temp);
+				v2.CopyTo(v1);
+				temp.CopyTo(v2);
+				
+			}
+		}
 
 
 
@@ -1171,7 +1486,7 @@ namespace juicescript.runtime.buildin
 
 
 
-		internal class VectorStore
+		internal class VectorStore 
 		{
 			internal static void InitStructSpan(Span<byte> struct_data,ASClass element)
 			{
@@ -1798,8 +2113,6 @@ namespace juicescript.runtime.buildin
 				buffer.AddRange(store.buffer);
 				
 			}
-
-			
 
 			
 		}

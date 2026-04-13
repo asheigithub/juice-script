@@ -15,13 +15,11 @@ package
 }
 var testMain:Main = new Main();
 
-var testMain:Main = new Main();
-
 function runTest():void {
     var v:Vector.<int> = new <int>[1,2];
 	v.insertAt(1, 3);
 	
-	v.sort(0);
+	v.sort( 16);
 	
 	trace(v);
 	
