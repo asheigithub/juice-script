@@ -17,7 +17,7 @@ var testMain:Main = new Main();
 
 function runTest():void {
     var v:Vector.<int> = new <int>[1,2];
-	v.splice(1, 0, 7, 8, 9);
+	v.splice(1,0,7,8,9);
 	trace(v);
 	
 }

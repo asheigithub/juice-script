@@ -35,7 +35,7 @@ namespace juicescript.runtime.buildin
 			//var rest = scope.ReadSlot(0, context.player);
 
 
-			int a_ptr = stackStPos 
+			int a_ptr = stackStPos
 									- 2; /*
 									      * arguments
 									      * callee
@@ -54,7 +54,7 @@ namespace juicescript.runtime.buildin
 			var rest_span = rest_array.stack_store.Span;
 
 			if (rest_span.Length > 2)
-			{				
+			{
 				rest_span = rest_span.Slice(2);  //initData.				
 
 				goto flag_initdata;
@@ -91,7 +91,7 @@ namespace juicescript.runtime.buildin
 				store.SetBuffer(element_size * (int)initLen);
 				store.length = (int)initLen;
 				store.elementSize = element_size;
-				store.SetDefault(vector.element_type, vector.element_asclass,0, (int)initLen);
+				store.SetDefault(vector.element_type, vector.element_asclass, 0, (int)initLen);
 
 				return;
 				//throw new NotImplementedException();
@@ -113,9 +113,9 @@ namespace juicescript.runtime.buildin
 			initLen = (uint)rest_span.Length;
 			isfixed = false;
 
-			for (int i = 0; i < rest_span.Length; i++) 
+			for (int i = 0; i < rest_span.Length; i++)
 			{
-				context.player.ConvertValueType(ref error, rest_span[i], vector.element_type, vector.element_asclass , ref rest_span[i],scope_ptr,thisPtr);
+				context.player.ConvertValueType(ref error, rest_span[i], vector.element_type, vector.element_asclass, ref rest_span[i], scope_ptr, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -184,7 +184,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(isfixed.ValueType == NaNBoxing.BoxType.Boolean);
 
 			((RtPayloadVector)vecinstance.facility).GetStore(context.player).isFixed = isfixed.Boolean;
-			
+
 		}
 		//__AS3__.vec$Vector@get#fixed
 		[NativeFunction("__AS3__.vec$Vector@get#fixed")]
@@ -196,7 +196,7 @@ namespace juicescript.runtime.buildin
 		{
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
-		    context.StackSlots[returnSlotIndex].SetBoolean(  	((RtPayloadVector)vecinstance.facility).GetStore(context.player).isFixed );
+			context.StackSlots[returnSlotIndex].SetBoolean(((RtPayloadVector)vecinstance.facility).GetStore(context.player).isFixed);
 
 		}
 
@@ -239,13 +239,13 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			((RtPayloadVector)vecinstance.facility).Resize(newlen.IntValue, ref error, context.player,(ASInstance)vecinstance.Type);
-				//throw new NotImplementedException();
-			
+			((RtPayloadVector)vecinstance.facility).Resize(newlen.IntValue, ref error, context.player, (ASInstance)vecinstance.Type);
+			//throw new NotImplementedException();
+
 		}
 
 
-		
+
 		[NativeFunction("__AS3__.vec$Vector@concat")]
 		public static void Vector_concat(Context context,
 			ASMethod method,
@@ -269,7 +269,7 @@ namespace juicescript.runtime.buildin
 			int instancePtr = context.CacheVectorPtr + ptrIndex;
 			var instance = context.GC.Heap[instancePtr];
 
-			
+
 			instance.Type = (ASInstance)vecinstance.Type;
 			((RtPayloadVector)instance.facility).HEAPINSTANCE_PTR = 0;
 			((RtPayloadVector)instance.facility).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
@@ -279,7 +279,7 @@ namespace juicescript.runtime.buildin
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
 
-			
+
 
 
 
@@ -352,11 +352,11 @@ namespace juicescript.runtime.buildin
 
 				var dstVec = (RtPayloadVector)instance.facility;
 				int count = srcVec.GetStore(context.player).length;
-				dstVec.Resize( len + count, ref error, context.player, (ASInstance)instance.Type);
+				dstVec.Resize(len + count, ref error, context.player, (ASInstance)instance.Type);
 				if (error.raised)
 				{
 					return;
-				}				
+				}
 				int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out dstVec);
 
 				int sindex = context.StackPosition;
@@ -394,7 +394,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			
+
 
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
@@ -419,7 +419,7 @@ namespace juicescript.runtime.buildin
 
 			var arguments = rest_array.stack_store.Span;
 
-			vector.Resize(len + arguments.Length , ref error, context.player, (ASInstance)vecinstance.Type);
+			vector.Resize(len + arguments.Length, ref error, context.player, (ASInstance)vecinstance.Type);
 			if (error.raised)
 			{
 				return;
@@ -431,14 +431,14 @@ namespace juicescript.runtime.buildin
 
 				context.player.ConvertValueType(ref error, a,
 					 ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-					  ((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex],scope_ptr
+					  ((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
 					);
 
 				if (error.raised)
 				{
 					return;
 				}
-				
+
 				int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 				vector.SetSlot(len + i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 
@@ -451,7 +451,7 @@ namespace juicescript.runtime.buildin
 			}
 
 
-			context.StackSlots[returnSlotIndex].SetUInt( (uint)(len + arguments.Length) );
+			context.StackSlots[returnSlotIndex].SetUInt((uint)(len + arguments.Length));
 		}
 
 
@@ -485,7 +485,7 @@ namespace juicescript.runtime.buildin
 					context.StackSlots[returnSlotIndex].SetUndefined();
 				}
 				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
-				{					
+				{
 					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
 					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr);
 				}
@@ -499,7 +499,7 @@ namespace juicescript.runtime.buildin
 
 						);
 
-					
+
 
 				}
 			}
@@ -514,7 +514,7 @@ namespace juicescript.runtime.buildin
 
 				Debug.Assert(context.StackPosition - 1 != returnSlotIndex);
 
-				NaNBoxing v = vector.ReadSlot(len-1, context.player, context.StackPosition-1, vecptr);
+				NaNBoxing v = vector.ReadSlot(len - 1, context.player, context.StackPosition - 1, vecptr);
 				context.StackSlots[returnSlotIndex] = v;
 
 				context.StackPosition--;
@@ -538,7 +538,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				vector.Resize(len-1, ref error, context.player, (ASInstance)vecinstance.Type);
+				vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
 				Debug.Assert(!error.raised); // 这里不可能发生
 			}
 
@@ -779,7 +779,7 @@ namespace juicescript.runtime.buildin
 					startIndex = fromIndex;
 				}
 			}
-			
+
 
 			int sindex = context.StackPosition;
 			context.StackPosition++;
@@ -832,7 +832,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing fromIndexBox = scope.ReadSlot(1, context.player);
 
 			int startIndex;
-			
+
 			Debug.Assert(fromIndexBox.ValueType == BoxType.Int);
 			int fromIndex = fromIndexBox.IntValue;
 			if (fromIndex < 0)
@@ -845,7 +845,7 @@ namespace juicescript.runtime.buildin
 				startIndex = fromIndex;
 				if (startIndex >= len) startIndex = len - 1;
 			}
-			
+
 
 			int sindex = context.StackPosition;
 			context.StackPosition++;
@@ -1055,7 +1055,7 @@ namespace juicescript.runtime.buildin
 
 			Span<byte> temp = stackalloc byte[elementSize];
 
-			while (st<last)
+			while (st < last)
 			{
 				var a = span.Slice(st * elementSize, elementSize);
 				var b = span.Slice(last * elementSize, elementSize);
@@ -1119,7 +1119,7 @@ namespace juicescript.runtime.buildin
 			context.StackPosition += 1;
 
 			context.StackSlots[basePos].SetUndefined();
-			
+
 			if (sortBehavior.ValueType == BoxType.HeapPtr)
 			{
 				context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[basePos]);
@@ -1130,14 +1130,14 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			SortHelper.QuickSort(vector, store, scope_ptr, vecPtr, context, ref error,sortBehavior);
+			SortHelper.QuickSort(vector, store, scope_ptr, vecPtr, context, ref error, sortBehavior);
 
 			context.StackPosition = basePos;
 
 
 		}
 
-		private static int comparer(NaNBoxing a,NaNBoxing b, NaNBoxing sortBehavior,  Context context, int scope_ptr, ref ReceiveError error)
+		private static int comparer(NaNBoxing a, NaNBoxing b, NaNBoxing sortBehavior, Context context, int scope_ptr, ref ReceiveError error)
 		{
 			if (sortBehavior.ValueType == BoxType.HeapPtr)
 			{
@@ -1158,7 +1158,7 @@ namespace juicescript.runtime.buildin
 					args->index = 0;
 					(args + 1)->index = 1;
 
-					var slots = context.StackSlots.AsSpan(context.StackPosition+1, 2);
+					var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
 					slots.Clear();
 
 					slots[0] = a;
@@ -1169,14 +1169,14 @@ namespace juicescript.runtime.buildin
 					context.StackPosition += 3;
 
 					context.player.RunMethod(method, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref error, basePos);
-					
+
 					if (error.raised)
 					{
 						context.StackPosition = basePos;
 						return 0;
 					}
 
-					context.player.ConvertValueType(ref error, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0] ,scope_ptr);
+					context.player.ConvertValueType(ref error, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
 					context.StackPosition = basePos;
 
 					double v = slots[0].Number;
@@ -1188,7 +1188,7 @@ namespace juicescript.runtime.buildin
 						return -1;
 
 				}
-				
+
 			}
 			else
 			{
@@ -1248,7 +1248,7 @@ namespace juicescript.runtime.buildin
 				{
 					//字符串比较
 
-					
+
 					context.StackSlots[context.StackPosition].SetUndefined();
 					context.StackSlots[context.StackPosition + 1].SetUndefined();
 
@@ -1258,7 +1258,7 @@ namespace juicescript.runtime.buildin
 					context.player.ConvertValueType(ref error, a, TypeKind.String, context.STRING, ref context.StackSlots[context.StackPosition - 2], scope_ptr);
 					if (error.raised)
 					{
-						context.StackPosition-=2;
+						context.StackPosition -= 2;
 						return 0;
 					}
 
@@ -1319,67 +1319,67 @@ namespace juicescript.runtime.buildin
 				//throw new NotImplementedException();
 			}
 
-			
+
 		}
 
 		static class SortHelper
 		{
-			public static void QuickSort(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr ,Context context, ref ReceiveError error ,NaNBoxing sortBehavior) 
+			public static void QuickSort(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr, Context context, ref ReceiveError error, NaNBoxing sortBehavior)
 			{
 				if (store == null || store.length <= 1) return;
-				QuickSort( vector ,store, scope_ptr, vecptr, 0, store.length - 1, context, ref error,sortBehavior);
+				QuickSort(vector, store, scope_ptr, vecptr, 0, store.length - 1, context, ref error, sortBehavior);
 			}
 
-			private static void QuickSort(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr, int left, int right, Context context, ref ReceiveError error,NaNBoxing sortBehavior)
+			private static void QuickSort(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr, int left, int right, Context context, ref ReceiveError error, NaNBoxing sortBehavior)
 			{
 				if (left >= right) return;
 
-				int pivotIndex = Partition( vector, store, scope_ptr, vecptr, left, right, context, ref error, sortBehavior);
+				int pivotIndex = Partition(vector, store, scope_ptr, vecptr, left, right, context, ref error, sortBehavior);
 				if (error.raised)
 				{
 					return;
 				}
 
-				QuickSort( vector ,store, scope_ptr, vecptr, left, pivotIndex - 1, context, ref error, sortBehavior);
+				QuickSort(vector, store, scope_ptr, vecptr, left, pivotIndex - 1, context, ref error, sortBehavior);
 				if (error.raised)
 				{
 					return;
 				}
 
-				QuickSort( vector ,store, scope_ptr, vecptr, pivotIndex + 1, right,context, ref error, sortBehavior);
+				QuickSort(vector, store, scope_ptr, vecptr, pivotIndex + 1, right, context, ref error, sortBehavior);
 				if (error.raised)
 				{
 					return;
 				}
 			}
 
-			private static int Partition(RtPayloadVector vector, VectorStore store,int scope_ptr ,int vecptr, int left, int right , 
-				Context context, ref ReceiveError error ,NaNBoxing sortBehavior)
+			private static int Partition(RtPayloadVector vector, VectorStore store, int scope_ptr, int vecptr, int left, int right,
+				Context context, ref ReceiveError error, NaNBoxing sortBehavior)
 			{
 				if (context.StackPosition + 2 >= Context.STACK_LENGTH)
-				{ 
+				{
 					context.player.RaiseStackOverflow(ref error);
 					return 0;
 				}
 
 				int basePos = context.StackPosition;
 
-				context.StackPosition+=2;
+				context.StackPosition += 2;
 				//T pivot = arr[right];
-				NaNBoxing pivot = vector.ReadSlot(right, context.player, basePos,vecptr);
+				NaNBoxing pivot = vector.ReadSlot(right, context.player, basePos, vecptr);
 
 				int i = left - 1;
 				for (int j = left; j < right; j++)
 				{
 					NaNBoxing test = vector.ReadSlot(j, context.player, basePos + 1, vecptr);
 
-					int comp = VectorImpl.comparer(test,pivot, sortBehavior ,context,scope_ptr,ref error);
+					int comp = VectorImpl.comparer(test, pivot, sortBehavior, context, scope_ptr, ref error);
 					if (error.raised)
 					{
 						return 0;
 					}
 
-					if(comp<0)
+					if (comp < 0)
 					{
 						i++;
 						Swap(store, i, j);
@@ -1388,7 +1388,7 @@ namespace juicescript.runtime.buildin
 
 				Swap(store, i + 1, right);
 
-				context.StackPosition-=2;
+				context.StackPosition -= 2;
 
 				return i + 1;
 			}
@@ -1406,7 +1406,7 @@ namespace juicescript.runtime.buildin
 				v1.CopyTo(temp);
 				v2.CopyTo(v1);
 				temp.CopyTo(v2);
-				
+
 			}
 		}
 
@@ -1417,8 +1417,202 @@ namespace juicescript.runtime.buildin
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{ 
+		{
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			var store = vector.GetStore(context.player);
+			int len = store.length;
+			int elementSize = store.elementSize;
+
+			var span = CollectionsMarshal.AsSpan(store.buffer);
+
+			int startIndex = scope.ReadSlot(0, context.player).IntValue;
+
+			uint deleteCount;
+			if (scope.SlotCount > 1)
+			{
+				deleteCount = scope.ReadSlot(1, context.player).UIntValue;
+			}
+			else
+			{
+				deleteCount = uint.MaxValue;
+			}
+
+			if (startIndex < 0)
+			{
+				startIndex = len + startIndex;
+			}
+
+			if (startIndex < 0)
+			{
+				startIndex = 0;
+			}
+
+			if (startIndex > len)
+			{
+				startIndex = len;
+			}
+
+			uint actualDeleteCount = (uint)(len - startIndex);
+			if (deleteCount < actualDeleteCount)
+			{
+				actualDeleteCount = deleteCount;
+			}
+
+			bool willChangeLength = actualDeleteCount > 0;
+
+			var rest_array = new RtPayloadArray();
+			int insertCount = 0;
+
+			if (scope.SlotCount > 2)
+			{
+				var rest = scope.ReadSlot(2, context.player);
+				rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+				insertCount = rest_array.stack_store.Span.Length;
+			}
+
+			willChangeLength = willChangeLength || insertCount > 0;
+
+			if (willChangeLength && store.isFixed)
+			{
+				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
+				return;
+			}
+
+
+			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
+			var resultInstance = context.GC.Heap[resultVecPtr];
+			resultInstance.Type = (ASInstance)vecinstance.Type;
+			((RtPayloadVector)resultInstance.facility).HEAPINSTANCE_PTR = 0;
+			((RtPayloadVector)resultInstance.facility).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
+			((RtPayloadVector)resultInstance.facility).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
+			((RtPayloadVector)resultInstance.facility).GetStore(context.player).SetBuffer(0);
+			((RtPayloadVector)resultInstance.facility).GetStore(context.player).length = 0;
+			((RtPayloadVector)resultInstance.facility).GetStore(context.player).elementSize = elementSize;
+
+			var resultVector = (RtPayloadVector)resultInstance.facility;
+
+			if (actualDeleteCount > 0)
+			{
+				resultVector.Resize((int)actualDeleteCount, ref error, context.player, (ASInstance)resultInstance.Type);
+				if (error.raised)
+				{
+					return;
+				}
+
+				RtPayloadVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
+
+				var resultStore = resultVector.GetStore(context.player);
+				var resultSpan = CollectionsMarshal.AsSpan(resultStore.buffer);
+
+				for (int i = 0; i < actualDeleteCount; i++)
+				{
+					var srcSlice = span.Slice((startIndex + i) * elementSize, elementSize);
+					var dstSlice = resultSpan.Slice(i * elementSize, elementSize);
+					srcSlice.CopyTo(dstSlice);
+				}
+			}
+
+			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr);
+
+			if (actualDeleteCount > 0 || insertCount > 0)
+			{
+				int newLen = len - (int)actualDeleteCount + insertCount;
+
+				RtPayloadVector vectorAfterResize;
+				int vptr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
+
 			
+				
+
+				int moveOffset = -(int)actualDeleteCount + insertCount;
+				if (moveOffset < 0)
+				{
+					var newStore = vectorAfterResize.GetStore(context.player);
+					var newSpan = CollectionsMarshal.AsSpan(newStore.buffer);
+
+
+					for (int i = 0; i < len - startIndex - (int)actualDeleteCount; i++)
+					{
+						var srcSlice = newSpan.Slice((startIndex  + i - moveOffset) * elementSize, elementSize);
+						var dstSlice = newSpan.Slice((startIndex  + i) * elementSize, elementSize);
+
+
+						srcSlice.CopyTo(dstSlice);
+					}
+
+					vectorAfterResize.Resize(newLen, ref error, context.player, (ASInstance)resultInstance.Type); //整体变少
+					if (error.raised)
+					{
+						return;
+					}
+				}
+				else if (moveOffset > 0)
+				{
+					vectorAfterResize.Resize(newLen, ref error, context.player, (ASInstance)resultInstance.Type); //数量变多
+					if (error.raised)
+					{
+						return;
+					}
+					var newStore = vectorAfterResize.GetStore(context.player);
+					var newSpan = CollectionsMarshal.AsSpan(newStore.buffer);
+
+
+					for (int i = len - startIndex - (int)actualDeleteCount -1; i >=0; i--) //拷贝方向不同
+					{
+						var srcSlice = newSpan.Slice((startIndex + (int)actualDeleteCount + i  ) * elementSize, elementSize);
+						var dstSlice = newSpan.Slice((startIndex + (int)actualDeleteCount + i + moveOffset) * elementSize, elementSize);
+
+
+						srcSlice.CopyTo(dstSlice);
+					}
+
+				}
+
+
+				if (insertCount > 0)
+				{
+					if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+					{
+						context.player.RaiseStackOverflow(ref error);
+						return;
+					}
+
+					int basePos = context.StackPosition;
+					context.StackPosition += 1;
+
+					var argsSpan = rest_array.stack_store.Span;
+					for (int i = 0; i < insertCount; i++)
+					{
+						NaNBoxing item = argsSpan[i];
+						context.player.ConvertValueType(ref error, item,
+							((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
+							((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[basePos], scope_ptr
+						);
+
+						if (error.raised)
+						{
+							context.StackPosition = basePos;
+							return;
+						}
+
+						vectorAfterResize.SetSlot(startIndex + i, context.player, vptr, context.StackSlots[basePos], ref error);
+						if (error.raised)
+						{
+							context.StackPosition = basePos;
+							return;
+						}
+					}
+
+					context.StackPosition = basePos;
+				}
+			}
+
 		}
 
 		class JoinPrinter : IPrint
@@ -1495,9 +1689,9 @@ namespace juicescript.runtime.buildin
 
 
 
-		internal class VectorStore 
+		internal class VectorStore
 		{
-			internal static void InitStructSpan(Span<byte> struct_data,ASClass element)
+			internal static void InitStructSpan(Span<byte> struct_data, ASClass element)
 			{
 				unsafe
 				{
@@ -1515,7 +1709,7 @@ namespace juicescript.runtime.buildin
 							}
 							else
 							{
-								RtPayloadInstance.InitSlotData(member, ptr , element.Instance._link_codescope.TypeLayout.SlotSize[i]);
+								RtPayloadInstance.InitSlotData(member, ptr, element.Instance._link_codescope.TypeLayout.SlotSize[i]);
 							}
 						}
 					}
@@ -1529,10 +1723,10 @@ namespace juicescript.runtime.buildin
 					if (buffer == null)
 					{
 						buffer = new List<byte>(size);
-						buffer.AddRange(Enumerable.Repeat<byte>(0,size));
-						
+						buffer.AddRange(Enumerable.Repeat<byte>(0, size));
+
 					}
-					else 
+					else
 					{
 #if DEBUG
 						if (buffer.Count > 0)
@@ -1541,11 +1735,11 @@ namespace juicescript.runtime.buildin
 						}
 #endif
 
-						
+
 						buffer.AddRange(Enumerable.Repeat<byte>(0, size));
-						
+
 					}
-					
+
 				}
 				else
 				{
@@ -1560,8 +1754,8 @@ namespace juicescript.runtime.buildin
 			public VectorStore()
 			{
 				IsCache = true;
-				buffer = new List<byte>( RtPayloadVector.MAX_CACHE_SIZE );//这里只是保留了内存，而不是实际元素个数！
-				
+				buffer = new List<byte>(RtPayloadVector.MAX_CACHE_SIZE);//这里只是保留了内存，而不是实际元素个数！
+
 			}
 
 			public VectorStore(VectorStore vectorStore)
@@ -1571,7 +1765,7 @@ namespace juicescript.runtime.buildin
 				isFixed = vectorStore.isFixed;
 				length = vectorStore.length;
 				elementSize = vectorStore.elementSize;
-				
+
 				buffer = new List<byte>(vectorStore.buffer.Count);
 				buffer.AddRange(vectorStore.buffer);
 
@@ -1590,7 +1784,7 @@ namespace juicescript.runtime.buildin
 			//	SetDefault(elementkind, element,0,len);
 			//}
 
-			internal void SetDefault(TypeKind elementkind, ASClass element,int start ,int len)
+			internal void SetDefault(TypeKind elementkind, ASClass element, int start, int len)
 			{
 				Span<byte> struct_data = stackalloc byte[RtPayloadInstance.MAX_CACHEABLE_SIZE];
 				if (element != null && element.Instance.Flags.HasFlag(ClassFlags.Struct))
@@ -1600,7 +1794,7 @@ namespace juicescript.runtime.buildin
 
 				var span = CollectionsMarshal.AsSpan(buffer);
 				//初始化默认值
-				for (int i = start; i <start + len; i++)
+				for (int i = start; i < start + len; i++)
 				{
 					var slice = span.Slice(i * elementSize, elementSize);
 					switch (elementkind)
@@ -1707,7 +1901,7 @@ namespace juicescript.runtime.buildin
 			//	CopySpan(element_type, element, rest_span, context);
 			//}
 
-			internal void CopySpan(TypeKind element_type, ASClass element , Span<NaNBoxing> rest_span, Context context)
+			internal void CopySpan(TypeKind element_type, ASClass element, Span<NaNBoxing> rest_span, Context context)
 			{
 				var span = CollectionsMarshal.AsSpan(buffer);
 				for (int i = 0; i < rest_span.Length; i++)
@@ -1872,9 +2066,9 @@ namespace juicescript.runtime.buildin
 
 			internal bool isFixed;
 
-			
 
-			internal bool IsValidIndexRange(NaNBoxing index,out int valided_index)
+
+			internal bool IsValidIndexRange(NaNBoxing index, out int valided_index)
 			{
 
 				switch (index.ValueType)
@@ -1905,13 +2099,13 @@ namespace juicescript.runtime.buildin
 						return index.UIntValue < length;
 					case NaNBoxing.BoxType.Sbyte:
 						valided_index = index.SByteValue;
-						return index.SByteValue <length && index.SByteValue >= 0;
+						return index.SByteValue < length && index.SByteValue >= 0;
 					case NaNBoxing.BoxType.Byte:
 						valided_index = index.ByteValue;
 						return index.ByteValue < length;
 					case NaNBoxing.BoxType.Short:
 						valided_index = index.ShortValue;
-						return index.ShortValue < length && index.ShortValue >= 0;	
+						return index.ShortValue < length && index.ShortValue >= 0;
 					case NaNBoxing.BoxType.UShort:
 						valided_index = index.UShortValue;
 						return index.UShortValue < length;
@@ -1941,7 +2135,7 @@ namespace juicescript.runtime.buildin
 				return CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize);
 			}
 
-			internal Span<byte> ReadStoreOffset(int offset,int size)
+			internal Span<byte> ReadStoreOffset(int offset, int size)
 			{
 				return CollectionsMarshal.AsSpan(buffer).Slice(offset, size);
 			}
@@ -1953,7 +2147,7 @@ namespace juicescript.runtime.buildin
 
 				var span = CollectionsMarshal.AsSpan(buffer);
 
-				for (int i = 0; i <length; i++)
+				for (int i = 0; i < length; i++)
 				{
 					var slice = span.Slice(i * elementSize, elementSize);
 
@@ -1969,72 +2163,72 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			internal void DoTrace(TypeKind element_type, ASClass element , Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer,string sep=",")
+			internal void DoTrace(TypeKind element_type, ASClass element, Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, string sep = ",")
 			{
 				var span = CollectionsMarshal.AsSpan(buffer);
 				for (int i = 0; i < length; i++)
 				{
 					var slice = span.Slice(i * elementSize, elementSize);
 					switch (element_type)
-					{					
+					{
 						case TypeKind.Boolean:
 							{
 								bool v = MemoryMarshal.Read<bool>(slice);
-								NaNBoxing box = default;box.SetBoolean(v);
+								NaNBoxing box = default; box.SetBoolean(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.SByte:
-							{ 
+							{
 								sbyte v = MemoryMarshal.Read<sbyte>(slice);
-								NaNBoxing box = default;box.SetSByte(v);
-								TopLevel.TraceElement(box,context, stackStPos, ref error,scope_ptr, default, printer);
+								NaNBoxing box = default; box.SetSByte(v);
+								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.Byte:
-							{ 
+							{
 								byte v = MemoryMarshal.Read<byte>(slice);
-								NaNBoxing box = default;box.SetByte(v);
+								NaNBoxing box = default; box.SetByte(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.Short:
-							{ 
+							{
 								short v = MemoryMarshal.Read<short>(slice);
 								NaNBoxing box = default; box.SetShort(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.UShort:
-							{ 
+							{
 								ushort v = MemoryMarshal.Read<ushort>(slice);
 								NaNBoxing box = default; box.SetUShort(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.Int:
-							{ 
+							{
 								int v = MemoryMarshal.Read<int>(slice);
-								NaNBoxing box=default;box.SetInt(v);
+								NaNBoxing box = default; box.SetInt(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.Uint:
-							{ 
+							{
 								uint v = MemoryMarshal.Read<uint>(slice);
-								NaNBoxing box = default;box.SetUInt(v);
+								NaNBoxing box = default; box.SetUInt(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.Float:
-							{ 
+							{
 								float v = MemoryMarshal.Read<float>(slice);
 								NaNBoxing box = default; box.SetFloat(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
 							}
 							break;
 						case TypeKind.Number:
-							{ 
+							{
 								double v = MemoryMarshal.Read<double>(slice);
 								NaNBoxing box = default; box.SetNumber(v);
 								TopLevel.TraceElement(box, context, stackStPos, ref error, scope_ptr, default, printer);
@@ -2044,8 +2238,8 @@ namespace juicescript.runtime.buildin
 						case TypeKind.TraitDataReference:
 						case TypeKind.RTQName_MultiName_DataReference:
 						case TypeKind.CParseNS_Traits:
-						case TypeKind.RTQNameRTQNameL_N:	
-						case TypeKind.SearchNameSpaceFromImports:	
+						case TypeKind.RTQNameRTQNameL_N:
+						case TypeKind.SearchNameSpaceFromImports:
 						case TypeKind.Unknown:
 						case TypeKind.Super:
 						case TypeKind.Null:
@@ -2077,11 +2271,11 @@ namespace juicescript.runtime.buildin
 										return;
 									}
 
-									int p =context.player.InitCacheInstance(element, context.StackPosition, false);
-									slice.CopyTo(((RtPayloadInstance)context.GC.Heap[p].facility).GetStoreData(context.player,(ASInstance)element.Instance));
+									int p = context.player.InitCacheInstance(element, context.StackPosition, false);
+									slice.CopyTo(((RtPayloadInstance)context.GC.Heap[p].facility).GetStoreData(context.player, (ASInstance)element.Instance));
 
 									context.StackPosition++;
-									TopLevel.TraceElement(context.StackSlots[context.StackPosition-1], context, stackStPos, ref error, scope_ptr,default,printer);
+									TopLevel.TraceElement(context.StackSlots[context.StackPosition - 1], context, stackStPos, ref error, scope_ptr, default, printer);
 									context.StackPosition--;
 
 									if (error.raised)
@@ -2120,10 +2314,10 @@ namespace juicescript.runtime.buildin
 
 				buffer.Clear();
 				buffer.AddRange(store.buffer);
-				
+
 			}
 
-			
+
 		}
 	}
 }
