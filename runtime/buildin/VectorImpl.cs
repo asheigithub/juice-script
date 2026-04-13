@@ -1410,7 +1410,16 @@ namespace juicescript.runtime.buildin
 			}
 		}
 
-
+		//__AS3__.vec$Vector@splice
+		[NativeFunction("__AS3__.vec$Vector@splice")]
+		public static void Vector_splice(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			
+		}
 
 		class JoinPrinter : IPrint
 		{

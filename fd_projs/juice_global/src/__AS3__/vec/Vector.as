@@ -45,6 +45,8 @@ package __AS3__.vec
 		
 		public native function sort(sortBehavior:*):Vector;
 		
+		public native function splice(startIndex:int, deleteCount:uint = 0x7fffffff, ... items):Vector;
+		
 		
 	}
 }
