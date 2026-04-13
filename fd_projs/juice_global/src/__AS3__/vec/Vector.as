@@ -43,5 +43,8 @@ package __AS3__.vec
 		
 		public native function insertAt(index:int, element:*):void;
 		
+		public native function sort(sortBehavior:*):Vector;
+		
+		
 	}
 }

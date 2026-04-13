@@ -21,6 +21,8 @@ function runTest():void {
     var v:Vector.<int> = new <int>[1,2];
 	v.insertAt(1, 3);
 	
+	v.sort(0);
+	
 	trace(v);
 	
 }

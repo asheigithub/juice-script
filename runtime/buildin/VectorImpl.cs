@@ -1028,9 +1028,6 @@ namespace juicescript.runtime.buildin
 		}
 
 
-
-
-
 		//__AS3__.vec$Vector@reverse
 		[NativeFunction("__AS3__.vec$Vector@reverse")]
 		public static void Vector_reverse(Context context,
@@ -1084,6 +1081,19 @@ namespace juicescript.runtime.buildin
 			//vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
 			//Debug.Assert(!error.raised);
 		}
+
+		//__AS3__.vec$Vector@sort
+		[NativeFunction("__AS3__.vec$Vector@sort")]
+		public static void Vector_sort(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			
+		}
+
+
 
 
 
