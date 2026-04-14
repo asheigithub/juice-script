@@ -1724,6 +1724,139 @@ namespace juicescript.runtime.buildin
 		}
 
 
+		//__AS3__.vec$Vector@filter
+		[NativeFunction("__AS3__.vec$Vector@filter")]
+		public static void Vector_filter(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+
+			var store = vector.GetStore(context.player);
+			int len = store.length;
+			int elementSize = store.elementSize;
+
+			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+			var cb = scope.ReadSlot(0, context.player);
+			if (cb.ValueType != BoxType.HeapPtr)
+			{
+				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
+				return;
+			}
+
+			var _this = scope.ReadSlot(1, context.player);
+			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
+			var cbclosure = (RtPayloadClosure)context.GC.Heap[cb.HeapPtr].facility;
+
+			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
+			{
+				_this = cbclosure.This;
+			}
+			else if (cbmethod.__is_hasOwnProperty)
+			{
+
+			}
+			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
+			{
+
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				while (sss.Kind != CodeScopeKind.Script)
+				{
+					sss = sss.Parent;
+				}
+
+				var globalptr = ((ASScript)sss.Container).__global_index__;
+				_this.SetHeapPtr(globalptr);
+
+			}
+
+			//目标
+			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
+			var resultInstance = context.GC.Heap[resultVecPtr];
+			resultInstance.Type = (ASInstance)vecinstance.Type;
+			((RtPayloadVector)resultInstance.facility).HEAPINSTANCE_PTR = 0;
+			((RtPayloadVector)resultInstance.facility).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
+			((RtPayloadVector)resultInstance.facility).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
+			((RtPayloadVector)resultInstance.facility).GetStore(context.player).SetBuffer(0);
+			((RtPayloadVector)resultInstance.facility).GetStore(context.player).length = 0;
+			((RtPayloadVector)resultInstance.facility).GetStore(context.player).elementSize = elementSize;
+
+			var resultVector = (RtPayloadVector)resultInstance.facility;
+
+			int basePos = context.StackPosition;
+			var argSlots = context.StackSlots.AsSpan(basePos, 5);
+			argSlots.Clear();
+
+
+
+			context.StackPosition += 5;
+
+			unsafe
+			{
+
+
+				StackLocater* args = stackalloc StackLocater[3];
+				args[0].index = 2;
+				args[1].index = 3;
+				args[2].index = 4;
+
+				int newlen = 0;
+				for (int i = 0; i < len; i++)
+				{
+					NaNBoxing v = vector.ReadSlot(i, context.player, basePos, vecPtr);
+
+					argSlots[2] = v;
+					argSlots[3].SetInt(i);
+					argSlots[4] = thisPtr;
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
+					if (error.raised)
+					{
+						context.StackPosition -= 5;
+						return;
+					}
+
+					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
+					Debug.Assert(!error.raised); //转BOOLEAN不会失败
+
+					if (r.Boolean)
+					{
+						resultVector.Resize(newlen + 1, ref error, context.player, (ASInstance)vecinstance.Type);
+						if (error.raised)
+						{
+							return;
+						}
+						resultVecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
+						resultVector.SetSlot(newlen, context.player, resultVecPtr, v, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+						newlen++;
+					}
+				}
+
+				context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr);
+
+			}
+
+
+			context.StackPosition -= 5;
+
+
+
+
+		}
 
 
 
