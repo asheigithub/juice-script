@@ -6,6 +6,7 @@ using juicescript.compiler.AST.Expr;
 using juicescript.runtime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -885,9 +886,53 @@ namespace juicescript.compiler.IL.Generator
 
                                     CheckMethodArgs(arguments, compileEnv, step, method);
 
+                                    {
+                                        string key = Player.GetMethodKey(method);
+                                        if (key == "__AS3__.vec$Vector@every" || key == "__AS3__.vec$Vector@filter")
+                                        {
+                                            //检查传入的function的签名
+                                            var cb = ((List<AS3DataStackElement>)step.Arg3.Data.Value)[0];
+                                            if (!cb.IsReg )
+                                            {
+                                                if (cb.Data.FF1Type == FF1DataValueType.as3_function)
+                                                {
+                                                    var cbmethod = compileEnv.CompileContext.dict_method_as3function[((AS3Function)cb.Data.Value)];
+                                                    if (cbmethod.ReturnTypeKind != TypeKind.Boolean)
+                                                    {
+                                                        throw new ResolverException(step.token, "callback must return Boolean.");
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    var stack = arguments[0];
+                                                    var ins = compileEnv.instructions.LastOrDefault(i => i.INS_Code == INS_Code.ld_function && ((INS_Ld_Function)i).dst.index == stack.index);
+                                                    if (ins != null)
+                                                    {
+                                                        var m = compileEnv.Constants[((INS_Ld_Function)ins).const_index];
+														int p = m.HeapPtr;
+                                                        Debug.Assert(p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method);
+														{
+															RtHeapInstance heapInstance = compileEnv.CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+                                                            Debug.Assert(heapInstance.TypeKind == RtHeapTypeKind.MethodScope);
+
+                                                            var cbmethod = ((ASMethodBody)heapInstance.Type).Method;
+															if (cbmethod.ReturnTypeKind != TypeKind.Boolean)
+															{
+																throw new ResolverException(step.token, "callback must return Boolean.");
+															}
+														}
+													}
+
+                                                }
+
+                                            }
+                                            
+                                        }
+
+                                    }
 
 
-                                    StackLocater fun = compileEnv.GetStackLocater(step.Arg2.Reg);
+									StackLocater fun = compileEnv.GetStackLocater(step.Arg2.Reg);
                                     //call method
                                     var result = compileEnv.GetStackLocater(step.Arg1.Reg, method.ReturnTypeKind);
 

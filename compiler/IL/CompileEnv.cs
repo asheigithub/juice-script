@@ -330,6 +330,14 @@ namespace juicescript.compiler.IL
                 return stackLocater;
             }
         }
+
+        internal AS3Reg[] FindRegByStackLocater(StackLocater stackLocater)
+        {
+            return dict_reg_stacklocater.Where(kv => kv.Value.index == stackLocater.index).Select(kv => kv.Key).ToArray();
+        }
+
+
+
         internal void BindStackLocator(AS3Reg reg, StackLocater rv)
         {
             if (reg == null)

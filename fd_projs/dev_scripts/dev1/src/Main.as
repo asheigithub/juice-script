@@ -17,8 +17,13 @@ var testMain:Main = new Main();
 
 function runTest():void {
     var v:Vector.<int> = new <int>[1,2];
-	v.splice(1,0,7,8,9);
-	trace(v);
+	
+	function cb(i,j,k):Boolean 
+	{
+		return i > 0;
+	}
+	
+	trace(v.filter( cb ));
 	
 }
 runTest();

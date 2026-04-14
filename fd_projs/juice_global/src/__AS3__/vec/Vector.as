@@ -47,6 +47,11 @@ package __AS3__.vec
 		
 		public native function splice(startIndex:int, deleteCount:uint = 0x7fffffff, ... items):Vector;
 		
+		public native function every(callback:Function, thisObject:Object = null):Boolean;
+		
+		public native function filter(callback:Function, thisObject:Object = null):Vector;
+		
+		
 		
 	}
 }
