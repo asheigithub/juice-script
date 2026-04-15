@@ -82,8 +82,29 @@ function runTest():void {
         return false;
     }) ? 1 : 0);
 
+    var v9:Vector.<int> = new <int>[1, 2];
+    var r9:Boolean = v9.every(function(item:int):Boolean {
+        if (item == 1) {
+            v9.push(3);
+        }
+        return item < 10;
+    });
+    results.push((r9 == true && v9.length == 3) ? 1 : 0);
+
+    var v10:Vector.<int> = new <int>[1, 2, 3, 4, 5];
+    var visited10:String = '';
+    var r10:Boolean = v10.every(function(item:int):Boolean {
+        visited10 += item + ',';
+        if (item == 2) {
+            v10.pop();
+            v10.pop();
+        }
+        return true;
+    });
+    results.push((visited10 == '1,2,3,' && v10.length == 3) ? 1 : 0);
+
     var separator:String = ',';
-    trace(results[0] + separator + results[1] + separator + results[2] + separator + results[3] + separator + results[4] + separator + results[5] + separator + results[6] + separator + results[7]);
+    trace(results[0] + separator + results[1] + separator + results[2] + separator + results[3] + separator + results[4] + separator + results[5] + separator + results[6] + separator + results[7] + separator + results[8] + separator + results[9]);
 }
 runTest();
 ";
@@ -121,8 +142,8 @@ runTest();
             Assert.AreEqual(1, results.Length, "Expected 1 line of output");
 
             var numbers = results[0].Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
-            Assert.AreEqual(8, numbers.Length, "Expected 8 test results");
-            for (int i = 0; i < 8; i++)
+            Assert.AreEqual(10, numbers.Length, "Expected 10 test results");
+            for (int i = 0; i < 10; i++)
             {
                 Assert.AreEqual("1", numbers[i], $"Test{i + 1} fail");
             }

@@ -1273,7 +1273,7 @@ namespace juicescript.runtime.buildin
 					stackslots,
 					basePos,
 					value,
-					value, // this_ptr same as instance
+					context.player.check_MultiNameLSearch_issameorinherit(value,heapInstance) , // this_ptr same as instance
 					ref error,
 					true   // exclude_user_ns
 				);
@@ -2012,7 +2012,7 @@ namespace juicescript.runtime.buildin
 			((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
 			if (!g_method.Flags.HasFlag(MethodFlags.Native))
 			{
-				context.player.Execute(ref info, m, genwapper.thisPtr, genwapper.async_body,
+				context.player.Execute(ref info, m, genwapper.async_body,
 					genwapper.scopeType, slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
 			}
 			else

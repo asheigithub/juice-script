@@ -2394,7 +2394,34 @@ namespace juicescript.runtime
 					instance.Traits.Add(trait);
 					vScript.allContainers.Add(trait.Method.Body);
 				}
+				//forEach
+				{
+					var t = Context.VECTOR.Instance.Traits.Find(t => t.QName.Name == "forEach" && t.Kind == TraitKind.Method);
+					ASTrait trait = new ASTrait(t.Token);
+					trait.Kind = t.Kind;
+					trait.Method = new ASMethod(instance, t.Token);
+					trait.Method.Body = new ASMethodBody(trait.Method);
+					trait.Method.Body.ByteCode = t.Method.Body.ByteCode;
+					trait.Method.Flags = t.Method.Flags;
+					trait.Method.__is_vector_method = true;
+					trait.Method.Name = t.Method.Name;
 
+					trait.Method.Parameters.AddRange(t.Method.Parameters);
+
+
+					trait.Method.ReturnTypeKind = t.Method.ReturnTypeKind;
+					trait.Method.ReturnType = t.Method.ReturnType;
+					trait.Method.__ismethod = t.Method.__ismethod;
+					trait.Method.Body.param_defaultvalues = t.Method.Body.param_defaultvalues;
+					trait.Method.__return_type_class__ = t.Method.__return_type_class__;
+					trait.Method.Trait = trait;
+
+
+					trait.QName = t.QName;
+
+					instance.Traits.Add(trait);
+					vScript.allContainers.Add(trait.Method.Body);
+				}
 
 				ComputeLayout(@class, Context.global_swc);
 				ComputeCodeScope(vScript, Context.global_swc.NamespaceSets);
@@ -8489,8 +8516,39 @@ namespace juicescript.runtime
 		}
 
 
+		internal bool check_MultiNameLSearch_issameorinherit(NaNBoxing instance, RtHeapInstance this_ins)
+		{
+			bool issameorinherit = this_ins != null && instance.ValueType == BoxType.HeapPtr &&
+
+				this_ins.TypeKind == Context.GC.Heap[instance.HeapPtr].TypeKind
+				&&
+				this_ins.TypeKind == RtHeapTypeKind.INSTANCE
+				&&
+				((ASInstance)Context.GC.Heap[instance.HeapPtr].Type).IsExtend((ASInstance)this_ins.Type)
+
+				;
+
+			if (instance.ValueType == BoxType.HeapPtr)
+			{
+				if (Context.GC.Heap[instance.HeapPtr].TypeKind == RtHeapTypeKind.CLASS) // Class['aa'] 这种，可以访问protected属性
+				{
+					if (this_ins != null && this_ins.TypeKind == RtHeapTypeKind.INSTANCE)
+					{
+						if (
+							((ASInstance)this_ins.Type).IsExtend(
+							((ASClass)((RtPayloadScriptClass)Context.GC.Heap[instance.HeapPtr].facility).Meta).Instance)
+							)
+						{
+							issameorinherit = true;
+						}
+					}
+				}
+			}
+			return issameorinherit;
+		}
+
 		internal int MultiNameLSearch(ASNamespaceSet ns_set, RtHeapTypeKind kind, ASContainer as_type, string name, StackLocater stack,
-			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing instance, NaNBoxing this_ptr, ref ReceiveError error, bool exclude_user_ns = false
+			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing instance, bool issameorinherit , ref ReceiveError error, bool exclude_user_ns = false
 			)
 		{
 #if FORCOMPILER
@@ -8500,32 +8558,7 @@ namespace juicescript.runtime
 			}
 #endif
 
-			bool issameorinherit = this_ptr.ValueType == NaNBoxing.BoxType.HeapPtr && instance.ValueType == BoxType.HeapPtr &&
-
-				Context.GC.Heap[this_ptr.HeapPtr].TypeKind == Context.GC.Heap[instance.HeapPtr].TypeKind
-				&&
-				Context.GC.Heap[this_ptr.HeapPtr].TypeKind == RtHeapTypeKind.INSTANCE
-				&&
-				((ASInstance)Context.GC.Heap[instance.HeapPtr].Type).IsExtend((ASInstance)Context.GC.Heap[this_ptr.HeapPtr].Type)
-
-				;
-
-			if (instance.ValueType == BoxType.HeapPtr)
-			{
-				if (Context.GC.Heap[instance.HeapPtr].TypeKind == RtHeapTypeKind.CLASS) // Class['aa'] 这种，可以访问protected属性
-				{
-					if (this_ptr.ValueType == NaNBoxing.BoxType.HeapPtr && Context.GC.Heap[this_ptr.HeapPtr].TypeKind == RtHeapTypeKind.INSTANCE)
-					{
-						if (
-							((ASInstance)Context.GC.Heap[this_ptr.HeapPtr].Type).IsExtend(
-							((ASClass)((RtPayloadScriptClass)Context.GC.Heap[instance.HeapPtr].facility).Meta).Instance)
-							)
-						{
-							issameorinherit = true;
-						}
-					}
-				}
-			}
+			
 
 			//lambda search member
 			var findMembers = (CodeScope scope, string name, out int index) =>
@@ -12603,7 +12636,7 @@ namespace juicescript.runtime
 		}
 
 		private Memory<char> frame_holdchars = new Memory<char>(new char[16]);
-		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType,
+		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
 		{
@@ -12677,6 +12710,7 @@ namespace juicescript.runtime
 
 				while (true)
 				{
+					
 
 					int codeanddst = *(int*)PC; PC += 4;
 					INS_Code opcode = (INS_Code)(byte)(codeanddst & 0xff);
@@ -12923,7 +12957,7 @@ namespace juicescript.runtime
 														&& "callee".AsSpan().CompareTo(searchName, StringComparison.Ordinal) == 0
 													)
 												{
-													Context.StackSlots[stackStPos - method.Body._link_codescope.Members.Count - 1].SetUndefined();
+													Context.StackSlots[stackStPos - method.Body._link_codescope.Members.Count - 2].SetUndefined();
 													stackslots[stack.index].SetBoolean(true);
 												}
 												else
@@ -13198,10 +13232,10 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 								}
 #endif
-
+								
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
-
-								int code = MultiNameLSearch(ns_set, kind, as_type, name, stack, stackslots, stackStPos, instance, thisPtr, ref error);
+								NaNBoxing thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
+								int code = MultiNameLSearch(ns_set, kind, as_type, name, stack, stackslots, stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
 
 								switch (code)
 								{
@@ -13577,6 +13611,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
+									
 									RtHeapInstance _n = Context.GC.Heap[prop_name.HeapPtr];
 									if (_n.TypeKind != RtHeapTypeKind.STRING)
 									{
@@ -13585,11 +13620,11 @@ namespace juicescript.runtime
 											RaiseStackOverflow(ref error);
 											goto flag_handle_error;
 										}
-
+										
 										var span = Context.StackSlots.AsSpan(Context.StackPosition, 1); span.Clear();
 										StackLocater tmp = default; tmp.index = 0;
 										Context.StackPosition++;
-										NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stackStPos, thisPtr);
+										NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 										if (error.raised)
 										{
 											Context.StackPosition--;
@@ -13620,8 +13655,8 @@ namespace juicescript.runtime
 #endif
 
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
-
-								int code = MultiNameLSearch(ns_set, kind, as_type, name, stack, stackslots, stackStPos, instance_box, thisPtr, ref error);
+								NaNBoxing thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
+								int code = MultiNameLSearch(ns_set, kind, as_type, name, stack, stackslots, stackStPos, instance_box, check_MultiNameLSearch_issameorinherit( instance_box, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null) , ref error);
 
 								switch (code)
 								{
@@ -13738,7 +13773,7 @@ namespace juicescript.runtime
 
 										ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 										Context.StackPosition++;
-										ConvertValueType(ref error, name, TypeKind.String, Context.STRING, ref conv, scope_ptr, thisPtr);
+										ConvertValueType(ref error, name, TypeKind.String, Context.STRING, ref conv, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 										if (error.raised)
 										{
 											Context.StackPosition--;
@@ -13832,7 +13867,7 @@ namespace juicescript.runtime
 
 
 							lbl_primitive:
-
+								var thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
 								bool issameorinherit = thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr && instance != null &&
 
 									Context.GC.Heap[thisPtr.HeapPtr].TypeKind == instance.TypeKind
@@ -14598,7 +14633,7 @@ namespace juicescript.runtime
 								target.index = dst_index;
 
 								var v = LoadValue(stackslots[sourc.index],
-									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + target.index);
+									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14624,7 +14659,7 @@ namespace juicescript.runtime
 #if FORCOMPILER
 								if (IsComputeConstExpr)
 								{
-									if (thisPtr.ValueType == BoxType.Fault)
+									if (((RtPayloadMethodScope)methodscope.facility).ThisPtr.ValueType == BoxType.Fault)
 									{
 										throw new EvalConstException();
 									}
@@ -14636,7 +14671,7 @@ namespace juicescript.runtime
 								StackLocater target;
 								target.index = dst_index;
 
-								stackslots[target.index] = thisPtr;
+								stackslots[target.index] = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
 
 							}
 							break;
@@ -14652,7 +14687,7 @@ namespace juicescript.runtime
 								StackLocater target;
 								target.index = dst_index;
 
-								int a_ptr = stackStPos - method.Body._link_codescope.Members.Count
+								int a_ptr = stackStPos - method.Body._link_codescope.Members.Count - 1
 									- 2; /*
 									      * arguments
 									      * callee
@@ -14883,7 +14918,7 @@ namespace juicescript.runtime
 												//throw new NotImplementedException("强制类型转换");
 												//break;
 												ExplicitConvert(ref error, (ushort)argsCount, (StackLocater*)argementsPtr, stackslots,
-													(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, thisPtr, false
+													(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr, false
 													);
 												if (error.raised)
 												{
@@ -15057,7 +15092,7 @@ namespace juicescript.runtime
 											//throw new NotImplementedException("强制类型转换");
 											//break;
 											ExplicitConvert(ref error, (ushort)argsCount, (StackLocater*)argementsPtr, stackslots,
-												(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, thisPtr, false
+												(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr, false
 												);
 											if (error.raised)
 											{
@@ -16017,7 +16052,7 @@ namespace juicescript.runtime
 											ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 											Context.StackPosition++;
 
-											ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+											ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 											if (error.raised)
 											{
 												Context.StackPosition--;
@@ -16074,7 +16109,7 @@ namespace juicescript.runtime
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+												ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -16115,7 +16150,7 @@ namespace juicescript.runtime
 
 												ConvertValueType(ref error, value,
 													s.Type._link_codescope.Members[heapLocater.MemberIndex].TypeKind,
-													s.Type._link_codescope.Members[heapLocater.MemberIndex].__rt_type_class__, ref conv, scope_ptr, thisPtr);
+													s.Type._link_codescope.Members[heapLocater.MemberIndex].__rt_type_class__, ref conv, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 
 												if (error.raised)
 												{
@@ -16153,7 +16188,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-
+												var thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
 												var scopemember = s.Type._link_codescope.Members[heapLocater.MemberIndex];
 
 
@@ -16241,6 +16276,8 @@ namespace juicescript.runtime
 								Context.StackPosition++;
 
 								bool isheaptype = false;
+
+								var thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
 
 								if (scopemember.Kind == ScopeMemberKind.Parameter)
 								{
@@ -16545,7 +16582,7 @@ namespace juicescript.runtime
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr, thisPtr);
+												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr,((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -16697,7 +16734,7 @@ namespace juicescript.runtime
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -16748,7 +16785,7 @@ namespace juicescript.runtime
 
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
-												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -17113,7 +17150,7 @@ namespace juicescript.runtime
 
 													NaNBoxing box = stackslots[argLocater.index];
 
-													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, thisPtr);
+													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 													if (error.raised)
 													{
 														goto flag_handle_error;
@@ -17176,7 +17213,7 @@ namespace juicescript.runtime
 
 													NaNBoxing box = stackslots[argLocater.index];
 
-													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, thisPtr);
+													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 													if (error.raised)
 													{
 														goto flag_handle_error;
@@ -17452,7 +17489,7 @@ namespace juicescript.runtime
 								var @class = Context.link_const_class[(int)boxing.UIntValue];
 								var v = LoadValue(stackslots[value.index], -1, ref error, stackslots, stackStPos + value.index);
 
-								ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr, thisPtr, false);
+								ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr,((RtPayloadMethodScope)methodscope.facility).ThisPtr, false);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17520,7 +17557,7 @@ namespace juicescript.runtime
 
 								var super_class = Context.link_const_class[(int)boxing.UIntValue];
 								var ctor = super_class.Instance.Constructor;
-								RunMethod(ctor, thisPtr, scope_ptr, (super_class).Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1);
+								RunMethod(ctor, ((RtPayloadMethodScope)methodscope.facility).ThisPtr, scope_ptr, (super_class).Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17588,7 +17625,7 @@ namespace juicescript.runtime
 
 								}
 
-								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
+								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17702,7 +17739,7 @@ namespace juicescript.runtime
 
 								}
 
-								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
+								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17819,7 +17856,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Add(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, thisPtr);
+								Exec_Add(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17855,7 +17892,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Sub(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, thisPtr);
+								Exec_Sub(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17893,7 +17930,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Multiply(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, thisPtr);
+								Exec_Multiply(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17914,7 +17951,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Division(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, thisPtr);
+								Exec_Division(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17936,7 +17973,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Modulus(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, thisPtr);
+								Exec_Modulus(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17960,7 +17997,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_bitWise(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos, thisPtr);
+								Exec_bitWise(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -17984,7 +18021,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Comparse(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos, thisPtr);
+								Exec_Comparse(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos,((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -18062,7 +18099,7 @@ namespace juicescript.runtime
 								LoadStackLocater(&v1, &PC);
 								LoadStackLocater(&v2, &PC);
 
-								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, thisPtr);
+								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -18081,7 +18118,7 @@ namespace juicescript.runtime
 								LoadStackLocater(&v1, &PC);
 								LoadStackLocater(&v2, &PC);
 
-								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, thisPtr);
+								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -18100,7 +18137,7 @@ namespace juicescript.runtime
 								LoadStackLocater(&v2, &PC);
 
 								var name_v = stackslots[v1.index];
-								NaNBoxing name_n = ToPrimitive(ref error, name_v, HINT.h_string, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
+								NaNBoxing name_n = ToPrimitive(ref error, name_v, HINT.h_string, scope_ptr, dst, dst, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -18612,7 +18649,7 @@ namespace juicescript.runtime
 								int addvalue = *(int*)PC; PC += 4;
 								NaNBoxing n1 = stackslots[src.index];
 
-								n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, result, result, stackslots, stackStPos, thisPtr);
+								n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, result, result, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -18625,7 +18662,7 @@ namespace juicescript.runtime
 
 								NaNBoxing n2 = default; n2.SetInt(addvalue);
 
-								Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, thisPtr);
+								Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtPayloadMethodScope)methodscope.facility).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -18935,7 +18972,7 @@ namespace juicescript.runtime
 								value.index = dst_index;
 
 								var lv = LoadValue(stackslots[value.index],
-									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
+									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19037,7 +19074,7 @@ namespace juicescript.runtime
 						//								value.index = dst_index;
 
 						//								var lv = LoadValue(stackslots[value.index],
-						//									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
+						//									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index);
 						//								if (error.raised)
 						//								{
 						//									goto flag_handle_error;
@@ -19473,7 +19510,7 @@ namespace juicescript.runtime
 								value.index = dst_index;
 
 								var lv = LoadValue(stackslots[value.index],
-									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
+									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index);
 								if (error.raised)
 								{
 									//如果有异常，那就不会保存上下文
@@ -19546,7 +19583,7 @@ namespace juicescript.runtime
 								value.index = dst_index;
 
 								var lv = LoadValue(stackslots[value.index],
-									 stackStPos - method.Body._link_codescope.Members.Count - 1, ref error, stackslots, stackStPos + value.index);
+									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index);
 								if (error.raised)
 								{
 									//如果有异常，那就不会保存上下文

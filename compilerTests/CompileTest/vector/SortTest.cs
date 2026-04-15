@@ -80,8 +80,22 @@ function runTest():void {
     });
     results.push((v9[0] == 1 && v9[1] == 2 && v9[2] == 3) ? 1 : 0);
 
+    var v10:Vector.<int> = new <int>[3, 1, 2];
+    var sortError10:Boolean = false;
+    try {
+        v10.sort(function(a:int, b:int):int {
+            if (a == 3) {
+                v10.pop();
+            }
+            return a - b;
+        });
+    } catch (e:Error) {
+        sortError10 = true;
+    }
+    results.push(sortError10 ? 1 : 0);
+
     var separator:String = ',';
-    trace(results[0] + separator + results[1] + separator + results[2] + separator + results[3] + separator + results[4] + separator + results[5] + separator + results[6] + separator + results[7] + separator + results[8]);
+    trace(results[0] + separator + results[1] + separator + results[2] + separator + results[3] + separator + results[4] + separator + results[5] + separator + results[6] + separator + results[7] + separator + results[8] + separator + results[9]);
 }
 runTest();
 ";
@@ -119,8 +133,8 @@ runTest();
             Assert.AreEqual(1, results.Length, "Expected 1 line of output");
 
             var numbers = results[0].Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
-            Assert.AreEqual(9, numbers.Length, "Expected 9 test results");
-            for (int i = 0; i < 9; i++)
+            Assert.AreEqual(10, numbers.Length, "Expected 10 test results");
+            for (int i = 0; i < 10; i++)
             {
                 Assert.AreEqual("1", numbers[i], $"Test{i + 1} fail");
             }

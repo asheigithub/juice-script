@@ -34,6 +34,14 @@ namespace juicescript.runtime
 		internal int StackPos;
 		internal int SlotCount;
 
+		public NaNBoxing ThisPtr
+		{
+			get {
+				return Slots.Span[SlotCount - 1];
+			}
+		}
+
+
 		/// <summary>
 		/// 实际上，只有RunMethod里的调用才会是在栈帧上分配
 		/// </summary>
@@ -45,9 +53,14 @@ namespace juicescript.runtime
 		{
 			IsStackSlot = isStackSlot;
 			StackPos = start;
-			SlotCount = codescope.Members.Count;
+			SlotCount = codescope.Members.Count
+				+ 1 //追加一个槽保存this
+				;
 
-			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count);
+			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count + 1);
+
+			Slots.Span[codescope.Members.Count].SetUndefined(); //此处槽保留this
+
 			cloneout_ptr = 0;
 #if FORCOMPILER
 			if (isCompiling)
@@ -59,7 +72,7 @@ namespace juicescript.runtime
 
 
 			var span = Slots.Span;
-			for (int i = codescope.ParameterCout; i < span.Length; i++)
+			for (int i = codescope.ParameterCout; i < span.Length - 1; i++)
 			{
 				var member = codescope.Members[i];
 
@@ -160,7 +173,8 @@ namespace juicescript.runtime
 		/// <summary>
 		/// 用于复制到堆时，避免重复处理。 注意它可能被多个下级函数引用，所以不要在clone完成后立即置0！仅在Init时置0
 		/// </summary>
-		internal int cloneout_ptr; 
+		internal int cloneout_ptr;
+
 
 		internal void SetSlot(NaNBoxing value, ushort memberIndex)
 		{
@@ -185,7 +199,7 @@ namespace juicescript.runtime
 			if (isCompiling)
 			{
 				
-				if (scope.Members[memberIndex].Kind != ScopeMemberKind.Constant || !hasSetData[memberIndex])
+				if ( memberIndex!= SlotCount-1 && (scope.Members[memberIndex].Kind != ScopeMemberKind.Constant || !hasSetData[memberIndex]))
 				{
 					throw new EvalConstException();
 				}

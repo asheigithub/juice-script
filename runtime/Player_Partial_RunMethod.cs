@@ -103,6 +103,7 @@ namespace juicescript.runtime
 					break;
 				}
 
+				
 				int para_argcount = 0;
 
 				if ( method.IsAnonymous  || skipcheckargscount )//method.Trait == null && method.Parameters.Count == 0)
@@ -338,8 +339,11 @@ namespace juicescript.runtime
 
 				
 
-				int scopeMembers = method.Body._link_codescope.Members.Count;
-				if (Context.StackPosition + para_argcount + scopeMembers + info.useSlots
+				int scopeHoleSlots = method.Body._link_codescope.Members.Count 
+					+ 1 //holdthis
+					;
+
+				if (Context.StackPosition + para_argcount + scopeHoleSlots + info.useSlots
 					//+ 1 
 					>= Context.STACK_LENGTH)
 				{
@@ -358,6 +362,22 @@ namespace juicescript.runtime
 				m_scopePayload.ParentPtr = scope_ptr;
 				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method.Body._link_codescope,true);
 
+				//save this
+				{
+					ScopeHeapLocater scopeHeapLocater;
+					scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
+					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount-1);
+					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error, true);					
+					if (error.raised)
+					{
+						Context.StackPosition -= para_argcount;
+						goto lbl_handle_arg_err;
+					}
+					m_scopePayload.SetSlot(thisPtr, (ushort)(m_scopePayload.SlotCount - 1));
+				}
+
+
+
 #if FORCOMPILER
 				m_scopePayload.isCompiling = false;
 				if (IsComputeConstExpr)
@@ -371,7 +391,7 @@ namespace juicescript.runtime
 					goto lbl_arguments_pass;
 				}
 #endif
-
+				
 
 				//***传参***
 
@@ -676,7 +696,7 @@ namespace juicescript.runtime
 					 */
 
 					if (Context.StackPosition + 4
-						+ scopeMembers + info.useSlots
+						+ scopeHoleSlots + info.useSlots
 					>= Context.STACK_LENGTH)
 					{
 						Context.StackPosition -= para_argcount;
@@ -791,7 +811,7 @@ namespace juicescript.runtime
 				else if (info.instructions > 0)
 				{
 					int calleelastpos = Context.StackPosition;
-					Context.StackPosition += scopeMembers;
+					Context.StackPosition += scopeHoleSlots;
 
 					int stPos = Context.StackPosition;
 					Context.StackPosition += info.useSlots;
@@ -802,7 +822,7 @@ namespace juicescript.runtime
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
 					slots.Clear(); //栈清空 -- 防止GC时错误访问
 					int P_PC;
-					Execute( ref info, mScope, thisPtr, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
+					Execute( ref info, mScope, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
 
 					Context.BackTraceIndex--;
 					//Context.BackTrace[Context.BackTraceIndex].Method = null;
@@ -810,7 +830,7 @@ namespace juicescript.runtime
 
 
 					Context.StackPosition -= info.useSlots;
-					Context.StackPosition -= scopeMembers;
+					Context.StackPosition -= scopeHoleSlots;
 
 					m_scopePayload.ParentPtr = 0;
 					mScope.Type = null;
@@ -870,9 +890,9 @@ namespace juicescript.runtime
 
 				//Context.BackTrace[Context.BackTraceIndex].Method = method;
 				Context.BackTraceIndex++; ;
-
+				Context.StackPosition += scopeHoleSlots;
 				((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
-
+				Context.StackPosition -= scopeHoleSlots;
 				Context.BackTraceIndex--;
 			//Context.BackTrace[Context.BackTraceIndex].Method = null;
 

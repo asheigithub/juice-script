@@ -13,18 +13,20 @@ package
     }
 
 }
-var testMain:Main = new Main();
 
 function runTest():void {
-    var v:Vector.<int> = new <int>[1,2];
-	
-	function cb(i,j,k):Boolean 
-	{
-		return i > 0;
-	}
-	
-	trace(v.filter( cb ));
-	
+
+	var visited10:String = '';
+var v10 = new <int>[1, 2];
+var cb10 = function(i:int, idx:int, vec:*):void {
+    visited10 += i + ',';
+    v10 = new <int>[100];
+};
+v10.forEach(cb10);
+trace(visited10 );
+
+
+
 }
 runTest();
 

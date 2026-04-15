@@ -69,14 +69,14 @@ namespace juicescript.runtime
 			}
 
 			var scope = Context.GC.Heap[scope_ptr];
-//#if DEBUG
-//			if (scope.TypeKind != RtHeapTypeKind.MethodScope)
-//			{
-//				throw new InvalidOperationException();
-//			}
-//#endif
-			
+			//#if DEBUG
+			//			if (scope.TypeKind != RtHeapTypeKind.MethodScope)
+			//			{
+			//				throw new InvalidOperationException();
+			//			}
+			//#endif
 
+			bool mcheck = check_MultiNameLSearch_issameorinherit(value, caller_bindthis_ptr.ValueType ==  NaNBoxing.BoxType.HeapPtr? Context.GC.Heap[caller_bindthis_ptr.HeapPtr] : null);
 
 			var instance = Context.GC.Heap[value.HeapPtr];
 			var ns_set = scope.Type._link_codescope.NamespaceSet;
@@ -111,7 +111,7 @@ namespace juicescript.runtime
 #endif
 			}
 
-			int code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "toString":"valueOf", tmp, stackslots, stackStPos, value, caller_bindthis_ptr, ref error,true);
+			int code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "toString":"valueOf", tmp, stackslots, stackStPos, value,   mcheck , ref error,true);
 			switch (code)
 			{
 				case 0:
@@ -169,7 +169,7 @@ namespace juicescript.runtime
 			}
 
 			//查找tostring,如果tostring后还不是primitive，则报错。
-			code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "valueOf" : "toString", tmp, stackslots, stackStPos, value, caller_bindthis_ptr, ref error, true);
+			code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "valueOf" : "toString", tmp, stackslots, stackStPos, value,  mcheck, ref error, true);
 			switch (code)
 			{
 				case 0:

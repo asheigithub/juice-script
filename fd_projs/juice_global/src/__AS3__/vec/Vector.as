@@ -51,7 +51,7 @@ package __AS3__.vec
 		
 		public native function filter(callback:Function, thisObject:Object = null):Vector;
 		
-		
+		public native function forEach(callback:Function, thisObject:Object = null):void;
 		
 	}
 }

@@ -409,7 +409,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count], 0, scope, true);
+							methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count+1], 0, scope, true);
 							if (methodscopeptr == 0)
 							{
 								throw new LoaderException("out of memory");
@@ -440,7 +440,7 @@ namespace juicescript.runtime
 								
 
 								//说明这个父scope没有初始值计算---但是可能会去参数求值！
-								methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count], 0, scope, true);
+								methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count+1], 0, scope, true);
 								if (methodscopeptr == 0)
 								{
 									throw new LoaderException("out of memory");
@@ -494,6 +494,8 @@ namespace juicescript.runtime
 								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 							}
 
+							((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
 							int P_PC;
@@ -505,7 +507,7 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								//((RtPayloadScriptClass)global.facility).computing_member = member;
-								Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
+								Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
 							}
 							finally
 							{
@@ -549,6 +551,8 @@ namespace juicescript.runtime
 								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 							}
 
+							((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
 							int P_PC;
@@ -560,7 +564,7 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								//((RtPayloadScriptClass)@class.facility).computing_member = member;
-								Execute(ref info,scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+								Execute(ref info,scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
@@ -648,6 +652,8 @@ namespace juicescript.runtime
 								thisP.setFault();
 							}
 
+							((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP,(ushort)( ((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+
 							if (info.useSlots > Context.StackSlots.Length)
 							{
 								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
@@ -663,7 +669,7 @@ namespace juicescript.runtime
 								{
 									//iscomputintg_closure_initmember = member;
 								}
-								Execute(ref info,scopeinstance, thisP, run_methodscope, 
+								Execute(ref info,scopeinstance, run_methodscope, 
 									is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
 									, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
@@ -782,7 +788,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count], 0, scope, true);
+						methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count+1], 0, scope, true);
 						if (methodscopeptr == 0)
 						{
 							throw new LoaderException("out of memory");
@@ -810,7 +816,7 @@ namespace juicescript.runtime
 
 
 							//说明这个父scope没有初始值计算---但是可能会去参数求值！
-							methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count], 0, scope, true);
+							methodscopeptr = Context.GC.AllocMethodScope(new NaNBoxing[scope.Members.Count+1], 0, scope, true);
 							if (methodscopeptr == 0)
 							{
 								throw new LoaderException("out of memory");
@@ -843,6 +849,9 @@ namespace juicescript.runtime
 						NaNBoxing thisP = default;
 						thisP.SetNull();
 
+						((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+
+
 						var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
 
 						if (info.useSlots > Context.StackSlots.Length)
@@ -855,7 +864,7 @@ namespace juicescript.runtime
 						int P_PC;
 
 						
-						Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+						Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						
 						if (error.raised)
 						{
@@ -875,6 +884,8 @@ namespace juicescript.runtime
 						NaNBoxing thisP = default;
 						thisP.SetNull();
 
+						((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+
 						var @class = Context.GC.Heap[((ASClass)scope.Container).__instance_index__];
 
 						if (info.useSlots > Context.StackSlots.Length)
@@ -887,7 +898,7 @@ namespace juicescript.runtime
 						int P_PC;
 
 						
-						Execute(ref info, scopeinstance, thisP, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+						Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						
 
 						if (error.raised)
@@ -969,12 +980,14 @@ namespace juicescript.runtime
 							throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 						}
 
+						((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
 						int P_PC;
 
 						
-						Execute(ref info, scopeinstance, thisP, run_methodscope, 
+						Execute(ref info, scopeinstance, run_methodscope, 
 							is_closure ? scopeinstance.Type : scope.Container
 							//scope.Container
 							, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
