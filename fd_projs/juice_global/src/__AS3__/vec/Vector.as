@@ -53,5 +53,7 @@ package __AS3__.vec
 		
 		public native function forEach(callback:Function, thisObject:Object = null):void;
 		
+		public native function some(callback:Function, thisObject:Object = null):Boolean;
+		
 	}
 }

@@ -1542,7 +1542,7 @@ namespace juicescript.runtime
 									}
 								}
 
-								if (scope.ParentPtr == ptr)
+								if (scope.ParentPtr == old.HeapPtr)
 								{
 									Debug.Assert(copyed_ptr != 0);
 									scope.ParentPtr = copyed_ptr;
@@ -1870,6 +1870,7 @@ namespace juicescript.runtime
 							if (array.stack_store_startindex < heap.StackPos + heap.SlotCount)
 							{
 								//pass
+								value.SetHeapPtr(array_ptr);
 							}
 							else
 							{
