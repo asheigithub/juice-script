@@ -55,5 +55,8 @@ package __AS3__.vec
 		
 		public native function some(callback:Function, thisObject:Object = null):Boolean;
 		
+		public native function map(callback:Function, thisObject:Object = null):Vector;
+		
+		
 	}
 }
