@@ -41,6 +41,17 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex] = thisPtr;
 		}
 
+		//.String$:AS3::concat
+		[NativeFunction(".String$:AS3::concat")]
+		public static void String_concat(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_concat(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
 		//.String$@::concat
 		[NativeFunction(".String$@::concat")]
 		public static void String_Proto_concat(Context context,
@@ -49,16 +60,14 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			//if (thisPtr.ValueType != NaNBoxing.BoxType.LocalString && (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr
-			//	||
-			//	context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.STRING
-			//	))
-			//{
-			//	context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
-			//	return;
-			//}
 
-			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr, thisPtr);
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex],scope_ptr);
 			if (error.raised)
 			{
 				return;
@@ -67,8 +76,7 @@ namespace juicescript.runtime.buildin
 			thisPtr = context.StackSlots[returnSlotIndex];
 
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
-			context.StackSlots[returnSlotIndex].SetUndefined();
-
+			
 			var rest = scope.ReadSlot(0, context.player);
 			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
 
@@ -79,53 +87,50 @@ namespace juicescript.runtime.buildin
 
 			var arguments = rest_array.stack_store.Span;
 
-			if (arguments.Length == 0)
-			{
-				context.StackSlots[returnSlotIndex] = thisPtr;
-			}
-			else
-			{
-				StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 
-				if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			//if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			//{
+			//	Span<char> temp = stackalloc char[16];
+			//	int len = thisPtr.GetLocalStringChars(temp);
+
+			//	sb.Append(temp.Slice(0, len));
+			//}
+			//else
+			//{
+			//	sb.Append(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str);
+			//}
+
+			sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex]));
+
+
+			Span<char> argchars = stackalloc char[16];
+			for (int i = 0; i < arguments.Length; i++)
+			{
+				var arg = arguments[i];
+
+				if (context.player.IsPrimitive(arg))
 				{
-					Span<char> temp = stackalloc char[16];
-					int len = thisPtr.GetLocalStringChars(temp);
+					sb.Append(Extensions.GetPrimitiveValueToString(context.player, arg));
 
-					sb.Append(temp.Slice(0, len));
 				}
 				else
 				{
-					sb.Append(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str);
-				}
-
-
-				Span<char> argchars = stackalloc char[16];
-				for (int i = 0; i < arguments.Length; i++)
-				{
-					var arg = arguments[i];
-					context.player.ConvertValueType(ref error, arg, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr,thisPtr);
+					context.player.ConvertValueType(ref error, arg, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr, thisPtr);
 					if (error.raised)
 					{
 						return;
 					}
 
-					if (context.StackSlots[returnSlotIndex].ValueType == NaNBoxing.BoxType.LocalString)
-					{
-						
-						int len = context.StackSlots[returnSlotIndex].GetLocalStringChars(argchars);
-						sb.Append(argchars.Slice(0, len));
-					}
-					else
-					{
-						sb.Append(((RtPayloadString)context.GC.Heap[context.StackSlots[returnSlotIndex].HeapPtr].facility).Str);
-					}
-				}
+					sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex]));
 
-				NaNBoxing v;
-				context.player.TryCreateStringValue(sb.ToString(), out v, ref error);
-				context.StackSlots[returnSlotIndex] = v;
+				}
 			}
+
+			NaNBoxing v;
+			context.player.TryCreateStringValue(sb.ToString(), out v, ref error);
+			context.StackSlots[returnSlotIndex] = v;
+			
 		}
 
 

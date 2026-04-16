@@ -13,13 +13,6 @@ package
     }
 
 }
-import flash.utils.Dictionary;
-
-var d:Dictionary = new Dictionary();
-
-d['a' + '1'] = 666;
-
-trace( d['a1'] );
 
 
 
@@ -153,7 +146,7 @@ trace( d['a1'] );
 //}
 
 
-//
+
 //class Test262Error extends Error
 //{
 	//var a;
@@ -262,6 +255,7 @@ trace( d['a1'] );
   //message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
   //throw new Test262Error(message);
 //};
+
 
 
 

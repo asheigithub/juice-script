@@ -4156,12 +4156,16 @@ namespace juicescript.compiler.parse
 
             enter_events.Add(node.Nodes[3], (e)=>
             {
+                flag_fun_anonymous.Push(true);
+
                 code_stack.Push(_if.condition);               
             } );
 
             quit_events.Add(node.Nodes[3], (e) =>
             {
                 code_stack.Pop();
+
+                flag_fun_anonymous.Pop();
             });
 
             enter_events.Add(node.Nodes[5], (e)=>

@@ -117,7 +117,7 @@ namespace juicescript.runtime
 
 				NaNBoxing naNBoxing = new NaNBoxing();
 
-				int messagePtr = Context.GC.AllocString($"Cannot call method Function/{method.Trait.ToDebugPropertyName()} as constructor."); ;
+				int messagePtr = Context.GC.AllocString($"Cannot call method Function/{( method.Trait == null ? GetMethodKey(method)  : method.Trait.ToDebugPropertyName() )} as constructor."); ;
 				if (messagePtr != 0)
 				{
 					naNBoxing.SetHeapPtr(messagePtr);

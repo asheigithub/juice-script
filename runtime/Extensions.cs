@@ -404,6 +404,10 @@ namespace juicescript.runtime
                                 {
 									return $"{instance.Type.QName.Name}@{value.HeapPtr.ToString("x")}";
 								}
+                            case RtHeapTypeKind.CLOSURE:
+                                {
+									return $"{((ASMethodBody)instance.Type).Method}@{value.HeapPtr.ToString("x")}";
+								}
                             default:
 #if DEBUG
                     throw new InvalidOperationException();

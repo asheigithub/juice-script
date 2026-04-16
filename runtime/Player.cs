@@ -3247,6 +3247,7 @@ namespace juicescript.runtime
 				}
 
 				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
 
@@ -3283,7 +3284,7 @@ namespace juicescript.runtime
 					__rt_type_class__ = null
 				});
 
-
+				
 				concat.__is_buildin_proto = true;
 
 				int concat_ptr = Context.GC.AllocClosure(concat);
@@ -3293,11 +3294,14 @@ namespace juicescript.runtime
 				}
 
 				((RtPayloadClosure)Context.GC.Heap[concat_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[concat_ptr].facility).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
 
 				NaNBoxing v_str = default; v_str.SetHeapPtr(concat_str);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+
+				
 
 			}
 
@@ -17514,6 +17518,7 @@ namespace juicescript.runtime
 										var constructor_closure = Context.GC.Heap[type_box.HeapPtr];
 
 										if (((ASMethodBody)constructor_closure.Type).Method.__ismethod ||
+											((ASMethodBody)constructor_closure.Type).Method.__is_buildin_proto ||
 											constructor_closure.Type == Context.FUNCTION.Instance.Constructor.Body
 											)
 										{
