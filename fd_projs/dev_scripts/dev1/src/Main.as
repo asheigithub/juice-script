@@ -24,10 +24,7 @@ function runTest():void {
    
     var v1:Vector.<Point> = new <Point>[ new Point(),new Point()  ] ;
 
-	 trace( v1.map( function (i,j,k) 
-	 {
-		 return i;
-	 } ));
+	trace(v1.toLocaleString());
 	
 	
 }

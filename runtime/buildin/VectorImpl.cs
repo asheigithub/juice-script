@@ -2323,6 +2323,73 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		class VectorToString : IPrint
+		{
+			internal StringBuilder sb;
+			public void Write(string message)
+			{
+				sb.Append(message);
+			}
+
+			public void Write(ReadOnlySpan<char> chars)
+			{
+				sb.Append(chars);
+			}
+
+			public void WriteLine(string message)
+			{
+				sb.AppendLine(message);
+			}
+		}
+
+		//__AS3__.vec$Vector@toString
+		[NativeFunction("__AS3__.vec$Vector@toString")]
+		public static void Vector_toString(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+
+			RtPayloadVector vector;
+			int vecPtr = RtPayloadVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+
+			var store = vector.GetStore(context.player);
+
+			TypeKind elementkind =
+			((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
+			ASClass elementcls = ((ASInstance)vecinstance.Type)._element_class;
+
+
+			StringBuilder sb = new StringBuilder();
+			VectorToString arrayToString = new VectorToString();
+			arrayToString.sb = sb;
+
+			store.DoTrace( elementkind, elementcls, context, stackStPos, ref error, scope_ptr, arrayToString);
+
+			string str = sb.ToString();
+			if (string.IsNullOrEmpty(str))
+			{
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+			}
+			else
+			{
+				int p = context.GC.AllocString(str);
+				if (p == 0)
+				{
+					context.player.RaiseOutOfMemory(ref error);
+					return;
+				}
+				else
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(p);
+				}
+			}
+
+		}
 
 
 		class JoinPrinter : IPrint

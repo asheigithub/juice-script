@@ -57,6 +57,9 @@ package __AS3__.vec
 		
 		public native function map(callback:Function, thisObject:Object = null):Vector;
 		
+		public native function toString():String;
+		
+		public native function toLocaleString():String;
 		
 	}
 }
