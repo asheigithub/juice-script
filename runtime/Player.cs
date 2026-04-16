@@ -3217,6 +3217,92 @@ namespace juicescript.runtime
 
 		}
 
+		private void CreateStringProto(ref ReceiveError error)
+		{
+#if FORCOMPILER
+			if (IsComputeConstExpr)
+			{
+				return;
+			}
+#endif
+			var proto_ptr = ((RtPayloadScriptClass)Context.GC.Heap[Context.STRING.__instance_index__].facility).PROTO__PTR;
+			var proto = Context.GC.Heap[proto_ptr];
+
+			// tostring
+			{
+				ASMethod tostring = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				tostring.ReturnTypeKind = TypeKind.String;
+				tostring.Flags = MethodFlags.Native;
+				tostring.Name = "toString";
+				tostring.Body = new ASMethodBody(tostring);
+				tostring.Body.ByteCode = new byte[12];
+				tostring.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = Context.STRING._link_codescope.Parent };
+				tostring.IsAnonymous = true;
+				tostring.__is_buildin_proto = true;
+				
+				int tostring_ptr = Context.GC.AllocClosure(tostring);
+				if (tostring_ptr == 0)
+				{
+					throw new LoaderException("String proto : toString alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+
+				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+
+			}
+			//concat
+			{
+				var concat_str = Context.GC.AllocString("concat");
+				if (concat_str == 0)
+				{
+					throw new LoaderException("concat_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[concat_str]);
+
+
+				ASMethod concat = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				concat.ReturnTypeKind = TypeKind.String;
+				concat.Flags = MethodFlags.Native |  MethodFlags.NeedRest;
+				concat.Name = "concat";
+				concat.Body = new ASMethodBody(concat);
+				concat.Body.ByteCode = new byte[12];
+				concat.Body._link_codescope = new CodeScope() { Members = new List<ScopeMember>(), Parent = Context.STRING._link_codescope.Parent };
+				concat.IsAnonymous = true;
+
+				concat.Parameters.Add(new ASParameter(concat) { IsOptional = false, Name = "args", IsRest = true, Type = null, TypeKind = TypeKind.Any });
+				concat.Body._link_codescope.Members.Add(new ScopeMember(concat.Body, null)
+				{
+					Kind = ScopeMemberKind.Parameter,
+					PName = "args",
+					Type = null,
+					TypeKind = TypeKind.Any,
+					__rt_type_class__ = null
+				});
+
+
+				concat.__is_buildin_proto = true;
+
+				int concat_ptr = Context.GC.AllocClosure(concat);
+				if (concat_ptr == 0)
+				{
+					throw new LoaderException("String proto : concat alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[concat_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+
+				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(concat_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+
+			}
+
+
+		}
 
 		private void CreateFunctionProto(ref ReceiveError error)
 		{
@@ -3477,6 +3563,8 @@ namespace juicescript.runtime
 
 			InitScript((ASScript)Context.CLASS._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("CLASS init failed"); }
 			InitScript((ASScript)Context.STRING._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("STRING init failed"); }
+			CreateStringProto(ref error); if (error.raised) { throw new LoaderException("STRING init failed"); }
+
 			InitScript((ASScript)Context.FUNCTION._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("FUNCTION init failed"); }
 			CreateFunctionProto(ref error); if (error.raised) { throw new LoaderException("FUNCTION init failed"); }
 
@@ -15412,6 +15500,9 @@ namespace juicescript.runtime
 										case BoxType.Float:
 											instacne = Context.FLOAT.Instance;
 											break;
+										case BoxType.LocalString:
+											instacne = Context.STRING.Instance;
+											break;
 									}
 
 									Debug.Assert(instacne != null);
@@ -15691,13 +15782,25 @@ namespace juicescript.runtime
 									RaiseTypeError_AccessNull(ref error);
 									goto flag_handle_error;
 								}
+								else if (thisValue.ValueType == BoxType.LocalString)
+								{
+									Span<char> temp = stackalloc char[16];
+									int len = thisValue.GetLocalStringChars(temp);
+									stackslots[target.index].SetInt(len);
+
+									break;
+								}
 
 								var obj = Context.GC.Heap[thisValue.HeapPtr];
 								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
 								{
 									uint len = ((RtPayloadArray)obj.facility).GetLength(this);
 									stackslots[target.index].SetUInt(len);
-
+								}
+								else if (obj.TypeKind == RtHeapTypeKind.STRING)
+								{
+									int len = ((RtPayloadString)obj.facility).Str.Length;
+									stackslots[target.index].SetInt(len);
 								}
 								else
 								{

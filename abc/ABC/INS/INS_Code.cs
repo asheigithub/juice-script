@@ -188,7 +188,7 @@ namespace juicescript.ABC.INS
         super_ctor =70,
 
         /// <summary>
-        /// 从Array或Vector中读length属性。
+        /// 从Array或Vector或String中读length属性。
         /// </summary>
         ld_length = 75,
 

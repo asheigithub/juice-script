@@ -24,7 +24,7 @@ namespace juicescript.runtime.buildin
 		}
 
 
-		private static bool try_convertkey2Number(string input, out double v)
+		private static bool try_convertkey2Number(ReadOnlySpan<char> input, out double v)
 		{
 			ulong result = 0;
 			bool isValid = true;
@@ -90,6 +90,11 @@ namespace juicescript.runtime.buildin
 					{
 						key.SetNumber(v);
 					}
+					NaNBoxing lk;
+					if (NaNBoxing.TryCreateLocalString(str, out lk))
+					{
+						key = lk;
+					}
 				}
 
 
@@ -104,6 +109,28 @@ namespace juicescript.runtime.buildin
 
 					context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
 
+				}
+			}
+			else if (key.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> buffer = stackalloc char[16];
+				int len = key.GetLocalStringChars(buffer);
+
+				double v;
+				if (try_convertkey2Number(buffer.Slice(0, len), out v))
+				{
+					key.SetNumber(v);
+				}
+
+				NaNBoxing value;
+				if (dict.dict.TryGetValue(new DictKey() { context = context, key = key }, out value))
+				{
+					context.StackSlots[returnSlotIndex] = value;
+				}
+				else
+				{
+					//context.StackSlots[returnSlotIndex].SetUndefined();
+					context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
 				}
 			}
 			else if (key.ValueType == NaNBoxing.BoxType.Null || key.ValueType == NaNBoxing.BoxType.Undefined
@@ -187,14 +214,32 @@ namespace juicescript.runtime.buildin
 					{
 						key.SetNumber(v);
 					}
+					NaNBoxing lk;
+					if (NaNBoxing.TryCreateLocalString(str, out lk))
+					{
+						key = lk;
+					}
 				}
 
 				dict.dict[new DictKey() { key = key, context = context }] = value;
 
 			}
+			else if (key.ValueType == NaNBoxing.BoxType.LocalString)
+			{ 
+				Span<char> buffer = stackalloc char[16];
+				int len = key.GetLocalStringChars(buffer);
+
+				double v;
+				if (try_convertkey2Number(buffer.Slice(0, len), out v))
+				{
+					key.SetNumber(v);
+				}
+
+				dict.dict[new DictKey() { key = key, context = context }] = value;
+			}
 			else if (key.ValueType == NaNBoxing.BoxType.Null || key.ValueType == NaNBoxing.BoxType.Undefined
 				||
-				(key.ValueType == NaNBoxing.BoxType.Number && double.IsNaN( key.Number))
+				(key.ValueType == NaNBoxing.BoxType.Number && double.IsNaN(key.Number))
 				||
 				(key.ValueType == NaNBoxing.BoxType.Float && float.IsNaN(key.FloatValue))
 				)
@@ -220,7 +265,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				
+
 				dict.dict[new DictKey() { key = key, context = context }] = value;
 			}
 
@@ -255,10 +300,31 @@ namespace juicescript.runtime.buildin
 					{
 						key.SetNumber(v);
 					}
+
+					NaNBoxing lk;
+					if (NaNBoxing.TryCreateLocalString(str, out lk))
+					{
+						key = lk;
+					}
+
 				}
 				dict.dict.Remove(new DictKey() { context = context, key = key });
 				context.StackSlots[returnSlotIndex].SetBoolean( true);
 				
+			}
+			else if (key.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> buffer = stackalloc char[16];
+				int len = key.GetLocalStringChars(buffer);
+
+				double v;
+				if (try_convertkey2Number(buffer.Slice(0, len), out v))
+				{
+					key.SetNumber(v);
+				}
+
+				dict.dict.Remove(new DictKey() { context = context, key = key });
+				context.StackSlots[returnSlotIndex].SetBoolean(true);
 			}
 			else if (key.ValueType == NaNBoxing.BoxType.Null || key.ValueType == NaNBoxing.BoxType.Undefined
 				||

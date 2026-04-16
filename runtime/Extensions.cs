@@ -400,6 +400,10 @@ namespace juicescript.runtime
                                 {
                                     return $"{instance.Type.QName.Name}@{value.HeapPtr.ToString("x")}";
                                 }
+                            case RtHeapTypeKind.ARRAY:
+                                {
+									return $"{instance.Type.QName.Name}@{value.HeapPtr.ToString("x")}";
+								}
                             default:
 #if DEBUG
                     throw new InvalidOperationException();

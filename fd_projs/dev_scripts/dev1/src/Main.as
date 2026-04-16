@@ -13,22 +13,28 @@ package
     }
 
 }
+import flash.utils.Dictionary;
 
-[struct]
-final class Point {
-    public var x:int = 0;
-    public var y:int = 0;
-}
+var d:Dictionary = new Dictionary();
 
-function runTest():void {
-   
-    var v1:Vector.<Point> = new <Point>[ new Point(),new Point()  ] ;
+d['a' + '1'] = 666;
 
-	trace(v1.toLocaleString());
-	
-	
-}
-runTest();
+trace( d['a1'] );
+
+
+
+
+//var __instance = new Object(42);
+//
+//__instance.charAt = String.prototype.charAt;
+//
+//if (__instance.charAt(false) + __instance.charAt(true) !== "42") {
+  //throw new Error('#1: __instance = new Object(42); __instance.charAt = String.prototype.charAt;  __instance = new Object(42); __instance.charAt = String.prototype.charAt; __instance.charAt(false)+__instance.charAt(true) === "42". Actual: ' + __instance.charAt(false) + __instance.charAt(true));
+//}
+//
+//
+//trace(String["hasOwnProperty"]("fromCharCode"));
+
 
 
 //async function asyncAdd(a:int, b:int):int {
@@ -147,7 +153,7 @@ runTest();
 //}
 
 
-
+//
 //class Test262Error extends Error
 //{
 	//var a;
@@ -256,7 +262,6 @@ runTest();
   //message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
   //throw new Test262Error(message);
 //};
-
 
 
 

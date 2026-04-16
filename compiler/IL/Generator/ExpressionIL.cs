@@ -6075,7 +6075,7 @@ namespace juicescript.compiler.IL.Generator
 
 						return stacklocator;
 					}
-					else if (instancetype.Maj == TypeKind.Array)
+					else if (instancetype.Maj == TypeKind.Array || instancetype.Maj == TypeKind.String)
 					{
 						Debug.Assert(instance.index >= 0);
 
