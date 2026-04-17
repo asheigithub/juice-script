@@ -67,7 +67,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex],scope_ptr);
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
 			if (error.raised)
 			{
 				return;
@@ -76,7 +76,7 @@ namespace juicescript.runtime.buildin
 			thisPtr = context.StackSlots[returnSlotIndex];
 
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
-			
+
 			var rest = scope.ReadSlot(0, context.player);
 			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
 
@@ -130,7 +130,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing v;
 			context.player.TryCreateStringValue(sb.ToString(), out v, ref error);
 			context.StackSlots[returnSlotIndex] = v;
-			
+
 		}
 
 
@@ -153,7 +153,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				context.StackSlots[returnSlotIndex].SetInt(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.Length );
+				context.StackSlots[returnSlotIndex].SetInt(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.Length);
 			}
 			//context.StackSlots[returnSlotIndex].SetInt(  )
 
@@ -198,8 +198,8 @@ namespace juicescript.runtime.buildin
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
 
 
-			NaNBoxing index_box  =default;
-			context.player.ConvertValueType(ref error, scope.ReadSlot(0, context.player), TypeKind.Int, context.INT,ref index_box);
+			NaNBoxing index_box = default;
+			context.player.ConvertValueType(ref error, scope.ReadSlot(0, context.player), TypeKind.Int, context.INT, ref index_box);
 			Debug.Assert(!error.raised);
 
 
@@ -303,7 +303,7 @@ namespace juicescript.runtime.buildin
 				else
 				{
 
-					context.StackSlots[returnSlotIndex].SetNumber(temp[i] );
+					context.StackSlots[returnSlotIndex].SetNumber(temp[i]);
 
 				}
 
@@ -319,8 +319,8 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					
-					context.StackSlots[returnSlotIndex].SetNumber(str[i] );
+
+					context.StackSlots[returnSlotIndex].SetNumber(str[i]);
 
 				}
 			}
@@ -348,10 +348,25 @@ namespace juicescript.runtime.buildin
 
 			var arguments = rest_array.stack_store.Span;
 
+			StringBuilder sb = new StringBuilder();
 
+			for (int i = 0; i < arguments.Length; i++)
+			{
+				var arg = arguments[i];
+				NaNBoxing charCode = default;
+				context.player.ConvertValueType(ref error, arg, TypeKind.Int, context.INT, ref charCode);
+				if (error.raised)
+				{
+					return;
+				}
 
+				sb.Append((char)charCode.IntValue);
+			}
+
+			NaNBoxing result;
+			context.player.TryCreateStringValue(sb.ToString(), out result, ref error);
+			context.StackSlots[returnSlotIndex] = result;
 		}
-
 
 
 
