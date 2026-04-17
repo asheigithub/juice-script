@@ -326,6 +326,35 @@ namespace juicescript.runtime.buildin
 			}
 		}
 
+
+
+		[NativeFunction("$.String$:AS3::fromCharCode")]
+		public static void String_fromCharCode(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var rest = scope.ReadSlot(0, context.player);
+			var rest_array = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+
+#if DEBUG
+			if (rest_array.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+				throw new InvalidOperationException();
+#endif
+
+			var arguments = rest_array.stack_store.Span;
+
+
+
+		}
+
+
+
+
 	}
 
 }

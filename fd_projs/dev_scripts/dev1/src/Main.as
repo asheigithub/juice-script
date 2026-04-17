@@ -256,18 +256,13 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
-
-var charCodeAt = String.prototype.charCodeAt;
-
-assert.sameValue(typeof charCodeAt, 'function');
-
-assert.throws(TypeError, function() {
-  charCodeAt.call(undefined, 0);
-}, 'undefined');
-
-assert.throws(TypeError, function() {
-  charCodeAt.call(null, 0);
-}, 'null');
+//////////////////////////////////////////////////////////////////////////////
+//CHECK#1
+if (String.fromCharCode() !== "") {
+  throw new Test262Error('#1: String.fromCharCode () returns empty string. Actual: ' + String.fromCharCode());
+}
+//
+//////////////////////////////////////////////////////////////////////////////
 
 
 
