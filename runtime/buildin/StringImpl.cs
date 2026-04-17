@@ -167,15 +167,43 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
-			double index = scope.ReadSlot(0, context.player).Number;
+			String_Proto_chatAt(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
 
-			if (double.IsNaN(index) || double.IsInfinity(index) || (int)index<0)
+
+		//.String$@::charAt
+		[NativeFunction(".String$@::charAt")]
+		public static void String_Proto_chatAt(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
 			}
 
-			int i = (int)index;
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+
+			NaNBoxing index_box  =default;
+			context.player.ConvertValueType(ref error, scope.ReadSlot(0, context.player), TypeKind.Int, context.INT,ref index_box);
+			Debug.Assert(!error.raised);
+
+
+			int i = index_box.IntValue;
 
 			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
 			{
@@ -188,10 +216,10 @@ namespace juicescript.runtime.buildin
 					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
 				}
 				else
-				{ 
+				{
 					Span<byte> bytes = stackalloc byte[16];
 					int utf8len = System.Text.Encoding.UTF8.GetBytes(temp.Slice(i, 1), bytes);
-					context.StackSlots[returnSlotIndex].SetLocalString(bytes.Slice(0,utf8len));
+					context.StackSlots[returnSlotIndex].SetLocalString(bytes.Slice(0, utf8len));
 
 				}
 
@@ -208,14 +236,15 @@ namespace juicescript.runtime.buildin
 				else
 				{
 					Span<byte> bytes = stackalloc byte[16];
-					int utf8len = System.Text.Encoding.UTF8.GetBytes( str.AsSpan().Slice(i,1) , bytes);
+					int utf8len = System.Text.Encoding.UTF8.GetBytes(str.AsSpan().Slice(i, 1), bytes);
 					context.StackSlots[returnSlotIndex].SetLocalString(bytes.Slice(0, utf8len));
 
 				}
 			}
 			//context.StackSlots[returnSlotIndex].SetInt(  )
-
 		}
 
+
 	}
+
 }
