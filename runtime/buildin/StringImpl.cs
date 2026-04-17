@@ -245,6 +245,87 @@ namespace juicescript.runtime.buildin
 		}
 
 
+		//.String$:AS3::charCodeAt
+		[NativeFunction(".String$:AS3::charCodeAt")]
+		public static void String_charCodeAt(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_charCodeAt(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		//.String$@::charCodeAt
+		[NativeFunction(".String$@::charCodeAt")]
+		public static void String_Proto_charCodeAt(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+
+			NaNBoxing index_box = default;
+			context.player.ConvertValueType(ref error, scope.ReadSlot(0, context.player), TypeKind.Int, context.INT, ref index_box);
+			Debug.Assert(!error.raised);
+
+
+			int i = index_box.IntValue;
+
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> temp = stackalloc char[16];
+				int len = thisPtr.GetLocalStringChars(temp);
+				//context.StackSlots[returnSlotIndex].SetLocalString()
+
+				if (i < 0 || i > len - 1)
+				{
+					context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
+				}
+				else
+				{
+
+					context.StackSlots[returnSlotIndex].SetNumber(temp[i] );
+
+				}
+
+			}
+			else
+			{
+				var str = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				int len = str.Length;
+
+				if (i < 0 || i > len - 1)
+				{
+					context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
+				}
+				else
+				{
+					
+					context.StackSlots[returnSlotIndex].SetNumber(str[i] );
+
+				}
+			}
+		}
+
 	}
 
 }
