@@ -68,6 +68,11 @@ namespace juicescript
         //internal const ulong MASK_EXPONENT = 0x7ff0000000000000;
         //internal const ulong MASK_SIGNATURE = 0xFFFFFFFF00000000;
 
+        /// <summary>
+        ///  \0 !
+        /// </summary>
+        public const ulong L_ZEROSTRING =  0xFFF80D00FFFFFFFF;
+
         public NaNBoxing()
         {
             //float_val = 0;
@@ -1233,6 +1238,12 @@ namespace juicescript
         /// <returns>实际写入的字符数，如果缓冲区不够大则返回-1</returns>
         public int GetLocalStringChars(Span<char> destination)
         {
+            if (store == L_ZEROSTRING)
+            {
+                destination[0] = '\0';
+                return 1;
+            }
+
             // 提取所有5字节，然后找到实际字符串结束位置
             Span<byte> utf8Bytes = stackalloc byte[5];
             for (int i = 0; i < 5; i++)
@@ -1266,6 +1277,15 @@ namespace juicescript
         /// <returns>实际写入的字节数</returns>
         public int GetLocalStringBytes(Span<byte> destination)
         {
+            if (store == L_ZEROSTRING)
+            {
+                if (destination.Length < 1)
+                    return -1;
+
+                destination[0] = 0;
+                return 1;
+            }
+
             // 提取所有5字节，然后找到实际字符串结束位置
             Span<byte> utf8Bytes = stackalloc byte[5];
             for (int i = 0; i < 5; i++)
@@ -1379,35 +1399,7 @@ namespace juicescript
             
         }
 
-        /// <summary>
-        /// 安全的UTF-8编码方法，不会抛出异常
-        /// 如果编码失败，返回空字节数组
-        /// </summary>
-        /// <param name="str">要编码的字符串</param>
-        /// <returns>UTF-8字节数组，失败时返回空数组</returns>
-        private static byte[] SafeGetUtf8Bytes(string str)
-        {
-            if (string.IsNullOrEmpty(str))
-                return Array.Empty<byte>();
-                
-            try
-            {
-                // 使用替换回退策略，遇到无法编码的字符时用替换字符代替
-                var encoder = Encoding.UTF8.GetEncoder();
-                encoder.Fallback = EncoderFallback.ReplacementFallback;
-                
-                int byteCount = Encoding.UTF8.GetByteCount(str);
-                byte[] bytes = new byte[byteCount];
-                Encoding.UTF8.GetBytes(str, 0, str.Length, bytes, 0);
-                return bytes;
-            }
-            catch
-            {
-                // 如果仍然失败，返回空字节数组
-                return Array.Empty<byte>();
-            }
-        }
-
+        
         /// <summary>
         /// 安全的UTF-8编码方法（Span版本），不会抛出异常
         /// 如果编码失败，返回0
@@ -1460,16 +1452,38 @@ namespace juicescript
         {
             // 调用者已经确保utf8Bytes.Length <= 5 (只有5字节可用空间)
             Debug.Assert(utf8Bytes.Length <= 5, "UTF-8 bytes length should not exceed 5");
-            
-            ulong data = TAG_LOCAL_STRING;
-            
-            // 存储UTF-8字节，从高位开始，剩余位置自动为0
-            for (int i = 0; i < utf8Bytes.Length; i++)
+
+            if (utf8Bytes.Length == 1 && utf8Bytes[0] == 0)
             {
-                data |= ((ulong)utf8Bytes[i]) << (32 - i * 8);
+				//// \0 !!
+				//ulong data = TAG_LOCAL_STRING;
+
+				//// 存储UTF-8字节，从高位开始，剩余位置自动为0
+				
+				//data |= ((ulong)0) << (32 - 0 * 8);
+				//data |= ((ulong)255) << (32 - 1 * 8);
+				//data |= ((ulong)255) << (32 - 2 * 8);
+				//data |= ((ulong)255) << (32 - 3 * 8);
+				//data |= ((ulong)255) << (32 - 4 * 8);
+				
+               
+
+
+				store = L_ZEROSTRING;
+
+			}
+            else
+            {
+                ulong data = TAG_LOCAL_STRING;
+
+                // 存储UTF-8字节，从高位开始，剩余位置自动为0
+                for (int i = 0; i < utf8Bytes.Length; i++)
+                {
+                    data |= ((ulong)utf8Bytes[i]) << (32 - i * 8);
+                }
+
+                store = data;
             }
-            
-            store = data;
         }
 
         public void setFault()

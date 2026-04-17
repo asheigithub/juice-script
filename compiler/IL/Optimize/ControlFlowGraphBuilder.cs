@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace juicescript.compiler.IL.Optimize
 {
@@ -557,6 +558,7 @@ namespace juicescript.compiler.IL.Optimize
 					else
 					{
 						blocks[i].Successors.Add(blocks.First(b => b.Instructions[0].INS_Code == INS_Code.END)); //跳到结束
+
 					}
 				}
 				else if (lastOpCode == INS_Code.try_exit)
@@ -592,6 +594,7 @@ namespace juicescript.compiler.IL.Optimize
 		/// 遍历所有blocks的流程，确定出口处的状态。
 		/// finally块会覆盖之前的行为，所以要先遍历finally块。
 		///     比如，finally中return,会覆盖之前的throw,finally中throw会覆盖之前的return,finally中goto到其他块，也会覆盖之前的return和throw!!
+		///     -- 特别注意，如果finally块中会goto出去，那么会覆盖异常，所以这时就不是必然抛出异常!
 		///     所以，只有在finally能正常结束的情况下，才继续计算从try_enter->运行到finally_enter.
 		/// 
 		/// 是否可能正常结束(运行到finally_exit 没有遇到throw 和 return）.
@@ -604,17 +607,92 @@ namespace juicescript.compiler.IL.Optimize
 		/// <exception cref="NotImplementedException"></exception>
 		private static void UpdateTryCtxState(TryCtx tryctx, BasicBlock[] cfgblocks, int TryId, Dictionary<BasicBlock, TryCtx> dict_childcfg)
 		{
-			bool flag_needchecktry = false;
+			bool flag_needchecktry = false; bool ishascontinue = false;
 
 			{ //finally path
 				Debug.Assert(cfgblocks[0].Instructions[0].INS_Code == INS_Code.try_enter);
 				var finallypass = cfgblocks.SkipWhile(b => !(b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == TryId)).ToArray();
 
-				GraphPathFinder pathFinder = new GraphPathFinder();
+
+				List<BasicBlock> throwblocks = new List<BasicBlock>();
+				List<BasicBlock> returnblocks = new List<BasicBlock>();
+				List<BasicBlock> gotooutblocks = new List<BasicBlock>();
+				try_state? try_ = null;
 				for (int i = 0; i < finallypass.Length; i++)
 				{
 					var b = finallypass[i];
+					if (dict_childcfg.ContainsKey(b))
+					{
+						//throw new NotImplementedException();
+						if (dict_childcfg[b].must_throw)
+						{
+							throwblocks.Add(b);
+						}
+
+						else if (!dict_childcfg[b].may_normal_exit)
+						{
+							Debug.Assert(dict_childcfg[b].successors.Contains(int.MaxValue));
+							if (dict_childcfg[b].successors.All(i => i == int.MaxValue)) //全部都是退出指令
+							{
+								returnblocks.Add(b);
+							}
+						}
+					}
+					else if(b.TryBlockId == tryctx.tryid)
+					{
+						
+						for (int ii = 0; ii < b.Instructions.Count; ii++)
+						{
+							var ins = b.Instructions[ii];
+
+
+							if (ins.INS_Code == INS_Code.throw_error)
+							{
+
+								throwblocks.Add(b);continue;
+
+							}
+
+							if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
+							{
+								returnblocks.Add(b);continue;
+							}
+
+							if (ins.INS_Code == INS_Code.goto_flag)
+							{
+
+								int jumptarget = GetFlagId(ins);
+
+								var target = finallypass.FirstOrDefault(b => b.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)b.Instructions[0]).flag_id == jumptarget);
+								if (target == null)
+								{
+									tryctx.successors.Add(jumptarget);
+									gotooutblocks.Add(b);
+								}
+
+							}
+						}
+
+					}
+
+				}
+
+				//查找有正常的路径
+				GraphPathFinder finder = new GraphPathFinder();
+				for (int i = 0; i < finallypass.Length; i++)
+				{
+					var b = finallypass[i];
+					if (!throwblocks.Contains(b) && !returnblocks.Contains(b) && !gotooutblocks.Contains(b))
+					{
+
+					}
+					else
+					{
+						continue;	
+					}
+
 					List<BasicBlock> successors;
+
 					if (dict_childcfg.ContainsKey(b))
 					{
 						var childctx = dict_childcfg[b];
@@ -624,133 +702,312 @@ namespace juicescript.compiler.IL.Optimize
 					{
 						successors = b.Successors;
 					}
+
 					for (int j = 0; j < successors.Count; j++)
 					{
 						var s = successors[j];
-						pathFinder.AddEdge(i, Array.IndexOf(finallypass, s));
+						if (!throwblocks.Contains(s) && !returnblocks.Contains(s) && !gotooutblocks.Contains(s))
+						{
+							finder.AddEdge(i, Array.IndexOf(finallypass, s));
+						}
 					}
 				}
+				bool existNormal = finder.FindPath(0, finallypass.Length - 1) != null;
 
-				var paths = pathFinder.FindAllPaths(0, finallypass.Length - 1);
-				//Debug.Assert(paths.Count > 0);
-				//paths.Count == 0 说明有死循环! 
-
-
-
-				int throwpath = 0;
-				int returnpath = 0;
-				int normalpath = 0;
-				int gotopath = 0;
-
-				for (int i = 0; i < paths.Count; i++)
+				//查找是否有提前return的路径
+				bool hasreturn = false;
+				foreach (var item in returnblocks)
 				{
-					var path = paths[i];
-
-					
-					bool mustthrow_path = false;
-					bool early_return = false;
-					bool jump_out = false;
-
-					for (int j = 0; j < path.Count; j++)
+					finder = new GraphPathFinder();
+					for (int i = 0; i < finallypass.Length; i++)
 					{
-						var b = finallypass[path[j]];
-						if (dict_childcfg.ContainsKey(b))
+						var b = finallypass[i];
+						if (!throwblocks.Contains(b) && !gotooutblocks.Contains(b))
 						{
-							//throw new NotImplementedException();
-							if (dict_childcfg[b].must_throw)
-							{
-								
-								mustthrow_path = true;
-									
-							}
-
-							else if (!dict_childcfg[b].may_normal_exit)
-							{
-								Debug.Assert(dict_childcfg[b].successors.Contains(int.MaxValue));
-								if (dict_childcfg[b].successors.All(i => i == int.MaxValue)) //全部都是退出指令
-								{
-									early_return = true;
-									goto lbl_nextpath;
-								}
-							}
 						}
 						else
 						{
-							Debug.Assert(b.TryBlockId == tryctx.tryid);
-							for (int ii = 0; ii < b.Instructions.Count; ii++)
+							continue;
+						}
+
+						List<BasicBlock> successors;
+
+						if (dict_childcfg.ContainsKey(b))
+						{
+							var childctx = dict_childcfg[b];
+							successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+						}
+						else
+						{
+							successors = b.Successors;
+						}
+
+						for (int j = 0; j < successors.Count; j++)
+						{
+							var s = successors[j];
+							if (!throwblocks.Contains(s) && !gotooutblocks.Contains(s))
 							{
-								var ins = b.Instructions[ii];
-								
-
-								if (ins.INS_Code == INS_Code.throw_error)
-								{
-									
-									mustthrow_path = true;
-									goto lbl_nextpath;
-									
-								}
-
-								if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
-								{
-									early_return = true;
-									goto lbl_nextpath;
-								}
-
-								if (ins.INS_Code == INS_Code.goto_flag)
-								{
-
-									int jumptarget = GetFlagId(ins);
-
-									var target = finallypass.FirstOrDefault(b => b.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)b.Instructions[0]).flag_id == jumptarget);
-									if (target == null)
-									{
-										tryctx.successors.Add(jumptarget);
-										jump_out = true;
-										goto lbl_nextpath;
-									}
-
-								}
+								finder.AddEdge(i, Array.IndexOf(finallypass, s));
 							}
-
 						}
 					}
 
-				lbl_nextpath:
+					if (finder.FindPath(0, Array.IndexOf(finallypass, item)) != null)
+					{
+						hasreturn = true;
+						break;
+					}
+				}
 
-					if (mustthrow_path)
+				//是否肯定会抛出异常
+				bool mustthrow = false;
+				finder = new GraphPathFinder();
+				for (int i = 0; i < finallypass.Length; i++)
+				{
+					var b = finallypass[i];
+					if (!throwblocks.Contains(b) )
 					{
-						throwpath++;
-					}
-					else if (early_return)
-					{
-						returnpath++;
-					}
-					else if (jump_out)
-					{
-						gotopath++;
+
 					}
 					else
 					{
-						normalpath++;
+						continue;
 					}
 
+					List<BasicBlock> successors;
+
+					if (dict_childcfg.ContainsKey(b))
+					{
+						var childctx = dict_childcfg[b];
+						successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+					}
+					else
+					{
+						successors = b.Successors;
+					}
+
+					for (int j = 0; j < successors.Count; j++)
+					{
+						var s = successors[j];
+						if (!throwblocks.Contains(s) )
+						{
+							finder.AddEdge(i, Array.IndexOf(finallypass, s));
+						}
+					}
+				}
+				if (finder.FindPath(0, finallypass.Length - 1) == null)
+				{
+					mustthrow = true;
 				}
 
-				Debug.Assert(throwpath + returnpath + normalpath + gotopath == paths.Count);
+				//检查是否有goto的路径，如果有，则说明有概率吃掉异常,那就不是必然throw.
+				
+				foreach (var item in gotooutblocks)
+				{
+					finder = new GraphPathFinder();
+					for (int i = 0; i < finallypass.Length; i++)
+					{
+						var b = finallypass[i];
+						if (!throwblocks.Contains(b) && !returnblocks.Contains(b))
+						{
+						}
+						else
+						{
+							continue;
+						}
 
-				if (returnpath > 0)
+						List<BasicBlock> successors;
+
+						if (dict_childcfg.ContainsKey(b))
+						{
+							var childctx = dict_childcfg[b];
+							successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+						}
+						else
+						{
+							successors = b.Successors;
+						}
+
+						for (int j = 0; j < successors.Count; j++)
+						{
+							var s = successors[j];
+							if (!throwblocks.Contains(s) && !returnblocks.Contains(s))
+							{
+								finder.AddEdge(i, Array.IndexOf(finallypass, s));
+							}
+						}
+					}
+
+					if (finder.FindPath(0, Array.IndexOf(finallypass, item)) != null)
+					{
+						ishascontinue = true;
+						break;
+					}
+				}
+
+
+
+				if (hasreturn )
 				{
 					tryctx.successors.Add(int.MaxValue);
 				}
 
-				if (throwpath == paths.Count)
+				if (mustthrow)
 				{
 					tryctx.must_throw = true;
 				}
-				else if (normalpath > 0)
+				else if (existNormal)
 				{
 					flag_needchecktry = true;
 				}
+
+
+
+
+
+				//GraphPathFinder pathFinder = new GraphPathFinder();
+				//for (int i = 0; i < finallypass.Length; i++)
+				//{
+				//	var b = finallypass[i];
+				//	List<BasicBlock> successors;
+				//	if (dict_childcfg.ContainsKey(b))
+				//	{
+				//		var childctx = dict_childcfg[b];
+				//		successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+				//	}
+				//	else
+				//	{
+				//		successors = b.Successors;
+				//	}
+				//	for (int j = 0; j < successors.Count; j++)
+				//	{
+				//		var s = successors[j];
+				//		pathFinder.AddEdge(i, Array.IndexOf(finallypass, s));
+				//	}
+				//}
+
+				//var paths = pathFinder.FindAllPaths(0, finallypass.Length - 1);
+				////Debug.Assert(paths.Count > 0);
+				////paths.Count == 0 说明有死循环! 
+
+
+
+				//int throwpath = 0;
+				//int returnpath = 0;
+				//int normalpath = 0;
+				//int gotopath = 0;
+
+				//int pathcount = 0;
+				////for (int i = 0; i < paths.Count; i++)
+				//foreach(var path in paths)
+				//{
+				//	//var path = paths[i];
+				//	pathcount++;
+
+				//	bool mustthrow_path = false;
+				//	bool early_return = false;
+				//	bool jump_out = false;
+
+				//	for (int j = 0; j < path.Count; j++)
+				//	{
+				//		var b = finallypass[path[j]];
+				//		if (dict_childcfg.ContainsKey(b))
+				//		{
+				//			//throw new NotImplementedException();
+				//			if (dict_childcfg[b].must_throw)
+				//			{
+
+				//				mustthrow_path = true;
+
+				//			}
+
+				//			else if (!dict_childcfg[b].may_normal_exit)
+				//			{
+				//				Debug.Assert(dict_childcfg[b].successors.Contains(int.MaxValue));
+				//				if (dict_childcfg[b].successors.All(i => i == int.MaxValue)) //全部都是退出指令
+				//				{
+				//					early_return = true;
+				//					goto lbl_nextpath;
+				//				}
+				//			}
+				//		}
+				//		else
+				//		{
+				//			Debug.Assert(b.TryBlockId == tryctx.tryid);
+				//			for (int ii = 0; ii < b.Instructions.Count; ii++)
+				//			{
+				//				var ins = b.Instructions[ii];
+
+
+				//				if (ins.INS_Code == INS_Code.throw_error)
+				//				{
+
+				//					mustthrow_path = true;
+				//					goto lbl_nextpath;
+
+				//				}
+
+				//				if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
+				//				{
+				//					early_return = true;
+				//					goto lbl_nextpath;
+				//				}
+
+				//				if (ins.INS_Code == INS_Code.goto_flag)
+				//				{
+
+				//					int jumptarget = GetFlagId(ins);
+
+				//					var target = finallypass.FirstOrDefault(b => b.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)b.Instructions[0]).flag_id == jumptarget);
+				//					if (target == null)
+				//					{
+				//						tryctx.successors.Add(jumptarget);
+				//						jump_out = true;
+				//						goto lbl_nextpath;
+				//					}
+
+				//				}
+				//			}
+
+				//		}
+				//	}
+
+				//lbl_nextpath:
+
+				//	if (mustthrow_path)
+				//	{
+				//		throwpath++;
+				//	}
+				//	else if (early_return)
+				//	{
+				//		returnpath++;
+				//	}
+				//	else if (jump_out)
+				//	{
+				//		gotopath++;
+				//	}
+				//	else
+				//	{
+				//		normalpath++;
+				//	}
+
+				//}
+
+				//Debug.Assert(throwpath + returnpath + normalpath + gotopath == pathcount);
+
+				//if (returnpath > 0)
+				//{
+				//	tryctx.successors.Add(int.MaxValue);
+				//}
+
+				//if (throwpath == pathcount)
+				//{
+				//	tryctx.must_throw = true;
+				//}
+				//else if (normalpath > 0)
+				//{
+				//	flag_needchecktry = true;
+				//}
 			}
 
 
@@ -760,10 +1017,127 @@ namespace juicescript.compiler.IL.Optimize
 				
 				var try_catch_pass = cfgblocks.Take( Array.IndexOf(cfgblocks,f_enter) + 1 ).ToArray();
 
-				GraphPathFinder pathFinder = new GraphPathFinder();
+				
+				List<BasicBlock> throwblocks = new List<BasicBlock>();
+				List<BasicBlock> returnblocks = new List<BasicBlock>();
+				try_state? try_ = null;
 				for (int i = 0; i < try_catch_pass.Length; i++)
 				{
 					var b = try_catch_pass[i];
+					if (dict_childcfg.ContainsKey(b))
+					{
+						//throw new NotImplementedException();
+						if (dict_childcfg[b].must_throw)
+						{
+							Debug.Assert(try_state.Finally != try_);
+
+							if (try_ == null || try_ == try_state.Catch)
+							{
+								throwblocks.Add(b);
+							}
+							else if (try_ == try_state.Try)
+							{
+								if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
+								{
+
+								}
+								else
+								{
+									throwblocks.Add(b);
+								}
+							}
+						}
+
+						else if (!dict_childcfg[b].may_normal_exit)
+						{
+							Debug.Assert(dict_childcfg[b].successors.Count > 0);
+
+							if (dict_childcfg[b].successors.All(i => i == int.MaxValue))
+							{
+								returnblocks.Add(b);
+							}
+						}
+					}
+					else if(b.TryBlockId == tryctx.tryid)
+					{
+						//Debug.Assert(b.TryBlockId == tryctx.tryid);
+						for (int ii = 0; ii < b.Instructions.Count; ii++)
+						{
+							var ins = b.Instructions[ii];
+							if (ins.INS_Code == INS_Code.try_enter)
+							{
+								try_ = try_state.Try;
+							}
+							if (ins.INS_Code == INS_Code.catch_enter)
+							{
+								try_ = try_state.Catch;
+							}
+							if (ins.INS_Code == INS_Code.finally_enter)
+							{
+								try_ = try_state.Finally;
+							}
+							Debug.Assert(ins.INS_Code != INS_Code.finally_exit);
+
+
+							if (ins.INS_Code == INS_Code.throw_error)
+							{
+								Debug.Assert(try_state.Finally != try_);
+								if (try_ == null || try_ == try_state.Catch)
+								{
+									throwblocks.Add(b); continue;
+								}
+								else if (try_ == try_state.Try)
+								{
+									if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
+									{
+
+									}
+									else
+									{
+										throwblocks.Add(b); continue;
+									}
+								}
+							}
+
+							if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
+							{
+								returnblocks.Add(b);
+								continue;
+							}
+
+							if (ins.INS_Code == INS_Code.goto_flag)
+							{
+
+								int jumptarget = GetFlagId(ins);
+
+								var target = try_catch_pass.FirstOrDefault(b => b.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)b.Instructions[0]).flag_id == jumptarget);
+								if (target == null)
+								{
+									tryctx.successors.Add(jumptarget);
+									//jump_out = true;
+									//goto lbl_nextpath;
+								}
+
+							}
+						}
+
+					}
+
+				}
+
+				//先查找是否有一条成功路径
+				GraphPathFinder finder = new GraphPathFinder();
+				for (int i = 0; i < try_catch_pass.Length; i++)
+				{
+					var b = try_catch_pass[i];
+					if (!throwblocks.Contains(b) && !returnblocks.Contains(b))
+					{
+
+					}
+					else
+					{
+						continue;	
+					}
 
 					List<BasicBlock> successors;
 
@@ -780,179 +1154,314 @@ namespace juicescript.compiler.IL.Optimize
 					for (int j = 0; j < successors.Count; j++)
 					{
 						var s = successors[j];
-						pathFinder.AddEdge(i, Array.IndexOf(try_catch_pass, s));
+						if (!throwblocks.Contains(s) && !returnblocks.Contains(s))
+						{
+							finder.AddEdge(i, Array.IndexOf(try_catch_pass, s));
+						}
 					}
 				}
+				bool existNormal = finder.FindPath(0, try_catch_pass.Length - 1) != null;
+				//查找是否有提前return的路径
+				bool hasreturn = false;
 
-				var paths = pathFinder.FindAllPaths(0, try_catch_pass.Length - 1);
-
-				//Debug.Assert(paths.Count > 0);
-				//paths.Count == 0 说明有死循环！
-
-				int throwpath = 0;
-				int returnpath = 0;
-				int normalpath = 0;
-				int gotopath = 0;
-
-				for (int i = 0; i < paths.Count; i++)
+				finder = new GraphPathFinder();
+				for (int i = 0; i < try_catch_pass.Length; i++)
 				{
-					var path = paths[i];
-
-					try_state? try_ = null;
-
-					bool mustthrow_path = false;
-					bool early_return = false;
-					bool jump_out = false;
-
-					for (int j = 0; j < path.Count; j++)
+					var b = try_catch_pass[i];
+					if (!throwblocks.Contains(b))
 					{
-						var b = try_catch_pass[path[j]];
-						if (dict_childcfg.ContainsKey(b))
-						{
-							//throw new NotImplementedException();
-							if (dict_childcfg[b].must_throw)
-							{
-								Debug.Assert(try_state.Finally != try_);
 
-								if (try_ == null || try_ == try_state.Catch )
-								{
-									mustthrow_path = true;
-									goto lbl_nextpath;
-								}
-								else if (try_ == try_state.Try)
-								{
-									if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
-									{
-
-									}
-									else
-									{
-										mustthrow_path = true;
-										goto lbl_nextpath;
-									}
-								}
-							}
-
-							else if (!dict_childcfg[b].may_normal_exit)
-							{
-								Debug.Assert(dict_childcfg[b].successors.Count>0);
-
-								if (dict_childcfg[b].successors.All(i => i == int.MaxValue))
-								{
-									early_return = true;
-									goto lbl_nextpath;
-								}
-
-							}
-						}
-						else
-						{
-							Debug.Assert(b.TryBlockId == tryctx.tryid);
-							for (int ii = 0; ii < b.Instructions.Count; ii++)
-							{
-								var ins = b.Instructions[ii];
-								if (ins.INS_Code == INS_Code.try_enter)
-								{
-									try_ = try_state.Try;
-								}
-								if (ins.INS_Code == INS_Code.catch_enter)
-								{
-									try_ = try_state.Catch;
-								}
-								if (ins.INS_Code == INS_Code.finally_enter)
-								{
-									try_ = try_state.Finally;
-								}
-								Debug.Assert(ins.INS_Code != INS_Code.finally_exit);
-								
-
-								if (ins.INS_Code == INS_Code.throw_error)
-								{
-									Debug.Assert(try_state.Finally != try_);
-									if (try_ == null || try_ == try_state.Catch )
-									{
-										mustthrow_path = true;
-										goto lbl_nextpath;
-									}
-									else if (try_ == try_state.Try)
-									{
-										if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
-										{
-
-										}
-										else
-										{
-											mustthrow_path = true;
-											goto lbl_nextpath;
-										}
-									}
-								}
-
-								if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
-								{
-									early_return = true;
-									goto lbl_nextpath;
-								}
-
-								if (ins.INS_Code == INS_Code.goto_flag)
-								{
-
-									int jumptarget = GetFlagId(ins);
-
-									var target = try_catch_pass.FirstOrDefault(b => b.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)b.Instructions[0]).flag_id == jumptarget);
-									if (target == null)
-									{
-										tryctx.successors.Add(jumptarget);
-										jump_out = true;
-										goto lbl_nextpath;
-									}
-
-								}
-							}
-
-						}
-					}
-
-				lbl_nextpath:
-
-					if (mustthrow_path)
-					{
-						throwpath++;
-					}
-					else if (early_return)
-					{
-						returnpath++;
-					}
-					else if (jump_out)
-					{
-						gotopath++;
 					}
 					else
 					{
-						normalpath++;
+						continue;
 					}
 
+					List<BasicBlock> successors;
+
+					if (dict_childcfg.ContainsKey(b))
+					{
+						var childctx = dict_childcfg[b];
+						successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+					}
+					else
+					{
+						successors = b.Successors;
+					}
+
+					for (int j = 0; j < successors.Count; j++)
+					{
+						var s = successors[j];
+						if (!throwblocks.Contains(s))
+						{
+							finder.AddEdge(i, Array.IndexOf(try_catch_pass, s));
+						}
+					}
 				}
 
-				Debug.Assert(throwpath + returnpath + normalpath + gotopath == paths.Count);
-
-				if (throwpath == paths.Count)
+				foreach (var item in returnblocks)
 				{
-					tryctx.must_throw = true;
+					if (finder.FindPath(0, Array.IndexOf( try_catch_pass,item)) != null)
+					{
+						hasreturn = true;
+						break;
+					}
 				}
-				else if (normalpath > 0)
+
+				bool mustthrow = false;
+				finder = new GraphPathFinder();
+				for (int i = 0; i < try_catch_pass.Length; i++)
+				{
+					var b = try_catch_pass[i];
+					if (!throwblocks.Contains(b))
+					{
+					}
+					else
+					{ 
+						continue;
+					}
+					List<BasicBlock> successors;
+
+					if (dict_childcfg.ContainsKey(b))
+					{
+						var childctx = dict_childcfg[b];
+						successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+					}
+					else
+					{
+						successors = b.Successors;
+					}
+
+					for (int j = 0; j < successors.Count; j++)
+					{
+						var s = successors[j];
+						if (!throwblocks.Contains(s))
+						{
+							finder.AddEdge(i, Array.IndexOf(try_catch_pass, s));
+						}
+					}
+				}
+				if (finder.FindPath(0, try_catch_pass.Length - 1) == null)
+				{ 
+					mustthrow = true;
+				}
+
+				if (mustthrow)
+				{
+					if (!ishascontinue)
+					{
+						tryctx.must_throw = true;
+					}
+				}
+				else if (existNormal)
 				{
 					tryctx.may_normal_exit = true;
 				}
-				else if (gotopath > 0)
-				{
-
-				}
-
-				if (returnpath > 0)
+					
+				if (hasreturn)
 				{
 					tryctx.successors.Add(int.MaxValue);
 				}
+
+				
+
+				//GraphPathFinder pathFinder = new GraphPathFinder();
+				//for (int i = 0; i < try_catch_pass.Length; i++)
+				//{
+				//	var b = try_catch_pass[i];
+
+				//	List<BasicBlock> successors;
+
+				//	if (dict_childcfg.ContainsKey(b))
+				//	{
+				//		var childctx = dict_childcfg[b];
+				//		successors = childctx.cfg_blocks[childctx.cfg_blocks.Length - 1].Successors;
+				//	}
+				//	else
+				//	{
+				//		successors = b.Successors;
+				//	}
+
+				//	for (int j = 0; j < successors.Count; j++)
+				//	{
+				//		var s = successors[j];
+				//		pathFinder.AddEdge(i, Array.IndexOf(try_catch_pass, s));
+				//	}
+				//}
+
+				//var paths = pathFinder.FindAllPaths(0, try_catch_pass.Length - 1);
+
+				////Debug.Assert(paths.Count > 0);
+				////paths.Count == 0 说明有死循环！
+
+				//int throwpath = 0;
+				//int returnpath = 0;
+				//int normalpath = 0;
+				//int gotopath = 0;
+
+				//int pathcount = 0;
+				////for (int i = 0; i < paths.Count; i++)
+
+				//foreach(var path in paths)
+				//{
+				//	pathcount++;
+				//	//var path = paths[i];
+
+				//	try_state? try_ = null;
+
+				//	bool mustthrow_path = false;
+				//	bool early_return = false;
+				//	bool jump_out = false;
+
+				//	for (int j = 0; j < path.Count; j++)
+				//	{
+				//		var b = try_catch_pass[path[j]];
+				//		if (dict_childcfg.ContainsKey(b))
+				//		{
+				//			//throw new NotImplementedException();
+				//			if (dict_childcfg[b].must_throw)
+				//			{
+				//				Debug.Assert(try_state.Finally != try_);
+
+				//				if (try_ == null || try_ == try_state.Catch )
+				//				{
+				//					mustthrow_path = true;
+				//					goto lbl_nextpath;
+				//				}
+				//				else if (try_ == try_state.Try)
+				//				{
+				//					if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
+				//					{
+
+				//					}
+				//					else
+				//					{
+				//						mustthrow_path = true;
+				//						goto lbl_nextpath;
+				//					}
+				//				}
+				//			}
+
+				//			else if (!dict_childcfg[b].may_normal_exit)
+				//			{
+				//				Debug.Assert(dict_childcfg[b].successors.Count>0);
+
+				//				if (dict_childcfg[b].successors.All(i => i == int.MaxValue))
+				//				{
+				//					early_return = true;
+				//					goto lbl_nextpath;
+				//				}
+
+				//			}
+				//		}
+				//		else
+				//		{
+				//			Debug.Assert(b.TryBlockId == tryctx.tryid);
+				//			for (int ii = 0; ii < b.Instructions.Count; ii++)
+				//			{
+				//				var ins = b.Instructions[ii];
+				//				if (ins.INS_Code == INS_Code.try_enter)
+				//				{
+				//					try_ = try_state.Try;
+				//				}
+				//				if (ins.INS_Code == INS_Code.catch_enter)
+				//				{
+				//					try_ = try_state.Catch;
+				//				}
+				//				if (ins.INS_Code == INS_Code.finally_enter)
+				//				{
+				//					try_ = try_state.Finally;
+				//				}
+				//				Debug.Assert(ins.INS_Code != INS_Code.finally_exit);
+								
+
+				//				if (ins.INS_Code == INS_Code.throw_error)
+				//				{
+				//					Debug.Assert(try_state.Finally != try_);
+				//					if (try_ == null || try_ == try_state.Catch )
+				//					{
+				//						mustthrow_path = true;
+				//						goto lbl_nextpath;
+				//					}
+				//					else if (try_ == try_state.Try)
+				//					{
+				//						if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
+				//						{
+
+				//						}
+				//						else
+				//						{
+				//							mustthrow_path = true;
+				//							goto lbl_nextpath;
+				//						}
+				//					}
+				//				}
+
+				//				if (ins.INS_Code == INS_Code.return_value || ins.INS_Code == INS_Code.return_void)
+				//				{
+				//					early_return = true;
+				//					goto lbl_nextpath;
+				//				}
+
+				//				if (ins.INS_Code == INS_Code.goto_flag)
+				//				{
+
+				//					int jumptarget = GetFlagId(ins);
+
+				//					var target = try_catch_pass.FirstOrDefault(b => b.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)b.Instructions[0]).flag_id == jumptarget);
+				//					if (target == null)
+				//					{
+				//						tryctx.successors.Add(jumptarget);
+				//						jump_out = true;
+				//						goto lbl_nextpath;
+				//					}
+
+				//				}
+				//			}
+
+				//		}
+				//	}
+
+				//lbl_nextpath:
+
+				//	if (mustthrow_path)
+				//	{
+				//		throwpath++;
+				//	}
+				//	else if (early_return)
+				//	{
+				//		returnpath++;
+				//	}
+				//	else if (jump_out)
+				//	{
+				//		gotopath++;
+				//	}
+				//	else
+				//	{
+				//		normalpath++;
+				//	}
+
+				//}
+
+				//Debug.Assert(throwpath + returnpath + normalpath + gotopath == pathcount);
+
+				//if (throwpath == pathcount)
+				//{
+				//	tryctx.must_throw = true;
+				//}
+				//else if (normalpath > 0)
+				//{
+				//	tryctx.may_normal_exit = true;
+				//}
+				//else if (gotopath > 0)
+				//{
+
+				//}
+
+				//if (returnpath > 0)
+				//{
+				//	tryctx.successors.Add(int.MaxValue);
+				//}
 
 
 			}
@@ -1008,9 +1517,9 @@ namespace juicescript.compiler.IL.Optimize
 		/// <summary>
 		/// 非递归方式查找起点到终点的所有路径
 		/// </summary>
-		public List<List<int>> FindAllPaths(int start, int end)
+		public IEnumerable<List<int>> FindAllPaths(int start, int end)
 		{
-			List<List<int>> allPaths = new List<List<int>>();
+			//List<List<int>> allPaths = new List<List<int>>();
 			// 初始化栈，压入起点状态
 			Stack<DfsState> stack = new Stack<DfsState>();
 			stack.Push(new DfsState
@@ -1029,7 +1538,10 @@ namespace juicescript.compiler.IL.Optimize
 				// 1. 终止条件：当前节点是终点 → 保存路径，弹出栈顶（该分支遍历完成）
 				if (currentNode == end)
 				{
-					allPaths.Add(new List<int>(currentState.CurrentPath));
+					//allPaths.Add(new List<int>(currentState.CurrentPath));
+
+					yield return currentState.CurrentPath;
+
 					stack.Pop();
 					continue;
 				}
@@ -1076,11 +1588,48 @@ namespace juicescript.compiler.IL.Optimize
 				}
 			}
 
-			return allPaths;
+			//return allPaths;
 		}
 
+		public List<int> FindPath(int start, int end)
+		{ 
+			List<int> path = new List<int>();
 
-		
+
+
+			Stack<int> stack = new Stack<int>();
+			stack.Push(start);
+
+			HashSet<int> visited = new HashSet<int>();
+
+			while (stack.Count>0)
+			{
+				int node = stack.Pop();
+				visited.Add(node);
+
+				path.Add(node);
+
+				if (node == end)
+				{ 
+					return path;
+				}
+
+				if (_adjacencyList.ContainsKey(node))
+				{
+					var neighbors = _adjacencyList[node];
+
+					foreach (var neighbor in neighbors)
+					{
+						if (!visited.Contains(neighbor))
+						{
+							stack.Push(neighbor);
+						}
+					}
+				}
+			}
+
+			return null;
+		}
 	}
 
 	

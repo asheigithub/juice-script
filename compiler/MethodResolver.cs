@@ -2926,9 +2926,9 @@ namespace juicescript.compiler
 
 
 
-		private static HashSet<ulong> BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash , HashSet<ASNamespace> dependnamespace)
+		private static HashSet<ulong> BuildScript(ScriptDef script, AS3SrcFile as_srcfile, CompileContext context, string sfile, string hash, HashSet<ASNamespace> dependnamespace)
 		{
-			
+
 			//查找源码对应的AS3ClassInterfaceBase  
 			var as3_srclist = ((new AS3ClassInterfaceBase[] { as_srcfile.Package.MainClass, as_srcfile.Package.MainInterface }).Union
 				(
@@ -3044,7 +3044,9 @@ namespace juicescript.compiler
 											FF1Type = AST.Expr.FF1DataValueType.super_pointer
 										}
 
-									}
+									},
+									OpCode = "autogen ctor"
+
 								});
 
 								function.FunctionScope.Codes.Add(expression);
@@ -3062,7 +3064,6 @@ namespace juicescript.compiler
 							{
 								var cfg = ControlFlowGraphBuilder.Build(instructions, method);
 
-
 								var blocks = cfg.Blocks.OrderBy(b => b.OriginalIndex).ToList();
 								GraphPathFinder pathFinder = new GraphPathFinder();
 								for (int j = 0; j < blocks.Count; j++)
@@ -3073,81 +3074,222 @@ namespace juicescript.compiler
 									for (int k = 0; k < successors.Count; k++)
 									{
 										var s = successors[k];
-										pathFinder.AddEdge(j, blocks.IndexOf(s));
+										pathFinder.AddEdge(b.OriginalIndex, s.OriginalIndex);
 									}
 								}
 
-								var paths = pathFinder.FindAllPaths(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
-								int nosuper = 0;
-								for (int j = 0; j < paths.Count; j++)
+								if (pathFinder.FindPath(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex) != null)
 								{
-									var path = paths[j];
-
-									if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) > 1)
+									pathFinder = new GraphPathFinder();
+									for (int j = 0; j < blocks.Count; j++)
 									{
-										var block = blocks[path.Last(p => blocks[p].Instructions.Exists(i => i.INS_Code == INS_Code.super_ctor))];
-										var ins = block.Instructions.Last(i => i.INS_Code == INS_Code.super_ctor);
-										throw new ResolverException(
-											new Token()
+										var b = blocks[j];
+
+										if (b.Instructions.Any((i) => i.INS_Code == INS_Code.super_ctor)) //禁止super
+										{
+											continue;
+										}
+
+										List<BasicBlock> successors;
+										successors = b.Successors;
+										for (int k = 0; k < successors.Count; k++)
+										{
+											var s = successors[k];
+
+											if (s.Instructions.Any((i) => i.INS_Code == INS_Code.super_ctor)) //禁止super
 											{
-												sourceFile = method.Token.sourceFile,
-												sourceFileFullPath = method.Token.sourceFileFullPath,
-												line = ins.token.line,
-												ptr = ins.token.ptr
+
 											}
-
-											, $"A super statement cannot occur after a super, return, or throw statement, or a reference to super.");
-
-									}
-
-									if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) == 0)
-									{
-										nosuper++;
-									}
-								}
-								if (nosuper == paths.Count)
-								{
-									var super = ((ASInstance)method.Container)._super_class_.Instance.Constructor;
-									if (super.Parameters.Count > 0 && !super.Parameters[0].IsOptional && !super.Parameters[0].IsRest)
-									{
-										// No default constructor found in base class BaseM.
-										throw new ResolverException(
-											new Token()
+											else
 											{
-												sourceFile = method.Token.sourceFile,
-												sourceFileFullPath = method.Token.sourceFileFullPath,
-												line = method.Token.line,
-												ptr = method.Token.ptr
+												pathFinder.AddEdge(b.OriginalIndex, s.OriginalIndex);
 											}
-
-											, $"No default constructor found in base class {super.Container.QName.ToDebugTypeName()}.");
+										}
+									}
+									if (pathFinder.FindPath(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex) == null)
+									{
+										//说明所有路径都有super
 									}
 									else
 									{
-
-										INS_SuperCtor superCtor = new INS_SuperCtor(method.Token);
-										superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
-										superCtor.args = new StackLocater[0];
-
-										compileEnv.instructions.Insert(0, superCtor);
-
-										for (int j = 0; j < instance_initmember.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+										//如果所有路径都没有super ,也就是其中没有路径可达super
+										pathFinder = new GraphPathFinder();
+										for (int j = 0; j < blocks.Count; j++)
 										{
-											instance_initmember.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+											var b = blocks[j];
+											List<BasicBlock> successors;
+											successors = b.Successors;
+											for (int k = 0; k < successors.Count; k++)
+											{
+												var s = successors[k];
+												pathFinder.AddEdge(b.OriginalIndex, s.OriginalIndex);
+											}
 										}
 
-										for (int j = 0; j < compileEnv.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+										bool hassuper = false;
+										foreach (var item in blocks)
 										{
-											compileEnv.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+											if (item.Instructions.Any((i) => i.INS_Code == INS_Code.super_ctor))
+											{
+												if (pathFinder.FindPath(blocks[0].OriginalIndex, item.OriginalIndex) != null)
+												{
+													hassuper = true;
+
+													//查找super会不会抵达另一个super
+
+													foreach (var item2 in blocks)
+													{
+														if (item2.Instructions.Any((i) => i.INS_Code == INS_Code.super_ctor))
+														{
+															//查找两个块之间的通路
+															var path = pathFinder.FindPath(item.OriginalIndex, item2.OriginalIndex);
+															if (path != null)
+															{
+																if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) > 1)
+																{
+																	var block = blocks[path.Last(p => blocks[p].Instructions.Exists(i => i.INS_Code == INS_Code.super_ctor))];
+																	var ins = block.Instructions.Last(i => i.INS_Code == INS_Code.super_ctor);
+																	throw new ResolverException(
+																		new Token()
+																		{
+																			sourceFile = method.Token.sourceFile,
+																			sourceFileFullPath = method.Token.sourceFileFullPath,
+																			line = ins.token.line,
+																			ptr = ins.token.ptr
+																		}
+
+																		, $"A super statement cannot occur after a super, return, or throw statement, or a reference to super.");
+
+																}
+															}
+
+														}
+													}
+
+
+												}
+											}
+										}
+
+										if (!hassuper)
+										{
+											var super = ((ASInstance)method.Container)._super_class_.Instance.Constructor;
+											if (super.Parameters.Count > 0 && !super.Parameters[0].IsOptional && !super.Parameters[0].IsRest)
+											{
+												// No default constructor found in base class BaseM.
+												throw new ResolverException(
+													new Token()
+													{
+														sourceFile = method.Token.sourceFile,
+														sourceFileFullPath = method.Token.sourceFileFullPath,
+														line = method.Token.line,
+														ptr = method.Token.ptr
+													}
+
+													, $"No default constructor found in base class {super.Container.QName.ToDebugTypeName()}.");
+											}
+											else
+											{
+
+												INS_SuperCtor superCtor = new INS_SuperCtor(method.Token);
+												superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
+												superCtor.args = new StackLocater[0];
+
+												compileEnv.instructions.Insert(0, superCtor);
+
+												for (int j = 0; j < instance_initmember.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+												{
+													instance_initmember.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+												}
+
+												for (int j = 0; j < compileEnv.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+												{
+													compileEnv.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+												}
+
+											}
 										}
 
 									}
 
 								}
-								else if (nosuper > 0)
-								{
-									//原版AIR似乎允许这种行为，那么我这里就不管了
-								}
+
+
+
+								//var paths = pathFinder.FindAllPaths(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
+								//int nosuper = 0;
+								////for (int j = 0; j < paths.Count; j++)
+								//int pathcount = 0;
+								//foreach(var path in paths)
+								//{
+								//	pathcount++;
+								//	//var path = paths[j];
+
+								//	if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) > 1)
+								//	{
+								//		var block = blocks[path.Last(p => blocks[p].Instructions.Exists(i => i.INS_Code == INS_Code.super_ctor))];
+								//		var ins = block.Instructions.Last(i => i.INS_Code == INS_Code.super_ctor);
+								//		throw new ResolverException(
+								//			new Token()
+								//			{
+								//				sourceFile = method.Token.sourceFile,
+								//				sourceFileFullPath = method.Token.sourceFileFullPath,
+								//				line = ins.token.line,
+								//				ptr = ins.token.ptr
+								//			}
+
+								//			, $"A super statement cannot occur after a super, return, or throw statement, or a reference to super.");
+
+								//	}
+
+								//	if (path.Sum(p => blocks[p].Instructions.Count(i => i.INS_Code == INS_Code.super_ctor)) == 0)
+								//	{
+								//		nosuper++;
+								//	}
+								//}
+								//if (nosuper == pathcount)
+								//{
+								//	var super = ((ASInstance)method.Container)._super_class_.Instance.Constructor;
+								//	if (super.Parameters.Count > 0 && !super.Parameters[0].IsOptional && !super.Parameters[0].IsRest)
+								//	{
+								//		// No default constructor found in base class BaseM.
+								//		throw new ResolverException(
+								//			new Token()
+								//			{
+								//				sourceFile = method.Token.sourceFile,
+								//				sourceFileFullPath = method.Token.sourceFileFullPath,
+								//				line = method.Token.line,
+								//				ptr = method.Token.ptr
+								//			}
+
+								//			, $"No default constructor found in base class {super.Container.QName.ToDebugTypeName()}.");
+								//	}
+								//	else
+								//	{
+
+								//		INS_SuperCtor superCtor = new INS_SuperCtor(method.Token);
+								//		superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
+								//		superCtor.args = new StackLocater[0];
+
+								//		compileEnv.instructions.Insert(0, superCtor);
+
+								//		for (int j = 0; j < instance_initmember.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+								//		{
+								//			instance_initmember.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+								//		}
+
+								//		for (int j = 0; j < compileEnv.initvalue_instructions.Count; j++) //在头部插入字节，需要给initvalue结构增加偏移
+								//		{
+								//			compileEnv.initvalue_instructions[j].start_byte_pos += superCtor.Size;
+								//		}
+
+								//	}
+
+								//}
+								//else if (nosuper > 0)
+								//{
+								//	//原版AIR似乎允许这种行为，那么我这里就不管了
+								//}
 
 							}
 						}
@@ -3358,24 +3500,33 @@ namespace juicescript.compiler
 								for (int j = 0; j < blocks.Count; j++)
 								{
 									var b = blocks[j];
+
+									if (b.Instructions.Any(i => i.INS_Code == INS_Code.return_value
+											|| i.INS_Code == INS_Code.throw_error
+											|| (i.INS_Code == INS_Code.flag && ((INS_Flag)i).flag_id == 0xffffff)
+										))
+									{
+										continue;
+									}
+
 									List<BasicBlock> successors;
 									successors = b.Successors;
 									for (int k = 0; k < successors.Count; k++)
 									{
 										var s = successors[k];
-										pathFinder.AddEdge(j, blocks.IndexOf(s));
+										if (!s.Instructions.Any(i => i.INS_Code == INS_Code.return_value
+											|| i.INS_Code == INS_Code.throw_error
+											|| (i.INS_Code == INS_Code.flag && ((INS_Flag)i).flag_id == 0xffffff)
+										))
+										{
+											pathFinder.AddEdge(j, blocks.IndexOf(s));
+										}
 									}
 								}
 
-								var paths = pathFinder.FindAllPaths(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
+								var path = pathFinder.FindPath(blocks[0].OriginalIndex, blocks[blocks.Count - 1].OriginalIndex);
 
-								
-								
-								if (paths.Any(p => p.All(id => !blocks[id].Instructions.Any(
-									i => i.INS_Code == INS_Code.return_value 
-									|| i.INS_Code == INS_Code.throw_error
-									|| (i.INS_Code == INS_Code.flag && ((INS_Flag)i).flag_id == 0xffffff)
-									))))
+								if (path != null)
 								{
 									throw new ResolverException(new Token()
 									{

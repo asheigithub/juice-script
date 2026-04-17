@@ -9,13 +9,87 @@ package
     public class Main extends Sprite {
         public function Main() {
             
+			
+			
+			
+			var passed:int = 0;
+            var total:int = 0;
+
+           
+
+			trace( String.fromCharCode(0).length );
+			
+            // S9.7_A2.1: ToUint16
+            total++;
+            var test1:Boolean = String.fromCharCode(0).charCodeAt(0) === 0;
+            test1 = test1 && String.fromCharCode(1).charCodeAt(0) === 1;
+            test1 = test1 && String.fromCharCode(-1).charCodeAt(0) === 65535;
+            test1 = test1 && String.fromCharCode(65535).charCodeAt(0) === 65535;
+            test1 = test1 && String.fromCharCode(65534).charCodeAt(0) === 65534;
+            test1 = test1 && String.fromCharCode(65536).charCodeAt(0) === 0;
+            test1 = test1 && String.fromCharCode(4294967295).charCodeAt(0) === 65535;
+            test1 = test1 && String.fromCharCode(4294967294).charCodeAt(0) === 65534;
+            test1 = test1 && String.fromCharCode(4294967296).charCodeAt(0) === 0;
+            if (!test1) {
+                trace("FAIL S9.7_A2.1");
+            } else {
+                passed++;
+                trace("PASS S9.7_A2.1");
+            }
+
+            // S9.7_A2.2: 模 2^16
+            total++;
+            var test2:Boolean = String.fromCharCode(-32767).charCodeAt(0) === 32769;
+            test2 = test2 && String.fromCharCode(-32768).charCodeAt(0) === 32768;
+            test2 = test2 && String.fromCharCode(-32769).charCodeAt(0) === 32767;
+            test2 = test2 && String.fromCharCode(-65535).charCodeAt(0) === 1;
+            test2 = test2 && String.fromCharCode(-65536).charCodeAt(0) === 0;
+            test2 = test2 && String.fromCharCode(-65537).charCodeAt(0) === 65535;
+            test2 = test2 && String.fromCharCode(65535).charCodeAt(0) === 65535;
+            test2 = test2 && String.fromCharCode(65536).charCodeAt(0) === 0;
+            test2 = test2 && String.fromCharCode(65537).charCodeAt(0) === 1;
+            test2 = test2 && String.fromCharCode(131071).charCodeAt(0) === 65535;
+            test2 = test2 && String.fromCharCode(131072).charCodeAt(0) === 0;
+            test2 = test2 && String.fromCharCode(131073).charCodeAt(0) === 1;
+            if (!test2) {
+                trace("FAIL S9.7_A2.2");
+            } else {
+                passed++;
+                trace("PASS S9.7_A2.2");
+            }
+
+            // S9.7_A1: NaN, 0, -0, Infinity 转 +0
+            total++;
+            var nanChar:int = String.fromCharCode(Number.NaN).charCodeAt(0);
+            var zeroChar:int = String.fromCharCode(0).charCodeAt(0);
+            var negZeroChar:int = String.fromCharCode(-0).charCodeAt(0);
+            var posInfChar:int = String.fromCharCode(Number.POSITIVE_INFINITY).charCodeAt(0);
+            var negInfChar:int = String.fromCharCode(Number.NEGATIVE_INFINITY).charCodeAt(0);
+            var test3:Boolean = nanChar === 0 && zeroChar === 0 && negZeroChar === 0 && posInfChar === 0 && negInfChar === 0;
+            // 检查 +0 (不是 -0)
+            test3 = test3 && (1 / nanChar) === Number.POSITIVE_INFINITY;
+            test3 = test3 && (1 / zeroChar) === Number.POSITIVE_INFINITY;
+            test3 = test3 && (1 / negZeroChar) === Number.POSITIVE_INFINITY;
+            test3 = test3 && (1 / posInfChar) === Number.POSITIVE_INFINITY;
+            test3 = test3 && (1 / negInfChar) === Number.POSITIVE_INFINITY;
+            if (!test3) {
+                trace("FAIL S9.7_A1");
+            } else {
+                passed++;
+                trace("PASS S9.7_A1");
+            }
+
+            trace("Total: " + passed + "/" + total);
+			
+				
+			
+			
         }
     }
 
 }
 
-
-
+var m = new Main();
 
 //var __instance = new Object(42);
 //
@@ -255,16 +329,6 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
   throw new Test262Error(message);
 };
-
-//////////////////////////////////////////////////////////////////////////////
-//CHECK#1
-if (String.fromCharCode() !== "") {
-  throw new Test262Error('#1: String.fromCharCode () returns empty string. Actual: ' + String.fromCharCode());
-}
-//
-//////////////////////////////////////////////////////////////////////////////
-
-
 
 
 trace('OK');

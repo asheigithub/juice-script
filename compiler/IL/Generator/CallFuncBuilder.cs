@@ -56,11 +56,21 @@ namespace juicescript.compiler.IL.Generator
 					var p = method.Parameters[i];
 					if (!p.IsOptional && !p.IsRest)
 					{
-						throw new ResolverException(step.token,
-							$"Incorrect number of arguments.  Expected {method.Parameters.Count(p => !p.IsOptional && !p.IsRest)}"
-							);
-					}
-				}
+                        if (step.OpCode == "autogen ctor")
+                        {
+							// No default constructor found in base class A.
+							throw new ResolverException(step.token,
+							   $"No default constructor found in base class { method.Container.QName.ToDebugTypeName() }."
+							   );
+						}
+						else
+                        {
+                            throw new ResolverException(step.token,
+                                $"Incorrect number of arguments.  Expected {method.Parameters.Count(p => !p.IsOptional && !p.IsRest)}"
+                                );
+                        }
+                    }
+                }
 			}
 		}
 
