@@ -256,55 +256,22 @@ assert.throws = function (expectedErrorConstructor, func, message) {
 };
 
 
+//since ToString(null) evaluates to "null" split(null) evaluates to split("null",0)
+var __split = function() {
+  return "gnulluna"
+}().split(null);
 
+assert.sameValue(typeof __split, "object", 'The value of `typeof __split` is "object"');
 
+assert.sameValue(
+  __split.constructor,
+  Array,
+  'The value of __split.constructor is expected to equal the value of Array'
+);
 
-var __obj = {
-  toString: function() {
-    return {};
-  },
-  valueOf: function() {
-    throw "intostr";
-  }
-};
-
-var __obj2 = {
-  valueOf: function() {
-    throw "intointeger";
-  }
-};
-
-__FACTORY.prototype.lastIndexOf = String.prototype.lastIndexOf;
-
-var __instance = new __FACTORY(void 0);
-
-//////////////////////////////////////////////////////////////////////////////
-//CHECK#1
-try {
-  var x = __instance.lastIndexOf(__obj, __obj2);
-  throw new Test262Error('#1: var x = __instance.lastIndexOf(__obj, __obj2) lead to throwing exception');
-} catch (e) {
-  if (e !== "intostr") {
-    throw new Test262Error('#1.1: Exception === "intostr". Actual: ' + e);
-  }
-}
-//
-//////////////////////////////////////////////////////////////////////////////
-
-function __FACTORY(value) {
-  this.value = value;
-  this.toString = function() {
-    return new Number;
-  };
-  this.valueOf = function() {
-    return this.value + ""
-  };
-}
-
-
-
-
-
+assert.sameValue(__split.length, 2, 'The value of __split.length is 2');
+assert.sameValue(__split[0], "g", 'The value of __split[0] is "g"');
+assert.sameValue(__split[1], "una", 'The value of __split[1] is "una"');
 
 
 trace('OK');

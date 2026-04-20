@@ -3469,6 +3469,47 @@ namespace juicescript.runtime
 				if (error.raised) return;
 			}
 
+			//slice
+			{
+				var name_str = Context.GC.AllocString("slice");
+				if (name_str == 0)
+				{
+					throw new LoaderException("slice_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.STRING.Instance.Traits.First(t => t.QName.Name == "slice").Method;
+
+				ASMethod m = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("String proto : slice alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+
 		}
 
 		private void CreateFunctionProto(ref ReceiveError error)
@@ -4231,7 +4272,19 @@ namespace juicescript.runtime
 
 		private unsafe NaNBoxing InvokeReadProperty(ref ReceiveError error, NaNBoxing thisValue, int vtable_index, ref Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
-			if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
+			if (thisValue.ValueType == BoxType.LocalString)
+			{
+				Debug.Assert(vtable_index == 0);
+
+				Span<char> buffer = stackalloc char[16];
+				int len = thisValue.GetLocalStringChars(buffer);
+
+				NaNBoxing result = default;
+				result.SetInt(len);
+
+				return result;
+			}
+			else if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
 				//讲道理，Number,Boolean之类好像没有属性
 #if DEBUG
@@ -5160,6 +5213,106 @@ namespace juicescript.runtime
 						{
 							NaNBoxing instance = new NaNBoxing();
 							instance.SetHeapPtr(_obj.RefInstance.HeapPtr);
+							result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
+
+							//throw new NotImplementedException("属性的引用未实现");
+						}
+					}
+					else if (_obj.RefInstance.ValueType == BoxType.LocalString)
+					{
+
+						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
+						{
+							Context.GC.CheckGC(ref error);
+
+							Span<char> temp = stackalloc char[16];
+							ReadOnlySpan<char> searchName;
+
+							if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
+							{
+								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+								searchName = temp.Slice(0, l);
+
+							}
+							else
+							{
+								searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str.AsSpan();
+							}
+
+							NaNBoxing ns = new NaNBoxing();
+							ASNamespace @namespace = null;
+							if (_obj.searchNameSpacePtr > 0)
+							{
+								ns.SetHeapPtr(_obj.searchNameSpacePtr);
+								RtHeapInstance ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+								@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
+
+							}
+
+
+							
+							if (@namespace != null)
+							{
+								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
+							}
+							else
+							{
+								var proto = Context.GC.Heap[((RtPayloadScriptClass)Context.GC.Heap[Context.STRING.__instance_index__].facility).PROTO__PTR];
+							lbl_searh_class_proto:
+								NaNBoxing value; int shape_ptr; int index; RtPayloadDynamic prop;
+								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+								{
+									result = value;
+								}
+								else
+								{
+									int p = ((RtPayloadInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									if (p != 0)
+									{
+										proto = Context.GC.Heap[p];
+										goto lbl_searh_class_proto;
+									}
+
+									RaiseReferenceError_MulitNameNotFound(ref error, searchName,Context.STRING.QName);
+								}
+							}
+							
+							
+							
+						}
+						else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
+						{
+#if DEBUG
+							throw new InvalidOperationException();
+#else
+								Environment.FailFast("出错了，这里跑不到") ; return default;
+#endif
+
+						}
+						else if (_obj.trait[0] == null && _obj.trait[1] != null)
+						{
+							RaiseReferenceError_WriteToReadonlyProperty(ref error, _obj.trait[1].Method.Body, _obj.as_type.QName);
+						}
+						else if (_obj.trait[0].Kind == TraitKind.Slot || _obj.trait[0].Kind == TraitKind.Constant)
+						{
+#if DEBUG
+								throw new InvalidOperationException();
+#else
+								Environment.FailFast("出错了，这里跑不到") ; return default;
+#endif
+							
+						}
+#if DEBUG
+						else if (_obj.trait[0].Kind == TraitKind.Method && _obj.trait[1] == null)
+						{
+							throw new InvalidOperationException("Method不会构造到STACK_CACHE_OBJ中");
+
+						}
+#endif
+						else
+						{
+							NaNBoxing instance = new NaNBoxing();
+							instance = _obj.RefInstance;
 							result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
 
 							//throw new NotImplementedException("属性的引用未实现");
@@ -7075,6 +7228,8 @@ namespace juicescript.runtime
 				totype = TypeKind.Vector;
 			}
 
+			bool isRetry = false;
+
 		lbl_retry:
 
 			switch (totype)
@@ -8034,7 +8189,14 @@ namespace juicescript.runtime
 								}
 							}
 						case NaNBoxing.BoxType.Undefined:
-							outvalue.SetNull();
+							if (isRetry)
+							{
+								outvalue.SetHeapPtr( TYPEOF_undefined_STR );
+							}
+							else
+							{
+								outvalue.SetNull();
+							}
 							return;
 						case NaNBoxing.BoxType.Null:
 							outvalue.SetNull();
@@ -8266,8 +8428,17 @@ namespace juicescript.runtime
 										}
 									case RtHeapTypeKind.CLOSURE:
 										{
-											outvalue.SetHeapPtr(is_from_objtostring ? OBJECT_FUNCTION_STR : FUNCTION_TOSTRING_STR);
-											return;
+											if (scope_ptr == 0)
+											{
+												outvalue.SetHeapPtr(is_from_objtostring ? OBJECT_FUNCTION_STR : FUNCTION_TOSTRING_STR);
+												return;
+											}
+											else
+											{
+												to_invoke = instance;
+												hint = HINT.h_string;
+												goto lbl_toprimitive;
+											}
 										}
 									//case RtHeapTypeKind.CACHE_LD_CLASS:
 									case RtHeapTypeKind.STACK_CACHE_OBJ:
@@ -8573,6 +8744,7 @@ namespace juicescript.runtime
 				}
 
 				invalue = outvalue;
+				isRetry = true;
 				goto lbl_retry;
 
 				//var ns_set = Context.GC.Heap[scope_ptr].Type._link_codescope.NamespaceSet;

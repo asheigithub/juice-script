@@ -131,6 +131,9 @@ namespace juicescript.runtime.buildin
 			context.player.TryCreateStringValue(sb.ToString(), out v, ref error);
 			context.StackSlots[returnSlotIndex] = v;
 
+			context.GC.CheckGC(ref error);
+
+
 		}
 
 
@@ -366,6 +369,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing result;
 			context.player.TryCreateStringValue(sb.ToString(), out result, ref error);
 			context.StackSlots[returnSlotIndex] = result;
+
+			context.GC.CheckGC(ref error);
 		}
 
 
@@ -752,6 +757,192 @@ namespace juicescript.runtime.buildin
 				}
 			}
 		}
+		//.String$:AS3::slice
+		[NativeFunction(".String$:AS3::slice")]
+		public static void String_slice(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_slice(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		//.String$@::slice
+		[NativeFunction(".String$@::slice")]
+		public static void String_Proto_slice(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			/*
+			 在JS里，如果 slice(0)  , 这时 endIndex是0。但是如果传 slice(0,undefined),那么endIndex是 0x7fffffff,这个过于奇怪.
+			AS3中，endIndex如果传入了undefined,undefined转换为Number是NaN,于是就是0，按Flash的来。
+			 */
+
+
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			NaNBoxing startArg = scope.ReadSlot(0, context.player);
+			NaNBoxing endArg = scope.ReadSlot(1, context.player);
+
+			if (double.IsPositiveInfinity(startArg.Number))
+			{
+				startArg.SetNumber(0x7fffffff);
+			}
+
+			if (double.IsPositiveInfinity(endArg.Number))
+			{
+				endArg.SetNumber(0x7fffffff);
+			}
+
+
+			NaNBoxing startIndex = default;
+			NaNBoxing endIndex = default;
+
+			context.player.ConvertValueType(ref error, startArg, TypeKind.Int, context.INT, ref startIndex);
+			if (error.raised)
+			{
+				return;
+			}
+			context.player.ConvertValueType(ref error, endArg, TypeKind.Int, context.INT, ref endIndex);
+			if (error.raised)
+			{
+				return;
+			}
+
+			int strLen;
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> str_buffer = stackalloc char[16];
+				strLen = thisPtr.GetLocalStringChars(str_buffer);
+
+				int startIdx = startIndex.IntValue;
+				int endIdx = endIndex.IntValue;
+
+				if (startIdx < 0)
+				{
+					startIdx = strLen + startIdx;
+					if (startIdx < 0) startIdx = 0;
+				}
+				else if (startIdx > strLen)
+				{
+					startIdx = strLen;
+				}
+
+				if (endIdx < 0)
+				{
+					endIdx = strLen + endIdx;
+					if (endIdx < 0) endIdx = 0;
+				}
+				else if (endIdx > strLen)
+				{
+					endIdx = strLen;
+				}
+
+				if (startIdx >= endIdx)
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+				}
+				else
+				{
+					int sliceLen = endIdx - startIdx;
+					if (sliceLen > 16) sliceLen = 16;
+					Span<char> temp = stackalloc char[16];
+					thisPtr.GetLocalStringChars(temp);
+					var result = temp.Slice(startIdx, sliceLen);
+
+					
+					NaNBoxing v=default;
+					Span<byte> dst = stackalloc byte[64];
+					int len = System.Text.Encoding.UTF8.GetBytes(result, dst);
+					if (len <= 5)
+					{
+						v.SetLocalString(dst.Slice(0, len));
+						context.StackSlots[returnSlotIndex] = v;
+					}
+					else
+					{
+						var resultStr = new string(result);
+						context.player.TryCreateStringValue(resultStr, out v, ref error);
+
+						context.StackSlots[returnSlotIndex] = v;
+
+						context.GC.CheckGC(ref error);
+					}
+					
+
+					
+
+				}
+			}
+			else
+			{
+				var str = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				strLen = str.Length;
+
+				int startIdx = startIndex.IntValue;
+				int endIdx = endIndex.IntValue;
+
+				if (startIdx < 0)
+				{
+					startIdx = strLen + startIdx;
+					if (startIdx < 0) startIdx = 0;
+				}
+				else if (startIdx > strLen)
+				{
+					startIdx = strLen;
+				}
+
+				if (endIdx < 0)
+				{
+					endIdx = strLen + endIdx;
+					if (endIdx < 0) endIdx = 0;
+				}
+				else if (endIdx > strLen)
+				{
+					endIdx = strLen;
+				}
+
+				if (startIdx >= endIdx)
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+				}
+				else
+				{
+					string result = str.Substring(startIdx, endIdx - startIdx);
+					NaNBoxing v;
+					context.player.TryCreateStringValue(result, out v, ref error);
+					context.StackSlots[returnSlotIndex] = v;
+
+
+					context.GC.CheckGC(ref error);
+				}
+			}
+		}
+
+
+
+
+
+
+
+
 
 	}
 
