@@ -370,6 +370,189 @@ namespace juicescript.runtime.buildin
 
 
 
+		[NativeFunction(".String$:AS3::indexOf")]
+		public static void String_indexOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			String_Proto_indexOf(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+		}
+
+
+		//.String$@::indexOf
+		[NativeFunction(".String$@::indexOf")]
+		public static void String_Proto_indexOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+
+			NaNBoxing val = scope.ReadSlot(0,context.player);
+			if (val.ValueType == NaNBoxing.BoxType.Null || val.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.StackSlots[returnSlotIndex].SetInt(-1);
+				return;
+			}
+
+			NaNBoxing index_box = default;
+			context.player.ConvertValueType(ref error, scope.ReadSlot(1, context.player), TypeKind.Int, context.INT, ref index_box);
+			Debug.Assert(!error.raised);
+
+
+			int i = index_box.IntValue;
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> str_buffer = stackalloc char[16];
+				int len = thisPtr.GetLocalStringChars(str_buffer);
+				ReadOnlySpan<char> str_span = str_buffer.Slice(0, len);
+
+				if (val.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					Span<char> temp = stackalloc char[16];
+					len = val.GetLocalStringChars(temp);
+					ReadOnlySpan<char> val_char = temp.Slice(0, len);
+
+					if (i >= str_span.Length)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						int find = str_span.Slice(i).IndexOf(val_char, StringComparison.Ordinal);
+						if (find < 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt(i + find);
+						}
+					}
+
+				}
+				else
+				{
+					string val_str = ((RtPayloadString)context.GC.Heap[val.HeapPtr].facility).Str;
+					ReadOnlySpan<char> val_char = val_str.AsSpan();
+
+					if (i >= str_span.Length)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						int find = str_span.Slice(i).IndexOf(val_char, StringComparison.Ordinal);
+						if (find < 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt(i + find);
+						}
+					}
+
+
+
+				}
+
+
+
+			}
+			else
+			{
+				var str = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+
+				if (val.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					Span<char> temp = stackalloc char[16];
+					int len = val.GetLocalStringChars(temp);
+					ReadOnlySpan<char> val_char = temp.Slice(0,len);
+
+					var str_span = str.AsSpan();
+					if (i >= str_span.Length || i< 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						int find = str_span.Slice(i).IndexOf(val_char, StringComparison.Ordinal);
+						if (find < 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt( i + find );
+						}
+					}
+
+				}
+				else
+				{
+					string val_str = ((RtPayloadString)context.GC.Heap[val.HeapPtr].facility).Str;
+
+					if (i >= str.Length || i<0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						context.StackSlots[returnSlotIndex].SetInt(str.IndexOf(val_str, i));
+					}
+				}
+
+			}
+		}
+
+		//.String$:AS3::lastIndexOf
+		[NativeFunction(".String$:AS3::lastIndexOf")]
+		public static void String_lastIndexOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_lastIndexOf(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+
+		//.String$@::lastIndexOf
+		[NativeFunction(".String$@::lastIndexOf")]
+		public static void String_Proto_lastIndexOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			
+
+
+
+		}
+
 	}
 
 }
