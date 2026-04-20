@@ -1,4 +1,4 @@
-﻿using juicescript.ABC;
+using juicescript.ABC;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -539,18 +539,218 @@ namespace juicescript.runtime.buildin
 
 
 
-		//.String$@::lastIndexOf
+//.String$@::lastIndexOf
 		[NativeFunction(".String$@::lastIndexOf")]
 		public static void String_Proto_lastIndexOf(Context context,
 			ASMethod method,
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{ 
-			
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
 
 
 
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+
+			NaNBoxing val = scope.ReadSlot(0, context.player);
+			if (val.ValueType == NaNBoxing.BoxType.Null || val.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.StackSlots[returnSlotIndex].SetInt(-1);
+				return;
+			}
+
+			NaNBoxing index_arg = scope.ReadSlot(1, context.player);
+			if (double.IsNaN(index_arg.Number))
+			{
+				index_arg.SetNumber(0x7FFFFFFF);
+			}
+
+			NaNBoxing index_box = default;
+			context.player.ConvertValueType(ref error, index_arg, TypeKind.Int, context.INT, ref index_box);
+			Debug.Assert(!error.raised);
+
+
+			int startIndex = index_box.IntValue;
+
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> str_buffer = stackalloc char[16];
+				int strLen = thisPtr.GetLocalStringChars(str_buffer);
+				ReadOnlySpan<char> str_span = str_buffer.Slice(0, strLen);
+
+				if (val.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					Span<char> temp = stackalloc char[16];
+					int valLen = val.GetLocalStringChars(temp);
+					ReadOnlySpan<char> val_span = temp.Slice(0, valLen);
+
+					if (valLen == 0)
+					{
+						int result = startIndex > strLen - 1 ? strLen : startIndex;
+						context.StackSlots[returnSlotIndex].SetInt(result);
+						return;
+					}
+
+					int startIdx = startIndex;
+					if (startIdx > strLen - 1)
+					{
+						startIdx = strLen - 1;
+					}
+					if (startIdx < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+						return;
+					}
+
+					for (int i = startIdx; i >= 0; i--)
+					{
+						bool found = true;
+						if (i + valLen > strLen)
+						{
+							found = false;
+						}
+						else
+						{
+							for (int j = 0; j < valLen; j++)
+							{
+								if (str_span[i + j] != val_span[j])
+								{
+									found = false;
+									break;
+								}
+							}
+						}
+						if (found)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(i);
+							return;
+						}
+					}
+					context.StackSlots[returnSlotIndex].SetInt(-1);
+				}
+				else
+				{
+					string val_str = ((RtPayloadString)context.GC.Heap[val.HeapPtr].facility).Str;
+					ReadOnlySpan<char> val_span = val_str.AsSpan();
+					int valLen = val_str.Length;
+
+					if (valLen == 0)
+					{
+						int result = startIndex > strLen - 1 ? strLen : startIndex;
+						context.StackSlots[returnSlotIndex].SetInt(result);
+						return;
+					}
+
+					int startIdx = startIndex;
+					if (startIdx > strLen - 1)
+					{
+						startIdx = strLen - 1;
+					}
+					if (startIdx < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+						return;
+					}
+
+					for (int i = startIdx; i >= 0; i--)
+					{
+						if (i + valLen <= strLen && str_span.Slice(i, valLen).SequenceEqual(val_span))
+						{
+							context.StackSlots[returnSlotIndex].SetInt(i);
+							return;
+						}
+					}
+					context.StackSlots[returnSlotIndex].SetInt(-1);
+				}
+			}
+			else
+			{
+				var str = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				int strLen = str.Length;
+				ReadOnlySpan<char> str_span = str.AsSpan();
+
+				if (val.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					Span<char> temp = stackalloc char[16];
+					int valLen = val.GetLocalStringChars(temp);
+					ReadOnlySpan<char> val_span = temp.Slice(0, valLen);
+
+					if (valLen == 0)
+					{
+						int result = startIndex > strLen - 1 ? strLen : startIndex;
+						context.StackSlots[returnSlotIndex].SetInt(result);
+						return;
+					}
+
+					int startIdx = startIndex;
+					if (startIdx > strLen - 1)
+					{
+						startIdx = strLen - 1;
+					}
+					if (startIdx < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+						return;
+					}
+
+					for (int i = startIdx; i >= 0; i--)
+					{
+						if (i + valLen <= strLen && str_span.Slice(i, valLen).SequenceEqual(val_span))
+						{
+							context.StackSlots[returnSlotIndex].SetInt(i);
+							return;
+						}
+					}
+					context.StackSlots[returnSlotIndex].SetInt(-1);
+				}
+				else
+				{
+					string val_str = ((RtPayloadString)context.GC.Heap[val.HeapPtr].facility).Str;
+					int valLen = val_str.Length;
+
+					if (valLen == 0)
+					{
+						int result = startIndex > strLen - 1 ? strLen : startIndex;
+						context.StackSlots[returnSlotIndex].SetInt(result);
+						return;
+					}
+
+					int startIdx = startIndex;
+					if (startIdx > strLen - 1)
+					{
+						startIdx = strLen - 1;
+					}
+					if (startIdx < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+						return;
+					}
+
+					for (int i = startIdx; i >= 0; i--)
+					{
+						if (i + valLen <= strLen && str_span.Slice(i, valLen).SequenceEqual(val_str))
+						{
+							context.StackSlots[returnSlotIndex].SetInt(i);
+							return;
+						}
+					}
+					context.StackSlots[returnSlotIndex].SetInt(-1);
+				}
+			}
 		}
 
 	}

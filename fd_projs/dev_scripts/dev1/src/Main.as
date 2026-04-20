@@ -256,22 +256,56 @@ assert.throws = function (expectedErrorConstructor, func, message) {
 };
 
 
-trace( "a".lastIndexOf('a') );
 
-var __instance = { valueOf: function () 
-{
-	return true;
-} };
 
-__instance.lastIndexOf = String.prototype.lastIndexOf;
+
+var __obj = {
+  toString: function() {
+    return {};
+  },
+  valueOf: function() {
+    throw "intostr";
+  }
+};
+
+var __obj2 = {
+  valueOf: function() {
+    throw "intointeger";
+  }
+};
+
+__FACTORY.prototype.lastIndexOf = String.prototype.lastIndexOf;
+
+var __instance = new __FACTORY(void 0);
 
 //////////////////////////////////////////////////////////////////////////////
 //CHECK#1
-if (__instance.lastIndexOf(true, false) !== 0) {
-  throw new Test262Error('#1: __instance = new Object(true); __instance.lastIndexOf = String.prototype.lastIndexOf;  __instance.lastIndexOf(true, false) === 0. Actual: ' + __instance.lastIndexOf(true, false));
+try {
+  var x = __instance.lastIndexOf(__obj, __obj2);
+  throw new Test262Error('#1: var x = __instance.lastIndexOf(__obj, __obj2) lead to throwing exception');
+} catch (e) {
+  if (e !== "intostr") {
+    throw new Test262Error('#1.1: Exception === "intostr". Actual: ' + e);
+  }
 }
 //
 //////////////////////////////////////////////////////////////////////////////
+
+function __FACTORY(value) {
+  this.value = value;
+  this.toString = function() {
+    return new Number;
+  };
+  this.valueOf = function() {
+    return this.value + ""
+  };
+}
+
+
+
+
+
+
 
 trace('OK');
 
