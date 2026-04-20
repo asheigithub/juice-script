@@ -256,25 +256,26 @@ assert.throws = function (expectedErrorConstructor, func, message) {
 };
 
 
-//since ToString(null) evaluates to "null" split(null) evaluates to split("null",0)
-var __split = function() {
-  return "gnulluna"
-}().split(null);
 
-assert.sameValue(typeof __split, "object", 'The value of `typeof __split` is "object"');
+var __obj = {
+  toString: function() {
+    return /*a*/ /\u0037\u0037/g;
+  }
+};
 
-assert.sameValue(
-  __split.constructor,
-  Array,
-  'The value of __split.constructor is expected to equal the value of Array'
-);
+Number.prototype.split = String.prototype.split;
 
-assert.sameValue(__split.length, 2, 'The value of __split.length is 2');
-assert.sameValue(__split[0], "g", 'The value of __split[0] is "g"');
-assert.sameValue(__split[1], "una", 'The value of __split[1] is "una"');
+try {
+  var __split = (6776767677.006771122677555).toString().split(__obj);
+  throw new Test262Error('#1: "__split = 6776767677.006771122677555.split(__obj)" lead to throwing exception');
+} catch (e) {
+  assert(e instanceof TypeError, 'The result of `(e instanceof TypeError)` is true');
+}
 
 
 trace('OK');
+
+
 
 
 

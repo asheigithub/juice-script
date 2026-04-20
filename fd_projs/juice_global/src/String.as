@@ -72,7 +72,7 @@ package
 		 * @param	limit 要放入数组中的最大项数。默认为允许的最大值。
 		 * @return  一个子字符串的数组。
 		 */
-		AS3 native function split(delimiter:String, limit:Number = 0x7fffffff):Array;
+		AS3 native function split(delimiter:* = null, limit:* = 0x7fffffff):Array;
 
 		/**
 		 * 返回一个子字符串，该子字符串中的字符是通过从指定的 startIndex 开始，按照 len 指定的长度截取所得的。原始字符串保持不变。

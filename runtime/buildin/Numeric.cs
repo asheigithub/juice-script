@@ -504,7 +504,7 @@ namespace juicescript.runtime.buildin
 			return sb.ToString();
 		}
 
-		private static string ToNumberString(double x, int radix)
+		internal static string ToNumberString(double x, int radix)
 		{
 			if (x < 0)
 			{

@@ -60,6 +60,8 @@ namespace juicescript.compiler.parse
         int cline;
         int linepos;
 
+        Token last_notwhitespace_word;
+
         public TokenList GetWords(string input,bool combieNeg)
         {
             cline = 0;
@@ -218,13 +220,14 @@ namespace juicescript.compiler.parse
                         result.StringValue += n1;
                     } while (true);
                 }
-                else if (lastword == null
-                    || lastword.Type == Token.TokenType.other && ExpressionContextTokens.Contains(lastword.StringValue)
-					|| lastword.Type == Token.TokenType.other && lastword.StringValue == ";"
-					|| lastword.Type == Token.TokenType.other && lastword.StringValue == "{"
-                    || (lastword.Type == Token.TokenType.other && lastword.StringValue == ":" && IsTernary(lastword,preWords) )
-					|| (lastword.Type == Token.TokenType.other && lastword.StringValue == "}" && IsBlockStatement(preWords))
-                    || (lastword.Type == Token.TokenType.other && lastword.StringValue == ">")
+                else if (last_notwhitespace_word == null
+                    || last_notwhitespace_word.Type == Token.TokenType.other && ExpressionContextTokens.Contains(last_notwhitespace_word.StringValue)
+					|| last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ";"
+					|| last_notwhitespace_word.Type == Token.TokenType.identifier && last_notwhitespace_word.StringValue == "return"
+					|| last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == "{"
+                    || (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ":" && IsTernary(last_notwhitespace_word, preWords) )
+					|| (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == "}" && IsBlockStatement(preWords))
+                    || (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ">")
                     )
                 {
                     result.line = cline;
@@ -511,7 +514,22 @@ namespace juicescript.compiler.parse
             else if (
                 char.IsDigit(ch)
                 ||
-                ch == '.' && seeNextChar(input, currentptr) != '\0' && char.IsDigit(seeNextChar(input, currentptr))
+                (ch == '.' && seeNextChar(input, currentptr) != '\0' && char.IsDigit(seeNextChar(input, currentptr)))
+                ||
+                (ch == '-' && seeNextChar(input, currentptr) != '\0' && (
+                                                char.IsDigit( seeNextChar(input,currentptr) ) 
+                                                || ( 
+                                                    seeNextChar(input,currentptr ) == '.'  &&  char.IsDigit( seeNextChar(input,currentptr + 1))
+																							&& '\0' != (seeNextChar(input, currentptr + 1))
+                                                    ) )
+                                                   
+                                                    &&
+                                                    (
+                                                    last_notwhitespace_word == null ||
+                                                    last_notwhitespace_word.Type == Token.TokenType.other  || last_notwhitespace_word.StringValue == "return")
+                                                   
+                                                    )
+                 //要正确处理类似 ( -1.toString ) 和 int.Min - 1 ,前者需要解析为-1,后者需要解析为减法。 
                 )
             {
                 
@@ -616,6 +634,11 @@ namespace juicescript.compiler.parse
 
             ptr = currentptr;
             lastword = result;
+
+            if (result.Type != Token.TokenType.comments && result.Type != Token.TokenType.whitespace)
+            { 
+                last_notwhitespace_word = result;
+            }
 
             return result;
         }

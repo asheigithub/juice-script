@@ -461,8 +461,12 @@ namespace juicescript.compiler.IL
 						||
 						(float.IsNaN(Constants[i].FloatValue) && float.IsNaN(v))
 						||
-						(Constants[i].FloatValue == v)
-						)
+						(Constants[i].FloatValue == v &&
+						(v != 0.0f ||
+										(float.IsNegative(v) && float.IsNegative(Constants[i].FloatValue))
+									 ||
+										(!float.IsNegative(v) && !float.IsNegative(Constants[i].FloatValue)))
+						))
 					{
 						return i;
 					}
@@ -489,7 +493,13 @@ namespace juicescript.compiler.IL
                         ||
                         (double.IsNaN(Constants[i].Number ) && double.IsNaN(v) )
                         ||
-                        (Constants[i].Number == v )
+                        (Constants[i].Number == v && 
+                        ( v != 0.0  ||  
+                                        ( double.IsNegative(v) && double.IsNegative( Constants[i].Number) )
+						             ||
+										(!double.IsNegative(v) && !double.IsNegative(Constants[i].Number))
+
+						) )
                         )
                     {
                         return i;

@@ -3510,6 +3510,47 @@ namespace juicescript.runtime
 				if (error.raised) return;
 			}
 
+			//split
+			{
+				var name_str = Context.GC.AllocString("split");
+				if (name_str == 0)
+				{
+					throw new LoaderException("split_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.STRING.Instance.Traits.First(t => t.QName.Name == "split").Method;
+
+				ASMethod m = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("String proto : split alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+
 		}
 
 		private void CreateFunctionProto(ref ReceiveError error)
@@ -8179,7 +8220,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									string str = invalue.Number.ToString();
+									string str = buildin.Numeric.ToNumberString(invalue.Number); //invalue.Number.ToString();
 									// 使用辅助函数优化字符串创建
 									if (!TryCreateStringValue(str, out outvalue, ref error))
 									{
@@ -8399,31 +8440,48 @@ namespace juicescript.runtime
 									case RtHeapTypeKind.ARRAY:
 										{
 
-											int ptr = Context.GC.AllocString("[object Array]");
-											if (ptr == 0)
+											if (scope_ptr == 0)
 											{
-												RaiseOutOfMemory(ref error);
-												return;
+												int ptr = Context.GC.AllocString("[object Array]");
+												if (ptr == 0)
+												{
+													RaiseOutOfMemory(ref error);
+													return;
+												}
+												else
+												{
+													outvalue.SetHeapPtr(ptr);
+													return;
+												}
 											}
 											else
 											{
-												outvalue.SetHeapPtr(ptr);
-												return;
+												to_invoke = instance;
+												hint = HINT.h_string;
+												goto lbl_toprimitive;
 											}
 										}
 									case RtHeapTypeKind.VECTOR:
 										{
-
-											int ptr = Context.GC.AllocString($"[object Vector.<{(((RtPayloadVector)instance.facility).element_asclass == null ? "*" : ((RtPayloadVector)instance.facility).element_asclass.QName.ToDebugTypeName())}>]");
-											if (ptr == 0)
+											if (scope_ptr == 0)
 											{
-												RaiseOutOfMemory(ref error);
-												return;
+												int ptr = Context.GC.AllocString($"[object Vector.<{(((RtPayloadVector)instance.facility).element_asclass == null ? "*" : ((RtPayloadVector)instance.facility).element_asclass.QName.ToDebugTypeName())}>]");
+												if (ptr == 0)
+												{
+													RaiseOutOfMemory(ref error);
+													return;
+												}
+												else
+												{
+													outvalue.SetHeapPtr(ptr);
+													return;
+												}
 											}
 											else
 											{
-												outvalue.SetHeapPtr(ptr);
-												return;
+												to_invoke = instance;
+												hint = HINT.h_string;
+												goto lbl_toprimitive;
 											}
 										}
 									case RtHeapTypeKind.CLOSURE:
@@ -17627,7 +17685,7 @@ namespace juicescript.runtime
 													LoadStackLocater(&argLocater, &P);
 
 													NaNBoxing box = stackslots[argLocater.index];
-													ConvertValueType(ref error, box, TypeKind.String, Context.STRING, ref stackslots[target.index]);
+													ConvertValueType(ref error, box, TypeKind.String, Context.STRING, ref stackslots[target.index] , scope_ptr);
 													if (error.raised)
 													{
 														goto flag_handle_error;

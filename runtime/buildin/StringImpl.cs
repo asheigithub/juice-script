@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using static juicescript.runtime.Player;
@@ -938,11 +939,211 @@ namespace juicescript.runtime.buildin
 
 
 
+		// .String$:AS3::split
+		[NativeFunction(".String$:AS3::split")]
+		public static void String_split(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_split(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		[NativeFunction(".String$@::split")]
+		public static void String_Proto_split(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			/*根据test262,传入undefined会导致split没有任何匹配,传入null却会当作"null"匹配
+			 */
 
 
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			NaNBoxing delimiter = scope.ReadSlot(0, context.player);
+			NaNBoxing limit = scope.ReadSlot(1, context.player);
 
 
+			if ( limit.ValueType == NaNBoxing.BoxType.Undefined )
+			{
+				limit.SetInt(0x7fffffff);
+			}
 
+			context.player.ConvertValueType(ref error, limit, TypeKind.Uint, context.UINT, ref limit,scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			unsafe
+			{
+				ReadOnlySpan<char> delimiter_char;
+				Span<char> _buffer = stackalloc char[16];
+
+				bool delimiterIsUndefined= false;
+
+				if (delimiter.ValueType == NaNBoxing.BoxType.Null)
+				{
+					delimiter_char = "null";
+				}
+				else if (delimiter.ValueType == NaNBoxing.BoxType.Undefined)
+				{
+					delimiter_char = "";delimiterIsUndefined = true;
+				}
+				else
+				{
+					context.player.ConvertValueType(ref error, delimiter, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+					if (error.raised)
+					{
+						return;
+					}
+					NaNBoxing v = context.StackSlots[returnSlotIndex];
+					if (v.ValueType == NaNBoxing.BoxType.LocalString)
+					{
+						var len = v.GetLocalStringChars(_buffer);
+						delimiter_char = _buffer.Slice(0, len);
+					}
+					else
+					{
+						delimiter_char = ((RtPayloadString)context.GC.Heap[v.HeapPtr].facility).Str.AsSpan();
+					}
+				}
+
+				
+				var instancePtr = context.CacheArrayPtr + returnSlotIndex;
+				var instance = context.GC.Heap[instancePtr];
+				instance.Type = context.ARRAY.Instance;
+
+				((RtPayloadArray)instance.facility).array_len = 0;
+				((RtPayloadArray)instance.facility).methodscopeslot_ref_state = 0;
+				((RtPayloadArray)instance.facility).HEAPINSTANCE_PTR = 0;
+
+
+				context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
+
+
+				var arr_payload = (RtPayloadArray)context.GC.Heap[instancePtr].facility;
+				Debug.Assert(arr_payload.StoreMode == RtPayloadArray.ArrayStoreMode.cache);
+
+
+				ReadOnlySpan<char> thisStr;
+				Span<char> thisbuffer = stackalloc char[16];
+				if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					var len = thisPtr.GetLocalStringChars(thisbuffer);
+					thisStr = thisbuffer.Slice(0, len);
+				}
+				else
+				{
+					thisStr = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.AsSpan();
+				}
+
+				if (context.StackPosition + 1 >= Context.STACK_LENGTH)
+				{
+					context.player.RaiseStackOverflow(ref error);
+					return;
+				}
+
+				while (true)
+				{
+					int index = thisStr.IndexOf(delimiter_char, StringComparison.Ordinal);
+
+					ReadOnlySpan<char> toemplace;
+
+					bool isbreak = false;
+
+
+					if (!delimiterIsUndefined && delimiter_char.Length == 0)
+					{
+						if (thisStr.Length == 0 || limit.UIntValue <= arr_payload.array_len)
+						{
+							return;
+						}
+
+						toemplace = thisStr.Slice(0, 1);
+						thisStr = thisStr.Slice(1);
+					}
+					else if (index >= 0 && delimiter_char.Length>0 && limit.UIntValue > arr_payload.array_len)
+					{
+						toemplace = thisStr.Slice(0, index);
+						thisStr = thisStr.Slice(index + delimiter_char.Length);
+					}
+					else if (limit.UIntValue > arr_payload.array_len)
+					{
+						toemplace = thisStr;
+						isbreak = true;
+					}
+					else
+					{
+						return;
+					}
+
+					if (arr_payload.array_len + 1 >= RtPayloadArray.MAX_CACHE_ELEMENT)
+					{
+						if (arr_payload.StoreMode != RtPayloadArray.ArrayStoreMode.normal)
+						{
+							instancePtr = arr_payload.ChangeStoreToHeap(context.player, ref error);
+							if (error.raised)
+							{
+								return;
+							}
+							instance = context.GC.Heap[instancePtr];
+							arr_payload = (RtPayloadArray)instance.facility;
+							context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
+
+
+							context.GC.CheckGC(ref error);
+
+						}
+					}
+
+					context.StackPosition++;
+
+					NaNBoxing result;
+					if (context.player.TryCreateStringValue(new string(toemplace), out result, ref error))
+					{
+						context.StackSlots[context.StackPosition - 1] = result;
+						context.player.SetArraySlot(result, arr_payload.array_len, instance, ref error);
+						context.StackPosition--;
+
+						if (error.raised)
+						{
+							return;
+						}
+
+						context.GC.CheckGC(ref error);
+					}
+					else
+					{
+						context.StackPosition--;
+						return;
+					}
+
+					if (isbreak)
+					{
+						break;
+					}
+
+				}
+
+			}
+
+		}
 
 	}
 

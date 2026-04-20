@@ -6375,15 +6375,30 @@ namespace juicescript.compiler.IL.Generator
 						sbyte t_sbytev;
 						if (sbyte.TryParse((string)data.Data.Value, out t_sbytev))
 						{
-							int constindex = compileEnv.AddConstSbyte(t_sbytev);
+							if (t_sbytev == 0 && ((string)data.Data.Value).StartsWith("-"))
+							{
+								int constindex = compileEnv.AddConstNumber(-0.0);
 
-							StackLocater stackLocater = makeOrGetLocater(TypeKind.SByte);
-							INS_Ld_Const ld_Const = new INS_Ld_Const(token);
-							ld_Const.dst = stackLocater;
-							ld_Const.const_index = constindex;
+								StackLocater stackLocater = makeOrGetLocater(TypeKind.Number);
+								INS_Ld_Const ld_Const = new INS_Ld_Const(token);
+								ld_Const.dst = stackLocater;
+								ld_Const.const_index = constindex;
 
-							compileEnv.instructions.Add(ld_Const);
-							return stackLocater;
+								compileEnv.instructions.Add(ld_Const);
+								return stackLocater;
+							}
+							else
+							{
+								int constindex = compileEnv.AddConstSbyte(t_sbytev);
+
+								StackLocater stackLocater = makeOrGetLocater(TypeKind.SByte);
+								INS_Ld_Const ld_Const = new INS_Ld_Const(token);
+								ld_Const.dst = stackLocater;
+								ld_Const.const_index = constindex;
+
+								compileEnv.instructions.Add(ld_Const);
+								return stackLocater;
+							}
 						}
 						else
 						{
@@ -6464,6 +6479,11 @@ namespace juicescript.compiler.IL.Generator
 												double v; 
 												if (double.TryParse((string)data.Data.Value, out v))
 												{
+													if (((string)data.Data.Value).StartsWith("-") && v == 0)
+													{
+														v = -0.0;
+													}
+
 													int constindex = compileEnv.AddConstNumber(v);
 
 													StackLocater stackLocater = makeOrGetLocater(TypeKind.Number);
