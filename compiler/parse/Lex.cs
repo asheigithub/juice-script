@@ -221,10 +221,11 @@ namespace juicescript.compiler.parse
                     } while (true);
                 }
                 else if (last_notwhitespace_word == null
-                    || last_notwhitespace_word.Type == Token.TokenType.other && ExpressionContextTokens.Contains(last_notwhitespace_word.StringValue)
-					|| last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ";"
-					|| last_notwhitespace_word.Type == Token.TokenType.identifier && last_notwhitespace_word.StringValue == "return"
-					|| last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == "{"
+                    || (last_notwhitespace_word.Type == Token.TokenType.other && ExpressionContextTokens.Contains(last_notwhitespace_word.StringValue))
+					|| (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ";")
+					|| (last_notwhitespace_word.Type == Token.TokenType.identifier && last_notwhitespace_word.StringValue == "return")
+					|| (last_notwhitespace_word.Type == Token.TokenType.identifier && last_notwhitespace_word.StringValue == "await")
+					|| (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == "{")
                     || (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ":" && IsTernary(last_notwhitespace_word, preWords) )
 					|| (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == "}" && IsBlockStatement(preWords))
                     || (last_notwhitespace_word.Type == Token.TokenType.other && last_notwhitespace_word.StringValue == ">")
@@ -526,7 +527,11 @@ namespace juicescript.compiler.parse
                                                     &&
                                                     (
                                                     last_notwhitespace_word == null ||
-                                                    last_notwhitespace_word.Type == Token.TokenType.other  || last_notwhitespace_word.StringValue == "return")
+                                                    last_notwhitespace_word.Type == Token.TokenType.other  
+                                                    || last_notwhitespace_word.StringValue == "return"
+                                                    || last_notwhitespace_word.StringValue == "await"
+                                                    
+                                                    )
                                                    
                                                     )
                  //要正确处理类似 ( -1.toString ) 和 int.Min - 1 ,前者需要解析为-1,后者需要解析为减法。 

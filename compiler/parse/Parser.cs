@@ -559,7 +559,7 @@ namespace juicescript.compiler.parse
                     if (token.StringValue == "continue" || 
                         token.StringValue == "break"    ||
                         token.StringValue == "return"   ||
-                        token.StringValue == "throw"
+                        token.StringValue == "throw"    
                         )
                     {
                         Token toreplace = null;
