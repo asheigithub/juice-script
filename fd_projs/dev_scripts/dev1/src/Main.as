@@ -16,9 +16,7 @@ package
 
 }
 
-trace( [].push(5,6,7) );
-
-
+trace( parseFloat("12.3456789012345678"));
 
 //var __instance = new Object(42);
 //

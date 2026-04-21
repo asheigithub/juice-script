@@ -53,6 +53,277 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex].SetBoolean(double.IsFinite(arg0.Number));
 		}
 
+		[NativeFunction("$__AS3__.toplevel$public::parseFloat")]
+		public static void TopLevel_parseFloat(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var arg0 = scope.ReadSlot(0, context.player);
+
+			if (arg0.ValueType == NaNBoxing.BoxType.Null || arg0.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
+			}
+			else
+			{
+				unsafe
+				{
+					ReadOnlySpan<char> thisStr;
+					Span<char> thisbuffer = stackalloc char[16];
+					if (arg0.ValueType == NaNBoxing.BoxType.LocalString)
+					{
+						var len = arg0.GetLocalStringChars(thisbuffer);
+						thisStr = thisbuffer.Slice(0, len);
+					}
+					else
+					{
+						thisStr = ((RtPayloadString)context.GC.Heap[arg0.HeapPtr].facility).Str.AsSpan();
+					}
+
+					long nv = 0;
+					bool nv_isoverflow = false;
+
+					double n = 0;
+					int e = 0;
+					bool isEmode = false;
+
+					int sign = 1;
+					int esign = 1;
+					bool haschecksign = false;
+
+					bool blank = false;
+
+
+					bool isdecimal = false;
+					double d = 1;
+
+					//Infinity
+
+					ReadOnlySpan<char> infchar = "Infinity";
+
+					int inftest = 0;
+
+					bool hasdigit = false;
+
+
+					int charindex = 0;
+					{
+						
+						while ( charindex < thisStr.Length )
+						{
+
+							var p = thisStr[charindex];
+							charindex++;
+
+							if (p == '\0')
+							{
+								break;	
+							}
+
+							char c = p;
+
+							if ( ! char.IsWhiteSpace(c) )//c != ' ')
+							{
+
+								if (blank)
+								{
+									break;
+								}
+
+
+								if (!haschecksign)
+								{
+									haschecksign = true;
+									if (c == '-')
+									{
+										if (isEmode)
+										{
+											esign = -1;
+										}
+										else
+										{
+											sign = -1;
+										}
+
+										++p;
+										continue;
+									}
+									else if (c == '+')
+									{
+										++p;
+										continue;
+									}
+								}
+
+								if (inftest < 8)
+								{
+									if (c == infchar[inftest])
+									{
+										++inftest;
+
+										if (inftest == 8)
+										{
+											n = double.PositiveInfinity;
+											hasdigit = true;
+											blank = true;
+										}
+
+										++p;
+										continue;
+									}
+								}
+
+								if (c >= '0' && c <= '9')
+								{
+									hasdigit = true;
+									if (isEmode)
+									{
+										if (e * 10 + (c - '0') > e)
+										{
+											e = e * 10 + (c - '0');
+										}
+
+									}
+									else if (isdecimal)
+									{
+										if (nv * 10 + (c - '0') > nv)
+										{
+											d = d * 10;
+
+											n = n * 10 + (c - '0');
+
+											nv = nv * 10 + (c - '0');
+										}
+										else
+										{
+											//小数点后溢出，那么 d和n都不乘就好了
+										}
+									}
+									else
+									{
+										n = n * 10 + (c - '0');
+
+										if (nv * 10 + (c - '0') > nv)
+										{
+											nv = nv * 10 + (c - '0');
+										}
+										else
+										{
+											nv_isoverflow = true;
+										}
+									}
+								}
+								else if (c == 'e' || c == 'E')
+								{
+									hasdigit = true;
+									if (!isEmode)
+									{
+										isEmode = true;
+										haschecksign = false;
+									}
+									else
+									{
+										break;
+									}
+								}
+
+								else if (c == '.')
+								{
+
+									if (isdecimal)
+									{
+										break;
+									}
+									else
+									{
+										isdecimal = true;
+									}
+								}
+								else
+								{
+									break;
+								}
+
+							}
+							else if (inftest > 0 || haschecksign)
+							{
+								blank = true;
+							}
+							else if (hasdigit)
+							{
+								blank = true;
+							}
+
+
+							++p;
+						}
+
+
+					}
+
+					if (double.IsNaN(n) || double.IsInfinity(n) || nv_isoverflow)
+					{
+						n = n / d;
+					}
+					else
+					{ 
+						n = nv / d;
+					}
+
+					if (esign > 0)
+					{
+						
+						while (e > 0)
+						{
+							n = n * 10;
+							--e;
+
+							if (double.IsInfinity(n))
+								break;
+
+						}
+						
+					}
+					else
+					{
+						
+						
+						double div = 1;
+
+						while (e > 0)
+						{
+							div *= 10;
+							--e;
+
+							if (double.IsInfinity(div))
+							{
+								break;
+							}
+						}
+
+						n = n / div;
+						
+
+					}
+
+					if (!hasdigit)
+						context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
+					else
+						context.StackSlots[returnSlotIndex].SetNumber(n * sign);
+					
+				}
+
+			}
+
+
+		}
+
+
+
+
 
 
 		private static void WritePrimitive(NaNBoxing arg, IPrint printer,Context context)
