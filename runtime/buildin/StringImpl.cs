@@ -3,8 +3,10 @@ using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static juicescript.runtime.Player;
@@ -130,11 +132,12 @@ namespace juicescript.runtime.buildin
 			}
 
 			NaNBoxing v;
-			context.player.TryCreateStringValue(sb.ToString(), out v, ref error);
-			context.StackSlots[returnSlotIndex] = v;
+			if (context.player.TryCreateStringValue(sb.ToString(), out v, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = v;
 
-			context.GC.CheckGC(ref error);
-
+				context.GC.CheckGC(ref error);
+			}
 
 		}
 
@@ -369,10 +372,12 @@ namespace juicescript.runtime.buildin
 			}
 
 			NaNBoxing result;
-			context.player.TryCreateStringValue(sb.ToString(), out result, ref error);
-			context.StackSlots[returnSlotIndex] = result;
+			if (context.player.TryCreateStringValue(sb.ToString(), out result, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = result;
 
-			context.GC.CheckGC(ref error);
+				context.GC.CheckGC(ref error);
+			}
 		}
 
 
@@ -383,8 +388,8 @@ namespace juicescript.runtime.buildin
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{ 
-			String_Proto_indexOf(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+		{
+			String_Proto_indexOf(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
 		}
 
 
@@ -415,7 +420,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
 
 
-			NaNBoxing val = scope.ReadSlot(0,context.player);
+			NaNBoxing val = scope.ReadSlot(0, context.player);
 			if (val.ValueType == NaNBoxing.BoxType.Null || val.ValueType == NaNBoxing.BoxType.Undefined)
 			{
 				context.StackSlots[returnSlotIndex].SetInt(-1);
@@ -495,10 +500,10 @@ namespace juicescript.runtime.buildin
 				{
 					Span<char> temp = stackalloc char[16];
 					int len = val.GetLocalStringChars(temp);
-					ReadOnlySpan<char> val_char = temp.Slice(0,len);
+					ReadOnlySpan<char> val_char = temp.Slice(0, len);
 
 					var str_span = str.AsSpan();
-					if (i >= str_span.Length || i< 0)
+					if (i >= str_span.Length || i < 0)
 					{
 						context.StackSlots[returnSlotIndex].SetInt(-1);
 					}
@@ -511,7 +516,7 @@ namespace juicescript.runtime.buildin
 						}
 						else
 						{
-							context.StackSlots[returnSlotIndex].SetInt( i + find );
+							context.StackSlots[returnSlotIndex].SetInt(i + find);
 						}
 					}
 
@@ -520,7 +525,7 @@ namespace juicescript.runtime.buildin
 				{
 					string val_str = ((RtPayloadString)context.GC.Heap[val.HeapPtr].facility).Str;
 
-					if (i >= str.Length || i<0)
+					if (i >= str.Length || i < 0)
 					{
 						context.StackSlots[returnSlotIndex].SetInt(-1);
 					}
@@ -546,7 +551,7 @@ namespace juicescript.runtime.buildin
 
 
 
-//.String$@::lastIndexOf
+		//.String$@::lastIndexOf
 		[NativeFunction(".String$@::lastIndexOf")]
 		public static void String_Proto_lastIndexOf(Context context,
 			ASMethod method,
@@ -869,8 +874,8 @@ namespace juicescript.runtime.buildin
 					thisPtr.GetLocalStringChars(temp);
 					var result = temp.Slice(startIdx, sliceLen);
 
-					
-					NaNBoxing v=default;
+
+					NaNBoxing v = default;
 					Span<byte> dst = stackalloc byte[64];
 					int len = System.Text.Encoding.UTF8.GetBytes(result, dst);
 					if (len <= 5)
@@ -881,15 +886,16 @@ namespace juicescript.runtime.buildin
 					else
 					{
 						var resultStr = new string(result);
-						context.player.TryCreateStringValue(resultStr, out v, ref error);
+						if (context.player.TryCreateStringValue(resultStr, out v, ref error))
+						{
+							context.StackSlots[returnSlotIndex] = v;
 
-						context.StackSlots[returnSlotIndex] = v;
-
-						context.GC.CheckGC(ref error);
+							context.GC.CheckGC(ref error);
+						}
 					}
-					
 
-					
+
+
 
 				}
 			}
@@ -929,11 +935,11 @@ namespace juicescript.runtime.buildin
 				{
 					string result = str.Substring(startIdx, endIdx - startIdx);
 					NaNBoxing v;
-					context.player.TryCreateStringValue(result, out v, ref error);
-					context.StackSlots[returnSlotIndex] = v;
-
-
-					context.GC.CheckGC(ref error);
+					if (context.player.TryCreateStringValue(result, out v, ref error))
+					{
+						context.StackSlots[returnSlotIndex] = v;
+						context.GC.CheckGC(ref error);
+					}
 				}
 			}
 		}
@@ -980,12 +986,12 @@ namespace juicescript.runtime.buildin
 			NaNBoxing limit = scope.ReadSlot(1, context.player);
 
 
-			if ( limit.ValueType == NaNBoxing.BoxType.Undefined )
+			if (limit.ValueType == NaNBoxing.BoxType.Undefined)
 			{
 				limit.SetInt(0x7fffffff);
 			}
 
-			context.player.ConvertValueType(ref error, limit, TypeKind.Uint, context.UINT, ref limit,scope_ptr);
+			context.player.ConvertValueType(ref error, limit, TypeKind.Uint, context.UINT, ref limit, scope_ptr);
 			if (error.raised)
 			{
 				return;
@@ -996,7 +1002,7 @@ namespace juicescript.runtime.buildin
 				ReadOnlySpan<char> delimiter_char;
 				Span<char> _buffer = stackalloc char[16];
 
-				bool delimiterIsUndefined= false;
+				bool delimiterIsUndefined = false;
 
 				if (delimiter.ValueType == NaNBoxing.BoxType.Null)
 				{
@@ -1004,7 +1010,7 @@ namespace juicescript.runtime.buildin
 				}
 				else if (delimiter.ValueType == NaNBoxing.BoxType.Undefined)
 				{
-					delimiter_char = "";delimiterIsUndefined = true;
+					delimiter_char = ""; delimiterIsUndefined = true;
 				}
 				else
 				{
@@ -1025,7 +1031,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				
+
 				var instancePtr = context.CacheArrayPtr + returnSlotIndex;
 				var instance = context.GC.Heap[instancePtr];
 				instance.Type = context.ARRAY.Instance;
@@ -1079,7 +1085,7 @@ namespace juicescript.runtime.buildin
 						toemplace = thisStr.Slice(0, 1);
 						thisStr = thisStr.Slice(1);
 					}
-					else if (index >= 0 && delimiter_char.Length>0 && limit.UIntValue > arr_payload.array_len)
+					else if (index >= 0 && delimiter_char.Length > 0 && limit.UIntValue > arr_payload.array_len)
 					{
 						toemplace = thisStr.Slice(0, index);
 						thisStr = thisStr.Slice(index + delimiter_char.Length);
@@ -1157,10 +1163,10 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			String_Proto_substring(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+			String_Proto_substring(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
 		}
 
-//.String$@::substring
+		//.String$@::substring
 		[NativeFunction(".String$@::substring")]
 		public static void String_Proto_substring(Context context,
 			ASMethod method,
@@ -1255,11 +1261,12 @@ namespace juicescript.runtime.buildin
 					else
 					{
 						var resultStr = new string(result);
-						context.player.TryCreateStringValue(resultStr, out v, ref error);
+						if (context.player.TryCreateStringValue(resultStr, out v, ref error))
+						{
+							context.StackSlots[returnSlotIndex] = v;
 
-						context.StackSlots[returnSlotIndex] = v;
-
-						context.GC.CheckGC(ref error);
+							context.GC.CheckGC(ref error);
+						}
 					}
 				}
 			}
@@ -1291,10 +1298,12 @@ namespace juicescript.runtime.buildin
 				{
 					string result = str.Substring(startIdx, endIdx - startIdx);
 					NaNBoxing v;
-					context.player.TryCreateStringValue(result, out v, ref error);
-					context.StackSlots[returnSlotIndex] = v;
+					if (context.player.TryCreateStringValue(result, out v, ref error))
+					{
+						context.StackSlots[returnSlotIndex] = v;
 
-					context.GC.CheckGC(ref error);
+						context.GC.CheckGC(ref error);
+					}
 				}
 			}
 		}
@@ -1303,11 +1312,168 @@ namespace juicescript.runtime.buildin
 
 		[NativeFunction(".String$:AS3::substr")]
 		public static void String_substr(Context context,
+					ASMethod method,
+					int scope_ptr,
+					NaNBoxing thisPtr,
+					int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			NaNBoxing startArg = scope.ReadSlot(0, context.player);
+			NaNBoxing lenArg = scope.ReadSlot(1, context.player);
+
+			if (double.IsPositiveInfinity(startArg.Number))
+			{
+				startArg.SetNumber(0x7fffffff);
+			}
+
+			if (double.IsPositiveInfinity(lenArg.Number))
+			{
+				lenArg.SetNumber(0x7fffffff);
+			}
+
+			NaNBoxing startIndex = default;
+			NaNBoxing length = default;
+
+			context.player.ConvertValueType(ref error, startArg, TypeKind.Int, context.INT, ref startIndex);
+			if (error.raised)
+			{
+				return;
+			}
+			context.player.ConvertValueType(ref error, lenArg, TypeKind.Int, context.INT, ref length);
+			if (error.raised)
+			{
+				return;
+			}
+
+			int strLen;
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> str_buffer = stackalloc char[16];
+				strLen = thisPtr.GetLocalStringChars(str_buffer);
+
+				int startIdx = startIndex.IntValue;
+				int len = length.IntValue;
+
+				if (startIdx < 0)
+				{
+					startIdx = strLen + startIdx;
+				}
+
+				if (startIdx < 0) startIdx = 0;
+				if (startIdx >= strLen)
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					return;
+				}
+
+				if (len < 0) len = 0;
+
+				int maxLen = strLen - startIdx;
+				if (len > maxLen) len = maxLen;
+
+				if (len <= 0)
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+				}
+				else
+				{
+					if (len > 16) len = 16;
+					Span<char> temp = stackalloc char[16];
+					thisPtr.GetLocalStringChars(temp);
+					var result = temp.Slice(startIdx, len);
+
+					NaNBoxing v = default;
+					Span<byte> dst = stackalloc byte[64];
+					int byteLen = System.Text.Encoding.UTF8.GetBytes(result, dst);
+					if (byteLen <= 5)
+					{
+						v.SetLocalString(dst.Slice(0, byteLen));
+						context.StackSlots[returnSlotIndex] = v;
+					}
+					else
+					{
+						var resultStr = new string(result);
+						if (context.player.TryCreateStringValue(resultStr, out v, ref error))
+						{
+							context.StackSlots[returnSlotIndex] = v;
+
+							context.GC.CheckGC(ref error);
+						}
+					}
+				}
+			}
+			else
+			{
+				var str = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				strLen = str.Length;
+
+				int startIdx = startIndex.IntValue;
+				int len = length.IntValue;
+
+				if (startIdx < 0)
+				{
+					startIdx = strLen + startIdx;
+				}
+
+				if (startIdx < 0) startIdx = 0;
+				if (startIdx >= strLen)
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					return;
+				}
+
+				if (len < 0) len = 0;
+
+				int maxLen = strLen - startIdx;
+				if (len > maxLen) len = maxLen;
+
+				if (len <= 0)
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+				}
+				else
+				{
+					string result = str.Substring(startIdx, len);
+					NaNBoxing v;
+					if (context.player.TryCreateStringValue(result, out v, ref error))
+					{
+						context.StackSlots[returnSlotIndex] = v;
+
+						context.GC.CheckGC(ref error);
+					}
+				}
+			}
+		}
+
+
+		//.String$:AS3::toLowerCase
+		[NativeFunction(".String$:AS3::toLowerCase")]
+		public static void String_toLowerCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			String_Proto_toLowerCase(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+		}
+
+		//.String$@::toLowerCase
+		[NativeFunction(".String$@::toLowerCase")]
+		public static void String_Proto_toLowerCase(Context context,
 			ASMethod method,
 			int scope_ptr,
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
 			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
 			if (error.raised)
 			{
@@ -1316,20 +1482,134 @@ namespace juicescript.runtime.buildin
 
 			thisPtr = context.StackSlots[returnSlotIndex];
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				
+				Span<char> thisbuffer = stackalloc char[16];
 
-			NaNBoxing startIndex = scope.ReadSlot(0, context.player);
-			NaNBoxing len = scope.ReadSlot(1, context.player);
+				var len = thisPtr.GetLocalStringChars(thisbuffer);
+				ReadOnlySpan<char> thisStr = thisbuffer.Slice(0, len);
 
+				Span<char> dst = stackalloc char[16];
+				int lowcaselen = thisStr.ToLowerInvariant(dst);
 
+				ReadOnlySpan<char> lowcase = dst.Slice(0,lowcaselen);
 
+				Span<byte> bytes = stackalloc byte[16];
+				int utf8len = System.Text.Encoding.UTF8.GetBytes(lowcase, bytes);
+
+				if (utf8len <= 5)
+				{
+					context.StackSlots[returnSlotIndex].SetLocalString(bytes.Slice(0, utf8len));
+				}
+				else
+				{
+					string lowcaseStr = lowcase.ToString();
+					NaNBoxing v;
+					if (context.player.TryCreateStringValue(lowcaseStr, out v, ref error))
+					{
+						context.StackSlots[returnSlotIndex] = v;
+
+						context.GC.CheckGC(ref error);
+					}
+				}
+
+			}
+			else
+			{
+				string lowcase = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.ToLowerInvariant();
+				NaNBoxing v;
+				if (context.player.TryCreateStringValue(lowcase, out v, ref error))
+				{
+					context.StackSlots[returnSlotIndex] = v;
+
+					context.GC.CheckGC(ref error);
+				}
+			}
+
+			
+		}
+
+		//.String$:AS3::toUpperCase
+		[NativeFunction(".String$:AS3::toUpperCase")]
+		public static void String_toUpperCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_toUpperCase(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		//.String$@::toUpperCase
+		[NativeFunction(".String$@::toUpperCase")]
+		public static void String_Proto_toUpperCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+
+				Span<char> thisbuffer = stackalloc char[16];
+
+				var len = thisPtr.GetLocalStringChars(thisbuffer);
+				ReadOnlySpan<char> thisStr = thisbuffer.Slice(0, len);
+
+				Span<char> dst = stackalloc char[16];
+				int lowcaselen = thisStr.ToUpperInvariant(dst);
+
+				ReadOnlySpan<char> lowcase = dst.Slice(0, lowcaselen);
+
+				Span<byte> bytes = stackalloc byte[16];
+				int utf8len = System.Text.Encoding.UTF8.GetBytes(lowcase, bytes);
+
+				if (utf8len <= 5)
+				{
+					context.StackSlots[returnSlotIndex].SetLocalString(bytes.Slice(0, utf8len));
+				}
+				else
+				{
+					string lowcaseStr = lowcase.ToString();
+					NaNBoxing v;
+					if (context.player.TryCreateStringValue(lowcaseStr, out v, ref error))
+					{
+						context.StackSlots[returnSlotIndex] = v;
+
+						context.GC.CheckGC(ref error);
+					}
+				}
+
+			}
+			else
+			{
+				string lowcase = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.ToUpperInvariant();
+				NaNBoxing v;
+				if (context.player.TryCreateStringValue(lowcase, out v, ref error))
+				{
+					context.StackSlots[returnSlotIndex] = v;
+
+					context.GC.CheckGC(ref error);
+				}
+			}
 
 
 		}
-
-
-
-
 	}
 
 }
