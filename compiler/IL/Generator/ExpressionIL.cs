@@ -2087,8 +2087,15 @@ namespace juicescript.compiler.IL.Generator
 				// await is only valid in async functions
 
 				var m = ((ASMethodBody)compileEnv.Scope.Container).Method;
-				
-				if (!m.Flags.HasFlag(MethodFlags.ASYNC))
+
+				if (m.Container is ASScript) //允许在包外代码await
+				{
+					m.Flags = m.Flags | MethodFlags.ASYNC;
+					m.Flags = m.Flags | MethodFlags.NeedActivation;
+
+				}
+
+				else if (!m.Flags.HasFlag(MethodFlags.ASYNC))
 				{
 					throw new ResolverException(step.token, "await is only valid in async functions");
 				}

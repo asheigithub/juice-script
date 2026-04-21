@@ -2010,22 +2010,22 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[retslot].SetUndefined();
 
 			((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
-			if (!g_method.Flags.HasFlag(MethodFlags.Native))
-			{
+			//if (!g_method.Flags.HasFlag(MethodFlags.Native))
+			//{
 				context.player.Execute(ref info, m, genwapper.async_body,
 					genwapper.scopeType, slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
-			}
-			else
-			{
-				context.player.SetNativeDelegate(g_method, ref asyncErr);
+			//}
+			//else
+			//{
+			//	context.player.SetNativeDelegate(g_method, ref asyncErr);
 
-				if (!asyncErr.raised)
-				{
-					((NativeFun)g_method.nativefunction_delegate)(context, g_method, genwapper.async_body , genwapper.thisPtr, context.StackPosition,
-						ref asyncErr, retslot);
-				}
+			//	if (!asyncErr.raised)
+			//	{
+			//		((NativeFun)g_method.nativefunction_delegate)(context, g_method, genwapper.async_body , genwapper.thisPtr, context.StackPosition,
+			//			ref asyncErr, retslot);
+			//	}
 				
-			}
+			//}
 
 
 
