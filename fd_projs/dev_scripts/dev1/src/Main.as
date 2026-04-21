@@ -256,16 +256,12 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
-
-
-var __instance =  { toString:function(){ return true; } };
-
-__instance.search = String.prototype.search;
+var aString = new String("test string");
 
 //////////////////////////////////////////////////////////////////////////////
 //CHECK#1
-if (__instance.search(true) !== 0) {
-  throw new Test262Error('#1: __instance = new Object(true); __instance.search = String.prototype.search;  __instance.search(true) === 0. Actual: ' + __instance.search(true));
+if (aString.search("String") !== -1) {
+  throw new Test262Error('#1: var aString = new String("test string"); aString.search("String")=== -1. Actual: ' + aString.search("String"));
 }
 //
 //////////////////////////////////////////////////////////////////////////////

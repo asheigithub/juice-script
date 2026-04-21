@@ -34,6 +34,9 @@ namespace juicescript.runtime
 		internal int StackPos;
 		internal int SlotCount;
 
+
+		internal int __sendargcount;
+
 		public NaNBoxing ThisPtr
 		{
 			get {

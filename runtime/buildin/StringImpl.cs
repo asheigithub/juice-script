@@ -448,7 +448,14 @@ namespace juicescript.runtime.buildin
 
 					if (i >= str_span.Length)
 					{
-						context.StackSlots[returnSlotIndex].SetInt(-1);
+						if (len == 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(0);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
 					}
 					else
 					{
@@ -471,7 +478,14 @@ namespace juicescript.runtime.buildin
 
 					if (i >= str_span.Length)
 					{
-						context.StackSlots[returnSlotIndex].SetInt(-1);
+						if (val_str.Length == 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(0);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
 					}
 					else
 					{
@@ -506,7 +520,14 @@ namespace juicescript.runtime.buildin
 					var str_span = str.AsSpan();
 					if (i >= str_span.Length || i < 0)
 					{
-						context.StackSlots[returnSlotIndex].SetInt(-1);
+						if (len == 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(0);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
 					}
 					else
 					{
@@ -528,7 +549,14 @@ namespace juicescript.runtime.buildin
 
 					if (i >= str.Length || i < 0)
 					{
-						context.StackSlots[returnSlotIndex].SetInt(-1);
+						if (i == 0 && val_str.Length == 0)
+						{
+							context.StackSlots[returnSlotIndex].SetInt(0);
+						}
+						else
+						{
+							context.StackSlots[returnSlotIndex].SetInt(-1);
+						}
 					}
 					else
 					{
@@ -1893,6 +1921,181 @@ namespace juicescript.runtime.buildin
 
 
 		}
+
+		//.String$@::search
+		[NativeFunction(".String$:AS3::search")]
+		public static void String_search(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_search(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+		[NativeFunction(".String$@::search")]
+		public static void String_Proto_search(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+
+			
+			
+
+			NaNBoxing val = scope.ReadSlot(0, context.player);
+
+			if (scope.__sendargcount == 0) //如果完全没有传参，则默认是"";
+			{
+				ReadOnlySpan<byte> temp = stackalloc byte[0];
+				val.SetLocalString(temp);
+			}
+
+			else if (val.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				val.SetHeapPtr(context.player.TYPEOF_undefined_STR);
+			}
+
+
+			if (context.StackPosition + 1 > Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+
+			int basePos = context.StackPosition;
+
+			context.StackSlots[basePos].SetUndefined();
+			context.StackPosition += 1;
+
+
+
+			context.player.ConvertValueType(ref error, val, TypeKind.String, context.STRING, ref context.StackSlots[basePos], scope_ptr);
+			if (error.raised)
+			{
+				context.StackPosition = basePos;
+				return;
+			}
+			val = context.StackSlots[basePos];
+			
+
+
+
+			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
+			{
+				Span<char> str_buffer = stackalloc char[16];
+				int len = thisPtr.GetLocalStringChars(str_buffer);
+				ReadOnlySpan<char> str_span = str_buffer.Slice(0, len);
+
+				if (val.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					Span<char> temp = stackalloc char[16];
+					len = val.GetLocalStringChars(temp);
+					ReadOnlySpan<char> val_char = temp.Slice(0, len);
+
+					
+					
+					int find = str_span.IndexOf(val_char, StringComparison.Ordinal);
+					if (find < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						context.StackSlots[returnSlotIndex].SetInt( find);
+					}
+					
+
+					context.StackPosition = basePos;
+
+				}
+				else
+				{
+					string val_str = Extensions.GetPrimitiveValueToString(context.player, val); 
+					ReadOnlySpan<char> val_char = val_str.AsSpan();
+
+					
+					
+					int find = str_span.IndexOf(val_char, StringComparison.Ordinal);
+					if (find < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						context.StackSlots[returnSlotIndex].SetInt(find);
+					}
+					
+
+					context.StackPosition = basePos;
+
+				}
+
+
+
+			}
+			else
+			{
+				var str = ((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+
+				if (val.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					Span<char> temp = stackalloc char[16];
+					int len = val.GetLocalStringChars(temp);
+					ReadOnlySpan<char> val_char = temp.Slice(0, len);
+
+					var str_span = str.AsSpan();
+					
+					
+					int find = str_span.IndexOf(val_char, StringComparison.Ordinal);
+					if (find < 0)
+					{
+						context.StackSlots[returnSlotIndex].SetInt(-1);
+					}
+					else
+					{
+						context.StackSlots[returnSlotIndex].SetInt(find);
+					}
+
+					context.StackPosition = basePos;
+				}
+				else
+				{
+					string val_str = Extensions.GetPrimitiveValueToString( context.player, val );
+
+					
+					
+					context.StackSlots[returnSlotIndex].SetInt(str.IndexOf(val_str));
+					
+				}
+
+			}
+
+
+
+		}
+
 
 	}
 

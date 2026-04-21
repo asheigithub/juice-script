@@ -362,6 +362,8 @@ namespace juicescript.runtime
 				m_scopePayload.ParentPtr = scope_ptr;
 				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method.Body._link_codescope,true);
 
+				m_scopePayload.__sendargcount = args;
+
 				//save this
 				{
 					ScopeHeapLocater scopeHeapLocater;
