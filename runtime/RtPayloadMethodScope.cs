@@ -34,7 +34,9 @@ namespace juicescript.runtime
 		internal int StackPos;
 		internal int SlotCount;
 
-
+		/// <summary>
+		/// 在RunMethod 构造时，记录实际上代码里写了几个参数。
+		/// </summary>
 		internal int __sendargcount;
 
 		public NaNBoxing ThisPtr

@@ -162,7 +162,7 @@ package
 		 * @param	args	要连接到新数组中的任意数据类型的值（如数字、元素或字符串）。
 		 * @return	一个数组，其中包含此数组中的元素，后跟参数中的元素。
 		 */
-		// AS3 native function concat (...rest) : Array; //移动到prototype
+		AS3 native function concat (...rest) : Array; 
 
 		/**
 		 * 将一个单独的元素插入一个数组中。此方法会修改数组但不制作副本。
@@ -196,7 +196,7 @@ package
 		 * @param	args	要追加到数组中的一个或多个值。
 		 * @return	一个表示新数组长度的整数。
 		 */
-		//AS3 native function push (...rest) : uint;
+		AS3 native function push (...rest) : uint;
 
 		/**
 		 * 从数组中删除一个单独的元素。此方法会修改数组但不制作副本。

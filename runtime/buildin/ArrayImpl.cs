@@ -225,7 +225,7 @@ namespace juicescript.runtime.buildin
 		}
 
 		[NativeFunction(".Array$@::toString")]
-		public static void Array_toString(
+		public static void Array_Proto_toString(
 			Context context,
 			ASMethod method,
 			int scope_ptr,
@@ -281,9 +281,19 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		[NativeFunction(".Array$:AS3::concat")]
+		public static void Array_concat(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{ 
+			Array_Proto_concat(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+		}
+
 
 		[NativeFunction(".Array$@::concat")]
-		public static void Array_concat(
+		public static void Array_Proto_concat(
 			Context context,
 			ASMethod method,
 			int scope_ptr,
@@ -448,8 +458,22 @@ namespace juicescript.runtime.buildin
 
 		}
 
-		[NativeFunction(".Array$@::push")]
+
+		//.Array$:AS3::push
+		[NativeFunction(".Array$:AS3::push")]
 		public static void Array_push(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{ 
+			Array_Proto_push(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+		}
+
+		[NativeFunction(".Array$@::push")]
+		public static void Array_Proto_push(
 			Context context,
 			ASMethod method,
 			int scope_ptr,
