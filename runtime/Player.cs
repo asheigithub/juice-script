@@ -3052,7 +3052,7 @@ namespace juicescript.runtime
 		internal int TYPEOF_string_STR;
 		internal int TYPEOF_undefined_STR;
 
-
+		internal int NULL_STR;
 
 
 		private void CreateObjectProto(ref ReceiveError error)
@@ -3810,6 +3810,51 @@ namespace juicescript.runtime
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
+
+			//replace
+			{
+				var name_str = Context.GC.AllocString("replace");
+				if (name_str == 0)
+				{
+					throw new LoaderException("replace_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.STRING.Instance.Traits.First(t => t.QName.Name == "replace").Method;
+
+				ASMethod m = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("String proto : replace alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+
 		}
 
 
@@ -4150,7 +4195,8 @@ namespace juicescript.runtime
 			TYPEOF_undefined_STR = Context.GC.AllocString("undefined"); if (TYPEOF_undefined_STR == 0) { throw new LoaderException("TYPEOF_undefined_STR alloc failed"); }
 			Context.GC.Root.Add(Context.GC.Heap[TYPEOF_undefined_STR]);
 
-
+			NULL_STR = Context.GC.AllocString("null"); if (NULL_STR == 0) { throw new LoaderException("NULL_STR alloc failed"); }
+			Context.GC.Root.Add(Context.GC.Heap[NULL_STR]);
 
 			cache_ERROR_NAME = Context.GC.AllocString("Error"); if (cache_ERROR_NAME == 0) { throw new LoaderException("cache_ERROR_NAME alloc failed"); }
 			Context.GC.Root.Add(Context.GC.Heap[cache_ERROR_NAME]);
@@ -9299,6 +9345,14 @@ namespace juicescript.runtime
 					}
 
 					outvalue.SetHeapPtr(vptr);
+				}
+				else if (totype == TypeKind.String && invalue.ValueType == BoxType.Undefined )
+				{
+					outvalue.SetHeapPtr(TYPEOF_undefined_STR);
+				}
+				else if (totype == TypeKind.String && invalue.ValueType == BoxType.Null)
+				{
+					outvalue.SetHeapPtr(NULL_STR);
 				}
 				else
 				{

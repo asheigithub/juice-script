@@ -1,4 +1,5 @@
 using juicescript.ABC;
+using juicescript.ABC.Locaters;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -1698,6 +1699,196 @@ namespace juicescript.runtime.buildin
 
 			context.StackSlots[returnSlotIndex] = thisPtr;
 
+		}
+
+
+
+
+		//.String$:AS3::replace
+		[NativeFunction(".String$:AS3::replace")]
+		public static void String_replace(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_replace(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+		//.String$@::replace
+		[NativeFunction(".String$@::replace")]
+		public static void String_Proto_replace(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			thisPtr = context.StackSlots[returnSlotIndex];
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			NaNBoxing pattern = scope.ReadSlot(0, context.player);
+			NaNBoxing repl = scope.ReadSlot(1, context.player);
+
+
+
+
+			string thisStr = Extensions.GetPrimitiveValueToString(context.player, thisPtr);
+			string patternStr = Extensions.GetPrimitiveValueToString(context.player, pattern);
+
+			int find = thisStr.IndexOf(patternStr);
+			if (find >=0 )
+			{
+
+				if (repl.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					RtHeapInstance replinstance = context.GC.Heap[repl.HeapPtr];
+					if (replinstance.TypeKind == RtHeapTypeKind.CLOSURE)
+					{
+						if (context.StackPosition + 4 > Context.STACK_LENGTH)
+						{
+							context.player.RaiseStackOverflow(ref error);
+							return;
+						}
+
+
+						int basePos = context.StackPosition;
+
+						context.StackSlots[basePos].SetUndefined();
+
+						var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 3);
+						slots.Clear();
+						slots[0] = pattern;
+						slots[1].SetInt(find);
+						slots[2] = thisPtr;
+
+						context.StackPosition += 4;
+
+						var closure = (RtPayloadClosure)replinstance.facility;
+
+						unsafe
+						{
+							StackLocater* args = stackalloc StackLocater[3];
+							args->index = 0;
+							(args + 1)->index = 1;
+							(args + 2)->index = 2;
+
+							context.player.RunMethod(((ASMethodBody)replinstance.Type).Method, closure.This, closure.ScopePtr,
+								closure.ScopeType, 3, (byte*)args, slots, ref error,
+								basePos
+								);
+
+							if (error.raised)
+							{
+								context.StackPosition = basePos;
+								return;
+							}
+
+							repl = context.StackSlots[basePos];
+
+
+							if (context.player.IsPrimitive(repl))
+							{
+
+							}
+							else
+							{
+								context.player.ConvertValueType(ref error, repl, TypeKind.String, context.STRING, ref slots[1]);
+								if (error.raised)
+								{
+									context.StackPosition = basePos;
+									return;
+								}
+
+								repl = slots[1];
+							}
+
+							string replStr = Extensions.GetPrimitiveValueToString(context.player, repl);
+							string final = thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
+
+							NaNBoxing v;
+							if (context.player.TryCreateStringValue(final, out v, ref error))
+							{
+								context.StackSlots[returnSlotIndex] = v;
+							}
+
+							context.StackPosition = basePos;
+
+							context.GC.CheckGC(ref error);
+
+							return;
+
+						}
+					}
+					else
+					{
+						goto lbl_nofunctioncase;
+					}
+
+				}
+
+			lbl_nofunctioncase:
+				{
+					if (context.StackPosition + 1 > Context.STACK_LENGTH)
+					{
+						context.player.RaiseStackOverflow(ref error);
+						return;
+					}
+
+
+					int basePos = context.StackPosition;
+
+					context.StackSlots[basePos].SetUndefined();
+					context.StackPosition += 1;
+
+					if (context.player.IsPrimitive(repl))
+					{
+					}
+					else
+					{
+						context.player.ConvertValueType(ref error, repl, TypeKind.String, context.STRING, ref context.StackSlots[basePos], scope_ptr);
+						if (error.raised)
+						{
+							context.StackPosition = basePos;
+							return;
+						}
+						repl = context.StackSlots[basePos];
+					}
+
+					
+
+					string replStr = Extensions.GetPrimitiveValueToString(context.player, repl);
+					string final = thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
+
+					NaNBoxing v;
+					if (context.player.TryCreateStringValue(final, out v, ref error))
+					{
+						context.StackSlots[returnSlotIndex] = v;
+					}
+
+					context.StackPosition = basePos;
+					context.GC.CheckGC(ref error);
+
+				}
+
+
+
+
+
+			}
 
 
 

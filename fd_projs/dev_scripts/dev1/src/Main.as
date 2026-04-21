@@ -256,38 +256,21 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
-var valueOf = String.prototype.valueOf;
-
-assert.throws(TypeError, function() {
-  valueOf.call(true);
-});
-
-assert.throws(TypeError, function() {
-  valueOf.call(-0);
-});
-
-assert.throws(TypeError, function() {
-  valueOf.call(null);
-});
-
-assert.throws(TypeError, function() {
-  valueOf.call();
-});
 
 
-assert.throws(TypeError, function() {
-  valueOf.call({
-    toString: function() {
-      return 'str';
-    }
-  });
-});
+var __instance =  { toString:function(){ return true; } };
 
-assert.throws(TypeError, function() {
-  valueOf.call(['s', 't', 'r']);
-});
+__instance.search = String.prototype.search;
 
-"bb".valueOf();
+//////////////////////////////////////////////////////////////////////////////
+//CHECK#1
+if (__instance.search(true) !== 0) {
+  throw new Test262Error('#1: __instance = new Object(true); __instance.search = String.prototype.search;  __instance.search(true) === 0. Actual: ' + __instance.search(true));
+}
+//
+//////////////////////////////////////////////////////////////////////////////
+
+
 
 trace('OK');
 

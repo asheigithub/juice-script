@@ -90,6 +90,14 @@ package
 		 */
 		AS3 native function substring(startIndex:Number = 0, endIndex:Number = 0x7fffffff):String;
 
+		
+		/**
+		* 搜索指定的 pattern 并返回第一个匹配子字符串的索引。如果没有匹配的子字符串，该方法返回 -1。
+		* 	pattern:* — 要匹配的模式，可以为任何类型的对象，但通常是字符串。如果 pattern 不是字符串，则该方法在执行前会将其转换为字符串。 当前实现中未实现正则表达式，所以只支持字符串搜索。
+		*/
+		AS3 native function search(pattern:* = null):int;
+		
+		
 		/**
 		 * 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。
 		 * @return
@@ -123,8 +131,8 @@ package
 		 * @param	repl
 		 * @return
 		 */
-		AS3 native function replace(pattern:String, repl:String):String;
-
+		AS3 native function replace(pattern:String, repl:*):String;
+		
 
 		/**
 		 * 在 String 对象末尾追加补充参数（如果需要，将它们转换为字符串）并返回结果字符串。源 String 对象的原始值保持不变。
