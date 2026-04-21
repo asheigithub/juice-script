@@ -256,24 +256,38 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
+var valueOf = String.prototype.valueOf;
+
+assert.throws(TypeError, function() {
+  valueOf.call(true);
+});
+
+assert.throws(TypeError, function() {
+  valueOf.call(-0);
+});
+
+assert.throws(TypeError, function() {
+  valueOf.call(null);
+});
+
+assert.throws(TypeError, function() {
+  valueOf.call();
+});
 
 
+assert.throws(TypeError, function() {
+  valueOf.call({
+    toString: function() {
+      return 'str';
+    }
+  });
+});
 
-var __obj = {
-  toString: function() {
-    return "\u0041b";
-  }
-}
-__obj.toUpperCase = String.prototype.toUpperCase;
+assert.throws(TypeError, function() {
+  valueOf.call(['s', 't', 'r']);
+});
 
-//////////////////////////////////////////////////////////////////////////////
-//CHECK#1
-if (__obj.toUpperCase() !== "AB") {
-  throw new Test262Error('#1: var __obj = {toString:function(){return "\u0041b";}}; __obj.toUpperCase = String.prototype.toUpperCase; __obj.toUpperCase() ==="AB". Actual: ' + __obj.toUpperCase());
-}
-//
-//////////////////////////////////////////////////////////////////////////////
-
+"bb".valueOf();
 
 trace('OK');
 

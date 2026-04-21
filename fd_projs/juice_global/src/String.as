@@ -96,12 +96,27 @@ package
 		 */
 		AS3 native function toLowerCase():String;
 
+		
+		/**
+		* 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toLowerCase() 方法生成的结果相同。
+		*/
+		AS3 native function toLocaleLowerCase():String;
+		
+		
+
 		/**
 		 * 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。
 		 * @return
 		 */
 		AS3 native function toUpperCase():String;
 
+		/**
+		 * 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toUpperCase() 方法生成的结果相同。
+		 * @return
+		 */
+		AS3 native function toLocaleUpperCase():String
+		
+		
 		/**
 		 * 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
 		 * @param	pattern

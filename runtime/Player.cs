@@ -3680,6 +3680,136 @@ namespace juicescript.runtime
 				if (error.raised) return;
 			}
 
+			//toLocaleLowerCase
+			{
+				var name_str = Context.GC.AllocString("toLocaleLowerCase");
+				if (name_str == 0)
+				{
+					throw new LoaderException("toLocaleLowerCase_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.STRING.Instance.Traits.First(t => t.QName.Name == "toLocaleLowerCase").Method;
+
+				ASMethod m = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("String proto : toLocaleLowerCase alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+			//toLocaleUpperCase
+			{
+				var name_str = Context.GC.AllocString("toLocaleUpperCase");
+				if (name_str == 0)
+				{
+					throw new LoaderException("toLocaleUpperCase_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.STRING.Instance.Traits.First(t => t.QName.Name == "toLocaleUpperCase").Method;
+
+				ASMethod m = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("String proto : toLocaleUpperCase alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+
+			//valueOf
+			{
+				var name_str = Context.GC.AllocString("valueOf");
+				if (name_str == 0)
+				{
+					throw new LoaderException("valueOf_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.STRING.Instance.Traits.First(t => t.QName.Name == "valueOf").Method;
+
+				ASMethod m = new ASMethod(Context.STRING._link_codescope.Parent.Container, Context.STRING.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("String proto : valueOf alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
 		}
 
 

@@ -1610,6 +1610,99 @@ namespace juicescript.runtime.buildin
 
 
 		}
+
+
+		
+		[NativeFunction(".String$:AS3::toLocaleLowerCase")]
+		public static void String_toLocaleLowerCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_toLowerCase(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		[NativeFunction(".String$@::toLocaleLowerCase")]
+		public static void String_Proto_toLocaleLowerCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_toLowerCase(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+		
+		[NativeFunction(".String$:AS3::toLocaleUpperCase")]
+		public static void String_toLocaleUpperCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_toUpperCase(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		[NativeFunction(".String$@::toLocaleUpperCase")]
+		public static void String_Proto_toLocaleUpperCase(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_toUpperCase(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+		//.String$:AS3::valueOf
+		[NativeFunction(".String$:AS3::valueOf")]
+		public static void String_valueOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			String_Proto_valueOf(context,method,scope_ptr,thisPtr,stackStPos,ref error,returnSlotIndex);
+		}
+
+		[NativeFunction(".String$@::valueOf")]
+		public static void String_Proto_valueOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			//if (thisPtr.ValueType == NaNBoxing.BoxType.Null || thisPtr.ValueType == NaNBoxing.BoxType.Undefined)
+			//{
+			//	context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+			//	return;
+			//}
+
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr && thisPtr.ValueType != NaNBoxing.BoxType.LocalString)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+				return;
+			}
+
+			if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr)
+			{
+				RtHeapInstance test = context.GC.Heap[thisPtr.HeapPtr];
+				if (test.TypeKind != RtHeapTypeKind.STRING)
+				{
+					context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
+					return;
+				}
+			}
+
+			context.StackSlots[returnSlotIndex] = thisPtr;
+
+
+
+
+		}
+
 	}
 
 }
