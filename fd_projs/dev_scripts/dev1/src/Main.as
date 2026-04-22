@@ -1,19 +1,108 @@
 package 
 {
-	import flash.display.Sprite;
-	import flash.utils.clearInterval;
-	import flash.utils.setInterval;
-	import ns1.BaseM;
-	
-	[Doc]
-   public class Main extends Sprite {
+	 [Doc]
+    public class Main {
         public function Main() {
-           
+            test_basic_shift();
+            test_empty_array_shift();
+            test_mixed_types();
+            test_length_property();
+            test_chain_shift();
+            test_sparse_array_shift();
+            test_sparse_with_holes();
+            test_struct_shift();
+
+            trace("All tests passed!");
         }
 
-       
-    }
+        private function test_basic_shift(): void {
+            var arr:Array = new Array(1, 2, 3);
+            var shifted = arr.shift();
+            assertEquals(1, shifted, "basic shift should return first element");
+            assertEquals(2, arr.length, "length should decrease after shift");
+            assertEquals(2, arr[0], "element at index 0 should be 2");
+            assertEquals(3, arr[1], "element at index 1 should be 3");
+            trace("test_basic_shift: PASS");
+        }
 
+        private function test_empty_array_shift(): void {
+            var arr:Array = new Array();
+            var shifted = arr.shift();
+            assertEquals(undefined, shifted, "shift empty array should return undefined");
+            assertEquals(0, arr.length, "empty array length should remain 0");
+            trace("test_empty_array_shift: PASS");
+        }
+
+        private function test_mixed_types(): void {
+            var arr:Array = new Array(1, "string", true, null, undefined);
+            var shifted = arr.shift();
+            assertEquals(1, shifted, "shift should return first element");
+            assertEquals(4, arr.length, "length should decrease");
+            assertEquals("string", arr[0], "element at index 0 should be string");
+            trace("test_mixed_types: PASS");
+        }
+
+        private function test_length_property(): void {
+            var arr:Array = new Array(1, 2, 3, 4, 5);
+            arr.length = 3;
+            var shifted = arr.shift();
+            assertEquals(1, shifted, "shift after set length should return element at index 0");
+            assertEquals(2, arr.length, "length should be 2 after shift");
+            assertEquals(2, arr[0], "element at index 0 should be 2");
+            trace("test_length_property: PASS");
+        }
+
+        private function test_chain_shift(): void {
+            var arr:Array = new Array(1, 2, 3);
+            var result = arr.shift();
+            result = arr.shift();
+            result = arr.shift();
+            result = arr.shift();
+            assertEquals(undefined, result, "multiple shifts should return undefined on empty");
+            assertEquals(0, arr.length, "array should be empty");
+            trace("test_chain_shift: PASS");
+        }
+
+        private function test_sparse_array_shift(): void {
+            var arr:Array = new Array(1, 2, 3);
+            arr[5] = 6;
+            var shifted = arr.shift();
+            assertEquals(1, shifted, "sparse array shift should return element at index 0");
+            assertEquals(5, arr.length, "sparse array length should be 5");
+            assertEquals(2, arr[0], "element at index 0 should be 2");
+            assertEquals(3, arr[1], "element at index 1 should be 3");
+            assertEquals(6, arr[4], "element at index 4 should be 6");
+            trace("test_sparse_array_shift: PASS");
+        }
+
+        private function test_sparse_with_holes(): void {
+            var arr:Array = new Array(1, 2, 3, 4, 5);
+            delete arr[1];
+            delete arr[3];
+            var shifted = arr.shift();
+            assertEquals(1, shifted, "shift should return first element");
+            assertEquals(4, arr.length, "holes are treated as elements, length should decrease from 5 to 4");
+            trace("test_sparse_with_holes: PASS");
+        }
+
+        private function test_struct_shift(): void {
+            var arr:Array = new Array();
+            var obj:Object = {x: 1};
+            arr.push(obj);
+            arr.push(2);
+            var shifted = arr.shift();
+            var result = shifted.x;
+            assertEquals(1, result, "shift should preserve struct data");
+            assertEquals(1, arr.length, "length should decrease");
+            trace("test_struct_shift: PASS");
+        }
+
+        private function assertEquals(expected:*, actual:*, msg:String): void {
+            if (expected != actual) {
+                throw new Error("Assertion failed: " + msg + ", expected=" + expected + ", actual=" + actual);
+            }
+        }
+    }
 }
 
 new Main();
@@ -257,38 +346,22 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
+Array.prototype[1] = -1;
+var x = [0, 1];
+x.length = 2;
 
-
-
-var x = new Array();
 var shift = x.shift();
-if (shift !== undefined) {
-  throw new Test262Error('#1: var x = new Array(); x.shift() === undefined. Actual: ' + (shift));
+if (shift !== 0) {
+  throw new Test262Error('#1: Array.prototype[1] = -1; x = [0,1]; x.length = 2; x.shift() === 0. Actual: ' + (shift));
 }
 
-if (x.length !== 0) {
-  throw new Test262Error('#2: var x = new Array(); x.shift(); x.length === 0. Actual: ' + (x.length));
+if (x[0] !== 1) {
+  throw new Test262Error('#2: Array.prototype[1] = -1; x = [0,1]; x.length = 2; x.shift(); x[0] === 1. Actual: ' + (x[0]));
 }
 
-var x = Array(1, 2, 3);
-x.length = 0;
-var shift = x.shift();
-if (shift !== undefined) {
-  throw new Test262Error('#2: var x = Array(1,2,3); x.length = 0; x.shift() === undefined. Actual: ' + (shift));
+if (x[1] !== -1) {
+  throw new Test262Error('#3: Array.prototype[1] = -1; x = [0,1]; x.length = 2; x.shift(); x[1] === -1. Actual: ' + (x[1]));
 }
-
-if (x.length !== 0) {
-  throw new Test262Error('#4: var x = new Array(1,2,3); x.length = 0; x.shift(); x.length === 0. Actual: ' + (x.length));
-}
-
-
-
-
-
-
-
-
-
 trace('OK');
 
 

@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
 
 namespace juicescript.runtime.buildin
@@ -572,6 +574,26 @@ namespace juicescript.runtime.buildin
 				NaNBoxing e = array.ReadSlot( array.array_len-1 , context.player, out isoutindex);
 				context.StackSlots[returnSlotIndex] = e;
 
+				if (e.ValueType == BoxType.HeapPtr)
+				{
+					var check = context.GC.Heap[e.HeapPtr];
+					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						var cacheObj = context.GC.Heap[clonedptr];
+						cacheObj.Type = check.Type;
+
+						((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+						((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+						((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+					}
+				}
+
+
+
+
 				array.SetLength(array.array_len - 1, context.player, ref error);
 			}
 			else
@@ -700,7 +722,66 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex
 			)
 		{
-			
+			// 1. Validate thisPtr is an Array
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			RtPayloadArray array;
+			int instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+
+			if (array.array_len > 0)
+			{
+				RtHeapInstance instance = context.GC.Heap[instancePtr];
+
+				bool isoutindex;
+				NaNBoxing e = array.ReadSlot(0, context.player, out isoutindex);
+				context.StackSlots[returnSlotIndex] = e;
+
+				if (e.ValueType == BoxType.HeapPtr)
+				{
+					var check = context.GC.Heap[e.HeapPtr];
+					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						var cacheObj = context.GC.Heap[clonedptr];
+						cacheObj.Type = check.Type;
+
+						((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+						((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+						((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+					}
+				}
+
+				array.DoShift(context.player, ref error);
+				if (error.raised)
+				{
+					return;
+				}
+
+				//for (uint i = 1; i < array.array_len; i++)
+				//{
+				//	NaNBoxing v =  array.ReadSlot(i, context.player, out isoutindex);
+				//	context.player.SetArraySlot(v, i - 1, instance, ref error);
+
+				//	Debug.Assert(!error.raised);
+				//}
+
+
+				array.SetLength(array.array_len - 1, context.player, ref error);
+			}
+			else
+			{
+				context.StackSlots[returnSlotIndex].SetUndefined();
+			}
 
 		}
 

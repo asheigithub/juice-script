@@ -20340,7 +20340,10 @@ namespace juicescript.runtime
 								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
 								{
 									var arr_payload = (RtPayloadArray)Context.GC.Heap[arr.HeapPtr].facility;
-									if (arr_payload.StoreMode != RtPayloadArray.ArrayStoreMode.normal)
+
+									Debug.Assert(arr_payload.StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack);
+
+									if (arr_payload.StoreMode != RtPayloadArray.ArrayStoreMode.normal && index >= arr_payload.cache_store.Length)
 									{
 										int heaparr = arr_payload.ChangeStoreToHeap(Context.player, ref error);
 										if (error.raised)
