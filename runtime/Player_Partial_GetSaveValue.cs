@@ -487,6 +487,7 @@ namespace juicescript.runtime
 						dstObj.Type = Context.GC.Heap[vec_ptr].Type;
 						var dst = (RtPayloadVector)dstObj.facility;
 
+						dst.HEAPINSTANCE_PTR = 0;
 						dst.CopyCacheFrom(vec, this);
 						dst.methodscopeslot_ref_state = 0;
 						

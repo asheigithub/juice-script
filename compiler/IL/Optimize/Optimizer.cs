@@ -458,6 +458,10 @@ namespace juicescript.compiler.IL.Optimize
 			//FastPeephole(method);
 			//return;
 
+			//if (method.Name.IndexOf("Main") >= 0)
+			//	return;
+
+
 			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
 
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);

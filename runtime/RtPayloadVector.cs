@@ -485,8 +485,7 @@ namespace juicescript.runtime
             }
 
 #endif
-
-
+            
             element_asclass = vector.element_asclass;
             element_type = vector.element_type;
 

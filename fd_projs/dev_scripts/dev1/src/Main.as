@@ -1,308 +1,218 @@
-package 
-{
-	import flash.display.Sprite;
-	import flash.utils.clearInterval;
-	import flash.utils.setInterval;
-	import ns1.BaseM;
-	
-	[Doc]
-   public class Main extends Sprite {
+package {
+    import flash.display.Sprite;
+    import flash.Vector;
+
+    [Doc]
+    public class Main extends Sprite {
+        private var width:int;
+        private var height:int;
+        private var maze:Vector.<Vector.<int>>;
+        private var visited:Vector.<Vector.<Boolean>>;
+        private var stack:Vector.<Object>;
+
         public function Main() {
-           
+            width = 31;
+            height = 21;
+            maze = new Vector.<Vector.<int>>(height);
+            visited = new Vector.<Vector.<Boolean>>(height);
+
+            for (var i:int = 0; i < height; i++) {
+                maze[i] = new Vector.<int>(width);
+                visited[i] = new Vector.<Boolean>(width);
+                for (var j:int = 0; j < width; j++) {
+                    maze[i][j] = 1;
+                    visited[i][j] = false;
+                }
+            }
+
+            generateMaze(1, 1);
+
+            var startX:int = 1;
+            var startY:int = 1;
+            var endX:int = width - 2;
+            var endY:int = height - 2;
+
+            var path:Vector.<Object> = findPath(startX, startY, endX, endY);
+
+            if (path.length > 0) {
+                for (var k:int = 0; k < path.length; k++) {
+					
+                    var px:int = path[k].x;
+                    var py:int = path[k].y;
+                    if (maze[py][px] == 0) {
+                        maze[py][px] = 2;
+                    }
+                }
+            }
+
+            var output:String = "";
+            for (var y:int = 0; y < height; y++) {
+                for (var x:int = 0; x < width; x++) {
+                    if (maze[y][x] == 1) {
+                        output += "█";
+                    } else if (maze[y][x] == 2) {
+                        output += "●";
+                    } else {
+                        output += " ";
+                    }
+                }
+                output += "\n";
+            }
+            trace(output);
+            trace("Path length: " + path.length);
         }
 
-       
-    }
+        private function generateMaze(startX:int, startY:int):void {
+            stack = new Vector.<Object>();
+            stack.push({x: startX, y: startY});
+            visited[startY][startX] = true;
+            maze[startY][startX] = 0;
 
+            while (stack.length > 0) {
+                var current:Object = stack[stack.length - 1];
+                var x:int = current.x;
+                var y:int = current.y;
+
+                var dirs:Vector.<Object> = Vector.<Object>([
+                    {dx: 0, dy: -2},
+                    {dx: 2, dy: 0},
+                    {dx: 0, dy: 2},
+                    {dx: -2, dy: 0}
+                ]);
+                shuffle(dirs);
+
+                var found:Boolean = false;
+                for (var i:int = 0; i < dirs.length; i++) {
+                    var nx:int = x + dirs[i].dx;
+                    var ny:int = y + dirs[i].dy;
+
+                    if (ny > 0 && ny < height - 1 && nx > 0 && nx < width - 1 && !visited[ny][nx]) {
+                        visited[ny][nx] = true;
+                        maze[y + dirs[i].dy / 2][x + dirs[i].dx / 2] = 0;
+                        maze[ny][nx] = 0;
+                        stack.push({x: nx, y: ny});
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    stack.pop();
+                }
+            }
+        }
+
+        private function findPath(startX:int, startY:int, endX:int, endY:int):Vector.<Object> {
+            var openSet:Vector.<Object> = new Vector.<Object>();
+            var closedSet:Vector.<Vector.<Boolean>> = new Vector.<Vector.<Boolean>>(height);
+            var cameFrom:Object = {};
+            var gScore:Vector.<Vector.<int>> = new Vector.<Vector.<int>>(height);
+            var fScore:Vector.<Vector.<int>> = new Vector.<Vector.<int>>(height);
+
+            for (var i:int = 0; i < height; i++) {
+                closedSet[i] = new Vector.<Boolean>(width);
+                gScore[i] = new Vector.<int>(width);
+                fScore[i] = new Vector.<int>(width);
+                for (var j:int = 0; j < width; j++) {
+                    closedSet[i][j] = false;
+                    gScore[i][j] = int.MAX_VALUE;
+                    fScore[i][j] = int.MAX_VALUE;
+                }
+            }
+
+            gScore[startY][startX] = 0;
+            fScore[startY][startX] = heuristic(startX, startY, endX, endY);
+            openSet.push({x: startX, y: startY, f: fScore[startY][startX]});
+
+            while (openSet.length > 0) {
+                var minIdx:int = 0;
+                for (var kk:int = 1; kk < openSet.length; kk++) {
+                    if (openSet[kk].f < openSet[minIdx].f) {
+                        minIdx = kk;
+                    }
+                }
+                var current:Object = openSet[minIdx];
+                var cx:int = current.x;
+                var cy:int = current.y;
+
+                if (cx == endX && cy == endY) {
+                    return reconstructPath(cameFrom, cx, cy);
+                }
+
+                openSet.splice(minIdx, 1);
+                closedSet[cy][cx] = true;
+
+                var neighbors:Vector.<Object> = Vector.<Object>([
+                    {dx: 0, dy: -1},
+                    {dx: 1, dy: 0},
+                    {dx: 0, dy: 1},
+                    {dx: -1, dy: 0}
+                ]);
+
+                for (var n:int = 0; n < neighbors.length; n++) {
+                    var nx:int = cx + neighbors[n].dx;
+                    var ny:int = cy + neighbors[n].dy;
+
+                    if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+                    if (maze[ny][nx] == 1) continue;
+                    if (closedSet[ny][nx]) continue;
+
+                    var tentativeG:int = gScore[cy][cx] + 1;
+                    var inOpen:Boolean = false;
+                    for (var m:int = 0; m < openSet.length; m++) {
+                        if (openSet[m].x == nx && openSet[m].y == ny) {
+                            inOpen = true;
+                            break;
+                        }
+                    }
+
+                    if (!inOpen || tentativeG < gScore[ny][nx]) {
+                        var k:String = nx + "," + ny;
+                        cameFrom[k] = {x: cx, y: cy};
+                        gScore[ny][nx] = tentativeG;
+                        fScore[ny][nx] = tentativeG + heuristic(nx, ny, endX, endY);
+
+                        if (!inOpen) {
+                            openSet.push({x: nx, y: ny, f: fScore[ny][nx]});
+                        }
+                    }
+                }
+            }
+
+            return new Vector.<Object>();
+        }
+
+        private function heuristic(x1:int, y1:int, x2:int, y2:int):int {
+            return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+        }
+
+        private function reconstructPath(cameFrom:Object, cx:int, cy:int):Vector.<Object> {
+            var path:Vector.<Object> = new Vector.<Object>();
+            path.push({x: cx, y: cy});
+
+            var k:String = cx + "," + cy;
+            while (cameFrom[k] != null) {
+                var prev:Object = cameFrom[k];
+                cx = prev.x;
+                cy = prev.y;
+                path.push({x: cx, y: cy});
+                k = cx + "," + cy;
+            }
+
+            return path;
+        }
+
+        private function shuffle(arr:Vector.<Object>):void {
+            for (var i:int = arr.length - 1; i > 0; i--) {
+                var j:int = Math.floor(Math.random() * (i + 1));
+                var temp:Object = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
 }
 
-
-//var __instance = new Object(42);
-//
-//__instance.charAt = String.prototype.charAt;
-//
-//if (__instance.charAt(false) + __instance.charAt(true) !== "42") {
-  //throw new Error('#1: __instance = new Object(42); __instance.charAt = String.prototype.charAt;  __instance = new Object(42); __instance.charAt = String.prototype.charAt; __instance.charAt(false)+__instance.charAt(true) === "42". Actual: ' + __instance.charAt(false) + __instance.charAt(true));
-//}
-//
-//
-//trace(String["hasOwnProperty"]("fromCharCode"));
+new Main();
 
 
-
-//async function asyncAdd(a:int, b:int):int {
-    //var x:int = await Promise.resolve(a);
-    //var y:int = await Promise.resolve(b);
-    //return x + y;
-//}
-//async function asyncHello():String {
-    //var result:String = await Promise.resolve("Hello");
-    //return result + " World";
-//}
-//async function returnsPromise():* {
-    //return Promise.resolve(42);
-//}
-//async function asyncVoid():void {
-    //trace("asyncVoid executing");
-//}
-//async function asyncNest():int {
-    //var inner:* = asyncInner(5);
-    //var result:int = await inner;
-    //return result * 2;
-//}
-//async function asyncInner(n:int):int {
-    //return n + 1;
-//}
-//// Test
-//var p1:* = asyncAdd(5, 3);
-//p1.then(function(v:int) { trace("asyncAdd(5,3) = " + v); });
-//var p2:* = asyncHello();
-//p2.then(function(v:String) { trace("asyncHello: " + v); });
-//var p3:* = returnsPromise();
-//p3.then(function(v:int) { trace("returnsPromise: " + v); });
-//var p4:* = asyncVoid();
-//p4.then(function(v:*) { trace("asyncVoid done"); });
-//var p5:* = asyncNest();
-//p5.then(function(v:int) { trace("asyncNest: " + v); });
-//trace("=== Init Complete ===");
-
-
-
-//import geom.Vector2;
-//var a:Vector2 = new Vector2(0,1);
-//var b = new Vector2(1,0);
-//
-//a += b;
-//
-//trace(a);
-//trace( a.dot(b) );
-//trace( a.cross(b) );
-//trace( a * 3 );
-//trace( a / 3 );
-//
-//trace( 6 * b );
-//
-//trace( +-b);   
-
-//final class BB
-//{
-	//[operator("%")]
-	//static function bsb(i:BB,j:int):String
-	//{
-		//if(true)
-		//{
-			//return "BB % " + [j, j].toString() ;
-		//}
-		//else
-		//{
-			//throw 3;
-		//}
-	//}
-//}
-//
-//
-//var c = new BB();
-//
-////var d = c / 3;
-////trace(d);
-//
-//c %= 3;
-//trace("c:",c,typeof c);
-
-
-//var v:Vector.<int> = new <int>[1,2,3,4,9,9,9,9,9,10,11,0,0,0,0,0,0,0,3+3,0,0,0];
-//trace(v);
-
-
-//
-//
-//async function Go()
-//{
-	//try
-	//{
-		//trace( await fetch("https://r.wxyfamily.duckdns.org") );	
-		//trace(2);
-	//
-	//}
-	//catch (e)
-	//{
-		//trace(e);
-		//
-		//trace( await fetch("http://oa.ofilm.com") );
-		//
-	//}
-//}
-//Go();
-//
-
-
- 
-//class Test262Error extends Error
-//{
-	//public function Test262Error(t)
-	//{
-		//super(t);
-	//}
-//}
-
-
-
-//class Test262Error extends Error
-//{
-	//var a;
-	//public function Test262Error(t=undefined)
-	//{
-		//super(t);
-	//}
-//}
-//
-//function assert(mustBeTrue, message = undefined) {
-  //if (mustBeTrue === true) {
-    //return;
-  //}
-//
-  //if (message === undefined) {
-    //message = 'Expected true but got ' + assert._toString(mustBeTrue);
-  //}
-  //throw new Test262Error(message);
-//}
-//
-//assert._toString = function (v:String) 
-//{
-	//return v;
-//}
-//
-//assert._isSameValue = function (a, b) {
-  //if (a === b) {
-    //// Handle +/-0 vs. -/+0
-    //return a !== 0 || 1 / a === 1 / b;
-  //}
-//
-  //// Handle NaN vs. NaN
-  //return a !== a && b !== b;
-//};
-//
-//assert.sameValue = function (actual, expected, message) {
-  //try {
-    //if (assert._isSameValue(actual, expected)) {
-      //return;
-    //}
-  //} catch (error) {
-    //throw new Test262Error(message + ' (_isSameValue operation threw) ' + error);
-    //return;
-  //}
-//
-  //if (message === undefined) {
-    //message = '';
-  //} else {
-    //message += ' ';
-  //}
-//
-  //message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(expected) + '») to be true';
-//
-  //throw new Test262Error(message);
-//};
-//
-//assert.notSameValue = function (actual, unexpected, message) {
-  //if (!assert._isSameValue(actual, unexpected)) {
-    //return;
-  //}
-//
-  //if (message === undefined) {
-    //message = '';
-  //} else {
-    //message += ' ';
-  //}
-//
-  //message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(unexpected) + '») to be false';
-//
-  //throw new Test262Error(message);
-//};
-//
-//assert.throws = function (expectedErrorConstructor, func, message) {
-  //var expectedName, actualName;
-  //if (typeof func !== "function") {
-    //throw new Test262Error('assert.throws requires two arguments: the error constructor ' +
-      //'and a function to run');
-    //return;
-  //}
-  //if (message === undefined) {
-    //message = '';
-  //} else {
-    //message += ' ';
-  //}
-//
-  //try {
-    //func();
-  //} catch (thrown) {	  
-	  //trace(thrown.name); 
-    //if (typeof thrown !== 'object' || thrown === null) {
-      //message += 'Thrown value was not an object!';
-      //throw new Test262Error(message);
-    //} else if (thrown.constructor !== expectedErrorConstructor) {
-      //expectedName = expectedErrorConstructor.name;
-      //actualName = thrown.constructor.name;
-      //if (expectedName === actualName) {
-        //message += 'Expected a ' + expectedName + ' but got a different error constructor with the same name';
-      //} else {
-        //message += 'Expected a ' + expectedName + ' but got a ' + actualName;
-      //}
-      //throw new Test262Error(message);
-    //}
-    //return;
-  //}
-//
-  //message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
-  //throw new Test262Error(message);
-//};
-
-
-
-trace('OK');
-
-
-
-
-
-//while (x < 10)
-//lbl1:
-//lbl2:
-    //x++;
-//
-	//
-	//
-	//trace(x);
-
-
-//aaa:for (;; )
-//lbl1:
-//lbl2:
-    //trace(x);
-	
-//function  fib(i:int):int 
-	//{
-		//if (i === 1 || i === 2)
-		//{
-			//return 1;
-		//}
-		//else 
-		//{
-			//
-			//return fib(i - 2) + fib(i-1);
-			//
-		//}	
-	//}
-	//
-	//
-	//
-//trace(fib(35));
-
-
-
-//fid = null;
-
-//trace("fib4 = ",fib(4));
-
-
-
-//trace("OK");
