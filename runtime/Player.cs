@@ -4173,6 +4173,93 @@ namespace juicescript.runtime
 				if (error.raised) return;
 			}
 
+			//join
+			{
+				var name_str = Context.GC.AllocString("join");
+				if (name_str == 0)
+				{
+					throw new LoaderException("join_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.ARRAY.Instance.Traits.First(t => t.QName.Name == "join").Method;
+
+				ASMethod m = new ASMethod(Context.ARRAY._link_codescope.Parent.Container, Context.ARRAY.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("Array proto : join alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+
+			//shift
+			{
+				var name_str = Context.GC.AllocString("shift");
+				if (name_str == 0)
+				{
+					throw new LoaderException("shift_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.ARRAY.Instance.Traits.First(t => t.QName.Name == "shift").Method;
+
+				ASMethod m = new ASMethod(Context.ARRAY._link_codescope.Parent.Container, Context.ARRAY.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("Array proto : shift alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
 
 		}
 

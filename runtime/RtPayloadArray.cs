@@ -1032,21 +1032,21 @@ namespace juicescript.runtime
 
         }
 
-		internal void Trace(Context context,int stackStPos, ref ReceiveError error,int scope_ptr ,IPrint printer,RtHeapInstance arrObj)
+		internal void Trace(Context context,int stackStPos, ref ReceiveError error,int scope_ptr ,IPrint printer,RtHeapInstance arrObj,ReadOnlySpan<char> sep)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
-				 DoTrace(context, stackStPos, ref error, scope_ptr ,printer,arrObj);
+				 DoTrace(context, stackStPos, ref error, scope_ptr ,printer,arrObj,sep);
 			}
 			else
 			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
-				target.DoTrace(context, stackStPos, ref error,scope_ptr ,printer,arrObj);
+				target.DoTrace(context, stackStPos, ref error,scope_ptr ,printer,arrObj,sep);
 			}
 		}
 
-		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr ,IPrint printer, RtHeapInstance arrObj)
+		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr ,IPrint printer, RtHeapInstance arrObj, ReadOnlySpan<char> sep)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
@@ -1077,7 +1077,7 @@ namespace juicescript.runtime
 
 					if (i < array_len - 1)
 					{
-						printer.Write(",".AsSpan());
+						printer.Write(sep);
 					}
 				}
 
@@ -1111,7 +1111,7 @@ namespace juicescript.runtime
 
 					if (i < array_len - 1)
 					{
-						printer.Write(",".AsSpan());
+						printer.Write(sep);
 					}
 				}
 			}
@@ -1175,7 +1175,7 @@ namespace juicescript.runtime
 
 							if (current < array_len - 1)
 							{
-								printer.Write(",");
+								printer.Write(sep);
 							}
 						}
 

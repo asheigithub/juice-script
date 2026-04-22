@@ -258,7 +258,7 @@ namespace juicescript.runtime.buildin
 			ArrayToString arrayToString = new ArrayToString();
 			arrayToString.sb = sb;
 
-			arr_payload.Trace(context, stackStPos, ref error, scope_ptr, arrayToString, arr);
+			arr_payload.Trace(context, stackStPos, ref error, scope_ptr, arrayToString, arr,",");
 
 			string str = sb.ToString();
 			if (string.IsNullOrEmpty(str))
@@ -266,16 +266,11 @@ namespace juicescript.runtime.buildin
 				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
 			}
 			else
-			{ 
-				int p = context.GC.AllocString(str);
-				if (p == 0)
+			{
+				NaNBoxing o;
+				if (context.player.TryCreateStringValue(str, out o, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
-				}
-				else
-				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(p);
+					context.StackSlots[returnSlotIndex] = o;
 				}
 			}
 
@@ -586,7 +581,132 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		//.Array$:AS3::join
+		[NativeFunction(".Array$:AS3::join")]
+		public static void Array_join(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			Array_Proto_join(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+		[NativeFunction(".Array$@::join")]
+		public static void Array_Proto_join(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			// 1. Validate thisPtr is an Array
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				
+				context.StackSlots[returnSlotIndex].SetHeapPtr( context.player.EMPTY_STR );
+				return;
+			}
+
+			
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			var sep = scope.ReadSlot(0, context.player);
+
+			ReadOnlySpan<char> sepstr;
+
+			if (scope.__sendargcount == 0)
+			{
+				sepstr = ",";
+			}
+			else if (sep.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				sepstr = ",";
+			}
+			else if (context.player.IsPrimitive(sep))
+			{
+				sepstr = Extensions.GetPrimitiveValueToString(context.player, sep);
+			}
+			else
+			{
+				context.player.ConvertValueType(ref error, sep, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], scope_ptr);
+				if (error.raised)
+				{
+					return;
+				}
+
+				sepstr = Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex]);
+			}
+
+
+			StringBuilder sb = new StringBuilder();
+			ArrayToString arrayToString = new ArrayToString();
+			arrayToString.sb = sb;
+
+			RtPayloadArray array;
+			int thisP = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+
+
+			array.Trace(context, stackStPos, ref error, scope_ptr, arrayToString, context.GC.Heap[thisP],sepstr );
+
+			string str = sb.ToString();
+			if (string.IsNullOrEmpty(str))
+			{
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+			}
+			else
+			{
+				int p = context.GC.AllocString(str);
+				if (p == 0)
+				{
+					context.player.RaiseOutOfMemory(ref error);
+					return;
+				}
+				else
+				{
+					context.StackSlots[returnSlotIndex].SetHeapPtr(p);
+				}
+			}
+
+
+		}
+
+
+
+		[NativeFunction(".Array$:AS3::shift")]
+		public static void Array_shift(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			Array_Proto_shift(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+
+		[NativeFunction(".Array$@::shift")]
+		public static void Array_Proto_shift(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			
+
+		}
+
+
 
 
 	}
+
 }

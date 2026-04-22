@@ -735,7 +735,7 @@ namespace juicescript.runtime.buildin
 						}
 						context.BackTraceIndex++;
 						((RtPayloadMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
-						((RtPayloadArray)instance.facility).Trace(context, stackStPos, ref error, scope_ptr, printer,instance);
+						((RtPayloadArray)instance.facility).Trace(context, stackStPos, ref error, scope_ptr, printer,instance,",");
 						context.BackTraceIndex--;
 						if (error.raised)
 						{
