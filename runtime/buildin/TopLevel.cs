@@ -85,6 +85,7 @@ namespace juicescript.runtime.buildin
 						thisStr = ((RtPayloadString)context.GC.Heap[arg0.HeapPtr].facility).Str.AsSpan();
 					}
 
+					
 					long nv = 0;//有效数字
 					//bool nv_isoverflow = false;
 					bool isINF = false;
@@ -182,10 +183,15 @@ namespace juicescript.runtime.buildin
 
 								if (c >= '0' && c <= '9')
 								{
-									hasdigit = true;
+									if (!isEmode)
+									{
+										
+										hasdigit = true;
+									}
+
 									if (isEmode)
 									{
-										if (e * 10 + (c - '0') > e)
+										if (e * 10 + (c - '0') >= e)
 										{
 											e = e * 10 + (c - '0');
 										}
@@ -193,7 +199,8 @@ namespace juicescript.runtime.buildin
 									}
 									else if (isdecimal)
 									{
-										if (nv * 10 + (c - '0') > nv)
+										
+										if (nv * 10 + (c - '0') >= nv)
 										{
 											//d = d * 10;
 
@@ -211,8 +218,8 @@ namespace juicescript.runtime.buildin
 									else
 									{
 										//n = n * 10 + (c - '0');
-
-										if (nv * 10 + (c - '0') > nv)
+										
+										if (nv * 10 + (c - '0') >= nv)
 										{
 											nv = nv * 10 + (c - '0');
 										}
@@ -225,7 +232,7 @@ namespace juicescript.runtime.buildin
 								}
 								else if (c == 'e' || c == 'E')
 								{
-									hasdigit = true;
+									//hasdigit = true;
 									if (!isEmode)
 									{
 										isEmode = true;
@@ -240,7 +247,7 @@ namespace juicescript.runtime.buildin
 								else if (c == '.')
 								{
 
-									if (isdecimal)
+									if (isdecimal || isEmode)
 									{
 										break;
 									}
@@ -325,9 +332,42 @@ namespace juicescript.runtime.buildin
 					{
 						n = double.PositiveInfinity;
 					}
+					else
+					{
+						//n = nv * Math.Pow(10, E);
 
-					n = nv * Math.Pow(10, E);
+						n = nv;
 
+						if (E > 0)
+						{
+							while (E > 0)
+							{
+								--E;
+
+								n *= 10;
+								if (double.IsInfinity(n))
+									break;
+							}
+						}
+						else if(E<0)
+						{
+							E = -E;
+
+							double div = 1;
+							while (E > 0)
+							{
+								--E;
+
+								div *= 10;
+								if (double.IsInfinity(div))
+									break;
+							}
+
+							n = n / div;
+						}
+
+
+					}
 					if (!hasdigit)
 						context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
 					else
@@ -341,7 +381,148 @@ namespace juicescript.runtime.buildin
 		}
 
 
+		//$__AS3__.toplevel$public::parseInt
+		[NativeFunction("$__AS3__.toplevel$public::parseInt")]
+		public static void TopLevel_parseInt(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var arg0 = scope.ReadSlot(0, context.player);
+			var arg1 = scope.ReadSlot(1, context.player);
 
+			if (arg0.ValueType == NaNBoxing.BoxType.Null || arg0.ValueType == NaNBoxing.BoxType.Undefined)
+			{
+				context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
+			}
+			else
+			{
+				Span<char> thisbuffer = stackalloc char[16];
+				ReadOnlySpan<char> thisStr = thisbuffer;
+
+				if (arg0.ValueType == NaNBoxing.BoxType.LocalString)
+				{
+					var len = arg0.GetLocalStringChars(thisbuffer);
+					thisStr = thisStr.Slice(0, len);
+				}
+				else
+				{
+					thisStr = ((RtPayloadString)context.GC.Heap[arg0.HeapPtr].facility).Str.AsSpan();
+				}
+
+				uint radix = (uint)arg1.IntValue;
+
+				/*if (str.length()==0)
+				{
+					returnSlot->value = (double)NAN;
+					return;
+				}*/
+				//ASCII 48-57 : 0-9 ,65-90 : A-Z;
+
+				bool isinput_radix_zero = false;
+				if (radix == 0)
+				{
+					isinput_radix_zero = true;
+					radix = 10; 								
+				}
+
+
+				if (radix < 2 || radix > 36)
+				{
+					context.StackSlots[returnSlotIndex].SetNumber(double.NaN);
+					return;
+				}//return new rtNumber(double.NaN); }
+
+				
+
+				double output = double.NaN;
+				int sign = 1;
+
+				int i = 0;
+
+				while (i < thisStr.Length && char.IsWhiteSpace(thisStr[i]))
+				{
+					++i;
+				}
+
+				if (i < thisStr.Length)
+				{
+					if (thisStr[i] == '-')
+					{
+						sign = -1;
+						++i;
+					}
+					else if (thisStr[i] == '+')
+					{
+						++i;
+					}
+				}
+
+				if (i < thisStr.Length - 2 && (isinput_radix_zero || radix == 16))
+				{
+					if (thisStr[i] == '0' && (thisStr[i + 1] == 'x' || thisStr[i + 1] == 'X'))
+					{
+						radix = 16;
+						i += 2;
+
+						if (i < thisStr.Length)
+						{
+							if (thisStr[i] == '-')
+							{
+								i = thisStr.Length;
+							}
+						}
+						else
+						{
+							i = thisStr.Length;
+						}
+
+					}
+				}
+
+				uint allowidx = 48 + radix;
+
+				if (radix > 10)
+				{
+					allowidx = 65 + radix - 10;
+				}
+
+				for (; i < thisStr.Length; i++)
+				{
+					var cc = thisStr[i];
+					if (cc >= 'a' && cc <= 'z')
+					{
+						cc = char.ToUpper(cc); //u+305 之类，ToUpper后会变成 A-Z里的字母，巨坑无比
+					}
+
+
+					var c = cc;
+					if (c < allowidx && ((c < 58 && c >= 48) || c >= 65))
+					{
+						if (double.IsNaN(output))
+						{
+							output = c < 58 ? (c - 48) : (c - 65 + 10);
+						}
+						else
+						{
+							output = output * radix + (c < 58 ? (c - 48) : (c - 65 + 10));
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				//returnSlot->value = output * sign;
+
+				context.StackSlots[returnSlotIndex].SetNumber(output * sign);
+
+
+			}
+		}
 
 
 
