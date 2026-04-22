@@ -8,11 +8,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+#nullable enable
 namespace juicescript.runtime.buildin.Pooling
 {
 
 	internal ref struct ValueStringBuilder
 	{
+
 		private char[]? _arrayToReturnToPool;
 		private Span<char> _chars;
 		private int _pos;

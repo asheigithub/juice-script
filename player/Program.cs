@@ -53,9 +53,9 @@ namespace player
 				app.OnExecute(() =>
 				{
 
-					string scriptPath = optionScript.Value();
-					string libDir = optionLibDir.Value();
-					string globalPath = optionGlobal.Value();
+					string? scriptPath = optionScript.Value();
+					string? libDir = optionLibDir.Value();
+					string? globalPath = optionGlobal.Value();
 					juicescript.runtime.Player player = new juicescript.runtime.Player(1024 * 1024 * 8);
 					HashSet<string> loadedAssemblies = new HashSet<string>();
 					LoadSwcWithDeps(player, scriptPath, libDir, loadedAssemblies);
@@ -108,7 +108,7 @@ namespace player
 				return 1;
 			}
 		}
-		static void LoadSwcWithDeps(Player player, string swcPath, string libDir, HashSet<string> loadedAssemblies)
+		static void LoadSwcWithDeps(Player player, string? swcPath, string? libDir, HashSet<string> loadedAssemblies)
 		{
 			if (!File.Exists(swcPath))
 			{
@@ -126,7 +126,7 @@ namespace player
 				player.LoadLib(swcBytes);
 				foreach (var refAssembly in swcFile.refAssemblys)
 				{
-					string depPath = FindSwcFile(refAssembly, libDir);
+					string? depPath = FindSwcFile(refAssembly, libDir);
 					if (depPath != null)
 					{
 						LoadSwcWithDeps(player, depPath, libDir, loadedAssemblies);
@@ -134,7 +134,7 @@ namespace player
 				}
 			}
 		}
-		static string FindSwcFile(string assemblyName, string libDir)
+		static string? FindSwcFile(string assemblyName, string? libDir)
 		{
 			if (!Directory.Exists(libDir))
 			{

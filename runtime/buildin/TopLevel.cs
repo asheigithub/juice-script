@@ -69,24 +69,27 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				unsafe
+				//unsafe
 				{
-					ReadOnlySpan<char> thisStr;
+					
 					Span<char> thisbuffer = stackalloc char[16];
+					ReadOnlySpan<char> thisStr = thisbuffer;
+
 					if (arg0.ValueType == NaNBoxing.BoxType.LocalString)
 					{
 						var len = arg0.GetLocalStringChars(thisbuffer);
-						thisStr = thisbuffer.Slice(0, len);
+						thisStr = thisStr.Slice(0, len);
 					}
 					else
 					{
 						thisStr = ((RtPayloadString)context.GC.Heap[arg0.HeapPtr].facility).Str.AsSpan();
 					}
 
-					long nv = 0;
-					bool nv_isoverflow = false;
+					long nv = 0;//有效数字
+					//bool nv_isoverflow = false;
+					bool isINF = false;
 
-					double n = 0;
+					//double n = 0;
 					int e = 0;
 					bool isEmode = false;
 
@@ -98,7 +101,7 @@ namespace juicescript.runtime.buildin
 
 
 					bool isdecimal = false;
-					double d = 1;
+					int d = 0; 
 
 					//Infinity
 
@@ -166,7 +169,8 @@ namespace juicescript.runtime.buildin
 
 										if (inftest == 8)
 										{
-											n = double.PositiveInfinity;
+											isINF = true;
+											//n = double.PositiveInfinity;
 											hasdigit = true;
 											blank = true;
 										}
@@ -191,9 +195,11 @@ namespace juicescript.runtime.buildin
 									{
 										if (nv * 10 + (c - '0') > nv)
 										{
-											d = d * 10;
+											//d = d * 10;
 
-											n = n * 10 + (c - '0');
+											//n = n * 10 + (c - '0');
+
+											d--;
 
 											nv = nv * 10 + (c - '0');
 										}
@@ -204,7 +210,7 @@ namespace juicescript.runtime.buildin
 									}
 									else
 									{
-										n = n * 10 + (c - '0');
+										//n = n * 10 + (c - '0');
 
 										if (nv * 10 + (c - '0') > nv)
 										{
@@ -212,7 +218,8 @@ namespace juicescript.runtime.buildin
 										}
 										else
 										{
-											nv_isoverflow = true;
+											d++;
+											//nv_isoverflow = true;
 										}
 									}
 								}
@@ -264,50 +271,62 @@ namespace juicescript.runtime.buildin
 
 					}
 
-					if (double.IsNaN(n) || double.IsInfinity(n) || nv_isoverflow)
-					{
-						n = n / d;
-					}
-					else
-					{ 
-						n = nv / d;
-					}
+					//if (double.IsNaN(n) || double.IsInfinity(n) || nv_isoverflow)
+					//{
+					//	n = n / d;
+					//}
+					//else
+					//{ 
+					//	n = nv / d;
+					//}
+
+					int E;
 
 					if (esign > 0)
 					{
-						
-						while (e > 0)
-						{
-							n = n * 10;
-							--e;
+						E = e + d;
 
-							if (double.IsInfinity(n))
-								break;
 
-						}
+						//while (e > 0)
+						//{
+						//	n = n * 10;
+						//	--e;
+
+						//	if (double.IsInfinity(n))
+						//		break;
+
+						//}
 						
 					}
 					else
 					{
+						E = -e + d;
 						
-						
-						double div = 1;
+						//double div = 1;
 
-						while (e > 0)
-						{
-							div *= 10;
-							--e;
+						//while (e > 0)
+						//{
+						//	div *= 10;
+						//	--e;
 
-							if (double.IsInfinity(div))
-							{
-								break;
-							}
-						}
+						//	if (double.IsInfinity(div))
+						//	{
+						//		break;
+						//	}
+						//}
 
-						n = n / div;
+						//n = n / div;
 						
 
 					}
+
+					double n;
+					if (isINF)
+					{
+						n = double.PositiveInfinity;
+					}
+
+					n = nv * Math.Pow(10, E);
 
 					if (!hasdigit)
 						context.StackSlots[returnSlotIndex].SetNumber(double.NaN);

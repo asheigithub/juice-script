@@ -1026,11 +1026,11 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			unsafe
+			
 			{
-				ReadOnlySpan<char> delimiter_char;
+				
 				Span<char> _buffer = stackalloc char[16];
-
+				ReadOnlySpan<char> delimiter_char =_buffer;
 				bool delimiterIsUndefined = false;
 
 				if (delimiter.ValueType == NaNBoxing.BoxType.Null)
@@ -1077,8 +1077,9 @@ namespace juicescript.runtime.buildin
 				Debug.Assert(arr_payload.StoreMode == RtPayloadArray.ArrayStoreMode.cache);
 
 
-				ReadOnlySpan<char> thisStr;
+				
 				Span<char> thisbuffer = stackalloc char[16];
+				ReadOnlySpan<char> thisStr = thisbuffer;
 				if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
 				{
 					var len = thisPtr.GetLocalStringChars(thisbuffer);
@@ -1099,7 +1100,7 @@ namespace juicescript.runtime.buildin
 				{
 					int index = thisStr.IndexOf(delimiter_char, StringComparison.Ordinal);
 
-					ReadOnlySpan<char> toemplace;
+					ReadOnlySpan<char> toemplace = thisStr;
 
 					bool isbreak = false;
 

@@ -1277,12 +1277,12 @@ namespace juicescript.runtime.buildin
 						return 0;
 					}
 
-					unsafe
+					//unsafe
 					{
 
-						ReadOnlySpan<char> chars1;
+						
 						Span<char> temp1 = stackalloc char[16];
-
+						ReadOnlySpan<char> chars1 = temp1;
 						NaNBoxing box1 = context.StackSlots[context.StackPosition - 2];
 						if (box1.ValueType == BoxType.HeapPtr)
 						{
@@ -1297,9 +1297,9 @@ namespace juicescript.runtime.buildin
 						}
 
 
-						ReadOnlySpan<char> chars2;
+						
 						Span<char> temp2 = stackalloc char[16];
-
+						ReadOnlySpan<char> chars2 = temp2;
 						ref NaNBoxing box2 = ref context.StackSlots[context.StackPosition - 1];
 						if (box2.ValueType == BoxType.HeapPtr)
 						{

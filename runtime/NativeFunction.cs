@@ -72,7 +72,7 @@ namespace juicescript.runtime
 			}
 		}
 
-		public static MethodInfo? GetFunction(string key) =>
+		public static MethodInfo GetFunction(string key) =>
 			_registry.TryGetValue(key, out var method) ? method : null;
 
 		public static IEnumerable<string> ListKeys() => _registry.Keys;

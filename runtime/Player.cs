@@ -4987,7 +4987,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
+		internal  NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 			NaNBoxing result = box;
 			if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -5012,12 +5012,12 @@ namespace juicescript.runtime
 
 
 							Span<char> temp = stackalloc char[16];
-							ReadOnlySpan<char> searchName;
+							ReadOnlySpan<char> searchName = temp;
 
 							if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
 							{
 								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
-								searchName = temp.Slice(0, l);
+								searchName = searchName.Slice(0, l);
 
 							}
 							else
@@ -5617,7 +5617,7 @@ namespace juicescript.runtime
 							Context.GC.CheckGC(ref error);
 
 							Span<char> temp = stackalloc char[16];
-							ReadOnlySpan<char> searchName;
+							ReadOnlySpan<char> searchName = temp;
 
 							if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
 							{
@@ -5719,8 +5719,9 @@ namespace juicescript.runtime
 
 							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
 
-							ReadOnlySpan<char> searchName;
+							
 							Span<char> temp = stackalloc char[16];
+							ReadOnlySpan<char> searchName = temp;
 							if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
 							{
 								searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str;
@@ -10251,7 +10252,7 @@ namespace juicescript.runtime
 		/// <param name="error"></param>
 		/// <param name="propname"></param>
 		/// <param name="value"></param>
-		internal unsafe void CreateDynamic(ref ReceiveError error, RtHeapInstance instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
+		internal  void CreateDynamic(ref ReceiveError error, RtHeapInstance instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 
@@ -10266,8 +10267,9 @@ namespace juicescript.runtime
 
 #endif
 			//string name = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
-			ReadOnlySpan<char> name;
+			
 			Span<char> temp = stackalloc char[16];
+			ReadOnlySpan<char> name = temp;
 			if (propname.ValueType == BoxType.LocalString)
 			{
 				int l = propname.GetLocalStringChars(temp);
@@ -11052,7 +11054,7 @@ namespace juicescript.runtime
 						}
 
 					}
-					break;
+					
 				case RtHeapTypeKind.GLOBAL:
 					{
 #if DEBUG
@@ -11067,7 +11069,7 @@ namespace juicescript.runtime
 						//stackslots[stackLocater.index] = value;
 						return value;
 					}
-					break;
+					
 				case RtHeapTypeKind.INSTANCE:
 					{
 						//考虑可能继承的情况，scopeType保存上下文堆内存用的布局类型
@@ -11115,7 +11117,7 @@ namespace juicescript.runtime
 						}
 
 					}
-					break;
+					
 				case RtHeapTypeKind.MethodScope:
 					{
 						if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
@@ -11137,7 +11139,7 @@ namespace juicescript.runtime
 							return value;
 						}
 					}
-					break;
+					
 				case RtHeapTypeKind.STRING:
 				//case RtHeapTypeKind.CACHE_LD_CLASS:
 				case RtHeapTypeKind.STACK_CACHE_OBJ:
@@ -12813,7 +12815,7 @@ namespace juicescript.runtime
 #if DEBUG
 				default:
 					throw new NotImplementedException();
-					break;
+					
 #endif
 			}
 
