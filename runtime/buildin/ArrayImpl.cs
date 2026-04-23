@@ -1,4 +1,4 @@
-﻿using juicescript.ABC;
+using juicescript.ABC;
 using juicescript.ABC.Locaters;
 using System;
 using System.Collections.Generic;
@@ -871,6 +871,71 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		//.Array$:AS3::reverse
+		[NativeFunction(".Array$:AS3::reverse")]
+		public static void Array_reverse(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+
+			RtPayloadArray array;
+			int instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			var instance = context.GC.Heap[instancePtr];
+
+			for (uint i = 0; i < array.array_len / 2 ; i++)
+			{
+				bool isoutofindex;
+				NaNBoxing v1 = array.ReadSlot(i, context.player, out isoutofindex);
+				NaNBoxing v2 = array.ReadSlot(array.array_len-i-1,context.player, out isoutofindex);
+
+
+				if (v1.ValueType == BoxType.HeapPtr)
+				{
+					var check = context.GC.Heap[v1.HeapPtr];
+					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						var cacheObj = context.GC.Heap[clonedptr];
+						cacheObj.Type = check.Type;
+
+						((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+						((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+						((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+					}
+					else
+					{
+						context.StackSlots[returnSlotIndex] = v1;
+					}
+				}
+				else
+				{
+					context.StackSlots[returnSlotIndex] = v1;
+				}
+
+				context.player.SetArraySlot(v2, i, instance, ref error);
+				if (error.raised)
+				{
+					return;
+				}
+				
+				context.player.SetArraySlot(context.StackSlots[returnSlotIndex],array.array_len-i-1,instance,ref error);
+				if (error.raised)
+				{
+					return;
+				}
+
+			}
+
+			context.StackSlots[returnSlotIndex].SetHeapPtr( instancePtr);
+
+		}
+
 
 
 		[NativeFunction(".Array$:AS3::some")]
@@ -997,9 +1062,9 @@ namespace juicescript.runtime.buildin
 					}
 
 
-					arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
-
+					arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);					
 					len = array.array_len;
+					
 
 					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
 					Debug.Assert(!error.raised); //转BOOLEAN不会失败

@@ -11,27 +11,7 @@ package
     }
 }
 
-(
-function ():void 
-{
-	var a = new Array(1, 2, 3, 4);
-	var c = 0;
-	trace( a.some( function(){
-		c++;
-		a = null;
-		return true;
-	} ) 
-	,
-	
-	a
-	,
-	c
-	); 
-	
-	
-}
-)();
-
+trace ( new Array(1, 2, 3).reverse() );
 
 
 
