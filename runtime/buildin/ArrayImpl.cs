@@ -1,4 +1,5 @@
 ﻿using juicescript.ABC;
+using juicescript.ABC.Locaters;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace juicescript.runtime.buildin
 {
@@ -869,6 +871,156 @@ namespace juicescript.runtime.buildin
 
 		}
 
+
+
+		[NativeFunction(".Array$:AS3::some")]
+		public static void Array_some(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			Array_Proto_some(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		[NativeFunction(".Array$@::some")]
+		public static void Array_Proto_some(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				//context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				context.StackSlots[returnSlotIndex].SetBoolean(false);
+				return;
+			}
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+
+			RtPayloadArray array;
+			int arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
+
+			uint len = array.array_len;
+
+
+			context.StackSlots[returnSlotIndex].SetHeapPtr(arrPtr); //保持到槽，防止GC
+
+			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
+			{
+				context.player.RaiseStackOverflow(ref error);
+				return;
+			}
+
+			var cb = scope.ReadSlot(0, context.player);
+			if (cb.ValueType != BoxType.HeapPtr)
+			{
+				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
+				return;
+			}
+
+			var _this = scope.ReadSlot(1, context.player);
+			//if (scope.__sendargcount < 2)
+			//{
+			//	_this.SetUndefined();
+			//}
+
+
+			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
+			var cbclosure = (RtPayloadClosure)context.GC.Heap[cb.HeapPtr].facility;
+
+			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
+			{
+				_this = cbclosure.This;
+			}
+			else if (cbmethod.__is_hasOwnProperty)
+			{
+
+			}
+			else if ((_this.ValueType == NaNBoxing.BoxType.Undefined
+				|| 
+				_this.ValueType == NaNBoxing.BoxType.Null
+				) //&& scope.__sendargcount==2
+				)
+			{
+
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				while (sss.Kind != CodeScopeKind.Script)
+				{
+					sss = sss.Parent;
+				}
+
+				var globalptr = ((ASScript)sss.Container).__global_index__;
+				_this.SetHeapPtr(globalptr);
+
+			}
+
+
+
+			int basePos = context.StackPosition;
+			var argSlots = context.StackSlots.AsSpan(basePos, 5);
+			argSlots.Clear();
+
+			context.StackPosition += 5;
+
+			unsafe
+			{
+
+				StackLocater* args = stackalloc StackLocater[3];
+				args[0].index = 2;
+				args[1].index = 3;
+				args[2].index = 4;
+
+				bool issome = false;
+
+				for (uint i = 0; i < len; i++)
+				{
+					bool isoutofindex;
+					NaNBoxing v = array.ReadSlot(i, context.player,out isoutofindex);
+
+					argSlots[2] = v;
+					argSlots[3].SetInt((int)i);
+					argSlots[4].SetHeapPtr(arrPtr);
+
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
+					if (error.raised)
+					{
+						context.StackPosition -= 5;
+						return;
+					}
+
+
+					arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
+
+					len = array.array_len;
+
+					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
+					Debug.Assert(!error.raised); //转BOOLEAN不会失败
+
+					if (r.Boolean)
+					{
+						issome = true;
+						break;
+					}
+
+				}
+
+				context.StackSlots[returnSlotIndex].SetBoolean(issome);
+
+			}
+
+
+			context.StackPosition -= 5;
+
+
+		}
 	}
 
 }

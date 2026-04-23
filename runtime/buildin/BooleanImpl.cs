@@ -10,8 +10,15 @@ namespace juicescript.runtime.buildin
 {
 	internal class BooleanImpl
 	{
-		
-
-
+		//.Boolean$public::valueOf
+		[NativeFunction(".Boolean$public::valueOf")]
+		public static void Boolean_valueOf(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			context.StackSlots[returnSlotIndex].SetBoolean(thisPtr.Boolean);
+		}
 	}
 }
