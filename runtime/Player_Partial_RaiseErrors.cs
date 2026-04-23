@@ -576,7 +576,7 @@ namespace juicescript.runtime
 		}
 
 		internal int cache_RANGE_ERROR_NAME;
-		internal void RaiseRangeError(ref ReceiveError error, string index, long maxrange)
+		internal void RaiseRangeError(ref ReceiveError error, ReadOnlySpan<char> index, long maxrange)
 		{
 			error.raised = true;
 			RtHeapInstance _temp = null;

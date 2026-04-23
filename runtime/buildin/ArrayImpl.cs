@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -640,7 +641,9 @@ namespace juicescript.runtime.buildin
 
 			var sep = scope.ReadSlot(0, context.player);
 
-			ReadOnlySpan<char> sepstr;
+			
+			Span<char> buffer = stackalloc char[16];
+			ReadOnlySpan<char> sepstr = buffer;
 
 			if (scope.__sendargcount == 0)
 			{
@@ -652,7 +655,7 @@ namespace juicescript.runtime.buildin
 			}
 			else if (context.player.IsPrimitive(sep))
 			{
-				sepstr = Extensions.GetPrimitiveValueToString(context.player, sep);
+				sepstr = Extensions.GetPrimitiveValueToString(context.player, sep,buffer);
 			}
 			else
 			{
@@ -662,7 +665,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				sepstr = Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex]);
+				sepstr = Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex],buffer);
 			}
 
 
@@ -785,8 +788,86 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		//.Array$:AS3::unshift
+		[NativeFunction(".Array$:AS3::unshift")]
+		public static void Array_unshift(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			Array_Proto_unshift(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
 
+		[NativeFunction(".Array$@::unshift")]
+		public static void Array_Proto_unshift(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			// 1. Validate thisPtr is an Array
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
 
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var rest = scope.ReadSlot(0, context.player);
+			var restArray = (RtPayloadArray)context.GC.Heap[rest.HeapPtr].facility;
+			var restSpan = restArray.stack_store.Span;
+
+			RtPayloadArray array;
+			int instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+
+			// 3. Get current length
+			uint currentLength = array.GetLength(context.player);
+
+			// 4. Handle empty push case
+			if (restSpan.Length == 0)
+			{
+				context.StackSlots[returnSlotIndex].SetUInt(currentLength);
+				return;
+			}
+
+			// 5. Check for overflow
+			if (currentLength > uint.MaxValue - (uint)restSpan.Length)
+			{
+				context.player.RaiseRangeError(ref error, ((long)currentLength + restSpan.Length).ToString(), uint.MaxValue);
+				context.StackSlots[returnSlotIndex].SetUInt(currentLength);
+				return;
+			}
+
+			// 7,扩容并且移动元素
+
+			array.DoUnshift(context.player,ref error,restSpan);
+			if (error.raised)
+			{
+				return;	
+			}
+
+			instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			var instance = context.GC.Heap[instancePtr];
+			//复制元素
+			for (int i = 0; i < restSpan.Length; i++)
+			{
+				context.player.SetArraySlot(restSpan[i], (uint)i, instance, ref error);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			context.StackSlots[returnSlotIndex].SetUInt( currentLength + (uint)restSpan.Length );
+
+		}
 
 	}
 

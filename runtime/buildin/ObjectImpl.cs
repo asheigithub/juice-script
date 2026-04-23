@@ -35,13 +35,17 @@ namespace juicescript.runtime.buildin
 			context.player.ConvertValueType(ref error, thisPtr, TypeKind.String, context.STRING, ref context.StackSlots[returnSlotIndex], 0, default, true);
 		}
 
-		internal static bool Find_ASContainer_Prop(ASContainer type,string name)
+		internal static bool Find_ASContainer_Prop(ASContainer type,ReadOnlySpan<char> name)
 		{
 			var scope = type._link_codescope;
 			for (int i = scope.Members.Count - 1; i >= 0; i--)
 			{
 				var member = scope.Members[i];
-				if (string.CompareOrdinal(member.QName.Name, name) == 0 && member.QName.Namespace.Kind == NamespaceKind.Package)
+				if (
+					//string.CompareOrdinal(member.QName.Name, name) == 0 
+					name.CompareTo( member.QName.Name, StringComparison.Ordinal ) == 0
+
+					&& member.QName.Namespace.Kind == NamespaceKind.Package)
 				{
 					return true;
 				}
@@ -50,7 +54,10 @@ namespace juicescript.runtime.buildin
 			for (int i = 0; i < type._vtable.Items.Count; i++)
 			{
 				var f = type._vtable.Items[i];
-				if (string.CompareOrdinal(f.Trait.QName.Name, name) == 0 && f.Trait.QName.Namespace.Kind == NamespaceKind.Package)
+				if (
+					//string.CompareOrdinal(f.Trait.QName.Name, name) == 0 
+					name.CompareTo( f.Trait.QName.Name, StringComparison.Ordinal )==0
+					&& f.Trait.QName.Namespace.Kind == NamespaceKind.Package)
 				{
 					return true;
 				}

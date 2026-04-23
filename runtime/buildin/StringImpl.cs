@@ -105,8 +105,8 @@ namespace juicescript.runtime.buildin
 			//{
 			//	sb.Append(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str);
 			//}
-
-			sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex]));
+			Span<char> buffer = stackalloc char[16];
+			sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex], buffer));
 
 
 			Span<char> argchars = stackalloc char[16];
@@ -116,7 +116,7 @@ namespace juicescript.runtime.buildin
 
 				if (context.player.IsPrimitive(arg))
 				{
-					sb.Append(Extensions.GetPrimitiveValueToString(context.player, arg));
+					sb.Append(Extensions.GetPrimitiveValueToString(context.player, arg,buffer));
 
 				}
 				else
@@ -127,7 +127,7 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-					sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex]));
+					sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex],buffer));
 
 				}
 			}
@@ -1773,10 +1773,11 @@ namespace juicescript.runtime.buildin
 			NaNBoxing repl = scope.ReadSlot(1, context.player);
 
 
+			Span<char> buffer1 = stackalloc char[16];
+			Span<char> buffer2 = stackalloc char[16];
 
-
-			string thisStr = Extensions.GetPrimitiveValueToString(context.player, thisPtr);
-			string patternStr = Extensions.GetPrimitiveValueToString(context.player, pattern);
+			var thisStr = Extensions.GetPrimitiveValueToString(context.player, thisPtr,buffer1);
+			var patternStr = Extensions.GetPrimitiveValueToString(context.player, pattern,buffer2);
 
 			int find = thisStr.IndexOf(patternStr);
 			if (find >=0 )
@@ -1845,8 +1846,15 @@ namespace juicescript.runtime.buildin
 								repl = slots[1];
 							}
 
-							string replStr = Extensions.GetPrimitiveValueToString(context.player, repl);
-							string final = thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
+							Span<char> replbuffer = stackalloc char[16];
+
+							var replStr = Extensions.GetPrimitiveValueToString(context.player, repl,replbuffer);
+
+
+
+							//string final =  thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
+							string final = $"{thisStr.Slice(0,find)}{replStr}{thisStr.Slice(find+patternStr.Length)}";
+
 
 							NaNBoxing v;
 							if (context.player.TryCreateStringValue(final, out v, ref error))
@@ -1897,10 +1905,11 @@ namespace juicescript.runtime.buildin
 						repl = context.StackSlots[basePos];
 					}
 
-					
+					Span<char> replbuffer = stackalloc char[16];
 
-					string replStr = Extensions.GetPrimitiveValueToString(context.player, repl);
-					string final = thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
+					var replStr = Extensions.GetPrimitiveValueToString(context.player, repl,replbuffer);
+					//string final = thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
+					string final = $"{thisStr.Slice(0, find)}{replStr}{thisStr.Slice(find + patternStr.Length)}";
 
 					NaNBoxing v;
 					if (context.player.TryCreateStringValue(final, out v, ref error))
@@ -2033,8 +2042,9 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					string val_str = Extensions.GetPrimitiveValueToString(context.player, val); 
-					ReadOnlySpan<char> val_char = val_str.AsSpan();
+					Span<char> buffer=stackalloc char[16];
+					var val_char = Extensions.GetPrimitiveValueToString(context.player, val,buffer); 
+					//ReadOnlySpan<char> val_char = val_str.AsSpan();
 
 					
 					
@@ -2083,11 +2093,12 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					string val_str = Extensions.GetPrimitiveValueToString( context.player, val );
+					Span<char> buffer = stackalloc char[16];
+					var val_str = Extensions.GetPrimitiveValueToString( context.player, val,buffer );
 
 					
 					
-					context.StackSlots[returnSlotIndex].SetInt(str.IndexOf(val_str));
+					context.StackSlots[returnSlotIndex].SetInt(str.AsSpan().IndexOf(val_str));
 					
 				}
 

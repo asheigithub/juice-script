@@ -472,7 +472,7 @@ namespace juicescript.runtime
 		{
             var store = GetStore(context.player);
 
-            store.DoTrace(element_type, element_asclass,  context,  stackStPos, ref error,  scope_ptr, printer);
+            store.DoTrace(element_type, element_asclass,  context,  stackStPos, ref error,  scope_ptr, printer,",");
 
 		}
 

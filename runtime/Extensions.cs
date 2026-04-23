@@ -558,7 +558,7 @@ namespace juicescript.runtime
 
         }
 
-		internal static string GetPrimitiveValueToString( Player player,NaNBoxing prop_name)
+		internal static ReadOnlySpan<char> GetPrimitiveValueToString( Player player,NaNBoxing prop_name, Span<char> buffchars)
 		{
 			//转字符串
 			switch (prop_name.ValueType)
@@ -670,11 +670,11 @@ namespace juicescript.runtime
 					}
                 case BoxType.LocalString:
                     {
-                        Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
-                        int charCount = prop_name.GetLocalStringChars(chars);
+                        //Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
+                        int charCount = prop_name.GetLocalStringChars(buffchars);
                         if (charCount > 0)
                         {
-                            return new string(chars.Slice(0, charCount));
+                            return buffchars.Slice(0, charCount); //new string(chars.Slice(0, charCount));
                         }
                         return string.Empty;
                     }

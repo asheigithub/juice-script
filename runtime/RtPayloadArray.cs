@@ -638,6 +638,188 @@ namespace juicescript.runtime
 
 		}
 
+		internal void DoUnshift(Player player, ref ReceiveError error, Span<NaNBoxing> restSpan)
+		{
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			{
+				if (restSpan.Length + array_len > stack_store.Length)
+				{
+					int heaparrayptr = ChangeStoreToHeap(player, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+
+					RtPayloadArray heap = (RtPayloadArray)player.Context.GC.Heap[heaparrayptr].facility;
+					heap.DoUnshift(player, ref error, restSpan);
+					return;
+				}
+
+				
+				var stack_span = stack_store.Span;
+				for (int i = (int)array_len - 1; i >= 0; i--)
+				{
+					var box = stack_span[i];
+					if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						var src = player.Context.GC.Heap[box.HeapPtr];
+						if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+						{
+							var dst_v = stack_span[i + restSpan.Length];
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+							{
+								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+								if (dst.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+								{
+									CopyStruct(dst, src, player);
+								}
+								else
+								{
+									stack_span[i + restSpan.Length] = box;
+								}
+							}
+							else
+							{
+								stack_span[i + restSpan.Length] = box;
+							}
+						}
+						else
+						{
+							stack_span[i + restSpan.Length] = box;
+						}
+					}
+					else
+					{
+						stack_span[i + restSpan.Length] = box;
+					}
+
+				}
+
+				array_len = array_len + (uint)restSpan.Length;
+
+			}
+			else if (StoreMode == ArrayStoreMode.cache)
+			{
+				if (restSpan.Length + array_len > cache_store.Length)
+				{
+					int heaparrayptr = ChangeStoreToHeap(player, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+
+					RtPayloadArray heap = (RtPayloadArray)player.Context.GC.Heap[heaparrayptr].facility;
+					heap.DoUnshift(player, ref error, restSpan);
+					return;
+				}
+
+
+
+				for (int i = (int)array_len - 1; i >= 0; i--)
+				{
+					var box = cache_store[i];
+					if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						var src = player.Context.GC.Heap[box.HeapPtr];
+						if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+						{
+							var dst_v = cache_store[i + restSpan.Length];
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+							{
+								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+								if (dst.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+								{
+									CopyStruct(dst, src, player);
+								}
+								else
+								{
+									cache_store[i + restSpan.Length] = box;
+								}
+							}
+							else
+							{
+								cache_store[i + restSpan.Length] = box;
+							}
+						}
+						else
+						{
+							cache_store[i + restSpan.Length] = box;
+						}
+					}
+					else
+					{
+						cache_store[i + restSpan.Length] = box;
+					}
+				}
+
+
+				array_len = array_len + (uint)restSpan.Length;
+
+			}
+			else
+			{
+				for (long i = (long)array_len - 1; i >= 0;--i)
+				{
+					NaNBoxing dst = default;
+					{
+						uint block_index = ( (uint)i + (uint)restSpan.Length ) / SPARSE_BLOCK_SIZE;
+						NaNBoxing[] block;
+						if (sparse_map.TryGetValue(block_index, out block))
+						{
+							dst = block[(i + restSpan.Length) % SPARSE_BLOCK_SIZE];
+						}
+						else
+						{
+							dst.setFault();
+						}
+					}
+
+					NaNBoxing src = default;
+					{
+						uint block_index = (uint)(i) / SPARSE_BLOCK_SIZE;
+						NaNBoxing[] block;
+						if (sparse_map.TryGetValue(block_index, out block))
+						{
+							src = block[(i) % SPARSE_BLOCK_SIZE];
+						}
+						else
+						{
+							src.setFault();
+						}
+					}
+
+					if (dst.ValueType == NaNBoxing.BoxType.Fault && src.ValueType == NaNBoxing.BoxType.Fault)
+					{
+						continue;
+					}
+
+					//复制过去。
+					{
+						var oldsize = Size;
+						NaNBoxing[] block = GetOrCreateBlock(((uint)i + (uint)restSpan.Length));
+						if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
+						{
+							player.RaiseOutOfMemory(ref error);
+							return;
+						}
+
+						block[(i + (uint)restSpan.Length) % SPARSE_BLOCK_SIZE] = src;
+
+					}
+
+				}
+
+				array_len = array_len + (uint)restSpan.Length;
+
+				
+			}
+
+			
+
+		}
+
+
 		internal void DoShift(Player player,ref ReceiveError error)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);

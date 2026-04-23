@@ -1407,10 +1407,11 @@ namespace juicescript
         /// <param name="str">要编码的字符串</param>
         /// <param name="destination">目标字节缓冲区</param>
         /// <returns>实际写入的字节数，失败时返回0</returns>
-        private static int SafeGetUtf8Bytes(string str, Span<byte> destination)
+        private static int SafeGetUtf8Bytes(ReadOnlySpan<char> str, Span<byte> destination)
         {
-            if (string.IsNullOrEmpty(str))
-                return 0;
+            //if (string.IsNullOrEmpty(str))
+            if(str.IsEmpty)
+               return 0;
                 
             try
             {
@@ -1432,9 +1433,10 @@ namespace juicescript
         /// </summary>
         /// <param name="str">要计算的字符串</param>
         /// <returns>UTF-8字节长度，失败时返回0</returns>
-        private static int SafeGetUtf8ByteCount(string str)
+        private static int SafeGetUtf8ByteCount(ReadOnlySpan<char> str)
         {
-            if (string.IsNullOrEmpty(str))
+            //if (string.IsNullOrEmpty(str))
+            if(str.IsEmpty)
                 return 0;
                 
             try
@@ -1498,13 +1500,14 @@ namespace juicescript
         /// <param name="str">要创建LocalString的字符串（不能为null）</param>
         /// <param name="result">创建的LocalString结果</param>
         /// <returns>如果成功创建LocalString返回true，否则返回false</returns>
-        public static bool TryCreateLocalString(string str, out NaNBoxing result)
+        public static bool TryCreateLocalString(ReadOnlySpan<char> str, out NaNBoxing result)
         {
             Debug.Assert(str != null, "String cannot be null - use SetNull() for null values");
 
             result = default;
-            
-            if (string.IsNullOrEmpty(str))
+                       
+            //if (string.IsNullOrEmpty(str))
+            if(str.IsEmpty)
             {
                 result = new NaNBoxing();
                 result.SetLocalString(ReadOnlySpan<byte>.Empty);

@@ -2606,7 +2606,7 @@ namespace juicescript.runtime
 		/// <param name="result">创建的NaNBoxing结果</param>
 		/// <param name="error">错误信息</param>
 		/// <returns>是否成功创建</returns>
-		public bool TryCreateStringValue(string str, out NaNBoxing result, ref ReceiveError error)
+		public bool TryCreateStringValue(ReadOnlySpan<char> str, out NaNBoxing result, ref ReceiveError error)
 		{
 			Debug.Assert(str != null, "String cannot be null - use SetNull() for null values");
 
@@ -2619,7 +2619,7 @@ namespace juicescript.runtime
 			}
 
 			// 回退到堆分配
-			int strptr = Context.GC.AllocString(str);
+			int strptr = Context.GC.AllocString( new string( str));
 			if (strptr == 0)
 			{
 				RaiseOutOfMemory(ref error);
@@ -2750,7 +2750,7 @@ namespace juicescript.runtime
 
 		}
 
-		internal void RaiseTypeError_Ambiguous(ref ReceiveError error, string name)
+		internal void RaiseTypeError_Ambiguous(ref ReceiveError error, ReadOnlySpan<char> name)
 		{
 
 			error.raised = true;
@@ -4261,6 +4261,50 @@ namespace juicescript.runtime
 				if (error.raised) return;
 			}
 
+			//unshift
+			{
+				var name_str = Context.GC.AllocString("unshift");
+				if (name_str == 0)
+				{
+					throw new LoaderException("unshift_str alloc failed");
+				}
+				Context.GC.Root.Add(Context.GC.Heap[name_str]);
+
+				var template = Context.ARRAY.Instance.Traits.First(t => t.QName.Name == "unshift").Method;
+
+				ASMethod m = new ASMethod(Context.ARRAY._link_codescope.Parent.Container, Context.ARRAY.Token);
+				m.ReturnTypeKind = TypeKind.String;
+				m.Flags = template.Flags;
+				m.Name = template.Name;
+				m.Body = new ASMethodBody(m);
+				m.Body.ByteCode = (byte[])template.Body.ByteCode.Clone();
+				if (template.Body.param_defaultvalues != null)
+				{
+					m.Body.param_defaultvalues = (byte[])template.Body.param_defaultvalues.Clone();
+				}
+				m.Body._link_codescope = template.Body._link_codescope;
+				m.IsAnonymous = true;
+
+				m.Parameters.AddRange(template.Parameters);
+
+				m.__is_buildin_proto = true;
+
+				int method_ptr = Context.GC.AllocClosure(m);
+				if (method_ptr == 0)
+				{
+					throw new LoaderException("Array proto : unshift alloc failed");
+				}
+
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtPayloadClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				CreateDynamic(ref error, proto, v_str, v, false, false, false);
+				if (error.raised) return;
+			}
+
 		}
 
 		private bool _shutdownEvent = false;
@@ -5594,7 +5638,8 @@ namespace juicescript.runtime
 
 										if (!(vector.IsValidIndexRange(_obj.indexer_key, out validid, out maxlen, this)))
 										{
-											RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key), maxlen);
+											Span<char> buffers = stackalloc char[16];
+											RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key,buffers), maxlen);
 											return default;
 										}
 										else
@@ -5642,7 +5687,8 @@ namespace juicescript.runtime
 								}
 								if (result.ValueType == BoxType.Fault) //表示需要继续原型链查找
 								{
-									string searchName = null;
+									Span<char> buffers = stackalloc char[16];
+									ReadOnlySpan<char> searchName = buffers;
 									//if (_obj.indexer_key.ValueType == BoxType.HeapPtr && Context.GC.Heap[_obj.indexer_key.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
 									//{
 									//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr].facility).Str;
@@ -5650,7 +5696,7 @@ namespace juicescript.runtime
 									//else if (_obj.indexer_key.ValueType != BoxType.HeapPtr)
 									if (IsPrimitive(_obj.indexer_key))
 									{
-										searchName = Extensions.GetPrimitiveValueToString(this, _obj.indexer_key);
+										searchName = Extensions.GetPrimitiveValueToString(this, _obj.indexer_key,buffers);
 									}
 									else
 									{
@@ -5668,7 +5714,7 @@ namespace juicescript.runtime
 											return default;
 										}
 
-										searchName = Extensions.GetPrimitiveValueToString(this, Context.StackSlots[Context.StackPosition]);
+										searchName = Extensions.GetPrimitiveValueToString(this, Context.StackSlots[Context.StackPosition],buffers);
 
 										//throw new NotImplementedException();
 									}
@@ -8866,8 +8912,9 @@ namespace juicescript.runtime
 											{
 												if (Extensions.IsExtend((ASInstance)instance.Type, Context.ERROR.Instance))
 												{
+													Span<char> buffers = stackalloc char[16];
 													var msg = ((RtPayloadInstance)instance.facility).ReadSlot(0, instance.Type._link_codescope, this);
-													int ptr = Context.GC.AllocString($"{instance.Type.QName.Name}: {Extensions.GetPrimitiveValueToString(this, msg)}");
+													int ptr = Context.GC.AllocString($"{instance.Type.QName.Name}: {Extensions.GetPrimitiveValueToString(this, msg,buffers)}");
 													if (ptr == 0)
 													{
 														RaiseOutOfMemory(ref error);
@@ -9634,7 +9681,7 @@ namespace juicescript.runtime
 			return issameorinherit;
 		}
 
-		internal int MultiNameLSearch(ASNamespaceSet ns_set, RtHeapTypeKind kind, ASContainer as_type, string name, StackLocater stack,
+		internal int MultiNameLSearch(ASNamespaceSet ns_set, RtHeapTypeKind kind, ASContainer as_type, ReadOnlySpan<char> name, StackLocater stack,
 			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing instance, bool issameorinherit , ref ReceiveError error, bool exclude_user_ns = false
 			)
 		{
@@ -9648,7 +9695,7 @@ namespace juicescript.runtime
 			
 
 			//lambda search member
-			var findMembers = (CodeScope scope, string name, out int index) =>
+			var findMembers = (CodeScope scope, ReadOnlySpan<char> name, out int index) =>
 			{
 				index = -1;
 				int count = 0;
@@ -9656,7 +9703,7 @@ namespace juicescript.runtime
 				for (int i = scope.Members.Count - 1; i >= 0; i--)
 				{
 					var member = scope.Members[i];
-					if (member.QName.Name == name
+					if ( name.CompareTo( member.QName.Name , StringComparison.Ordinal) == 0
 					   && (
 							(
 								member.DefineAt.QName.Namespace == ns_set.Namespaces[0] && member.QName.Namespace.Kind == NamespaceKind.PackageInternal && member.QName.Namespace.def_uri == null
@@ -9692,7 +9739,7 @@ namespace juicescript.runtime
 			};
 
 
-			var findvtable = (VTable table, string name, out int m_index, out int g_index, out int s_index, out int m_count, out int g_count, out int s_count) =>
+			var findvtable = (VTable table, ReadOnlySpan<char> name, out int m_index, out int g_index, out int s_index, out int m_count, out int g_count, out int s_count) =>
 			{
 				m_index = -1;
 				g_index = -1;
@@ -9707,7 +9754,9 @@ namespace juicescript.runtime
 				{
 					var item = table.Items[i];
 
-					if (item.Trait.QName.Name == name &&
+					if (//item.Trait.QName.Name == name 
+					name.CompareTo(item.Trait.QName.Name, StringComparison.Ordinal) == 0
+					&&
 						(
 							(
 								item.DefineAt.QName.Namespace == ns_set.Namespaces[0] &&
@@ -9892,11 +9941,15 @@ namespace juicescript.runtime
 					Context.GC.CheckGC(ref error);
 
 					NaNBoxing searchPtr = default;
-					if (string.CompareOrdinal(name, "valueOf") == 0)
+					//if (string.CompareOrdinal(name, "valueOf") == 0)
+					if(name.CompareTo("valueOf", StringComparison.Ordinal) == 0)
 					{
 						searchPtr.SetHeapPtr(VALUEOF_STR);
 					}
-					else if (string.CompareOrdinal(name, "toString") == 0)
+					else if (
+						//string.CompareOrdinal(name, "toString") == 0
+						name.CompareTo("toString",StringComparison.Ordinal) == 0
+						)
 					{
 						searchPtr.SetHeapPtr(TOSTRING_STR);
 					}
@@ -10067,11 +10120,17 @@ namespace juicescript.runtime
 						Context.GC.CheckGC(ref error);
 
 						NaNBoxing searchPtr = default;
-						if (string.CompareOrdinal(name, "valueOf") == 0)
+						if (
+							//string.CompareOrdinal(name, "valueOf") == 0
+							name.CompareTo( "valueOf", StringComparison.Ordinal) == 0
+							)
 						{
 							searchPtr.SetHeapPtr(VALUEOF_STR);
 						}
-						else if (string.CompareOrdinal(name, "toString") == 0)
+						else if (
+							//string.CompareOrdinal(name, "toString") == 0
+							name.CompareTo( "toString", StringComparison.Ordinal) == 0
+							)
 						{
 							searchPtr.SetHeapPtr(TOSTRING_STR);
 						}
@@ -10152,11 +10211,17 @@ namespace juicescript.runtime
 					Context.GC.CheckGC(ref error);
 
 					NaNBoxing searchPtr = default;
-					if (string.CompareOrdinal(name, "valueOf") == 0)
+					if (
+						//string.CompareOrdinal(name, "valueOf") == 0
+						name.CompareTo( "valueOf", StringComparison.Ordinal) == 0
+						)
 					{
 						searchPtr.SetHeapPtr(VALUEOF_STR);
 					}
-					else if (string.CompareOrdinal(name, "toString") == 0)
+					else if (
+						//string.CompareOrdinal(name, "toString") == 0
+						name.CompareTo("toString", StringComparison.Ordinal)==0
+						)
 					{
 						searchPtr.SetHeapPtr(TOSTRING_STR);
 					}
@@ -10303,11 +10368,17 @@ namespace juicescript.runtime
 					Context.GC.CheckGC(ref error);
 
 					NaNBoxing searchPtr = default;
-					if (string.CompareOrdinal(name, "valueOf") == 0)
+					if (
+						//string.CompareOrdinal(name, "valueOf") == 0
+						name.CompareTo("valueOf", StringComparison.Ordinal) == 0
+						)
 					{
 						searchPtr.SetHeapPtr(VALUEOF_STR);
 					}
-					else if (string.CompareOrdinal(name, "toString") == 0)
+					else if (
+						//string.CompareOrdinal(name, "toString") == 0
+						name.CompareTo( "toString", StringComparison.Ordinal) == 0
+						)
 					{
 						searchPtr.SetHeapPtr(TOSTRING_STR);
 					}
@@ -11410,8 +11481,10 @@ namespace juicescript.runtime
 									int charCount2 = n2.GetLocalStringChars(chars2);
 									if (charCount2 > 0)
 									{
-										string str2 = new string(chars2.Slice(0, charCount2));
-										string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
+										var str2 = chars2.Slice(0, charCount2);
+
+										Span<char> buffers = stackalloc char[16];
+										var concatenated = $"{Extensions.GetPrimitiveValueToString(this, n1,buffers)}{str2}";
 
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -11422,7 +11495,8 @@ namespace juicescript.runtime
 									else
 									{
 										// Empty LocalString, just convert n1 to string
-										string concatenated = Extensions.GetPrimitiveValueToString(this, n1);
+										Span<char> buffers = stackalloc char[16];
+										var concatenated = Extensions.GetPrimitiveValueToString(this, n1,buffers);
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
 											return;
@@ -11464,8 +11538,9 @@ namespace juicescript.runtime
 									int charCount2 = n2.GetLocalStringChars(chars2);
 									if (charCount2 > 0)
 									{
-										string str2 = new string(chars2.Slice(0, charCount2));
-										string concatenated = Extensions.GetPrimitiveValueToString(this, n1) + str2;
+										var str2 = chars2.Slice(0, charCount2);
+										Span<char> buffers = stackalloc char[16];
+										string concatenated = $"{Extensions.GetPrimitiveValueToString(this, n1,buffers)}{str2}";
 
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -11475,8 +11550,9 @@ namespace juicescript.runtime
 									}
 									else
 									{
+										Span<char> buffers = stackalloc char[16];
 										// Empty LocalString, just convert n1 to string
-										string concatenated = Extensions.GetPrimitiveValueToString(this, n1);
+										var concatenated = Extensions.GetPrimitiveValueToString(this, n1,buffers);
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
 											return;
@@ -11714,7 +11790,7 @@ namespace juicescript.runtime
 						// Use efficient char-based operations to avoid string allocation
 						Span<char> chars1 = stackalloc char[16];
 						int charCount1 = n1.GetLocalStringChars(chars1);
-						string str1 = charCount1 > 0 ? new string(chars1.Slice(0, charCount1)) : string.Empty;
+						var str1 = charCount1 > 0 ? chars1.Slice(0, charCount1) : ReadOnlySpan<char>.Empty;
 
 						switch (n2.ValueType)
 						{
@@ -11730,8 +11806,9 @@ namespace juicescript.runtime
 							case BoxType.UShort:
 							case BoxType.Float:
 								{
-									var str2 = Extensions.GetPrimitiveValueToString(this, n2);
-									string concatenated = str1 + str2;
+									Span<char> buffers = stackalloc char[16];
+									var str2 = Extensions.GetPrimitiveValueToString(this, n2,buffers);
+									string concatenated = $"{str1}{str2}";
 
 									// 使用安全的字符串创建方法
 									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -11746,7 +11823,7 @@ namespace juicescript.runtime
 									if (instance2.TypeKind == RtHeapTypeKind.STRING)
 									{
 										var str2 = ((RtPayloadString)instance2.facility).Str;
-										string concatenated = str1 + str2;
+										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -11769,8 +11846,8 @@ namespace juicescript.runtime
 									int charCount2 = n2.GetLocalStringChars(chars2);
 									if (charCount2 > 0)
 									{
-										string str2 = new string(chars2.Slice(0, charCount2));
-										string concatenated = str1 + str2;
+										ReadOnlySpan<char> str2 = chars2.Slice(0, charCount2);
+										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -11817,8 +11894,9 @@ namespace juicescript.runtime
 								case BoxType.UShort:
 								case BoxType.Float:
 									{
-										var str2 = Extensions.GetPrimitiveValueToString(this, n2);
-										string concatenated = str1 + str2;
+										Span<char> buffers = stackalloc char[16];
+										var str2 = Extensions.GetPrimitiveValueToString(this, n2,buffers);
+										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -11903,11 +11981,12 @@ namespace juicescript.runtime
 				var instance = Context.GC.Heap[n2.HeapPtr];
 				if (instance.TypeKind == RtHeapTypeKind.STRING)
 				{
-					string str = Extensions.GetPrimitiveValueToString(this, n1);
+					Span<char> buffers = stackalloc char[16];
+					var str = Extensions.GetPrimitiveValueToString(this, n1,buffers);
 					var str2 = ((RtPayloadString)instance.facility).Str;
 					Context.GC.CheckGC(ref error);
 
-					string concatenated = str + str2;
+					string concatenated = $"{str}{str2}" ;
 
 					// 使用安全的字符串创建方法
 					if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
@@ -13725,13 +13804,15 @@ namespace juicescript.runtime
 
 		}
 
-		private Memory<char> frame_holdchars = new Memory<char>(new char[16]);
+		//private Memory<char> frame_holdchars = new Memory<char>(new char[16]);
 		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
 		{
 			//ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			//method.Body.GetInfo(ref info);
+
+			Span<char> frame_holdchars = stackalloc char[16];
 
 #if DEBUG
 			int iter_ctx_index = Context.GC.IterCtxIndex;
@@ -13996,14 +14077,14 @@ namespace juicescript.runtime
 
 												//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
 
-												ReadOnlySpan<char> searchName;
+												ReadOnlySpan<char> searchName = frame_holdchars;
 												if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
 												{
 													searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str;
 												}
 												else
 												{
-													Span<char> temp = frame_holdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
+													Span<char> temp = frame_holdchars; //stackalloc char[16];//用于从LocalString中提取值
 													int l = _obj.searchPropertyName.GetLocalStringChars(temp);
 													searchName = temp.Slice(0, l);
 												}
@@ -14476,8 +14557,8 @@ namespace juicescript.runtime
 								instance = Context.GC.Heap[instance_box.HeapPtr];
 
 							lbl_instance_primitive:
-
-								string name;
+								Span<char> buffers = frame_holdchars; //stackalloc char[16];
+								ReadOnlySpan<char> name = buffers ;
 
 								NaNBoxing prop_name = stackslots[_name.index];
 
@@ -14520,9 +14601,9 @@ namespace juicescript.runtime
 										{
 											case BoxType.LocalString:
 												// Use efficient char-based extraction to avoid string allocation
-												Span<char> chars = stackalloc char[16];
-												int charCount = prop_name.GetLocalStringChars(chars);
-												name = charCount > 0 ? new string(chars.Slice(0, charCount)) : string.Empty;
+												
+												int charCount = prop_name.GetLocalStringChars(frame_holdchars);
+												name = charCount > 0 ? buffers.Slice(0, charCount) : ReadOnlySpan<char>.Empty;
 												goto lbl_name_solved;
 											case NaNBoxing.BoxType.Number:
 												{
@@ -14542,7 +14623,7 @@ namespace juicescript.runtime
 													}
 													else
 													{
-														name = Extensions.GetPrimitiveValueToString(this, prop_name);
+														name = Extensions.GetPrimitiveValueToString(this, prop_name,buffers);
 														goto array_prop;
 													}
 												}
@@ -14564,7 +14645,7 @@ namespace juicescript.runtime
 													}
 													else
 													{
-														name = Extensions.GetPrimitiveValueToString(this, prop_name);
+														name = Extensions.GetPrimitiveValueToString(this, prop_name,buffers);
 														goto array_prop;
 													}
 												}
@@ -14691,11 +14772,11 @@ namespace juicescript.runtime
 										}
 #endif
 
-										name = Extensions.GetPrimitiveValueToString(this, prop_name);
+										name = Extensions.GetPrimitiveValueToString(this, prop_name,buffers);
 									}
 									else
 									{
-										name = Extensions.GetPrimitiveValueToString(this, prop_name);
+										name = Extensions.GetPrimitiveValueToString(this, prop_name,buffers);
 										//throw new NotImplementedException("转字符串？还是数组？");
 									}
 								}
@@ -14721,7 +14802,7 @@ namespace juicescript.runtime
 											goto flag_handle_error;
 										}
 
-										name = Extensions.GetPrimitiveValueToString(this, primitive_name);
+										name = Extensions.GetPrimitiveValueToString(this, primitive_name,buffers);
 										Context.StackPosition--;
 
 
@@ -14809,7 +14890,9 @@ namespace juicescript.runtime
 								var name = stackslots[_name.index];
 
 								ASNamespace searchNs = null;
-								string searchName = null;
+
+								Span<char> searchNameBuffer = frame_holdchars;
+								ReadOnlySpan<char> searchName = searchNameBuffer;
 								if (ns.ValueType != NaNBoxing.BoxType.HeapPtr)
 								{
 									goto lbl_rtqname_ns_not_a_namespace;
@@ -14831,7 +14914,7 @@ namespace juicescript.runtime
 								if (name.ValueType != NaNBoxing.BoxType.HeapPtr)
 								{
 									//throw new NotImplementedException("cast to string");
-									searchName = Extensions.GetPrimitiveValueToString(this, name);
+									searchName = Extensions.GetPrimitiveValueToString(this, name,searchNameBuffer);
 								}
 								else
 								{
@@ -14870,7 +14953,7 @@ namespace juicescript.runtime
 											goto flag_handle_error;
 										}
 
-										searchName = Extensions.GetPrimitiveValueToString(this, conv);
+										searchName = Extensions.GetPrimitiveValueToString(this, conv,searchNameBuffer);
 
 										//throw new NotImplementedException("cast to string");
 									}
@@ -14968,12 +15051,12 @@ namespace juicescript.runtime
 								;
 
 								//lambda search member
-								var searchmember = (CodeScope scope, ASNamespace ns, string name, out int index) =>
+								var searchmember = (CodeScope scope, ASNamespace ns, ReadOnlySpan<char> name, out int index) =>
 								{
 									for (int i = 0; i < scope.Members.Count; i++)
 									{
 										var member = scope.Members[i];
-										if (member.QName.Name == name && !((ns.Kind == NamespaceKind.Protected || ns.Kind == NamespaceKind.StaticProtected) && !issameorinherit) &&
+										if (name.CompareTo(member.QName.Name, StringComparison.Ordinal) == 0 && !((ns.Kind == NamespaceKind.Protected || ns.Kind == NamespaceKind.StaticProtected) && !issameorinherit) &&
 											(
 												member.QName.Namespace == ns
 												||
@@ -15015,14 +15098,14 @@ namespace juicescript.runtime
 								};
 
 
-								var searchvtable = (VTable vtable, ASNamespace ns, string name, out int m_idx, out int g_idx, out int s_idx) =>
+								var searchvtable = (VTable vtable, ASNamespace ns, ReadOnlySpan<char> name, out int m_idx, out int g_idx, out int s_idx) =>
 									{
 										m_idx = -1; g_idx = -1; s_idx = -1;
 										for (int i = 0; i < vtable.Items.Count; i++)
 										{
 											var v = vtable.Items[i];
 
-											if (v.Trait.QName.Name == name && !((ns.Kind == NamespaceKind.Protected || ns.Kind == NamespaceKind.StaticProtected) && !issameorinherit) &&
+											if (name.CompareTo(v.Trait.QName.Name, StringComparison.Ordinal) == 0 && !((ns.Kind == NamespaceKind.Protected || ns.Kind == NamespaceKind.StaticProtected) && !issameorinherit) &&
 											(
 												v.Trait.QName.Namespace == ns
 												||
@@ -16673,7 +16756,7 @@ namespace juicescript.runtime
 								}
 								else if (thisValue.ValueType == BoxType.LocalString)
 								{
-									Span<char> temp = stackalloc char[16];
+									Span<char> temp = frame_holdchars;
 									int len = thisValue.GetLocalStringChars(temp);
 									stackslots[target.index].SetInt(len);
 
@@ -17476,14 +17559,14 @@ namespace juicescript.runtime
 
 
 
-									ReadOnlySpan<char> searchName;
+									ReadOnlySpan<char> searchName = frame_holdchars;
 									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
 									{
 										searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr].facility).Str;
 									}
 									else
 									{
-										Span<char> temp = frame_holdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
+										Span<char> temp = frame_holdchars; //stackalloc char[16];//用于从LocalString中提取值
 										int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
 										searchName = temp.Slice(0, l);
 									}
@@ -17521,7 +17604,7 @@ namespace juicescript.runtime
 										//int searchname_ptr;// = cacheObj.searchPropertyNamePtr;
 										//string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr].facility).Str;
 
-										ReadOnlySpan<char> searchName;
+										ReadOnlySpan<char> searchName = frame_holdchars;
 										if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
 										{
 											//searchname_ptr = cacheObj.searchPropertyName.HeapPtr;
@@ -17529,7 +17612,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											Span<char> temp = frame_holdchars.Span; //stackalloc char[16];//用于从LocalString中提取值
+											Span<char> temp = frame_holdchars; //stackalloc char[16];//用于从LocalString中提取值
 											int l = cacheObj.searchPropertyName.GetLocalStringChars(temp);
 											searchName = temp.Slice(0, l);
 
@@ -17650,7 +17733,8 @@ namespace juicescript.runtime
 												//Vector不能动态创建属性
 												if (!RtPayloadVector.IsValidIndexType(cacheObj.indexer_key))
 												{
-													RaiseReferenceError_CanNotCreateProperty(ref error, null, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key), instance.Type.QName);
+													Span<char> buffers = frame_holdchars;
+													RaiseReferenceError_CanNotCreateProperty(ref error, null, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key,buffers), instance.Type.QName);
 													goto flag_handle_error;
 												}
 
@@ -17670,7 +17754,8 @@ namespace juicescript.runtime
 													}
 													else
 													{
-														RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key), maxlen);
+														Span<char> buffers = stackalloc char[16];
+														RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key,buffers), maxlen);
 														goto flag_handle_error;
 													}
 												}
@@ -17792,7 +17877,8 @@ namespace juicescript.runtime
 													box.ValueType == BoxType.Number && box.Number > uint.MaxValue &&
 													cacheObj.trait[1] == Context.ARRAY.Instance._vtable.Items[1].Trait)
 												{
-													RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, box), uint.MaxValue);
+													Span<char> buffers = frame_holdchars;
+													RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, box,buffers), uint.MaxValue);
 													goto flag_handle_error;
 												}
 
@@ -19249,7 +19335,8 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								string name = Extensions.GetPrimitiveValueToString(this, name_n);
+								Span<char> buffers = frame_holdchars;
+								ReadOnlySpan<char> name = Extensions.GetPrimitiveValueToString(this, name_n,buffers);
 
 								var type = stackslots[v2.index];
 								bool isvaluebox = false;
@@ -19298,7 +19385,7 @@ namespace juicescript.runtime
 								}
 
 								var find =
-									(ASContainer type, string name, int proto) =>
+									(ASContainer type, ReadOnlySpan<char> name, int proto) =>
 								{
 									if (ObjectImpl.Find_ASContainer_Prop(type, name))
 									{

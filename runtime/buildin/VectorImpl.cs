@@ -2368,7 +2368,7 @@ namespace juicescript.runtime.buildin
 			VectorToString arrayToString = new VectorToString();
 			arrayToString.sb = sb;
 
-			store.DoTrace( elementkind, elementcls, context, stackStPos, ref error, scope_ptr, arrayToString);
+			store.DoTrace( elementkind, elementcls, context, stackStPos, ref error, scope_ptr, arrayToString,",");
 
 			string str = sb.ToString();
 			if (string.IsNullOrEmpty(str))
@@ -2431,7 +2431,8 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				string sepStr;
+				Span<char> buffer = stackalloc char[16];
+				ReadOnlySpan<char> sepStr = buffer;
 
 				NaNBoxing sep = scope.ReadSlot(0, context.player);
 				if (sep.ValueType == NaNBoxing.BoxType.Null)
@@ -2440,7 +2441,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					sepStr = Extensions.GetPrimitiveValueToString(context.player, sep);
+					sepStr = Extensions.GetPrimitiveValueToString(context.player, sep,buffer);
 				}
 
 				joinPrinter.stringBuilder.Clear();
@@ -2940,7 +2941,7 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			internal void DoTrace(TypeKind element_type, ASClass element, Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, string sep = ",")
+			internal void DoTrace(TypeKind element_type, ASClass element, Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, ReadOnlySpan<char> sep)
 			{
 				var span = CollectionsMarshal.AsSpan(buffer);
 				for (int i = 0; i < length; i++)
