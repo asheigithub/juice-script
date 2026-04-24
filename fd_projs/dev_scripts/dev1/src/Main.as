@@ -251,11 +251,14 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
+function callbackfn(val, idx, obj) {
+  return obj.length === 2;
+}
 
-var arr = new Array(10);
-assert.throws(TypeError, function() {
-  arr.forEach(null);
-});
+var newArr = [12, 11].filter(callbackfn);
+
+assert.sameValue(newArr.length, 2, 'newArr.length');
+
 
 
 trace('OK');
