@@ -5,11 +5,29 @@ package
     public class Main extends Sprite {
         public function Main() {
             
+			
+			
         }
 
        
     }
 }
+
+function pass(msg) {
+	trace(msg || 'OK');
+}
+
+var arr = [1, 2, 3];
+var idx;
+
+// fromIndex >= length returns -1
+idx = arr.indexOf(1, 10);
+if (idx !== -1) throw new Error('A: indexOf(1, 10) expected -1');
+
+idx = arr.indexOf(1, 3);
+if (idx !== -1) throw new Error('B: indexOf(1, 3) expected -1');
+
+pass('fromIndex edge tests passed');
 
 
 //var __instance = new Object(42);
@@ -250,7 +268,6 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
   throw new Test262Error(message);
 };
-
 var targetObj = {};
 var arrProtoLen;
 
@@ -258,7 +275,6 @@ arrProtoLen = Array.prototype.length;
 Array.prototype.length = 0;
 
 assert.sameValue([0, targetObj].indexOf(targetObj), 1, '[0, targetObj].indexOf(targetObj)');
-
 
 trace('OK');
 
