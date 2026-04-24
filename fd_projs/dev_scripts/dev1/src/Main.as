@@ -11,9 +11,6 @@ package
     }
 }
 
-trace ( [1, 2, 3,,,,,,,,,,,,,,,,,,9].reverse() );
-
-
 
 //var __instance = new Object(42);
 //
@@ -254,6 +251,11 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
+
+var arr = new Array(10);
+assert.throws(TypeError, function() {
+  arr.forEach(null);
+});
 
 
 trace('OK');
