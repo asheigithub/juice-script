@@ -15,43 +15,43 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
-    public sealed class RtPayloadArray : FacilityBase
-    {
-        /// <summary>
-        /// 缓存数组的最大缓存数量
-        /// </summary>
-        public const int MAX_CACHE_ELEMENT = 16;
+	public sealed class RtPayloadArray : FacilityBase
+	{
+		/// <summary>
+		/// 缓存数组的最大缓存数量
+		/// </summary>
+		public const int MAX_CACHE_ELEMENT = 16;
 
-        public enum ArrayStoreMode 
-        { 
-            /// <summary>
-            /// 传参时构造在栈上的数组参数
-            /// </summary>
-            cache_on_stack = 0,
+		public enum ArrayStoreMode
+		{
+			/// <summary>
+			/// 传参时构造在栈上的数组参数
+			/// </summary>
+			cache_on_stack = 0,
 
-            /// <summary>
-            /// 分配在缓存对象里
-            /// </summary>
-            cache =1,
+			/// <summary>
+			/// 分配在缓存对象里
+			/// </summary>
+			cache = 1,
 
-            /// <summary>
-            /// 分配在堆里
-            /// </summary>
-            normal = 2
+			/// <summary>
+			/// 分配在堆里
+			/// </summary>
+			normal = 2
 
-        }
+		}
 
 
-        public override int Size
-        {
-            get
-            {
-                return  4 + 4 + 4 + 8 + 8 +8 + 4 +(
-					StoreMode == ArrayStoreMode.cache_on_stack?0: 
-					( StoreMode == ArrayStoreMode.cache?( MAX_CACHE_ELEMENT * 8 + 16 ):( sparse_map.Count * SPARSE_BLOCK_SIZE * 8 + (16 + 16) * sparse_map.Count)   ) 
+		public override int Size
+		{
+			get
+			{
+				return 4 + 4 + 4 + 8 + 8 + 8 + 4 + (
+					StoreMode == ArrayStoreMode.cache_on_stack ? 0 :
+					(StoreMode == ArrayStoreMode.cache ? (MAX_CACHE_ELEMENT * 8 + 16) : (sparse_map.Count * SPARSE_BLOCK_SIZE * 8 + (16 + 16) * sparse_map.Count))
 					);
-            }
-        }
+			}
+		}
 
 
 		private int m_property_ptr;
@@ -117,19 +117,19 @@ namespace juicescript.runtime
 
 
 		internal int stack_store_startindex;
-        internal Memory<NaNBoxing> stack_store;
-        
-
-        internal NaNBoxing[] cache_store;
-        internal int[] cache_structs;
+		internal Memory<NaNBoxing> stack_store;
 
 
-		private const int SPARSE_BLOCK_SIZE = 16;
+		internal NaNBoxing[] cache_store;
+		internal int[] cache_structs;
+
+
+		private const int SPARSE_BLOCK_SIZE = 64;
 		private Dictionary<uint, NaNBoxing[]> sparse_map;
 
 		private NaNBoxing[] GetOrCreateBlock(uint array_index)
 		{
-			
+
 			uint block_index = array_index / SPARSE_BLOCK_SIZE;
 			if (!sparse_map.TryGetValue(block_index, out var block))
 			{
@@ -163,8 +163,8 @@ namespace juicescript.runtime
 
 		internal uint array_len = 0;
 
-        public uint GetLength(Player player)
-        {
+		public uint GetLength(Player player)
+		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
 				return array_len;
@@ -178,17 +178,17 @@ namespace juicescript.runtime
 		}
 
 
-		public void SetLength(uint len,Player player, ref ReceiveError error)
-        {
+		public void SetLength(uint len, Player player, ref ReceiveError error)
+		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
-				DoSetLength(len, player,ref error);
+				DoSetLength(len, player, ref error);
 			}
 			else
 			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				target.DoSetLength(len,player,ref error);
+				target.DoSetLength(len, player, ref error);
 			}
 		}
 
@@ -200,7 +200,7 @@ namespace juicescript.runtime
 					{
 						if (len > stack_store.Length)
 						{
-							ChangeStoreToHeap(len, player,ref error);
+							ChangeStoreToHeap(len, player, ref error);
 							//throw new NotImplementedException();
 						}
 						else
@@ -213,12 +213,12 @@ namespace juicescript.runtime
 							}
 						}
 					}
-					break;		
+					break;
 				case ArrayStoreMode.cache:
 					{
 						if (len > MAX_CACHE_ELEMENT)
 						{
-							ChangeStoreToHeap(len,player,ref error);
+							ChangeStoreToHeap(len, player, ref error);
 							//throw new NotImplementedException();
 						}
 						else
@@ -237,11 +237,11 @@ namespace juicescript.runtime
 						array_len = len;
 						int oldsize = Size;
 
-						
+
 						foreach (var id in sparse_map.Keys.ToArray())
 						{
 							if (id * SPARSE_BLOCK_SIZE >= array_len)
-							{ 
+							{
 								sparse_map.Remove(id);
 							}
 						}
@@ -282,11 +282,11 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 #endif
 			uint len = GetLength(player);
-			return ChangeStoreToHeap(len,player,ref error);	
+			return ChangeStoreToHeap(len, player, ref error);
 
 		}
 
-		internal void InitHeapData(Span<NaNBoxing> init_data,Player player,ref ReceiveError error)
+		internal void InitHeapData(Span<NaNBoxing> init_data, Player player, ref ReceiveError error)
 		{
 			int usg = player.Context.GC.MemUsage - Size;
 			int oldsize = Size;
@@ -339,14 +339,14 @@ namespace juicescript.runtime
 			if (usg + Size >= player.Context.GC.USAGE_LIMIT)
 			{
 				player.RaiseOutOfMemory(ref error);
-				return ;
+				return;
 			}
 
 			player.Context.GC.UpdateMemUsage_Change(Size - oldsize);
 		}
 
 
-		private int ChangeStoreToHeap(uint newlen,Player player,ref ReceiveError error)
+		private int ChangeStoreToHeap(uint newlen, Player player, ref ReceiveError error)
 		{
 			RtHeapInstance arr_instance;
 			int arr_ptr = player.Context.GC.AllocArray(out arr_instance, ArrayStoreMode.normal);
@@ -357,7 +357,7 @@ namespace juicescript.runtime
 			}
 
 			RtPayloadArray arr = (RtPayloadArray)arr_instance.facility;
-			
+
 			Span<NaNBoxing> store_span;
 
 			//转换基本块
@@ -378,7 +378,7 @@ namespace juicescript.runtime
 			}
 
 			arr.array_len = array_len;
-			arr.InitHeapData(store_span,player,ref error);
+			arr.InitHeapData(store_span, player, ref error);
 			if (error.raised)
 			{
 				return 0;
@@ -405,7 +405,7 @@ namespace juicescript.runtime
 						//创建动态对象callee
 						//throw new NotImplementedException();
 
-						NaNBoxing callee_str = default;callee_str.SetHeapPtr(player.CALLEE_STR);
+						NaNBoxing callee_str = default; callee_str.SetHeapPtr(player.CALLEE_STR);
 						player.CreateDynamic(ref error, arr_instance, callee_str, callee_v, true, false, true);
 						if (error.raised)
 						{
@@ -436,22 +436,22 @@ namespace juicescript.runtime
 			}
 #endif
 			switch (StoreMode)
-            {
-                case ArrayStoreMode.cache_on_stack:
+			{
+				case ArrayStoreMode.cache_on_stack:
 
-                    {
-                        var elements = stack_store.Span;
-                        for (int i = 0; i < array_len; i++)
-                        {
-                            if (elements[i].ValueType == NaNBoxing.BoxType.HeapPtr)
-                            {
-                                context.GC.mark(context.GC.Heap[elements[i].HeapPtr]);
-                            }
-                        }
-                    }
-                    break;
-                case ArrayStoreMode.cache:
-                    {
+					{
+						var elements = stack_store.Span;
+						for (int i = 0; i < array_len; i++)
+						{
+							if (elements[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+							{
+								context.GC.mark(context.GC.Heap[elements[i].HeapPtr]);
+							}
+						}
+					}
+					break;
+				case ArrayStoreMode.cache:
+					{
 						var elements = cache_store;
 						for (int i = 0; i < array_len; i++)
 						{
@@ -461,8 +461,8 @@ namespace juicescript.runtime
 							}
 						}
 					}
-                    break;
-                case ArrayStoreMode.normal:
+					break;
+				case ArrayStoreMode.normal:
 
 					{
 						foreach (var item in sparse_map)
@@ -477,13 +477,13 @@ namespace juicescript.runtime
 										context.GC.mark(context.GC.Heap[item.Value[i].HeapPtr]);
 									}
 								}
-							}	
+							}
 
 						}
 					}
 
 					break;
-                default:
+				default:
 
 #if DEBUG
 					throw new InvalidOperationException();
@@ -500,20 +500,20 @@ namespace juicescript.runtime
 
 		private short storeMode;
 
-		public ArrayStoreMode StoreMode 
-        {
-            get 
-            { 
-                return (ArrayStoreMode)(storeMode & 0xFF);
-            }
-            set
-            { 
-                storeMode = (short)value;
-            }       
-        }
+		public ArrayStoreMode StoreMode
+		{
+			get
+			{
+				return (ArrayStoreMode)(storeMode & 0xFF);
+			}
+			set
+			{
+				storeMode = (short)value;
+			}
+		}
 
-        public bool Delete(uint index,Player player)
-        {
+		public bool Delete(uint index, Player player)
+		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
 				return DoDelete(index);
@@ -541,7 +541,7 @@ namespace juicescript.runtime
 			else if (StoreMode == ArrayStoreMode.cache)
 			{
 				if (index < array_len)
-				{ 
+				{
 					cache_store[(int)index].setFault();
 				}
 
@@ -566,21 +566,21 @@ namespace juicescript.runtime
 
 
 
-		internal void SetSlot(NaNBoxing box, uint array_index, Player player,ref ReceiveError error)
-        {
+		internal void SetSlot(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
+		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
-				 DoSetSlot(box, array_index,ref error,player);
+				DoSetSlot(box, array_index, ref error, player);
 			}
 			else
 			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				target.DoSetSlot(box, array_index,ref error,player	);
+				target.DoSetSlot(box, array_index, ref error, player);
 			}
 		}
 
-		private void DoSetSlot(NaNBoxing box, uint array_index,ref ReceiveError error,Player player)
+		private void DoSetSlot(NaNBoxing box, uint array_index, ref ReceiveError error, Player player)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
@@ -605,10 +605,10 @@ namespace juicescript.runtime
 				{
 					throw new InvalidOperationException();
 				}
-#endif       
+#endif
 
 				cache_store[array_index] = box;
-				
+
 
 				if (array_index + 1 > array_len)
 				{
@@ -619,7 +619,7 @@ namespace juicescript.runtime
 			else
 			{
 				var oldsize = Size;
-				NaNBoxing[] block=GetOrCreateBlock(array_index);
+				NaNBoxing[] block = GetOrCreateBlock(array_index);
 
 				if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
 				{
@@ -635,7 +635,7 @@ namespace juicescript.runtime
 				{
 					array_len = array_index + 1;
 				}
-				
+
 			}
 
 		}
@@ -659,7 +659,7 @@ namespace juicescript.runtime
 
 					stack_span[st] = v2;
 					stack_span[ed] = v1;
-			
+
 					st++;
 					ed--;
 				}
@@ -715,15 +715,27 @@ namespace juicescript.runtime
 				long st = 0;
 				long ed = (long)array_len - 1;
 
+				uint _lastv1_index = uint.MaxValue; NaNBoxing[] _lastv1_block = null;
+				uint _lastv2_index = uint.MaxValue; NaNBoxing[] _lastv2_block = null;
+
+
 				while (st < ed)
 				{
 					NaNBoxing v1 = default;
 					{
 						uint block_index = (uint)((st) / SPARSE_BLOCK_SIZE);
 						NaNBoxing[] block;
-						if (sparse_map.TryGetValue(block_index, out block))
+
+						if (_lastv1_index == block_index)
+						{
+							v1 = _lastv1_block[st % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
 						{
 							v1 = block[(st) % SPARSE_BLOCK_SIZE];
+
+							_lastv1_block = block;
+							_lastv1_index = block_index;
 						}
 						else
 						{
@@ -735,9 +747,20 @@ namespace juicescript.runtime
 					{
 						uint block_index = (uint)((ed) / SPARSE_BLOCK_SIZE);
 						NaNBoxing[] block;
-						if (sparse_map.TryGetValue(block_index, out block))
+
+
+
+						if (_lastv2_index == block_index)
+						{
+							v2 = _lastv2_block[st % SPARSE_BLOCK_SIZE];
+
+						}
+						else if(sparse_map.TryGetValue(block_index, out block))
 						{
 							v2 = block[(ed) % SPARSE_BLOCK_SIZE];
+
+							_lastv2_block = block;
+							_lastv2_index = block_index;
 						}
 						else
 						{
@@ -751,6 +774,11 @@ namespace juicescript.runtime
 					}
 					else //不存在struct_cache问题，直接交换
 					{
+						if (_lastv1_index == (uint)((st) / SPARSE_BLOCK_SIZE))
+						{
+							_lastv1_block[st % SPARSE_BLOCK_SIZE] = v2;
+						}
+						else
 						{
 							var oldsize = Size;
 							NaNBoxing[] block = GetOrCreateBlock((uint)st);
@@ -764,6 +792,11 @@ namespace juicescript.runtime
 
 						}
 
+						if (_lastv2_index == (uint)((ed) / SPARSE_BLOCK_SIZE))
+						{
+							_lastv2_block[ed % SPARSE_BLOCK_SIZE] = v1;
+						}
+						else
 						{
 							var oldsize = Size;
 							NaNBoxing[] block = GetOrCreateBlock((uint)ed);
@@ -788,6 +821,384 @@ namespace juicescript.runtime
 		}
 
 
+		internal void DoSplice(
+			Context context,
+			ref ReceiveError error,
+			int start,
+			uint deleteCount,
+			long netChange )
+		{
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+			long len = array_len;
+			
+		
+			long newLen = len + netChange;
+
+			Debug.Assert(newLen <= uint.MaxValue);
+
+			switch (StoreMode)
+			{
+				case ArrayStoreMode.cache_on_stack:
+					DoSplice_OnStack(context, ref error, start, deleteCount, (int)len, newLen, netChange);
+					break;
+				case ArrayStoreMode.cache:
+					DoSplice_Cache(context, ref error, start, deleteCount, (int)len, newLen, netChange);
+					break;
+				case ArrayStoreMode.normal:
+					DoSplice_Normal(context, ref error, start, deleteCount, (uint)len, (uint)newLen, netChange);
+					break;
+			}
+		}
+
+		private void DoSplice_OnStack(
+			Context context, ref ReceiveError error,
+			int start, uint deleteCount,
+			int len, long newLen, long netChange)
+		{
+			var span = stack_store.Span;
+			// 检查是否溢出缓存
+			if (newLen > span.Length)
+			{
+				// 提升到堆存储（会把当前数据转移到 normal 存储）
+				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
+				if (error.raised) return;
+
+				RtPayloadArray heap = (RtPayloadArray)context.player.Context.GC.Heap[heaparrayptr].facility;
+				heap.DoSplice(context, ref error, start, deleteCount,netChange);
+				return;
+			}
+			if (netChange > 0)
+			{
+				// 情况A：插入比删除多 → 向右移（类似 DoUnshift）
+				// 1. 从末尾开始，把 [start + deleteCount, len) 的元素向右移动 netChange 个位置
+				for (long i = len - 1; i >= start + deleteCount; i--)
+				{
+					var box = span[(int)i];
+					CopyBoxTo_OnStack(span, (int)(i + netChange), box, context.player);
+				}
+				
+				
+			}
+			else if (netChange < 0)
+			{
+				// 情况B：删除比插入多 → 向左移（类似 DoShift）
+				// 1. 把 [start + deleteCount, len) 的元素向左移动 |netChange| 个位置
+				for (long i = start + deleteCount; i < len; i++)
+				{
+					var box = span[(int)i];
+					CopyBoxTo_OnStack(span, (int)(i + netChange), box, context.player);
+				}
+				// 2. 清除末尾 |netChange| 个位置
+				for (int i = (int)(len + netChange); i < len; i++)
+					span[i].setFault();
+			}
+			else
+			{
+				
+			}
+			array_len = (uint)newLen;
+		}
+
+		private void DoSplice_Cache(
+			Context context, ref ReceiveError error,
+			int start, uint deleteCount, 
+			int len, long newLen, long netChange)
+		{
+			var span = cache_store;
+			// 检查是否溢出缓存
+			if (newLen > span.Length)
+			{
+				// 提升到堆存储（会把当前数据转移到 normal 存储）
+				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
+				if (error.raised) return;
+
+				RtPayloadArray heap = (RtPayloadArray)context.player.Context.GC.Heap[heaparrayptr].facility;
+				heap.DoSplice(context, ref error, start, deleteCount,netChange);
+				return;
+			}
+			if (netChange > 0)
+			{
+				// 情况A：插入比删除多 → 向右移（类似 DoUnshift）
+				// 1. 从末尾开始，把 [start + deleteCount, len) 的元素向右移动 netChange 个位置
+				for (long i = len - 1; i >= start + deleteCount; i--)
+				{
+					var box = span[i];
+					CopyBoxTo_OnStack(span, (int)(i + netChange), box, context.player);
+				}
+				
+				
+			}
+			else if (netChange < 0)
+			{
+				// 情况B：删除比插入多 → 向左移（类似 DoShift）
+				// 1. 把 [start + deleteCount, len) 的元素向左移动 |netChange| 个位置
+				for (long i = start + deleteCount; i < len; i++)
+				{
+					var box = span[i];
+					CopyBoxTo_OnStack(span, (int)(i + netChange), box, context.player);
+				}
+				// 2. 清除末尾 |netChange| 个位置
+				for (int i = (int)(len + netChange); i < len; i++)
+					span[i].setFault();
+				
+			}
+			else
+			{
+				
+			}
+			array_len = (uint)newLen;
+		}
+
+
+		// 辅助方法：复制 box（处理结构体）
+		private void CopyBoxTo_OnStack(Span<NaNBoxing> span, int dstIndex, NaNBoxing box, Player player)
+		{
+			if (box.ValueType == BoxType.HeapPtr)
+			{
+				var src = player.Context.GC.Heap[box.HeapPtr];
+				if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+				{
+					var dst_v = span[dstIndex];
+					if (dst_v.ValueType == BoxType.HeapPtr)
+					{
+						var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+						if (dst.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+						{
+							CopyStruct(dst, src, player);
+							span[dstIndex].SetHeapPtr(dst_v.HeapPtr);
+							return;
+						}
+					}
+				}
+			}
+			span[dstIndex] = box;
+		}
+
+		private void DoSplice_Normal(
+			Context context, ref ReceiveError error,
+			int start, uint deleteCount, 
+			uint len, uint newLen,long netChange)
+		{	
+			if (netChange > 0)
+			{
+				NaNBoxing[] _last_srcblock = null; uint _last_src_blockid = uint.MaxValue;
+				NaNBoxing[] _last_dstblock = null; uint _last_dst_blockid = uint.MaxValue;
+
+				// 情况A：插入比删除多 → 向右移（类似 DoUnshift）
+				// 把 [start + deleteCount, len) 的元素向右移动 netChange 个位置
+				for (long i = (long)len - 1; i >= start + (long)deleteCount; i--)
+				{
+					
+					NaNBoxing src = default;
+					{
+						uint block_index = (uint)i / SPARSE_BLOCK_SIZE;
+						NaNBoxing[] block;
+						if (block_index == _last_src_blockid)
+						{
+							block = _last_srcblock;
+							_last_src_blockid = block_index;
+
+							src = block[i % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
+						{
+							src = block[i % SPARSE_BLOCK_SIZE];
+
+							_last_src_blockid = block_index;
+							_last_srcblock = block;
+
+						}
+						else
+						{
+							src.setFault();
+						}
+					}
+
+					if (src.ValueType == BoxType.Fault)
+					{
+
+						uint block_index = (uint)(i + netChange) / SPARSE_BLOCK_SIZE;
+						NaNBoxing[] block;
+
+
+						if (block_index == _last_dst_blockid)
+						{ 
+						
+						}
+						else if ( sparse_map.TryGetValue(block_index, out block))
+						{
+							_last_dst_blockid = block_index;
+							_last_dstblock = block;							
+						}
+						else
+						{
+							continue; //跳过都是空洞.
+						}
+
+					}
+
+
+					// 计算目标位置
+					long dstIndex = i + netChange;
+
+					Debug.Assert(dstIndex < newLen);
+
+					// 写入目标位置（只为实际存在的索引分配块）
+					{
+						if (_last_dst_blockid == (uint)(i + netChange) / SPARSE_BLOCK_SIZE)
+						{
+							_last_dstblock[dstIndex % SPARSE_BLOCK_SIZE] = src;
+						}
+						else
+						{
+							var oldsize = Size;
+							NaNBoxing[] dstBlock = GetOrCreateBlock((uint)dstIndex);
+							if (context.player.Context.GC.MemUsage - oldsize + Size >= context.player.Context.GC.USAGE_LIMIT)
+							{
+								context.player.RaiseOutOfMemory(ref error);
+								return;
+							}
+							dstBlock[dstIndex % SPARSE_BLOCK_SIZE] = src;
+
+							_last_dst_blockid = (uint)(i + netChange) / SPARSE_BLOCK_SIZE;
+							_last_dstblock = dstBlock;
+
+						}
+					}
+				}
+				
+			}
+			else if (netChange < 0)
+			{
+				NaNBoxing[] _last_srcblock = null; uint _last_src_blockid = uint.MaxValue;
+				NaNBoxing[] _last_dstblock = null; uint _last_dst_blockid = uint.MaxValue;
+
+
+				// 情况B：删除比插入多 → 向左移（类似 DoShift）
+				// 把 [start + deleteCount, len) 的元素向左移动 |netChange| 个位置
+				for (long i = start + (long)deleteCount; i < len; i++)
+				{
+					NaNBoxing src = default;
+					{
+						uint block_index = (uint)i / SPARSE_BLOCK_SIZE;
+						NaNBoxing[] block;
+						if (block_index == _last_src_blockid)
+						{
+							block = _last_srcblock;
+							_last_src_blockid = block_index;
+
+							src = block[i % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
+						{
+							src = block[i % SPARSE_BLOCK_SIZE];
+
+							_last_src_blockid = block_index;
+							_last_srcblock = block;
+
+						}
+						else
+						{
+							src.setFault();
+						}
+					}
+
+					if (src.ValueType == BoxType.Fault)
+					{
+
+						uint block_index = (uint)(i + netChange) / SPARSE_BLOCK_SIZE;
+						NaNBoxing[] block;
+						if (block_index == _last_dst_blockid)
+						{
+
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
+						{
+							_last_dst_blockid = block_index;
+							_last_dstblock = block;
+						}
+						else
+						{
+							continue; //跳过都是空洞.
+						}
+
+					}
+
+					// 计算目标位置
+					long dstIndex = i + netChange; // netChange 是负数
+					Debug.Assert (dstIndex >= 0) ;
+					// 写入目标位置 
+					{
+						if (_last_dst_blockid == (uint)(i + netChange) / SPARSE_BLOCK_SIZE)
+						{
+							_last_dstblock[dstIndex % SPARSE_BLOCK_SIZE] = src;
+						}
+						else
+						{
+							var oldsize = Size;
+							NaNBoxing[] dstBlock = GetOrCreateBlock((uint)dstIndex);
+							if (context.player.Context.GC.MemUsage - oldsize + Size >= context.player.Context.GC.USAGE_LIMIT)
+							{
+								context.player.RaiseOutOfMemory(ref error);
+								return;
+							}
+							dstBlock[dstIndex % SPARSE_BLOCK_SIZE] = src;
+
+							_last_dst_blockid = (uint)(i + netChange) / SPARSE_BLOCK_SIZE;
+							_last_dstblock = dstBlock;
+
+						}
+					}
+				}
+				// 清除末尾多余范围 [newLen, len)
+				// 删除 sparse_map 中索引 >= newLen 的块
+				var keysToRemove = new List<uint>();
+				foreach (var kv in sparse_map)
+				{
+					if (kv.Key * SPARSE_BLOCK_SIZE >= newLen)
+					{
+						keysToRemove.Add(kv.Key);
+					}
+				}
+				foreach (var key in keysToRemove)
+				{
+					sparse_map.Remove(key);
+				}
+				
+			}
+			else
+			{
+				// netChange == 0：删除和插入数量相同 → 直接覆盖
+				// 清除 [start, start + deleteCount) 范围
+				for (uint i = (uint)start; i < (uint)start + deleteCount; i++)
+				{
+					uint block_index = i / SPARSE_BLOCK_SIZE;
+					NaNBoxing[] block;
+					if (sparse_map.TryGetValue(block_index, out block))
+					{
+						block[i % SPARSE_BLOCK_SIZE].setFault();
+					}
+				}
+				
+			}
+
+			array_len = (uint)newLen;
+			// 清理最后一个块的超出 array_len 部分
+			if (array_len > 0)
+			{
+				uint last_block = (array_len - 1) / SPARSE_BLOCK_SIZE;
+				NaNBoxing[] block;
+				if (sparse_map.TryGetValue(last_block, out block))
+				{
+					for (uint i = (array_len - 1) % SPARSE_BLOCK_SIZE + 1; i < SPARSE_BLOCK_SIZE; i++)
+					{
+						block[i].setFault();
+					}
+				}
+			}
+			
+		}
 
 
 		internal void DoUnshift(Player player, ref ReceiveError error, Span<NaNBoxing> restSpan)
@@ -808,7 +1219,7 @@ namespace juicescript.runtime
 					return;
 				}
 
-				
+
 				var stack_span = stack_store.Span;
 				for (int i = (int)array_len - 1; i >= 0; i--)
 				{
@@ -911,15 +1322,28 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				for (long i = (long)array_len - 1; i >= 0;--i)
+				NaNBoxing[] _last_srcblock = null; uint _last_src_blockid = uint.MaxValue;
+				NaNBoxing[] _last_dstblock = null; uint _last_dst_blockid = uint.MaxValue;
+
+
+				for (long i = (long)array_len - 1; i >= 0; --i)
 				{
 					NaNBoxing dst = default;
 					{
-						uint block_index = ( (uint)i + (uint)restSpan.Length ) / SPARSE_BLOCK_SIZE;
+						uint block_index = ((uint)i + (uint)restSpan.Length) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (sparse_map.TryGetValue(block_index, out block))
+
+						if (_last_dst_blockid == block_index)
+						{
+							dst = _last_dstblock[(i + restSpan.Length) % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
 						{
 							dst = block[(i + restSpan.Length) % SPARSE_BLOCK_SIZE];
+
+							_last_dstblock = block;
+							_last_dst_blockid = block_index;
+
 						}
 						else
 						{
@@ -931,9 +1355,18 @@ namespace juicescript.runtime
 					{
 						uint block_index = (uint)(i) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (sparse_map.TryGetValue(block_index, out block))
+
+						if (_last_src_blockid == block_index)
+						{
+							src = _last_srcblock[(i) % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
 						{
 							src = block[(i) % SPARSE_BLOCK_SIZE];
+
+							_last_srcblock = block;
+							_last_src_blockid = block_index;
+
 						}
 						else
 						{
@@ -948,31 +1381,37 @@ namespace juicescript.runtime
 
 					//复制过去。
 					{
-						var oldsize = Size;
-						NaNBoxing[] block = GetOrCreateBlock(((uint)i + (uint)restSpan.Length));
-						if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
+						if (_last_dst_blockid == ((uint)i + (uint)restSpan.Length) / SPARSE_BLOCK_SIZE)
 						{
-							player.RaiseOutOfMemory(ref error);
-							return;
+							_last_dstblock[(i + (uint)restSpan.Length) % SPARSE_BLOCK_SIZE] = src;
 						}
+						else
+						{
+							var oldsize = Size;
+							NaNBoxing[] block = GetOrCreateBlock(((uint)i + (uint)restSpan.Length));
+							if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
+							{
+								player.RaiseOutOfMemory(ref error);
+								return;
+							}
 
-						block[(i + (uint)restSpan.Length) % SPARSE_BLOCK_SIZE] = src;
-
+							block[(i + (uint)restSpan.Length) % SPARSE_BLOCK_SIZE] = src;
+						}
 					}
 
 				}
 
 				array_len = array_len + (uint)restSpan.Length;
 
-				
+
 			}
 
-			
+
 
 		}
 
 
-		internal void DoShift(Player player,ref ReceiveError error)
+		internal void DoShift(Player player, ref ReceiveError error)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
@@ -986,16 +1425,16 @@ namespace juicescript.runtime
 						var src = player.Context.GC.Heap[box.HeapPtr];
 						if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
-							
 
-							var dst_v = stack_span[i-1];
+
+							var dst_v = stack_span[i - 1];
 							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
 							{
 								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
 								if (dst.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 								{
 									CopyStruct(dst, src, player);
-									
+
 								}
 								else
 								{
@@ -1014,15 +1453,15 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						
-						stack_span[i-1] = box;
 
-						
+						stack_span[i - 1] = box;
+
+
 					}
 
 				}
 
-				
+
 			}
 			else if (StoreMode == ArrayStoreMode.cache)
 			{
@@ -1034,9 +1473,9 @@ namespace juicescript.runtime
 						var src = player.Context.GC.Heap[box.HeapPtr];
 						if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
-							var dst = player.Context.GC.Heap[cache_structs[i-1]];
+							var dst = player.Context.GC.Heap[cache_structs[i - 1]];
 							CopyStruct(dst, src, player);
-							cache_store[i-1].SetHeapPtr(cache_structs[i - 1]);
+							cache_store[i - 1].SetHeapPtr(cache_structs[i - 1]);
 						}
 						else
 						{
@@ -1045,24 +1484,36 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						cache_store[i-1] = box;
+						cache_store[i - 1] = box;
 					}
 				}
 
-				
+
 			}
 			else
 			{
+				NaNBoxing[] _last_srcblock = null; uint _last_src_blockid = uint.MaxValue;
+				NaNBoxing[] _last_dstblock = null; uint _last_dst_blockid = uint.MaxValue;
+
+
 				for (uint array_index = 1; array_index < array_len; array_index++)
 				{
-					
+
 					NaNBoxing dst = default;
 					{
 						uint block_index = (array_index - 1) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (sparse_map.TryGetValue(block_index, out block))
+
+						if (_last_dst_blockid == block_index)
+						{
+							dst = _last_dstblock[(array_index - 1) % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
 						{
 							dst = block[(array_index - 1) % SPARSE_BLOCK_SIZE];
+
+							_last_dstblock = block;
+							_last_dst_blockid = block_index;
 						}
 						else
 						{
@@ -1070,13 +1521,21 @@ namespace juicescript.runtime
 						}
 					}
 
-					NaNBoxing src = default;					
+					NaNBoxing src = default;
 					{
-						uint block_index = (array_index ) / SPARSE_BLOCK_SIZE;
+						uint block_index = (array_index) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (sparse_map.TryGetValue(block_index, out block))
+
+						if (_last_src_blockid == block_index)
 						{
-							src = block[(array_index ) % SPARSE_BLOCK_SIZE];
+							src = _last_srcblock[(array_index) % SPARSE_BLOCK_SIZE];
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
+						{
+							src = block[(array_index) % SPARSE_BLOCK_SIZE];
+
+							_last_srcblock = block;
+							_last_src_blockid = block_index;
 						}
 						else
 						{
@@ -1085,28 +1544,45 @@ namespace juicescript.runtime
 					}
 
 					if (dst.ValueType == NaNBoxing.BoxType.Fault && src.ValueType == NaNBoxing.BoxType.Fault)
-					{ 
+					{
 						continue;
 					}
 
 					//复制过去。
 					{
-						var oldsize = Size;
-						NaNBoxing[] block = GetOrCreateBlock(array_index - 1);
-						if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
+						if (_last_dst_blockid == (array_index - 1) / SPARSE_BLOCK_SIZE)
 						{
-							player.RaiseOutOfMemory(ref error);
-							return;
+							_last_dstblock[(array_index - 1) % SPARSE_BLOCK_SIZE] = src;
 						}
+						else
+						{
+							var oldsize = Size;
+							NaNBoxing[] block = GetOrCreateBlock(array_index - 1);
+							if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
+							{
+								player.RaiseOutOfMemory(ref error);
+								return;
+							}
 
-						block[(array_index - 1) % SPARSE_BLOCK_SIZE] = src;
-
+							block[(array_index - 1) % SPARSE_BLOCK_SIZE] = src;
+						}
 					}
 
 				}
 
-
-
+				// 清理最后一个块的超出 array_len 部分
+				if (array_len > 0)
+				{
+					uint last_block = (array_len - 1) / SPARSE_BLOCK_SIZE;
+					NaNBoxing[] block;
+					if (sparse_map.TryGetValue(last_block, out block))
+					{
+						for (uint i = (array_len - 1) % SPARSE_BLOCK_SIZE + 1; i < SPARSE_BLOCK_SIZE; i++)
+						{
+							block[i].setFault();
+						}
+					}
+				}
 
 
 			}
@@ -1115,23 +1591,23 @@ namespace juicescript.runtime
 
 
 
-        internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index,Player player,ref ReceiveError error)
-        {
-            if (HEAPINSTANCE_PTR == 0)
-            {
-                return DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player,ref error);
-            }
-            else
-            {
+		internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
+		{
+			if (HEAPINSTANCE_PTR == 0)
+			{
+				return DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
+			}
+			else
+			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.DoTrySetSlotIfReplaceStructOrNotHeap(box,array_index,player,ref error);
+				return target.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 			}
 
-        }
+		}
 
-        private void CopyStruct(RtHeapInstance dst,RtHeapInstance src,Player player)
-        {
+		private void CopyStruct(RtHeapInstance dst, RtHeapInstance src, Player player)
+		{
 			dst.Type = src.Type;
 			((RtPayloadInstance)dst.facility).HEAPINSTANCE_PTR = 0;
 			((RtPayloadInstance)dst.facility).methodscopeslot_ref_state = 0;
@@ -1140,18 +1616,18 @@ namespace juicescript.runtime
 		}
 
 		private bool DoTrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
-        {
-            if (StoreMode == ArrayStoreMode.cache_on_stack)
-            {
+		{
+			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			{
 				if (array_index >= stack_store.Length)
 				{
-					ChangeStoreToHeap(array_index, player,ref error);
+					ChangeStoreToHeap(array_index, player, ref error);
 					if (error.raised)
 					{
 						return false;
 					}
 
-					return TrySetSlotIfReplaceStructOrNotHeap(box,array_index,player,ref error);
+					return TrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 
 					//throw new NotImplementedException();
 				}
@@ -1162,7 +1638,7 @@ namespace juicescript.runtime
 					{
 						var stack_span = stack_store.Span;
 
-						var dst_v = stack_span[(int)array_index] ;
+						var dst_v = stack_span[(int)array_index];
 						if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
 							var dst = player.Context.GC.Heap[dst_v.HeapPtr];
@@ -1202,11 +1678,11 @@ namespace juicescript.runtime
 
 					return true;
 				}
-            }
-            else if (StoreMode == ArrayStoreMode.cache)
-            {
-                if (array_index >= cache_store.Length)
-                {
+			}
+			else if (StoreMode == ArrayStoreMode.cache)
+			{
+				if (array_index >= cache_store.Length)
+				{
 					ChangeStoreToHeap(array_index, player, ref error);
 					if (error.raised)
 					{
@@ -1216,14 +1692,14 @@ namespace juicescript.runtime
 					return TrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 					//throw new NotImplementedException();
 				}
-                else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
-                {
-                    var src = player.Context.GC.Heap[box.HeapPtr];
-                    if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
-                    {
-                        var dst = player.Context.GC.Heap[cache_structs[array_index]];
-                        CopyStruct(dst, src, player);
-                        cache_store[array_index].SetHeapPtr(cache_structs[array_index]);
+				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					var src = player.Context.GC.Heap[box.HeapPtr];
+					if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						var dst = player.Context.GC.Heap[cache_structs[array_index]];
+						CopyStruct(dst, src, player);
+						cache_store[array_index].SetHeapPtr(cache_structs[array_index]);
 
 						if (array_index + 1 > array_len)
 						{
@@ -1231,29 +1707,29 @@ namespace juicescript.runtime
 						}
 
 						return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    cache_store[array_index] = box;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else
+				{
+					cache_store[array_index] = box;
 
-                    if (array_index + 1 > array_len)
-                    {
-                        array_len = array_index + 1;
-                    }
+					if (array_index + 1 > array_len)
+					{
+						array_len = array_index + 1;
+					}
 
-                    return true;
-                }
-            }
-            else
-            {
+					return true;
+				}
+			}
+			else
+			{
 
-				var oldsize = Size;				
-				NaNBoxing[] block=GetOrCreateBlock(array_index);
+				var oldsize = Size;
+				NaNBoxing[] block = GetOrCreateBlock(array_index);
 				if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
 				{
 					player.RaiseOutOfMemory(ref error);
@@ -1268,7 +1744,7 @@ namespace juicescript.runtime
 					var src = player.Context.GC.Heap[box.HeapPtr];
 					if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
 						&&
-						array_index<array_len
+						array_index < array_len
 						)
 					{
 						var dst_v = block[array_index % SPARSE_BLOCK_SIZE];
@@ -1277,7 +1753,7 @@ namespace juicescript.runtime
 							var dst = player.Context.GC.Heap[dst_v.HeapPtr];
 							if (dst.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 							{
-								CopyStruct(dst, src,player);
+								CopyStruct(dst, src, player);
 								return true;
 							}
 							else
@@ -1286,7 +1762,7 @@ namespace juicescript.runtime
 							}
 						}
 						else
-						{ 
+						{
 							return false;
 						}
 					}
@@ -1298,7 +1774,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					block[ array_index % SPARSE_BLOCK_SIZE ] = box;
+					block[array_index % SPARSE_BLOCK_SIZE] = box;
 					if (array_index + 1 > array_len)
 					{
 						array_len = array_index + 1;
@@ -1307,32 +1783,32 @@ namespace juicescript.runtime
 					return true;
 				}
 
-				
-
-            }
-        }
 
 
+			}
+		}
 
 
-		public NaNBoxing ReadSlot(uint array_index, Player player,out bool isoutofindex_or_ishole)
-        {
+
+
+		public NaNBoxing ReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
+		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
-				return DoReadSlot( array_index, player,out isoutofindex_or_ishole);
+				return DoReadSlot(array_index, player, out isoutofindex_or_ishole);
 			}
 			else
 			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.DoReadSlot(array_index, player,out isoutofindex_or_ishole);
+				return target.DoReadSlot(array_index, player, out isoutofindex_or_ishole);
 			}
 
 		}
 
 
-		private NaNBoxing DoReadSlot(uint array_index, Player player,out bool isoutofindex_or_ishole)
-        {
+		private NaNBoxing DoReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
+		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
 				if (array_index < array_len)
@@ -1363,7 +1839,7 @@ namespace juicescript.runtime
 			{
 				if (array_index < array_len)
 				{
-					
+
 					var v = cache_store[array_index];
 					if (v.ValueType == NaNBoxing.BoxType.Fault)
 					{
@@ -1432,12 +1908,12 @@ namespace juicescript.runtime
 
 		internal void SetIsRest(bool v)
 		{
-            if (v)
-            {
-                storeMode = (short)((storeMode & 0xff) | 0x100) ;
-            }
-            else
-            {
+			if (v)
+			{
+				storeMode = (short)((storeMode & 0xff) | 0x100);
+			}
+			else
+			{
 				storeMode &= 0xff;
 			}
 		}
@@ -1454,76 +1930,76 @@ namespace juicescript.runtime
 			}
 		}
 
-        internal bool isArguments()
-        {
-            return (storeMode >> 8) == 0x2;
-        }
+		internal bool isArguments()
+		{
+			return (storeMode >> 8) == 0x2;
+		}
 
-        internal bool isRest()
-        {
+		internal bool isRest()
+		{
 			return (storeMode >> 8) == 0x1;
 		}
 
 		internal void CopyCacheFrom(RtPayloadArray arr_store, Player player)
 		{
 #if DEBUG
-            if (arr_store.StoreMode != ArrayStoreMode.cache || StoreMode != ArrayStoreMode.cache)
-            {
-                throw new InvalidOperationException();
-            }
-            if (arr_store.HEAPINSTANCE_PTR != 0)
-            {
-                throw new InvalidOperationException();
-            }
+			if (arr_store.StoreMode != ArrayStoreMode.cache || StoreMode != ArrayStoreMode.cache)
+			{
+				throw new InvalidOperationException();
+			}
+			if (arr_store.HEAPINSTANCE_PTR != 0)
+			{
+				throw new InvalidOperationException();
+			}
 #endif
 
 			m_property_ptr = arr_store.m_property_ptr;
-			
-			array_len = arr_store.array_len;
-            for (int i = 0; i < MAX_CACHE_ELEMENT; i++)
-            {
-                if (arr_store.cache_store[i].ValueType == NaNBoxing.BoxType.HeapPtr)
-                {
-                    if (arr_store.cache_store[i].HeapPtr == arr_store.cache_structs[i])
-                    {
-                        var dst = player.Context.GC.Heap[cache_structs[i]];
-                        var src = player.Context.GC.Heap[arr_store.cache_structs[i]];
 
-                        CopyStruct(dst, src, player);
+			array_len = arr_store.array_len;
+			for (int i = 0; i < MAX_CACHE_ELEMENT; i++)
+			{
+				if (arr_store.cache_store[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					if (arr_store.cache_store[i].HeapPtr == arr_store.cache_structs[i])
+					{
+						var dst = player.Context.GC.Heap[cache_structs[i]];
+						var src = player.Context.GC.Heap[arr_store.cache_structs[i]];
+
+						CopyStruct(dst, src, player);
 
 						cache_store[i].SetHeapPtr(cache_structs[i]);
-                    }
-                    else
-                    {
-                        //除了struct,凡是存入array的对象都禁用cache对象，完事。。。
+					}
+					else
+					{
+						//除了struct,凡是存入array的对象都禁用cache对象，完事。。。
 						cache_store[i] = arr_store.cache_store[i];
 					}
-                }
-                else
-                {
-                    cache_store[i] = arr_store.cache_store[i];
-                }
+				}
+				else
+				{
+					cache_store[i] = arr_store.cache_store[i];
+				}
 
-            }
+			}
 
 
-        }
+		}
 
-		internal void Trace(Context context,int stackStPos, ref ReceiveError error,int scope_ptr ,IPrint printer,RtHeapInstance arrObj,ReadOnlySpan<char> sep)
+		internal void Trace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapInstance arrObj, ReadOnlySpan<char> sep)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
-				 DoTrace(context, stackStPos, ref error, scope_ptr ,printer,arrObj,sep);
+				DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
 			}
 			else
 			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
-				target.DoTrace(context, stackStPos, ref error,scope_ptr ,printer,arrObj,sep);
+				target.DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
 			}
 		}
 
-		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr ,IPrint printer, RtHeapInstance arrObj, ReadOnlySpan<char> sep)
+		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapInstance arrObj, ReadOnlySpan<char> sep)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
@@ -1541,7 +2017,7 @@ namespace juicescript.runtime
 					else
 					{
 						bool isoutofindex_or_ishole;
-						NaNBoxing l= context.player.LoadSlotFromArray((uint)i, arrObj,out isoutofindex_or_ishole);
+						NaNBoxing l = context.player.LoadSlotFromArray((uint)i, arrObj, out isoutofindex_or_ishole);
 						if (l.ValueType != NaNBoxing.BoxType.Fault && l.ValueType != NaNBoxing.BoxType.Null && l.ValueType != NaNBoxing.BoxType.Undefined)
 						{
 							TopLevel.TraceElement(l, context, stackStPos, ref error, scope_ptr, default, printer);
@@ -1563,10 +2039,10 @@ namespace juicescript.runtime
 			{
 				for (int i = 0; i < array_len; i++)
 				{
-					
-					if (cache_store[i].ValueType != NaNBoxing.BoxType.Null && cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && cache_store[i].ValueType != NaNBoxing.BoxType.Fault )
+
+					if (cache_store[i].ValueType != NaNBoxing.BoxType.Null && cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
 					{
-						TopLevel.TraceElement(cache_store[i], context, stackStPos, ref error,scope_ptr,default, printer);
+						TopLevel.TraceElement(cache_store[i], context, stackStPos, ref error, scope_ptr, default, printer);
 						if (error.raised)
 						{
 							return;
@@ -1575,7 +2051,7 @@ namespace juicescript.runtime
 					else
 					{
 						bool isoutofindex_or_ishole;
-						NaNBoxing l = context.player.LoadSlotFromArray((uint)i, arrObj,out isoutofindex_or_ishole);
+						NaNBoxing l = context.player.LoadSlotFromArray((uint)i, arrObj, out isoutofindex_or_ishole);
 						if (l.ValueType != NaNBoxing.BoxType.Fault && l.ValueType != NaNBoxing.BoxType.Null && l.ValueType != NaNBoxing.BoxType.Undefined)
 						{
 							TopLevel.TraceElement(l, context, stackStPos, ref error, scope_ptr, default, printer);
@@ -1662,41 +2138,41 @@ namespace juicescript.runtime
 			}
 		}
 
-		internal bool TryReadIterItem(int index, out uint key ,out uint next_index, out NaNBoxing v , Context context)
+		internal bool TryReadIterItem(int index, out uint key, out uint next_index, out NaNBoxing v, Context context)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
-				return DoTryReadIterItem( index,out key ,out next_index, out v);
+				return DoTryReadIterItem(index, out key, out next_index, out v);
 			}
 			else
 			{
 				RtPayloadArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
-				return target.DoTryReadIterItem( index,out key, out next_index, out v );
+				return target.DoTryReadIterItem(index, out key, out next_index, out v);
 			}
 		}
 
-		private bool DoTryReadIterItem(int index, out uint key,out uint next_index,out NaNBoxing v)
+		private bool DoTryReadIterItem(int index, out uint key, out uint next_index, out NaNBoxing v)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
 				var stack_span = stack_store.Span;
-				
-				next_index = 0;key = 0;
+
+				next_index = 0; key = 0;
 				v = default;
 
 				for (int i = index; i < array_len; i++)
 				{
-					if (stack_span[i].ValueType != NaNBoxing.BoxType.Null && 
+					if (stack_span[i].ValueType != NaNBoxing.BoxType.Null &&
 						//stack_span[i].ValueType != NaNBoxing.BoxType.Undefined && 
 						stack_span[i].ValueType != NaNBoxing.BoxType.Fault)
 					{
 						key = (uint)i;
-						next_index = (uint)i+1;
+						next_index = (uint)i + 1;
 						v = stack_span[i];
 
 						return true;
-						
+
 					}
 
 				}
@@ -1710,16 +2186,16 @@ namespace juicescript.runtime
 				for (int i = index; i < array_len; i++)
 				{
 
-					if (cache_store[i].ValueType != NaNBoxing.BoxType.Null && 
+					if (cache_store[i].ValueType != NaNBoxing.BoxType.Null &&
 						//cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && 
 						cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
 					{
 						key = (uint)i;
-						next_index = (uint)i+1;
+						next_index = (uint)i + 1;
 						v = cache_store[i];
 
 						return true;
-						
+
 					}
 
 				}
@@ -1737,15 +2213,15 @@ namespace juicescript.runtime
 
 					uint j_start = ((uint)index) % SPARSE_BLOCK_SIZE;
 
-					var maps = sparse_map.OrderBy(i => i.Key).Where(i=>i.Key>= (uint)index / SPARSE_BLOCK_SIZE );
-					
-					foreach(var kv in maps)
+					var maps = sparse_map.OrderBy(i => i.Key).Where(i => i.Key >= (uint)index / SPARSE_BLOCK_SIZE);
+
+					foreach (var kv in maps)
 					{
 						uint i = kv.Key;
 
 						NaNBoxing[] block = kv.Value;
-						
-						for (uint j = j_start ; j < SPARSE_BLOCK_SIZE; j++)
+
+						for (uint j = j_start; j < SPARSE_BLOCK_SIZE; j++)
 						{
 							uint current = i * SPARSE_BLOCK_SIZE + j;
 
@@ -1754,9 +2230,9 @@ namespace juicescript.runtime
 								return false;
 							}
 
-							
+
 							{
-								if (block[j].ValueType != NaNBoxing.BoxType.Null && 
+								if (block[j].ValueType != NaNBoxing.BoxType.Null &&
 									//block[j].ValueType != NaNBoxing.BoxType.Undefined && 
 									block[j].ValueType != NaNBoxing.BoxType.Fault)
 								{
@@ -1780,6 +2256,6 @@ namespace juicescript.runtime
 			}
 		}
 
-		
+
 	}
 }

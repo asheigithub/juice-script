@@ -1871,12 +1871,141 @@ namespace juicescript.runtime.buildin
 			// 6. Copy elements from start to end
 			for (int i = start; i < end && i < len; i++)
 			{
-				bool isoutindex;
-				NaNBoxing v = array.ReadSlot((uint)i, context.player, out isoutindex);
-				context.player.SetArraySlot(v, result.array_len, context.GC.Heap[result_instancePtr], ref error);
-				if (error.raised) return;
+				bool ishole;
+				NaNBoxing v = array.ReadSlot((uint)i, context.player, out ishole);
+				if (!ishole)
+				{
+					context.player.SetArraySlot(v, result.array_len, context.GC.Heap[result_instancePtr], ref error);
+					if (error.raised) return;
+				}
+				else
+				{
+					result.SetLength(result.array_len + 1, context.player, ref error);
+					if (error.raised) return;
+				}
 				result_instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
 			}
+			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr);
+		}
+
+
+		[NativeFunction(".Array$:AS3::splice")]
+		public static void Array_splice(Context context,
+			ASMethod method, int scope_ptr,
+			NaNBoxing thisPtr, int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			Array_Proto_splice(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		[NativeFunction(".Array$@::splice")]
+		public static void Array_Proto_splice(
+			Context context, ASMethod method, int scope_ptr,
+			NaNBoxing thisPtr, int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			// 1. 校验 this 是 Array
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				return;
+			}
+			// 2. 获取原数组和长度
+			RtPayloadArray array;
+			int arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			uint len = array.array_len;
+			// 3. 读取参数（RunMethod 已传入默认值）
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var startVal = scope.ReadSlot(0, context.player);   // int: startIndex
+			var deleteCountVal = scope.ReadSlot(1, context.player); // uint: deleteCount
+			var values = scope.ReadSlot(2, context.player);  // Array: ...values
+
+			// 4. 标准化 startIndex（负数从末尾计数）
+			int start = startVal.IntValue;
+			if (start < 0) start = (int)len + start;
+			if (start < 0) start = 0;
+			if (start > (int)len) start = (int)len;
+
+
+
+
+			// 5. 计算实际删除数量
+			uint deleteCount;
+			
+			uint requested = deleteCountVal.UIntValue;
+			uint available = (start >= len) ? 0 : len - (uint)start;
+			deleteCount = Math.Min(requested, available);
+			
+
+
+			// 检查是否会越界
+			var values_array = (RtPayloadArray)context.GC.Heap[values.HeapPtr].facility;
+			var values_span = values_array.stack_store.Span;
+			// 注意：values 的存储方式是 cache_on_stack
+
+			Debug.Assert((long)len - deleteCount + values_span.Length >= 0);
+
+			if ((long)len - deleteCount + values_span.Length > uint.MaxValue)
+			{
+				context.player.RaiseRangeError(ref error, ((long)len - deleteCount + values_span.Length).ToString(), uint.MaxValue);
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+
+
+
+			// 6. 创建结果数组（存放被删除的元素）
+			int result_instancePtr = context.CacheArrayPtr + returnSlotIndex;
+			var result_instance = context.GC.Heap[result_instancePtr];
+			result_instance.Type = context.ARRAY.Instance;
+			var result = (RtPayloadArray)result_instance.facility;
+			result.array_len = 0;
+			result.HEAPINSTANCE_PTR = 0;
+			result.methodscopeslot_ref_state = 0;
+			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr); //先存上，防止GC!很重要
+
+
+
+			// 7. 复制被删除的元素到结果数组
+			for (uint i = (uint)start; i < (uint)start + deleteCount && i < len; i++)
+			{
+				bool ishole;
+				NaNBoxing v = array.ReadSlot(i, context.player, out ishole);
+				if (!ishole)
+				{
+					context.player.SetArraySlot(v, result.array_len, context.GC.Heap[result_instancePtr], ref error);
+					if (error.raised) return;
+				}
+				else
+				{
+					result.SetLength(result.array_len+1,context.player, ref error);
+					if (error.raised) return;
+				}
+
+				result_instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+			}
+
+
+			// 9. 调用 DoSplice 执行实际修改
+			array.DoSplice(context, ref error, start, deleteCount, (long) values_span.Length - deleteCount );
+			if (error.raised) return;
+
+
+
+			// 10,统一复制插入的数组
+
+			arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			var instance = context.GC.Heap[arrPtr];
+
+			for (int i = 0; i < values_span.Length; i++)
+			{
+				context.player.SetArraySlot(values_span[i], (uint)(start + i), instance, ref error);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+			// 11. 返回结果数组
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr);
 		}
 
