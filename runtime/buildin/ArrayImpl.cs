@@ -886,51 +886,7 @@ namespace juicescript.runtime.buildin
 			int instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
 			var instance = context.GC.Heap[instancePtr];
 
-			for (uint i = 0; i < array.array_len / 2 ; i++)
-			{
-				bool isoutofindex;
-				NaNBoxing v1 = array.ReadSlot(i, context.player, out isoutofindex);
-				NaNBoxing v2 = array.ReadSlot(array.array_len-i-1,context.player, out isoutofindex);
-
-
-				if (v1.ValueType == BoxType.HeapPtr)
-				{
-					var check = context.GC.Heap[v1.HeapPtr];
-					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
-					{
-						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
-						var cacheObj = context.GC.Heap[clonedptr];
-						cacheObj.Type = check.Type;
-
-						((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-						((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-						((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
-
-						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
-					}
-					else
-					{
-						context.StackSlots[returnSlotIndex] = v1;
-					}
-				}
-				else
-				{
-					context.StackSlots[returnSlotIndex] = v1;
-				}
-
-				context.player.SetArraySlot(v2, i, instance, ref error);
-				if (error.raised)
-				{
-					return;
-				}
-				
-				context.player.SetArraySlot(context.StackSlots[returnSlotIndex],array.array_len-i-1,instance,ref error);
-				if (error.raised)
-				{
-					return;
-				}
-
-			}
+			array.DoReverse(context, ref error, returnSlotIndex);
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr( instancePtr);
 
@@ -1044,8 +1000,8 @@ namespace juicescript.runtime.buildin
 				args[2].index = 4;
 
 				bool issome = false;
-
-				for (uint i = 0; i < len; i++)
+				uint olen = len;
+				for (uint i = 0; i < len && i<olen; i++)
 				{
 					bool isoutofindex;
 					NaNBoxing v = array.ReadSlot(i, context.player,out isoutofindex);

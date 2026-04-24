@@ -97,7 +97,7 @@ function runTest():void {
         }
         return item > 0;
     });
-    results.push((r9.length == 4 && v9.length == 4) ? 1 : 0);
+    results.push((r9.length == 3 && v9.length == 4) ? 1 : 0);
 
     var v10:Vector.<int> = new <int>[1, 2, 3, 4, 5];
     var visited10:String = '';

@@ -7,8 +7,10 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
@@ -637,6 +639,156 @@ namespace juicescript.runtime
 			}
 
 		}
+
+
+
+		internal void DoReverse(Context context, ref ReceiveError error, int tempSlot)
+		{
+			Debug.Assert(context != null);
+			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			{
+				var stack_span = stack_store.Span;
+
+				int st = 0;
+				int ed = (int)array_len - 1;
+
+				while (st < ed) //这里不存在 struct_cache问题，所以直接交换
+				{
+					var v1 = stack_span[st];
+					var v2 = stack_span[ed];
+
+					stack_span[st] = v2;
+					stack_span[ed] = v1;
+			
+					st++;
+					ed--;
+				}
+
+			}
+			else if (StoreMode == ArrayStoreMode.cache)
+			{
+				int st = 0;
+				int ed = (int)array_len - 1;
+
+				while (st < ed) //可能存在struct_cache问题，所以要走全流程
+				{
+					var v1 = cache_store[st];
+					var v2 = cache_store[ed];
+
+					if (v1.ValueType == BoxType.HeapPtr)
+					{
+						var check = context.GC.Heap[v1.HeapPtr];
+						if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+						{
+							int clonedptr = tempSlot + context.CacheInstancePtr;
+							var cacheObj = context.GC.Heap[clonedptr];
+							cacheObj.Type = check.Type;
+
+							((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+							((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+							((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+							context.StackSlots[tempSlot].SetHeapPtr(clonedptr);
+						}
+						else
+						{
+							context.StackSlots[tempSlot] = v1;
+						}
+					}
+					else
+					{
+						context.StackSlots[tempSlot] = v1;
+					}
+
+					DoSetSlot(v2, (uint)st, ref error, context.player);
+					if (error.raised) return;
+
+					DoSetSlot(context.StackSlots[tempSlot], (uint)ed, ref error, context.player);
+					if (error.raised) return;
+
+					st++;
+					ed--;
+				}
+			}
+			else
+			{
+				long st = 0;
+				long ed = (long)array_len - 1;
+
+				while (st < ed)
+				{
+					NaNBoxing v1 = default;
+					{
+						uint block_index = (uint)((st) / SPARSE_BLOCK_SIZE);
+						NaNBoxing[] block;
+						if (sparse_map.TryGetValue(block_index, out block))
+						{
+							v1 = block[(st) % SPARSE_BLOCK_SIZE];
+						}
+						else
+						{
+							v1.setFault();
+						}
+					}
+
+					NaNBoxing v2 = default;
+					{
+						uint block_index = (uint)((ed) / SPARSE_BLOCK_SIZE);
+						NaNBoxing[] block;
+						if (sparse_map.TryGetValue(block_index, out block))
+						{
+							v2 = block[(ed) % SPARSE_BLOCK_SIZE];
+						}
+						else
+						{
+							v2.setFault();
+						}
+					}
+
+					if (v1.Raw == v2.Raw)
+					{
+
+					}
+					else //不存在struct_cache问题，直接交换
+					{
+						{
+							var oldsize = Size;
+							NaNBoxing[] block = GetOrCreateBlock((uint)st);
+							if (context.GC.MemUsage - oldsize + Size >= context.GC.USAGE_LIMIT)
+							{
+								context.player.RaiseOutOfMemory(ref error);
+								return;
+							}
+
+							block[st % SPARSE_BLOCK_SIZE] = v2;
+
+						}
+
+						{
+							var oldsize = Size;
+							NaNBoxing[] block = GetOrCreateBlock((uint)ed);
+							if (context.GC.MemUsage - oldsize + Size >= context.GC.USAGE_LIMIT)
+							{
+								context.player.RaiseOutOfMemory(ref error);
+								return;
+							}
+
+							block[ed % SPARSE_BLOCK_SIZE] = v1;
+
+						}
+
+					}
+
+					st++;
+					ed--;
+				}
+			}
+
+
+		}
+
+
+
 
 		internal void DoUnshift(Player player, ref ReceiveError error, Span<NaNBoxing> restSpan)
 		{

@@ -1732,8 +1732,8 @@ namespace juicescript.runtime.buildin
 				args[2].index = 4;
 
 				bool isEvery = true;
-
-				for (int i = 0; i < len; i++)
+				int olen = len;
+				for (int i = 0; i < len && i<olen; i++)
 				{
 					NaNBoxing v = vector.ReadSlot(i, context.player, basePos, vecPtr);
 
@@ -1852,8 +1852,8 @@ namespace juicescript.runtime.buildin
 				args[2].index = 4;
 
 				bool issome = false;
-
-				for (int i = 0; i < len; i++)
+				int olen = len;
+				for (int i = 0; i < len && i < olen; i++)
 				{
 					NaNBoxing v = vector.ReadSlot(i, context.player, basePos, vecPtr);
 
@@ -1990,8 +1990,8 @@ namespace juicescript.runtime.buildin
 				args[1].index = 3;
 				args[2].index = 4;
 
-				int newlen = 0;
-				for (int i = 0; i < len; i++)
+				int newlen = 0;int olen = len;
+				for (int i = 0; i < len && i<olen; i++)
 				{
 					NaNBoxing v = vector.ReadSlot(i, context.player, basePos, vecPtr);
 
@@ -2141,8 +2141,8 @@ namespace juicescript.runtime.buildin
 				args[1].index = 3;
 				args[2].index = 4;
 
-				int newlen = 0;
-				for (int i = 0; i < len; i++)
+				int newlen = 0; int olen = len;
+				for (int i = 0; i < len && i < olen; i++)
 				{
 					NaNBoxing v = vector.ReadSlot(i, context.player, basePos, vecPtr);
 
@@ -2289,9 +2289,9 @@ namespace juicescript.runtime.buildin
 				args[1].index = 3;
 				args[2].index = 4;
 
-				
 
-				for (int i = 0; i < len; i++)
+				int olen = len;
+				for (int i = 0; i < len && i < olen; i++)
 				{
 					NaNBoxing v = vector.ReadSlot(i, context.player, basePos, vecPtr);
 

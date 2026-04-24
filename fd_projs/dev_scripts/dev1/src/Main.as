@@ -11,7 +11,7 @@ package
     }
 }
 
-trace ( new Array(1, 2, 3).reverse() );
+trace ( [1, 2, 3,,,,,,,,,,,,,,,,,,9].reverse() );
 
 
 

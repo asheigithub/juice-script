@@ -94,7 +94,7 @@ function runTest():void {
             v8.push(4);
         }
     });
-    results.push((sum8 == 10) ? 1 : 0);
+    results.push((sum8 == 3) ? 1 : 0);
 
     var visited9:String = '';
     var v9:Vector.<int> = new <int>[1, 2, 3, 4, 5];
