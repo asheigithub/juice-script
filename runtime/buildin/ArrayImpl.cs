@@ -1723,6 +1723,88 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex].SetInt(-1);
 		}
 
+
+		[NativeFunction(".Array$:AS3::lastIndexOf")]
+		public static void Array_lastIndexOf(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			Array_Proto_lastIndexOf(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+
+		[NativeFunction(".Array$@::lastIndexOf")]
+		public static void Array_Proto_lastIndexOf(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				return;
+			}
+
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+
+			RtPayloadArray array;
+			int arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
+
+			uint len = array.array_len;
+
+			if (len == 0)
+			{
+				context.StackSlots[returnSlotIndex].SetInt(-1);
+				return;
+			}
+
+			NaNBoxing searchElement = scope.ReadSlot(0, context.player);
+			var fromIndexVal = scope.ReadSlot(1, context.player);
+
+			Debug.Assert(fromIndexVal.ValueType == BoxType.Int);
+
+			int fromIndex = fromIndexVal.IntValue;
+			
+
+			int startIndex;
+			if (fromIndex < 0)
+			{
+				startIndex = (int)len + fromIndex;
+				if (startIndex < 0)
+				{
+					startIndex = -1;
+				}
+			}
+			else if (fromIndex >= (int)len)
+			{
+				startIndex = (int)len - 1;
+			}
+			else
+			{
+				startIndex = fromIndex;
+			}
+
+			for (int i = startIndex; i >= 0; i--)
+			{
+				bool isoutofindex;
+				NaNBoxing element = array.ReadSlot((uint)i, context.player, out isoutofindex);
+				if (context.player.IsStrictlyEqual(element, searchElement))
+				{
+					context.StackSlots[returnSlotIndex].SetInt(i);
+					return;
+				}
+			}
+
+			context.StackSlots[returnSlotIndex].SetInt(-1);
+		}
+
 	}
 
 }
