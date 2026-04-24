@@ -251,14 +251,13 @@ assert.throws = function (expectedErrorConstructor, func, message) {
   throw new Test262Error(message);
 };
 
-function callbackfn(val, idx, obj) {
-  return obj.length === 2;
-}
+var targetObj = {};
+var arrProtoLen;
 
-var newArr = [12, 11].filter(callbackfn);
+arrProtoLen = Array.prototype.length;
+Array.prototype.length = 0;
 
-assert.sameValue(newArr.length, 2, 'newArr.length');
-
+assert.sameValue([0, targetObj].indexOf(targetObj), 1, '[0, targetObj].indexOf(targetObj)');
 
 
 trace('OK');
