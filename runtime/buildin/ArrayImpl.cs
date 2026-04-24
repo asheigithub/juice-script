@@ -1805,6 +1805,81 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex].SetInt(-1);
 		}
 
+		[NativeFunction(".Array$:AS3::slice")]
+		public static void Array_slice(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			Array_Proto_slice(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		}
+		[NativeFunction(".Array$@::slice")]
+		public static void Array_Proto_slice(
+			Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex
+			)
+		{
+			// 1. Validate thisPtr is an Array
+			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
+				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+			{
+				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
+				return;
+			}
+			RtPayloadArray array;
+			int arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			uint len = array.array_len;
+			// 2. Read parameters (defaults: A=0, B=16777215 are passed by RunMethod)
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var startVal = scope.ReadSlot(0, context.player);
+			var endVal = scope.ReadSlot(1, context.player);
+			// 3. Normalize start (handle negative: count from end)
+			int start = startVal.IntValue;
+			if (start < 0) start = (int)len + start;
+			if (start < 0) start = 0;
+			if (start > (int)len) start = (int)len;
+			// 4. Normalize end (16777215 means "until end", negative means count from end)
+			int end = endVal.IntValue;
+			if (end == 16777215)
+			{
+				end = (int)len;
+			}
+			else if (end < 0)
+			{
+				end = (int)len + end;
+				if (end < 0) end = 0;
+			}
+			else if (end > (int)len)
+			{
+				end = (int)len;
+			}
+			// 5. Create new array for result
+			int ptrIndex = returnSlotIndex;
+			int result_instancePtr = context.CacheArrayPtr + ptrIndex;
+			var result_instance = context.GC.Heap[result_instancePtr];
+			result_instance.Type = context.ARRAY.Instance;
+			var result = (RtPayloadArray)result_instance.facility;
+			result.array_len = 0;
+			result.methodscopeslot_ref_state = 0;
+			result.HEAPINSTANCE_PTR = 0;
+			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr);
+			// 6. Copy elements from start to end
+			for (int i = start; i < end && i < len; i++)
+			{
+				bool isoutindex;
+				NaNBoxing v = array.ReadSlot((uint)i, context.player, out isoutindex);
+				context.player.SetArraySlot(v, result.array_len, context.GC.Heap[result_instancePtr], ref error);
+				if (error.raised) return;
+				result_instancePtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+			}
+			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr);
+		}
+
 	}
 
 }
