@@ -10994,6 +10994,8 @@ namespace juicescript.runtime
 		/// <param name="value"></param>
 		internal  void CreateDynamic(ref ReceiveError error, RtHeapInstance instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
 		{
+			findd_lastshapeptr = 0;
+
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 
 #if DEBUG
@@ -11327,6 +11329,12 @@ namespace juicescript.runtime
 			return PROPERTY_PTR;
 		}
 
+		int findd_lastshapeptr = 0;
+		string findd_lastsearchname = null;
+		int findd_matchShapePtr = 0;
+		
+		int findd_slot = 0;
+
 		internal bool FindDynamicValue(RtHeapInstance instance, ReadOnlySpan<char> searchName, out NaNBoxing value, out int matchShapePtr, out int slotindex, out RtPayloadDynamic prop)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
@@ -11337,25 +11345,50 @@ namespace juicescript.runtime
 				int p = prop.SHAPE_PTR;
 				int index = prop.Slots.Count - 1;
 
-				while (p != Context.BlankShapePtr)
+				//这是一个简单的缓存机制，只要有任何修改动态属性操作就会失效，这样肯定不会出错。
+				if (findd_lastshapeptr == p && searchName.CompareTo(findd_lastsearchname, StringComparison.Ordinal) == 0)
 				{
-					var shape = (RtPayloadShape)Context.GC.Heap[p].facility;
-
-					//if (string.Equals(
-					//	//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
-					//	searchName,
-					//	((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
-					//	StringComparison.Ordinal
-					//	))
-					if (CompareShapePropertyName(shape.PTR_NAME, searchName) == 0)
+					matchShapePtr = findd_matchShapePtr;
+					
+					slotindex = findd_slot;
+					value = prop.Slots[slotindex];
+					return true;
+				}
+				else
+				{
+					while (p != Context.BlankShapePtr)
 					{
-						matchShapePtr = p;
-						value = prop.Slots[index];
-						slotindex = index;
-						return true;
+						var shape = (RtPayloadShape)Context.GC.Heap[p].facility;
+
+						//if (string.Equals(
+						//	//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
+						//	searchName,
+						//	((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+						//	StringComparison.Ordinal
+						//	))
+						if (CompareShapePropertyName(shape.PTR_NAME, searchName) == 0)
+						{
+							findd_lastshapeptr = prop.SHAPE_PTR;
+							
+							if (findd_lastsearchname == null || searchName.CompareTo(findd_lastsearchname, StringComparison.Ordinal) != 0)
+							{
+								findd_lastsearchname = new string(searchName);
+							}
+
+
+							findd_matchShapePtr = p;
+							
+							findd_slot = index;
+
+
+							matchShapePtr = p;
+							value = prop.Slots[index];
+							slotindex = index;
+							return true;
+						}
+						--index;
+						p = shape.PTR_PARENT;
 					}
-					--index;
-					p = shape.PTR_PARENT;
 				}
 			}
 			else
@@ -11394,6 +11427,8 @@ namespace juicescript.runtime
 
 		private void ChangeTranslation(RtPayloadDynamic dynamic, int shape_ptr, ref ReceiveError error)
 		{
+			findd_lastshapeptr = 0;
+
 			if (dynamic.SHAPE_PTR == shape_ptr) //正好删除最后一个,使SHAPE指向上一个SHAPE即可
 			{
 				dynamic.SHAPE_PTR = ((RtPayloadShape)Context.GC.Heap[shape_ptr].facility).PTR_PARENT;

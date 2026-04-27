@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -2223,6 +2224,7 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static int comparer(NaNBoxing a, NaNBoxing b, NaNBoxing sortBehavior, Context context, int scope_ptr, ref ReceiveError error)
 		{
 			//确保空槽不会传入。

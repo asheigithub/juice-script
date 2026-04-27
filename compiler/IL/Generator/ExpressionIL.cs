@@ -6803,8 +6803,15 @@ namespace juicescript.compiler.IL.Generator
 						if (items.Count > 0)
 						{
 							HashSet<string> addedprops = new HashSet<string>();
-
+							List<object> keys = new List<object>();
 							foreach (var key in items.Keys)
+							{
+								keys.Add(key);	
+							}
+							keys.Sort((a, b) => { return string.CompareOrdinal(((Token)a).StringValue, ((Token)b).StringValue); } ); //将key排序
+
+
+							foreach (var key in keys)
 							{
 								var v = items[key];
 								StackLocater local = LoadRightValue((AS3DataStackElement)v, compileEnv, (Token)key);
