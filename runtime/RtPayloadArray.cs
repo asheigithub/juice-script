@@ -1640,6 +1640,148 @@ namespace juicescript.runtime
 		}
 
 
+		internal void Swap(uint i, uint j, Context context,ref ReceiveError error, int tempslot)
+		{
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			{
+				var v1 = stack_store.Span[(int)i];
+				var v2 = stack_store.Span[(int)j];
+
+				stack_store.Span[(int)i] = v2;
+				stack_store.Span[(int)j] = v1;
+			}
+			else if (StoreMode == ArrayStoreMode.cache)
+			{
+				var v1 = cache_store[i];
+				var v2 = cache_store[j];
+
+				bool v1isstruct = false;
+				if (v1.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					var src = context.GC.Heap[v1.HeapPtr];
+					if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						v1isstruct = true;
+
+						int clonedptr =tempslot + context.CacheInstancePtr;
+						var dst = context.GC.Heap[clonedptr];
+
+						CopyStruct(dst, src, context.player);
+						context.StackSlots[tempslot].SetHeapPtr(clonedptr);
+
+					}
+					else
+					{
+						context.StackSlots[tempslot] = v1;
+					}
+				}
+				else
+				{
+					context.StackSlots[tempslot] = v1;
+				}
+
+				//v2->v1
+				if (v2.ValueType == NaNBoxing.BoxType.HeapPtr)
+				{
+					var src = context.GC.Heap[v2.HeapPtr];
+					if (src.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					{
+						var dst = context.GC.Heap[cache_structs[i]];
+						CopyStruct(dst, src, context.player);
+						cache_store[i].SetHeapPtr(cache_structs[i - 1]);
+					}
+					else
+					{
+						cache_store[i] = v2;
+					}
+				}
+				else
+				{
+					cache_store[i] = v2;
+				}
+
+				//context.StackSlots[context.StackPosition - 2] -> v2
+				if (v1isstruct)
+				{
+					var src = context.GC.Heap[context.StackSlots[tempslot].HeapPtr];
+					var dst = context.GC.Heap[cache_structs[j]];
+					CopyStruct(dst, src, context.player);
+					cache_store[j].SetHeapPtr(cache_structs[j]);
+
+				}
+				else
+				{
+					cache_store[j] = context.StackSlots[tempslot];
+				}
+
+			}
+			else
+			{
+				NaNBoxing v1 = default;
+				NaNBoxing[] v1block;
+
+				{
+					uint block_index = i / SPARSE_BLOCK_SIZE;
+					
+
+					if (sparse_map.TryGetValue(block_index, out v1block))
+					{
+						v1 = v1block[(i) % SPARSE_BLOCK_SIZE];
+					}
+					else
+					{
+						v1.setFault();
+					}
+				}
+
+				NaNBoxing v2 = default;
+				NaNBoxing[] v2block;
+				{
+					uint block_index = j  / SPARSE_BLOCK_SIZE;
+					if (sparse_map.TryGetValue(block_index, out v2block))
+					{
+						v2 = v2block[j % SPARSE_BLOCK_SIZE];
+					}
+					else
+					{
+						v2.setFault();
+					}
+				}
+
+				if (v1.Raw != v2.Raw)
+				{
+					if (v1block == null)
+					{
+						var oldsize = Size;
+						v1block = GetOrCreateBlock(i);
+						if (context.GC.MemUsage - oldsize + Size >= context.GC.USAGE_LIMIT)
+						{
+							context.player.RaiseOutOfMemory(ref error);
+							return;
+						}
+					}
+					if (v2block == null)
+					{
+						var oldsize = Size;
+						v2block = GetOrCreateBlock(j);
+						if (context.GC.MemUsage - oldsize + Size >= context.GC.USAGE_LIMIT)
+						{
+							context.player.RaiseOutOfMemory(ref error);
+							return;
+						}
+					}
+					v1block[i % SPARSE_BLOCK_SIZE] = v2;
+					v2block[j % SPARSE_BLOCK_SIZE] = v1;
+				}
+
+			}
+
+
+		}
+
+
 
 		internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
 		{
@@ -2306,6 +2448,6 @@ namespace juicescript.runtime
 			}
 		}
 
-
+		
 	}
 }
