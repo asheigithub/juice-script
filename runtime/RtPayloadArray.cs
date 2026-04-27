@@ -234,19 +234,22 @@ namespace juicescript.runtime
 				case ArrayStoreMode.normal:
 					//throw new NotImplementedException();
 					{
-						array_len = len;
-						int oldsize = Size;
-
-
-						foreach (var id in sparse_map.Keys.ToArray())
+						if (array_len < len) //仅收缩时才需要释放。
 						{
-							if (id * SPARSE_BLOCK_SIZE >= array_len)
+							int oldsize = Size;
+
+							foreach (var id in sparse_map.Keys.ToArray())
 							{
-								sparse_map.Remove(id);
+								if (id * SPARSE_BLOCK_SIZE >= array_len)
+								{
+									sparse_map.Remove(id);
+								}
 							}
+
+							player.Context.GC.UpdateMemUsage_Change(oldsize - Size);
 						}
 
-						player.Context.GC.UpdateMemUsage_Change(oldsize - Size);
+						array_len = len;
 
 						if (array_len > 0)
 						{
@@ -994,12 +997,16 @@ namespace juicescript.runtime
 					{
 						uint block_index = (uint)i / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (block_index == _last_src_blockid)
+						if (block_index == _last_src_blockid && _last_srcblock != null)
 						{
 							block = _last_srcblock;
 							_last_src_blockid = block_index;
 
 							src = block[i % SPARSE_BLOCK_SIZE];
+						}
+						else if (block_index == _last_src_blockid)
+						{
+							src.setFault();
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1011,6 +1018,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							_last_src_blockid = block_index;
+							_last_srcblock = null;
 							src.setFault();
 						}
 					}
@@ -1022,14 +1031,18 @@ namespace juicescript.runtime
 						NaNBoxing[] block;
 
 
-						if (block_index == _last_dst_blockid)
-						{ 
-						
+						if (block_index == _last_dst_blockid && _last_dstblock != null)
+						{
+
 						}
-						else if ( sparse_map.TryGetValue(block_index, out block))
+						else if (block_index == _last_dst_blockid)
+						{
+							continue;
+						}
+						else if (sparse_map.TryGetValue(block_index, out block))
 						{
 							_last_dst_blockid = block_index;
-							_last_dstblock = block;							
+							_last_dstblock = block;
 						}
 						else
 						{
@@ -1046,7 +1059,7 @@ namespace juicescript.runtime
 
 					// 写入目标位置（只为实际存在的索引分配块）
 					{
-						if (_last_dst_blockid == (uint)(i + netChange) / SPARSE_BLOCK_SIZE)
+						if (_last_dst_blockid == (uint)(i + netChange) / SPARSE_BLOCK_SIZE && _last_dstblock !=null)
 						{
 							_last_dstblock[dstIndex % SPARSE_BLOCK_SIZE] = src;
 						}
@@ -1083,12 +1096,16 @@ namespace juicescript.runtime
 					{
 						uint block_index = (uint)i / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (block_index == _last_src_blockid)
+						if (block_index == _last_src_blockid && _last_srcblock != null)
 						{
 							block = _last_srcblock;
 							_last_src_blockid = block_index;
 
 							src = block[i % SPARSE_BLOCK_SIZE];
+						}
+						else if (block_index == _last_src_blockid)
+						{
+							src.setFault();
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1100,6 +1117,9 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							_last_src_blockid = block_index;
+							_last_srcblock = null;
+
 							src.setFault();
 						}
 					}
@@ -1109,9 +1129,13 @@ namespace juicescript.runtime
 
 						uint block_index = (uint)(i + netChange) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
-						if (block_index == _last_dst_blockid)
+						if (block_index == _last_dst_blockid && _last_dstblock != null)
 						{
 
+						}
+						else if (block_index == _last_dst_blockid)
+						{
+							continue;
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1130,7 +1154,7 @@ namespace juicescript.runtime
 					Debug.Assert (dstIndex >= 0) ;
 					// 写入目标位置 
 					{
-						if (_last_dst_blockid == (uint)(i + netChange) / SPARSE_BLOCK_SIZE)
+						if (_last_dst_blockid == (uint)(i + netChange) / SPARSE_BLOCK_SIZE && _last_dstblock != null)
 						{
 							_last_dstblock[dstIndex % SPARSE_BLOCK_SIZE] = src;
 						}
@@ -1333,9 +1357,13 @@ namespace juicescript.runtime
 						uint block_index = ((uint)i + (uint)restSpan.Length) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
 
-						if (_last_dst_blockid == block_index)
+						if (_last_dst_blockid == block_index && _last_dstblock != null)
 						{
 							dst = _last_dstblock[(i + restSpan.Length) % SPARSE_BLOCK_SIZE];
+						}
+						else if (_last_dst_blockid == block_index)
+						{
+							dst.setFault();
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1347,6 +1375,9 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							_last_dstblock = null;
+							_last_dst_blockid = block_index;
+
 							dst.setFault();
 						}
 					}
@@ -1356,9 +1387,13 @@ namespace juicescript.runtime
 						uint block_index = (uint)(i) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
 
-						if (_last_src_blockid == block_index)
+						if (_last_src_blockid == block_index && _last_srcblock != null)
 						{
 							src = _last_srcblock[(i) % SPARSE_BLOCK_SIZE];
+						}
+						else if (_last_src_blockid == block_index)
+						{
+							src.setFault();
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1370,6 +1405,9 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							_last_srcblock = null;
+							_last_src_blockid = block_index;
+
 							src.setFault();
 						}
 					}
@@ -1381,7 +1419,7 @@ namespace juicescript.runtime
 
 					//复制过去。
 					{
-						if (_last_dst_blockid == ((uint)i + (uint)restSpan.Length) / SPARSE_BLOCK_SIZE)
+						if (_last_dst_blockid == ((uint)i + (uint)restSpan.Length) / SPARSE_BLOCK_SIZE && _last_dstblock != null)
 						{
 							_last_dstblock[(i + (uint)restSpan.Length) % SPARSE_BLOCK_SIZE] = src;
 						}
@@ -1504,9 +1542,13 @@ namespace juicescript.runtime
 						uint block_index = (array_index - 1) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
 
-						if (_last_dst_blockid == block_index)
+						if (_last_dst_blockid == block_index && _last_dstblock != null)
 						{
 							dst = _last_dstblock[(array_index - 1) % SPARSE_BLOCK_SIZE];
+						}
+						else if (_last_dst_blockid == block_index)
+						{
+							dst.setFault();
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1517,6 +1559,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							_last_dstblock = null;
+							_last_dst_blockid = block_index;
 							dst.setFault();
 						}
 					}
@@ -1526,9 +1570,13 @@ namespace juicescript.runtime
 						uint block_index = (array_index) / SPARSE_BLOCK_SIZE;
 						NaNBoxing[] block;
 
-						if (_last_src_blockid == block_index)
+						if (_last_src_blockid == block_index && _last_srcblock != null)
 						{
 							src = _last_srcblock[(array_index) % SPARSE_BLOCK_SIZE];
+						}
+						else if (_last_src_blockid == block_index)
+						{ 
+							src.setFault();
 						}
 						else if (sparse_map.TryGetValue(block_index, out block))
 						{
@@ -1539,6 +1587,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							_last_srcblock = null;
+							_last_src_blockid = block_index;
 							src.setFault();
 						}
 					}
@@ -1550,7 +1600,7 @@ namespace juicescript.runtime
 
 					//复制过去。
 					{
-						if (_last_dst_blockid == (array_index - 1) / SPARSE_BLOCK_SIZE)
+						if (_last_dst_blockid == (array_index - 1) / SPARSE_BLOCK_SIZE && _last_dstblock != null)
 						{
 							_last_dstblock[(array_index - 1) % SPARSE_BLOCK_SIZE] = src;
 						}

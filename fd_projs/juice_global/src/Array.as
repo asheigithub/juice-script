@@ -407,7 +407,7 @@ trace(numbers); // 3,5,10,34,100
 		 * 返回一个字符串，它表示指定数组中的元素。数组中的每一个元素（从索引 0 开始到最高索引结束）均会转换为一个连接字符串，并以逗号分隔。要指定自定义的分隔符，请使用 Array.join() 方法。
 		 * @return  数组元素的字符串。
 		 */
-		//public native function toString():String ;
+		//AS3 native function toString():String ;
 
 	}
 }

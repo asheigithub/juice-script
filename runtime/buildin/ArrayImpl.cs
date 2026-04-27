@@ -229,6 +229,18 @@ namespace juicescript.runtime.buildin
 			}
 		}
 
+		//[NativeFunction(".Array$:AS3::toString")]
+		//public static void Array_toString(Context context,
+		//	ASMethod method,
+		//	int scope_ptr,
+		//	NaNBoxing thisPtr,
+		//	int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		//{
+		//	Array_Proto_toString(context, method, scope_ptr, thisPtr, stackStPos, ref error, returnSlotIndex);
+		//}
+
+
+
 		[NativeFunction(".Array$@::toString")]
 		public static void Array_Proto_toString(
 			Context context,
@@ -2007,6 +2019,45 @@ namespace juicescript.runtime.buildin
 			}
 			// 11. 返回结果数组
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr);
+		}
+
+
+		//.Array$:AS3::insertAt
+		[NativeFunction(".Array$:AS3::insertAt")]
+		public static void Array_insertAt(Context context,
+			ASMethod method, int scope_ptr,
+			NaNBoxing thisPtr, int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			// 2. 获取原数组和长度
+			RtPayloadArray array;
+			int arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			uint len = array.array_len;
+			// 3. 读取参数（RunMethod 已传入默认值）
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var startVal = scope.ReadSlot(0, context.player);   // int: startIndex
+			
+			var element = scope.ReadSlot(1,context.player);
+
+			// 4. 标准化 startIndex（负数从末尾计数）
+			int start = startVal.IntValue;
+			if (start < 0) start = (int)len + start;
+			if (start < 0) start = 0;
+			if (start > (int)len) start = (int)len;
+
+
+			// 5. 调用 DoSplice 调整存储
+			array.DoSplice(context, ref error, start, 0,1);
+			if (error.raised) return;
+
+			// 6. 插入
+			context.player.SetArraySlot( element , (uint)(start ), context.GC.Heap[arrPtr] , ref error);
+			if (error.raised)
+			{
+				return;
+			}
+
+			context.StackSlots[returnSlotIndex].SetUndefined();
+
 		}
 
 	}
