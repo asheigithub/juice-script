@@ -2060,6 +2060,71 @@ namespace juicescript.runtime.buildin
 
 		}
 
+
+
+		//removeAt
+		[NativeFunction(".Array$:AS3::removeAt")]
+		public static void Array_removeAt(Context context,
+			ASMethod method, int scope_ptr,
+			NaNBoxing thisPtr, int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			RtPayloadArray array;
+			int arrPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			uint len = array.array_len;
+			// 3. 读取参数（RunMethod 已传入默认值）
+			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var indexVal = scope.ReadSlot(0, context.player);   // int: startIndex
+
+			// 4. 标准化 startIndex（负数从末尾计数）
+			int index = indexVal.IntValue;
+			if (index < 0) index = (int)len + index;
+			if (index < 0)
+			{
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+
+			if (index >= len)
+			{
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+
+			RtHeapInstance instance = context.GC.Heap[arrPtr];
+
+			bool isoutindex;
+			NaNBoxing e = array.ReadSlot((uint)index, context.player, out isoutindex);
+			context.StackSlots[returnSlotIndex] = e;
+
+			if (e.ValueType == BoxType.HeapPtr)
+			{
+				var check = context.GC.Heap[e.HeapPtr];
+				if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+				{
+					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+					var cacheObj = context.GC.Heap[clonedptr];
+					cacheObj.Type = check.Type;
+
+					((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+					((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+					((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+
+					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
+				}
+			}
+
+			array.DoSplice(context, ref error, index, 1, -1);
+			if (error.raised)
+			{
+				context.StackSlots[returnSlotIndex].SetUndefined();
+				return;
+			}
+
+		}
+
+
 	}
 
 }

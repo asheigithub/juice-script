@@ -6,7 +6,7 @@ package {
           
 			var a = [1, 2, 3];
 			
-			a.insertAt(1, 'b');
+			a.removeAt(2);
 			
 			trace(a);
 			
