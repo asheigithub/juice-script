@@ -2242,18 +2242,19 @@ namespace juicescript.runtime.buildin
 			{
 				return -1;
 			}
-			else if (a.ValueType == BoxType.Undefined && b.ValueType != BoxType.Undefined)
-			{
-				return 1;
-			}
-			else if (a.ValueType != BoxType.Undefined && b.ValueType == BoxType.Undefined)
-			{
-				return -1;
-			}
-
+			
 
 			if (sortBehavior.ValueType == BoxType.HeapPtr)
 			{
+				if (a.ValueType == BoxType.Undefined && b.ValueType != BoxType.Undefined)
+				{
+					return 1;
+				}
+				else if (a.ValueType != BoxType.Undefined && b.ValueType == BoxType.Undefined)
+				{
+					return -1;
+				}
+
 				RtHeapInstance func = context.GC.Heap[sortBehavior.HeapPtr];
 				RtPayloadClosure closure = (RtPayloadClosure)func.facility;
 
@@ -2313,6 +2314,12 @@ namespace juicescript.runtime.buildin
 
 				if ((option & 16) == 16)
 				{
+					if (a.ValueType == BoxType.Undefined)
+					{
+						context.player.RaiseTypeError(ref error, a, TypeKind.Number);
+						return 0;
+					}
+
 					//转数字
 					context.StackPosition++;
 					context.StackSlots[context.StackPosition - 1].SetUndefined();
@@ -2324,6 +2331,12 @@ namespace juicescript.runtime.buildin
 					}
 
 					double v1 = context.StackSlots[context.StackPosition - 1].Number;
+
+					if (b.ValueType == BoxType.Undefined)
+					{
+						context.player.RaiseTypeError(ref error, b, TypeKind.Number);
+						return 0;
+					}
 
 					context.player.ConvertValueType(ref error, b, TypeKind.Number, context.NUMBER, ref context.StackSlots[context.StackPosition - 1], scope_ptr);
 					if (error.raised)
@@ -2341,7 +2354,19 @@ namespace juicescript.runtime.buildin
 
 					context.StackPosition--;
 
-					if ((option & 2) == 2)
+					if (double.IsNaN(v1) && double.IsNaN(v2))
+					{
+						return 0;
+					}
+					else if (double.IsNaN(v1))
+					{
+						return 1;
+					}
+					else if (double.IsNaN(v2))
+					{ 
+						return -1;
+					}
+					else if ((option & 2) == 2)
 					{
 						if (v1 == v2)
 							return 0;
@@ -2362,6 +2387,15 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
+					if (a.ValueType == BoxType.Undefined && b.ValueType != BoxType.Undefined)
+					{
+						return 1;
+					}
+					else if (a.ValueType != BoxType.Undefined && b.ValueType == BoxType.Undefined)
+					{
+						return -1;
+					}
+
 					//字符串比较
 
 

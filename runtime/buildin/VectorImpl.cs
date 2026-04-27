@@ -1233,7 +1233,19 @@ namespace juicescript.runtime.buildin
 
 					context.StackPosition--;
 
-					if ((option & 2) == 2)
+					if (double.IsNaN(v1) && double.IsNaN(v2))
+					{
+						return 0;
+					}
+					else if (double.IsNaN(v1))
+					{
+						return 1;
+					}
+					else if (double.IsNaN(v2))
+					{
+						return -1;
+					}
+					else if ((option & 2) == 2)
 					{
 						if (v1 == v2)
 							return 0;
