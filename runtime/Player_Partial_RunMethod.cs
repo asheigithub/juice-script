@@ -369,7 +369,7 @@ namespace juicescript.runtime
 					ScopeHeapLocater scopeHeapLocater;
 					scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
 					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount-1);
-					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error, true);					
+					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error, method.IsConstructor  );					
 					if (error.raised)
 					{
 						Context.StackPosition -= para_argcount;

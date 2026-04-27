@@ -1268,7 +1268,7 @@ namespace juicescript.runtime.buildin
 					ns_set,
 					kind,
 					as_type,
-					"then",
+					"then",0,
 					stack,
 					stackslots,
 					basePos,

@@ -10088,7 +10088,136 @@ namespace juicescript.runtime
 			return issameorinherit;
 		}
 
-		internal int MultiNameLSearch(ASNamespaceSet ns_set, RtHeapTypeKind kind, ASContainer as_type, ReadOnlySpan<char> name, StackLocater stack,
+
+		private int multinamelsearch_findmembers(CodeScope scope, ReadOnlySpan<char> name, out int index,ASNamespaceSet ns_set,bool issameorinherit,bool exclude_user_ns)
+		{
+			index = -1;
+			int count = 0;
+			ASContainer defat = null;
+			for (int i = scope.Members.Count - 1; i >= 0; i--)
+			{
+				var member = scope.Members[i];
+				if (name.CompareTo(member.QName.Name, StringComparison.Ordinal) == 0
+				   && (
+						(
+							member.DefineAt.QName.Namespace == ns_set.Namespaces[0] && member.QName.Namespace.Kind == NamespaceKind.PackageInternal && member.QName.Namespace.def_uri == null
+						)
+						||
+						ns_set.Namespaces.Contains(member.QName.Namespace)
+					)
+
+				   &&
+				   (issameorinherit || (member.QName.Namespace.Kind != NamespaceKind.Protected && member.QName.Namespace.Kind != NamespaceKind.StaticProtected))
+				   &&
+				   (
+					!exclude_user_ns ||
+					!(member.QName.Namespace.def_uri != null && member.QName.Namespace.Kind == NamespaceKind.PackageInternal)
+				   )
+
+				)
+				{
+					if (defat == null)
+					{
+						defat = member.DefineAt;
+					}
+					else if (defat != member.DefineAt)
+					{
+						break;
+					}
+					index = i;
+					count++;
+				}
+			}
+
+			return count;
+		}
+
+
+		private void multinamelsearch_findvables(VTable table, ReadOnlySpan<char> name,
+			out int m_index, out int g_index, out int s_index, out int m_count, out int g_count, out int s_count , ASNamespaceSet ns_set, bool issameorinherit, bool exclude_user_ns)
+		{
+			m_index = -1;
+			g_index = -1;
+			s_index = -1;
+			m_count = 0;
+			g_count = 0;
+			s_count = 0;
+			ASContainer defat = null;
+			ASContainer defat_get = null;
+			ASContainer defat_set = null;
+			for (int i = table.Items.Count - 1; i >= 0; i--)
+			{
+				var item = table.Items[i];
+
+				if (//item.Trait.QName.Name == name 
+				name.CompareTo(item.Trait.QName.Name, StringComparison.Ordinal) == 0
+				&&
+					(
+						(
+							item.DefineAt.QName.Namespace == ns_set.Namespaces[0] &&
+							item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal &&
+							item.Trait.QName.Namespace.def_uri == null
+						)
+						||
+					ns_set.Namespaces.Contains(item.Trait.QName.Namespace)
+					)
+				 &&
+				   (issameorinherit || (item.Trait.QName.Namespace.Kind != NamespaceKind.Protected && item.Trait.QName.Namespace.Kind != NamespaceKind.StaticProtected))
+				 &&
+				   (
+					!exclude_user_ns ||
+					!(item.Trait.QName.Namespace.def_uri != null && item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal)
+				   )
+				)
+				{
+
+					if (item.Trait.Kind == TraitKind.Method)
+					{
+						if (defat == null)
+						{
+							defat = item.DefineAt;
+						}
+						else if (defat != item.DefineAt)
+						{
+							break;
+						}
+
+						m_index = i; m_count++;
+					}
+					else if (item.Trait.Kind == TraitKind.Getter)
+					{
+						if (defat_get == null)
+						{
+							defat_get = item.DefineAt;
+						}
+						else if (defat_get != item.DefineAt)
+						{
+							break;
+						}
+
+						g_index = i; g_count++;
+					}
+					else if (item.Trait.Kind == TraitKind.Setter)
+					{
+						if (defat_set == null)
+						{
+							defat_set = item.DefineAt;
+						}
+						else if (defat_set != item.DefineAt)
+						{
+							break;
+						}
+
+						s_index = i; s_count++;
+					}
+
+
+				}
+
+			}
+		}
+
+		internal int MultiNameLSearch(ASNamespaceSet ns_set, RtHeapTypeKind kind, ASContainer as_type, ReadOnlySpan<char> name, int name_strptr ,StackLocater stack,
 			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing instance, bool issameorinherit , ref ReceiveError error, bool exclude_user_ns = false
 			)
 		{
@@ -10100,135 +10229,134 @@ namespace juicescript.runtime
 #endif
 
 			
+			////lambda search member
+			//var findMembers = (CodeScope scope, ReadOnlySpan<char> name, out int index) =>
+			//{
+			//	index = -1;
+			//	int count = 0;
+			//	ASContainer defat = null;
+			//	for (int i = scope.Members.Count - 1; i >= 0; i--)
+			//	{
+			//		var member = scope.Members[i];
+			//		if ( name.CompareTo( member.QName.Name , StringComparison.Ordinal) == 0
+			//		   && (
+			//				(
+			//					member.DefineAt.QName.Namespace == ns_set.Namespaces[0] && member.QName.Namespace.Kind == NamespaceKind.PackageInternal && member.QName.Namespace.def_uri == null
+			//				)
+			//				||
+			//				ns_set.Namespaces.Contains(member.QName.Namespace)
+			//			)
 
-			//lambda search member
-			var findMembers = (CodeScope scope, ReadOnlySpan<char> name, out int index) =>
-			{
-				index = -1;
-				int count = 0;
-				ASContainer defat = null;
-				for (int i = scope.Members.Count - 1; i >= 0; i--)
-				{
-					var member = scope.Members[i];
-					if ( name.CompareTo( member.QName.Name , StringComparison.Ordinal) == 0
-					   && (
-							(
-								member.DefineAt.QName.Namespace == ns_set.Namespaces[0] && member.QName.Namespace.Kind == NamespaceKind.PackageInternal && member.QName.Namespace.def_uri == null
-							)
-							||
-							ns_set.Namespaces.Contains(member.QName.Namespace)
-						)
+			//		   &&
+			//		   (issameorinherit || (member.QName.Namespace.Kind != NamespaceKind.Protected && member.QName.Namespace.Kind != NamespaceKind.StaticProtected))
+			//		   &&
+			//		   (
+			//			!exclude_user_ns ||
+			//			!(member.QName.Namespace.def_uri != null && member.QName.Namespace.Kind == NamespaceKind.PackageInternal)
+			//		   )
 
-					   &&
-					   (issameorinherit || (member.QName.Namespace.Kind != NamespaceKind.Protected && member.QName.Namespace.Kind != NamespaceKind.StaticProtected))
-					   &&
-					   (
-						!exclude_user_ns ||
-						!(member.QName.Namespace.def_uri != null && member.QName.Namespace.Kind == NamespaceKind.PackageInternal)
-					   )
+			//		)
+			//		{
+			//			if (defat == null)
+			//			{
+			//				defat = member.DefineAt;
+			//			}
+			//			else if (defat != member.DefineAt)
+			//			{
+			//				break;
+			//			}
+			//			index = i;
+			//			count++;
+			//		}
+			//	}
 
-					)
-					{
-						if (defat == null)
-						{
-							defat = member.DefineAt;
-						}
-						else if (defat != member.DefineAt)
-						{
-							break;
-						}
-						index = i;
-						count++;
-					}
-				}
-
-				return count;
-			};
-
-
-			var findvtable = (VTable table, ReadOnlySpan<char> name, out int m_index, out int g_index, out int s_index, out int m_count, out int g_count, out int s_count) =>
-			{
-				m_index = -1;
-				g_index = -1;
-				s_index = -1;
-				m_count = 0;
-				g_count = 0;
-				s_count = 0;
-				ASContainer defat = null;
-				ASContainer defat_get = null;
-				ASContainer defat_set = null;
-				for (int i = table.Items.Count - 1; i >= 0; i--)
-				{
-					var item = table.Items[i];
-
-					if (//item.Trait.QName.Name == name 
-					name.CompareTo(item.Trait.QName.Name, StringComparison.Ordinal) == 0
-					&&
-						(
-							(
-								item.DefineAt.QName.Namespace == ns_set.Namespaces[0] &&
-								item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal &&
-								item.Trait.QName.Namespace.def_uri == null
-							)
-							||
-						ns_set.Namespaces.Contains(item.Trait.QName.Namespace)
-						)
-					 &&
-					   (issameorinherit || (item.Trait.QName.Namespace.Kind != NamespaceKind.Protected && item.Trait.QName.Namespace.Kind != NamespaceKind.StaticProtected))
-					 &&
-					   (
-						!exclude_user_ns ||
-						!(item.Trait.QName.Namespace.def_uri != null && item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal)
-					   )
-					)
-					{
-
-						if (item.Trait.Kind == TraitKind.Method)
-						{
-							if (defat == null)
-							{
-								defat = item.DefineAt;
-							}
-							else if (defat != item.DefineAt)
-							{
-								break;
-							}
-
-							m_index = i; m_count++;
-						}
-						else if (item.Trait.Kind == TraitKind.Getter)
-						{
-							if (defat_get == null)
-							{
-								defat_get = item.DefineAt;
-							}
-							else if (defat_get != item.DefineAt)
-							{
-								break;
-							}
-
-							g_index = i; g_count++;
-						}
-						else if (item.Trait.Kind == TraitKind.Setter)
-						{
-							if (defat_set == null)
-							{
-								defat_set = item.DefineAt;
-							}
-							else if (defat_set != item.DefineAt)
-							{
-								break;
-							}
-
-							s_index = i; s_count++;
-						}
+			//	return count;
+			//};
 
 
-					}
+			//var findvtable = (VTable table, ReadOnlySpan<char> name, out int m_index, out int g_index, out int s_index, out int m_count, out int g_count, out int s_count) =>
+			//{
+			//	m_index = -1;
+			//	g_index = -1;
+			//	s_index = -1;
+			//	m_count = 0;
+			//	g_count = 0;
+			//	s_count = 0;
+			//	ASContainer defat = null;
+			//	ASContainer defat_get = null;
+			//	ASContainer defat_set = null;
+			//	for (int i = table.Items.Count - 1; i >= 0; i--)
+			//	{
+			//		var item = table.Items[i];
 
-				}
+			//		if (//item.Trait.QName.Name == name 
+			//		name.CompareTo(item.Trait.QName.Name, StringComparison.Ordinal) == 0
+			//		&&
+			//			(
+			//				(
+			//					item.DefineAt.QName.Namespace == ns_set.Namespaces[0] &&
+			//					item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal &&
+			//					item.Trait.QName.Namespace.def_uri == null
+			//				)
+			//				||
+			//			ns_set.Namespaces.Contains(item.Trait.QName.Namespace)
+			//			)
+			//		 &&
+			//		   (issameorinherit || (item.Trait.QName.Namespace.Kind != NamespaceKind.Protected && item.Trait.QName.Namespace.Kind != NamespaceKind.StaticProtected))
+			//		 &&
+			//		   (
+			//			!exclude_user_ns ||
+			//			!(item.Trait.QName.Namespace.def_uri != null && item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal)
+			//		   )
+			//		)
+			//		{
 
-			};
+			//			if (item.Trait.Kind == TraitKind.Method)
+			//			{
+			//				if (defat == null)
+			//				{
+			//					defat = item.DefineAt;
+			//				}
+			//				else if (defat != item.DefineAt)
+			//				{
+			//					break;
+			//				}
+
+			//				m_index = i; m_count++;
+			//			}
+			//			else if (item.Trait.Kind == TraitKind.Getter)
+			//			{
+			//				if (defat_get == null)
+			//				{
+			//					defat_get = item.DefineAt;
+			//				}
+			//				else if (defat_get != item.DefineAt)
+			//				{
+			//					break;
+			//				}
+
+			//				g_index = i; g_count++;
+			//			}
+			//			else if (item.Trait.Kind == TraitKind.Setter)
+			//			{
+			//				if (defat_set == null)
+			//				{
+			//					defat_set = item.DefineAt;
+			//				}
+			//				else if (defat_set != item.DefineAt)
+			//				{
+			//					break;
+			//				}
+
+			//				s_index = i; s_count++;
+			//			}
+
+
+			//		}
+
+			//	}
+
+			//};
 
 			if (instance.HeapPtr == Context.CLASS.__instance_index__)
 			{
@@ -10240,11 +10368,11 @@ namespace juicescript.runtime
 			{
 				CodeScope cls = as_type._link_codescope;
 				int i;
-				var count = findMembers(cls, name, out i);
+				var count = multinamelsearch_findmembers(cls, name, out i,ns_set,issameorinherit,exclude_user_ns);
 
 				//查找虚函数表
 				int m_idx, m_count, g_idx, g_count, s_idx, s_count;
-				findvtable(as_type._vtable, name, out m_idx, out g_idx, out s_idx, out m_count, out g_count, out s_count);
+				multinamelsearch_findvables(as_type._vtable, name, out m_idx, out g_idx, out s_idx, out m_count, out g_count, out s_count, ns_set, issameorinherit,exclude_user_ns);
 
 				if (count + m_count + g_count > 1 || count + m_count + s_count > 1)
 				{
@@ -10405,11 +10533,11 @@ namespace juicescript.runtime
 			{
 				CodeScope type = as_type._link_codescope;
 				int i;
-				var count = findMembers(type, name, out i);
+				var count = multinamelsearch_findmembers(type, name, out i,ns_set,issameorinherit,exclude_user_ns);
 
 				//查找虚函数表
 				int m_idx, m_count, g_idx, g_count, s_idx, s_count;
-				findvtable(as_type._vtable, name, out m_idx, out g_idx, out s_idx, out m_count, out g_count, out s_count);
+				multinamelsearch_findvables(as_type._vtable, name, out m_idx, out g_idx, out s_idx, out m_count, out g_count, out s_count, ns_set, issameorinherit, exclude_user_ns);
 
 				//从写代码角度，不可能出现需要搜索基类的情况。
 
@@ -10545,7 +10673,12 @@ namespace juicescript.runtime
 						{
 							//未找到，进行动态属性处理
 							//searchPtr = Context.GC.AllocString(name);
-							if (!TryCreateStringValue(name, out searchPtr, ref error))
+
+							if (name_strptr != 0)
+							{
+								searchPtr.SetHeapPtr(name_strptr);
+							}
+							else if (!TryCreateStringValue(name, out searchPtr, ref error))
 							{
 								goto flag_handle_error;
 							}
@@ -10612,7 +10745,7 @@ namespace juicescript.runtime
 			{
 				CodeScope type = as_type._link_codescope;
 				int i;
-				var count = findMembers(type, name, out i);
+				var count = multinamelsearch_findmembers(type, name, out i,ns_set,issameorinherit,exclude_user_ns);
 				if (count == 0) //dynamic property
 				{
 					Context.GC.CheckGC(ref error);
@@ -10707,7 +10840,7 @@ namespace juicescript.runtime
 			{
 				//查找虚函数表
 				int m_idx, m_count, g_idx, g_count, s_idx, s_count;
-				findvtable(Context.FUNCTION.Instance._vtable, name, out m_idx, out g_idx, out s_idx, out m_count, out g_count, out s_count);
+				multinamelsearch_findvables(Context.FUNCTION.Instance._vtable, name, out m_idx, out g_idx, out s_idx, out m_count, out g_count, out s_count, ns_set, issameorinherit, exclude_user_ns);
 				if (m_count == 1)
 				{
 					var vitem = Context.FUNCTION.Instance._vtable.Items[m_idx];
@@ -14813,7 +14946,7 @@ namespace juicescript.runtime
 								
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
 								NaNBoxing thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
-								int code = MultiNameLSearch(ns_set, kind, as_type, name, stack, stackslots, stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
+								int code = MultiNameLSearch(ns_set, kind, as_type, name, constants[const_id].HeapPtr, stack, stackslots, stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
 
 								switch (code)
 								{
@@ -15234,7 +15367,7 @@ namespace juicescript.runtime
 
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
 								NaNBoxing thisPtr = ((RtPayloadMethodScope)methodscope.facility).ThisPtr;
-								int code = MultiNameLSearch(ns_set, kind, as_type, name, stack, stackslots, stackStPos, instance_box, check_MultiNameLSearch_issameorinherit( instance_box, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null) , ref error);
+								int code = MultiNameLSearch(ns_set, kind, as_type, name, 0, stack, stackslots, stackStPos, instance_box, check_MultiNameLSearch_issameorinherit( instance_box, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null) , ref error);
 
 								switch (code)
 								{

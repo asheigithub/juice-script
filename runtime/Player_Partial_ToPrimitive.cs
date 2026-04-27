@@ -111,7 +111,7 @@ namespace juicescript.runtime
 #endif
 			}
 
-			int code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "toString":"valueOf", tmp, stackslots, stackStPos, value,   mcheck , ref error,true);
+			int code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "toString":"valueOf",0, tmp, stackslots, stackStPos, value,   mcheck , ref error,true);
 			switch (code)
 			{
 				case 0:
@@ -169,7 +169,7 @@ namespace juicescript.runtime
 			}
 
 			//查找tostring,如果tostring后还不是primitive，则报错。
-			code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "valueOf" : "toString", tmp, stackslots, stackStPos, value,  mcheck, ref error, true);
+			code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "valueOf" : "toString",0, tmp, stackslots, stackStPos, value,  mcheck, ref error, true);
 			switch (code)
 			{
 				case 0:

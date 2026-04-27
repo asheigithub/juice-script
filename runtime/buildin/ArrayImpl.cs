@@ -2185,7 +2185,8 @@ namespace juicescript.runtime.buildin
 
 				if (sortBehavior.ValueType == BoxType.LocalString || sortBehavior.ValueType == BoxType.Null || sortBehavior.ValueType == BoxType.Undefined)
 				{
-					sortBehavior.setDefault(0);	
+					context.player.RaiseTypeError(ref error, sortBehavior, TypeKind.Function);
+					return;
 				}
 
 				int basePos = context.StackPosition;
@@ -2224,11 +2225,14 @@ namespace juicescript.runtime.buildin
 
 		private static int comparer(NaNBoxing a, NaNBoxing b, NaNBoxing sortBehavior, Context context, int scope_ptr, ref ReceiveError error)
 		{
-			if (a.Raw == b.Raw)
+			//确保空槽不会传入。
+			if (a.ValueType ==  BoxType.Fault && b.ValueType == BoxType.Fault) 
 			{
 				return 0;
 			}
-			else if (a.ValueType == BoxType.Fault && b.ValueType != BoxType.Fault)
+			else 
+			
+			if (a.ValueType == BoxType.Fault && b.ValueType != BoxType.Fault) 
 			{
 				return 1;
 			}
@@ -2299,6 +2303,9 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
+				
+
+
 				context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
 				int option = sortBehavior.IntValue;
 
@@ -2378,7 +2385,7 @@ namespace juicescript.runtime.buildin
 
 					//unsafe
 					{
-
+						
 
 						Span<char> temp1 = stackalloc char[16];
 						ReadOnlySpan<char> chars1 = temp1;
@@ -2390,9 +2397,12 @@ namespace juicescript.runtime.buildin
 						}
 						else
 						{
-							Debug.Assert(box1.ValueType == BoxType.LocalString);
-							int len = box1.GetLocalStringChars(temp1);
-							chars1 = temp1.Slice(0, len);
+							//Debug.Assert(box1.ValueType == BoxType.LocalString);
+							//int len = box1.GetLocalStringChars(temp1);
+							//chars1 = temp1.Slice(0, len);
+
+							chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
 						}
 
 
@@ -2407,11 +2417,17 @@ namespace juicescript.runtime.buildin
 						}
 						else
 						{
-							Debug.Assert(box2.ValueType == BoxType.LocalString);
-							int len = box2.GetLocalStringChars(temp2);
-							chars2 = temp2.Slice(0, len);
+							//Debug.Assert(box2.ValueType == BoxType.LocalString);
+							//int len = box2.GetLocalStringChars(temp2);
+							//chars2 = temp2.Slice(0, len);
+
+
+							chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
 						}
 
+
+						context.StackPosition -= 2;
 
 						int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
 						if ((option & 2) == 2)
@@ -2498,11 +2514,16 @@ namespace juicescript.runtime.buildin
 					bool ishole2;
 					NaNBoxing test = vpayload.ReadSlot((uint)j, context.player, out ishole2);
 
-					if (pivot.Raw != test.Raw)
+					//if (pivot.Raw != test.Raw)
+
+					if (pivot.Raw == test.Raw && pivot.ValueType != BoxType.HeapPtr)
+					{ 
+					}
+					else
 					{
 						uint olen = vpayload.array_len;
 
-						int comp = ArrayImpl.comparer(test, pivot, sortBehavior, context, scope_ptr, ref error);
+						long comp = ArrayImpl.comparer(test, pivot, sortBehavior, context, scope_ptr, ref error);
 						if (error.raised)
 						{
 							return 0;
@@ -2513,17 +2534,22 @@ namespace juicescript.runtime.buildin
 						if (vpayload.array_len != olen)
 						{
 							context.player.RaiseError(ref error, "array length changed!");
-							
+
 							return 0;
+						}
+
+						if (comp == 0)
+						{
+							comp = j - right;
 						}
 
 						if (comp < 0)
 						{
 							i++;
-							vpayload.Swap( (uint)i,(uint)j , context ,ref error,tempslot);
+							vpayload.Swap((uint)i, (uint)j, context, ref error, tempslot);
 							if (error.raised)
 							{
-							
+
 								return 0;
 							}
 						}

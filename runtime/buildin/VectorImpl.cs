@@ -1313,6 +1313,7 @@ namespace juicescript.runtime.buildin
 							chars2 = temp2.Slice(0, len);
 						}
 
+						context.StackPosition -= 2;
 
 						int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
 						if ((option & 2) == 2)
