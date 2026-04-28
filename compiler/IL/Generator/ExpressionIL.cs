@@ -6952,8 +6952,8 @@ namespace juicescript.compiler.IL.Generator
 
 								if (items[i].IsReg)
 								{
-									var stack = compileEnv.GetStackLocater(items[i].Reg);
-									var at = compileEnv.instructions.Last(i => i.GetDef().Contains(stack));
+									//var stack = compileEnv.GetStackLocater(items[i].Reg);
+									var at = compileEnv.instructions.Last(i => i.GetDef().Contains(v));
 
 									int index = compileEnv.instructions.IndexOf(at) + 1;
 									compileEnv.instructions.Insert(index, pushelement);
