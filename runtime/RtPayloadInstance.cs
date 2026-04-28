@@ -99,7 +99,18 @@ namespace juicescript.runtime
 						target = check;
 						return ptr;
 					}
+					else if (tmp2.TypeKind == RtHeapTypeKind.VECTOR)
+					{
+#if DEBUG
+						if (((RtPayloadVector)tmp2.facility).HEAPINSTANCE_PTR != 0)
+						{
+							throw new InvalidOperationException();
+						}
+#endif
 
+						target = check;
+						return ptr;
+					}
 #if DEBUG
 
 					if (tmp2.TypeKind == RtHeapTypeKind.VECTOR)

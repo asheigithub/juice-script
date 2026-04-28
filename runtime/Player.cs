@@ -5566,7 +5566,6 @@ namespace juicescript.runtime
 		/// <param name="box"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal  NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 			NaNBoxing result = box;
@@ -5618,8 +5617,7 @@ namespace juicescript.runtime
 
 							}
 
-
-
+							
 							if (refObj.TypeKind == RtHeapTypeKind.INSTANCE
 								&&
 									(
@@ -5843,6 +5841,7 @@ namespace juicescript.runtime
 #endif
 							else
 							{
+								
 								if (@namespace != null)
 								{
 									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
@@ -5993,6 +5992,7 @@ namespace juicescript.runtime
 
 								}
 							}
+
 						}
 						else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
 						{
@@ -10228,136 +10228,6 @@ namespace juicescript.runtime
 			}
 #endif
 
-			
-			////lambda search member
-			//var findMembers = (CodeScope scope, ReadOnlySpan<char> name, out int index) =>
-			//{
-			//	index = -1;
-			//	int count = 0;
-			//	ASContainer defat = null;
-			//	for (int i = scope.Members.Count - 1; i >= 0; i--)
-			//	{
-			//		var member = scope.Members[i];
-			//		if ( name.CompareTo( member.QName.Name , StringComparison.Ordinal) == 0
-			//		   && (
-			//				(
-			//					member.DefineAt.QName.Namespace == ns_set.Namespaces[0] && member.QName.Namespace.Kind == NamespaceKind.PackageInternal && member.QName.Namespace.def_uri == null
-			//				)
-			//				||
-			//				ns_set.Namespaces.Contains(member.QName.Namespace)
-			//			)
-
-			//		   &&
-			//		   (issameorinherit || (member.QName.Namespace.Kind != NamespaceKind.Protected && member.QName.Namespace.Kind != NamespaceKind.StaticProtected))
-			//		   &&
-			//		   (
-			//			!exclude_user_ns ||
-			//			!(member.QName.Namespace.def_uri != null && member.QName.Namespace.Kind == NamespaceKind.PackageInternal)
-			//		   )
-
-			//		)
-			//		{
-			//			if (defat == null)
-			//			{
-			//				defat = member.DefineAt;
-			//			}
-			//			else if (defat != member.DefineAt)
-			//			{
-			//				break;
-			//			}
-			//			index = i;
-			//			count++;
-			//		}
-			//	}
-
-			//	return count;
-			//};
-
-
-			//var findvtable = (VTable table, ReadOnlySpan<char> name, out int m_index, out int g_index, out int s_index, out int m_count, out int g_count, out int s_count) =>
-			//{
-			//	m_index = -1;
-			//	g_index = -1;
-			//	s_index = -1;
-			//	m_count = 0;
-			//	g_count = 0;
-			//	s_count = 0;
-			//	ASContainer defat = null;
-			//	ASContainer defat_get = null;
-			//	ASContainer defat_set = null;
-			//	for (int i = table.Items.Count - 1; i >= 0; i--)
-			//	{
-			//		var item = table.Items[i];
-
-			//		if (//item.Trait.QName.Name == name 
-			//		name.CompareTo(item.Trait.QName.Name, StringComparison.Ordinal) == 0
-			//		&&
-			//			(
-			//				(
-			//					item.DefineAt.QName.Namespace == ns_set.Namespaces[0] &&
-			//					item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal &&
-			//					item.Trait.QName.Namespace.def_uri == null
-			//				)
-			//				||
-			//			ns_set.Namespaces.Contains(item.Trait.QName.Namespace)
-			//			)
-			//		 &&
-			//		   (issameorinherit || (item.Trait.QName.Namespace.Kind != NamespaceKind.Protected && item.Trait.QName.Namespace.Kind != NamespaceKind.StaticProtected))
-			//		 &&
-			//		   (
-			//			!exclude_user_ns ||
-			//			!(item.Trait.QName.Namespace.def_uri != null && item.Trait.QName.Namespace.Kind == NamespaceKind.PackageInternal)
-			//		   )
-			//		)
-			//		{
-
-			//			if (item.Trait.Kind == TraitKind.Method)
-			//			{
-			//				if (defat == null)
-			//				{
-			//					defat = item.DefineAt;
-			//				}
-			//				else if (defat != item.DefineAt)
-			//				{
-			//					break;
-			//				}
-
-			//				m_index = i; m_count++;
-			//			}
-			//			else if (item.Trait.Kind == TraitKind.Getter)
-			//			{
-			//				if (defat_get == null)
-			//				{
-			//					defat_get = item.DefineAt;
-			//				}
-			//				else if (defat_get != item.DefineAt)
-			//				{
-			//					break;
-			//				}
-
-			//				g_index = i; g_count++;
-			//			}
-			//			else if (item.Trait.Kind == TraitKind.Setter)
-			//			{
-			//				if (defat_set == null)
-			//				{
-			//					defat_set = item.DefineAt;
-			//				}
-			//				else if (defat_set != item.DefineAt)
-			//				{
-			//					break;
-			//				}
-
-			//				s_index = i; s_count++;
-			//			}
-
-
-			//		}
-
-			//	}
-
-			//};
-
 			if (instance.HeapPtr == Context.CLASS.__instance_index__)
 			{
 				kind = RtHeapTypeKind.INSTANCE;
@@ -10531,6 +10401,11 @@ namespace juicescript.runtime
 			}
 			else if (kind == RtHeapTypeKind.INSTANCE || kind == RtHeapTypeKind.STRING || kind == RtHeapTypeKind.VECTOR || kind == RtHeapTypeKind.ARRAY || kind == RtHeapTypeKind.NAMESPACE || (byte)kind == 255)
 			{
+				if (as_type == Context.OBJECT.Instance)
+				{
+					goto lbl_nomember;
+				}
+
 				CodeScope type = as_type._link_codescope;
 				int i;
 				var count = multinamelsearch_findmembers(type, name, out i,ns_set,issameorinherit,exclude_user_ns);
@@ -10632,8 +10507,12 @@ namespace juicescript.runtime
 					goto lbl_multiname_success;
 
 				}
-				else
+
+
+			lbl_nomember:
 				{
+				
+
 					ASInstance it = (ASInstance)as_type;
 					//if ((it.Flags & ClassFlags.Sealed) == ClassFlags.Sealed)
 					//{
@@ -11330,7 +11209,9 @@ namespace juicescript.runtime
 		}
 
 		int findd_lastshapeptr = 0;
-		string findd_lastsearchname = null;
+		Memory<char> findd_buffer = new Memory<char>(new char[16]);
+		int findd_chars = 0;
+
 		int findd_matchShapePtr = 0;
 		
 		int findd_slot = 0;
@@ -11346,7 +11227,7 @@ namespace juicescript.runtime
 				int index = prop.Slots.Count - 1;
 
 				//这是一个简单的缓存机制，只要有任何修改动态属性操作就会失效，这样肯定不会出错。
-				if (findd_lastshapeptr == p && searchName.CompareTo(findd_lastsearchname, StringComparison.Ordinal) == 0)
+				if (findd_lastshapeptr == p && searchName.CompareTo(findd_buffer.Span.Slice(0,findd_chars), StringComparison.Ordinal) == 0)
 				{
 					matchShapePtr = findd_matchShapePtr;
 					
@@ -11368,20 +11249,22 @@ namespace juicescript.runtime
 						//	))
 						if (CompareShapePropertyName(shape.PTR_NAME, searchName) == 0)
 						{
-							findd_lastshapeptr = prop.SHAPE_PTR;
-							
-							if (findd_lastsearchname == null || searchName.CompareTo(findd_lastsearchname, StringComparison.Ordinal) != 0)
+							if (searchName.Length <= 16)
 							{
-								findd_lastsearchname = new string(searchName);
+								findd_lastshapeptr = prop.SHAPE_PTR;
+
+								searchName.CopyTo(findd_buffer.Span);
+								findd_chars = searchName.Length;
+								findd_matchShapePtr = p;
+								findd_slot = index;
+							}
+							else
+							{
+								findd_lastshapeptr = 0;
 							}
 
 
-							findd_matchShapePtr = p;
-							
-							findd_slot = index;
-
-
-							matchShapePtr = p;
+								matchShapePtr = p;
 							value = prop.Slots[index];
 							slotindex = index;
 							return true;
@@ -14560,6 +14443,16 @@ namespace juicescript.runtime
 								{
 									goto flag_handle_error;
 								}
+								if (@class.__instance_index__ == 0) 
+								{
+									//在@class就在当前正在初始化的script中，却又没有初始化到的情况。
+									InitASClass(@class, ref error);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+								}
+
 								stackslots[stackLocater.index].SetHeapPtr(@class.__instance_index__);
 
 							}

@@ -76,6 +76,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType, ushort args, byte* argementPtr,
 			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex , int callee_closure_ptr = 0 ,bool skipcheckargscount = false)
 		{
@@ -369,7 +370,7 @@ namespace juicescript.runtime
 					ScopeHeapLocater scopeHeapLocater;
 					scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
 					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount-1);
-					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error, method.IsConstructor  );					
+					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error,true , method.Flags.HasFlag(MethodFlags.StructMethod));					
 					if (error.raised)
 					{
 						Context.StackPosition -= para_argcount;
@@ -480,7 +481,7 @@ namespace juicescript.runtime
 										scopeHeapLocater.MemberIndex = i;
 
 									
-										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, true);
+										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, true, method.Flags.HasFlag(MethodFlags.StructMethod));
 #if DEBUG
 										if (error.raised)
 										{

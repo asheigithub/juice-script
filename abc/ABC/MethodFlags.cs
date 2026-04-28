@@ -35,9 +35,9 @@ namespace juicescript.ABC
         /// </summary>
         Native = 32,
         /// <summary>
-        /// 仅当指令中操作了xmlns才会设置
+        /// 结构体的方法，排除了各种危险操作。
         /// </summary>
-        SetDxns = 0x40,
+        StructMethod = 0x40,
         /// <summary>
         /// 用于外部工具，Methodinfo中保存了参数名
         /// </summary>

@@ -458,7 +458,7 @@ namespace juicescript.compiler.IL.Optimize
 			//FastPeephole(method);
 			//return;
 
-			//if (method.Name.IndexOf("Main") >= 0)
+			//if (method.Name.IndexOf("SSS") >= 0)
 			//	return;
 
 

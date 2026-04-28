@@ -825,7 +825,7 @@ namespace juicescript.compiler.IL.Generator
                                         INS_BindThis_Call bindThis_Call = new INS_BindThis_Call(step.token);
                                         bindThis_Call.dst = result;
                                         bindThis_Call.function = fun;
-                                        bindThis_Call._this_ = ld_This.dst; // new StackLocater() { index = -1 - compileEnv.Scope.index }; //bindthis;  
+                                        bindThis_Call._this_ = ld_This.dst; 
                                         bindThis_Call.args = arguments.ToArray();
 
                                         compileEnv.SetCallResult(result);

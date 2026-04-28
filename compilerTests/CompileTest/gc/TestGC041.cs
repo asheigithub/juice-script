@@ -47,7 +47,7 @@ package
 [struct]
 final class O
 {
-	public function O(v)
+	public function O(v:int)
 	{
 		this.v = v;
 	}

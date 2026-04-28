@@ -100,72 +100,206 @@ namespace juicescript.compiler.IL
             }
 
 			//确认method是否引用其他method中的 参数或者变量。
-
-			var check = compileEnv.Scope.Parent;
-			while (check != null)
 			{
-				if (check.Kind != CodeScopeKind.Method)
+				var check = compileEnv.Scope.Parent;
+				while (check != null)
 				{
-					break;
+					
+
+					for (int i = 0; i < compileEnv.instructions.Count; i++)
+					{
+						bool flag = false;
+
+						var instruction = compileEnv.instructions[i];
+						if (instruction.INS_Code == INS_Code.ld_ScopeH)
+						{
+							INS_Ld_ScopeHeap ld_ScopeHeap = (INS_Ld_ScopeHeap)instruction;
+							if (check.index == ld_ScopeHeap.heap.ScopeIndex)
+							{
+								flag = true;
+							}
+						}
+						else if (instruction.INS_Code == INS_Code.storeScopeH)
+						{
+							INS_Store_ScopeHeap store_ScopeHeap = (INS_Store_ScopeHeap)instruction;
+							if (check.index == store_ScopeHeap.heap.ScopeIndex)
+							{
+								flag = true;
+							}
+						}
+						else if (instruction.INS_Code == INS_Code.ld_function)
+						{
+							INS_Ld_Function ld_Function = (INS_Ld_Function)instruction;
+							if (check.index == ld_Function.heapLocater.ScopeIndex)
+							{
+								flag = true;
+							}
+						}
+						else if (instruction.INS_Code == INS_Code.ld_function_bindglobal_call)
+						{
+							INS_Ld_Function_BindGlobal_Call ld_function_bindg_call = (INS_Ld_Function_BindGlobal_Call)instruction;
+							if (check.index == ld_function_bindg_call.heapLocater.ScopeIndex)
+							{
+								flag = true;
+							}
+						}
+
+
+
+
+
+
+
+						//仅有这几个类能访问到method方法的scopemember。
+						//那个用 stacklocator的负值找到的是 class,instance,global中的成员。
+
+						if (check.Kind == CodeScopeKind.Method)
+						{
+							if (flag)
+							{
+								((ASMethodBody)check.Container).Method.Flags |= MethodFlags.NeedActivation;
+								//break;
+							}
+						}
+						else if ( compileEnv.Scope.Kind == CodeScopeKind.Method &&  ((ASMethodBody)compileEnv.Scope.Container).Method.__ismethod  )
+						{
+
+							if (flag)
+							{
+								if (check.Kind == CodeScopeKind.Script)
+								{
+									if (compileEnv.Scope.Parent.Kind == CodeScopeKind.Instance)
+									{
+										if (compileEnv.Scope.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
+										{
+											//禁止在struct的method中访问公共变量，避免这种情况出现:代码删除了vector.<T>,然后this又依赖vector.<T>的情况
+											//同时禁止struct中的method传入非struct,非primitive的变量。杜绝代码中出现修改本身存储的情况出现。
+											/*
+											 var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
+
+											[struct]
+											final class P
+											{
+												public function P(x:float,y:float)
+												{
+													X = x;
+													Y = y;
+												}
+	
+												public var X:float;
+												public var Y:float;
+	
+												public function toString()
+												{
+													return X + "," + Y;
+												}
+	
+												public function Test()
+												{
+													v.length = 0;        
+													this.X = 0;
+		
+													//trace( this );
+												}
+											}
+
+											v[1].Test();
+											 */
+
+											throw new ResolverException(instruction.token, "Access script member not allowed in struct method.");
+										}
+									}
+								}
+							}
+						}
+
+					}
+
+					check = check.Parent;
+
 				}
-
-				for (int i = 0; i < compileEnv.instructions.Count; i++)
-				{
-					bool flag = false;
-
-					var instruction = compileEnv.instructions[i];
-					if (instruction.INS_Code == INS_Code.ld_ScopeH)
-					{
-						INS_Ld_ScopeHeap ld_ScopeHeap = (INS_Ld_ScopeHeap)instruction;
-						if (check.index == ld_ScopeHeap.heap.ScopeIndex)
-						{
-							flag = true;
-						}
-					}
-					else if (instruction.INS_Code == INS_Code.storeScopeH)
-					{
-						INS_Store_ScopeHeap store_ScopeHeap = (INS_Store_ScopeHeap)instruction;
-						if (check.index == store_ScopeHeap.heap.ScopeIndex)
-						{
-							flag = true;
-						}
-					}
-					else if (instruction.INS_Code == INS_Code.ld_function)
-					{
-						INS_Ld_Function ld_Function = (INS_Ld_Function)instruction;
-						if (check.index == ld_Function.heapLocater.ScopeIndex)
-						{
-							flag = true;
-						}
-					}
-					else if (instruction.INS_Code == INS_Code.ld_function_bindglobal_call)
-					{
-						INS_Ld_Function_BindGlobal_Call ld_function_bindg_call = (INS_Ld_Function_BindGlobal_Call)instruction;
-						if (check.index == ld_function_bindg_call.heapLocater.ScopeIndex)
-						{
-							flag = true;
-						}
-					}
-					
-					
-					
-
-
-
-					
-					//仅有这2个之类能访问到method方法的scopemember。
-					//那个用 stacklocator的负值找到的是 class,instance,global中的成员。
-
-					if (flag)
-					{
-						((ASMethodBody)check.Container).Method.Flags |= MethodFlags.NeedActivation;
-						break;
-					}
-				}
-
-				check = check.Parent;	
 
 			}
+
+			//检查struct的其他限制
+
+			{
+				if (compileEnv.Scope.Kind == CodeScopeKind.Method && ((ASMethodBody)compileEnv.Scope.Container).Method.__ismethod)
+				{
+					if (compileEnv.Scope.Parent.Kind == CodeScopeKind.Instance)
+					{
+						var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
+							s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+						var @ctype = alltypes.First( c=>c.QName == compileEnv.Scope.Parent.Container.QName );
+
+						if ( ctype.Instance.Flags.HasFlag(ClassFlags.Struct))
+						{
+							//var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
+							//	s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+							//var getclass = (NaNBoxing c) => {
+
+							//	ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
+							//	return alltypes.First( c=>c.Type_identifier == cid );	
+
+							//};
+
+
+							if (compileEnv.instructions.Any(i => i.INS_Code == INS_Code.ld_class
+								//&&
+								//getclass( compileEnv.Constants[ ((INS_Ld_Class)i).classid_index]).Type_identifier != compileEnv.Scope.Parent.TypeLayout.ASType.Type_identifier
+
+							)) //杜绝通过Class静态成员绕过
+							{
+								/*
+								 class SSS
+								{
+									public static var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
+								}
+								[struct]
+								final class P
+								{
+									public function P(x:float,y:float)
+									{
+										X = x;
+										Y = y;
+									}
+	
+									public var X:float;
+									public var Y:float;
+	
+									public function toString()
+									{
+										return X + "," + Y;
+									}
+	
+									public function Test()
+									{
+										SSS.v.length = 0;
+										this.X = 0;
+		
+										//trace( this );
+									}
+								}
+								SSS.v[1].Test();							 
+								 */
+
+
+
+								throw new ResolverException(compileEnv.instructions.First( i=>i.INS_Code == INS_Code.ld_class ).token  , "ld_class not allowed in struct method.");
+							}
+
+							
+
+						}
+
+					}
+				}
+
+			}
+
+
 
 			#endregion
 

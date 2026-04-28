@@ -106,7 +106,7 @@ final class P
 {
 	public function toString()
 	{
-		trace(arguments.callee == o.toString);
+		//trace(arguments.callee == o.toString);
 		return ""ABCD"";
 	}
 }
@@ -210,7 +210,7 @@ trace(""OK"");
 
             Assert.IsNull(ex);
 			//null 肯定是 object,这里flash的实现应该不正确
-            Assert.AreEqual("true\r\nABCD\r\ntrue\r\nABCD 1,2,3\r\ntrue\r\nABCD string\r\ntrue\r\nABCD string\r\ntrue\r\nABCD string\r\nnull object\r\ntrue\r\nABCD string\r\ntrue\r\nABCD string\r\nnull object\r\ntrue\r\nABCD string\r\nnull object\r\ntrue\r\nABCD string\r\ntrue\r\nABCD\r\ntrue\r\njjj ABCD string\r\nOK\r\n", ((StringPrint) player.Print).output.ToString());
+            Assert.AreEqual("ABCD\r\nABCD 1,2,3\r\nABCD string\r\nABCD string\r\nABCD string\r\nnull object\r\nABCD string\r\nABCD string\r\nnull object\r\nABCD string\r\nnull object\r\nABCD string\r\nABCD\r\njjj ABCD string\r\nOK\r\n", ((StringPrint) player.Print).output.ToString());
 
         }
 

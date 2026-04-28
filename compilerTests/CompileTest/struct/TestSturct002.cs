@@ -42,7 +42,7 @@ package
 [struct]
 final class O
 {
-	public function O(v)
+	public function O(v:sbyte)
 	{
 		this.v = v;
 	}

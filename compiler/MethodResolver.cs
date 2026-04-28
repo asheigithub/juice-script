@@ -3579,6 +3579,42 @@ namespace juicescript.compiler
 					}
 				}
 
+
+				//检查[struct]的method的参数。禁止传入非primitive,非struct的参数。
+				{
+					if (method.__ismethod)
+					{
+						var alltypes = context.scriptDefs.SelectMany(
+									s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+						var @type = alltypes.FirstOrDefault(c=>c.QName == method.Body._link_codescope.Parent.Container.QName);
+
+						if (type.Instance.Flags.HasFlag(ClassFlags.Struct))
+						{
+							
+
+							if (method.Parameters.Any(p => p.TypeKind == TypeKind.Any))
+							{
+								throw new ResolverException(method.Token, $"parameter  type must is primitive or [struct]. In [struct] method ");
+
+							}
+
+							var p = method.Parameters.FirstOrDefault(p =>
+							p.TypeKind != TypeKind.String && p.TypeKind.IsHeapType() &&
+							!alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance.Flags.HasFlag(ClassFlags.Struct));
+							if (p != null)
+							{
+								//var ii = alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance;
+
+								throw new ResolverException(method.Token,  $"[struct].method parameter:{p.Name}:{ p.TypeKind.ToDebugString(context.player_for_compiler) } must is primitive or [struct]");
+
+							}
+
+							method.Flags |= MethodFlags.StructMethod;
+						}
+					}
+				}
+
+
 				//检查特殊函数如Generator等，是否满足条件
 				{
 					if (method.Flags.HasFlag(MethodFlags.Generator))

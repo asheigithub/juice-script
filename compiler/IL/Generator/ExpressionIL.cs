@@ -6808,7 +6808,19 @@ namespace juicescript.compiler.IL.Generator
 							{
 								keys.Add(key);	
 							}
-							keys.Sort((a, b) => { return string.CompareOrdinal(((Token)a).StringValue, ((Token)b).StringValue); } ); //将key排序
+							keys.Sort((a, b) => {
+								Token ta = (Token)a;
+								Token tb = (Token)b;
+								if (ta.line != tb.line)
+								{
+									return ta.line - tb.line;
+								}
+								else
+								{ 
+									return ta.ptr - tb.ptr;
+								}
+							
+							} ); //将key排序
 
 
 							foreach (var key in keys)
