@@ -1690,7 +1690,7 @@ namespace juicescript.runtime
 					{
 						var dst = context.GC.Heap[cache_structs[i]];
 						CopyStruct(dst, src, context.player);
-						cache_store[i].SetHeapPtr(cache_structs[i - 1]);
+						cache_store[i].SetHeapPtr(cache_structs[i]);
 					}
 					else
 					{
@@ -2355,7 +2355,7 @@ namespace juicescript.runtime
 
 				for (int i = index; i < array_len; i++)
 				{
-					if (stack_span[i].ValueType != NaNBoxing.BoxType.Null &&
+					if (//stack_span[i].ValueType != NaNBoxing.BoxType.Null &&
 						//stack_span[i].ValueType != NaNBoxing.BoxType.Undefined && 
 						stack_span[i].ValueType != NaNBoxing.BoxType.Fault)
 					{
@@ -2378,7 +2378,7 @@ namespace juicescript.runtime
 				for (int i = index; i < array_len; i++)
 				{
 
-					if (cache_store[i].ValueType != NaNBoxing.BoxType.Null &&
+					if (//cache_store[i].ValueType != NaNBoxing.BoxType.Null &&
 						//cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && 
 						cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
 					{
@@ -2424,7 +2424,7 @@ namespace juicescript.runtime
 
 
 							{
-								if (block[j].ValueType != NaNBoxing.BoxType.Null &&
+								if (//block[j].ValueType != NaNBoxing.BoxType.Null &&
 									//block[j].ValueType != NaNBoxing.BoxType.Undefined && 
 									block[j].ValueType != NaNBoxing.BoxType.Fault)
 								{

@@ -2737,7 +2737,9 @@ namespace juicescript.runtime.buildin
 			context.StackPosition += 2;
 
 			var ns_set = context.player.nsSetIncludingPublicAndAS3;
-			ASContainer as_type = instance.Type;
+			ASContainer as_type = instance.TypeKind == RtHeapTypeKind.STRING? context.STRING.Instance : instance.Type;
+
+
 			int code = context.player.MultiNameLSearch(ns_set, instance.TypeKind,
 				as_type, mode, namestr, new StackLocater() { index = 0 }, stackslots, stPos, obj, context.player.check_MultiNameLSearch_issameorinherit(obj, null) , ref error, true);
 			switch (code)
@@ -2778,14 +2780,14 @@ namespace juicescript.runtime.buildin
 			NaNBoxing a;
 			if (!TryFind(test, context, name, field.ValueType == BoxType.HeapPtr ? field.HeapPtr : 0, ref error, out a))
 			{
-				return 0;
+				a.SetUndefined();
 			}
 			if (error.raised) return 0;
 
 			NaNBoxing b;
 			if (!TryFind(pivot, context, name, field.ValueType == BoxType.HeapPtr ? field.HeapPtr : 0, ref error, out b))
 			{
-				return 0;
+				b.SetUndefined();
 			}
 			if (error.raised) return 0;
 

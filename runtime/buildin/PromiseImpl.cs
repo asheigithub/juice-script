@@ -1245,6 +1245,11 @@ namespace juicescript.runtime.buildin
 					return true; // No type info, "then" is undefined
 				}
 
+				if (kind != RtHeapTypeKind.INSTANCE)
+				{
+					return true;
+				}
+
 				// Get namespace set for property resolution
 				ASNamespaceSet ns_set = context.player.nsSetIncludingPublicAndAS3;
 

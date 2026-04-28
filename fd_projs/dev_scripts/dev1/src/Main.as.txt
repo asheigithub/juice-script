@@ -1,0 +1,120 @@
+package {
+    import flash.display.Sprite;
+    [Doc]
+    public class Main extends Sprite {
+        public function Main() {
+            // 1. 单字段默认排序（字符串升序、区分大小写）
+            trace("=== Test1: 单字段默认排序 ===");
+            var arr1:Array = [
+                {name: "Bob"},
+                {name: "Alice"},
+                {name: "Charlie"},
+                {name: "bob"}  // 小写b会排在后面（区分大小写）
+            ];
+            arr1.sortOn("name");
+            for each (var o1 in arr1) trace(o1.name);
+            // 2. NUMERIC 数字排序
+            trace("\n=== Test2: NUMERIC 数字排序 ===");
+            var arr2:Array = [
+                {score: 100},
+                {score: 7},
+                {score: 35}
+            ];
+            arr2.sortOn("score", Array.NUMERIC);
+            for each (var o2 in arr2) trace(o2.score);
+            // 3. DESCENDING 降序排序
+            trace("\n=== Test3: DESCENDING 降序 ===");
+            var arr3:Array = [
+                {name: "Bob"},
+                {name: "Alice"},
+                {name: "Charlie"}
+            ];
+            arr3.sortOn("name", Array.DESCENDING);
+            for each (var o3 in arr3) trace(o3.name);
+            // 4. CASEINSENSITIVE 不区分大小写
+            trace("\n=== Test4: CASEINSENSITIVE ===");
+            var arr4:Array = [
+                {name: "bob"},
+                {name: "Alice"},
+                {name: "Charlie"}
+            ];
+            arr4.sortOn("name", Array.CASEINSENSITIVE);
+            for each (var o4 in arr4) trace(o4.name);
+            // 5. 多字段排序（先按age升序，再按name升序）
+            trace("\n=== Test5: 多字段排序 ===");
+            var arr5:Array = [
+                {age: 20, name: "Bob"},
+                {age: 20, name: "Alice"},
+                {age: 18, name: "Charlie"}
+            ];
+            arr5.sortOn(["age", "name"]);
+            for each (var o5 in arr5) trace(o5.age, o5.name);
+            // 6. 多字段+不同选项（name不区分大小写，score降序）
+            trace("\n=== Test6: 多字段+选项数组 ===");
+            var arr6:Array = [
+                {name: "Bob", score: 80},
+                {name: "Alice", score: 90},
+                {name: "Bob", score: 70}
+            ];
+            arr6.sortOn(["name", "score"], [Array.CASEINSENSITIVE, Array.DESCENDING]);
+            for each (var o6 in arr6) trace(o6.name, o6.score);
+			
+			
+			// 7. 字符串数字 NUMERIC 排序（字段值是字符串类型的数字）
+            trace("\n=== Test7: 字符串数字 NUMERIC 排序 ===");
+            var arr7:Array = [
+                {val: "100"},
+                {val: "7"},
+                {val: "35"}
+            ];
+            arr7.sortOn("val", Array.NUMERIC);
+            for each (var o7 in arr7) trace(o7.val); // 预期 7,35,100
+            // 8. CASEINSENSITIVE + DESCENDING 组合
+            trace("\n=== Test8: CASEINSENSITIVE + DESCENDING ===");
+            var arr8:Array = [
+                {name: "Bob"},
+                {name: "alice"},
+                {name: "Charlie"},
+                {name: "bob"}
+            ];
+            arr8.sortOn("name", Array.CASEINSENSITIVE | Array.DESCENDING);
+            for each (var o8 in arr8) trace(o8.name); 
+            // 预期 Charlie, Bob, bob, alice（不区分大小写降序）
+            
+            // 10. 元素是null的情况
+            trace("\n=== Test10: 元素为null ===");
+            var arr10:Array = [
+                {name: "Alice"},
+                null,
+                {name: "Bob"}
+            ];
+            arr10.sortOn("name");
+            for each (var o10 in arr10) {
+                if (o10 == null) trace("null");
+                else trace(o10.name);
+            } // 预期 Alice, Bob, null
+            // 以下是参数错误测试（若不支持try catch可注释）
+            // 11. 单字段传数组options（长度不匹配）
+            trace("\n=== Test11: 单字段+数组options（预期报错）===");
+            var arr11:Array = [{a:1}];
+            try {
+                arr11.sortOn("a", [Array.NUMERIC]);
+                trace("未报错（不符合预期）");
+            } catch (e:*) {
+                trace("捕获到错误（符合预期）");
+            }
+            // 12. 字段名传非字符串
+            trace("\n=== Test12: 字段名非字符串（预期报错）===");
+            var arr12:Array = [{a:1}];
+            try {
+                arr12.sortOn(123);
+                trace("未报错（不符合预期）");
+            } catch (e:*) {
+                trace("捕获到错误（符合预期）");
+            }
+			
+        }
+    }
+}
+
+new Main();
