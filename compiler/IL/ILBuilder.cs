@@ -13,6 +13,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 using System.Security.AccessControl;
+using System.Security.Authentication.ExtendedProtection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -145,11 +146,6 @@ namespace juicescript.compiler.IL
 						}
 
 
-
-
-
-
-
 						//仅有这几个类能访问到method方法的scopemember。
 						//那个用 stacklocator的负值找到的是 class,instance,global中的成员。
 
@@ -215,6 +211,19 @@ namespace juicescript.compiler.IL
 
 					}
 
+
+					if (check.Kind == CodeScopeKind.Method)
+					{
+						if (check.Parent.Kind == CodeScopeKind.Instance)
+						{
+							if (check.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
+							{ //禁止在[struct]方法内使用闭包
+								throw new ResolverException(((ASMethodBody)check.Container).Method.Token, "Closure not allowed in struct method.");
+							}
+						}
+
+					}
+
 					check = check.Parent;
 
 				}
@@ -238,17 +247,33 @@ namespace juicescript.compiler.IL
 							//var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
 							//	s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
 
-							//var getclass = (NaNBoxing c) => {
+							//var getclass = (NaNBoxing c) =>
+							//{
 
 							//	ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
-							//	return alltypes.First( c=>c.Type_identifier == cid );	
+							//	return alltypes.First(c => c.Type_identifier == cid);
 
 							//};
+							var g = compileEnv.CompileContext.player_for_compiler.Context.libs.FirstOrDefault(s => s.assemblyName == "juice_global.swc" && s.refAssemblys.Count == 0);
+
+							var checkclass = (NaNBoxing c) =>
+							{
+								if (g != null)
+								{
+									ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
+
+									return g.Classes.Any(cls =>cls !=null && cls.Type_identifier == cid);
+								}
+
+								return false;
+							};
 
 
 							if (compileEnv.instructions.Any(i => i.INS_Code == INS_Code.ld_class
-								//&&
-								//getclass( compileEnv.Constants[ ((INS_Ld_Class)i).classid_index]).Type_identifier != compileEnv.Scope.Parent.TypeLayout.ASType.Type_identifier
+								&&
+								!checkclass(compileEnv.Constants[((INS_Ld_Class)i).classid_index])
+
+							//getclass( compileEnv.Constants[ ((INS_Ld_Class)i).classid_index]).Type_identifier != compileEnv.Scope.Parent.TypeLayout.ASType.Type_identifier
 
 							)) //杜绝通过Class静态成员绕过
 							{
@@ -285,8 +310,7 @@ namespace juicescript.compiler.IL
 								SSS.v[1].Test();							 
 								 */
 
-
-
+								//global_swc里的Class是安全的
 								throw new ResolverException(compileEnv.instructions.First( i=>i.INS_Code == INS_Code.ld_class ).token  , "ld_class not allowed in struct method.");
 							}
 

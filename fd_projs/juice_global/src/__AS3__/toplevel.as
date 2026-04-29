@@ -18,7 +18,7 @@ package __AS3__
 		
 		native public static function parseInt (s:String="NaN", radix:int=0) : Number;
 		
-		
+		native public static function getTimer() : int;
 		
 		
 		native public static function setTimeout(closure:Function, delay:Number, ... arguments):uint;
