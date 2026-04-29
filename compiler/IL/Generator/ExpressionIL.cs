@@ -2268,7 +2268,7 @@ namespace juicescript.compiler.IL.Generator
 					t.Mir = TypeKind.Any;
 				}
 
-				StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg,t.Maj,t.Mir );
+				StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg,t.Mir );
 
 				INS_As insAs = new INS_As(step.token);
 				insAs.dst = dst;
