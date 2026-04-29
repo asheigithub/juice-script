@@ -7754,12 +7754,12 @@ namespace juicescript.runtime
 			}
 
 			//字符串转数字
-			if (v1.ValueType == BoxType.HeapPtr && IsNumeric(v2))
+			if ((v1.ValueType == BoxType.HeapPtr || v1.ValueType== BoxType.LocalString) && IsNumeric(v2))
 			{
 				ConvertValueType(ref error, v1, TypeKind.Number, Context.NUMBER, ref v1); //这里不会出错
 			}
 
-			if (v2.ValueType == BoxType.HeapPtr && IsNumeric(v1))
+			if ((v2.ValueType == BoxType.HeapPtr || v2.ValueType == BoxType.LocalString) && IsNumeric(v1))
 			{
 				ConvertValueType(ref error, v2, TypeKind.Number, Context.NUMBER, ref v2);  //这里不会出错
 			}
