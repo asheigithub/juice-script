@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -1639,10 +1640,15 @@ namespace juicescript.runtime
 
 		}
 
-
+		
 		internal void Swap(uint i, uint j, Context context,ref ReceiveError error, int tempslot)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+			if (i == j)
+			{
+				return;
+			}
 
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{

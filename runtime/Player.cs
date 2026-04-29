@@ -46,7 +46,6 @@ namespace juicescript.runtime
 		static Player()
 		{
 			NativeFunctionRegistry.RegisterAllFromAssembly(typeof(NativeFun).Assembly);
-
 		}
 
 		public Context Context { get; }
@@ -9988,7 +9987,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RaiseArgementErrorCountMisMatch(ref error, null, 1, argsCount);
+				RaiseArgumentErrorCountMisMatch(ref error, null, 1, argsCount);
 			}
 		}
 
@@ -18892,7 +18891,7 @@ namespace juicescript.runtime
 											{
 												if (argsCount > 0)
 												{
-													RaiseArgementErrorCountMisMatch(ref error, Context.FUNCTION.Instance.Constructor, 0, argsCount);
+													RaiseArgumentErrorCountMisMatch(ref error, Context.FUNCTION.Instance.Constructor, 0, argsCount);
 													goto flag_handle_error;
 												}
 												else

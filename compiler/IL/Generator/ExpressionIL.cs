@@ -119,6 +119,13 @@ namespace juicescript.compiler.IL.Generator
 			{
 				searchQueue.Enqueue(toplevel._link_codescope);
 			}
+			var utils = env.CompileContext.player_for_compiler.Context.libs.SelectMany(s => s.Classes).FirstOrDefault(s => s != null && s.QName.Namespace.Name == "__AS3__" && s.QName.Name == "utils");
+			if (toplevel != null)
+			{
+				searchQueue.Enqueue(utils._link_codescope);
+			}
+
+
 
 			while (searchQueue.Count > 0)
 			{
@@ -697,7 +704,7 @@ namespace juicescript.compiler.IL.Generator
 				{
 					if (env.CompileContext.vectorDefs.Any(v => v.Identifier == t))
 					{
-						return env.CompileContext.vectorDefs.First(v => v.Identifier == t).ToString().Replace("__AS3__.vec.", "");
+						return env.CompileContext.vectorDefs.First(v => v.Identifier == t).ToString().Replace("__AS3__.vec::", "");
 					}
 					else
 					{

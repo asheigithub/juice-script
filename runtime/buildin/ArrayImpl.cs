@@ -2229,6 +2229,7 @@ namespace juicescript.runtime.buildin
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static int comparer(NaNBoxing a, NaNBoxing b, NaNBoxing sortBehavior, Context context, int scope_ptr, ref ReceiveError error)
 		{
+			
 			//确保空槽不会传入。
 			if (a.ValueType ==  BoxType.Fault && b.ValueType == BoxType.Fault) 
 			{
@@ -2576,10 +2577,10 @@ namespace juicescript.runtime.buildin
 							return 0;
 						}
 
-						if (comp == 0)
-						{
-							comp = j - right;
-						}
+						//if (comp == 0)
+						//{
+						//	comp = right - j;
+						//}
 
 						if (comp < 0)
 						{
@@ -2776,7 +2777,6 @@ namespace juicescript.runtime.buildin
 			Span<char> buffer = stackalloc char[16];
 			var name = Extensions.GetPrimitiveValueToString(context.player, field, buffer);
 
-
 			NaNBoxing a;
 			if (!TryFind(test, context, name, field.ValueType == BoxType.HeapPtr ? field.HeapPtr : 0, ref error, out a))
 			{
@@ -2962,6 +2962,24 @@ namespace juicescript.runtime.buildin
 
 		private static long sorton_comparer(NaNBoxing test, NaNBoxing pivot, bool fieldisarray, bool optionisarray, NaNBoxing field, NaNBoxing option_box, Context context, int scope_ptr, ref ReceiveError error)
 		{
+			
+			//确保空槽不会传入。
+			if (test.ValueType == BoxType.Fault && pivot.ValueType == BoxType.Fault)
+			{
+				return 0;
+			}
+			else
+			if (test.ValueType == BoxType.Fault && pivot.ValueType != BoxType.Fault)
+			{
+				return 1;
+			}
+			else if (test.ValueType != BoxType.Fault && test.ValueType == BoxType.Fault)
+			{
+				return -1;
+			}
+
+
+
 			if (fieldisarray)
 			{
 				RtPayloadArray fieldarr;
@@ -3029,13 +3047,13 @@ namespace juicescript.runtime.buildin
 				context.StackPosition++;
 				context.StackSlots[context.StackPosition - 1].SetUndefined();
 
-				QuickSort(scope, vpayload, vecPtr, scope_ptr, 0, vpayload.array_len - 1, context, ref error, fieldisarray,optionisarray, field,option, context.StackPosition - 1);
+				QuickSort(scope,  vecPtr, scope_ptr, 0, vpayload.array_len - 1, context, ref error, fieldisarray,optionisarray, field,option, context.StackPosition - 1);
 
 				context.StackPosition--;
 
 			}
 
-			private static void QuickSort(RtPayloadMethodScope scope, RtPayloadArray vpayload, int vecptr, int scope_ptr, long left, long right, Context context, ref ReceiveError error, bool fieldisarray, bool optionisarray, NaNBoxing field, NaNBoxing option,int tempslot)
+			private static void QuickSort(RtPayloadMethodScope scope,  int vecptr, int scope_ptr, long left, long right, Context context, ref ReceiveError error, bool fieldisarray, bool optionisarray, NaNBoxing field, NaNBoxing option,int tempslot)
 			{
 				if (left >= right) return;
 
@@ -3045,15 +3063,16 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
+				RtPayloadArray vpayload;
 				vecptr = RtPayloadArray.FindAndUpdateHeapInstancePtr(vecptr, context.player, out vpayload);
 
-				QuickSort(scope, vpayload, vecptr, scope_ptr, left, pivotIndex - 1, context, ref error, fieldisarray,optionisarray,field,option,tempslot);
+				QuickSort(scope, vecptr, scope_ptr, left, pivotIndex - 1, context, ref error, fieldisarray,optionisarray,field,option,tempslot);
 				if (error.raised)
 				{
 					return;
 				}
 
-				QuickSort(scope, vpayload, vecptr, scope_ptr, pivotIndex + 1, right, context, ref error, fieldisarray,optionisarray,field,option,tempslot );
+				QuickSort(scope, vecptr, scope_ptr, pivotIndex + 1, right, context, ref error, fieldisarray,optionisarray,field,option,tempslot );
 				if (error.raised)
 				{
 					return;
@@ -3091,7 +3110,7 @@ namespace juicescript.runtime.buildin
 							return 0;
 						}
 
-						vecPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						vecPtr = RtPayloadArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload); //访问属性也可能导致数组本身变化
 
 						if (vpayload.array_len != olen)
 						{
@@ -3100,10 +3119,10 @@ namespace juicescript.runtime.buildin
 							return 0;
 						}
 
-						if (comp == 0)
-						{
-							comp = j - right;
-						}
+						//if (comp == 0)
+						//{
+						//	comp = right - j;
+						//}
 
 						if (comp < 0)
 						{

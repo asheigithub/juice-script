@@ -533,9 +533,48 @@ namespace juicescript.runtime
 
 		}
 
+		//Variable int1 is not defined.
+		internal void RaiseReferenceError_TypeNotFound(ref ReceiveError error, ReadOnlySpan<char> name)
+		{
+			error.raised = true;
+			RtHeapInstance _temp = null;
+			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
+			if (errPtr == 0)
+			{
+				error.error.setFault();
+			}
+			else
+			{
+				NaNBoxing errName = new NaNBoxing();
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, _temp.Type._link_codescope, this);
+
+				RtPayloadInstance payloadInstance = (RtPayloadInstance)_temp.facility;
+
+				int messagePtr = Context.GC.AllocString($"Variable {name} is not defined.");
+				if (messagePtr != 0)
+				{
+					NaNBoxing naNBoxing = new NaNBoxing();
+					naNBoxing.SetHeapPtr(messagePtr);
+					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
+				}
+				else
+				{
+					NaNBoxing naNBoxing = new NaNBoxing();
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
+				}
+
+				error.error.SetHeapPtr(errPtr);
+
+			}
+
+		}
+
+
 
 		int cache_ARGEMENT_ERROR_NAME;
-		private void RaiseArgementErrorCountMisMatch(ref ReceiveError error, ASMethod method, int expected, int got)
+		private void RaiseArgumentErrorCountMisMatch(ref ReceiveError error, ASMethod method, int expected, int got)
 		{
 			error.raised = true;
 			RtHeapInstance _temp = null;
@@ -574,6 +613,55 @@ namespace juicescript.runtime
 				error.error.SetHeapPtr(errPtr);
 			}
 		}
+
+
+
+
+		internal void RaiseArgumentNotNull(ref ReceiveError error,ReadOnlySpan<char> name)
+		{
+			//Argument name cannot be null.
+
+			error.raised = true;
+			RtHeapInstance _temp = null;
+			int errPtr = Context.GC.AllocInstance(Context.ARGEMENT_ERROR.Instance, out _temp);
+			if (errPtr == 0)
+			{
+				error.error.setFault();
+			}
+			else
+			{
+				NaNBoxing errName = new NaNBoxing();
+				errName.SetHeapPtr(cache_ARGEMENT_ERROR_NAME);
+				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, _temp.Type._link_codescope, this);
+
+				RtPayloadInstance payloadInstance = (RtPayloadInstance)_temp.facility;
+
+				int messagePtr = Context.GC.AllocString(
+					$"Argument {name} cannot be null."
+					);
+				if (messagePtr != 0)
+				{
+					NaNBoxing naNBoxing = new NaNBoxing();
+					naNBoxing.SetHeapPtr(messagePtr);
+					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
+				}
+				else
+				{
+					NaNBoxing naNBoxing = new NaNBoxing();
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
+				}
+
+				error.error.SetHeapPtr(errPtr);
+			}
+		}
+
+
+
+
+
+
+
 
 		internal int cache_RANGE_ERROR_NAME;
 		internal void RaiseRangeError(ref ReceiveError error, ReadOnlySpan<char> index, long maxrange)

@@ -116,7 +116,7 @@ catch(e)
 
 				StringPrint print = (StringPrint)player.Print;
 
-				Assert.AreEqual("Vector\r\nVector\r\n[class __AS3__.vec.Vector<__AS3__.vec.Vector.<int>>]\r\nProperty http://adobe.com/AS3/2006/builtin::LL not found on __AS3__.vec.Vector<__AS3__.vec.Vector.<int>> and there is no default value.\r\n", print.GetOutput());
+				Assert.AreEqual("Vector\r\nVector\r\n[class __AS3__.vec::Vector<__AS3__.vec::Vector.<int>>]\r\nProperty http://adobe.com/AS3/2006/builtin::LL not found on __AS3__.vec::Vector<__AS3__.vec::Vector.<int>> and there is no default value.\r\n", print.GetOutput());
 
 				NaNBoxing a = rtPayload.ReadSlot(0);
 				Assert.AreEqual( NaNBoxing.BoxType.HeapPtr, a.ValueType );

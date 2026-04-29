@@ -112,7 +112,7 @@ namespace juicescript.compiler.IL
 				case TypeKind.Array:
 					return "Array";
 				case TypeKind.Vector:
-					return "__AS3__.vec.Vector";
+					return "__AS3__.vec::Vector";
 				case TypeKind.Namespace:
 					return "Namespace";
 				default:

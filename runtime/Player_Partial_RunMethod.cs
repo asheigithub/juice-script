@@ -126,7 +126,7 @@ namespace juicescript.runtime
 								--expected;
 							} while (expected >= 0 && (method.Parameters[expected].IsOptional || method.Parameters[expected].IsRest));
 
-							RaiseArgementErrorCountMisMatch(ref error, method, expected + 1, args);
+							RaiseArgumentErrorCountMisMatch(ref error, method, expected + 1, args);
 
 							goto lbl_handle_arg_err;
 
@@ -143,7 +143,7 @@ namespace juicescript.runtime
 							} while (expected >= 0 && method.Parameters[expected].IsOptional);
 
 
-							RaiseArgementErrorCountMisMatch(ref error, method, expected + 1, args);
+							RaiseArgumentErrorCountMisMatch(ref error, method, expected + 1, args);
 
 							goto lbl_handle_arg_err;
 						}

@@ -4,25 +4,33 @@ package {
     [Doc]
     public class Main extends Sprite {
         public function Main() {
-            
+           
         }
     }
 }
+import flash.utils.getDefinitionByName;
 
 
-var a = new <P>[ new P() ];
-
-[struct]
-final class P
+class F
 {
-	public var X:int;
-	
-	public function Test():void
+	public function F()
 	{
-		trace(X);
+		a.length = 0;
 	}
-	
 }
 
+var a:Vector.<P> = new <P>[new P()];
 
+[struct]
+final class P {
+    public var X:int;
+    public function Test():void {
+        
+		new (getDefinitionByName("FilePrivateNS:Main::F"))();
+		
+        X = 6;
+    }
+}
 a[0].Test();
+
+

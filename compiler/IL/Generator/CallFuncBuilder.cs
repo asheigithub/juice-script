@@ -665,35 +665,63 @@ namespace juicescript.compiler.IL.Generator
                     {
                         case TypeKind.Any:
                             {
-                                var trait = compileEnv.ReadTraitRef(step.Arg2.Reg);
-                                if (trait.Item1.Length == 1)
+                                Tuple<ASTrait[], AS3ExprStep> trait;
+                                if (compileEnv.TryReadTraitRef(step.Arg2.Reg, out trait))
                                 {
-                                    //function的this 是变量a 所在global
-                                    StackLocater ret = compileEnv.GetStackLocater(step.Arg1.Reg);
-                                    List<StackLocater> arguments = new List<StackLocater>();
-                                    if (step.Arg3 != null)
+                                    //var trait = compileEnv.ReadTraitRef(step.Arg2.Reg);
+                                    if (trait.Item1.Length == 1)
                                     {
-                                        //读取传递的参数
-                                        var args = (List<AS3DataStackElement>)step.Arg3.Data.Value;
-                                        for (int i = 0; i < args.Count; i++)
+                                        //function的this 是变量a 所在global
+                                        StackLocater ret = compileEnv.GetStackLocater(step.Arg1.Reg);
+                                        List<StackLocater> arguments = new List<StackLocater>();
+                                        if (step.Arg3 != null)
                                         {
-                                            arguments.Add(ExpressionIL.LoadRightValue(args[i], compileEnv, step.token));
+                                            //读取传递的参数
+                                            var args = (List<AS3DataStackElement>)step.Arg3.Data.Value;
+                                            for (int i = 0; i < args.Count; i++)
+                                            {
+                                                arguments.Add(ExpressionIL.LoadRightValue(args[i], compileEnv, step.token));
+                                            }
                                         }
+
+                                        INS_bindGlobal_Call bindGlobal_Call = new INS_bindGlobal_Call(step.token);
+                                        bindGlobal_Call.args = arguments.ToArray();
+                                        bindGlobal_Call.dst = ret;
+                                        bindGlobal_Call.function = function;
+
+                                        compileEnv.SetCallResult(ret);
+                                        compileEnv.instructions.Add(bindGlobal_Call);
+
                                     }
-
-                                    INS_bindGlobal_Call bindGlobal_Call = new INS_bindGlobal_Call(step.token);
-                                    bindGlobal_Call.args = arguments.ToArray();
-                                    bindGlobal_Call.dst = ret;
-                                    bindGlobal_Call.function = function;
-
-                                    compileEnv.SetCallResult(ret);
-                                    compileEnv.instructions.Add(bindGlobal_Call);
-
+                                    else
+                                    {
+                                        throw new InvalidOperationException();
+                                    }
                                 }
                                 else
                                 {
-                                    throw new InvalidOperationException();
-                                }
+									StackLocater ret = compileEnv.GetStackLocater(step.Arg1.Reg);
+									List<StackLocater> arguments = new List<StackLocater>();
+									if (step.Arg3 != null)
+									{
+										//读取传递的参数
+										var args = (List<AS3DataStackElement>)step.Arg3.Data.Value;
+										for (int i = 0; i < args.Count; i++)
+										{
+											arguments.Add(ExpressionIL.LoadRightValue(args[i], compileEnv, step.token));
+										}
+									}
+
+									INS_bindGlobal_Call bindGlobal_Call = new INS_bindGlobal_Call(step.token);
+									bindGlobal_Call.args = arguments.ToArray();
+									bindGlobal_Call.dst = ret;
+									bindGlobal_Call.function = function;
+
+									compileEnv.SetCallResult(ret);
+									compileEnv.instructions.Add(bindGlobal_Call);
+								}
+
+                               
                             }
                             break;
                         case TypeKind.Boolean:

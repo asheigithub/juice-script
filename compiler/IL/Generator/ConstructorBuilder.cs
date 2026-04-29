@@ -219,7 +219,7 @@ namespace juicescript.compiler.IL.Generator
                 {
                     throw new ResolverException(step.token, "Instantiation attempted on a non-constructor."); // 编译期检查
                 }
-                else if (type.Maj > TypeKind.Object)
+                else if (type.Maj >= TypeKind.Object)
                 {
 					List<StackLocater> arguments = new List<StackLocater>();
 					if (step.Arg3 != null)

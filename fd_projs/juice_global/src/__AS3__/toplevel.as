@@ -21,6 +21,8 @@ package __AS3__
 		native public static function getTimer() : int;
 		
 		
+		
+		
 		native public static function setTimeout(closure:Function, delay:Number, ... arguments):uint;
 		
 		native public static function clearTimeout(id:uint):void;

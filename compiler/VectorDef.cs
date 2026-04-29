@@ -112,7 +112,7 @@ namespace juicescript.compiler
         {
             if (context.vectorDefs.Exists( v=>v.Identifier == type ) )//dict_VectorDefs.ContainsKey(type))
             {
-                return "__AS3__.vec.Vector<" + 
+                return "__AS3__.vec::Vector<" + 
                     //context.dict_VectorDefs[type]._TypeStr_ 
                     context.vectorDefs.First(v=>v.Identifier == type)._TypeStr_
                     + ">";
@@ -122,41 +122,41 @@ namespace juicescript.compiler
                 switch (type)
                 {
                     case TypeKind.Any:
-                        return "__AS3__.vec.Vector.<*>";
+                        return "__AS3__.vec::Vector.<*>";
                     case TypeKind.Boolean:
-                        return "__AS3__.vec.Vector.<Boolean>";
+                        return "__AS3__.vec::Vector.<Boolean>";
                     case TypeKind.SByte:
-                        return "__AS3__.vec.Vector.<sbyte>";
+                        return "__AS3__.vec::Vector.<sbyte>";
                     case TypeKind.Byte:
-                        return "__AS3__.vec.Vector.<byte>";
+                        return "__AS3__.vec::Vector.<byte>";
                     case TypeKind.Short:
-                        return "__AS3__.vec.Vector.<short>";
+                        return "__AS3__.vec::Vector.<short>";
                     case TypeKind.UShort:
-                        return "__AS3__.vec.Vector.<ushort>";
+                        return "__AS3__.vec::Vector.<ushort>";
                     case TypeKind.Int:
-                        return "__AS3__.vec.Vector.<int>";
+                        return "__AS3__.vec::Vector.<int>";
                     case TypeKind.Uint:
-                        return "__AS3__.vec.Vector.<uint>";
+                        return "__AS3__.vec::Vector.<uint>";
                     case TypeKind.Float:
-                        return "__AS3__.vec.Vector.<float>";
+                        return "__AS3__.vec::Vector.<float>";
                     case TypeKind.Number:
-                        return "__AS3__.vec.Vector.<Number>";
+                        return "__AS3__.vec::Vector.<Number>";
                     case TypeKind.Null:
                         throw new InvalidOperationException();
                         
                     case TypeKind.String:
-                        return "__AS3__.vec.Vector.<String>";
+                        return "__AS3__.vec::Vector.<String>";
                     case TypeKind.Function:
-                        return "__AS3__.vec.Vector.<Function>";
+                        return "__AS3__.vec::Vector.<Function>";
                     case TypeKind.Fun_Void:
                         throw new InvalidOperationException();
                     case TypeKind.Array:
-                        return "__AS3__.vec.Vector.<Array>";
+                        return "__AS3__.vec::Vector.<Array>";
                     case TypeKind.Vector:
                         throw new InvalidOperationException();
                         
                     case TypeKind.Namespace:
-                        return "__AS3__.vec.Vector.<Namespace>";
+                        return "__AS3__.vec::Vector.<Namespace>";
                     
                     default:
 
@@ -166,7 +166,7 @@ namespace juicescript.compiler
                             {
                                 if (c != null && c.Type_identifier == (ulong)type)
                                 { 
-                                    return "__AS3__.vec.Vector.<" + c.QName.Namespace.Name + "." + c.QName.Name + ">";
+                                    return "__AS3__.vec::Vector.<" + c.QName.Namespace.Name + "." + c.QName.Name + ">";
                                 }
 
                             }
@@ -178,7 +178,7 @@ namespace juicescript.compiler
                             {
                                 if (c != null && c.Type_identifier == (ulong)type)
                                 {
-                                    return "__AS3__.vec.Vector.<" + c.QName.Namespace.Name + "." + c.QName.Name + ">";
+                                    return "__AS3__.vec::Vector.<" + c.QName.Namespace.Name + "." + c.QName.Name + ">";
                                 }
                             }
                         }

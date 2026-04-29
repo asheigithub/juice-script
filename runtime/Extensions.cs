@@ -317,7 +317,7 @@ namespace juicescript.runtime
                 case TypeKind.Array:
                     return "Array";
                 case TypeKind.Vector:
-                    return "__AS3__.vec.Vector";
+                    return "__AS3__.vec::Vector";
                 case TypeKind.Namespace:
                     return "Namespace";
                 default:
@@ -427,8 +427,20 @@ namespace juicescript.runtime
 			}
 		}
 
+        public static string ToQualifiedName(this ASMultiname multiname)
+        {
+			if (string.IsNullOrEmpty(multiname.Namespace.Name))
+			{
+				return multiname.Name;
+			}
+			else
+			{
+				return multiname.Namespace.Name + "::" + multiname.Name;
+			}
+		}
 
-        public static string ToDebugTypeName(this ASMultiname multiname)
+
+		public static string ToDebugTypeName(this ASMultiname multiname)
         {
             if (string.IsNullOrEmpty(multiname.Namespace.Name))
             {

@@ -202,7 +202,7 @@ namespace juicescript.compiler.IL
 											v[1].Test();
 											 */
 
-											throw new ResolverException(instruction.token, "Access script member not allowed in struct method.");
+											throw new ResolverException(instruction.token, "[global] unreachable in struct method.");
 										}
 									}
 								}
@@ -262,7 +262,23 @@ namespace juicescript.compiler.IL
 								{
 									ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
 
-									return g.Classes.Any(cls =>cls !=null && cls.Type_identifier == cid);
+									if (g.Classes.Any(cls => cls != null && cls.Type_identifier == cid))
+									{
+										var cls = g.Classes.First(cls => cls != null && cls.Type_identifier == cid);
+
+										if (cls.QName.ToQualifiedName() == "__AS3__::utils")
+										{
+											return false;
+										}
+										else
+										{
+											return true;
+										}
+									}
+									else
+									{
+										return false;
+									}
 								}
 
 								return false;
