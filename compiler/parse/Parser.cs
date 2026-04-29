@@ -606,12 +606,14 @@ namespace juicescript.compiler.parse
                 Stack<Token> do_tokens = new Stack<Token>();
 
                 int skips = 0;
+                int opencurly = 0;
 
-                for (int index = 0; index < words.Count; index++)
+				for (int index = 0; index < words.Count; index++)
                 {
                     var token = words[index];
                     if (token.Type == Token.TokenType.identifier && token.StringValue == "do")
                     {
+                        opencurly = 0;
                         skips = 0;
                         do_tokens.Push(token);
                     }
@@ -623,7 +625,7 @@ namespace juicescript.compiler.parse
                         }
 
                         Token toreplace = null;
-                        if (do_tokens.Count > 0)
+                        if (do_tokens.Count > 0 && opencurly==0)
                         {
                             do_tokens.Pop();
 
@@ -704,6 +706,15 @@ namespace juicescript.compiler.parse
                     }
                     else
                     {
+                        if (token.StringValue == "{")
+                        {
+                            opencurly++;
+                        }
+                        else if (token.StringValue == "}")
+                        {
+                            opencurly--;
+                        }
+
                         skips++;
                     }
                 }

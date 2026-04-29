@@ -173,7 +173,8 @@ namespace juicescript.compiler.IL
                 return false;
             }
 
-            if (from < TypeKind.Unknown && to == TypeKind.Object)
+            if (//from < TypeKind.Unknown && 
+                to == TypeKind.Object)
             {
                 return true;
             }

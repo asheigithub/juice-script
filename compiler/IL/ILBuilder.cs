@@ -1699,7 +1699,9 @@ namespace juicescript.compiler.IL
 
 				//StackLocater var_loc = ExpressionIL.LoadRightValue(@switch.Expr.Value, compileEnv, @switch.Expr.Token);
 
-				StackLocater var_loc = BuildExpression(compileEnv, @switch.Expr, ref flagseed);
+				//StackLocater var_loc = BuildExpression(compileEnv, @switch.Expr, ref flagseed);
+				BuildExpression(compileEnv, @switch.Expr, ref flagseed);
+				StackLocater var_loc = ExpressionIL.LoadRightValue(@switch.Expr.Value, compileEnv, @switch.Expr.Token);
 
 				for (int i = 0; i < @switch.CaseTestList.Count; i++)
 				{

@@ -757,7 +757,7 @@ namespace juicescript.runtime
 
 				default:
 #if DEBUG
-					if (value.ValueType != NaNBoxing.BoxType.HeapPtr)
+					if (value.ValueType != NaNBoxing.BoxType.HeapPtr && value.ValueType != NaNBoxing.BoxType.Null)
 					{
 						throw new InvalidOperationException();
 					}

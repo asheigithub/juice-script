@@ -744,17 +744,19 @@ namespace juicescript.runtime.gc
 													case TypeKind.Null:
                                                         break;
                                                     case TypeKind.Any:
-                                                        if (((NaNBoxing*)ptr)->ValueType == NaNBoxing.BoxType.HeapPtr)
+													case TypeKind.Object:
+
+														if (((NaNBoxing*)ptr)->ValueType == NaNBoxing.BoxType.HeapPtr)
                                                         {
                                                             mark(Heap[((NaNBoxing*)ptr)->HeapPtr]);
                                                         }
                                                         break;
-                                                    case TypeKind.String:
+													
+													case TypeKind.String:
                                                     case TypeKind.Function:
                                                     case TypeKind.Array:
                                                     case TypeKind.Vector:
-                                                    case TypeKind.Namespace:
-                                                    case TypeKind.Object:
+                                                    case TypeKind.Namespace:                                                    
                                                     case TypeKind.Class:
                                                         if (((NaNBoxing*)ptr)->ValueType == NaNBoxing.BoxType.LocalString)
                                                         {
