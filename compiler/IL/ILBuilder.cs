@@ -608,20 +608,20 @@ namespace juicescript.compiler.IL
 				}
 
 
-				//for (int i = 0; i < @if.condition.Count; i++)
-				//{
-				//	BuildAS3SyntaxNode(compileEnv, @if.condition[i], trycatchState, blockcontexts, ref flagseed);
-				//}
-
-				//AS3Expression expr = (AS3Expression)@if.condition[@if.condition.Count - 1];
-				//StackLocater condition = ExpressionIL.LoadRightValue(expr.Value, compileEnv, expr.Token);
-
-				StackLocater condition = default;
-
 				for (int i = 0; i < @if.condition.Count; i++)
 				{
-					condition = BuildExpression(compileEnv, (AS3Expression)@if.condition[i], ref flagseed);
+					BuildAS3SyntaxNode(compileEnv, @if.condition[i], trycatchState, blockcontexts, ref flagseed);
 				}
+
+				AS3Expression expr = (AS3Expression)@if.condition[@if.condition.Count - 1];
+				StackLocater condition = ExpressionIL.LoadRightValue(expr.Value, compileEnv, expr.Token);
+
+				//StackLocater condition = default;
+
+				//for (int i = 0; i < @if.condition.Count; i++)
+				//{
+				//	condition =  BuildExpression(compileEnv, (AS3Expression)@if.condition[i], ref flagseed);
+				//}
 
 
 				bool truepart_blank = @if.truepart.Count == 0 || (@if.truepart.Count == 1 && @if.truepart[0] is AS3Block && ((AS3Block)@if.truepart[0]).Code.Count == 0);
@@ -1529,9 +1529,9 @@ namespace juicescript.compiler.IL
 				if (@while.Condition.Count > 0)
 				{
 					var condition = (AS3Expression)@while.Condition[@while.Condition.Count - 1];
-					//StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
+					StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
 
-					var condition_reg = _c;
+					//var condition_reg = _c;
 
 					INS_If_False_Goto if_False_Goto = new INS_If_False_Goto(condition.Token);
 					if_False_Goto.condition = condition_reg;
@@ -1606,8 +1606,8 @@ namespace juicescript.compiler.IL
 				{
 
 					var condition = (AS3Expression)doWhile.Condition[doWhile.Condition.Count - 1];
-					//StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
-					StackLocater condition_reg = _c;
+					StackLocater condition_reg = ExpressionIL.LoadRightValue(condition.Value, compileEnv, condition.Token);
+					//StackLocater condition_reg = _c;
 
 					INS_If_True_Goto if_true_goto = new INS_If_True_Goto(condition.Token);
 					if_true_goto.condition = condition_reg;

@@ -10031,6 +10031,9 @@ namespace juicescript.runtime
 
 				case NaNBoxing.BoxType.HeapPtr:
 					{
+
+						Debug.Assert((Context.GC.Heap[invalue.HeapPtr].TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ));
+
 						if (Context.GC.Heap[invalue.HeapPtr].TypeKind == RtHeapTypeKind.STRING
 							&&
 							string.IsNullOrEmpty(((RtPayloadString)Context.GC.Heap[invalue.HeapPtr].facility).Str)
