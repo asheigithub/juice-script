@@ -368,7 +368,7 @@ namespace juicescript.runtime
 						(value.HeapPtr < Context.CacheInstancePtr + calleelastpos) //传入
 						)
 					{
-						if (((RtPayloadInstance)obj.facility).IsRefVectorOrStruct(this, (ASInstance)obj.Type))
+						if (((RtPayloadInstance)obj.facility).IsRefVectorOrFromArrayOrStruct(this, (ASInstance)obj.Type))
 						{
 							//Clone结构体
 							int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
@@ -1733,12 +1733,13 @@ namespace juicescript.runtime
 						&&
 						(!is_prepare_arg  // 传参时，假设结构体也是传引用。	
 							||
-							((RtPayloadInstance)src.facility).IsRefVectorOrStruct(this, (ASInstance)src.Type)  //但是对结构体内部的引用或Vector内部的结构体引用是例外，
-								
-								
-																											   //代码中有可能对存储目标Vector或变量进行赋值导致存储失效
-						)                                                        //为了避免麻烦，干脆引用不能通过参数传进去，直接复制结构体 | 
-																				
+							((RtPayloadInstance)src.facility).IsRefVectorOrFromArrayOrStruct(this, (ASInstance)src.Type)
+
+						//但是对结构体内部的引用或Vector内部的结构体 ,或者刚从数组里取出的结构体是例外，
+						//类似C#处理，
+						//引用不能通过参数传进去，直接复制结构体 
+						)                                                        
+
 
 						)
 			{
