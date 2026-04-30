@@ -65,6 +65,30 @@ namespace juicescript.runtime.buildin
 			}
 		}
 
+
+		private static void ReturnValue(int returnSlotIndex,Context context ,NaNBoxing src )
+		{
+			if (src.ValueType == NaNBoxing.BoxType.HeapPtr)
+			{
+				var obj = context.GC.Heap[src.HeapPtr];
+				if (obj.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+				{
+					((RtPayloadInstance)obj.facility).MarkFromContainer();
+					context.StackSlots[returnSlotIndex] = src;
+				}
+				else
+				{
+					context.StackSlots[returnSlotIndex] = src;
+				}
+			}
+			else
+			{
+				context.StackSlots[returnSlotIndex] = src;
+			}
+		}
+
+
+
 		[NativeFunction("flash.utils.Dictionary$private::indexer_get")]
 		public static void Getter(Context context,
 			ASMethod method,
@@ -101,7 +125,8 @@ namespace juicescript.runtime.buildin
 				NaNBoxing value;
 				if (dict.dict.TryGetValue(new DictKey() { context = context, key = key }, out value))
 				{
-					context.StackSlots[returnSlotIndex] = value;
+					//context.StackSlots[returnSlotIndex] = value;
+					ReturnValue(returnSlotIndex, context, value);
 				}
 				else
 				{
@@ -125,7 +150,8 @@ namespace juicescript.runtime.buildin
 				NaNBoxing value;
 				if (dict.dict.TryGetValue(new DictKey() { context = context, key = key }, out value))
 				{
-					context.StackSlots[returnSlotIndex] = value;
+					//context.StackSlots[returnSlotIndex] = value;
+					ReturnValue(returnSlotIndex, context, value);
 				}
 				else
 				{
@@ -159,7 +185,8 @@ namespace juicescript.runtime.buildin
 				NaNBoxing value;
 				if (dict.dict.TryGetValue(new DictKey() { context = context, key = conv }, out value))
 				{
-					context.StackSlots[returnSlotIndex] = value;
+					//context.StackSlots[returnSlotIndex] = value;
+					ReturnValue(returnSlotIndex, context, value);
 				}
 				else
 				{
@@ -176,7 +203,7 @@ namespace juicescript.runtime.buildin
 				NaNBoxing value;
 				if (dict.dict.TryGetValue(new DictKey() { context = context, key = key }, out value))
 				{
-					context.StackSlots[returnSlotIndex] = value;
+					ReturnValue(returnSlotIndex, context, value);
 				}
 				else
 				{

@@ -493,7 +493,7 @@ namespace juicescript.runtime
 										scopeHeapLocater.MemberIndex = i;
 
 									
-										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, true);
+										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, false /*结构体拷贝传递*/);
 #if DEBUG
 										if (error.raised)
 										{

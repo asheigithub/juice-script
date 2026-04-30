@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace compilerTests.CompileTest.Struct
 {
 	[TestClass]
-	public class TestSturct011 : CodeTestBase
+	public class TestSturct018 : CodeTestBase
 	{
 		protected override TestCodeProject LoadProject()
 		{
@@ -86,38 +86,65 @@ final class W
 	
 	public function toString()
 	{
-		return ""{ w="" + w + "",n="" + n + "",p="" + p + ""}""  ;
+		return ""{ w="" + w + "",n="" + n + "",p="" + p + ""}"" ;
 	}
 	
 }
 
+
 (
-function ():void 
+function B():void 
 {
-	var o = new O();
-	
-	function m(v)
+	var o = {};
+	o.toString = function () 
 	{
-		v.i = 5;
-		v.vec.x = 9;
-		v.vec.y.n = 10;
+		trace(""toString"");
+		return ""bb"";
 	}
 	
-	m(o);
-	
-	trace(o);
-	
-	function m2(v)
+	o.valueOf = function () 
 	{
-		v.x = 8;
-		v.y.w = false;
+		trace(""valueOf"");
+		return o;
 	}
 	
-	m2(o.vec);
+	//var v:Vector.<O> = new Vector.<O>(3); v[0] = new O();
+	//B.prototype = O;
 	
-	trace(o)
+	//trace( v instanceof Vector.<int> );
+	
+	var v:Vector.<O> = new Vector.<O>(4);
+	
+	function m(a)
+	{
+		
+		a.n = 6;	
+		trace(a);
+	}
+	
+	m(v[1].vec.y);
+	
+	trace(v);
+	
+	v[1].vec.x = 999;
+	v[1].vec.y.p = 666;
+	
+	var b = v[1];
+	m(b.vec.y);
+	
+	trace(b);
+	
+	//v[0].i = 9;
+	//v[1][""""i""""] = 10;
+	//v[""""2""""].i = 11;
+	
+	
+	//trace(v);
+	//trace(v[0].vec == v[1].vec);
+	
 }
 )();
+
 
 
 "
@@ -134,16 +161,10 @@ function ():void
 		{
 			Assert.IsNull(ex);
 
-			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
-			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "V").Count());
-			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "W").Count());
-
+			
 			player.ForceGC();
 
-			Assert.AreEqual("{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false}\r\n{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false}\r\n", ((StringPrint)player.Print).GetOutput());
+			Assert.AreEqual("{ w=true,n=6,p=5}\r\n{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false},{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false},{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false},{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false}\r\n{ w=true,n=6,p=666}\r\n{ i=0, vec={ x=999,y={ w=true,n=3,p=666},z=3}, b=false}\r\n", ((StringPrint)player.Print).GetOutput());
 
 		}
 

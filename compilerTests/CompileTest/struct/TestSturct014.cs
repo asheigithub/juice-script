@@ -122,7 +122,9 @@ function B():void
 	m(v[1]);
 	
 	trace(v);
-	
+
+	v[1].n = 7;
+
 	var b = v[1];
 	m(b);
 	
@@ -158,7 +160,7 @@ function B():void
 			
 			player.ForceGC();
 
-			Assert.AreEqual("{ w=true,n=3,p=5}\r\n{ w=true,n=3,p=5},{ w=true,n=3,p=5},{ w=true,n=3,p=5},{ w=true,n=3,p=5}\r\n{ w=true,n=3,p=5}\r\n{ w=true,n=6,p=5}\r\n", ((StringPrint)player.Print).GetOutput());
+			Assert.AreEqual("{ w=true,n=3,p=5}\r\n{ w=true,n=3,p=5},{ w=true,n=3,p=5},{ w=true,n=3,p=5},{ w=true,n=3,p=5}\r\n{ w=true,n=7,p=5}\r\n{ w=true,n=7,p=5}\r\n", ((StringPrint)player.Print).GetOutput());
 
 		}
 

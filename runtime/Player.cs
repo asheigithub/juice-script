@@ -6016,8 +6016,7 @@ namespace juicescript.runtime
 									var obj = Context.GC.Heap[v.HeapPtr];
 									if (obj.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
 									{
-										Debug.Assert(((RtPayloadInstance)obj.facility).HEAPINSTANCE_PTR == 0); 
-										((RtPayloadInstance)obj.facility).Set_PROPERTY_PTR(int.MinValue, this, null);//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
+										((RtPayloadInstance)obj.facility).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
 									}
 								}
 

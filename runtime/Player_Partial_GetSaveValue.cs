@@ -368,7 +368,7 @@ namespace juicescript.runtime
 						(value.HeapPtr < Context.CacheInstancePtr + calleelastpos) //传入
 						)
 					{
-						if (((RtPayloadInstance)obj.facility).IsRefVectorOrFromArrayOrStruct(this, (ASInstance)obj.Type))
+						if (((RtPayloadInstance)obj.facility).IsRefVectorOrFromContainerOrStruct(this, (ASInstance)obj.Type))
 						{
 							//Clone结构体
 							int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
@@ -1727,21 +1727,19 @@ namespace juicescript.runtime
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private void prepare_savemethodscope_saveinstacne(RtPayloadMethodScope heap, ref NaNBoxing saveSlot, RtHeapInstance src, int srcPtr, ref ScopeHeapLocater heapLocater,bool is_prepare_arg)
+		private void prepare_savemethodscope_saveinstacne(RtPayloadMethodScope heap, ref NaNBoxing saveSlot, RtHeapInstance src, int srcPtr, ref ScopeHeapLocater heapLocater,bool is_pass_this)
 		{
 			if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
 						&&
-						(!is_prepare_arg  // 传参时，假设结构体也是传引用。	
+						(!is_pass_this  // 传This时传引用	
 							||
-							((RtPayloadInstance)src.facility).IsRefVectorOrFromArrayOrStruct(this, (ASInstance)src.Type)
+							((RtPayloadInstance)src.facility).IsRefVectorOrFromContainerOrStruct(this, (ASInstance)src.Type)
 
-						//但是对结构体内部的引用或Vector内部的结构体 ,或者刚从数组里取出的结构体是例外，
+						//但是对结构体内部的引用或Vector内部的结构体 ,或者刚从数组,字典等里取出的结构体是例外，
 						//类似C#处理，
-						//引用不能通过参数传进去，直接复制结构体 
+						//此时This也要直接复制结构体 
 						)                                                        
-
-
-						)
+				)
 			{
 				//Clone结构体
 				int clonedptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheInstancePtr;
@@ -1837,7 +1835,7 @@ namespace juicescript.runtime
 		///否则，复制到堆。
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void PrepareSaveMethodScope(RtPayloadMethodScope heap, ref ScopeHeapLocater heapLocater, ref NaNBoxing value, int* m_scope, int* method_scopes, ref ReceiveError error , bool is_prepare_arg = false)
+		private unsafe void PrepareSaveMethodScope(RtPayloadMethodScope heap, ref ScopeHeapLocater heapLocater, ref NaNBoxing value, int* m_scope, int* method_scopes, ref ReceiveError error , bool is_pass_this = false)
 		{
 			if (heap.IsStackSlot)
 			{
@@ -1864,7 +1862,7 @@ namespace juicescript.runtime
 					var obj = Context.GC.Heap[value.HeapPtr];
 					if (obj.TypeKind == RtHeapTypeKind.INSTANCE)
 					{
-						prepare_savemethodscope_saveinstacne(heap,ref value, obj, value.HeapPtr, ref heapLocater,is_prepare_arg);
+						prepare_savemethodscope_saveinstacne(heap,ref value, obj, value.HeapPtr, ref heapLocater,is_pass_this);
 					}
 					else if (obj.TypeKind == RtHeapTypeKind.STRING)
 					{
@@ -2050,7 +2048,7 @@ namespace juicescript.runtime
 										prepare_savemethodscope_beforeSave(heap, old, heapLocater, m_scope, method_scopes);
 									}
 
-									prepare_savemethodscope_saveinstacne( heap ,ref dstClosure.This, _this, dstClosure.This.HeapPtr, ref heapLocater,is_prepare_arg);
+									prepare_savemethodscope_saveinstacne( heap ,ref dstClosure.This, _this, dstClosure.This.HeapPtr, ref heapLocater,is_pass_this);
 
 									if (needupdatescopePtr)
 									{

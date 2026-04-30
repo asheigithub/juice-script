@@ -147,7 +147,7 @@ function ():void
 
 			player.ForceGC();
 
-			Assert.AreEqual("{ i=5, vec={ x=9,y={ w=true,n=10,p=5},z=3}, b=false}\r\n{ i=5, vec={ x=9,y={ w=true,n=10,p=5},z=3}, b=false} { x=2,y={ w=false,n=10,p=5},z=3}\r\n", ((StringPrint)player.Print).GetOutput());
+			Assert.AreEqual("{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false}\r\n{ i=0, vec={ x=1,y={ w=true,n=3,p=5},z=3}, b=false} { x=2,y={ w=false,n=3,p=5},z=3}\r\n", ((StringPrint)player.Print).GetOutput());
 
 		}
 

@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Numerics;
@@ -198,7 +199,13 @@ namespace juicescript.runtime
 			}
 		}
 
-		internal bool IsRefVectorOrFromArrayOrStruct(Player player,ASInstance type)
+		internal void MarkFromContainer()
+		{
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+			m_property_ptr = int.MinValue;
+		}
+
+		internal bool IsRefVectorOrFromContainerOrStruct(Player player,ASInstance type)
 		{
 			if (!type.Flags.HasFlag(ClassFlags.Struct))
 			{
@@ -889,7 +896,8 @@ namespace juicescript.runtime
 			facility.GetStoreData(player, type, out isref_vector,out isref_struct,out RtPayloadInstance target).Slice(0, size).CopyTo(store.Span);
 			//}
 
-			if (!isref_vector && !isref_struct)
+			//if (!isref_vector && !isref_struct && facility.m_property_ptr != int.MinValue)
+			if(! type.Flags.HasFlag( ClassFlags.Struct) ) //非结构体才需要复制property
 			{
 				m_property_ptr = facility.m_property_ptr;
 			}
