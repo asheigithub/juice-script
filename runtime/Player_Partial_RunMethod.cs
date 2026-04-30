@@ -367,16 +367,28 @@ namespace juicescript.runtime
 
 				//save this
 				{
+					//bool flag = false;
+					//if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr && scope_ptr == thisPtr.HeapPtr)
+					//{
+					//	flag = true;
+					//}
 					ScopeHeapLocater scopeHeapLocater;
 					scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
 					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount-1);
-					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error,true , method.Flags.HasFlag(MethodFlags.StructMethod));					
+					PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref thisPtr, null, null, ref error,true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 					if (error.raised)
 					{
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
 					}
 					m_scopePayload.SetSlot(thisPtr, (ushort)(m_scopePayload.SlotCount - 1));
+
+					//if (flag)//this 结构体可能被拷贝，所以要同步更新scope.
+					//{
+					//	m_scopePayload.ParentPtr = thisPtr.HeapPtr;
+					
+					//}
+
 				}
 
 
@@ -481,7 +493,7 @@ namespace juicescript.runtime
 										scopeHeapLocater.MemberIndex = i;
 
 									
-										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, true, method.Flags.HasFlag(MethodFlags.StructMethod));
+										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, true);
 #if DEBUG
 										if (error.raised)
 										{

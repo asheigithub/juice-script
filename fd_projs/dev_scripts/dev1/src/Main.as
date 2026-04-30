@@ -7,37 +7,39 @@ package {
            
         }
 		
-		var token:Token = new Token();		
-		public function Test()
-		{
-					
-			if (token.a) 
-			{
-				throw new Error("!!");
-			}
-
-			while (token.a) 
-			{
-				throw new Error("!!");
-			}
-			
-			do 
-			{
-				trace("OK");
-			} while (token.a);
-			
-			
-		}
+		
 		
     }
 }
 
-new Main().Test();
+var a:Vector.<P> = new <P>[ new P() ];
 
-
-class Token
+[struct]
+final class P
 {
-	public var a;
+	public var X:int;
+	
+	public function Test()
+	{
+		this["M"]();
+		X = 0;
+	}
+	
 }
 
+
+P.prototype.M = function ():void 
+{
+	a.length = 0;
+}
+
+
+a[0].X = 9;
+a[0].Test();
+
+
+var v = a[0];
+trace(v.X);
+v.Test();
+trace(v.X);
 

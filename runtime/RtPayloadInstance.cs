@@ -890,7 +890,10 @@ namespace juicescript.runtime
 			{
 				m_property_ptr = facility.m_property_ptr;
 			}
-
+			else
+			{
+				m_property_ptr = 0; //拷贝值过来，偏移必然为0.
+			}
 
 
 			m__proto__ = facility.m__proto__;

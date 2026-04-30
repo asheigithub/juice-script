@@ -166,44 +166,44 @@ namespace juicescript.compiler.IL
 								{
 									if (compileEnv.Scope.Parent.Kind == CodeScopeKind.Instance)
 									{
-										if (compileEnv.Scope.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
-										{
-											//禁止在struct的method中访问公共变量，避免这种情况出现:代码删除了vector.<T>,然后this又依赖vector.<T>的情况
-											//同时禁止struct中的method传入非struct,非primitive的变量。杜绝代码中出现修改本身存储的情况出现。
-											/*
-											 var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
+										//if (compileEnv.Scope.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
+										//{
+										//	//禁止在struct的method中访问公共变量，避免这种情况出现:代码删除了vector.<T>,然后this又依赖vector.<T>的情况
+										//	//同时禁止struct中的method传入非struct,非primitive的变量。杜绝代码中出现修改本身存储的情况出现。
+										//	/*
+										//	 var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
 
-											[struct]
-											final class P
-											{
-												public function P(x:float,y:float)
-												{
-													X = x;
-													Y = y;
-												}
+										//	[struct]
+										//	final class P
+										//	{
+										//		public function P(x:float,y:float)
+										//		{
+										//			X = x;
+										//			Y = y;
+										//		}
 	
-												public var X:float;
-												public var Y:float;
+										//		public var X:float;
+										//		public var Y:float;
 	
-												public function toString()
-												{
-													return X + "," + Y;
-												}
+										//		public function toString()
+										//		{
+										//			return X + "," + Y;
+										//		}
 	
-												public function Test()
-												{
-													v.length = 0;        
-													this.X = 0;
+										//		public function Test()
+										//		{
+										//			v.length = 0;        
+										//			this.X = 0;
 		
-													//trace( this );
-												}
-											}
+										//			//trace( this );
+										//		}
+										//	}
 
-											v[1].Test();
-											 */
+										//	v[1].Test();
+										//	 */
 
-											throw new ResolverException(instruction.token, "[global] unreachable in struct method.");
-										}
+										//	throw new ResolverException(instruction.token, "[global] unreachable in struct method.");
+										//}
 									}
 								}
 							}
@@ -212,17 +212,17 @@ namespace juicescript.compiler.IL
 					}
 
 
-					if (check.Kind == CodeScopeKind.Method)
-					{
-						if (check.Parent.Kind == CodeScopeKind.Instance)
-						{
-							if (check.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
-							{ //禁止在[struct]方法内使用闭包
-								throw new ResolverException(((ASMethodBody)check.Container).Method.Token, "Closure not allowed in struct method.");
-							}
-						}
+					//if (check.Kind == CodeScopeKind.Method)
+					//{
+					//	if (check.Parent.Kind == CodeScopeKind.Instance)
+					//	{
+					//		if (check.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
+					//		{ //禁止在[struct]方法内使用闭包
+					//			throw new ResolverException(((ASMethodBody)check.Container).Method.Token, "Closure not allowed in struct method.");
+					//		}
+					//	}
 
-					}
+					//}
 
 					check = check.Parent;
 
@@ -232,112 +232,112 @@ namespace juicescript.compiler.IL
 
 			//检查struct的其他限制
 
-			{
-				if (compileEnv.Scope.Kind == CodeScopeKind.Method && ((ASMethodBody)compileEnv.Scope.Container).Method.__ismethod)
-				{
-					if (compileEnv.Scope.Parent.Kind == CodeScopeKind.Instance)
-					{
-						var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
-							s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+			//{
+			//	if (compileEnv.Scope.Kind == CodeScopeKind.Method && ((ASMethodBody)compileEnv.Scope.Container).Method.__ismethod)
+			//	{
+			//		if (compileEnv.Scope.Parent.Kind == CodeScopeKind.Instance)
+			//		{
+			//			var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
+			//				s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
 
-						var @ctype = alltypes.First( c=>c.QName == compileEnv.Scope.Parent.Container.QName );
+			//			var @ctype = alltypes.First( c=>c.QName == compileEnv.Scope.Parent.Container.QName );
 
-						if ( ctype.Instance.Flags.HasFlag(ClassFlags.Struct))
-						{
-							//var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
-							//	s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+			//			if ( ctype.Instance.Flags.HasFlag(ClassFlags.Struct))
+			//			{
+			//				//var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
+			//				//	s => s.scriptClasses).Union(compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
 
-							//var getclass = (NaNBoxing c) =>
-							//{
+			//				//var getclass = (NaNBoxing c) =>
+			//				//{
 
-							//	ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
-							//	return alltypes.First(c => c.Type_identifier == cid);
+			//				//	ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
+			//				//	return alltypes.First(c => c.Type_identifier == cid);
 
-							//};
-							var g = compileEnv.CompileContext.player_for_compiler.Context.libs.FirstOrDefault(s => s.assemblyName == "juice_global.swc" && s.refAssemblys.Count == 0);
+			//				//};
+			//				var g = compileEnv.CompileContext.player_for_compiler.Context.libs.FirstOrDefault(s => s.assemblyName == "juice_global.swc" && s.refAssemblys.Count == 0);
 
-							var checkclass = (NaNBoxing c) =>
-							{
-								if (g != null)
-								{
-									ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
+			//				var checkclass = (NaNBoxing c) =>
+			//				{
+			//					if (g != null)
+			//					{
+			//						ulong cid = compileEnv.CompileContext.constpool_ldclass[c.HeapPtr & 0xffffff];
 
-									if (g.Classes.Any(cls => cls != null && cls.Type_identifier == cid))
-									{
-										var cls = g.Classes.First(cls => cls != null && cls.Type_identifier == cid);
+			//						if (g.Classes.Any(cls => cls != null && cls.Type_identifier == cid))
+			//						{
+			//							var cls = g.Classes.First(cls => cls != null && cls.Type_identifier == cid);
 
-										if (cls.QName.ToQualifiedName() == "__AS3__::utils")
-										{
-											return false;
-										}
-										else
-										{
-											return true;
-										}
-									}
-									else
-									{
-										return false;
-									}
-								}
+			//							if (cls.QName.ToQualifiedName() == "__AS3__::utils")
+			//							{
+			//								return false;
+			//							}
+			//							else
+			//							{
+			//								return true;
+			//							}
+			//						}
+			//						else
+			//						{
+			//							return false;
+			//						}
+			//					}
 
-								return false;
-							};
+			//					return false;
+			//				};
 
 
-							if (compileEnv.instructions.Any(i => i.INS_Code == INS_Code.ld_class
-								&&
-								!checkclass(compileEnv.Constants[((INS_Ld_Class)i).classid_index])
+			//				if (compileEnv.instructions.Any(i => i.INS_Code == INS_Code.ld_class
+			//					&&
+			//					!checkclass(compileEnv.Constants[((INS_Ld_Class)i).classid_index])
 
-							//getclass( compileEnv.Constants[ ((INS_Ld_Class)i).classid_index]).Type_identifier != compileEnv.Scope.Parent.TypeLayout.ASType.Type_identifier
+			//				//getclass( compileEnv.Constants[ ((INS_Ld_Class)i).classid_index]).Type_identifier != compileEnv.Scope.Parent.TypeLayout.ASType.Type_identifier
 
-							)) //杜绝通过Class静态成员绕过
-							{
-								/*
-								 class SSS
-								{
-									public static var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
-								}
-								[struct]
-								final class P
-								{
-									public function P(x:float,y:float)
-									{
-										X = x;
-										Y = y;
-									}
+			//				)) //杜绝通过Class静态成员绕过
+			//				{
+			//					/*
+			//					 class SSS
+			//					{
+			//						public static var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
+			//					}
+			//					[struct]
+			//					final class P
+			//					{
+			//						public function P(x:float,y:float)
+			//						{
+			//							X = x;
+			//							Y = y;
+			//						}
 	
-									public var X:float;
-									public var Y:float;
+			//						public var X:float;
+			//						public var Y:float;
 	
-									public function toString()
-									{
-										return X + "," + Y;
-									}
+			//						public function toString()
+			//						{
+			//							return X + "," + Y;
+			//						}
 	
-									public function Test()
-									{
-										SSS.v.length = 0;
-										this.X = 0;
+			//						public function Test()
+			//						{
+			//							SSS.v.length = 0;
+			//							this.X = 0;
 		
-										//trace( this );
-									}
-								}
-								SSS.v[1].Test();							 
-								 */
+			//							//trace( this );
+			//						}
+			//					}
+			//					SSS.v[1].Test();							 
+			//					 */
 
-								//global_swc里的Class是安全的
-								throw new ResolverException(compileEnv.instructions.First( i=>i.INS_Code == INS_Code.ld_class ).token  , "ld_class not allowed in struct method.");
-							}
+			//					//global_swc里的Class是安全的
+			//					throw new ResolverException(compileEnv.instructions.First( i=>i.INS_Code == INS_Code.ld_class ).token  , "ld_class not allowed in struct method.");
+			//				}
 
 							
 
-						}
+			//			}
 
-					}
-				}
+			//		}
+			//	}
 
-			}
+			//}
 
 
 

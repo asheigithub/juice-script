@@ -1688,6 +1688,9 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.Kind = (CodeScopeKind)255;
 								_temp.Body._link_codescope.ParameterCout = 0;
 								_temp.Body._link_codescope.NamespaceSet = member.DefineAt._link_codescope.NamespaceSet;
+
+								_temp.IsConstructor = method.IsConstructor;
+
 							}
 							else if (member.DefineAt is ASScript)
 							{
@@ -1708,6 +1711,8 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.index = test_method.Body._link_codescope.index;
 								_temp.Body._link_codescope.ParameterCout = 0;
 								_temp.Body._link_codescope.NamespaceSet = member.DefineAt._link_codescope.NamespaceSet;
+
+								_temp.IsConstructor = method.IsConstructor;
 							}
 							else if (member.DefineAt is ASInstance)
 							{
@@ -1727,6 +1732,8 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.Kind = (CodeScopeKind)255;
 								_temp.Body._link_codescope.ParameterCout = 0;
 								_temp.Body._link_codescope.NamespaceSet = member.DefineAt._link_codescope.NamespaceSet;
+
+								_temp.IsConstructor = method.IsConstructor;
 							}
 							else if (member.DefineAt is ASMethodBody)
 							{
@@ -1748,6 +1755,8 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.NamespaceSet = test_method.Body._link_codescope.NamespaceSet;
 								_temp.Body._link_codescope.Container = test_method.Body._link_codescope.Container;
 								_temp.Body._link_codescope.Parent = test_method.Body._link_codescope.Parent;
+
+								_temp.IsConstructor = method.IsConstructor;
 
 								int mid = member.DefineAt._link_codescope.Members.IndexOf(member);
 								t_member = test_method.Body._link_codescope.Members[mid];
@@ -3580,7 +3589,7 @@ namespace juicescript.compiler
 				}
 
 
-				//检查[struct]的method的参数。禁止传入非primitive,非struct的参数。
+				//检查[struct]的method
 				{
 					if (method.__ismethod)
 					{
@@ -3590,26 +3599,36 @@ namespace juicescript.compiler
 
 						if (type.Instance.Flags.HasFlag(ClassFlags.Struct))
 						{
-							
-
-							if (method.Parameters.Any(p => p.TypeKind == TypeKind.Any))
+							if (method.Flags.HasFlag(MethodFlags.Generator))
 							{
-								throw new ResolverException(method.Token, $"parameter  type must is primitive or [struct]. In [struct] method ");
-
+								throw new ResolverException(method.Token, $"[struct].method should not generator");
 							}
 
-							var p = method.Parameters.FirstOrDefault(p =>
-							p.TypeKind != TypeKind.String && p.TypeKind.IsHeapType() &&
-							!alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance.Flags.HasFlag(ClassFlags.Struct));
-							if (p != null)
+							if (method.Flags.HasFlag(MethodFlags.ASYNC))
 							{
-								//var ii = alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance;
-
-								throw new ResolverException(method.Token,  $"[struct].method parameter:{p.Name}:{ p.TypeKind.ToDebugString(context.player_for_compiler) } must is primitive or [struct]");
-
+								throw new ResolverException(method.Token, $"[struct].method should not async");
 							}
 
-							method.Flags |= MethodFlags.StructMethod;
+
+
+							//if (method.Parameters.Any(p => p.TypeKind == TypeKind.Any))
+							//{
+							//	throw new ResolverException(method.Token, $"parameter  type must is primitive or [struct]. In [struct] method ");
+
+							//}
+
+							//var p = method.Parameters.FirstOrDefault(p =>
+							//p.TypeKind != TypeKind.String && p.TypeKind.IsHeapType() &&
+							//!alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance.Flags.HasFlag(ClassFlags.Struct));
+							//if (p != null)
+							//{
+							//	//var ii = alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance;
+
+							//	throw new ResolverException(method.Token,  $"[struct].method parameter:{p.Name}:{ p.TypeKind.ToDebugString(context.player_for_compiler) } must is primitive or [struct]");
+
+							//}
+
+							//method.Flags |= MethodFlags.StructMethod;
 						}
 					}
 				}

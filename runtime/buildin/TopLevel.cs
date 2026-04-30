@@ -1027,8 +1027,10 @@ namespace juicescript.runtime.buildin
 								//invoke_it
 								unsafe
 								{
-									NaNBoxing conv = context.player.RunMethod(((ASMethodBody)funinstance.Type).Method,
-										arg, ((RtPayloadClosure)funinstance.facility).ScopePtr, ((RtPayloadClosure)funinstance.facility).ScopeType, 0, null, null, ref error, stPos + 1, fun.HeapPtr);
+									var m = ((ASMethodBody)funinstance.Type).Method;
+
+									NaNBoxing conv = context.player.RunMethod(m,
+										arg,  ((RtPayloadClosure)funinstance.facility).ScopePtr, ((RtPayloadClosure)funinstance.facility).ScopeType, 0, null, null, ref error, stPos + 1, fun.HeapPtr);
 									context.StackPosition -= 2;
 									if (error.raised)
 									{
