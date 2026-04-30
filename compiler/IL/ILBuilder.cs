@@ -166,44 +166,44 @@ namespace juicescript.compiler.IL
 								{
 									if (compileEnv.Scope.Parent.Kind == CodeScopeKind.Instance)
 									{
-										//if (compileEnv.Scope.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
-										//{
-										//	//禁止在struct的method中访问公共变量，避免这种情况出现:代码删除了vector.<T>,然后this又依赖vector.<T>的情况
-										//	//同时禁止struct中的method传入非struct,非primitive的变量。杜绝代码中出现修改本身存储的情况出现。
-										//	/*
-										//	 var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
+										if (compileEnv.Scope.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
+										{
+											//禁止在struct的method中访问公共变量，避免这种情况出现:代码删除了vector.<T>,然后this又依赖vector.<T>的情况
+											//同时禁止struct中的method传入非struct,非primitive的变量。杜绝代码中出现修改本身存储的情况出现。
+											/*
+											 var v:Vector.<P> = new <P>[ new P(1,1),new P(2,2) ];
 
-										//	[struct]
-										//	final class P
-										//	{
-										//		public function P(x:float,y:float)
-										//		{
-										//			X = x;
-										//			Y = y;
-										//		}
+											[struct]
+											final class P
+											{
+												public function P(x:float,y:float)
+												{
+													X = x;
+													Y = y;
+												}
 	
-										//		public var X:float;
-										//		public var Y:float;
+												public var X:float;
+												public var Y:float;
 	
-										//		public function toString()
-										//		{
-										//			return X + "," + Y;
-										//		}
+												public function toString()
+												{
+													return X + "," + Y;
+												}
 	
-										//		public function Test()
-										//		{
-										//			v.length = 0;        
-										//			this.X = 0;
+												public function Test()
+												{
+													v.length = 0;        
+													this.X = 0;
 		
-										//			//trace( this );
-										//		}
-										//	}
+													//trace( this );
+												}
+											}
 
-										//	v[1].Test();
-										//	 */
+											v[1].Test();
+											 */
 
-										//	throw new ResolverException(instruction.token, "[global] unreachable in struct method.");
-										//}
+											throw new ResolverException(instruction.token, "[global] unreachable in struct method.");
+										}
 									}
 								}
 							}
@@ -212,17 +212,17 @@ namespace juicescript.compiler.IL
 					}
 
 
-					//if (check.Kind == CodeScopeKind.Method)
-					//{
-					//	if (check.Parent.Kind == CodeScopeKind.Instance)
-					//	{
-					//		if (check.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
-					//		{ //禁止在[struct]方法内使用闭包
-					//			throw new ResolverException(((ASMethodBody)check.Container).Method.Token, "Closure not allowed in struct method.");
-					//		}
-					//	}
+					if (check.Kind == CodeScopeKind.Method)
+					{
+						if (check.Parent.Kind == CodeScopeKind.Instance)
+						{
+							if (check.Parent.TypeLayout.ASType.Instance.Flags.HasFlag(ClassFlags.Struct))
+							{ //禁止在[struct]方法内使用闭包
+								throw new ResolverException(((ASMethodBody)check.Container).Method.Token, "Closure not allowed in struct method.");
+							}
+						}
 
-					//}
+					}
 
 					check = check.Parent;
 

@@ -147,14 +147,15 @@ namespace juicescript.runtime
 
         internal Span<byte> GetStoreData(Player player,ASInstance type)
         {
-			bool is_ref_vector;bool is_ref_struct;
-			return GetStoreData(player, type, out is_ref_vector,out is_ref_struct);
+			bool is_ref_vector;bool is_ref_struct;RtPayloadInstance target;
+			return GetStoreData(player, type, out is_ref_vector,out is_ref_struct,out target);
         }
 
-		private Span<byte> GetStoreData(Player player,ASInstance type , out bool is_ref_vector,out bool is_ref_struct)
+		private Span<byte> GetStoreData(Player player,ASInstance type , out bool is_ref_vector,out bool is_ref_struct,out RtPayloadInstance target)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
+				target = this;
 				is_ref_struct = false;
 				is_ref_vector = false;
 				return store.Span;
@@ -162,7 +163,7 @@ namespace juicescript.runtime
 			else
 			{
 				
-				RtPayloadInstance target;
+				//RtPayloadInstance target;
 				int p = DoFindAndUpdatePtr(  HEAPINSTANCE_PTR, player, type, out target);
 
 				if (p < 0)
@@ -197,16 +198,18 @@ namespace juicescript.runtime
 			}
 		}
 
-		internal bool IsRefVectorOrStruct(Player player,ASInstance type)
+		internal bool IsRefVectorOrFromArrayOrStruct(Player player,ASInstance type)
 		{
 			if (!type.Flags.HasFlag(ClassFlags.Struct))
 			{
 				return false;
 			}
 
-			bool is_ref_vector;bool is_ref_struct;
-			GetStoreData(player, type ,out is_ref_vector,out is_ref_struct);
-			return is_ref_vector || is_ref_struct;
+			
+			bool is_ref_vector;bool is_ref_struct;RtPayloadInstance target;
+			GetStoreData(player, type ,out is_ref_vector,out is_ref_struct, out target);
+			return is_ref_vector || is_ref_struct || 
+				target.m_property_ptr == int.MinValue/*标记是数组中获取的struct*/ ;
 		}
 
 		//internal bool IsRefStruct(Player player, ASInstance type)
@@ -883,7 +886,7 @@ namespace juicescript.runtime
 
 			//if (size > 0)
 			//{
-			facility.GetStoreData(player, type, out isref_vector,out isref_struct).Slice(0, size).CopyTo(store.Span);
+			facility.GetStoreData(player, type, out isref_vector,out isref_struct,out RtPayloadInstance target).Slice(0, size).CopyTo(store.Span);
 			//}
 
 			if (!isref_vector && !isref_struct)

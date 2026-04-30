@@ -3611,22 +3611,22 @@ namespace juicescript.compiler
 
 
 
-							//if (method.Parameters.Any(p => p.TypeKind == TypeKind.Any))
-							//{
-							//	throw new ResolverException(method.Token, $"parameter  type must is primitive or [struct]. In [struct] method ");
+							if (method.Parameters.Any(p => p.TypeKind == TypeKind.Any))
+							{
+								throw new ResolverException(method.Token, $"parameter  type must is primitive or [struct]. In [struct] method ");
 
-							//}
+							}
 
-							//var p = method.Parameters.FirstOrDefault(p =>
-							//p.TypeKind != TypeKind.String && p.TypeKind.IsHeapType() &&
-							//!alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance.Flags.HasFlag(ClassFlags.Struct));
-							//if (p != null)
-							//{
-							//	//var ii = alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance;
+							var p = method.Parameters.FirstOrDefault(p =>
+							p.TypeKind != TypeKind.String && p.TypeKind.IsHeapType() &&
+							!alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance.Flags.HasFlag(ClassFlags.Struct));
+							if (p != null)
+							{
+								//var ii = alltypes.First(c => c.Type_identifier == (ulong)p.TypeKind).Instance;
 
-							//	throw new ResolverException(method.Token,  $"[struct].method parameter:{p.Name}:{ p.TypeKind.ToDebugString(context.player_for_compiler) } must is primitive or [struct]");
+								throw new ResolverException(method.Token, $"[struct].method parameter:{p.Name}:{p.TypeKind.ToDebugString(context.player_for_compiler)} must is primitive or [struct]");
 
-							//}
+							}
 
 							//method.Flags |= MethodFlags.StructMethod;
 						}
