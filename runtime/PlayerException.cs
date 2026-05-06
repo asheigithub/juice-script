@@ -80,12 +80,12 @@ namespace juicescript.runtime
                                 stringBuilder.Append("[class " +
 
                                    (
-                                    string.IsNullOrEmpty(((RtPayloadScriptClass)instance.facility).Meta.QName.Namespace.Name) ?
+                                    string.IsNullOrEmpty(((RtScriptClass)instance.facility).Meta.QName.Namespace.Name) ?
                                     "" :
-                                    (((RtPayloadScriptClass)instance.facility).Meta.QName.Namespace.Name + ".")
+                                    (((RtScriptClass)instance.facility).Meta.QName.Namespace.Name + ".")
                                     )
                                     +
-                                    ((RtPayloadScriptClass)instance.facility).Meta.QName.Name +
+                                    ((RtScriptClass)instance.facility).Meta.QName.Name +
 
                                     "]");
                                 break;
@@ -93,14 +93,14 @@ namespace juicescript.runtime
                                 stringBuilder.Append("[object global]");
                                 break;
                             case RtHeapTypeKind.STRING:
-                                stringBuilder.Append("'" + ((RtPayloadString)instance.facility).Str + "'");
+                                stringBuilder.Append("'" + ((RtString)instance.facility).Str + "'");
                                 break;
                             case RtHeapTypeKind.INSTANCE:
 
                                 {
                                     if (((ASInstance)instance.Type).IsExtend(ex.player.Context.ERROR.Instance))
                                     {
-                                        RtPayloadInstance rtPayload = (RtPayloadInstance)instance.facility;
+                                        RtInstance rtPayload = (RtInstance)instance.facility;
                                         NaNBoxing msg = rtPayload.ReadSlot(0, instance.Type._link_codescope,player);
 
                                         stringBuilder.Append(instance.Type.QName.Name);
@@ -108,7 +108,7 @@ namespace juicescript.runtime
 
                                         if (msg.ValueType == NaNBoxing.BoxType.HeapPtr)
                                         {
-                                            RtPayloadString @string = (RtPayloadString)ex.player.Context.GC.Heap[msg.HeapPtr].facility;
+                                            RtString @string = (RtString)ex.player.Context.GC.Heap[msg.HeapPtr].facility;
                                             stringBuilder.Append(@string.Str);
                                         }
                                         else
@@ -126,7 +126,7 @@ namespace juicescript.runtime
 
                                 break;
                             case RtHeapTypeKind.NAMESPACE:
-                                stringBuilder.Append(((RtPayloadNameSpace)instance.facility).ASNamespace.def_uri);
+                                stringBuilder.Append(((RtNameSpace)instance.facility).ASNamespace.def_uri);
                                 break;
                             case RtHeapTypeKind.VECTOR:
 								stringBuilder.Append("[Vector]");

@@ -74,7 +74,7 @@ namespace juicescript.runtime.gc
         /// <returns></returns>
         public int AllocShape()
         { 
-            RtHeapBase heapInstance = new RtPayloadShape();
+            RtHeapBase heapInstance = new RtShape();
             //heapInstance.TypeKind = RtHeapTypeKind.SHAPE;
            // heapInstance.facility = new RtPayloadShape();
 
@@ -92,7 +92,7 @@ namespace juicescript.runtime.gc
 
         public int AllocDynamicSlot()
         {
-            RtHeapBase heapInstance = new RtPayloadDynamic();
+            RtHeapBase heapInstance = new RtDynamic();
             //heapInstance.TypeKind = RtHeapTypeKind.DYNAMIC_PROPERTYS;
             //heapInstance.facility = new RtPayloadDynamic();
 
@@ -127,13 +127,6 @@ namespace juicescript.runtime.gc
                 }
                 _protoObj = Heap[_protoPtr];
 
-    //            RtHeapInstance _o;
-    //            int c_proto = AllocInstance(OBJECT, out _o);
-    //            if (c_proto == 0)
-    //            {
-    //                return 0;
-    //            }
-				//((RtPayloadClosure)_protoObj.facility).Set_PROTOTYPE( c_proto, context.player);
 
             }
             else
@@ -148,7 +141,7 @@ namespace juicescript.runtime.gc
             //检测 Object.prototype的__proto__必须指向null.
             if (cls == context.OBJECT)
             {
-                if (((RtPayloadInstance)_protoObj.facility).PROTOTYPE(context.player,(ASInstance)_protoObj.Type) != 0)
+                if (((RtInstance)_protoObj.facility).PROTOTYPE(context.player,(ASInstance)_protoObj.Type) != 0)
                 {
                     throw new InvalidOperationException();
                 }
@@ -156,7 +149,7 @@ namespace juicescript.runtime.gc
 
 #endif
 
-            RtHeapBase heapInstance = new RtPayloadScriptClass(cls, _protoPtr)
+            RtHeapBase heapInstance = new RtScriptClass(cls, _protoPtr)
 #if FORCOMPILER
             { isCompiling = context.player.IsComputeConstExpr }
 #endif                 
@@ -189,15 +182,14 @@ namespace juicescript.runtime.gc
         /// <returns>返回内存堆对象的序号</returns>
         public int AllocGlobal(ASScript script)
         {
-            RtHeapBase heapInstance = new RtPayloadScriptClass(script)
+            RtHeapBase heapInstance = new RtScriptClass(script)
 #if FORCOMPILER
             {  isCompiling = context.player.IsComputeConstExpr }
 #endif                   
                 ;
-            //heapInstance.TypeKind = RtHeapTypeKind.GLOBAL;
+           
             heapInstance.Type = script.Initializer.Body; // type设定为初始化函数
-            //heapInstance.facility = new RtPayloadScriptClass(script)
-
+           
                 ;
 
             int size = CalculMemusage(heapInstance);
@@ -220,35 +212,31 @@ namespace juicescript.runtime.gc
         /// <param name="instance"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal int AllocArray(out RtHeapBase instance, RtPayloadArray.ArrayStoreMode storeMode,int cache_struct_st = 0)
+        internal int AllocArray(out RtHeapBase instance, RtArray.ArrayStoreMode storeMode,int cache_struct_st = 0)
         {
-            RtHeapBase heapInstance = new RtPayloadArray();
-            //heapInstance.TypeKind = RtHeapTypeKind.ARRAY;
-
-
-            //RtPayloadArray payload = new RtPayloadArray();
-            //heapInstance.facility = payload;
-            RtPayloadArray payload = (RtPayloadArray)heapInstance;
+            RtHeapBase heapInstance = new RtArray();
+           
+            RtArray payload = (RtArray)heapInstance;
             payload.StoreMode = storeMode;
 
             switch (storeMode)
             {
-                case RtPayloadArray.ArrayStoreMode.cache_on_stack:
+                case RtArray.ArrayStoreMode.cache_on_stack:
                     heapInstance.Type = null;
                     Root.Add(heapInstance);
                     break;
-                case RtPayloadArray.ArrayStoreMode.cache:
+                case RtArray.ArrayStoreMode.cache:
                     heapInstance.Type = null;
-                    payload.cache_store = new NaNBoxing[RtPayloadArray.MAX_CACHE_ELEMENT];
-                    payload.cache_structs = new int[RtPayloadArray.MAX_CACHE_ELEMENT];
-                    for (int i = 0; i < RtPayloadArray.MAX_CACHE_ELEMENT; i++)
+                    payload.cache_store = new NaNBoxing[RtArray.MAX_CACHE_ELEMENT];
+                    payload.cache_structs = new int[RtArray.MAX_CACHE_ELEMENT];
+                    for (int i = 0; i < RtArray.MAX_CACHE_ELEMENT; i++)
                     {
                         payload.cache_structs[i] = cache_struct_st + i;
                     }
 
                     Root.Add(heapInstance);
                     break;
-                case RtPayloadArray.ArrayStoreMode.normal:
+                case RtArray.ArrayStoreMode.normal:
                     heapInstance.Type = context.ARRAY.Instance;
                     payload.InitNormalStore();
 
@@ -287,20 +275,15 @@ namespace juicescript.runtime.gc
             if (type.Flags.HasFlag(ClassFlags.Vector))
             {
 
-                heapInstance = new RtPayloadVector(type._element_class);
-               //heapInstance.TypeKind = RtHeapTypeKind.VECTOR;
+                heapInstance = new RtVector(type._element_class);
+              
                 heapInstance.Type = type;
-
-                //RtPayloadVector payload = new RtPayloadVector(type._element_class);
-               //heapInstance.facility = payload;
 
             }
             else
             {
 
-				//heapInstance.TypeKind = RtHeapTypeKind.INSTANCE;
-				//
-				heapInstance = new RtPayloadInstance()
+				heapInstance = new RtInstance()
 #if FORCOMPILER
                 {  isCompiling = context.player.IsComputeConstExpr}
 #endif
@@ -309,13 +292,13 @@ namespace juicescript.runtime.gc
 
 				TypeLayout typeLayout = type._link_codescope.TypeLayout;
 
-                RtPayloadInstance payload = (RtPayloadInstance)heapInstance;
+                RtInstance payload = (RtInstance)heapInstance;
 
 				payload.GenStore(typeLayout.Size);
 
                 if (typeLayout.ASType.__instance_index__ > 0)
                 {
-                    payload.Set_PROTOTYPE( ((RtPayloadScriptClass)Heap[ typeLayout.ASType.__instance_index__].facility).PROTO__PTR , context.player);
+                    payload.Set_PROTOTYPE( ((RtScriptClass)Heap[ typeLayout.ASType.__instance_index__].facility).PROTO__PTR , context.player);
                 }
 
                 if (typeLayout.Size > 0)
@@ -341,13 +324,9 @@ namespace juicescript.runtime.gc
 
         public int AllocCacheVector()
         {
-			//RtHeapBase heapInstance = new RtHeapBase();
-			//heapInstance.TypeKind = RtHeapTypeKind.VECTOR;
-			//heapInstance.Type = null;
-
-			RtPayloadVector payload = new RtPayloadVector(null);
-			//heapInstance.facility = payload;
-
+			
+			RtVector payload = new RtVector(null);
+			
             payload.SetStore( new buildin.VectorImpl.VectorStore() );
 
 			int size = CalculMemusage(payload);
@@ -364,15 +343,10 @@ namespace juicescript.runtime.gc
 
         public int AllocCacheInstance()
         {
-            //RtHeapBase heapInstance = new RtHeapBase();
-            //heapInstance.TypeKind = RtHeapTypeKind.INSTANCE;
-            //heapInstance.Type = null;
-            RtPayloadInstance payload = new RtPayloadInstance();//true);
-            payload.GenStore(RtPayloadInstance.MAX_CACHEABLE_SIZE);
-            //{
-            //    bytes = new Memory<byte>(new byte[RtPayloadInstance.MAX_CACHEABLE_SIZE])
-            //};
-            //heapInstance.facility = payload;
+            
+            RtInstance payload = new RtInstance();//true);
+            payload.GenStore(RtInstance.MAX_CACHEABLE_SIZE);
+           
             
             int size = CalculMemusage(payload);
             if (MemUsage + size > USAGE_LIMIT)
@@ -394,11 +368,10 @@ namespace juicescript.runtime.gc
         /// <returns>返回内存堆对象序号</returns>
         public int AllocString(string str)
         {
-            RtHeapBase heapInstance = new RtPayloadString(str);
-            //heapInstance.TypeKind = RtHeapTypeKind.STRING;
+            RtHeapBase heapInstance = new RtString(str);
+           
             heapInstance.Type = context.STRING;
-            //heapInstance.facility = new RtPayloadString(str);
-
+            
             int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
             {
@@ -411,10 +384,8 @@ namespace juicescript.runtime.gc
 
         public int AllocNamespace(ASNamespace @namespace,int prefixPtr,int uriPtr)
         {
-            //RtHeapBase heapInstance = new RtHeapBase();
-            //heapInstance.TypeKind = RtHeapTypeKind.NAMESPACE;
-            //heapInstance.Type = null;
-			RtHeapBase heapInstance = new RtPayloadNameSpace()
+          
+			RtHeapBase heapInstance = new RtNameSpace()
             {
                 ASNamespace = @namespace,
                 prefixPtr = prefixPtr,
@@ -436,11 +407,8 @@ namespace juicescript.runtime.gc
 
         public int AllocClosure(ASMethod method)
         {
-			//RtHeapBase heapInstance = new RtHeapBase();
-			//heapInstance.TypeKind = RtHeapTypeKind.CLOSURE;
-
-
-			RtHeapBase heapInstance = new RtPayloadClosure();
+			
+			RtHeapBase heapInstance = new RtClosure();
 
             int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
@@ -477,7 +445,7 @@ namespace juicescript.runtime.gc
                 ctx = cache_iter_ctx[cache_iter_ctx_index];
 				cache_iter_ctx_index++;
 
-				return ((IterContxt)((RtPayloadInstance)ctx.facility).wapperedObject).heapPtr;
+				return ((IterContxt)((RtInstance)ctx.facility).wapperedObject).heapPtr;
             }
             else
             {
@@ -488,7 +456,7 @@ namespace juicescript.runtime.gc
 				var p = AllocInstance(cls.Instance, out iterctx);
 				if (p != 0)
 				{
-					((RtPayloadInstance)iterctx.facility).wapperedObject = new IterContxt() { heapPtr=p };
+					((RtInstance)iterctx.facility).wapperedObject = new IterContxt() { heapPtr=p };
 				}
 
 				ctx = iterctx;
@@ -516,7 +484,7 @@ namespace juicescript.runtime.gc
 #endif
             cache_iter_ctx_index--;
 
-            ((IterContxt)((RtPayloadInstance)iter_ctx.facility).wapperedObject).Close();
+            ((IterContxt)((RtInstance)iter_ctx.facility).wapperedObject).Close();
 
         }
 
@@ -527,7 +495,7 @@ namespace juicescript.runtime.gc
 
         internal IterContxt CurrentIterContext()
         {
-            return  (IterContxt)((RtPayloadInstance)cache_iter_ctx[cache_iter_ctx_index - 1].facility).wapperedObject;
+            return  (IterContxt)((RtInstance)cache_iter_ctx[cache_iter_ctx_index - 1].facility).wapperedObject;
 
 		}
 
@@ -542,7 +510,7 @@ namespace juicescript.runtime.gc
 			//RtHeapBase heapInstance = new RtHeapBase();
 			//heapInstance.TypeKind = RtHeapTypeKind.STACK_CACHE_OBJ;
 			//heapInstance.Type = null;
-			RtHeapBase heapInstance = new RtPayloadStackCache();
+			RtHeapBase heapInstance = new RtStackCache();
 
             int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
@@ -565,10 +533,8 @@ namespace juicescript.runtime.gc
 #endif
             )
         {
-			//RtHeapBase heapInstance = new RtHeapBase();
-			//heapInstance.TypeKind = RtHeapTypeKind.MethodScope;
-			//heapInstance.Type = null;
-			RtHeapBase heapInstance = new RtPayloadMethodScope()
+
+			RtHeapBase heapInstance = new RtMethodScope()
 
 #if FORCOMPILER
             { isCompiling=isEvalInitValue }
@@ -587,7 +553,7 @@ namespace juicescript.runtime.gc
 
             if (data != null)
             {                
-                ((RtPayloadMethodScope)heapInstance.facility).InitSlot(data, start, codescope,false);
+                ((RtMethodScope)heapInstance.facility).InitSlot(data, start, codescope,false);
             }
             else
             {
@@ -607,10 +573,8 @@ namespace juicescript.runtime.gc
         /// <returns></returns>
         public int Complie_AllocString(string v)
         {
-			//RtHeapBase heapInstance = new RtHeapBase();
-			//heapInstance.TypeKind = RtHeapTypeKind.STRING;
-			//heapInstance.Type = null;
-			RtHeapBase heapInstance = new RtPayloadString(v);
+
+			RtHeapBase heapInstance = new RtString(v);
 
             int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
@@ -675,7 +639,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.GLOBAL:
                         {
                             //递归标记子对象
-                            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)obj.facility;
+                            RtScriptClass rtPayload = (RtScriptClass)obj.facility;
                             var slots = rtPayload.__get_slots_for_gc;
 
                             for (int j = 0; j < slots.Length; j++)
@@ -702,7 +666,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.INSTANCE:
                         {
-                            RtPayloadInstance rtPayload = (RtPayloadInstance)obj.facility;
+                            RtInstance rtPayload = (RtInstance)obj.facility;
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
                                 mark(Heap[rtPayload.HEAPINSTANCE_PTR]);
@@ -841,7 +805,7 @@ namespace juicescript.runtime.gc
                     //    break;
                     case RtHeapTypeKind.NAMESPACE:
                         {
-                            RtPayloadNameSpace rtPayload = (RtPayloadNameSpace)obj.facility;
+                            RtNameSpace rtPayload = (RtNameSpace)obj.facility;
                             if (rtPayload.prefixPtr > 0)
                             {
                                 Heap[rtPayload.prefixPtr].gc_mark = true;
@@ -855,7 +819,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.STACK_CACHE_OBJ:
                         {
-                            RtPayloadStackCache rtPayload = (RtPayloadStackCache)obj.facility;
+                            RtStackCache rtPayload = (RtStackCache)obj.facility;
                             if (rtPayload.searchPropertyName.ValueType == NaNBoxing.BoxType.HeapPtr )
                             {
                                 mark(Heap[rtPayload.searchPropertyName.HeapPtr]);
@@ -886,7 +850,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.MethodScope:
                         { 
                             //throw new NotImplementedException();
-                            RtPayloadMethodScope rtPayload = (RtPayloadMethodScope)obj.facility;
+                            RtMethodScope rtPayload = (RtMethodScope)obj.facility;
 
                             if (rtPayload.cloneout_ptr != 0)
                             {
@@ -914,7 +878,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.CLOSURE:
                         { 
-                            RtPayloadClosure rtPayload = (RtPayloadClosure)obj.facility;
+                            RtClosure rtPayload = (RtClosure)obj.facility;
 
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
@@ -945,7 +909,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.VECTOR:
                         { 
-                            RtPayloadVector rtPayload = (RtPayloadVector)obj.facility;
+                            RtVector rtPayload = (RtVector)obj.facility;
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
                                 mark(Heap[rtPayload.HEAPINSTANCE_PTR]);
@@ -969,7 +933,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.ARRAY:
                         {
-                            RtPayloadArray rtPayload = (RtPayloadArray)obj.facility;
+                            RtArray rtPayload = (RtArray)obj.facility;
                             
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
@@ -1003,7 +967,7 @@ namespace juicescript.runtime.gc
 						
                     case RtHeapTypeKind.DYNAMIC_PROPERTYS:
                         { 
-                            RtPayloadDynamic rtPayload = (RtPayloadDynamic)obj.facility;
+                            RtDynamic rtPayload = (RtDynamic)obj.facility;
                             for (int i = 0; i < rtPayload.Slots.Count; i++)
                             {
                                 NaNBoxing box = rtPayload.Slots[i];
@@ -1088,7 +1052,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.GLOBAL:
                         {
                             //递归标记子对象
-                            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)instance.facility;
+                            RtScriptClass rtPayload = (RtScriptClass)instance.facility;
                             var slots = rtPayload.__get_slots_for_gc;
 
                             for (int j = 0; j < slots.Length; j++)
@@ -1152,7 +1116,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.NAMESPACE:
 
                         {
-                            RtPayloadNameSpace rtPayload = (RtPayloadNameSpace)instance.facility;
+                            RtNameSpace rtPayload = (RtNameSpace)instance.facility;
 
                             if (rtPayload.prefixPtr > 0)
                             {
@@ -1185,7 +1149,7 @@ namespace juicescript.runtime.gc
                         //Root中的Array和Vector只有在栈上被访问到时才表示引用了对象
                         break;
                     case RtHeapTypeKind.SHAPE:
-                        RtPayloadShape shape = (RtPayloadShape)instance.facility;
+                        RtShape shape = (RtShape)instance.facility;
                         // 标记属性名 - 支持LocalString和HeapPtr
                         if (shape.PTR_NAME.ValueType == NaNBoxing.BoxType.HeapPtr && shape.PTR_NAME.HeapPtr != 0)
                         {

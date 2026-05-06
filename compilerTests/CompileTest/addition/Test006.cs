@@ -102,7 +102,7 @@ trace (new Number(1) + new Number(1) );
 				Assert.IsNotNull(globalInstance);
 				Assert.IsNull(ex);
 
-				RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+				RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 				StringPrint print = (StringPrint)player.Print;
 

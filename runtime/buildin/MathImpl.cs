@@ -18,7 +18,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing num = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing num = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 #if DEBUG
 			if (num.ValueType != NaNBoxing.BoxType.Number)
 			{
@@ -38,7 +38,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing num = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing num = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 #if DEBUG
 			if (num.ValueType != NaNBoxing.BoxType.Number)
 			{
@@ -58,7 +58,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Abs(val.Number));
 		}
 
@@ -70,7 +70,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Acos(val.Number));
 		}
 
@@ -82,7 +82,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Asin(val.Number));
 		}
 
@@ -94,7 +94,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Atan(val.Number));
 		}
 
@@ -106,8 +106,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing y = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
-			NaNBoxing x = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(1, context.player);
+			NaNBoxing y = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing x = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(1, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Atan2(y.Number, x.Number));
 		}
 
@@ -119,7 +119,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Cos(val.Number));
 		}
 
@@ -131,7 +131,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Exp(val.Number));
 		}
 
@@ -143,7 +143,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Log(val.Number));
 		}
 
@@ -155,7 +155,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 			
 			double result = double.NegativeInfinity;
 			bool hasNaN = false;
@@ -175,7 +175,7 @@ namespace juicescript.runtime.buildin
 					{
 						break;
 					}
-					var restArray = (RtPayloadArray)context.GC.Heap[slot.HeapPtr].facility;
+					var restArray = (RtArray)context.GC.Heap[slot.HeapPtr].facility;
 					var restSpan = restArray.stack_store.Span;
 					for (int i = 0; i < restSpan.Length; i++)
 					{
@@ -234,7 +234,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 			
 			double result = double.PositiveInfinity;
 			bool hasNaN = false;
@@ -254,7 +254,7 @@ namespace juicescript.runtime.buildin
 					{
 						break;
 					}
-					var restArray = (RtPayloadArray)context.GC.Heap[slot.HeapPtr].facility;
+					var restArray = (RtArray)context.GC.Heap[slot.HeapPtr].facility;
 					var restSpan = restArray.stack_store.Span;
 					for (int i = 0; i < restSpan.Length; i++)
 					{
@@ -313,8 +313,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing bas = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
-			NaNBoxing pow = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(1, context.player);
+			NaNBoxing bas = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing pow = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(1, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Pow(bas.Number, pow.Number));
 		}
 
@@ -337,7 +337,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Round(val.Number));
 		}
 
@@ -349,7 +349,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Sin(val.Number));
 		}
 
@@ -361,7 +361,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Sqrt(val.Number));
 		}
 
@@ -373,7 +373,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			NaNBoxing val = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
+			NaNBoxing val = ((RtMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 			context.StackSlots[returnSlotIndex].SetNumber(Math.Tan(val.Number));
 		}
 

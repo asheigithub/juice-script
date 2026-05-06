@@ -82,7 +82,7 @@ a.h = '-Infinity';
             var globalInstance = player.Context.GC.Heap[global.__global_index__];
             Assert.IsNotNull(globalInstance);
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
             NaNBoxing a = rtPayload.ReadSlot(0);
 
             Assert.AreEqual(a.ValueType, NaNBoxing.BoxType.HeapPtr);
@@ -96,40 +96,40 @@ a.h = '-Infinity';
 
             Assert.AreEqual(a_v.Type, OO.Instance);
 
-            var slot = ((RtPayloadInstance)a_v.facility).ReadSlot(0, OO.Instance._link_codescope,player);
+            var slot = ((RtInstance)a_v.facility).ReadSlot(0, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Sbyte, slot.ValueType);
             Assert.AreEqual(unchecked((sbyte)335), slot.SByteValue);
 
-            var s_a = ((RtPayloadInstance)a_v.facility).ReadSlot(1, OO.Instance._link_codescope,player);
+            var s_a = ((RtInstance)a_v.facility).ReadSlot(1, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Byte, s_a.ValueType);
             Assert.AreEqual(255, s_a.ByteValue);
 
 
-            var s_b = ((RtPayloadInstance)a_v.facility).ReadSlot(2, OO.Instance._link_codescope,player);
+            var s_b = ((RtInstance)a_v.facility).ReadSlot(2, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Short, s_b.ValueType);
             Assert.AreEqual(6553, s_b.ShortValue);
 
-            var s_c = ((RtPayloadInstance)a_v.facility).ReadSlot(3, OO.Instance._link_codescope,player);
+            var s_c = ((RtInstance)a_v.facility).ReadSlot(3, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.UShort, s_c.ValueType);
             Assert.AreEqual(65535, s_c.UShortValue);
 
-            var s_d = ((RtPayloadInstance)a_v.facility).ReadSlot(4, OO.Instance._link_codescope,player);
+            var s_d = ((RtInstance)a_v.facility).ReadSlot(4, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Int, s_d.ValueType);
             Assert.AreEqual(-1147967296, s_d.IntValue);
 
-            var s_e = ((RtPayloadInstance)a_v.facility).ReadSlot(5, OO.Instance._link_codescope,player);
+            var s_e = ((RtInstance)a_v.facility).ReadSlot(5, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Uint, s_e.ValueType);
             Assert.AreEqual( unchecked( (uint)-1) , s_e.UIntValue);
 
-            var s_f = ((RtPayloadInstance)a_v.facility).ReadSlot(6, OO.Instance._link_codescope,player);
+            var s_f = ((RtInstance)a_v.facility).ReadSlot(6, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Float, s_f.ValueType);
             Assert.AreEqual(float.NaN , s_f.FloatValue);
 
-            var s_g = ((RtPayloadInstance)a_v.facility).ReadSlot(7, OO.Instance._link_codescope,player);
+            var s_g = ((RtInstance)a_v.facility).ReadSlot(7, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Float, s_g.ValueType);
             Assert.AreEqual(7.4432f , s_g.FloatValue);
 
-            var s_h = ((RtPayloadInstance)a_v.facility).ReadSlot(8, OO.Instance._link_codescope,player);
+            var s_h = ((RtInstance)a_v.facility).ReadSlot(8, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Number, s_h.ValueType);
             Assert.AreEqual(double.NegativeInfinity , s_h.Number);
 

@@ -288,7 +288,7 @@ namespace juicescript.runtime
 						}
 
 						var clsinstance = Context.GC.Heap[((ASClass)c._link_codescope.Container).__instance_index__];
-						var clspayload = (RtPayloadScriptClass)clsinstance.facility;
+						var clspayload = (RtScriptClass)clsinstance.facility;
 
 						int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
 						return clspayload.__get_slots_for_gc[idx];
@@ -317,7 +317,7 @@ namespace juicescript.runtime
 							throw new EvalConstException();
 						}
 						
-						var globalpayload = (RtPayloadScriptClass)globalinstance.facility;
+						var globalpayload = (RtScriptClass)globalinstance.facility;
 
 						int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
 						return globalpayload.__get_slots_for_gc[idx];
@@ -377,7 +377,7 @@ namespace juicescript.runtime
 								throw new EvalConstException();
 							}
 
-							var payload = (RtPayloadInstance)instance.facility;
+							var payload = (RtInstance)instance.facility;
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
 
@@ -426,8 +426,8 @@ namespace juicescript.runtime
 						bool hassetparent = false;
 						scope = scope.Parent;
 
-						List< Tuple< RtPayloadMethodScope,int>> link = new List<Tuple<RtPayloadMethodScope, int>>();
-						link.Add( new Tuple<RtPayloadMethodScope, int>( (RtPayloadMethodScope)Context.GC.Heap[methodscopeptr].facility,methodscopeptr));
+						List< Tuple< RtMethodScope,int>> link = new List<Tuple<RtMethodScope, int>>();
+						link.Add( new Tuple<RtMethodScope, int>( (RtMethodScope)Context.GC.Heap[methodscopeptr].facility,methodscopeptr));
 
 						while (scope.Kind == CodeScopeKind.Method)
 						{
@@ -449,16 +449,16 @@ namespace juicescript.runtime
 								Context.GC.Heap[methodscopeptr].Type = scope.Container;
 								Context.GC.Root.Add(Context.GC.Heap[methodscopeptr]);
 								computermember_cachemethodscope.Add(scope.Container, methodscopeptr);
-								((RtPayloadMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
+								((RtMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
 							}
 							else
 							{
 								hassetparent = true;
 								
 								methodscopeptr = computermember_cachemethodscope[scope.Container];
-								((RtPayloadMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
+								((RtMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
 							}
-							link.Add( new Tuple<RtPayloadMethodScope, int>( (RtPayloadMethodScope)Context.GC.Heap[methodscopeptr].facility, methodscopeptr));
+							link.Add( new Tuple<RtMethodScope, int>( (RtMethodScope)Context.GC.Heap[methodscopeptr].facility, methodscopeptr));
 							
 							scope = scope.Parent;
 						}
@@ -479,7 +479,7 @@ namespace juicescript.runtime
 							var scopeinstance = Context.GC.Heap[run_methodscope];
 							if (!hassetparent)
 							{
-								((RtPayloadMethodScope)scopeinstance.facility).ParentPtr = ((ASScript)scope.Container).__global_index__;
+								((RtMethodScope)scopeinstance.facility).ParentPtr = ((ASScript)scope.Container).__global_index__;
 							}
 							scopeinstance.Type = method.Body;
 
@@ -494,7 +494,7 @@ namespace juicescript.runtime
 								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 							}
 
-							((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+							((RtMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance.facility).SlotCount - 1));
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -525,7 +525,7 @@ namespace juicescript.runtime
 
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
-							return ((RtPayloadMethodScope)scopeinstance.facility).__get_slots_for_gc[idx];
+							return ((RtMethodScope)scopeinstance.facility).__get_slots_for_gc[idx];
 						}
 						else if (scope.Kind == CodeScopeKind.Class)
 						{
@@ -537,7 +537,7 @@ namespace juicescript.runtime
 							var scopeinstance = Context.GC.Heap[run_methodscope];
 							if (!hassetparent)
 							{
-								((RtPayloadMethodScope)scopeinstance.facility).ParentPtr = ((ASClass)scope.Container).__instance_index__;								
+								((RtMethodScope)scopeinstance.facility).ParentPtr = ((ASClass)scope.Container).__instance_index__;								
 							}
 							scopeinstance.Type = method.Body;
 
@@ -551,7 +551,7 @@ namespace juicescript.runtime
 								throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 							}
 
-							((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+							((RtMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance.facility).SlotCount - 1));
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -581,7 +581,7 @@ namespace juicescript.runtime
 							}
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
-							return ((RtPayloadMethodScope)scopeinstance.facility).__get_slots_for_gc[idx];
+							return ((RtMethodScope)scopeinstance.facility).__get_slots_for_gc[idx];
 
 						}
 						else if (scope.Kind == CodeScopeKind.Instance)
@@ -637,7 +637,7 @@ namespace juicescript.runtime
 							this_instancePtr = computemember_cacheinstance[cache_idx];
 							this_instance = Context.GC.Heap[this_instancePtr];
 
-							((RtPayloadMethodScope)Context.GC.Heap[methodscopeptr].facility).ParentPtr = this_instancePtr;
+							((RtMethodScope)Context.GC.Heap[methodscopeptr].facility).ParentPtr = this_instancePtr;
 							
 							var scopeinstance = Context.GC.Heap[run_methodscope];
 							scopeinstance.Type = method.Body;
@@ -652,7 +652,7 @@ namespace juicescript.runtime
 								thisP.setFault();
 							}
 
-							((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP,(ushort)( ((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+							((RtMethodScope)scopeinstance.facility).SetSlot(thisP,(ushort)( ((RtMethodScope)scopeinstance.facility).SlotCount - 1));
 
 							if (info.useSlots > Context.StackSlots.Length)
 							{
@@ -688,7 +688,7 @@ namespace juicescript.runtime
 							}
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
-							return ((RtPayloadMethodScope)scopeinstance.facility).__get_slots_for_gc[idx];
+							return ((RtMethodScope)scopeinstance.facility).__get_slots_for_gc[idx];
 
 						}
 						else
@@ -825,14 +825,14 @@ namespace juicescript.runtime
 							Context.GC.Heap[methodscopeptr].Type = scope.Container;
 							Context.GC.Root.Add(Context.GC.Heap[methodscopeptr]);
 							computermember_cachemethodscope.Add(scope.Container, methodscopeptr);
-							((RtPayloadMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
+							((RtMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
 						}
 						else
 						{
 							hassetparent = true;
 							
 							methodscopeptr = computermember_cachemethodscope[scope.Container];
-							((RtPayloadMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
+							((RtMethodScope)pre_scopeinstance.facility).ParentPtr = methodscopeptr;
 						}
 						scope = scope.Parent;
 					}
@@ -842,14 +842,14 @@ namespace juicescript.runtime
 						var scopeinstance = Context.GC.Heap[run_methodscope];
 						if (!hassetparent)
 						{
-							((RtPayloadMethodScope)scopeinstance.facility).ParentPtr = ((ASScript)scope.Container).__global_index__;
+							((RtMethodScope)scopeinstance.facility).ParentPtr = ((ASScript)scope.Container).__global_index__;
 						}
 						scopeinstance.Type = method.Body;
 
 						NaNBoxing thisP = default;
 						thisP.SetNull();
 
-						((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+						((RtMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance.facility).SlotCount - 1));
 
 
 						var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
@@ -877,14 +877,14 @@ namespace juicescript.runtime
 						var scopeinstance = Context.GC.Heap[run_methodscope];
 						if (!hassetparent)
 						{
-							((RtPayloadMethodScope)scopeinstance.facility).ParentPtr = ((ASClass)scope.Container).__instance_index__;
+							((RtMethodScope)scopeinstance.facility).ParentPtr = ((ASClass)scope.Container).__instance_index__;
 						}
 						scopeinstance.Type = method.Body;
 
 						NaNBoxing thisP = default;
 						thisP.SetNull();
 
-						((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+						((RtMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance.facility).SlotCount - 1));
 
 						var @class = Context.GC.Heap[((ASClass)scope.Container).__instance_index__];
 
@@ -934,7 +934,7 @@ namespace juicescript.runtime
 									if (scope.TypeLayout.ASType.Type_identifier == (ulong)TypeKind.Array)
 									{
 										//throw new InvalidOperationException();
-										instancePtr = Context.GC.AllocArray(out instance, RtPayloadArray.ArrayStoreMode.normal);
+										instancePtr = Context.GC.AllocArray(out instance, RtArray.ArrayStoreMode.normal);
 									}
 									else
 									{
@@ -959,7 +959,7 @@ namespace juicescript.runtime
 							this_instancePtr = computemember_cacheinstance[cache_idx];
 							this_instance = Context.GC.Heap[this_instancePtr];
 
-							((RtPayloadMethodScope)Context.GC.Heap[methodscopeptr].facility).ParentPtr = this_instancePtr;
+							((RtMethodScope)Context.GC.Heap[methodscopeptr].facility).ParentPtr = this_instancePtr;
 						}
 
 						var scopeinstance = Context.GC.Heap[run_methodscope];
@@ -980,7 +980,7 @@ namespace juicescript.runtime
 							throw new EvalConstOutOfStackException(method); //槽溢出了，无法计算
 						}
 
-						((RtPayloadMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtPayloadMethodScope)scopeinstance.facility).SlotCount - 1));
+						((RtMethodScope)scopeinstance.facility).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance.facility).SlotCount - 1));
 
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问

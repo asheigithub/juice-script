@@ -76,7 +76,7 @@ var d = b.public::K;
 
             Assert.IsNull(ex);
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
             NaNBoxing b = rtPayload.ReadSlot(0);
             NaNBoxing c = rtPayload.ReadSlot(1);
             NaNBoxing d = rtPayload.ReadSlot(2);

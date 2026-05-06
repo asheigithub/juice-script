@@ -74,7 +74,7 @@ var o = int[key()];
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+			RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 			NaNBoxing o = rtPayload.ReadSlot(1);
 			Assert.AreEqual(NaNBoxing.BoxType.Int, o.ValueType);

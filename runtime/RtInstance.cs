@@ -16,16 +16,16 @@ namespace juicescript.runtime
     /// <summary>
     /// 负载对象实例ASInstance
     /// </summary>
-    public sealed class RtPayloadInstance : RtHeapBase
+    public sealed class RtInstance : RtHeapBase
     {
-		public RtPayloadInstance() : base(RtHeapTypeKind.INSTANCE) { }
+		public RtInstance() : base(RtHeapTypeKind.INSTANCE) { }
 
 		/// <summary>
 		/// 缓存对象的最大成员大小
 		/// </summary>
 		public const int MAX_CACHEABLE_SIZE = 16 * 8;
 
-		private static int DoFindAndUpdatePtr( int ptr, Player player, ASInstance type , out RtPayloadInstance target)
+		private static int DoFindAndUpdatePtr( int ptr, Player player, ASInstance type , out RtInstance target)
 		{
 			
 			var ref_instance = player.Context.GC.Heap[ptr];
@@ -39,7 +39,7 @@ namespace juicescript.runtime
 			
 
 
-			var payload = ((RtPayloadInstance)ref_instance.facility);
+			var payload = ((RtInstance)ref_instance.facility);
 			var origin = payload;
 			target = origin;
 
@@ -68,7 +68,7 @@ namespace juicescript.runtime
 #endif
 
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtPayloadInstance)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtInstance)player.Context.GC.Heap[ptr].facility);
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -78,10 +78,10 @@ namespace juicescript.runtime
 		}
 		
 
-        internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player,out RtPayloadInstance target)
+        internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player,out RtInstance target)
         {
 			RtHeapBase tmp = player.Context.GC.Heap[ptr];
-			RtPayloadInstance check = (RtPayloadInstance)tmp.facility;
+			RtInstance check = (RtInstance)tmp.facility;
 
 			if (((ASInstance)tmp.Type).Flags.HasFlag(ClassFlags.Struct))
 			{
@@ -94,7 +94,7 @@ namespace juicescript.runtime
 					if (tmp2.TypeKind == RtHeapTypeKind.INSTANCE && tmp2.Type != tmp.Type)
 					{
 #if DEBUG
-						if (((RtPayloadInstance)tmp2.facility).HEAPINSTANCE_PTR != 0)
+						if (((RtInstance)tmp2.facility).HEAPINSTANCE_PTR != 0)
 						{
 							throw new InvalidOperationException();
 						}
@@ -105,7 +105,7 @@ namespace juicescript.runtime
 					else if (tmp2.TypeKind == RtHeapTypeKind.VECTOR)
 					{
 #if DEBUG
-						if (((RtPayloadVector)tmp2.facility).HEAPINSTANCE_PTR != 0)
+						if (((RtVector)tmp2.facility).HEAPINSTANCE_PTR != 0)
 						{
 							throw new InvalidOperationException();
 						}
@@ -150,11 +150,11 @@ namespace juicescript.runtime
 
         internal Span<byte> GetStoreData(Player player,ASInstance type)
         {
-			bool is_ref_vector;bool is_ref_struct;RtPayloadInstance target;
+			bool is_ref_vector;bool is_ref_struct;RtInstance target;
 			return GetStoreData(player, type, out is_ref_vector,out is_ref_struct,out target);
         }
 
-		private Span<byte> GetStoreData(Player player,ASInstance type , out bool is_ref_vector,out bool is_ref_struct,out RtPayloadInstance target)
+		private Span<byte> GetStoreData(Player player,ASInstance type , out bool is_ref_vector,out bool is_ref_struct,out RtInstance target)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
@@ -188,7 +188,7 @@ namespace juicescript.runtime
 						target = this;
 					}
 
-					RtPayloadVector vector = (RtPayloadVector)player.Context.GC.Heap[target.HEAPINSTANCE_PTR].facility;
+					RtVector vector = (RtVector)player.Context.GC.Heap[target.HEAPINSTANCE_PTR].facility;
 					is_ref_vector = true;
 					is_ref_struct = false;
 
@@ -215,7 +215,7 @@ namespace juicescript.runtime
 			}
 
 			
-			bool is_ref_vector;bool is_ref_struct;RtPayloadInstance target;
+			bool is_ref_vector;bool is_ref_struct;RtInstance target;
 			GetStoreData(player, type ,out is_ref_vector,out is_ref_struct, out target);
 			return is_ref_vector || is_ref_struct || 
 				target.m_property_ptr == int.MinValue/*标记是数组中获取的struct*/ ;
@@ -253,7 +253,7 @@ namespace juicescript.runtime
             }
             else
             {
-                RtPayloadInstance target;
+                RtInstance target;
                 HEAPINSTANCE_PTR = DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type,out target);
                 return target.m_property_ptr;
 
@@ -270,7 +270,7 @@ namespace juicescript.runtime
             }
             else
             {
-				RtPayloadInstance target;
+				RtInstance target;
 				HEAPINSTANCE_PTR = DoFindAndUpdatePtr(HEAPINSTANCE_PTR,  player, type ,out target);
                 target.m_property_ptr = ptr;
 
@@ -288,7 +288,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadInstance target;
+				RtInstance target;
 				HEAPINSTANCE_PTR = DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type ,out target);
 				return target.m__proto__;
 			}
@@ -620,7 +620,7 @@ namespace juicescript.runtime
 								var cache = player.Context.GC.Heap[cache_ptr];
 
 								cache.Type = member.__rt_type_class__.Instance;
-								RtPayloadInstance struct_payload = (RtPayloadInstance)cache.facility;
+								RtInstance struct_payload = (RtInstance)cache.facility;
 
 								struct_payload.methodscopeslot_ref_state = 0;
 								struct_payload.m_property_ptr = m_property_ptr + codescope.TypeLayout.Offset[memberIndex]; //标记index.
@@ -830,7 +830,7 @@ namespace juicescript.runtime
 				var src = contxt.GC.Heap[newValue.HeapPtr];
 				if (src.TypeKind == RtHeapTypeKind.INSTANCE)
 				{
-					RtPayloadInstance srcPayload = (RtPayloadInstance)src.facility;
+					RtInstance srcPayload = (RtInstance)src.facility;
 
 
 					if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
@@ -870,7 +870,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal void CopyFrom(RtPayloadInstance facility, ASInstance type , Player player,int size)
+		internal void CopyFrom(RtInstance facility, ASInstance type , Player player,int size)
 		{
 #if DEBUG
 			if (HEAPINSTANCE_PTR != 0)
@@ -890,7 +890,7 @@ namespace juicescript.runtime
 
 			//if (size > 0)
 			//{
-			facility.GetStoreData(player, type, out isref_vector,out isref_struct,out RtPayloadInstance target).Slice(0, size).CopyTo(store.Span);
+			facility.GetStoreData(player, type, out isref_vector,out isref_struct,out RtInstance target).Slice(0, size).CopyTo(store.Span);
 			//}
 
 			//if (!isref_vector && !isref_struct && facility.m_property_ptr != int.MinValue)
@@ -914,7 +914,7 @@ namespace juicescript.runtime
 		/// <exception cref="NotImplementedException"></exception>
 		internal void CopyFrom(RtHeapBase src,Player player,int size)
         {
-			RtPayloadInstance facility = (RtPayloadInstance)src.facility;
+			RtInstance facility = (RtInstance)src.facility;
 			CopyFrom(facility, (ASInstance)src.Type, player, size);
 		}
 

@@ -135,7 +135,7 @@ var i = b.Y;
 
             Assert.IsNull(ex);
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
             NaNBoxing b = rtPayload.ReadSlot(0);
             NaNBoxing c = rtPayload.ReadSlot(1);
             NaNBoxing d = rtPayload.ReadSlot(2);
@@ -151,7 +151,7 @@ var i = b.Y;
 
             var ns_instance = player.Context.GC.Heap[e.HeapPtr];
             Assert.AreEqual(ns_instance.TypeKind, RtHeapTypeKind.NAMESPACE);
-            Assert.AreEqual(((RtPayloadNameSpace)ns_instance.facility).ASNamespace.Name, ":AS3");
+            Assert.AreEqual(((RtNameSpace)ns_instance.facility).ASNamespace.Name, ":AS3");
 
             NaNBoxing f = rtPayload.ReadSlot(4);
             Assert.AreEqual(f, d);

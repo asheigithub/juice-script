@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-	public sealed class RtPayloadMethodScope : RtHeapBase
+	public sealed class RtMethodScope : RtHeapBase
 	{
-		public RtPayloadMethodScope() : base( RtHeapTypeKind.MethodScope) { }
+		public RtMethodScope() : base( RtHeapTypeKind.MethodScope) { }
 
 		private Memory<NaNBoxing> Slots;
 
@@ -238,7 +238,7 @@ namespace juicescript.runtime
 		/// 当加载到堆后，把槽位更新到使用new出来的堆对象的槽位
 		/// </summary>
 		/// <param name="newHeapScope"></param>
-		internal void ChangeStore(RtPayloadMethodScope newHeapScope)
+		internal void ChangeStore(RtMethodScope newHeapScope)
 		{
 			IsStackSlot = newHeapScope.IsStackSlot;
 			StackPos = newHeapScope.StackPos;

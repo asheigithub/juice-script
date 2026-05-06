@@ -24,9 +24,9 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			err.SetSlot(scope.ReadSlot(0,context.player), 0, context.ERROR.Instance._link_codescope, context.player);
 			err.SetSlot(scope.ReadSlot(1,context.player), 2, context.ERROR.Instance._link_codescope, context.player);
@@ -47,9 +47,9 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			err.SetSlot(scope.ReadSlot(0,context.player), 0, context.TYPE_ERROR.Instance._link_codescope, context.player);
 			err.SetSlot(scope.ReadSlot(1,context.player), 2, context.TYPE_ERROR.Instance._link_codescope, context.player);
@@ -71,9 +71,9 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
 			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.ERROR.Instance._link_codescope, context.player);
@@ -95,9 +95,9 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
 			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.ERROR.Instance._link_codescope, context.player);
@@ -119,9 +119,9 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
 			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.ERROR.Instance._link_codescope, context.player);
@@ -145,14 +145,14 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
 
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
 
 			var scriptid = ((ASScript)context.GC.Heap[thisPtr.HeapPtr].Type._link_codescope.Parent.Container).__global_index__	;
-			NaNBoxing name = ((RtPayloadScriptClass)context.GC.Heap[scriptid].facility).ReadSlot(0);
+			NaNBoxing name = ((RtScriptClass)context.GC.Heap[scriptid].facility).ReadSlot(0);
 
 			Debug.Assert(name.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(context.GC.Heap[name.HeapPtr].TypeKind == RtHeapTypeKind.STRING );
@@ -184,7 +184,7 @@ namespace juicescript.runtime.buildin
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr)
 				throw new InvalidOperationException();
 #endif
-			var err = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
 
 			NaNBoxing id = err.ReadSlot(2, context.ERROR.Instance._link_codescope, context.player);
 

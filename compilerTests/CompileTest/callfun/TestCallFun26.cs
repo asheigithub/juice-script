@@ -125,7 +125,7 @@ var o =new Main();
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
                 NaNBoxing o = rtPayload.ReadSlot(0);
                 Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
@@ -134,7 +134,7 @@ var o =new Main();
 				Assert.AreEqual(RtHeapTypeKind.INSTANCE, instance.TypeKind);
 				Assert.AreEqual( "Main",instance.Type.QName.Name );
 
-				RtPayloadInstance payloadInstance = (RtPayloadInstance)instance.facility;
+				RtInstance payloadInstance = (RtInstance)instance.facility;
 
 				NaNBoxing box = payloadInstance.ReadSlot(4, instance.Type._link_codescope, player);
 				Assert.AreEqual(NaNBoxing.BoxType.Int, box.ValueType);
@@ -149,7 +149,7 @@ var o =new Main();
 				Assert.IsNotNull(globalInstance);
 				Assert.IsNull(ex);
 
-				RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+				RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 				NaNBoxing o = rtPayload.ReadSlot(0);
 				Assert.AreEqual(NaNBoxing.BoxType.Sbyte, o.ValueType);

@@ -145,7 +145,7 @@ o();
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+			RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 			NaNBoxing o = rtPayload.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
@@ -156,7 +156,7 @@ o();
 			var globalBInstance = player.Context.GC.Heap[globalB.__global_index__];
 			Assert.IsNotNull(globalBInstance);
 
-			RtPayloadScriptClass rtPayloadB = (RtPayloadScriptClass)globalBInstance.facility;
+			RtScriptClass rtPayloadB = (RtScriptClass)globalBInstance.facility;
 
 			NaNBoxing o2 = rtPayloadB.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.Sbyte, o2.ValueType);
@@ -168,7 +168,7 @@ o();
 			var globalAInstance = player.Context.GC.Heap[globalA.__global_index__];
 			Assert.IsNotNull(globalAInstance);
 
-			RtPayloadScriptClass rtPayloadA = (RtPayloadScriptClass)globalAInstance.facility;
+			RtScriptClass rtPayloadA = (RtScriptClass)globalAInstance.facility;
 
 			NaNBoxing k = rtPayloadA.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, k.ValueType);

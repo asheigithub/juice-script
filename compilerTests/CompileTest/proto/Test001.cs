@@ -146,7 +146,7 @@ trace(c , d ,g, h,i);
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 				StringPrint print = (StringPrint)player.Print;
 

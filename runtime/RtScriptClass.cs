@@ -11,7 +11,7 @@ namespace juicescript.runtime
     /// <summary>
     /// 运行时负载Global,Class的实例
     /// </summary>
-    public sealed class RtPayloadScriptClass : RtHeapBase
+    public sealed class RtScriptClass : RtHeapBase
     {
 		private NaNBoxing[] Slots;
 
@@ -42,7 +42,7 @@ namespace juicescript.runtime
             }
         }
 
-        public RtPayloadScriptClass(ASClass cls, int _protoPtr):base(RtHeapTypeKind.CLASS)
+        public RtScriptClass(ASClass cls, int _protoPtr):base(RtHeapTypeKind.CLASS)
         {
             Meta = cls;
             Slots = new NaNBoxing[cls._link_codescope.Members.Count];
@@ -52,7 +52,7 @@ namespace juicescript.runtime
 
         }
 
-        public RtPayloadScriptClass(ASScript script):base(RtHeapTypeKind.GLOBAL) 
+        public RtScriptClass(ASScript script):base(RtHeapTypeKind.GLOBAL) 
         {
             Meta = script;
             Slots = new NaNBoxing[script._link_codescope.Members.Count];

@@ -76,16 +76,16 @@ var q;
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			NaNBoxing o = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(1);
+			NaNBoxing o = ((RtScriptClass)globalInstance.facility).ReadSlot(1);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
 
-			NaNBoxing p = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(2);
+			NaNBoxing p = ((RtScriptClass)globalInstance.facility).ReadSlot(2);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, p.ValueType);
 
 			Assert.AreEqual(o, p);
 
 			Assert.AreEqual( RtHeapTypeKind.STRING, player.Context.GC.Heap[o.HeapPtr].TypeKind );
-			Assert.AreEqual( "", ((RtPayloadString)player.Context.GC.Heap[o.HeapPtr].facility).Str );
+			Assert.AreEqual( "", ((RtString)player.Context.GC.Heap[o.HeapPtr].facility).Str );
 
 
 

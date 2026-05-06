@@ -8,9 +8,9 @@ namespace juicescript.runtime
 {
 
 
-    public sealed class RtPayloadDynamic : RtHeapBase
+    public sealed class RtDynamic : RtHeapBase
     {
-        public RtPayloadDynamic() : base(RtHeapTypeKind.DYNAMIC_PROPERTYS) { }
+        public RtDynamic() : base(RtHeapTypeKind.DYNAMIC_PROPERTYS) { }
 
 		public override int Size => (8 + 8) * Slots.Count + 8 + 8;
 

@@ -97,7 +97,7 @@ trace( a.AS3::LL );
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNotNull(ex);
 
-                RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 				StringPrint print = (StringPrint)player.Print;
 

@@ -16,9 +16,9 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
-	public sealed class RtPayloadArray : RtHeapBase
+	public sealed class RtArray : RtHeapBase
 	{
-		public RtPayloadArray() : base( RtHeapTypeKind.ARRAY)
+		public RtArray() : base( RtHeapTypeKind.ARRAY)
 		{
 		}
 
@@ -72,7 +72,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m_property_ptr;
 
@@ -89,7 +89,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.m_property_ptr = ptr;
 			}
@@ -103,15 +103,15 @@ namespace juicescript.runtime
 		internal int HEAPINSTANCE_PTR;
 
 
-		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtPayloadArray target)
+		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
-			var payload = ((RtPayloadArray)player.Context.GC.Heap[ptr].facility);
+			var payload = ((RtArray)player.Context.GC.Heap[ptr].facility);
 			var origin = payload;
 			target = origin;
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtPayloadArray)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtArray)player.Context.GC.Heap[ptr].facility);
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -176,7 +176,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.array_len;
 			}
@@ -191,7 +191,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.DoSetLength(len, player, ref error);
 			}
@@ -364,7 +364,7 @@ namespace juicescript.runtime
 				return arr_ptr;
 			}
 
-			RtPayloadArray arr = (RtPayloadArray)arr_instance.facility;
+			RtArray arr = (RtArray)arr_instance.facility;
 
 			Span<NaNBoxing> store_span;
 
@@ -530,7 +530,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.DoDelete(index);
 			}
@@ -584,7 +584,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.DoSetSlot(box, array_index, ref error, player);
 			}
@@ -694,9 +694,9 @@ namespace juicescript.runtime
 							var cacheObj = context.GC.Heap[clonedptr];
 							cacheObj.Type = check.Type;
 
-							((RtPayloadInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-							((RtPayloadInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-							((RtPayloadInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+							((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
+							((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
+							((RtInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
 							context.StackSlots[tempSlot].SetHeapPtr(clonedptr);
 						}
@@ -874,7 +874,7 @@ namespace juicescript.runtime
 				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
 				if (error.raised) return;
 
-				RtPayloadArray heap = (RtPayloadArray)context.player.Context.GC.Heap[heaparrayptr].facility;
+				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr].facility;
 				heap.DoSplice(context, ref error, start, deleteCount,netChange);
 				return;
 			}
@@ -923,7 +923,7 @@ namespace juicescript.runtime
 				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
 				if (error.raised) return;
 
-				RtPayloadArray heap = (RtPayloadArray)context.player.Context.GC.Heap[heaparrayptr].facility;
+				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr].facility;
 				heap.DoSplice(context, ref error, start, deleteCount,netChange);
 				return;
 			}
@@ -1245,7 +1245,7 @@ namespace juicescript.runtime
 						return;
 					}
 
-					RtPayloadArray heap = (RtPayloadArray)player.Context.GC.Heap[heaparrayptr].facility;
+					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr].facility;
 					heap.DoUnshift(player, ref error, restSpan);
 					return;
 				}
@@ -1303,7 +1303,7 @@ namespace juicescript.runtime
 						return;
 					}
 
-					RtPayloadArray heap = (RtPayloadArray)player.Context.GC.Heap[heaparrayptr].facility;
+					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr].facility;
 					heap.DoUnshift(player, ref error, restSpan);
 					return;
 				}
@@ -1803,7 +1803,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 			}
@@ -1813,9 +1813,9 @@ namespace juicescript.runtime
 		private void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
 		{
 			dst.Type = src.Type;
-			((RtPayloadInstance)dst.facility).HEAPINSTANCE_PTR = 0;
-			((RtPayloadInstance)dst.facility).methodscopeslot_ref_state = 0;
-			((RtPayloadInstance)dst.facility).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
+			((RtInstance)dst.facility).HEAPINSTANCE_PTR = 0;
+			((RtInstance)dst.facility).methodscopeslot_ref_state = 0;
+			((RtInstance)dst.facility).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
 
 		}
 
@@ -2003,7 +2003,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.DoReadSlot(array_index, player, out isoutofindex_or_ishole);
 			}
@@ -2144,7 +2144,7 @@ namespace juicescript.runtime
 			return (storeMode >> 8) == 0x1;
 		}
 
-		internal void CopyCacheFrom(RtPayloadArray arr_store, Player player)
+		internal void CopyCacheFrom(RtArray arr_store, Player player)
 		{
 #if DEBUG
 			if (arr_store.StoreMode != ArrayStoreMode.cache || StoreMode != ArrayStoreMode.cache)
@@ -2197,7 +2197,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
 				target.DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
 			}
@@ -2350,7 +2350,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadArray target;
+				RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
 				return target.DoTryReadIterItem(index, out key, out next_index, out v);
 			}

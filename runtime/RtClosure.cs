@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public sealed class RtPayloadClosure : RtHeapBase
+    public sealed class RtClosure : RtHeapBase
     {
-		public RtPayloadClosure() : base(RtHeapTypeKind.CLOSURE) { }
+		public RtClosure() : base(RtHeapTypeKind.CLOSURE) { }
 
         public override int Size => 4 + 4 + 4 + 8 + 4 + 4 + 4+ 1;
 
@@ -55,15 +55,15 @@ namespace juicescript.runtime
 
 
 
-		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtPayloadClosure target)
+		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtClosure target)
 		{
-			var payload = ((RtPayloadClosure)player.Context.GC.Heap[ptr].facility);
+			var payload = ((RtClosure)player.Context.GC.Heap[ptr].facility);
 			var origin = payload;
 			target = origin;
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtPayloadClosure)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtClosure)player.Context.GC.Heap[ptr].facility);
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -82,7 +82,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadClosure target;
+				RtClosure target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m_property_ptr;
 			}
@@ -96,7 +96,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadClosure target;
+				RtClosure target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.m_property_ptr = ptr;
 			}
@@ -111,7 +111,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadClosure target;
+				RtClosure target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m__proto__;
 			}
@@ -125,7 +125,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtPayloadClosure target;
+				RtClosure target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.m__proto__ = proto_ptr;
 			}
@@ -133,7 +133,7 @@ namespace juicescript.runtime
 
 
 
-		public void CopyDataFrom(RtPayloadClosure facility , Player player )
+		public void CopyDataFrom(RtClosure facility , Player player )
 		{
 			_ref_as_type = facility._ref_as_type;
 			ScopeType = facility.ScopeType;

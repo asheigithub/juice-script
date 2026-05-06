@@ -9,9 +9,9 @@ namespace juicescript.runtime
     /// <summary>
     /// 负载动态对象的Transition链节点
     /// </summary>
-    public sealed class RtPayloadShape : RtHeapBase
+    public sealed class RtShape : RtHeapBase
     {
-        public RtPayloadShape() : base( RtHeapTypeKind.SHAPE) { }
+        public RtShape() : base( RtHeapTypeKind.SHAPE) { }
 
 
 		[Flags]

@@ -98,7 +98,7 @@ namespace juicescript.runtime
 					if (callback.resolve_or_reject && !r.error.raised)
 					{
 						//resolve
-						PromiseWapper promise = (PromiseWapper)((RtPayloadInstance)promise_instance.facility).wapperedObject;
+						PromiseWapper promise = (PromiseWapper)((RtInstance)promise_instance.facility).wapperedObject;
 						promise.FulFill(context, r.value);
 
 					}
@@ -112,13 +112,13 @@ namespace juicescript.runtime
 
 						context.errorStack.Clear();
 
-						PromiseWapper promise = (PromiseWapper)((RtPayloadInstance)promise_instance.facility).wapperedObject;
+						PromiseWapper promise = (PromiseWapper)((RtInstance)promise_instance.facility).wapperedObject;
 						promise.Reject(context, r.error.error);
 					}
 					else
 					{
 						//reject
-						PromiseWapper promise = (PromiseWapper)((RtPayloadInstance)promise_instance.facility).wapperedObject;
+						PromiseWapper promise = (PromiseWapper)((RtInstance)promise_instance.facility).wapperedObject;
 						promise.Reject(context, r.value);
 
 					}

@@ -94,7 +94,7 @@ trace(""1\u0009\u000B\u000C\u0020\u00A0\u000A\u000D\u2028\u2029+\u0009\u000B\u00
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 				StringPrint print = (StringPrint)player.Print;
 

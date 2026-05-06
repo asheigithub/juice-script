@@ -124,7 +124,7 @@ package
 				Assert.AreEqual(1 , player.Context.GC.Heap.DumpHeap().Where(h => h.TypeKind == RtHeapTypeKind.CLOSURE && !((ASMethodBody)h.Type).Method.__is_buildin_proto ).Count());
 
 
-                RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 				StringPrint print = (StringPrint)player.Print;
 

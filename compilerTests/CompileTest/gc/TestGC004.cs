@@ -105,10 +105,10 @@ var i = k.ci;
             Assert.IsNull(ex);
 
             Assert.AreEqual( 1,  player.Context.GC.Heap.DumpHeap()
-                .Where( o=> o.TypeKind == RtHeapTypeKind.CLASS && ((RtPayloadScriptClass)o.facility).Meta.QName.Name == "a" ).Count());
+                .Where( o=> o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "a" ).Count());
 
-            ASClass type_a = (ASClass)((RtPayloadScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtPayloadScriptClass)o.facility).Meta.QName.Name == "a").facility).Meta;
+            ASClass type_a = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "a").facility).Meta;
 
 
             var objList = player.Context.GC.Heap.DumpHeap().Where(
@@ -129,8 +129,8 @@ var i = k.ci;
                 //!((RtPayloadInstance)o.facility).isCache
                 ).Count());
 
-            ASClass type_b = (ASClass)((RtPayloadScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtPayloadScriptClass)o.facility).Meta.QName.Name == "b").facility).Meta;
+            ASClass type_b = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "b").facility).Meta;
 
             Assert.AreEqual(1,
             player.Context.GC.Heap.DumpHeap().Where(
@@ -142,7 +142,7 @@ var i = k.ci;
 
             var globalInstance = FindGlobal(player);
 
-            var payload = (RtPayloadScriptClass)globalInstance.facility;
+            var payload = (RtScriptClass)globalInstance.facility;
 
             NaNBoxing k = payload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, k.ValueType);
@@ -153,8 +153,8 @@ var i = k.ci;
             Assert.AreEqual(999, j.ShortValue);
 
 
-            ASClass type_c = (ASClass)((RtPayloadScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtPayloadScriptClass)o.facility).Meta.QName.Name == "c").facility).Meta;
+            ASClass type_c = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "c").facility).Meta;
 
 
             NaNBoxing i = payload.ReadSlot(2);

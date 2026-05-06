@@ -203,7 +203,7 @@ var b = new Main();
 
             Assert.IsNull(ex);
 
-            var payload = (RtPayloadScriptClass)globalInstance.facility;
+            var payload = (RtScriptClass)globalInstance.facility;
 
             NaNBoxing c = payload.ReadSlot(2);
             Assert.AreEqual( NaNBoxing.BoxType.Sbyte, c.ValueType);
@@ -216,7 +216,7 @@ var b = new Main();
             NaNBoxing e = payload.ReadSlot(4);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, e.ValueType);
             var instance = player.Context.GC.Heap[e.HeapPtr];
-            Assert.AreEqual(player.Context.ERROR,((RtPayloadScriptClass)instance.facility).Meta);
+            Assert.AreEqual(player.Context.ERROR,((RtScriptClass)instance.facility).Meta);
 
             NaNBoxing f = payload.ReadSlot(5);
             Assert.AreEqual(NaNBoxing.BoxType.Sbyte, f.ValueType);

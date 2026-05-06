@@ -78,7 +78,7 @@ var j = o.vvv()()()();
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+			RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
 			NaNBoxing o = rtPayload.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
@@ -92,10 +92,10 @@ var j = o.vvv()()()();
 			var oobj = player.Context.GC.Heap[o.HeapPtr];
 			Assert.AreEqual(RtHeapTypeKind.INSTANCE, oobj.TypeKind);
 
-			int prop_ptr = ((RtPayloadInstance)oobj.facility).PROPERTY_PTR(player,(ASInstance)oobj.Type);
+			int prop_ptr = ((RtInstance)oobj.facility).PROPERTY_PTR(player,(ASInstance)oobj.Type);
 			var prop = player.Context.GC.Heap[prop_ptr];
 			Assert.AreEqual(RtHeapTypeKind.DYNAMIC_PROPERTYS, prop.TypeKind);
-			Assert.AreEqual( j, ((RtPayloadDynamic)prop.facility).Slots[0]);
+			Assert.AreEqual( j, ((RtDynamic)prop.facility).Slots[0]);
 
 		}
 

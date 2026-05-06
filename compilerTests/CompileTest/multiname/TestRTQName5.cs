@@ -130,7 +130,7 @@ var m = new Main();
             Assert.IsNotNull(ex);
             Assert.AreEqual("[Fault] exception,[Message]=ReferenceError: Cannot create property http://adobe.com/AS3/2006/builtin::len on __AS3__.vec::Vector.<int>.", ex.ToDebugMessage());
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
             NaNBoxing test = rtPayload.ReadSlot(0);
 
             Assert.AreEqual(test.ValueType, NaNBoxing.BoxType.HeapPtr);

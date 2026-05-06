@@ -83,14 +83,14 @@ var o;
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
             
             NaNBoxing o = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
 
             RtHeapBase instance = player.Context.GC.Heap[o.HeapPtr];
             Assert.AreEqual(RtHeapTypeKind.CLASS, instance.TypeKind);
-            Assert.AreEqual("Main", ((RtPayloadScriptClass)instance.facility).Meta.QName.Name);
+            Assert.AreEqual("Main", ((RtScriptClass)instance.facility).Meta.QName.Name);
             
 
 

@@ -402,7 +402,7 @@ namespace juicescript.compiler
 						typeLayout.Size += (max_instance_slot_align - typeLayout.Size % max_instance_slot_align);
 					}
 
-					if (typeLayout.Size > RtPayloadInstance.MAX_CACHEABLE_SIZE)
+					if (typeLayout.Size > RtInstance.MAX_CACHEABLE_SIZE)
 					{
 						throw new ResolverException(cls.Token,$"struct {cls.QName} is too large");
 					}

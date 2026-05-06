@@ -91,7 +91,7 @@ new A().exec();
 
 			Assert.AreEqual("TypeError", err.Type.QName.Name);
 
-			var errinstance = (RtPayloadInstance)err.facility;
+			var errinstance = (RtInstance)err.facility;
 
 			var message = errinstance.ReadSlot(0, err.Type._link_codescope, player);
 
@@ -101,7 +101,7 @@ new A().exec();
 
 			Assert.AreEqual(RtHeapTypeKind.STRING, message_obj.TypeKind);
 
-			Assert.AreEqual("F is ambiguous; Found more than one matching binding.", ((RtPayloadString)message_obj.facility).Str);
+			Assert.AreEqual("F is ambiguous; Found more than one matching binding.", ((RtString)message_obj.facility).Str);
 
 
 			player.ForceGC();

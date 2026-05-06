@@ -89,13 +89,13 @@ var p;
 			Assert.IsNotNull(clsInstance);
 			Assert.IsNull(ex);
 
-			var K = ((RtPayloadScriptClass)clsInstance.facility).ReadSlot(1);
-			var B = ((RtPayloadScriptClass)clsInstance.facility).ReadSlot(2);
+			var K = ((RtScriptClass)clsInstance.facility).ReadSlot(1);
+			var B = ((RtScriptClass)clsInstance.facility).ReadSlot(2);
 
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, K.ValueType);
 			var Kinstance = player.Context.GC.Heap[K.HeapPtr];
 			Assert.AreEqual(RtHeapTypeKind.STRING, Kinstance.TypeKind);
-			Assert.AreEqual("hjk", ((RtPayloadString)Kinstance.facility).Str );
+			Assert.AreEqual("hjk", ((RtString)Kinstance.facility).Str );
 
 			Assert.AreEqual(K, B);
 
@@ -104,25 +104,25 @@ var p;
 			var globalInstance = player.Context.GC.Heap[global.__global_index__];
 			Assert.IsNotNull(globalInstance);
 			
-			NaNBoxing o = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(2);
+			NaNBoxing o = ((RtScriptClass)globalInstance.facility).ReadSlot(2);
 			Assert.AreEqual(NaNBoxing.BoxType.Int, o.ValueType);
 			Assert.AreEqual(int.MinValue, o.IntValue);
 
-			NaNBoxing GB = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(3);
+			NaNBoxing GB = ((RtScriptClass)globalInstance.facility).ReadSlot(3);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, GB.ValueType);
 
-			NaNBoxing GG = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(4);
+			NaNBoxing GG = ((RtScriptClass)globalInstance.facility).ReadSlot(4);
 			Assert.AreEqual(NaNBoxing.BoxType.Int, GG.ValueType);
 			Assert.AreEqual(int.MinValue, GG.IntValue);
 
-			NaNBoxing G2 = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(5);
+			NaNBoxing G2 = ((RtScriptClass)globalInstance.facility).ReadSlot(5);
 			Assert.AreEqual(NaNBoxing.BoxType.Int, G2.ValueType);
 			Assert.AreEqual(int.MinValue, G2.IntValue);
 
 
 
 
-			NaNBoxing p = ((RtPayloadScriptClass)globalInstance.facility).ReadSlot(6);
+			NaNBoxing p = ((RtScriptClass)globalInstance.facility).ReadSlot(6);
 			Assert.AreEqual(K, p);
 
 

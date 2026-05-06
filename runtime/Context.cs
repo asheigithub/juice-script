@@ -200,10 +200,10 @@ namespace juicescript.runtime
 
 
             RtHeapBase arr;
-            M_RestArrayPtr = GC.AllocArray(out arr, RtPayloadArray.ArrayStoreMode.cache_on_stack);if(M_RestArrayPtr == 0) { throw new LoaderException("alloc M_RestArrayPtr failed,out of memory."); }
+            M_RestArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache_on_stack);if(M_RestArrayPtr == 0) { throw new LoaderException("alloc M_RestArrayPtr failed,out of memory."); }
             for (int i = 1; i < MAX_BACKTRACE; i++)
             {
-                if (GC.AllocArray(out arr, RtPayloadArray.ArrayStoreMode.cache_on_stack) == 0)
+                if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache_on_stack) == 0)
                     throw new LoaderException("alloc M_RestArrayPtr failed,out of memory.");
             }
 
@@ -211,7 +211,7 @@ namespace juicescript.runtime
             //先分配Array的缓存struct
             for (int i = 0; i < STACK_LENGTH; i++)
             {
-                for (int j = 0; j < RtPayloadArray.MAX_CACHE_ELEMENT; j++)
+                for (int j = 0; j < RtArray.MAX_CACHE_ELEMENT; j++)
                 {
                     int cache_struct = GC.AllocCacheInstance();
                     if (cache_struct == 0)
@@ -225,10 +225,10 @@ namespace juicescript.runtime
                 }
             }
            
-            CacheArrayPtr = GC.AllocArray(out arr, RtPayloadArray.ArrayStoreMode.cache,cache_struct_p); if (CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
+            CacheArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p); if (CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
             for (int i = 1; i < STACK_LENGTH; i++)
             {
-                if (GC.AllocArray(out arr, RtPayloadArray.ArrayStoreMode.cache,cache_struct_p + i* RtPayloadArray.MAX_CACHE_ELEMENT) == 0)
+                if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p + i* RtArray.MAX_CACHE_ELEMENT) == 0)
                     throw new LoaderException("alloc CacheArrayPtr failed,out of memory.");
             }
 

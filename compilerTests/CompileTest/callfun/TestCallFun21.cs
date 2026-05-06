@@ -83,7 +83,7 @@ var o;
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
 
             NaNBoxing o = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);

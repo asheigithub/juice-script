@@ -180,12 +180,12 @@ var b = new Main();
 
             Assert.IsNull(ex);
 
-            var payload = (RtPayloadScriptClass)globalInstance.facility;
+            var payload = (RtScriptClass)globalInstance.facility;
 
             NaNBoxing c = payload.ReadSlot(2);
             Assert.AreEqual(c.ValueType, NaNBoxing.BoxType.HeapPtr);
             var instance = player.Context.GC.Heap[c.HeapPtr];
-            Assert.AreEqual(((RtPayloadScriptClass)instance.facility).Meta, player.Context.ERROR);
+            Assert.AreEqual(((RtScriptClass)instance.facility).Meta, player.Context.ERROR);
 
         }
 

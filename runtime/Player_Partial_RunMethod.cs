@@ -197,7 +197,7 @@ namespace juicescript.runtime
 										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
 										var struct_ins = Context.GC.Heap[struct_ptr];
 
-										((RtPayloadInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
+										((RtInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 										box.SetHeapPtr(struct_ptr);
 									}
 									else
@@ -254,7 +254,7 @@ namespace juicescript.runtime
 								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
 								var struct_ins = Context.GC.Heap[struct_ptr];
 
-								((RtPayloadInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
+								((RtInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 								box.SetHeapPtr(struct_ptr);
 							}
 							else
@@ -275,18 +275,18 @@ namespace juicescript.runtime
 					int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 					RtHeapBase arg_rest = Context.GC.Heap[argumentsPtr];
 #if DEBUG
-					if (((RtPayloadArray)arg_rest.facility).StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+					if (((RtArray)arg_rest.facility).StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 					{
 						throw new InvalidOperationException();
 					}
 #endif
 					arg_rest.Type = Context.ARRAY.Instance;
-					((RtPayloadArray)arg_rest.facility).array_len = (uint)arguments.Length;
-					((RtPayloadArray)arg_rest.facility).stack_store = arguments;
-					((RtPayloadArray)arg_rest.facility).stack_store_startindex = Context.StackPosition;
-					((RtPayloadArray)arg_rest.facility).HEAPINSTANCE_PTR = 0;
-					((RtPayloadArray)arg_rest.facility).Set_PROPERTY_PTR(0, this);
-					((RtPayloadArray)arg_rest.facility).SetIsArguments(true);
+					((RtArray)arg_rest.facility).array_len = (uint)arguments.Length;
+					((RtArray)arg_rest.facility).stack_store = arguments;
+					((RtArray)arg_rest.facility).stack_store_startindex = Context.StackPosition;
+					((RtArray)arg_rest.facility).HEAPINSTANCE_PTR = 0;
+					((RtArray)arg_rest.facility).Set_PROPERTY_PTR(0, this);
+					((RtArray)arg_rest.facility).SetIsArguments(true);
 
 					if (callee_closure_ptr != 0)
 					{
@@ -306,7 +306,7 @@ namespace juicescript.runtime
 
 						
 						Context.GC.Heap[calleePtr].Type = method.Body;
-						RtPayloadClosure payloadClosure = (RtPayloadClosure)Context.GC.Heap[calleePtr].facility;
+						RtClosure payloadClosure = (RtClosure)Context.GC.Heap[calleePtr].facility;
 						payloadClosure.This = thisPtr;
 						payloadClosure.ScopePtr = scope_ptr;
 						payloadClosure.ScopeType = null; payloadClosure._ref_as_type = null;
@@ -359,7 +359,7 @@ namespace juicescript.runtime
 				RtHeapBase mScope = Context.GC.Heap[mScopeId];
 
 				mScope.Type = method.Body;
-				RtPayloadMethodScope m_scopePayload = (RtPayloadMethodScope)mScope.facility;
+				RtMethodScope m_scopePayload = (RtMethodScope)mScope.facility;
 				m_scopePayload.ParentPtr = scope_ptr;
 				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method.Body._link_codescope,true);
 
@@ -418,7 +418,7 @@ namespace juicescript.runtime
 					{
 						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 						RtHeapBase arg_arguments = Context.GC.Heap[argumentsPtr];
-						arguments_span = ((RtPayloadArray)arg_arguments.facility).stack_store.Span;
+						arguments_span = ((RtArray)arg_arguments.facility).stack_store.Span;
 					}
 
 					Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, method.Parameters.Count);
@@ -438,18 +438,18 @@ namespace juicescript.runtime
 							RtHeapBase arg_rest = Context.GC.Heap[restPtr];
 
 #if DEBUG
-							if (((RtPayloadArray)arg_rest.facility).StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
+							if (((RtArray)arg_rest.facility).StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 							{
 								throw new InvalidOperationException();
 							}
 #endif
 							arg_rest.Type = Context.ARRAY.Instance;
-							((RtPayloadArray)arg_rest.facility).array_len = (uint)rest.Length;
-							((RtPayloadArray)arg_rest.facility).stack_store = rest;
-							((RtPayloadArray)arg_rest.facility).stack_store_startindex = Context.StackPosition- para_argcount;
-							((RtPayloadArray)arg_rest.facility).HEAPINSTANCE_PTR = 0;
-							((RtPayloadArray)arg_rest.facility).Set_PROPERTY_PTR(0, this);
-							((RtPayloadArray)arg_rest.facility).SetIsRest(true);
+							((RtArray)arg_rest.facility).array_len = (uint)rest.Length;
+							((RtArray)arg_rest.facility).stack_store = rest;
+							((RtArray)arg_rest.facility).stack_store_startindex = Context.StackPosition- para_argcount;
+							((RtArray)arg_rest.facility).HEAPINSTANCE_PTR = 0;
+							((RtArray)arg_rest.facility).Set_PROPERTY_PTR(0, this);
+							((RtArray)arg_rest.facility).SetIsRest(true);
 
 
 							NaNBoxing box = new NaNBoxing();
@@ -520,7 +520,7 @@ namespace juicescript.runtime
 												);
 											var struct_ins = Context.GC.Heap[struct_ptr];
 
-											((RtPayloadInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
+											((RtInstance)struct_ins.facility).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 											box.SetHeapPtr(struct_ptr);
 										}
 										else
@@ -650,7 +650,7 @@ namespace juicescript.runtime
 					wapper.scopeType = scopeType;
 
 
-					((RtPayloadInstance)gen.facility).wapperedObject = wapper;
+					((RtInstance)gen.facility).wapperedObject = wapper;
 
 					Context.StackPosition -= 2;
 					Context.StackPosition -= para_argcount;
@@ -767,7 +767,7 @@ namespace juicescript.runtime
 					wapper.state = 0;
 					wapper.thisPtr = _this;
 					wapper.scopeType = scopeType;
-					((RtPayloadInstance)gen.facility).wapperedObject = wapper;
+					((RtInstance)gen.facility).wapperedObject = wapper;
 
 					//构造promise
 					RtHeapBase promise;
@@ -785,7 +785,7 @@ namespace juicescript.runtime
 					//创建构造函数闭包
 					int template_ctor = Context.M_ClosurePtr + basePos + 3;
 
-					RtPayloadClosure ctorClosure = (RtPayloadClosure)Context.GC.Heap[template_ctor].facility;
+					RtClosure ctorClosure = (RtClosure)Context.GC.Heap[template_ctor].facility;
 					Context.GC.Heap[template_ctor].Type = Context.MicroTaskQueue.async_template_ctor.Body;
 					ctorClosure.This.SetHeapPtr(promise_ptr);
 					ctorClosure.ScopePtr = generator_ptr;

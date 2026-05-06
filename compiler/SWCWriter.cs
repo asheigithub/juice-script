@@ -201,7 +201,7 @@ namespace juicescript.compiler
                         ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(c.HeapPtr >> 24);
                         if (kind == ASMethodBody.PoolHeapPtrKind.String)
                         {
-                            _string_.Add(((RtPayloadString)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF].facility).Str);
+                            _string_.Add(((RtString)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF].facility).Str);
                         }
                         else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
                         {
@@ -225,7 +225,7 @@ namespace juicescript.compiler
                         {
                             var heapInstance = context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF];
                             ulong type = ((ASClass)heapInstance.Type).Type_identifier;
-                            int vtable_index = ((RtPayloadMethodScope)heapInstance.facility).ParentPtr;
+                            int vtable_index = ((RtMethodScope)heapInstance.facility).ParentPtr;
 
                             if (!_ld_supermethod.Exists((t) => t.Item1 == type && t.Item2 == vtable_index))
                             {
@@ -666,7 +666,7 @@ namespace juicescript.compiler
                     RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
                     if (heapInstance.TypeKind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
                     {
-                        int pool_index = _stringPool_.IndexOf(((RtPayloadString)heapInstance.facility).Str);
+                        int pool_index = _stringPool_.IndexOf(((RtString)heapInstance.facility).Str);
 
                         if (pool_index > 0xFFFFFF)
                         {
@@ -692,7 +692,7 @@ namespace juicescript.compiler
                     //}
                     else if (heapInstance.TypeKind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
                     {
-                        int pool_index = _namespaces.IndexOf(((RtPayloadNameSpace)heapInstance.facility).ASNamespace);
+                        int pool_index = _namespaces.IndexOf(((RtNameSpace)heapInstance.facility).ASNamespace);
                         if (pool_index > 0xFFFFFF)
                         {
                             throw new ParseException("pool_index > 0xffffff");
@@ -723,7 +723,7 @@ namespace juicescript.compiler
                     else if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
                     {
                         ulong type = ((ASClass)heapInstance.Type).Type_identifier;
-                        int vtable_index = ((RtPayloadMethodScope)heapInstance.facility).ParentPtr;
+                        int vtable_index = ((RtMethodScope)heapInstance.facility).ParentPtr;
 
                         int pool_index = _ld_supermethod.FindIndex((t) => { return t.Item1 == type && t.Item2 == vtable_index; });
                         if (pool_index > 0xFFFFFF)

@@ -55,7 +55,7 @@ b = b.K;
             var globalInstance = player.Context.GC.Heap[global.__global_index__];
             Assert.IsNotNull(globalInstance);
 
-            RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
             NaNBoxing b = rtPayload.ReadSlot(0);
 
             Assert.AreEqual(b.ValueType, NaNBoxing.BoxType.Sbyte);
