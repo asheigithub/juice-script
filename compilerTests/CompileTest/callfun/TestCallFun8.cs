@@ -96,22 +96,22 @@ c(6,7);
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             
             NaNBoxing a = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, a.ValueType);
 
             RtHeapBase instance = player.Context.GC.Heap[a.HeapPtr];
             Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.TypeKind);
-            Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance.facility).StoreMode);
+            Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance).StoreMode);
 
-            Assert.AreEqual(2u, ((RtArray)instance.facility).GetLength(player));
+            Assert.AreEqual(2u, ((RtArray)instance).GetLength(player));
             bool isoutofindex;
-            Assert.AreEqual(NaNBoxing.BoxType.Sbyte, ((RtArray)instance.facility).ReadSlot(0,player,out isoutofindex).ValueType);
-            Assert.AreEqual(6, ((RtArray)instance.facility).ReadSlot(0,player, out isoutofindex).SByteValue);
+            Assert.AreEqual(NaNBoxing.BoxType.Sbyte, ((RtArray)instance).ReadSlot(0,player,out isoutofindex).ValueType);
+            Assert.AreEqual(6, ((RtArray)instance).ReadSlot(0,player, out isoutofindex).SByteValue);
 
-            Assert.AreEqual(NaNBoxing.BoxType.Sbyte, ((RtArray)instance.facility).ReadSlot(1,player, out isoutofindex).ValueType);
-            Assert.AreEqual(7, ((RtArray)instance.facility).ReadSlot(1, player, out isoutofindex).SByteValue);
+            Assert.AreEqual(NaNBoxing.BoxType.Sbyte, ((RtArray)instance).ReadSlot(1,player, out isoutofindex).ValueType);
+            Assert.AreEqual(7, ((RtArray)instance).ReadSlot(1, player, out isoutofindex).SByteValue);
 
 
 

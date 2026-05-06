@@ -65,7 +65,7 @@ a.o = 3;
             var globalInstance = player.Context.GC.Heap[global.__global_index__];
             Assert.IsNotNull(globalInstance);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             NaNBoxing a = rtPayload.ReadSlot(0);
 
             Assert.AreEqual(a.ValueType, NaNBoxing.BoxType.HeapPtr);
@@ -79,7 +79,7 @@ a.o = 3;
 
             Assert.AreEqual(a_v.Type, OO.Instance);
 
-            var slot = ((RtInstance)a_v.facility).ReadSlot(0, OO.Instance._link_codescope,player);
+            var slot = ((RtInstance)a_v).ReadSlot(0, OO.Instance._link_codescope,player);
             Assert.AreEqual(NaNBoxing.BoxType.Int, slot.ValueType);
             Assert.AreEqual(3, slot.IntValue);
 

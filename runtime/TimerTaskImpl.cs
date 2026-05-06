@@ -119,7 +119,7 @@ namespace juicescript.runtime
 						var callmethod = ((ASMethodBody)closureinstance.Type).Method;
 
 
-						int len; RtArray argArray = (RtArray)context.GC.Heap[task.argumentsPtr].facility;
+						int len; RtArray argArray = (RtArray)context.GC.Heap[task.argumentsPtr];
 
 						len = (int)argArray.GetLength(context.player);
 
@@ -166,9 +166,9 @@ namespace juicescript.runtime
 
 						ReceiveError error = default;
 
-						context.player.RunMethod(callmethod, ((RtClosure)closureinstance.facility).This,
-							((RtClosure)closureinstance.facility).ScopePtr,
-							((RtClosure)closureinstance.facility).ScopeType,
+						context.player.RunMethod(callmethod, ((RtClosure)closureinstance).This,
+							((RtClosure)closureinstance).ScopePtr,
+							((RtClosure)closureinstance).ScopeType,
 							(ushort)len, (byte*)args,
 							slots,
 							ref error,
@@ -250,7 +250,7 @@ namespace juicescript.runtime
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var id = scope.ReadSlot(0, context.player).UIntValue;
 
 			context.TimerTaskQueue.clearTimeOut(id);
@@ -265,7 +265,7 @@ namespace juicescript.runtime
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var id = scope.ReadSlot(0, context.player).UIntValue;
 
 			context.TimerTaskQueue.clearTimeOut(id);
@@ -281,7 +281,7 @@ namespace juicescript.runtime
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
 			{
@@ -298,7 +298,7 @@ namespace juicescript.runtime
 
 			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
 			if (restArray.GetLength(context.player) > 16)
 			{
 				context.player.RaiseError(ref error, "setTimeout(closure:Function, delay:Number, ... arguments),arguments.length must less 16.");
@@ -347,7 +347,7 @@ namespace juicescript.runtime
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			if (context.StackPosition + 1 >= Context.STACK_LENGTH)
 			{
@@ -364,7 +364,7 @@ namespace juicescript.runtime
 
 			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
 			if (restArray.GetLength(context.player) > 16)
 			{
 				context.player.RaiseError(ref error, "setTimeout(closure:Function, delay:Number, ... arguments),arguments.length must less 16.");

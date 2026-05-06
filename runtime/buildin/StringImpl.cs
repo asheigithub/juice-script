@@ -80,10 +80,10 @@ namespace juicescript.runtime.buildin
 
 			thisPtr = context.StackSlots[returnSlotIndex];
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var rest = scope.ReadSlot(0, context.player);
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
@@ -103,7 +103,7 @@ namespace juicescript.runtime.buildin
 			//}
 			//else
 			//{
-			//	sb.Append(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr].facility).Str);
+			//	sb.Append(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr]).Str);
 			//}
 			Span<char> buffer = stackalloc char[16];
 			sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex], buffer));
@@ -162,7 +162,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				context.StackSlots[returnSlotIndex].SetInt(((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.Length);
+				context.StackSlots[returnSlotIndex].SetInt(((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str.Length);
 			}
 			//context.StackSlots[returnSlotIndex].SetInt(  )
 
@@ -204,7 +204,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
 			NaNBoxing index_box = default;
@@ -235,7 +235,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				int len = str.Length;
 
 				if (i < 0 || i > len - 1)
@@ -289,7 +289,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
 			NaNBoxing index_box = default;
@@ -319,7 +319,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				int len = str.Length;
 
 				if (i < 0 || i > len - 1)
@@ -345,10 +345,10 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var rest = scope.ReadSlot(0, context.player);
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
@@ -418,7 +418,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
 			NaNBoxing val = scope.ReadSlot(0, context.player);
@@ -473,7 +473,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					string val_str = ((RtString)context.GC.Heap[val.HeapPtr].facility).Str;
+					string val_str = ((RtString)context.GC.Heap[val.HeapPtr]).Str;
 					ReadOnlySpan<char> val_char = val_str.AsSpan();
 
 					if (i >= str_span.Length)
@@ -509,7 +509,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 
 				if (val.ValueType == NaNBoxing.BoxType.LocalString)
 				{
@@ -545,7 +545,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					string val_str = ((RtString)context.GC.Heap[val.HeapPtr].facility).Str;
+					string val_str = ((RtString)context.GC.Heap[val.HeapPtr]).Str;
 
 					if (i >= str.Length || i < 0)
 					{
@@ -604,7 +604,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
 			NaNBoxing val = scope.ReadSlot(0, context.player);
@@ -685,7 +685,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					string val_str = ((RtString)context.GC.Heap[val.HeapPtr].facility).Str;
+					string val_str = ((RtString)context.GC.Heap[val.HeapPtr]).Str;
 					ReadOnlySpan<char> val_span = val_str.AsSpan();
 					int valLen = val_str.Length;
 
@@ -720,7 +720,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				int strLen = str.Length;
 				ReadOnlySpan<char> str_span = str.AsSpan();
 
@@ -760,7 +760,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					string val_str = ((RtString)context.GC.Heap[val.HeapPtr].facility).Str;
+					string val_str = ((RtString)context.GC.Heap[val.HeapPtr]).Str;
 					int valLen = val_str.Length;
 
 					if (valLen == 0)
@@ -832,7 +832,7 @@ namespace juicescript.runtime.buildin
 
 			thisPtr = context.StackSlots[returnSlotIndex];
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			NaNBoxing startArg = scope.ReadSlot(0, context.player);
 			NaNBoxing endArg = scope.ReadSlot(1, context.player);
@@ -930,7 +930,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				strLen = str.Length;
 
 				int startIdx = startIndex.IntValue;
@@ -1010,7 +1010,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			thisPtr = context.StackSlots[returnSlotIndex];
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			NaNBoxing delimiter = scope.ReadSlot(0, context.player);
 			NaNBoxing limit = scope.ReadSlot(1, context.player);
 
@@ -1056,7 +1056,7 @@ namespace juicescript.runtime.buildin
 					}
 					else
 					{
-						delimiter_char = ((RtString)context.GC.Heap[v.HeapPtr].facility).Str.AsSpan();
+						delimiter_char = ((RtString)context.GC.Heap[v.HeapPtr]).Str.AsSpan();
 					}
 				}
 
@@ -1065,15 +1065,15 @@ namespace juicescript.runtime.buildin
 				var instance = context.GC.Heap[instancePtr];
 				instance.Type = context.ARRAY.Instance;
 
-				((RtArray)instance.facility).array_len = 0;
-				((RtArray)instance.facility).methodscopeslot_ref_state = 0;
-				((RtArray)instance.facility).HEAPINSTANCE_PTR = 0;
+				((RtArray)instance).array_len = 0;
+				((RtArray)instance).methodscopeslot_ref_state = 0;
+				((RtArray)instance).HEAPINSTANCE_PTR = 0;
 
 
 				context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
 
 
-				var arr_payload = (RtArray)context.GC.Heap[instancePtr].facility;
+				var arr_payload = (RtArray)context.GC.Heap[instancePtr];
 				Debug.Assert(arr_payload.StoreMode == RtArray.ArrayStoreMode.cache);
 
 
@@ -1087,7 +1087,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					thisStr = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.AsSpan();
+					thisStr = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str.AsSpan();
 				}
 
 				if (context.StackPosition + 1 >= Context.STACK_LENGTH)
@@ -1140,7 +1140,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 							instance = context.GC.Heap[instancePtr];
-							arr_payload = (RtArray)instance.facility;
+							arr_payload = (RtArray)instance;
 							context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
 
 
@@ -1218,7 +1218,7 @@ namespace juicescript.runtime.buildin
 
 			thisPtr = context.StackSlots[returnSlotIndex];
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			NaNBoxing startArg = scope.ReadSlot(0, context.player);
 			NaNBoxing endArg = scope.ReadSlot(1, context.player);
@@ -1302,7 +1302,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				strLen = str.Length;
 
 				int startIdx = startIndex.IntValue;
@@ -1349,7 +1349,7 @@ namespace juicescript.runtime.buildin
 		{
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			NaNBoxing startArg = scope.ReadSlot(0, context.player);
 			NaNBoxing lenArg = scope.ReadSlot(1, context.player);
@@ -1437,7 +1437,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				strLen = str.Length;
 
 				int startIdx = startIndex.IntValue;
@@ -1547,7 +1547,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				string lowcase = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.ToLowerInvariant();
+				string lowcase = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str.ToLowerInvariant();
 				NaNBoxing v;
 				if (context.player.TryCreateStringValue(lowcase, out v, ref error))
 				{
@@ -1628,7 +1628,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				string lowcase = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str.ToUpperInvariant();
+				string lowcase = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str.ToUpperInvariant();
 				NaNBoxing v;
 				if (context.player.TryCreateStringValue(lowcase, out v, ref error))
 				{
@@ -1767,7 +1767,7 @@ namespace juicescript.runtime.buildin
 
 			thisPtr = context.StackSlots[returnSlotIndex];
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			NaNBoxing pattern = scope.ReadSlot(0, context.player);
 			NaNBoxing repl = scope.ReadSlot(1, context.player);
@@ -1807,7 +1807,7 @@ namespace juicescript.runtime.buildin
 
 						context.StackPosition += 4;
 
-						var closure = (RtClosure)replinstance.facility;
+						var closure = (RtClosure)replinstance;
 
 						unsafe
 						{
@@ -1967,7 +1967,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
 			
@@ -2068,7 +2068,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr].facility).Str;
+				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 
 				if (val.ValueType == NaNBoxing.BoxType.LocalString)
 				{

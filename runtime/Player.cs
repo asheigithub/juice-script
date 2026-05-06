@@ -2575,10 +2575,10 @@ namespace juicescript.runtime
 
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
 				naNBoxing.SetHeapPtr(cache_STACKOVERFLOW_STR);
@@ -2646,10 +2646,10 @@ namespace juicescript.runtime
 
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
 				naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
@@ -2684,10 +2684,10 @@ namespace juicescript.runtime
 
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 
 				int messagePtr = Context.GC.AllocString(message);
@@ -2724,10 +2724,10 @@ namespace juicescript.runtime
 			{
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				int messagePtr = Context.GC.AllocString($"Type Coercion failed: can not convert {value.ToDebugString(this)} to {toType.ToDebugString(this)}.");
 				if (messagePtr != 0)
@@ -2763,10 +2763,10 @@ namespace juicescript.runtime
 			{
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				int messagePtr = Context.GC.AllocString($"{name} is ambiguous; Found more than one matching binding.");
 				if (messagePtr != 0)
@@ -2800,10 +2800,10 @@ namespace juicescript.runtime
 			{
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				int messagePtr = Context.GC.AllocString($"Cannot convert {value.ToDebugString(this)} to primitive.");
 				if (messagePtr != 0)
@@ -2838,10 +2838,10 @@ namespace juicescript.runtime
 			{
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_ILLEGALOPERATION_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.ILLEGALOPERATION_ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.ILLEGALOPERATION_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				int messagePtr = Context.GC.AllocString($"native function {methodkey} is missing.");
 				if (messagePtr != 0)
@@ -2877,10 +2877,10 @@ namespace juicescript.runtime
 			{
 				NaNBoxing errName = new NaNBoxing();
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
-				((RtInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
+				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
-				RtInstance payloadInstance = (RtInstance)error_instance.facility;
+				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
 				naNBoxing.SetHeapPtr(cache_CANNOT_ACCESS_NULL);
@@ -2910,7 +2910,7 @@ namespace juicescript.runtime
 			else if (shapeName.ValueType == NaNBoxing.BoxType.HeapPtr && shapeName.HeapPtr != 0)
 			{
 				// HeapPtr字符串比较
-				string str = ((RtString)Context.GC.Heap[shapeName.HeapPtr].facility).Str;
+				string str = ((RtString)Context.GC.Heap[shapeName.HeapPtr]).Str;
 				return searchName.CompareTo(str.AsSpan(), StringComparison.Ordinal);
 			}
 			else
@@ -2964,7 +2964,7 @@ namespace juicescript.runtime
 
 				ReadOnlySpan<char> c1 = chars1;
 
-				string str2 = ((RtString)Context.GC.Heap[shapeName2.HeapPtr].facility).Str;
+				string str2 = ((RtString)Context.GC.Heap[shapeName2.HeapPtr]).Str;
 				return c1.Slice(0, charCount1).CompareTo(str2.AsSpan(), StringComparison.Ordinal);
 			}
 
@@ -2980,7 +2980,7 @@ namespace juicescript.runtime
 
 				ReadOnlySpan<char> c2 = chars2;
 
-				string str1 = ((RtString)Context.GC.Heap[shapeName1.HeapPtr].facility).Str;
+				string str1 = ((RtString)Context.GC.Heap[shapeName1.HeapPtr]).Str;
 				return str1.AsSpan().CompareTo(c2.Slice(0, charCount2), StringComparison.Ordinal);
 			}
 
@@ -2994,8 +2994,8 @@ namespace juicescript.runtime
 				if (shapeName2.HeapPtr == 0) return 1;
 
 				// 比较堆字符串，使用AsSpan避免额外分配
-				string str1 = ((RtString)Context.GC.Heap[shapeName1.HeapPtr].facility).Str;
-				string str2 = ((RtString)Context.GC.Heap[shapeName2.HeapPtr].facility).Str;
+				string str1 = ((RtString)Context.GC.Heap[shapeName1.HeapPtr]).Str;
+				string str2 = ((RtString)Context.GC.Heap[shapeName2.HeapPtr]).Str;
 				return str1.AsSpan().CompareTo(str2.AsSpan(), StringComparison.Ordinal);
 			}
 
@@ -3056,7 +3056,7 @@ namespace juicescript.runtime
 
 		private void CreateObjectProto(ref ReceiveError error)
 		{
-			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR;
+			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
 			var proto = Context.GC.Heap[proto_ptr];
 
 			// tostring
@@ -3084,7 +3084,7 @@ namespace juicescript.runtime
 					throw new LoaderException("Object proto : toString alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 
 				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
 
@@ -3118,7 +3118,7 @@ namespace juicescript.runtime
 					throw new LoaderException("Object proto : valueOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[valueof_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[valueof_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 
 				NaNBoxing v = default; v.SetHeapPtr(valueof_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(VALUEOF_STR);
@@ -3161,8 +3161,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Object proto: hasOwnProperty alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[hasownproperty_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[hasownproperty_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
+				((RtClosure)Context.GC.Heap[hasownproperty_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[hasownproperty_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v = default; v.SetHeapPtr(hasownproperty_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(hasOwnProperty);
@@ -3207,8 +3207,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Object proto: isPrototypeOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[isprototypeof_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[isprototypeof_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
+				((RtClosure)Context.GC.Heap[isprototypeof_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[isprototypeof_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v = default; v.SetHeapPtr(isprototypeof_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(isPrototypeOf);
@@ -3226,7 +3226,7 @@ namespace juicescript.runtime
 				return;
 			}
 #endif
-			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__].facility).PROTO__PTR;
+			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__]).PROTO__PTR;
 			var proto = Context.GC.Heap[proto_ptr];
 
 			// tostring
@@ -3247,8 +3247,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : toString alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[tostring_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[tostring_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
 
@@ -3294,8 +3294,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : concat alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[concat_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[concat_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[concat_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[concat_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
 
@@ -3337,8 +3337,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : charAt alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3378,8 +3378,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : charCodeAt alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3418,8 +3418,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : indexOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3458,8 +3458,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : lastIndexOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3499,8 +3499,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : slice alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3540,8 +3540,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : split alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3581,8 +3581,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : substring alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3625,8 +3625,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : toLowerCase alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3669,8 +3669,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : toUpperCase alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3713,8 +3713,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : toLocaleLowerCase alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3756,8 +3756,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : toLocaleUpperCase alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3800,8 +3800,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : valueOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3844,8 +3844,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : replace alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3888,8 +3888,8 @@ namespace juicescript.runtime
 					throw new LoaderException("String proto : search alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -3910,7 +3910,7 @@ namespace juicescript.runtime
 			}
 #endif
 
-			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__].facility).PROTO__PTR;
+			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
 			var proto = Context.GC.Heap[proto_ptr];
 
 			// call
@@ -3930,8 +3930,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Function proto : call alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[invokecall_ptr].facility).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[invokecall_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[invokecall_ptr]).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[invokecall_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(invokecall_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(call_ptr);
@@ -3956,8 +3956,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Function proto : apply alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[invokeapply_ptr].facility).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[invokeapply_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[invokeapply_ptr]).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[invokeapply_ptr]).Set_PROTOTYPE(-1, this);
 
 
 				NaNBoxing v = default; v.SetHeapPtr(invokeapply_ptr);
@@ -3986,7 +3986,7 @@ namespace juicescript.runtime
 					throw new LoaderException("Function proto : toString alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
 
 				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
@@ -4003,7 +4003,7 @@ namespace juicescript.runtime
 				return;
 			}
 #endif
-			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__].facility).PROTO__PTR;
+			var proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR;
 			var proto = Context.GC.Heap[proto_ptr];
 
 			//tostring
@@ -4027,7 +4027,7 @@ namespace juicescript.runtime
 						throw new LoaderException("Array proto : toString alloc failed");
 					}
 
-				((RtClosure)Context.GC.Heap[tostring_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 
 					NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
 					NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
@@ -4073,8 +4073,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto: concat alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[concat_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[concat_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
+				((RtClosure)Context.GC.Heap[concat_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[concat_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(concat);
@@ -4119,8 +4119,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto: push alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[push_ptr].facility).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[push_ptr].facility).Set_PROTOTYPE(-1, this); //设置prototype为undefined
+				((RtClosure)Context.GC.Heap[push_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[push_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
 				NaNBoxing v2 = default; v2.SetHeapPtr(push_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(push);
@@ -4162,8 +4162,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : pop alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4206,8 +4206,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : join alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4250,8 +4250,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : shift alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4294,8 +4294,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : unshift alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4338,8 +4338,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : some alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4381,8 +4381,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : every alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4424,8 +4424,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : forEach alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4467,8 +4467,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : filter alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4510,8 +4510,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : map alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4553,8 +4553,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : indexOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4596,8 +4596,8 @@ namespace juicescript.runtime
 					throw new LoaderException("Array proto : lastIndexOf alloc failed");
 				}
 
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 
@@ -4633,8 +4633,8 @@ namespace juicescript.runtime
 				{
 					throw new LoaderException("Array proto : slice alloc failed");
 				}
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
@@ -4668,8 +4668,8 @@ namespace juicescript.runtime
 				{
 					throw new LoaderException("Array proto : splice alloc failed");
 				}
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
@@ -4703,8 +4703,8 @@ namespace juicescript.runtime
 				{
 					throw new LoaderException("Array proto : sort alloc failed");
 				}
-				((RtClosure)Context.GC.Heap[method_ptr].facility).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
-				((RtClosure)Context.GC.Heap[method_ptr].facility).Set_PROTOTYPE(-1, this);
+				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
+				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
 				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
@@ -5063,7 +5063,7 @@ namespace juicescript.runtime
 			cls.__instance_index__ = index;
 
 			//构造proto的constructor, 就是Class自己。
-			var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[index].facility).PROTO__PTR];
+			var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[index]).PROTO__PTR];
 			NaNBoxing constructor = new NaNBoxing(); constructor.SetHeapPtr(index);
 			NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR);
 			CreateDynamic(ref error, proto, v_str, constructor, true, false, true);
@@ -5184,7 +5184,7 @@ namespace juicescript.runtime
 			{
 				if (box.ValueType == NaNBoxing.BoxType.Undefined || box.ValueType == NaNBoxing.BoxType.Null)
 				{
-					((RtClosure)closure.facility).Set_PROTOTYPE(-1, this);
+					((RtClosure)closure).Set_PROTOTYPE(-1, this);
 				}
 				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
@@ -5215,7 +5215,7 @@ namespace juicescript.runtime
 
 
 
-							((RtClosure)closure.facility).Set_PROTOTYPE(box.HeapPtr, this);
+							((RtClosure)closure).Set_PROTOTYPE(box.HeapPtr, this);
 							break;
 						case RtHeapTypeKind.NAMESPACE:
 						case RtHeapTypeKind.STRING:
@@ -5304,7 +5304,7 @@ namespace juicescript.runtime
 						throw new InvalidOperationException();
 #endif
 					NaNBoxing result = new NaNBoxing();
-					result.SetHeapPtr(((RtScriptClass)ins.facility).PROTO__PTR);
+					result.SetHeapPtr(((RtScriptClass)ins).PROTO__PTR);
 
 					return result;
 
@@ -5323,7 +5323,7 @@ namespace juicescript.runtime
 				}
 				else if (ins.TypeKind == RtHeapTypeKind.CLASS)
 				{
-					var @class = ((RtScriptClass)ins.facility).Meta;
+					var @class = ((RtScriptClass)ins).Meta;
 					var function = @class._vtable.Items[vtable_index].Trait.Method;
 
 					if (vtable_index == 0)
@@ -5336,7 +5336,7 @@ namespace juicescript.runtime
 #endif
 
 						NaNBoxing result = new NaNBoxing();
-						result.SetHeapPtr(((RtScriptClass)ins.facility).PROTO__PTR);
+						result.SetHeapPtr(((RtScriptClass)ins).PROTO__PTR);
 
 						return result;
 					}
@@ -5393,7 +5393,7 @@ namespace juicescript.runtime
 						{
 
 
-							var closure = (RtClosure)ins.facility;
+							var closure = (RtClosure)ins;
 
 							int proto = closure.PROTOTYPE(this);
 							if (proto < 0) //被手动置为undefined.
@@ -5473,7 +5473,7 @@ namespace juicescript.runtime
 		internal NaNBoxing LoadSlotFromArray(uint uindex, RtHeapBase arrObj, out bool isoutofindex_or_ishole)
 		{
 
-			NaNBoxing result = ((RtArray)arrObj.facility).ReadSlot(uindex, this, out isoutofindex_or_ishole);
+			NaNBoxing result = ((RtArray)arrObj).ReadSlot(uindex, this, out isoutofindex_or_ishole);
 
 			if (isoutofindex_or_ishole) //如果索引超出了length或者是一个洞则查找原型链。。。
 			{
@@ -5486,7 +5486,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__].facility).PROTO__PTR];
+					var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR];
 				lbl_searh_class_proto:
 					if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
 					{
@@ -5494,7 +5494,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+						int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 						if (p != 0)
 						{
 							proto = Context.GC.Heap[p];
@@ -5511,7 +5511,7 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal void SetArraySlot(NaNBoxing box, uint index, RtHeapBase instance, ref ReceiveError error)
 		{
-			if (((RtArray)instance.facility).TrySetSlotIfReplaceStructOrNotHeap(box, index, this, ref error))
+			if (((RtArray)instance).TrySetSlotIfReplaceStructOrNotHeap(box, index, this, ref error))
 			{
 
 			}
@@ -5529,7 +5529,7 @@ namespace juicescript.runtime
 					return;
 				}
 
-				((RtArray)instance.facility).SetSlot(box, index, this, ref error);
+				((RtArray)instance).SetSlot(box, index, this, ref error);
 				if (error.raised)
 				{
 					return;
@@ -5542,11 +5542,11 @@ namespace juicescript.runtime
 		{
 			VisitDynamicValue(arrObj, OnVisit);
 
-			var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__].facility).PROTO__PTR];
+			var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR];
 
 		lbl_searh_class_proto:
 			VisitDynamicValue(proto, OnVisit);
-			int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+			int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 			if (p != 0)
 			{
 				proto = Context.GC.Heap[p];
@@ -5573,7 +5573,7 @@ namespace juicescript.runtime
 				RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
 				if (rtHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 				{
-					RtStackCache _obj = (RtStackCache)rtHeap.facility;
+					RtStackCache _obj = (RtStackCache)rtHeap;
 
 					if (_obj.RefInstance.ValueType == BoxType.HeapPtr)
 					{
@@ -5585,7 +5585,7 @@ namespace juicescript.runtime
 						{
 							Context.GC.CheckGC(ref error);
 
-							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
 
 
 
@@ -5600,7 +5600,7 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str.AsSpan();
+								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str.AsSpan();
 							}
 
 
@@ -5612,7 +5612,7 @@ namespace juicescript.runtime
 							{
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
 								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-								@namespace = ((RtNameSpace)ns_instance.facility).ASNamespace;
+								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
 							}
 
@@ -5637,7 +5637,7 @@ namespace juicescript.runtime
 								else
 								{
 									//到class的prototype里查找，再找不到就到Object的prototype里查找
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__].facility).PROTO__PTR];
+									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
 								lbl_searh_class_proto:
 									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
@@ -5646,7 +5646,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 										if (p != 0)
 										{
 											proto = Context.GC.Heap[p];
@@ -5668,7 +5668,7 @@ namespace juicescript.runtime
 								else
 								{
 									//到class的prototype里查找，再找不到就到Object的prototype里查找
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__].facility).PROTO__PTR];
+									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__]).PROTO__PTR];
 								lbl_searh_class_proto:
 									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
@@ -5677,7 +5677,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 										if (p != 0)
 										{
 											proto = Context.GC.Heap[p];
@@ -5696,7 +5696,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__].facility).PROTO__PTR];
+									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
 								lbl_searh_class_proto:
 									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
@@ -5705,7 +5705,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 										if (p != 0)
 										{
 											proto = Context.GC.Heap[p];
@@ -5724,7 +5724,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__].facility).PROTO__PTR];
+									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__]).PROTO__PTR];
 								lbl_searh_class_proto:
 									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
@@ -5733,7 +5733,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 										if (p != 0)
 										{
 											proto = Context.GC.Heap[p];
@@ -5745,7 +5745,7 @@ namespace juicescript.runtime
 								}
 							}
 							else if (refObj.TypeKind == RtHeapTypeKind.ARRAY &&
-									((RtArray)refObj.facility).isArguments()
+									((RtArray)refObj).isArguments()
 									&& @namespace == null
 									&& "callee".AsSpan().CompareTo(searchName, StringComparison.Ordinal) == 0
 								)
@@ -5775,17 +5775,17 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												int f_proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__].facility).PROTO__PTR;
+												int f_proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
 												if (f_proto <= 0)
 												{
-													proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR];
+													proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
 												}
 												else
 												{
 													proto = Context.GC.Heap[f_proto];
 													if (refObj == proto) //Function.prototyoe是一个function,于是又转回来，这时转到OBJECT
 													{
-														proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR];
+														proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
 
 													}
 												}
@@ -5793,7 +5793,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__].facility).PROTO__PTR];
+											proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR];
 										}
 
 									lbl_searh_class_proto:
@@ -5810,7 +5810,7 @@ namespace juicescript.runtime
 												goto lbl_retry_method;
 											}
 
-											int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+											int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 											if (p != 0)
 											{
 												proto = Context.GC.Heap[p];
@@ -5858,7 +5858,7 @@ namespace juicescript.runtime
 
 										if (refObj.TypeKind == RtHeapTypeKind.VECTOR)
 										{
-											refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__].facility).PROTO__PTR];
+											refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
 										}
 
 										if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
@@ -5869,7 +5869,7 @@ namespace juicescript.runtime
 										{
 											if (refObj.TypeKind == RtHeapTypeKind.GLOBAL)
 											{
-												var proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR;
+												var proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
 
 												if (FindDynamicValue(Context.GC.Heap[proto], searchName, out value, out shape_ptr, out index, out prop))
 												{
@@ -5882,7 +5882,7 @@ namespace juicescript.runtime
 											}
 											else if (refObj.TypeKind == RtHeapTypeKind.ARRAY)
 											{
-												var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__].facility).PROTO__PTR];
+												var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR];
 											lbl_searh_class_proto:
 												if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
 												{
@@ -5890,7 +5890,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+													int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 													if (p != 0)
 													{
 														proto = Context.GC.Heap[p];
@@ -5903,7 +5903,7 @@ namespace juicescript.runtime
 											else if (refObj.TypeKind == RtHeapTypeKind.CLASS)
 											{
 
-												var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.CLASS.__instance_index__].facility).PROTO__PTR];
+												var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.CLASS.__instance_index__]).PROTO__PTR];
 											lbl_searh_class_proto:
 												if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
 												{
@@ -5911,7 +5911,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+													int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 													if (p != 0)
 													{
 														proto = Context.GC.Heap[p];
@@ -5927,7 +5927,7 @@ namespace juicescript.runtime
 											}
 											else if (refObj.TypeKind == RtHeapTypeKind.INSTANCE)
 											{
-												int protoptr = ((RtInstance)refObj.facility).PROTOTYPE(this, (ASInstance)refObj.Type);
+												int protoptr = ((RtInstance)refObj).PROTOTYPE(this, (ASInstance)refObj.Type);
 												if (protoptr == 0)
 												{
 													result.SetUndefined();
@@ -5948,14 +5948,14 @@ namespace juicescript.runtime
 													}
 													else
 													{
-														int protoptr = ((RtClosure)refObj.facility).PROTOTYPE(this);
+														int protoptr = ((RtClosure)refObj).PROTOTYPE(this);
 														if (protoptr <= 0)
 														{
-															protoptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__].facility).PROTO__PTR;
+															protoptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
 
 															if (protoptr <= 0)
 															{
-																refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR];
+																refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
 															}
 															else
 															{
@@ -5964,7 +5964,7 @@ namespace juicescript.runtime
 														}
 														else
 														{
-															refObj = Context.GC.Heap[((RtClosure)refObj.facility).PROTOTYPE(this)];
+															refObj = Context.GC.Heap[((RtClosure)refObj).PROTOTYPE(this)];
 														}
 
 
@@ -5973,7 +5973,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__].facility).PROTO__PTR];
+													refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR];
 													goto lbl_instance_search_proto;
 												}
 											}
@@ -6016,7 +6016,7 @@ namespace juicescript.runtime
 									var obj = Context.GC.Heap[v.HeapPtr];
 									if (obj.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
 									{
-										((RtInstance)obj.facility).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
+										((RtInstance)obj).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
 									}
 								}
 
@@ -6109,7 +6109,7 @@ namespace juicescript.runtime
 									ReadOnlySpan<char> searchName = buffers;
 									//if (_obj.indexer_key.ValueType == BoxType.HeapPtr && Context.GC.Heap[_obj.indexer_key.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
 									//{
-									//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr].facility).Str;
+									//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr]).Str;
 									//}
 									//else if (_obj.indexer_key.ValueType != BoxType.HeapPtr)
 									if (IsPrimitive(_obj.indexer_key))
@@ -6138,7 +6138,7 @@ namespace juicescript.runtime
 									}
 
 									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__].facility).PROTO__PTR];
+									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
 								lbl_searh_class_proto:
 									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
 									{
@@ -6146,7 +6146,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 										if (p != 0)
 										{
 											proto = Context.GC.Heap[p];
@@ -6171,11 +6171,11 @@ namespace juicescript.runtime
 						{
 							if (refObj.TypeKind == RtHeapTypeKind.GLOBAL || refObj.TypeKind == RtHeapTypeKind.CLASS)
 							{
-								result = ((RtScriptClass)refObj.facility).ReadSlot(_obj.scopemember_index);
+								result = ((RtScriptClass)refObj).ReadSlot(_obj.scopemember_index);
 							}
 							else if (refObj.TypeKind == RtHeapTypeKind.INSTANCE)
 							{
-								result = ((RtInstance)refObj.facility).ReadSlot(_obj.scopemember_index, refObj.Type._link_codescope, this, returnSlotIndex, _obj.RefInstance.HeapPtr);
+								result = ((RtInstance)refObj).ReadSlot(_obj.scopemember_index, refObj.Type._link_codescope, this, returnSlotIndex, _obj.RefInstance.HeapPtr);
 							}
 							else
 							{
@@ -6220,7 +6220,7 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str.AsSpan();
+								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str.AsSpan();
 							}
 
 							NaNBoxing ns = new NaNBoxing();
@@ -6229,7 +6229,7 @@ namespace juicescript.runtime
 							{
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
 								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-								@namespace = ((RtNameSpace)ns_instance.facility).ASNamespace;
+								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
 							}
 
@@ -6241,7 +6241,7 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__].facility).PROTO__PTR];
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__]).PROTO__PTR];
 							lbl_searh_class_proto:
 								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
@@ -6250,7 +6250,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 									if (p != 0)
 									{
 										proto = Context.GC.Heap[p];
@@ -6310,14 +6310,14 @@ namespace juicescript.runtime
 						{
 							Context.GC.CheckGC(ref error);
 
-							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
 
 							
 							Span<char> temp = stackalloc char[16];
 							ReadOnlySpan<char> searchName = temp;
 							if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
 							{
-								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str;
+								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str;
 							}
 							else
 							{
@@ -6377,7 +6377,7 @@ namespace juicescript.runtime
 							{
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
 								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-								@namespace = ((RtNameSpace)ns_instance.facility).ASNamespace;
+								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
 
 								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
@@ -6388,7 +6388,7 @@ namespace juicescript.runtime
 
 
 								//查找原始类型的原型链
-								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[primitiveCls.__instance_index__].facility).PROTO__PTR];
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[primitiveCls.__instance_index__]).PROTO__PTR];
 							lbl_searh_class_proto:
 								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
@@ -6397,7 +6397,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									int p = ((RtInstance)proto.facility).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
 									if (p != 0)
 									{
 										proto = Context.GC.Heap[p];
@@ -6511,7 +6511,7 @@ namespace juicescript.runtime
 					{
 						if (o.Type._link_codescope.index != scopeid)
 						{
-							RtMethodScope rtPayload = (RtMethodScope)o.facility;
+							RtMethodScope rtPayload = (RtMethodScope)o;
 							o = Context.GC.Heap[rtPayload.ParentPtr];
 							instancePtr = rtPayload.ParentPtr;
 						}
@@ -6522,7 +6522,7 @@ namespace juicescript.runtime
 					}
 					else if (o.TypeKind == RtHeapTypeKind.INSTANCE)
 					{
-						RtInstance heap = (RtInstance)o.facility;
+						RtInstance heap = (RtInstance)o;
 						if (o.Type._link_codescope.index != scopeid)
 						{
 							//不可能到这里
@@ -6539,7 +6539,7 @@ namespace juicescript.runtime
 					}
 					else if (o.TypeKind == RtHeapTypeKind.CLASS || o.TypeKind == RtHeapTypeKind.GLOBAL)
 					{
-						var codeScope = ((RtScriptClass)o.facility).Meta._link_codescope;
+						var codeScope = ((RtScriptClass)o).Meta._link_codescope;
 						if (codeScope.index != scopeid)
 						{
 #if DEBUG
@@ -6578,7 +6578,7 @@ namespace juicescript.runtime
 			{
 				case RtHeapTypeKind.CLASS:
 				case RtHeapTypeKind.GLOBAL:
-					type = ((RtScriptClass)temp.facility).Meta;
+					type = ((RtScriptClass)temp).Meta;
 					break;
 				case RtHeapTypeKind.STRING:
 					type = Context.STRING.Instance;
@@ -7322,7 +7322,7 @@ namespace juicescript.runtime
 
 				if (ins1.TypeKind == RtHeapTypeKind.STRING && ins2.TypeKind == RtHeapTypeKind.STRING)
 				{
-					return string.CompareOrdinal(((RtString)ins1.facility).Str, ((RtString)ins2.facility).Str) == 0;
+					return string.CompareOrdinal(((RtString)ins1).Str, ((RtString)ins2).Str) == 0;
 				}
 				else if (ins1.TypeKind == RtHeapTypeKind.INSTANCE && ins2.TypeKind == RtHeapTypeKind.INSTANCE)
 				{
@@ -7330,14 +7330,14 @@ namespace juicescript.runtime
 					{
 						var layoutsize = ins1.Type._link_codescope.TypeLayout.Size;
 
-						return ((RtInstance)ins1.facility).GetStoreData(this, (ASInstance)ins1.Type).Slice(0, layoutsize).SequenceEqual(
-								 ((RtInstance)ins2.facility).GetStoreData(this, (ASInstance)ins2.Type).Slice(0, layoutsize))
+						return ((RtInstance)ins1).GetStoreData(this, (ASInstance)ins1.Type).Slice(0, layoutsize).SequenceEqual(
+								 ((RtInstance)ins2).GetStoreData(this, (ASInstance)ins2.Type).Slice(0, layoutsize))
 							;
 
 					}
 					else if (((ASInstance)ins1.Type).Flags.HasFlag(ClassFlags.Wapper))
 					{
-						return ((RtInstance)ins1.facility).wapperedObject.Equals(((RtInstance)ins2.facility).wapperedObject);
+						return ((RtInstance)ins1).wapperedObject.Equals(((RtInstance)ins2).wapperedObject);
 					}
 					else
 					{
@@ -7405,7 +7405,7 @@ namespace juicescript.runtime
 				var ins2 = Context.GC.Heap[v2.HeapPtr];
 				if (ins2.TypeKind == RtHeapTypeKind.STRING)
 				{
-					string str2 = ((RtString)ins2.facility).Str;
+					string str2 = ((RtString)ins2).Str;
 
 					// 使用高效的字符比较，避免创建LocalString的字符串
 					Span<char> chars1 = stackalloc char[16];
@@ -7420,7 +7420,7 @@ namespace juicescript.runtime
 				var ins1 = Context.GC.Heap[v1.HeapPtr];
 				if (ins1.TypeKind == RtHeapTypeKind.STRING)
 				{
-					string str1 = ((RtString)ins1.facility).Str;
+					string str1 = ((RtString)ins1).Str;
 
 					// 使用高效的字符比较，避免创建LocalString的字符串
 					Span<char> chars2 = stackalloc char[16];
@@ -7818,7 +7818,7 @@ namespace juicescript.runtime
 				}
 				else if (ins1.TypeKind == RtHeapTypeKind.STRING)
 				{
-					return string.CompareOrdinal(((RtString)ins1.facility).Str, ((RtString)ins2.facility).Str) == 0;
+					return string.CompareOrdinal(((RtString)ins1).Str, ((RtString)ins2).Str) == 0;
 				}
 				else if (ins1.TypeKind == RtHeapTypeKind.INSTANCE)
 				{
@@ -7826,14 +7826,14 @@ namespace juicescript.runtime
 					{
 						var layoutsize = ins1.Type._link_codescope.TypeLayout.Size;
 
-						return ((RtInstance)ins1.facility).GetStoreData(this, (ASInstance)ins1.Type).Slice(0, layoutsize).SequenceEqual(
-								 ((RtInstance)ins2.facility).GetStoreData(this, (ASInstance)ins2.Type).Slice(0, layoutsize))
+						return ((RtInstance)ins1).GetStoreData(this, (ASInstance)ins1.Type).Slice(0, layoutsize).SequenceEqual(
+								 ((RtInstance)ins2).GetStoreData(this, (ASInstance)ins2.Type).Slice(0, layoutsize))
 							;
 
 					}
 					else if (((ASInstance)ins1.Type).Flags.HasFlag(ClassFlags.Wapper))
 					{
-						return ((RtInstance)ins1.facility).wapperedObject.Equals(((RtInstance)ins2.facility).wapperedObject);
+						return ((RtInstance)ins1).wapperedObject.Equals(((RtInstance)ins2).wapperedObject);
 					}
 					else
 					{
@@ -8158,7 +8158,7 @@ namespace juicescript.runtime
 					var ins2 = Context.GC.Heap[key2.HeapPtr];
 					if (ins2.TypeKind == RtHeapTypeKind.STRING)
 					{
-						string str2 = ((RtString)ins2.facility).Str;
+						string str2 = ((RtString)ins2).Str;
 
 						// 使用高效的字符比较，避免创建LocalString的字符串
 						Span<char> chars1 = stackalloc char[16];
@@ -8173,7 +8173,7 @@ namespace juicescript.runtime
 					var ins1 = Context.GC.Heap[key1.HeapPtr];
 					if (ins1.TypeKind == RtHeapTypeKind.STRING)
 					{
-						string str1 = ((RtString)ins1.facility).Str;
+						string str1 = ((RtString)ins1).Str;
 
 						// 使用高效的字符比较，避免创建LocalString的字符串
 						Span<char> chars2 = stackalloc char[16];
@@ -8272,7 +8272,7 @@ namespace juicescript.runtime
 							{
 								if (Context.GC.Heap[invalue.HeapPtr].TypeKind == RtHeapTypeKind.STRING
 									&&
-									string.IsNullOrEmpty(((RtString)Context.GC.Heap[invalue.HeapPtr].facility).Str)
+									string.IsNullOrEmpty(((RtString)Context.GC.Heap[invalue.HeapPtr]).Str)
 									)
 								{
 									outvalue.SetBoolean(false);
@@ -8365,7 +8365,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									int v = ReadIntFromString(str);
 									outvalue.SetSByte((sbyte)v);
 								}
@@ -8470,7 +8470,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									uint v = ReadUIntFromString(str);
 									outvalue.SetByte((byte)v);
 								}
@@ -8572,7 +8572,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									int v = ReadIntFromString(str);
 									outvalue.SetShort((short)v);
 								}
@@ -8677,7 +8677,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									uint v = ReadUIntFromString(str);
 									outvalue.SetUShort((ushort)v);
 								}
@@ -8781,7 +8781,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									int v = ReadIntFromString(str);
 									outvalue.SetInt(v);
 								}
@@ -8884,7 +8884,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									uint v = ReadUIntFromString(str);
 									outvalue.SetUInt(v);
 								}
@@ -8975,7 +8975,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									double v = ReadDoubleFromString(str);
 									outvalue.SetFloat((float)v);
 								}
@@ -9064,7 +9064,7 @@ namespace juicescript.runtime
 								var instance = Context.GC.Heap[invalue.HeapPtr];
 								if (instance.TypeKind == RtHeapTypeKind.STRING)
 								{
-									var str = ((RtString)instance.facility).Str;
+									var str = ((RtString)instance).Str;
 									double v = ReadDoubleFromString(str);
 									outvalue.SetNumber(v);
 								}
@@ -9295,7 +9295,7 @@ namespace juicescript.runtime
 								{
 									case RtHeapTypeKind.CLASS:
 										{
-											int ptr = Context.GC.AllocString($"[class {((RtScriptClass)instance.facility).Meta.QName.Name}]");
+											int ptr = Context.GC.AllocString($"[class {((RtScriptClass)instance).Meta.QName.Name}]");
 											if (ptr == 0)
 											{
 												RaiseOutOfMemory(ref error);
@@ -9331,7 +9331,7 @@ namespace juicescript.runtime
 												if (Extensions.IsExtend((ASInstance)instance.Type, Context.ERROR.Instance))
 												{
 													Span<char> buffers = stackalloc char[16];
-													var msg = ((RtInstance)instance.facility).ReadSlot(0, instance.Type._link_codescope, this);
+													var msg = ((RtInstance)instance).ReadSlot(0, instance.Type._link_codescope, this);
 													int ptr = Context.GC.AllocString($"{instance.Type.QName.Name}: {Extensions.GetPrimitiveValueToString(this, msg,buffers)}");
 													if (ptr == 0)
 													{
@@ -9369,7 +9369,7 @@ namespace juicescript.runtime
 										}
 									case RtHeapTypeKind.NAMESPACE:
 										{
-											ASNamespace ns = ((RtNameSpace)instance.facility).ASNamespace;
+											ASNamespace ns = ((RtNameSpace)instance).ASNamespace;
 											int ptr = Context.GC.AllocString(string.IsNullOrEmpty(ns.def_uri) ? ns.Name : ns.def_uri);
 											if (ptr == 0)
 											{
@@ -9410,7 +9410,7 @@ namespace juicescript.runtime
 										{
 											if (scope_ptr == 0)
 											{
-												int ptr = Context.GC.AllocString($"[object Vector.<{(((RtVector)instance.facility).element_asclass == null ? "*" : ((RtVector)instance.facility).element_asclass.QName.ToDebugTypeName())}>]");
+												int ptr = Context.GC.AllocString($"[object Vector.<{(((RtVector)instance).element_asclass == null ? "*" : ((RtVector)instance).element_asclass.QName.ToDebugTypeName())}>]");
 												if (ptr == 0)
 												{
 													RaiseOutOfMemory(ref error);
@@ -9632,7 +9632,7 @@ namespace juicescript.runtime
 
 										if (
 											((ASInstance)obj.Type).indexer_get.ReturnTypeKind == totype_class.Instance.indexer_get.ReturnTypeKind
-											//(ulong)((RtPayloadVector)obj.facility).element_type == totype_class.Instance._element_class.Type_identifier
+											//(ulong)((RtPayloadVector)obj).element_type == totype_class.Instance._element_class.Type_identifier
 											)
 										{
 											outvalue = invalue;
@@ -9801,7 +9801,7 @@ namespace juicescript.runtime
 				//	unsafe
 				//	{
 				//		invalue = RunMethod(((ASMethodBody)funinstance.Type).Method,
-				//			invalue, ((RtPayloadClosure)funinstance.facility).ScopePtr, ((RtPayloadClosure)funinstance.facility).ScopeType, 0, null, null, ref error, stPos + 1, fun.HeapPtr);
+				//			invalue, ((RtPayloadClosure)funinstance).ScopePtr, ((RtPayloadClosure)funinstance).ScopeType, 0, null, null, ref error, stPos + 1, fun.HeapPtr);
 				//		Context.StackPosition -= 2;
 				//		if (error.raised)
 				//		{
@@ -9838,9 +9838,9 @@ namespace juicescript.runtime
 				var instance = Context.GC.Heap[instancePtr];
 				instance.Type = Context.ARRAY.Instance;
 
-				((RtArray)instance.facility).array_len = 0;
-				((RtArray)instance.facility).methodscopeslot_ref_state = 0;
-				((RtArray)instance.facility).HEAPINSTANCE_PTR = 0;
+				((RtArray)instance).array_len = 0;
+				((RtArray)instance).methodscopeslot_ref_state = 0;
+				((RtArray)instance).HEAPINSTANCE_PTR = 0;
 
 				//Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
 				//Context.StackPosition += 2;
@@ -9932,11 +9932,11 @@ namespace juicescript.runtime
 					var instance = Context.GC.Heap[instancePtr];
 
 					instance.Type = totype_class.Instance;
-					((RtVector)instance.facility).HEAPINSTANCE_PTR = 0;
-					((RtVector)instance.facility).element_asclass = totype_class.Instance._element_class;
-					((RtVector)instance.facility).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
-					//((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
-					((RtVector)instance.facility).GetStore(this).length = 0;
+					((RtVector)instance).HEAPINSTANCE_PTR = 0;
+					((RtVector)instance).element_asclass = totype_class.Instance._element_class;
+					((RtVector)instance).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
+					//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
+					((RtVector)instance).GetStore(this).length = 0;
 
 					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr);
 
@@ -10048,7 +10048,7 @@ namespace juicescript.runtime
 
 						if (Context.GC.Heap[invalue.HeapPtr].TypeKind == RtHeapTypeKind.STRING
 							&&
-							string.IsNullOrEmpty(((RtString)Context.GC.Heap[invalue.HeapPtr].facility).Str)
+							string.IsNullOrEmpty(((RtString)Context.GC.Heap[invalue.HeapPtr]).Str)
 							)
 						{
 							return (false);
@@ -10091,7 +10091,7 @@ namespace juicescript.runtime
 					{
 						if (
 							((ASInstance)this_ins.Type).IsExtend(
-							((ASClass)((RtScriptClass)Context.GC.Heap[instance.HeapPtr].facility).Meta).Instance)
+							((ASClass)((RtScriptClass)Context.GC.Heap[instance.HeapPtr]).Meta).Instance)
 							)
 						{
 							issameorinherit = true;
@@ -10276,7 +10276,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = (ushort)i;
@@ -10300,7 +10300,7 @@ namespace juicescript.runtime
 					int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 					Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
-					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr].facility;
+					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 					closure.This.SetNull();
 					closure.ScopePtr = instance.HeapPtr;
 					closure.ScopeType = vitem.DefineAt;
@@ -10323,7 +10323,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					if (g_idx > -1)
 					{
@@ -10398,7 +10398,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
@@ -10448,7 +10448,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = (ushort)i;
@@ -10466,7 +10466,7 @@ namespace juicescript.runtime
 					int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 					Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
-					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr].facility;
+					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 					//closure.This.SetHeapPtr(instancePtr);
 					//closure.ScopePtr = instancePtr;
 					closure.This = instance;
@@ -10490,7 +10490,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					if (g_idx > -1)
 					{
@@ -10602,7 +10602,7 @@ namespace juicescript.runtime
 							)
 							)
 						{
-							RtStackCache cachePayload = (RtStackCache)cache.facility;
+							RtStackCache cachePayload = (RtStackCache)cache;
 							cachePayload.RefInstance = instance;
 							cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 							cachePayload.scopemember_index = 0;
@@ -10616,7 +10616,7 @@ namespace juicescript.runtime
 						else
 						{
 
-							RtStackCache cachePayload = (RtStackCache)cache.facility;
+							RtStackCache cachePayload = (RtStackCache)cache;
 							cachePayload.RefInstance = instance;
 							cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 							cachePayload.scopemember_index = 0;
@@ -10684,7 +10684,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
@@ -10709,7 +10709,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = (ushort)i;
@@ -10742,7 +10742,7 @@ namespace juicescript.runtime
 					int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 					Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
-					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr].facility;
+					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 					closure.This.SetHeapPtr(instance.HeapPtr);
 					closure.ScopePtr = instance.HeapPtr;
 					closure.ScopeType = vitem.DefineAt;
@@ -10764,7 +10764,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					if (g_idx > -1)
 					{
@@ -10841,7 +10841,7 @@ namespace juicescript.runtime
 					}
 #endif
 
-					RtStackCache cachePayload = (RtStackCache)cache.facility;
+					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
@@ -10901,7 +10901,7 @@ namespace juicescript.runtime
 			}
 
 #endif
-			//string name = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
+			//string name = ((RtPayloadString)Context.GC.Heap[propname_ptr]).Str;
 			
 			Span<char> temp = stackalloc char[16];
 			ReadOnlySpan<char> name = temp;
@@ -10912,7 +10912,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				name = ((RtString)Context.GC.Heap[propname.HeapPtr].facility).Str;
+				name = ((RtString)Context.GC.Heap[propname.HeapPtr]).Str;
 			}
 
 
@@ -10930,13 +10930,13 @@ namespace juicescript.runtime
 
 
 				//先创建或者查找Shape。(第一个属性就是)
-				var blank_shape = (RtShape)Context.GC.Heap[Context.BlankShapePtr].facility;
+				var blank_shape = (RtShape)Context.GC.Heap[Context.BlankShapePtr];
 
 				var ptr = blank_shape.PTR_CHILD;
 				RtShape shape;
 				while (ptr != 0)
 				{
-					shape = (RtShape)Context.GC.Heap[ptr].facility;
+					shape = (RtShape)Context.GC.Heap[ptr];
 					if (
 						//shape.Attribute.HasFlag(
 						//RtPayloadShape.PropertyAttribute.Configurable |
@@ -10947,7 +10947,7 @@ namespace juicescript.runtime
 
 						&&
 
-						//string.Equals(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+						//string.Equals(((RtPayloadString)Context.GC.Heap[shape.PTR_NAME]).Str,
 						//	name,
 						//	StringComparison.Ordinal)
 
@@ -10975,7 +10975,7 @@ namespace juicescript.runtime
 
 
 
-					shape = (RtShape)Context.GC.Heap[ptr].facility;
+					shape = (RtShape)Context.GC.Heap[ptr];
 
 					shape.Attribute = attribute;
 					//RtPayloadShape.PropertyAttribute.Configurable |
@@ -11008,7 +11008,7 @@ namespace juicescript.runtime
 
 				Context.GC.UpdateMemUsage_Sub(Context.GC.Heap[prop_ptr]);
 
-				var propDynamic = (RtDynamic)Context.GC.Heap[prop_ptr].facility;
+				var propDynamic = (RtDynamic)Context.GC.Heap[prop_ptr];
 				propDynamic.SHAPE_PTR = ptr;
 				propDynamic.Slots.Add(value);
 
@@ -11016,23 +11016,23 @@ namespace juicescript.runtime
 
 				if (instance.TypeKind == RtHeapTypeKind.INSTANCE)
 				{
-					((RtInstance)instance.facility).Set_PROPERTY_PTR(prop_ptr, this, (ASInstance)instance.Type);
+					((RtInstance)instance).Set_PROPERTY_PTR(prop_ptr, this, (ASInstance)instance.Type);
 				}
 				else if (instance.TypeKind == RtHeapTypeKind.CLASS)
 				{
-					((RtScriptClass)instance.facility).PROPERTY_PTR = prop_ptr;
+					((RtScriptClass)instance).PROPERTY_PTR = prop_ptr;
 				}
 				else if (instance.TypeKind == RtHeapTypeKind.GLOBAL)
 				{
-					((RtScriptClass)instance.facility).PROPERTY_PTR = prop_ptr;
+					((RtScriptClass)instance).PROPERTY_PTR = prop_ptr;
 				}
 				else if (instance.TypeKind == RtHeapTypeKind.ARRAY)
 				{
-					((RtArray)instance.facility).Set_PROPERTY_PTR(prop_ptr, this);
+					((RtArray)instance).Set_PROPERTY_PTR(prop_ptr, this);
 				}
 				else if (instance.TypeKind == RtHeapTypeKind.CLOSURE)
 				{
-					((RtClosure)instance.facility).Set_PROPERTY_PTR(prop_ptr, this);
+					((RtClosure)instance).Set_PROPERTY_PTR(prop_ptr, this);
 				}
 				else
 				{
@@ -11046,7 +11046,7 @@ namespace juicescript.runtime
 			else
 			{
 				//查看是否在当前Transation链上。
-				RtDynamic prop = (RtDynamic)Context.GC.Heap[PROPERTY_PTR].facility;
+				RtDynamic prop = (RtDynamic)Context.GC.Heap[PROPERTY_PTR];
 
 				int index = prop.Slots.Count - 1;
 
@@ -11056,13 +11056,13 @@ namespace juicescript.runtime
 
 				while (p != Context.BlankShapePtr)
 				{
-					shape = (RtShape)Context.GC.Heap[p].facility;
+					shape = (RtShape)Context.GC.Heap[p];
 
 					if (
 						CompareShapePropertyName(shape.PTR_NAME, name) == 0
 						//	string.Equals(
-						//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
-						//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+						//((RtPayloadString)Context.GC.Heap[propname_ptr]).Str,
+						//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME]).Str,
 						//StringComparison.Ordinal
 						//)
 
@@ -11105,16 +11105,16 @@ namespace juicescript.runtime
 				{
 					//查找是否有现成的
 
-					int p_child = ((RtShape)Context.GC.Heap[prop.SHAPE_PTR].facility).PTR_CHILD;
+					int p_child = ((RtShape)Context.GC.Heap[prop.SHAPE_PTR]).PTR_CHILD;
 
 					while (p_child != 0)
 					{
-						shape = (RtShape)Context.GC.Heap[p_child].facility;
+						shape = (RtShape)Context.GC.Heap[p_child];
 
 						if (
 							//string.Equals(
-							//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
-							//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+							//((RtPayloadString)Context.GC.Heap[propname_ptr]).Str,
+							//((RtPayloadString)Context.GC.Heap[shape.PTR_NAME]).Str,
 							//StringComparison.Ordinal
 							//)
 							CompareShapePropertyName(shape.PTR_NAME, name) == 0
@@ -11155,16 +11155,16 @@ namespace juicescript.runtime
 							RaiseOutOfMemory(ref error);
 							return;
 						}
-						var new_shape = (RtShape)Context.GC.Heap[nshape_ptr].facility;
+						var new_shape = (RtShape)Context.GC.Heap[nshape_ptr];
 
 						new_shape.Attribute = attribute;
 
 
 						new_shape.PTR_NAME = propname;
 
-						//string pname = ((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str;
+						//string pname = ((RtPayloadString)Context.GC.Heap[propname_ptr]).Str;
 
-						var current_shape = (RtShape)Context.GC.Heap[prop.SHAPE_PTR].facility;
+						var current_shape = (RtShape)Context.GC.Heap[prop.SHAPE_PTR];
 
 						new_shape.PTR_PARENT = prop.SHAPE_PTR;
 						new_shape.PTR_CHILD = 0;
@@ -11196,20 +11196,20 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					PROPERTY_PTR = ((RtInstance)instance.facility).PROPERTY_PTR(this, (ASInstance)instance.Type);
+					PROPERTY_PTR = ((RtInstance)instance).PROPERTY_PTR(this, (ASInstance)instance.Type);
 				}
 			}
 			else if (instance.TypeKind == RtHeapTypeKind.CLASS || instance.TypeKind == RtHeapTypeKind.GLOBAL)
 			{
-				PROPERTY_PTR = ((RtScriptClass)instance.facility).PROPERTY_PTR;
+				PROPERTY_PTR = ((RtScriptClass)instance).PROPERTY_PTR;
 			}
 			else if (instance.TypeKind == RtHeapTypeKind.ARRAY)
 			{
-				PROPERTY_PTR = ((RtArray)instance.facility).PROPERTY_PTR(this);
+				PROPERTY_PTR = ((RtArray)instance).PROPERTY_PTR(this);
 			}
 			else if (instance.TypeKind == RtHeapTypeKind.CLOSURE)
 			{
-				PROPERTY_PTR = ((RtClosure)instance.facility).PROPERTY_PTR(this);
+				PROPERTY_PTR = ((RtClosure)instance).PROPERTY_PTR(this);
 			}
 			else
 			{
@@ -11235,7 +11235,7 @@ namespace juicescript.runtime
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 			if (PROPERTY_PTR != 0)
 			{
-				prop = (RtDynamic)Context.GC.Heap[PROPERTY_PTR].facility;
+				prop = (RtDynamic)Context.GC.Heap[PROPERTY_PTR];
 
 				int p = prop.SHAPE_PTR;
 				int index = prop.Slots.Count - 1;
@@ -11253,12 +11253,12 @@ namespace juicescript.runtime
 				{
 					while (p != Context.BlankShapePtr)
 					{
-						var shape = (RtShape)Context.GC.Heap[p].facility;
+						var shape = (RtShape)Context.GC.Heap[p];
 
 						//if (string.Equals(
-						//	//((RtPayloadString)Context.GC.Heap[propname_ptr].facility).Str,
+						//	//((RtPayloadString)Context.GC.Heap[propname_ptr]).Str,
 						//	searchName,
-						//	((RtPayloadString)Context.GC.Heap[shape.PTR_NAME].facility).Str,
+						//	((RtPayloadString)Context.GC.Heap[shape.PTR_NAME]).Str,
 						//	StringComparison.Ordinal
 						//	))
 						if (CompareShapePropertyName(shape.PTR_NAME, searchName) == 0)
@@ -11301,14 +11301,14 @@ namespace juicescript.runtime
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 			if (PROPERTY_PTR != 0)
 			{
-				var prop = (RtDynamic)Context.GC.Heap[PROPERTY_PTR].facility;
+				var prop = (RtDynamic)Context.GC.Heap[PROPERTY_PTR];
 
 				int p = prop.SHAPE_PTR;
 				int index = prop.Slots.Count - 1;
 
 				while (p != Context.BlankShapePtr)
 				{
-					var shape = (RtShape)Context.GC.Heap[p].facility;
+					var shape = (RtShape)Context.GC.Heap[p];
 
 					if (shape.Attribute.HasFlag(RtShape.PropertyAttribute.Enumerable))
 					{
@@ -11328,13 +11328,13 @@ namespace juicescript.runtime
 
 			if (dynamic.SHAPE_PTR == shape_ptr) //正好删除最后一个,使SHAPE指向上一个SHAPE即可
 			{
-				dynamic.SHAPE_PTR = ((RtShape)Context.GC.Heap[shape_ptr].facility).PTR_PARENT;
+				dynamic.SHAPE_PTR = ((RtShape)Context.GC.Heap[shape_ptr]).PTR_PARENT;
 			}
 			else
 			{
 				//先反向search到，要移除的shape的下一个shape。
 				int p = dynamic.SHAPE_PTR;
-				var parent_p = ((RtShape)Context.GC.Heap[dynamic.SHAPE_PTR].facility).PTR_PARENT;
+				var parent_p = ((RtShape)Context.GC.Heap[dynamic.SHAPE_PTR]).PTR_PARENT;
 
 				List<int> path = new List<int>();
 				path.Add(p);
@@ -11342,18 +11342,18 @@ namespace juicescript.runtime
 				while (parent_p != shape_ptr)
 				{
 					p = parent_p;
-					parent_p = ((RtShape)Context.GC.Heap[p].facility).PTR_PARENT;
+					parent_p = ((RtShape)Context.GC.Heap[p]).PTR_PARENT;
 
 					path.Add(p);
 				}
 
 				//从shape_ptr的父节点开始找
-				var chain_node = (RtShape)Context.GC.Heap[((RtShape)Context.GC.Heap[shape_ptr].facility).PTR_PARENT].facility;
+				var chain_node = (RtShape)Context.GC.Heap[((RtShape)Context.GC.Heap[shape_ptr]).PTR_PARENT];
 
 				int found_ptr = 0;
 				for (int i = path.Count - 1; i >= 0; i--)
 				{
-					RtShape tomatch = (RtShape)Context.GC.Heap[path[i]].facility;
+					RtShape tomatch = (RtShape)Context.GC.Heap[path[i]];
 					//string tomatch_name = GetShapePropertyNameAsString(tomatch.PTR_NAME);
 					var tomatch_name = tomatch.PTR_NAME;
 
@@ -11363,7 +11363,7 @@ namespace juicescript.runtime
 
 					while (search_p != 0)
 					{
-						var shape = (RtShape)Context.GC.Heap[search_p].facility;
+						var shape = (RtShape)Context.GC.Heap[search_p];
 
 						if (search_p != shape_ptr)
 						{
@@ -11397,8 +11397,8 @@ namespace juicescript.runtime
 				if (chain_node == null)
 				{
 					//需要新clone一条链
-					//chain_node = (RtPayloadShape)Context.GC.Heap[((RtPayloadShape)Context.GC.Heap[shape_ptr].facility).PTR_PARENT].facility;
-					int chain_ptr = ((RtShape)Context.GC.Heap[shape_ptr].facility).PTR_PARENT;
+					//chain_node = (RtPayloadShape)Context.GC.Heap[((RtPayloadShape)Context.GC.Heap[shape_ptr]).PTR_PARENT];
+					int chain_ptr = ((RtShape)Context.GC.Heap[shape_ptr]).PTR_PARENT;
 
 
 					for (int i = path.Count - 1; i >= 0; i--)
@@ -11410,14 +11410,14 @@ namespace juicescript.runtime
 							return;
 						}
 
-						var new_shape = (RtShape)Context.GC.Heap[nshape_ptr].facility;
-						var old_shape = (RtShape)Context.GC.Heap[path[i]].facility;
+						var new_shape = (RtShape)Context.GC.Heap[nshape_ptr];
+						var old_shape = (RtShape)Context.GC.Heap[path[i]];
 
 						new_shape.Attribute = old_shape.Attribute;
 						new_shape.PTR_NAME = old_shape.PTR_NAME;
 						new_shape.PTR_PARENT = chain_ptr;
 
-						chain_node = (RtShape)Context.GC.Heap[chain_ptr].facility;
+						chain_node = (RtShape)Context.GC.Heap[chain_ptr];
 						new_shape.PTR_BROTHER = chain_node.PTR_CHILD;
 						chain_node.PTR_CHILD = nshape_ptr;
 
@@ -11425,14 +11425,14 @@ namespace juicescript.runtime
 
 					}
 
-					//chain_node = (RtPayloadShape)Context.GC.Heap[chain_ptr].facility;
-					//string foundname = ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME].facility).Str;
+					//chain_node = (RtPayloadShape)Context.GC.Heap[chain_ptr];
+					//string foundname = ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME]).Str;
 					//string path_s = "";
 					//do
 					//{
-					//    path_s = path_s + ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME].facility).Str + ",";
+					//    path_s = path_s + ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME]).Str + ",";
 
-					//    chain_node = (RtPayloadShape)Context.GC.Heap[chain_node.PTR_PARENT].facility;
+					//    chain_node = (RtPayloadShape)Context.GC.Heap[chain_node.PTR_PARENT];
 
 					//} while (chain_node.PTR_PARENT != 0);
 
@@ -11441,13 +11441,13 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					//string foundname = ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME].facility).Str;
+					//string foundname = ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME]).Str;
 					//string path_s ="";
 					//do
 					//{
-					//    path_s = path_s + ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME].facility).Str + ",";
+					//    path_s = path_s + ((RtPayloadString)Context.GC.Heap[chain_node.PTR_NAME]).Str + ",";
 
-					//    chain_node = (RtPayloadShape)Context.GC.Heap[chain_node.PTR_PARENT].facility;
+					//    chain_node = (RtPayloadShape)Context.GC.Heap[chain_node.PTR_PARENT];
 
 					//} while (chain_node.PTR_PARENT != 0);
 
@@ -11469,15 +11469,15 @@ namespace juicescript.runtime
 			var cache = Context.GC.Heap[cache_ptr];
 			cache.Type = @class.Instance;
 
-			((RtInstance)cache.facility).HEAPINSTANCE_PTR = 0;
-			((RtInstance)cache.facility).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
-			((RtInstance)cache.facility).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__].facility).PROTO__PTR, this);
-			((RtInstance)cache.facility).methodscopeslot_ref_state = 0;
+			((RtInstance)cache).HEAPINSTANCE_PTR = 0;
+			((RtInstance)cache).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
+			((RtInstance)cache).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
+			((RtInstance)cache).methodscopeslot_ref_state = 0;
 
 			CodeScope cscope = @class.Instance._link_codescope;
 			if (cscope.TypeLayout.Size > 0)
 			{
-				((RtInstance)cache.facility).Init(cscope, Context.player, initmember);
+				((RtInstance)cache).Init(cscope, Context.player, initmember);
 			}
 
 			Context.StackSlots[slotindex].SetHeapPtr(cache_ptr);
@@ -11505,7 +11505,7 @@ namespace juicescript.runtime
 					)
 					{
 						
-							s = Context.GC.Heap[((RtMethodScope)s.facility).ParentPtr];
+							s = Context.GC.Heap[((RtMethodScope)s).ParentPtr];
 						
 					}
 
@@ -11513,17 +11513,17 @@ namespace juicescript.runtime
 					if (s.TypeKind == RtHeapTypeKind.GLOBAL)
 					{
 #if DEBUG
-						if (((RtScriptClass)s.facility).Meta._link_codescope.index != heapLocater.ScopeIndex)
+						if (((RtScriptClass)s).Meta._link_codescope.index != heapLocater.ScopeIndex)
 						{
 							throw new InvalidOperationException();
 						}
 #endif
 
-						c = ((RtScriptClass)s.facility).ReadSlot(heapLocater.MemberIndex);
+						c = ((RtScriptClass)s).ReadSlot(heapLocater.MemberIndex);
 					}
 					else if (s.TypeKind == RtHeapTypeKind.MethodScope)
 					{
-						c = ((RtMethodScope)s.facility).ReadSlot(heapLocater.MemberIndex, this);
+						c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex, this);
 					}
 					else if (s.TypeKind == RtHeapTypeKind.INSTANCE)
 					{
@@ -11534,7 +11534,7 @@ namespace juicescript.runtime
 						}
 #endif
 						s = Context.GC.Heap[((ASScript)s.Type._link_codescope.Parent.Container).__global_index__];
-						c = ((RtScriptClass)s.facility).ReadSlot(heapLocater.MemberIndex);
+						c = ((RtScriptClass)s).ReadSlot(heapLocater.MemberIndex);
 					}
 					else
 					{
@@ -11554,10 +11554,10 @@ namespace juicescript.runtime
 
 						var closure = Context.GC.Heap[closurePtr];
 						closure.Type = function.Body;
-						((RtClosure)closure.facility).ScopePtr = scope_ptr;
-						((RtClosure)closure.facility).ScopeType = null; ((RtClosure)closure.facility)._ref_as_type = null;
-						((RtClosure)closure.facility).This.SetNull(); ((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-						((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+						((RtClosure)closure).ScopePtr = scope_ptr;
+						((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+						((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
+						((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
 						//stackslots[target.index].SetHeapPtr(closurePtr);
 
@@ -11573,12 +11573,12 @@ namespace juicescript.runtime
 
 						if (s.TypeKind == RtHeapTypeKind.GLOBAL)
 						{
-							((RtScriptClass)s.facility).SetSlot(v, heapLocater.MemberIndex);
+							((RtScriptClass)s).SetSlot(v, heapLocater.MemberIndex);
 							stackslots[target.index] = v;
 						}
 						else if (s.TypeKind == RtHeapTypeKind.MethodScope)
 						{
-							((RtMethodScope)s.facility).SetSlot(v, heapLocater.MemberIndex);
+							((RtMethodScope)s).SetSlot(v, heapLocater.MemberIndex);
 							stackslots[target.index] = v;
 						}
 
@@ -11611,7 +11611,7 @@ namespace juicescript.runtime
 						throw new InvalidOperationException();
 					}
 #endif
-					var c = ((RtMethodScope)s.facility).ReadSlot(heapLocater.MemberIndex, this);
+					var c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex, this);
 					if (c.ValueType == BoxType.Undefined)
 					{
 						ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
@@ -11621,10 +11621,10 @@ namespace juicescript.runtime
 
 						var closure = Context.GC.Heap[closurePtr];
 						closure.Type = function.Body;
-						((RtClosure)closure.facility).ScopePtr = scope_ptr;
-						((RtClosure)closure.facility).ScopeType = null; ((RtClosure)closure.facility)._ref_as_type = null;
-						((RtClosure)closure.facility).This.SetNull(); ((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-						((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+						((RtClosure)closure).ScopePtr = scope_ptr;
+						((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+						((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
+						((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
 						//保存到method的成员中，可以考虑到缓存
 						ASTrait t = s.Type._link_codescope.Members[heapLocater.MemberIndex].trait;
@@ -11632,7 +11632,7 @@ namespace juicescript.runtime
 						NaNBoxing v = new NaNBoxing();
 						v.SetHeapPtr(closurePtr);
 
-						PrepareSaveMethodScope((RtMethodScope)s.facility, ref heapLocater, ref v, m_scope, method_scopes, ref error);
+						PrepareSaveMethodScope((RtMethodScope)s, ref heapLocater, ref v, m_scope, method_scopes, ref error);
 						if (error.raised)
 						{
 							closure_instance = null;
@@ -11640,7 +11640,7 @@ namespace juicescript.runtime
 						}
 
 
-						((RtMethodScope)s.facility).SetSlot(v, heapLocater.MemberIndex);
+						((RtMethodScope)s).SetSlot(v, heapLocater.MemberIndex);
 						stackslots[target.index] = v;
 						closure_instance = Context.GC.Heap[v.HeapPtr]; ;
 						return v.HeapPtr;
@@ -11673,10 +11673,10 @@ namespace juicescript.runtime
 
 				var closure = Context.GC.Heap[closurePtr];
 				closure.Type = function.Body;
-				((RtClosure)closure.facility).ScopePtr = scope_ptr;
-				((RtClosure)closure.facility).ScopeType = null; ((RtClosure)closure.facility)._ref_as_type = null;
-				((RtClosure)closure.facility).This.SetNull(); ((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-				((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+				((RtClosure)closure).ScopePtr = scope_ptr;
+				((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+				((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
+				((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
 				stackslots[target.index].SetHeapPtr(closurePtr);
 				closure_instance = closure;
@@ -11696,7 +11696,7 @@ namespace juicescript.runtime
 			{
 				case RtHeapTypeKind.CLASS:
 					{
-						var codeScope = ((RtScriptClass)s.facility).Meta._link_codescope;
+						var codeScope = ((RtScriptClass)s).Meta._link_codescope;
 						if (codeScope.index != heapLocater.ScopeIndex)
 						{
 							codeScope = codeScope.Parent;
@@ -11708,9 +11708,9 @@ namespace juicescript.runtime
 #endif
 
 							RtHeapBase sInstance = Context.GC.Heap[
-							((ASScript)((RtScriptClass)s.facility).Meta._link_codescope.Parent.Container).__global_index__];
+							((ASScript)((RtScriptClass)s).Meta._link_codescope.Parent.Container).__global_index__];
 
-							RtScriptClass heap = (RtScriptClass)sInstance.facility;
+							RtScriptClass heap = (RtScriptClass)sInstance;
 							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
 
 							//stackslots[stackLocater.index] = value;
@@ -11718,7 +11718,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							RtScriptClass heap = (RtScriptClass)s.facility;
+							RtScriptClass heap = (RtScriptClass)s;
 							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
 
 							//stackslots[stackLocater.index] = value;
@@ -11730,12 +11730,12 @@ namespace juicescript.runtime
 				case RtHeapTypeKind.GLOBAL:
 					{
 #if DEBUG
-						var codeScope = ((RtScriptClass)s.facility).Meta._link_codescope;
+						var codeScope = ((RtScriptClass)s).Meta._link_codescope;
 						if (codeScope.index != heapLocater.ScopeIndex)
 							throw new InvalidOperationException();
 #endif
 
-						RtScriptClass heap = (RtScriptClass)s.facility;
+						RtScriptClass heap = (RtScriptClass)s;
 						NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
 
 						//stackslots[stackLocater.index] = value;
@@ -11773,7 +11773,7 @@ namespace juicescript.runtime
 							RtHeapBase sInstance = Context.GC.Heap[
 									((ASScript)(sType.Container)).__global_index__];
 
-							RtScriptClass heap = (RtScriptClass)sInstance.facility;
+							RtScriptClass heap = (RtScriptClass)sInstance;
 							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
 
 							//stackslots[stackLocater.index] = value;
@@ -11782,7 +11782,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							NaNBoxing value = ((RtInstance)s.facility).ReadSlot(heapLocater.MemberIndex, s.Type._link_codescope, this, returnSlotIndex, _parent_ptr);
+							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex, s.Type._link_codescope, this, returnSlotIndex, _parent_ptr);
 							//stackslots[stackLocater.index] = value;
 
 							return value;
@@ -11794,13 +11794,13 @@ namespace juicescript.runtime
 					{
 						if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
 						{
-							_parent_ptr = ((RtMethodScope)s.facility).ParentPtr;
+							_parent_ptr = ((RtMethodScope)s).ParentPtr;
 							s = Context.GC.Heap[_parent_ptr];
 							goto label_method_parent;
 						}
 						else
 						{
-							RtMethodScope heap = (RtMethodScope)s.facility;
+							RtMethodScope heap = (RtMethodScope)s;
 							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex
 								//#if FORCOMPILER
 								, this
@@ -12294,7 +12294,7 @@ namespace juicescript.runtime
 									var instance2 = Context.GC.Heap[n2.HeapPtr];
 									if (instance2.TypeKind == RtHeapTypeKind.STRING)
 									{
-										var str2 = ((RtString)instance2.facility).Str;
+										var str2 = ((RtString)instance2).Str;
 										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
@@ -12350,7 +12350,7 @@ namespace juicescript.runtime
 						var instance1 = Context.GC.Heap[n1.HeapPtr];
 						if (instance1.TypeKind == RtHeapTypeKind.STRING)
 						{
-							var str1 = ((RtString)instance1.facility).Str;
+							var str1 = ((RtString)instance1).Str;
 
 							switch (n2.ValueType)
 							{
@@ -12408,7 +12408,7 @@ namespace juicescript.runtime
 										var instance2 = Context.GC.Heap[n2.HeapPtr];
 										if (instance2.TypeKind == RtHeapTypeKind.STRING)
 										{
-											var str2 = ((RtString)instance2.facility).Str;
+											var str2 = ((RtString)instance2).Str;
 											string concatenated = str1 + str2;
 
 											// 使用安全的字符串创建方法
@@ -12455,7 +12455,7 @@ namespace juicescript.runtime
 				{
 					Span<char> buffers = stackalloc char[16];
 					var str = Extensions.GetPrimitiveValueToString(this, n1,buffers);
-					var str2 = ((RtString)instance.facility).Str;
+					var str2 = ((RtString)instance).Str;
 					Context.GC.CheckGC(ref error);
 
 					string concatenated = $"{str}{str2}" ;
@@ -13547,7 +13547,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						str1 = ((RtString)Context.GC.Heap[n1.HeapPtr].facility).Str;
+						str1 = ((RtString)Context.GC.Heap[n1.HeapPtr]).Str;
 					}
 
 					if (n2.ValueType == BoxType.LocalString)
@@ -13559,7 +13559,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						str2 = ((RtString)Context.GC.Heap[n2.HeapPtr].facility).Str;
+						str2 = ((RtString)Context.GC.Heap[n2.HeapPtr]).Str;
 					}
 
 					int c = string.CompareOrdinal(str1, str2);
@@ -14147,7 +14147,7 @@ namespace juicescript.runtime
 											return (true);
 										}
 
-										if (((RtVector)v_instance.facility).element_asclass == typeclass.Instance._element_class)
+										if (((RtVector)v_instance).element_asclass == typeclass.Instance._element_class)
 										{
 											return (true);
 										}
@@ -14200,38 +14200,38 @@ namespace juicescript.runtime
 			switch (obj.TypeKind)
 			{
 				case RtHeapTypeKind.INSTANCE:
-					o_proto = ((RtInstance)obj.facility).PROTOTYPE(this, (ASInstance)obj.Type);
+					o_proto = ((RtInstance)obj).PROTOTYPE(this, (ASInstance)obj.Type);
 					break;
 				case RtHeapTypeKind.CLOSURE:
 					if (((ASMethodBody)obj.Type).Method.__ismethod)
 					{
-						o_proto = ((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__].facility).PROTO__PTR;
+						o_proto = ((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR;
 					}
 					else
 					{
-						o_proto = ((RtClosure)obj.facility).PROTOTYPE(this);
+						o_proto = ((RtClosure)obj).PROTOTYPE(this);
 						if (o_proto <= 0) //默认，指向$FUNCTION的proto
 						{
-							o_proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__].facility).PROTO__PTR;
+							o_proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
 							if (o_proto <= 0) // Function.prototype默认是一个closure,也可能<=0。那么就指向到Object.proto
 							{
-								o_proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR;
+								o_proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
 							}
 						}
 					}
 					break;
 				case RtHeapTypeKind.ARRAY:
-					o_proto = ((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__].facility).PROTO__PTR;
+					o_proto = ((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR;
 					break;
 				case RtHeapTypeKind.VECTOR:
-					o_proto = ((RtScriptClass)Context.GC.Heap[obj.Type._link_codescope.TypeLayout.ASType.__instance_index__].facility).PROTO__PTR;
+					o_proto = ((RtScriptClass)Context.GC.Heap[obj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR;
 					break;
 				case RtHeapTypeKind.CLASS:
-					o_proto = ((RtScriptClass)Context.GC.Heap[Context.CLASS.__instance_index__].facility).PROTO__PTR;
-					//o_proto = ((RtPayloadScriptClass)obj.facility).PROTO__PTR;
+					o_proto = ((RtScriptClass)Context.GC.Heap[Context.CLASS.__instance_index__]).PROTO__PTR;
+					//o_proto = ((RtPayloadScriptClass)obj).PROTO__PTR;
 					break;
 				case RtHeapTypeKind.NAMESPACE:
-					o_proto = ((RtScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__].facility).PROTO__PTR;
+					o_proto = ((RtScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__]).PROTO__PTR;
 					break;
 
 				default:
@@ -14542,7 +14542,7 @@ namespace juicescript.runtime
 									RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
 									if (rtHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 									{
-										RtStackCache _obj = (RtStackCache)rtHeap.facility;
+										RtStackCache _obj = (RtStackCache)rtHeap;
 
 										if (_obj.RefInstance.ValueType != BoxType.HeapPtr)
 										{
@@ -14557,12 +14557,12 @@ namespace juicescript.runtime
 											if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 											{
 
-												//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr].facility).Str;
+												//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
 
 												ReadOnlySpan<char> searchName = frame_holdchars;
 												if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
 												{
-													searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr].facility).Str;
+													searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str;
 												}
 												else
 												{
@@ -14579,7 +14579,7 @@ namespace juicescript.runtime
 												{
 													ns.SetHeapPtr(_obj.searchNameSpacePtr);
 													RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-													@namespace = ((RtNameSpace)ns_instance.facility).ASNamespace;
+													@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 													_obj.searchNameSpacePtr = 0;
 												}
 
@@ -14605,7 +14605,7 @@ namespace juicescript.runtime
 													stackslots[stack.index].SetBoolean(false);
 												}
 												else if (refObj.TypeKind == RtHeapTypeKind.ARRAY &&
-														((RtArray)refObj.facility).isArguments()
+														((RtArray)refObj).isArguments()
 														&& @namespace == null
 														&& "callee".AsSpan().CompareTo(searchName, StringComparison.Ordinal) == 0
 													)
@@ -14618,7 +14618,7 @@ namespace juicescript.runtime
 													NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 													if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
 													{
-														RtShape shape = (RtShape)Context.GC.Heap[shape_ptr].facility;
+														RtShape shape = (RtShape)Context.GC.Heap[shape_ptr];
 
 														if (shape.Attribute.HasFlag(RtShape.PropertyAttribute.Configurable))
 														{
@@ -14653,7 +14653,7 @@ namespace juicescript.runtime
 													if (_obj.indexer_key.ValueType == BoxType.Uint)
 #endif
 													{
-														stackslots[stack.index].SetBoolean(((RtArray)refObj.facility).Delete(_obj.indexer_key.UIntValue, this));
+														stackslots[stack.index].SetBoolean(((RtArray)refObj).Delete(_obj.indexer_key.UIntValue, this));
 													}
 #if DEBUG
 													else
@@ -14805,7 +14805,7 @@ namespace juicescript.runtime
 									//*_p = *PC++;
 								}
 
-								string name = ((RtString)Context.GC.Heap[constants[const_id].HeapPtr].facility).Str;
+								string name = ((RtString)Context.GC.Heap[constants[const_id].HeapPtr]).Str;
 
 								//int instancePtr;
 								NaNBoxing instance;
@@ -14887,7 +14887,7 @@ namespace juicescript.runtime
 #endif
 								
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
-								NaNBoxing thisPtr = ((RtMethodScope)methodscope.facility).ThisPtr;
+								NaNBoxing thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 								int code = MultiNameLSearch(ns_set, kind, as_type, name, constants[const_id].HeapPtr, stack, stackslots, stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
 
 								switch (code)
@@ -15062,7 +15062,7 @@ namespace juicescript.runtime
 #endif
 
 
-									RtStackCache cachePayload = (RtStackCache)cache.facility;
+									RtStackCache cachePayload = (RtStackCache)cache;
 									cachePayload.RefInstance = instance_box;
 									cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 									cachePayload.scopemember_index = 0;
@@ -15228,7 +15228,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
@@ -15277,7 +15277,7 @@ namespace juicescript.runtime
 										var span = Context.StackSlots.AsSpan(Context.StackPosition, 1); span.Clear();
 										StackLocater tmp = default; tmp.index = 0;
 										Context.StackPosition++;
-										NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+										NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 										if (error.raised)
 										{
 											Context.StackPosition--;
@@ -15292,7 +15292,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = ((RtString)_n.facility).Str;
+										name = ((RtString)_n).Str;
 									}
 
 								}
@@ -15308,7 +15308,7 @@ namespace juicescript.runtime
 #endif
 
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
-								NaNBoxing thisPtr = ((RtMethodScope)methodscope.facility).ThisPtr;
+								NaNBoxing thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 								int code = MultiNameLSearch(ns_set, kind, as_type, name, 0, stack, stackslots, stackStPos, instance_box, check_MultiNameLSearch_issameorinherit( instance_box, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null) , ref error);
 
 								switch (code)
@@ -15384,7 +15384,7 @@ namespace juicescript.runtime
 									RtHeapBase ns_instance = Context.GC.Heap[ns.HeapPtr];
 									if (ns_instance.TypeKind == RtHeapTypeKind.NAMESPACE)
 									{
-										searchNs = ((RtNameSpace)ns_instance.facility).ASNamespace;
+										searchNs = ((RtNameSpace)ns_instance).ASNamespace;
 
 									}
 									else
@@ -15403,11 +15403,11 @@ namespace juicescript.runtime
 									RtHeapBase name_instance = Context.GC.Heap[name.HeapPtr];
 									if (name_instance.TypeKind == RtHeapTypeKind.STRING)
 									{
-										searchName = ((RtString)name_instance.facility).Str;
+										searchName = ((RtString)name_instance).Str;
 									}
 									else if (name_instance.TypeKind == RtHeapTypeKind.NAMESPACE)
 									{
-										var n = ((RtNameSpace)name_instance.facility).ASNamespace;
+										var n = ((RtNameSpace)name_instance).ASNamespace;
 										if (!string.IsNullOrEmpty(n.def_uri))
 										{
 											searchName = n.def_uri;
@@ -15428,7 +15428,7 @@ namespace juicescript.runtime
 
 										ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 										Context.StackPosition++;
-										ConvertValueType(ref error, name, TypeKind.String, Context.STRING, ref conv, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr);
+										ConvertValueType(ref error, name, TypeKind.String, Context.STRING, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 										if (error.raised)
 										{
 											Context.StackPosition--;
@@ -15512,7 +15512,7 @@ namespace juicescript.runtime
 								//RTQName查找 -- 由于自定义命名空间只会在class级别定义，所以实际上只需要查找 静态成员 或者 类成员-继承的类成员-静态成员-基类静态成员找即可。
 								while (instance.TypeKind == RtHeapTypeKind.MethodScope)
 								{
-									instancePtr = ((RtMethodScope)instance.facility).ParentPtr;
+									instancePtr = ((RtMethodScope)instance).ParentPtr;
 									instance = Context.GC.Heap[instancePtr];
 									deepsearch = true;
 								}
@@ -15522,7 +15522,7 @@ namespace juicescript.runtime
 
 
 							lbl_primitive:
-								var thisPtr = ((RtMethodScope)methodscope.facility).ThisPtr;
+								var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 								bool issameorinherit = thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr && instance != null &&
 
 									Context.GC.Heap[thisPtr.HeapPtr].TypeKind == instance.TypeKind
@@ -15660,7 +15660,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
@@ -15677,7 +15677,7 @@ namespace juicescript.runtime
 										int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 										Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
-										RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr].facility;
+										RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 										closure.This = instance_box;
 										closure.ScopePtr = 0;
 										closure.ScopeType = vitem.DefineAt;
@@ -15713,7 +15713,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
@@ -15773,7 +15773,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance.SetHeapPtr(instancePtr);
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
@@ -15795,7 +15795,7 @@ namespace juicescript.runtime
 											int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 											Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
-											RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr].facility;
+											RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 											closure.This.SetHeapPtr(instancePtr);
 											closure.ScopePtr = instancePtr;
 											closure.ScopeType = vitem.DefineAt;
@@ -15817,7 +15817,7 @@ namespace juicescript.runtime
 											}
 #endif
 
-											RtStackCache cachePayload = (RtStackCache)cache.facility;
+											RtStackCache cachePayload = (RtStackCache)cache;
 											cachePayload.RefInstance.SetHeapPtr(instancePtr);
 											if (g_idx > -1)
 											{
@@ -15874,7 +15874,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance.SetHeapPtr(o_instancePtr);
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
@@ -15890,7 +15890,7 @@ namespace juicescript.runtime
 								}
 								else if (instance.TypeKind == RtHeapTypeKind.CLASS)
 								{
-									CodeScope cls = ((RtScriptClass)instance.facility).Meta._link_codescope;
+									CodeScope cls = ((RtScriptClass)instance).Meta._link_codescope;
 									int i;
 									var member = searchmember(cls, searchNs, searchName, out i);
 
@@ -15909,7 +15909,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance.SetHeapPtr(instancePtr);
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
@@ -15930,7 +15930,7 @@ namespace juicescript.runtime
 											int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 											Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
-											RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr].facility;
+											RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 											closure.This.SetNull();
 											closure.ScopePtr = instancePtr;
 											closure.ScopeType = vitem.DefineAt;
@@ -15952,7 +15952,7 @@ namespace juicescript.runtime
 											}
 #endif
 
-											RtStackCache cachePayload = (RtStackCache)cache.facility;
+											RtStackCache cachePayload = (RtStackCache)cache;
 											cachePayload.RefInstance.SetHeapPtr(instancePtr);
 											if (g_idx > -1)
 											{
@@ -16016,7 +16016,7 @@ namespace juicescript.runtime
 										}
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance.SetHeapPtr(o_instancePtr);
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
@@ -16120,7 +16120,7 @@ namespace juicescript.runtime
 									{
 
 
-										RtScriptClass heap = (RtScriptClass)instance.facility;
+										RtScriptClass heap = (RtScriptClass)instance;
 										ASTrait trait = heap.Meta._link_codescope.Members[(ushort)scopemember_index].trait;
 #if DEBUG
 										if (!
@@ -16143,7 +16143,7 @@ namespace juicescript.runtime
 										}
 
 #endif
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)scopemember_index;
@@ -16156,7 +16156,7 @@ namespace juicescript.runtime
 									{
 
 
-										RtInstance heap = (RtInstance)instance.facility;
+										RtInstance heap = (RtInstance)instance;
 										ASTrait trait = instance.Type._link_codescope.Members[(ushort)scopemember_index].trait;
 #if DEBUG
 										if (!
@@ -16179,7 +16179,7 @@ namespace juicescript.runtime
 
 #endif
 
-										RtStackCache cachePayload = (RtStackCache)cache.facility;
+										RtStackCache cachePayload = (RtStackCache)cache;
 										cachePayload.RefInstance = instance_box;
 										cachePayload.trait[0] = trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)scopemember_index;
@@ -16264,7 +16264,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 #endif
 
-								stackslots[dst_index] = ((RtMethodScope)methodscope.facility).ReadSlot(heapLocater->MemberIndex, this);
+								stackslots[dst_index] = ((RtMethodScope)methodscope).ReadSlot(heapLocater->MemberIndex, this);
 
 
 							}
@@ -16276,7 +16276,7 @@ namespace juicescript.runtime
 						//								if (methodscope.Type._link_codescope.index != (ushort)((uint)dst_index >> 16 & 0xff))
 						//									throw new InvalidOperationException();
 						//#endif
-						//								stackslots[(int)((uint)dst_index & 0xff)] = ((RtPayloadMethodScope)methodscope.facility).ReadSlot((ushort)((uint)dst_index >> 8 & 0xff), this);
+						//								stackslots[(int)((uint)dst_index & 0xff)] = ((RtPayloadMethodScope)methodscope).ReadSlot((ushort)((uint)dst_index >> 8 & 0xff), this);
 						//							}
 						//							break;
 						case INS_Code.ld_ValueRef:
@@ -16314,7 +16314,7 @@ namespace juicescript.runtime
 #if FORCOMPILER
 								if (IsComputeConstExpr)
 								{
-									if (((RtMethodScope)methodscope.facility).ThisPtr.ValueType == BoxType.Fault)
+									if (((RtMethodScope)methodscope).ThisPtr.ValueType == BoxType.Fault)
 									{
 										throw new EvalConstException();
 									}
@@ -16326,7 +16326,7 @@ namespace juicescript.runtime
 								StackLocater target;
 								target.index = dst_index;
 
-								stackslots[target.index] = ((RtMethodScope)methodscope.facility).ThisPtr;
+								stackslots[target.index] = ((RtMethodScope)methodscope).ThisPtr;
 
 							}
 							break;
@@ -16354,7 +16354,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 								if (Context.GC.Heap[arguments.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
 									throw new InvalidOperationException();
-								if (((RtArray)Context.GC.Heap[arguments.HeapPtr].facility).StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
+								if (((RtArray)Context.GC.Heap[arguments.HeapPtr]).StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 									throw new InvalidOperationException();
 
 #endif
@@ -16437,7 +16437,7 @@ namespace juicescript.runtime
 								{
 									if (o.TypeKind == RtHeapTypeKind.MethodScope)
 									{
-										RtMethodScope rtPayload = (RtMethodScope)o.facility;
+										RtMethodScope rtPayload = (RtMethodScope)o;
 										o = Context.GC.Heap[rtPayload.ParentPtr];
 										instancePtr = rtPayload.ParentPtr;
 									}
@@ -16514,10 +16514,10 @@ namespace juicescript.runtime
 									_this_ = global_obj;
 								}
 
-								var _scopeType = Context.GC.Heap[((RtClosure)closure.facility).ScopePtr].Type;
+								var _scopeType = Context.GC.Heap[((RtClosure)closure).ScopePtr].Type;
 
 								NaNBoxing ret = RunMethod(((ASMethodBody)closure.Type).Method, _this_,
-									((RtClosure)closure.facility).ScopePtr, _scopeType,
+									((RtClosure)closure).ScopePtr, _scopeType,
 									(ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, closure_ptr);
 								if (error.raised)
 								{
@@ -16552,7 +16552,7 @@ namespace juicescript.runtime
 									funinstance = Context.GC.Heap[funValue.HeapPtr];
 									if (funinstance.TypeKind == RtHeapTypeKind.CLASS)
 									{
-										var @class = ((ASClass)((RtScriptClass)funinstance.facility).Meta);
+										var @class = ((ASClass)((RtScriptClass)funinstance).Meta);
 
 										if (@class.Instance.Flags.HasFlag(ClassFlags.NoConstructor))
 										{
@@ -16573,7 +16573,7 @@ namespace juicescript.runtime
 												//throw new NotImplementedException("强制类型转换");
 												//break;
 												ExplicitConvert(ref error, (ushort)argsCount, (StackLocater*)argementsPtr, stackslots,
-													(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr, false
+													(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, ((RtMethodScope)methodscope).ThisPtr, false
 													);
 												if (error.raised)
 												{
@@ -16604,7 +16604,7 @@ namespace juicescript.runtime
 
 								//funinstance肯定不为空，如果为空前面就失败了。
 								var func = ((ASMethodBody)funinstance.Type).Method;
-								RtClosure closure = (RtClosure)funinstance.facility;
+								RtClosure closure = (RtClosure)funinstance;
 
 
 								NaNBoxing _this_ = new NaNBoxing();
@@ -16727,7 +16727,7 @@ namespace juicescript.runtime
 									funinstance = Context.GC.Heap[funValue.HeapPtr];
 									if (funinstance.TypeKind == RtHeapTypeKind.CLASS)
 									{
-										var @class = ((ASClass)((RtScriptClass)funinstance.facility).Meta);
+										var @class = ((ASClass)((RtScriptClass)funinstance).Meta);
 
 										if (@class.Instance.Flags.HasFlag(ClassFlags.NoConstructor))
 										{
@@ -16747,7 +16747,7 @@ namespace juicescript.runtime
 											//throw new NotImplementedException("强制类型转换");
 											//break;
 											ExplicitConvert(ref error, (ushort)argsCount, (StackLocater*)argementsPtr, stackslots,
-												(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr, false
+												(TypeKind)@class.Type_identifier, @class, ref stackslots[result.index], stackStPos + result.index, scope_ptr, ((RtMethodScope)methodscope).ThisPtr, false
 												);
 											if (error.raised)
 											{
@@ -16791,7 +16791,7 @@ namespace juicescript.runtime
 
 								//执行到这里 funinstance肯定不为空
 								var func = ((ASMethodBody)funinstance.Type).Method;
-								RtClosure closure = (RtClosure)funinstance.facility;
+								RtClosure closure = (RtClosure)funinstance;
 
 
 
@@ -16865,12 +16865,12 @@ namespace juicescript.runtime
 
 								var closure = Context.GC.Heap[closurePtr];
 								closure.Type = function.Body;
-								((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-								((RtClosure)closure.facility).ScopeType = define;
-								((RtClosure)closure.facility).This = thisValue;
-								((RtClosure)closure.facility)._ref_as_type = define;
-								((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-								((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+								((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+								((RtClosure)closure).ScopeType = define;
+								((RtClosure)closure).This = thisValue;
+								((RtClosure)closure)._ref_as_type = define;
+								((RtClosure)closure).methodscopeslot_ref_state = 0;
+								((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 								stackslots[target.index].SetHeapPtr(closurePtr);
 
 							}
@@ -16901,7 +16901,7 @@ namespace juicescript.runtime
 									{
 										if (o.TypeKind == RtHeapTypeKind.MethodScope)
 										{
-											RtMethodScope rtPayload = (RtMethodScope)o.facility;
+											RtMethodScope rtPayload = (RtMethodScope)o;
 											o = Context.GC.Heap[rtPayload.ParentPtr];
 											instancePtr = rtPayload.ParentPtr;
 										}
@@ -16971,12 +16971,12 @@ namespace juicescript.runtime
 
 									var closure = Context.GC.Heap[closurePtr];
 									closure.Type = function.Body;
-									((RtClosure)closure.facility).ScopePtr = 0;////thisValue.HeapPtr;
-									((RtClosure)closure.facility).ScopeType = define;
-									((RtClosure)closure.facility).This = thisValue;
-									((RtClosure)closure.facility)._ref_as_type = define;
-									((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-									((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+									((RtClosure)closure).ScopePtr = 0;////thisValue.HeapPtr;
+									((RtClosure)closure).ScopeType = define;
+									((RtClosure)closure).This = thisValue;
+									((RtClosure)closure)._ref_as_type = define;
+									((RtClosure)closure).methodscopeslot_ref_state = 0;
+									((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 									stackslots[target.index].SetHeapPtr(closurePtr);
 
 								}
@@ -16996,12 +16996,12 @@ namespace juicescript.runtime
 
 										var closure = Context.GC.Heap[closurePtr];
 										closure.Type = function.Body;
-										((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-										((RtClosure)closure.facility).ScopeType = define;
-										((RtClosure)closure.facility).This = thisValue;
-										((RtClosure)closure.facility)._ref_as_type = define;
-										((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-										((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+										((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+										((RtClosure)closure).ScopeType = define;
+										((RtClosure)closure).This = thisValue;
+										((RtClosure)closure)._ref_as_type = define;
+										((RtClosure)closure).methodscopeslot_ref_state = 0;
+										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
 									else if (ins.TypeKind == RtHeapTypeKind.STRING)
@@ -17015,17 +17015,17 @@ namespace juicescript.runtime
 
 										var closure = Context.GC.Heap[closurePtr];
 										closure.Type = function.Body;
-										((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-										((RtClosure)closure.facility).ScopeType = define;
-										((RtClosure)closure.facility).This = thisValue;
-										((RtClosure)closure.facility)._ref_as_type = define;
-										((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-										((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+										((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+										((RtClosure)closure).ScopeType = define;
+										((RtClosure)closure).This = thisValue;
+										((RtClosure)closure)._ref_as_type = define;
+										((RtClosure)closure).methodscopeslot_ref_state = 0;
+										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
 									else if (ins.TypeKind == RtHeapTypeKind.CLASS)
 									{
-										var @class = ((RtScriptClass)ins.facility).Meta;
+										var @class = ((RtScriptClass)ins).Meta;
 										var function = @class._vtable.Items[vtable_index].Trait.Method;
 
 										int ptrIndex = stackStPos + target.index;
@@ -17033,12 +17033,12 @@ namespace juicescript.runtime
 
 										var closure = Context.GC.Heap[closurePtr];
 										closure.Type = function.Body;
-										((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-										((RtClosure)closure.facility).ScopeType = @class;
-										((RtClosure)closure.facility)._ref_as_type = @class;
-										((RtClosure)closure.facility).This = thisValue;
-										((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-										((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+										((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+										((RtClosure)closure).ScopeType = @class;
+										((RtClosure)closure)._ref_as_type = @class;
+										((RtClosure)closure).This = thisValue;
+										((RtClosure)closure).methodscopeslot_ref_state = 0;
+										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
@@ -17051,12 +17051,12 @@ namespace juicescript.runtime
 
 										var closure = Context.GC.Heap[closurePtr];
 										closure.Type = function.Body;
-										((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-										((RtClosure)closure.facility).ScopeType = Context.FUNCTION.Instance;
-										((RtClosure)closure.facility).This = thisValue;
-										((RtClosure)closure.facility)._ref_as_type = Context.FUNCTION.Instance;
-										((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-										((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+										((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+										((RtClosure)closure).ScopeType = Context.FUNCTION.Instance;
+										((RtClosure)closure).This = thisValue;
+										((RtClosure)closure)._ref_as_type = Context.FUNCTION.Instance;
+										((RtClosure)closure).methodscopeslot_ref_state = 0;
+										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
 									else if (ins.TypeKind == RtHeapTypeKind.ARRAY)
@@ -17068,12 +17068,12 @@ namespace juicescript.runtime
 
 										var closure = Context.GC.Heap[closurePtr];
 										closure.Type = function.Body;
-										((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-										((RtClosure)closure.facility).ScopeType = Context.ARRAY.Instance;
-										((RtClosure)closure.facility).This = thisValue;
-										((RtClosure)closure.facility)._ref_as_type = Context.ARRAY.Instance;
-										((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-										((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+										((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+										((RtClosure)closure).ScopeType = Context.ARRAY.Instance;
+										((RtClosure)closure).This = thisValue;
+										((RtClosure)closure)._ref_as_type = Context.ARRAY.Instance;
+										((RtClosure)closure).methodscopeslot_ref_state = 0;
+										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
 #if DEBUG
@@ -17161,12 +17161,12 @@ namespace juicescript.runtime
 
 										var closure = Context.GC.Heap[closurePtr];
 										closure.Type = function.Body;
-										((RtClosure)closure.facility).ScopePtr = thisValue.HeapPtr;
-										((RtClosure)closure.facility).ScopeType = define;
-										((RtClosure)closure.facility).This = thisValue;
-										((RtClosure)closure.facility)._ref_as_type = define;
-										((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-										((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+										((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+										((RtClosure)closure).ScopeType = define;
+										((RtClosure)closure).This = thisValue;
+										((RtClosure)closure)._ref_as_type = define;
+										((RtClosure)closure).methodscopeslot_ref_state = 0;
+										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 										stackslots[target.index].SetHeapPtr(closurePtr);
 									}
 #if DEBUG
@@ -17202,7 +17202,7 @@ namespace juicescript.runtime
 								}
 #endif
 								RtHeapBase _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
-								RtClosure _methodclosure_ = (RtClosure)_method_.facility;
+								RtClosure _methodclosure_ = (RtClosure)_method_;
 								NaNBoxing result = RunMethod(((ASMethodBody)_method_.Type).Method,
 									_methodclosure_.This, _methodclosure_.ScopePtr, _methodclosure_.ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
 
@@ -17248,18 +17248,18 @@ namespace juicescript.runtime
 								var obj = Context.GC.Heap[thisValue.HeapPtr];
 								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
 								{
-									uint len = ((RtArray)obj.facility).GetLength(this);
+									uint len = ((RtArray)obj).GetLength(this);
 									stackslots[target.index].SetUInt(len);
 								}
 								else if (obj.TypeKind == RtHeapTypeKind.STRING)
 								{
-									int len = ((RtString)obj.facility).Str.Length;
+									int len = ((RtString)obj).Str.Length;
 									stackslots[target.index].SetInt(len);
 								}
 								else
 								{
 									Debug.Assert(obj.TypeKind == RtHeapTypeKind.VECTOR);
-									int len = ((RtVector)obj.facility).GetStore(this).length;
+									int len = ((RtVector)obj).GetStore(this).length;
 									stackslots[target.index].SetInt(len);
 								}
 
@@ -17291,7 +17291,7 @@ namespace juicescript.runtime
 									{
 										if (o.TypeKind == RtHeapTypeKind.MethodScope)
 										{
-											RtMethodScope rtPayload = (RtMethodScope)o.facility;
+											RtMethodScope rtPayload = (RtMethodScope)o;
 											o = Context.GC.Heap[rtPayload.ParentPtr];
 											instancePtr = rtPayload.ParentPtr;
 										}
@@ -17438,7 +17438,7 @@ namespace juicescript.runtime
 									{
 										if (o.TypeKind == RtHeapTypeKind.MethodScope)
 										{
-											RtMethodScope rtPayload = (RtMethodScope)o.facility;
+											RtMethodScope rtPayload = (RtMethodScope)o;
 											o = Context.GC.Heap[rtPayload.ParentPtr];
 											instancePtr = rtPayload.ParentPtr;
 										}
@@ -17505,7 +17505,7 @@ namespace juicescript.runtime
 									}
 									else if (ins.TypeKind == RtHeapTypeKind.CLASS)
 									{
-										var @class = ((RtScriptClass)ins.facility).Meta;
+										var @class = ((RtScriptClass)ins).Meta;
 										var function = @class._vtable.Items[vtable_index].Trait.Method;
 
 
@@ -17693,7 +17693,7 @@ namespace juicescript.runtime
 									case RtHeapTypeKind.CLASS:
 									case RtHeapTypeKind.GLOBAL:
 										{
-											RtScriptClass heap = (RtScriptClass)s.facility;
+											RtScriptClass heap = (RtScriptClass)s;
 
 											if (heap.Meta._link_codescope.index != heapLocater.ScopeIndex)
 											{
@@ -17706,7 +17706,7 @@ namespace juicescript.runtime
 #endif
 												{
 													heap = (RtScriptClass)Context.GC.Heap[((ASScript)heap.Meta._link_codescope.Parent.Container).__global_index__]
-															.facility;
+															;
 												}
 											}
 
@@ -17722,7 +17722,7 @@ namespace juicescript.runtime
 											ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 											Context.StackPosition++;
 
-											ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr);
+											ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 											if (error.raised)
 											{
 												Context.StackPosition--;
@@ -17765,7 +17765,7 @@ namespace juicescript.runtime
 												}
 
 												RtScriptClass heap = (RtScriptClass)Context.GC.Heap[((ASScript)sType.Container).__global_index__]
-															.facility;
+															;
 												ASTrait t = heap.Meta._link_codescope.Members[heapLocater.MemberIndex].trait;
 
 
@@ -17779,7 +17779,7 @@ namespace juicescript.runtime
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr);
+												ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -17805,7 +17805,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												RtInstance heap = (RtInstance)s.facility;
+												RtInstance heap = (RtInstance)s;
 
 
 												Context.GC.CheckGC(ref error);
@@ -17820,7 +17820,7 @@ namespace juicescript.runtime
 
 												ConvertValueType(ref error, value,
 													s.Type._link_codescope.Members[heapLocater.MemberIndex].TypeKind,
-													s.Type._link_codescope.Members[heapLocater.MemberIndex].__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr);
+													s.Type._link_codescope.Members[heapLocater.MemberIndex].__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 
 												if (error.raised)
 												{
@@ -17850,7 +17850,7 @@ namespace juicescript.runtime
 
 											if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
 											{
-												int parentPtr = ((RtMethodScope)s.facility).ParentPtr;
+												int parentPtr = ((RtMethodScope)s).ParentPtr;
 												s = Context.GC.Heap[parentPtr];
 												*m_scope++ = parentPtr;
 
@@ -17858,7 +17858,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												var thisPtr = ((RtMethodScope)methodscope.facility).ThisPtr;
+												var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 												var scopemember = s.Type._link_codescope.Members[heapLocater.MemberIndex];
 
 
@@ -17893,7 +17893,7 @@ namespace juicescript.runtime
 
 												value = conv;
 
-												RtMethodScope heap = (RtMethodScope)s.facility;
+												RtMethodScope heap = (RtMethodScope)s;
 												if (isheaptype)
 												{
 													PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
@@ -17947,7 +17947,7 @@ namespace juicescript.runtime
 
 								bool isheaptype = false;
 
-								var thisPtr = ((RtMethodScope)methodscope.facility).ThisPtr;
+								var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 
 								if (scopemember.Kind == ScopeMemberKind.Parameter)
 								{
@@ -17974,7 +17974,7 @@ namespace juicescript.runtime
 
 
 
-								RtMethodScope heap = (RtMethodScope)methodscope.facility;
+								RtMethodScope heap = (RtMethodScope)methodscope;
 
 								if (isheaptype)
 								{
@@ -18012,9 +18012,9 @@ namespace juicescript.runtime
 
 								if (cache.TypeKind == RtHeapTypeKind.CLOSURE)
 								{
-									RaiseReferenceError_WriteToMethod(ref error, (ASMethodBody)cache.Type, ((RtClosure)cache.facility)._ref_as_type.QName);
+									RaiseReferenceError_WriteToMethod(ref error, (ASMethodBody)cache.Type, ((RtClosure)cache)._ref_as_type.QName);
 
-									//throw new NotImplementedException($"Cannot assign to a method { cache.Type.QName.Name } on { ((RtPayloadClosure)cache.facility)._ref_as_type.QName.Name }.");
+									//throw new NotImplementedException($"Cannot assign to a method { cache.Type.QName.Name } on { ((RtPayloadClosure)cache)._ref_as_type.QName.Name }.");
 									goto flag_handle_error;
 								}
 
@@ -18028,7 +18028,7 @@ namespace juicescript.runtime
 								NaNBoxing box = stackslots[source.index];
 
 
-								RtStackCache cacheObj = (RtStackCache)cache.facility;
+								RtStackCache cacheObj = (RtStackCache)cache;
 
 								if (cacheObj.RefInstance.ValueType != BoxType.HeapPtr)
 								{
@@ -18044,7 +18044,7 @@ namespace juicescript.runtime
 									ReadOnlySpan<char> searchName = frame_holdchars;
 									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
 									{
-										searchName = ((RtString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr].facility).Str;
+										searchName = ((RtString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr]).Str;
 									}
 									else
 									{
@@ -18065,7 +18065,7 @@ namespace juicescript.runtime
 									//{
 									//	ns.SetHeapPtr(cacheObj.searchNameSpacePtr);
 									//	RtHeapInstance ns_instance = Context.GC.Heap[cacheObj.searchNameSpacePtr];
-									//	@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
+									//	@namespace = ((RtPayloadNameSpace)ns_instance).ASNamespace;
 
 									//	cacheObj.searchNameSpacePtr = 0;
 
@@ -18084,13 +18084,13 @@ namespace juicescript.runtime
 										Context.GC.CheckGC(ref error); //只能在此处先GC,否则后面会意外回收searchname_ptr。 
 
 										//int searchname_ptr;// = cacheObj.searchPropertyNamePtr;
-										//string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr].facility).Str;
+										//string searchName = ((RtPayloadString)Context.GC.Heap[cacheObj.searchPropertyNamePtr]).Str;
 
 										ReadOnlySpan<char> searchName = frame_holdchars;
 										if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr)
 										{
 											//searchname_ptr = cacheObj.searchPropertyName.HeapPtr;
-											searchName = ((RtString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr].facility).Str;
+											searchName = ((RtString)Context.GC.Heap[cacheObj.searchPropertyName.HeapPtr]).Str;
 										}
 										else
 										{
@@ -18117,7 +18117,7 @@ namespace juicescript.runtime
 										{
 											ns.SetHeapPtr(cacheObj.searchNameSpacePtr);
 											RtHeapBase ns_instance = Context.GC.Heap[cacheObj.searchNameSpacePtr];
-											@namespace = ((RtNameSpace)ns_instance.facility).ASNamespace;
+											@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
 											cacheObj.searchNameSpacePtr = 0;
 
@@ -18221,11 +18221,11 @@ namespace juicescript.runtime
 												}
 
 												int maxlen; int validid;
-												if (!((RtVector)instance.facility).IsValidIndexRange(cacheObj.indexer_key, out validid, out maxlen, this))
+												if (!((RtVector)instance).IsValidIndexRange(cacheObj.indexer_key, out validid, out maxlen, this))
 												{
 													if (validid == maxlen && maxlen < int.MaxValue) //扩容
 													{
-														((RtVector)instance.facility).Resize(validid + 1, ref error, this, (ASInstance)instance.Type);
+														((RtVector)instance).Resize(validid + 1, ref error, this, (ASInstance)instance.Type);
 
 														if (error.raised)
 														{
@@ -18242,7 +18242,7 @@ namespace juicescript.runtime
 													}
 												}
 
-												RtVector vector = ((RtVector)instance.facility);
+												RtVector vector = ((RtVector)instance);
 
 												Context.GC.CheckGC(ref error);
 												if (Context.StackPosition >= Context.STACK_LENGTH)
@@ -18254,7 +18254,7 @@ namespace juicescript.runtime
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr,((RtMethodScope)methodscope.facility).ThisPtr);
+												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr,((RtMethodScope)methodscope).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -18385,7 +18385,7 @@ namespace juicescript.runtime
 										}
 										else if (instance.TypeKind == RtHeapTypeKind.GLOBAL || instance.TypeKind == RtHeapTypeKind.CLASS)
 										{
-											RtScriptClass payload = (RtScriptClass)instance.facility;
+											RtScriptClass payload = (RtScriptClass)instance;
 
 											ASTrait trait = cacheObj.trait[0];
 
@@ -18407,7 +18407,7 @@ namespace juicescript.runtime
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr);
+												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -18438,7 +18438,7 @@ namespace juicescript.runtime
 										}
 										else if (instance.TypeKind == RtHeapTypeKind.INSTANCE)
 										{
-											RtInstance payload = (RtInstance)instance.facility;
+											RtInstance payload = (RtInstance)instance;
 
 											ASTrait trait = cacheObj.trait[0];
 
@@ -18458,7 +18458,7 @@ namespace juicescript.runtime
 
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
-												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope.facility).ThisPtr);
+												ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
@@ -18528,7 +18528,7 @@ namespace juicescript.runtime
 									case RtHeapTypeKind.CLASS:
 									case RtHeapTypeKind.GLOBAL:
 										{
-											RtScriptClass heap = (RtScriptClass)s.facility;
+											RtScriptClass heap = (RtScriptClass)s;
 #if DEBUG
 											if (heap.Meta._link_codescope.index != heapLocater.ScopeIndex)
 											{
@@ -18549,7 +18549,7 @@ namespace juicescript.runtime
 												throw new InvalidOperationException();
 											}
 #endif
-											RtInstance heap = (RtInstance)s.facility;
+											RtInstance heap = (RtInstance)s;
 
 											ASTrait t = scopeType._link_codescope.Members[heapLocater.MemberIndex].trait;
 											heap.SetSlot(t.Value.initValue.Value, heapLocater.MemberIndex, scopeType._link_codescope, this);
@@ -18560,7 +18560,7 @@ namespace juicescript.runtime
 										{
 											if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
 											{
-												int parentPtr = ((RtMethodScope)s.facility).ParentPtr;
+												int parentPtr = ((RtMethodScope)s).ParentPtr;
 												s = Context.GC.Heap[parentPtr];
 												*m_scope++ = parentPtr;
 												goto label_method_parent;
@@ -18569,7 +18569,7 @@ namespace juicescript.runtime
 											{
 												ASTrait t = s.Type._link_codescope.Members[heapLocater.MemberIndex].trait;
 
-												RtMethodScope heap = (RtMethodScope)s.facility;
+												RtMethodScope heap = (RtMethodScope)s;
 												NaNBoxing value = t.Value.initValue.Value;
 
 												if (t.TypeKind.IsHeapType())
@@ -18627,7 +18627,7 @@ namespace juicescript.runtime
 									if (type.TypeKind == RtHeapTypeKind.CLASS)
 									{
 
-										ASClass @class = (ASClass)((RtScriptClass)type.facility).Meta;
+										ASClass @class = (ASClass)((RtScriptClass)type).Meta;
 										//构造实例
 
 										RtHeapBase instance;
@@ -18650,11 +18650,11 @@ namespace juicescript.runtime
 											instance = Context.GC.Heap[instancePtr];
 
 											instance.Type = @class.Instance;
-											((RtVector)instance.facility).HEAPINSTANCE_PTR = 0;
-											((RtVector)instance.facility).element_asclass = @class.Instance._element_class;
-											((RtVector)instance.facility).element_type = @class.Instance._element_class == null ? TypeKind.Any : (TypeKind)@class.Instance._element_class.Type_identifier;
-											//((RtPayloadVector)instance.facility).GetStore(this).SetBuffer(0);
-											((RtVector)instance.facility).GetStore(this).length = 0;
+											((RtVector)instance).HEAPINSTANCE_PTR = 0;
+											((RtVector)instance).element_asclass = @class.Instance._element_class;
+											((RtVector)instance).element_type = @class.Instance._element_class == null ? TypeKind.Any : (TypeKind)@class.Instance._element_class.Type_identifier;
+											//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
+											((RtVector)instance).GetStore(this).length = 0;
 
 											stackslots[target.index].SetHeapPtr(instancePtr);
 
@@ -18680,15 +18680,15 @@ namespace juicescript.runtime
 											//instance = Context.GC.Heap[instancePtr];
 											//instance.Type = @class.Instance;
 
-											//((RtPayloadInstance)instance.facility).HEAPINSTANCE_PTR = 0;
-											//((RtPayloadInstance)instance.facility).Set_PROPERTY_PTR(0, this);
-											//((RtPayloadInstance)instance.facility).Set_PROTOTYPE(((RtPayloadScriptClass)Context.GC.Heap[@class.__instance_index__].facility).PROTO__PTR, this);
-											//((RtPayloadInstance)instance.facility).methodscopeslot_ref_state = 0;
+											//((RtPayloadInstance)instance).HEAPINSTANCE_PTR = 0;
+											//((RtPayloadInstance)instance).Set_PROPERTY_PTR(0, this);
+											//((RtPayloadInstance)instance).Set_PROTOTYPE(((RtPayloadScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
+											//((RtPayloadInstance)instance).methodscopeslot_ref_state = 0;
 
 											//CodeScope scope = @class.Instance._link_codescope;
 											//if (scope.TypeLayout.Size > 0)
 											//{
-											//	((RtPayloadInstance)instance.facility).Init(scope, this);
+											//	((RtPayloadInstance)instance).Init(scope, this);
 											//}
 
 											//stackslots[target.index].SetHeapPtr(instancePtr);
@@ -18718,9 +18718,9 @@ namespace juicescript.runtime
 													instance = Context.GC.Heap[instancePtr];
 													instance.Type = Context.ARRAY.Instance;
 
-													((RtArray)instance.facility).array_len = 0;
-													((RtArray)instance.facility).methodscopeslot_ref_state = 0;
-													((RtArray)instance.facility).HEAPINSTANCE_PTR = 0;
+													((RtArray)instance).array_len = 0;
+													((RtArray)instance).methodscopeslot_ref_state = 0;
+													((RtArray)instance).HEAPINSTANCE_PTR = 0;
 
 
 												}
@@ -18823,7 +18823,7 @@ namespace juicescript.runtime
 
 													NaNBoxing box = stackslots[argLocater.index];
 
-													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 													if (error.raised)
 													{
 														goto flag_handle_error;
@@ -18886,7 +18886,7 @@ namespace juicescript.runtime
 
 													NaNBoxing box = stackslots[argLocater.index];
 
-													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+													box = ToPrimitive(ref error, box, HINT.h_number, scope_ptr, target, target, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 													if (error.raised)
 													{
 														goto flag_handle_error;
@@ -18921,12 +18921,12 @@ namespace juicescript.runtime
 
 													var closure = Context.GC.Heap[closurePtr];
 													closure.Type = function.Body;
-													((RtClosure)closure.facility).ScopePtr = scope_ptr;
-													((RtClosure)closure.facility).ScopeType = scopeType;
-													((RtClosure)closure.facility).This.SetNull();
-													((RtClosure)closure.facility)._ref_as_type = define;
-													((RtClosure)closure.facility).methodscopeslot_ref_state = 0;
-													((RtClosure)closure.facility).HEAPINSTANCE_PTR = 0;
+													((RtClosure)closure).ScopePtr = scope_ptr;
+													((RtClosure)closure).ScopeType = scopeType;
+													((RtClosure)closure).This.SetNull();
+													((RtClosure)closure)._ref_as_type = define;
+													((RtClosure)closure).methodscopeslot_ref_state = 0;
+													((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 													stackslots[target.index].SetHeapPtr(closurePtr);
 
 
@@ -18981,11 +18981,11 @@ namespace juicescript.runtime
 
 
 
-										var function_proto = ((RtClosure)constructor_closure.facility).PROTOTYPE(this);
+										var function_proto = ((RtClosure)constructor_closure).PROTOTYPE(this);
 
 										if (function_proto == 0)
 										{
-											((RtClosure)constructor_closure.facility).Set_PROTOTYPE(0, this);
+											((RtClosure)constructor_closure).Set_PROTOTYPE(0, this);
 											var proto = InvokeReadProperty(ref error, constructor_box, 0, ref stackslots, -1);
 											if (error.raised)
 											{
@@ -19004,7 +19004,7 @@ namespace juicescript.runtime
 												goto flag_handle_error;
 											}
 
-											((RtClosure)constructor_closure.facility).Set_PROTOTYPE(function_proto, this);
+											((RtClosure)constructor_closure).Set_PROTOTYPE(function_proto, this);
 										}
 
 										if (Context.StackPosition >= Context.STACK_LENGTH)
@@ -19025,18 +19025,18 @@ namespace juicescript.runtime
 										var instance = Context.GC.Heap[instancePtr];
 										instance.Type = Context.OBJECT.Instance;
 
-										((RtInstance)instance.facility).HEAPINSTANCE_PTR = 0;
-										((RtInstance)instance.facility).Set_PROPERTY_PTR(0, this, Context.OBJECT.Instance);
-										((RtInstance)instance.facility).Set_PROTOTYPE(function_proto, this);
-										((RtInstance)instance.facility).methodscopeslot_ref_state = 0;
+										((RtInstance)instance).HEAPINSTANCE_PTR = 0;
+										((RtInstance)instance).Set_PROPERTY_PTR(0, this, Context.OBJECT.Instance);
+										((RtInstance)instance).Set_PROTOTYPE(function_proto, this);
+										((RtInstance)instance).methodscopeslot_ref_state = 0;
 
 										Context.StackSlots[ptrIndex].SetHeapPtr(instancePtr);
 
 
 										var constructor = ((ASMethodBody)type.Type).Method;
 										NaNBoxing ret_constructor = RunMethod(constructor, Context.StackSlots[ptrIndex],
-											((RtClosure)constructor_closure.facility).ScopePtr,
-											((RtClosure)constructor_closure.facility).ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, type_box.HeapPtr, true);
+											((RtClosure)constructor_closure).ScopePtr,
+											((RtClosure)constructor_closure).ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, type_box.HeapPtr, true);
 
 										if (error.raised)
 										{
@@ -19063,7 +19063,7 @@ namespace juicescript.runtime
 
 										if (move) //使用前面的 ,移动过来 
 										{
-											if (((RtInstance)instance.facility).HEAPINSTANCE_PTR == 0)
+											if (((RtInstance)instance).HEAPINSTANCE_PTR == 0)
 											{
 												int target_index = stackStPos + target.index;
 												var target_instancePtr = Context.CacheInstancePtr + target_index;
@@ -19080,9 +19080,9 @@ namespace juicescript.runtime
 #endif
 												}
 
-												((RtInstance)target_ins.facility).HEAPINSTANCE_PTR = 0;
-												((RtInstance)target_ins.facility).methodscopeslot_ref_state = 0;
-												((RtInstance)target_ins.facility).CopyFrom(instance, this, 0);
+												((RtInstance)target_ins).HEAPINSTANCE_PTR = 0;
+												((RtInstance)target_ins).methodscopeslot_ref_state = 0;
+												((RtInstance)target_ins).CopyFrom(instance, this, 0);
 
 												stackslots[target.index].SetHeapPtr(target_instancePtr);
 											}
@@ -19095,8 +19095,8 @@ namespace juicescript.runtime
 #if DEBUG
 												if (!(src_ptr < Context.CacheInstancePtr + Context.STACK_LENGTH) //堆里
 																												 //||
-																												 //(src_ptr < Context.CacheInstancePtr + ((RtPayloadMethodScope)methodscope.facility).StackPos +
-																												 //((RtPayloadMethodScope)methodscope.facility).SlotCount) //传入
+																												 //(src_ptr < Context.CacheInstancePtr + ((RtPayloadMethodScope)methodscope).StackPos +
+																												 //((RtPayloadMethodScope)methodscope).SlotCount) //传入
 														)
 												{
 
@@ -19163,7 +19163,7 @@ namespace juicescript.runtime
 								var @class = Context.link_const_class[(int)boxing.UIntValue];
 								var v = LoadValue(stackslots[value.index], -1, ref error, stackslots, stackStPos + value.index);
 
-								ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr,((RtMethodScope)methodscope.facility).ThisPtr, false);
+								ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr,((RtMethodScope)methodscope).ThisPtr, false);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19231,7 +19231,7 @@ namespace juicescript.runtime
 
 								var super_class = Context.link_const_class[(int)boxing.UIntValue];
 								var ctor = super_class.Instance.Constructor;
-								RunMethod(ctor, ((RtMethodScope)methodscope.facility).ThisPtr, scope_ptr, (super_class).Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1);
+								RunMethod(ctor, ((RtMethodScope)methodscope).ThisPtr, scope_ptr, (super_class).Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19299,7 +19299,7 @@ namespace juicescript.runtime
 
 								}
 
-								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19413,7 +19413,7 @@ namespace juicescript.runtime
 
 								}
 
-								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								v = ToPrimitive(ref error, v, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19530,7 +19530,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Add(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Add(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19566,7 +19566,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Sub(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Sub(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19604,7 +19604,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Multiply(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Multiply(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19625,7 +19625,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Division(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Division(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19647,7 +19647,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Modulus(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Modulus(ref error, n1, n2, dst, scope_ptr, v1, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19671,7 +19671,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_bitWise(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_bitWise(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19695,7 +19695,7 @@ namespace juicescript.runtime
 								NaNBoxing n1 = stackslots[v1.index];
 								NaNBoxing n2 = stackslots[v2.index];
 
-								Exec_Comparse(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos,((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Comparse(ref error, n1, n2, dst, opMode, scope_ptr, v1, v2, stackslots, stackStPos,((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19773,7 +19773,7 @@ namespace juicescript.runtime
 								LoadStackLocater(&v1, &PC);
 								LoadStackLocater(&v2, &PC);
 
-								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19792,7 +19792,7 @@ namespace juicescript.runtime
 								LoadStackLocater(&v1, &PC);
 								LoadStackLocater(&v2, &PC);
 
-								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19811,7 +19811,7 @@ namespace juicescript.runtime
 								LoadStackLocater(&v2, &PC);
 
 								var name_v = stackslots[v1.index];
-								NaNBoxing name_n = ToPrimitive(ref error, name_v, HINT.h_string, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								NaNBoxing name_n = ToPrimitive(ref error, name_v, HINT.h_string, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -19902,7 +19902,7 @@ namespace juicescript.runtime
 								{
 									case RtHeapTypeKind.CLASS:
 										{
-											var @class = ((RtScriptClass)obj.facility).Meta;
+											var @class = ((RtScriptClass)obj).Meta;
 											if (find(@class, name, 0) || find(((ASClass)@class).Instance, name, 0))
 											{
 												stackslots[dst.index].SetBoolean(true);
@@ -19938,7 +19938,7 @@ namespace juicescript.runtime
 											else // Number.prototype["F"]=1; "F" in 33.0  这种
 											{
 												bool found = false;
-												int proto = ((RtScriptClass)obj.facility).PROTO__PTR;
+												int proto = ((RtScriptClass)obj).PROTO__PTR;
 												int steps = 0;
 												while (proto != 0 && steps < 32)
 												{
@@ -20128,7 +20128,7 @@ namespace juicescript.runtime
 										{
 
 											int index;
-											if (((RtVector)obj.facility).GetStore(this).IsValidIndexRange(name_n, out index))
+											if (((RtVector)obj).GetStore(this).IsValidIndexRange(name_n, out index))
 											{
 												stackslots[dst.index].SetBoolean(true);
 											}
@@ -20262,7 +20262,7 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								var typeclass = (ASClass)((RtScriptClass)obj.facility).Meta;
+								var typeclass = (ASClass)((RtScriptClass)obj).Meta;
 								var v = stackslots[v1.index];
 
 								stackslots[dst.index].SetBoolean(Is(v, typeclass));
@@ -20294,7 +20294,7 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								var typeclass = (ASClass)((RtScriptClass)obj.facility).Meta;
+								var typeclass = (ASClass)((RtScriptClass)obj).Meta;
 								var v = stackslots[v1.index];
 
 								bool v1isv2 = Is(v, typeclass);
@@ -20324,7 +20324,7 @@ namespace juicescript.runtime
 								int addvalue = *(int*)PC; PC += 4;
 								NaNBoxing n1 = stackslots[src.index];
 
-								n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, result, result, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, result, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -20337,7 +20337,7 @@ namespace juicescript.runtime
 
 								NaNBoxing n2 = default; n2.SetInt(addvalue);
 
-								Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtMethodScope)methodscope.facility).ThisPtr);
+								Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -20375,7 +20375,7 @@ namespace juicescript.runtime
 
 								if (type_instance.TypeKind == RtHeapTypeKind.CLASS)
 								{
-									var @typeclass = (ASClass)((RtScriptClass)type_instance.facility).Meta;
+									var @typeclass = (ASClass)((RtScriptClass)type_instance).Meta;
 									if (typeclass.Instance.Flags.HasFlag(ClassFlags.NoConstructor) && !typeclass.Instance.IsInterface)
 									{
 										RaiseTypeError_InstanceOf(ref error);
@@ -20438,8 +20438,8 @@ namespace juicescript.runtime
 														}
 														else
 														{
-															o_proto = ((RtInstance)v_instance.facility).PROTOTYPE(this, (ASInstance)v_instance.Type);
-															fun_proto = ((RtScriptClass)Context.GC.Heap[typeclass.__instance_index__].facility).PROTO__PTR;
+															o_proto = ((RtInstance)v_instance).PROTOTYPE(this, (ASInstance)v_instance.Type);
+															fun_proto = ((RtScriptClass)Context.GC.Heap[typeclass.__instance_index__]).PROTO__PTR;
 															goto lbl_do_proto;
 														}
 
@@ -20466,7 +20466,7 @@ namespace juicescript.runtime
 																	break;
 																}
 
-																if (((RtVector)v_instance.facility).element_asclass == typeclass.Instance._element_class)
+																if (((RtVector)v_instance).element_asclass == typeclass.Instance._element_class)
 																{
 																	stackslots[dst.index].SetBoolean(true);
 																	break;
@@ -20532,25 +20532,25 @@ namespace juicescript.runtime
 										break;
 									}
 
-									int obj_proto = ((RtInstance)obj.facility).PROTOTYPE(this, (ASInstance)obj.Type);
+									int obj_proto = ((RtInstance)obj).PROTOTYPE(this, (ASInstance)obj.Type);
 
 									int proto_ptr;
 									if (((ASMethodBody)type_instance.Type).Method.__ismethod)
 									{
-										proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__].facility).PROTO__PTR;
+										proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR;
 									}
 									else
 									{
-										proto_ptr = ((RtClosure)type_instance.facility).PROTOTYPE(this);
+										proto_ptr = ((RtClosure)type_instance).PROTOTYPE(this);
 										if (proto_ptr <= 0) //默认，指向FUNCTION的proto
 										{
 											//按test262,此处应该跑TypeError(Function has non-object prototype 'undefined' in instanceof check)
 											//RaiseTypeError_InstanceOf(ref error);
 											//goto flag_handle_error;
-											proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__].facility).PROTO__PTR;
+											proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
 											if (proto_ptr <= 0) //Function.prototype是一个function (){},所以如果还是空白的，就跳到Object.proto里去。
 											{
-												proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR;
+												proto_ptr = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
 											}
 										}
 									}
@@ -20908,7 +20908,7 @@ namespace juicescript.runtime
 								var obj = Context.GC.Heap[arr.HeapPtr];
 								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
 								{
-									var arr_payload = (RtArray)Context.GC.Heap[arr.HeapPtr].facility;
+									var arr_payload = (RtArray)Context.GC.Heap[arr.HeapPtr];
 
 									Debug.Assert(arr_payload.StoreMode != RtArray.ArrayStoreMode.cache_on_stack);
 
@@ -20930,7 +20930,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									var vec_payload = (RtVector)Context.GC.Heap[arr.HeapPtr].facility;
+									var vec_payload = (RtVector)Context.GC.Heap[arr.HeapPtr];
 
 									ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref stackslots[dst_index]);
 									if (error.raised)
@@ -20958,7 +20958,7 @@ namespace juicescript.runtime
 
 
 
-						//		var v1 = ((RtPayloadMethodScope)methodscope.facility).ReadSlot(heap_member, this);
+						//		var v1 = ((RtPayloadMethodScope)methodscope).ReadSlot(heap_member, this);
 						//		var v2 = constants[const_index];
 
 
@@ -21365,10 +21365,10 @@ namespace juicescript.runtime
 
 								//Context.StackPosition++; //执行iter.next时，保留给它当返回值槽用
 
-								((IterContxt)((RtInstance)iterctx.facility).wapperedObject).PC = PC;
+								((IterContxt)((RtInstance)iterctx).wapperedObject).PC = PC;
 
 								// 将迭代器上下文存储到方法变量中
-								RtMethodScope heap = (RtMethodScope)methodscope.facility;
+								RtMethodScope heap = (RtMethodScope)methodscope;
 #if DEBUG
 								if (methodscope.Type._link_codescope.index != iterContextVar.ScopeIndex)
 									throw new InvalidOperationException();
@@ -21422,7 +21422,7 @@ namespace juicescript.runtime
 									int* m_scope = method_scopes;
 									*m_scope++ = scope_ptr;
 
-									RtMethodScope heap = (RtMethodScope)methodscope.facility;
+									RtMethodScope heap = (RtMethodScope)methodscope;
 #if DEBUG
 									if (methodscope.Type._link_codescope.index != iterSrcObj_Holder.ScopeIndex)
 									{
@@ -21471,7 +21471,7 @@ namespace juicescript.runtime
 											}
 											heap.SetSlot(Context.StackSlots[iter_slot], iterVar.MemberIndex);
 
-											var iter = (RtInstance)Context.GC.Heap[Context.StackSlots[iter_slot].HeapPtr].facility;
+											var iter = (RtInstance)Context.GC.Heap[Context.StackSlots[iter_slot].HeapPtr];
 
 											NaNBoxing index = default; index.SetInt(0);
 											NaNBoxing count = default; count.SetInt(0);
@@ -21543,7 +21543,7 @@ namespace juicescript.runtime
 										}
 										heap.SetSlot(Context.StackSlots[iter_slot], iterVar.MemberIndex);
 
-										var iter = (RtInstance)Context.GC.Heap[Context.StackSlots[iter_slot].HeapPtr].facility;
+										var iter = (RtInstance)Context.GC.Heap[Context.StackSlots[iter_slot].HeapPtr];
 
 
 										NaNBoxing index = default; index.SetInt(0);
@@ -21605,7 +21605,7 @@ namespace juicescript.runtime
 								}
 
 
-								RtMethodScope heap = (RtMethodScope)methodscope.facility;
+								RtMethodScope heap = (RtMethodScope)methodscope;
 
 #if DEBUG
 								if (methodscope.Type._link_codescope.index != iterSrcObjSaveInVar.ScopeIndex)
@@ -21682,7 +21682,7 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								RtInstance result_payload = (RtInstance)result.facility;
+								RtInstance result_payload = (RtInstance)result;
 								var done = result_payload.ReadSlot(0, result.Type._link_codescope, this);
 #if DEBUG
 								if (done.ValueType != BoxType.Boolean) throw new InvalidOperationException();
@@ -21709,9 +21709,9 @@ namespace juicescript.runtime
 												var cacheObj = Context.GC.Heap[clonedptr];
 												cacheObj.Type = check.Type;
 
-												((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-												((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-												((RtInstance)cacheObj.facility).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+												((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+												((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+												((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
 
 												key.SetHeapPtr(clonedptr);
 
@@ -21736,9 +21736,9 @@ namespace juicescript.runtime
 												var cacheObj = Context.GC.Heap[clonedptr];
 												cacheObj.Type = check.Type;
 
-												((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-												((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-												((RtInstance)cacheObj.facility).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+												((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+												((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+												((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
 
 												value.SetHeapPtr(clonedptr);
 
@@ -21778,7 +21778,7 @@ namespace juicescript.runtime
 									iterContextVar.MemberIndex = *(ushort*)PC; PC += 2;
 								}
 
-								RtMethodScope heap = (RtMethodScope)methodscope.facility;
+								RtMethodScope heap = (RtMethodScope)methodscope;
 
 #if DEBUG
 								if (methodscope.Type._link_codescope.index != holderLoc.ScopeIndex)
@@ -21860,18 +21860,18 @@ namespace juicescript.runtime
 								else
 								{
 									var proto = GetProtoPtr(obj);
-									var iter_ctx_wapper = (IterContxt)((RtInstance)iter_ctx.facility).wapperedObject;
+									var iter_ctx_wapper = (IterContxt)((RtInstance)iter_ctx).wapperedObject;
 
 									iter_ctx_wapper.visitedObjs.Add(obj_h.HeapPtr);
 
 									if (iter_ctx_wapper.visitedObjs.Contains(proto))
 									{
 										//环只有function才可能产生，所以如果出现就跳到Function的proto里去
-										proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__].facility).PROTO__PTR;
+										proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
 										if (iter_ctx_wapper.visitedObjs.Contains(proto))
 										{
 											//循环访问Function.prototype 跳到Object.prototype.
-											proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__].facility).PROTO__PTR;
+											proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
 										}
 									}
 
@@ -21987,7 +21987,7 @@ namespace juicescript.runtime
 
 								//								var memberindex = exception_ctx->catched_error.MemberIndex;
 								//								ASTrait t = s.Type._link_codescope.Members[memberindex].trait;
-								//								RtPayloadMethodScope heap = (RtPayloadMethodScope)s.facility;
+								//								RtPayloadMethodScope heap = (RtPayloadMethodScope)s;
 								//								NaNBoxing value = default;
 
 								//								ReceiveError store_err = default;
@@ -22351,7 +22351,7 @@ namespace juicescript.runtime
 								{
 
 									//exception_ctx->catched_error = heapLocater;
-									RtMethodScope heap = (RtMethodScope)s.facility;
+									RtMethodScope heap = (RtMethodScope)s;
 									NaNBoxing value = default;
 
 									ReceiveError store_err = default;

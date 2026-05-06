@@ -50,7 +50,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			ref var funslot = ref context.StackSlots[returnSlotIndex];
 			context.player.ConvertValueType(ref error, thisPtr, TypeKind.Function, context.FUNCTION, ref funslot);
@@ -70,7 +70,7 @@ namespace juicescript.runtime.buildin
 			var _this = scope.ReadSlot(0,context.player);
 			var rest = scope.ReadSlot(1,context.player);
 
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
@@ -87,7 +87,7 @@ namespace juicescript.runtime.buildin
 			var callmethod = ((ASMethodBody)closureinstance.Type).Method;
 			if (callmethod.__ismethod && !callmethod.__is_call_or_apply)
 			{
-				_this = ((RtClosure)closureinstance.facility).This;
+				_this = ((RtClosure)closureinstance).This;
 			}
 			else if (callmethod.__is_hasOwnProperty)
 			{ 
@@ -121,8 +121,8 @@ namespace juicescript.runtime.buildin
 				context.StackPosition += arguments.Length;
 
 				context.player.RunMethod(callmethod, _this,
-					((RtClosure)closureinstance.facility).ScopePtr,
-					((RtClosure)closureinstance.facility).ScopeType,
+					((RtClosure)closureinstance).ScopePtr,
+					((RtClosure)closureinstance).ScopeType,
 					(ushort)rest_array.stack_store.Length , (byte*)args,
 					slots,
 					ref error,
@@ -145,7 +145,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			
 
 			ref var funslot = ref context.StackSlots[returnSlotIndex];
@@ -170,7 +170,7 @@ namespace juicescript.runtime.buildin
 			var callmethod = ((ASMethodBody)closureinstance.Type).Method;
 			if (callmethod.__ismethod && !callmethod.__is_call_or_apply)
 			{
-				_this = ((RtClosure)closureinstance.facility).This;
+				_this = ((RtClosure)closureinstance).This;
 			}
 			else if (callmethod.__is_hasOwnProperty)
 			{
@@ -194,7 +194,7 @@ namespace juicescript.runtime.buildin
 			int len; RtArray argArray = null;
 			if (_arr.ValueType != NaNBoxing.BoxType.Null)
 			{
-				argArray = (RtArray)context.GC.Heap[_arr.HeapPtr].facility;
+				argArray = (RtArray)context.GC.Heap[_arr.HeapPtr];
 				len = (int)argArray.GetLength(context.player);
 			}
 			else
@@ -225,8 +225,8 @@ namespace juicescript.runtime.buildin
 				context.StackPosition += len;
 
 				context.player.RunMethod(callmethod, _this,
-					((RtClosure)closureinstance.facility).ScopePtr,
-					((RtClosure)closureinstance.facility).ScopeType,
+					((RtClosure)closureinstance).ScopePtr,
+					((RtClosure)closureinstance).ScopeType,
 					(ushort)len, (byte*)args,
 					slots,
 					ref error,

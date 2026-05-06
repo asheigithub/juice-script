@@ -151,14 +151,14 @@ var C;
 
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             NaNBoxing test = rtPayload.ReadSlot(0);
 
             Assert.AreEqual(test.ValueType, NaNBoxing.BoxType.HeapPtr);
 
             var ns = player.Context.GC.Heap[test.HeapPtr];
             Assert.AreEqual(ns.TypeKind, RtHeapTypeKind.NAMESPACE);
-            Assert.IsTrue(((RtNameSpace)ns.facility).ASNamespace.Name.EndsWith(":test"));
+            Assert.IsTrue(((RtNameSpace)ns).ASNamespace.Name.EndsWith(":test"));
 
 
             NaNBoxing b = rtPayload.ReadSlot(1);

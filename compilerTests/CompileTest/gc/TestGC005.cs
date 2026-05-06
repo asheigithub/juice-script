@@ -76,10 +76,10 @@ b = new a();
             Assert.IsNull(ex);
 
             Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "a").Count());
+                .Where(o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a").Count());
 
             ASClass @class = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "a").facility).Meta;
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a")).Meta;
 
 
             var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");
@@ -88,19 +88,19 @@ b = new a();
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
             NaNBoxing b = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, b.ValueType);
 
-            RtInstance bins = (RtInstance)player.Context.GC.Heap[b.HeapPtr].facility;
+            RtInstance bins = (RtInstance)player.Context.GC.Heap[b.HeapPtr];
             var b_I = bins.ReadSlot(0, @class.Instance._link_codescope, player);
             Assert.AreEqual(NaNBoxing.BoxType.Undefined, b_I.ValueType);
 
             NaNBoxing c = rtPayload.ReadSlot(1);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, b.ValueType);
 
-            RtInstance cins = (RtInstance)player.Context.GC.Heap[c.HeapPtr].facility;
+            RtInstance cins = (RtInstance)player.Context.GC.Heap[c.HeapPtr];
             var c_I = cins.ReadSlot(0, @class.Instance._link_codescope, player);
             Assert.AreEqual(NaNBoxing.BoxType.Sbyte, c_I.ValueType);
 

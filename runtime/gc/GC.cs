@@ -76,7 +76,7 @@ namespace juicescript.runtime.gc
         { 
             RtHeapBase heapInstance = new RtShape();
             //heapInstance.TypeKind = RtHeapTypeKind.SHAPE;
-           // heapInstance.facility = new RtPayloadShape();
+           // heapInstance = new RtPayloadShape();
 
             int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
@@ -94,7 +94,7 @@ namespace juicescript.runtime.gc
         {
             RtHeapBase heapInstance = new RtDynamic();
             //heapInstance.TypeKind = RtHeapTypeKind.DYNAMIC_PROPERTYS;
-            //heapInstance.facility = new RtPayloadDynamic();
+            //heapInstance = new RtPayloadDynamic();
 
             int size = CalculMemusage(heapInstance);
             if (MemUsage + size > USAGE_LIMIT)
@@ -141,7 +141,7 @@ namespace juicescript.runtime.gc
             //检测 Object.prototype的__proto__必须指向null.
             if (cls == context.OBJECT)
             {
-                if (((RtInstance)_protoObj.facility).PROTOTYPE(context.player,(ASInstance)_protoObj.Type) != 0)
+                if (((RtInstance)_protoObj).PROTOTYPE(context.player,(ASInstance)_protoObj.Type) != 0)
                 {
                     throw new InvalidOperationException();
                 }
@@ -156,7 +156,7 @@ namespace juicescript.runtime.gc
                 ;
             //heapInstance.TypeKind = RtHeapTypeKind.CLASS;
             heapInstance.Type = context.CLASS;
-            //heapInstance.facility = new RtPayloadScriptClass(cls, _protoPtr)
+            //heapInstance = new RtPayloadScriptClass(cls, _protoPtr)
 
 
                 ;
@@ -298,14 +298,14 @@ namespace juicescript.runtime.gc
 
                 if (typeLayout.ASType.__instance_index__ > 0)
                 {
-                    payload.Set_PROTOTYPE( ((RtScriptClass)Heap[ typeLayout.ASType.__instance_index__].facility).PROTO__PTR , context.player);
+                    payload.Set_PROTOTYPE( ((RtScriptClass)Heap[ typeLayout.ASType.__instance_index__]).PROTO__PTR , context.player);
                 }
 
                 if (typeLayout.Size > 0)
                 {
                     payload.Init(type._link_codescope,context.player,true);
                 }
-                //heapInstance.facility = payload;
+                //heapInstance = payload;
             }
 
             int size = CalculMemusage(heapInstance);
@@ -445,7 +445,7 @@ namespace juicescript.runtime.gc
                 ctx = cache_iter_ctx[cache_iter_ctx_index];
 				cache_iter_ctx_index++;
 
-				return ((IterContxt)((RtInstance)ctx.facility).wapperedObject).heapPtr;
+				return ((IterContxt)((RtInstance)ctx).wapperedObject).heapPtr;
             }
             else
             {
@@ -456,7 +456,7 @@ namespace juicescript.runtime.gc
 				var p = AllocInstance(cls.Instance, out iterctx);
 				if (p != 0)
 				{
-					((RtInstance)iterctx.facility).wapperedObject = new IterContxt() { heapPtr=p };
+					((RtInstance)iterctx).wapperedObject = new IterContxt() { heapPtr=p };
 				}
 
 				ctx = iterctx;
@@ -484,7 +484,7 @@ namespace juicescript.runtime.gc
 #endif
             cache_iter_ctx_index--;
 
-            ((IterContxt)((RtInstance)iter_ctx.facility).wapperedObject).Close();
+            ((IterContxt)((RtInstance)iter_ctx).wapperedObject).Close();
 
         }
 
@@ -495,7 +495,7 @@ namespace juicescript.runtime.gc
 
         internal IterContxt CurrentIterContext()
         {
-            return  (IterContxt)((RtInstance)cache_iter_ctx[cache_iter_ctx_index - 1].facility).wapperedObject;
+            return  (IterContxt)((RtInstance)cache_iter_ctx[cache_iter_ctx_index - 1]).wapperedObject;
 
 		}
 
@@ -553,7 +553,7 @@ namespace juicescript.runtime.gc
 
             if (data != null)
             {                
-                ((RtMethodScope)heapInstance.facility).InitSlot(data, start, codescope,false);
+                ((RtMethodScope)heapInstance).InitSlot(data, start, codescope,false);
             }
             else
             {
@@ -595,7 +595,7 @@ namespace juicescript.runtime.gc
                 8 +  //TypeKind
                 8 +  //元数据指针
                 8 +      //facility 指针
-                (instance.facility == null ? 0 : instance.facility.Size) //facility负载本身占用内存
+                (instance == null ? 0 : instance.Size) //facility负载本身占用内存
 
                 ;
 
@@ -639,7 +639,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.GLOBAL:
                         {
                             //递归标记子对象
-                            RtScriptClass rtPayload = (RtScriptClass)obj.facility;
+                            RtScriptClass rtPayload = (RtScriptClass)obj;
                             var slots = rtPayload.__get_slots_for_gc;
 
                             for (int j = 0; j < slots.Length; j++)
@@ -666,7 +666,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.INSTANCE:
                         {
-                            RtInstance rtPayload = (RtInstance)obj.facility;
+                            RtInstance rtPayload = (RtInstance)obj;
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
                                 mark(Heap[rtPayload.HEAPINSTANCE_PTR]);
@@ -805,7 +805,7 @@ namespace juicescript.runtime.gc
                     //    break;
                     case RtHeapTypeKind.NAMESPACE:
                         {
-                            RtNameSpace rtPayload = (RtNameSpace)obj.facility;
+                            RtNameSpace rtPayload = (RtNameSpace)obj;
                             if (rtPayload.prefixPtr > 0)
                             {
                                 Heap[rtPayload.prefixPtr].gc_mark = true;
@@ -819,7 +819,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.STACK_CACHE_OBJ:
                         {
-                            RtStackCache rtPayload = (RtStackCache)obj.facility;
+                            RtStackCache rtPayload = (RtStackCache)obj;
                             if (rtPayload.searchPropertyName.ValueType == NaNBoxing.BoxType.HeapPtr )
                             {
                                 mark(Heap[rtPayload.searchPropertyName.HeapPtr]);
@@ -850,7 +850,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.MethodScope:
                         { 
                             //throw new NotImplementedException();
-                            RtMethodScope rtPayload = (RtMethodScope)obj.facility;
+                            RtMethodScope rtPayload = (RtMethodScope)obj;
 
                             if (rtPayload.cloneout_ptr != 0)
                             {
@@ -878,7 +878,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.CLOSURE:
                         { 
-                            RtClosure rtPayload = (RtClosure)obj.facility;
+                            RtClosure rtPayload = (RtClosure)obj;
 
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
@@ -909,7 +909,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.VECTOR:
                         { 
-                            RtVector rtPayload = (RtVector)obj.facility;
+                            RtVector rtPayload = (RtVector)obj;
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
                                 mark(Heap[rtPayload.HEAPINSTANCE_PTR]);
@@ -933,7 +933,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.ARRAY:
                         {
-                            RtArray rtPayload = (RtArray)obj.facility;
+                            RtArray rtPayload = (RtArray)obj;
                             
                             if (rtPayload.HEAPINSTANCE_PTR != 0)
                             {
@@ -956,7 +956,7 @@ namespace juicescript.runtime.gc
                         break;
                     case RtHeapTypeKind.SHAPE:
                         {
-							//RtPayloadShape rtPayload = (RtPayloadShape)obj.facility;
+							//RtPayloadShape rtPayload = (RtPayloadShape)obj;
 
 #if DEBUG
                             throw new InvalidOperationException();
@@ -967,7 +967,7 @@ namespace juicescript.runtime.gc
 						
                     case RtHeapTypeKind.DYNAMIC_PROPERTYS:
                         { 
-                            RtDynamic rtPayload = (RtDynamic)obj.facility;
+                            RtDynamic rtPayload = (RtDynamic)obj;
                             for (int i = 0; i < rtPayload.Slots.Count; i++)
                             {
                                 NaNBoxing box = rtPayload.Slots[i];
@@ -1052,7 +1052,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.GLOBAL:
                         {
                             //递归标记子对象
-                            RtScriptClass rtPayload = (RtScriptClass)instance.facility;
+                            RtScriptClass rtPayload = (RtScriptClass)instance;
                             var slots = rtPayload.__get_slots_for_gc;
 
                             for (int j = 0; j < slots.Length; j++)
@@ -1082,7 +1082,7 @@ namespace juicescript.runtime.gc
 #if FORCOMPILER
                             if (!context.player.iscomputing_initvalue) //计算初始化值时需要保存临时对象不被回收
                             {
-                                if (i >= root_cache_count) //instance不可能直接加入到Root中    //!((RtPayloadInstance)instance.facility).isCache)
+                                if (i >= root_cache_count) //instance不可能直接加入到Root中    //!((RtPayloadInstance)instance).isCache)
                                 {
                                     throw new InvalidOperationException();
                                 }
@@ -1099,11 +1099,11 @@ namespace juicescript.runtime.gc
 #else
 
 #if DEBUG
-                            if (i >= root_cache_count) //instance不可能直接加入到Root中    //!((RtPayloadInstance)instance.facility).isCache)
+                            if (i >= root_cache_count) //instance不可能直接加入到Root中    //!((RtPayloadInstance)instance).isCache)
                             {
                                 throw new InvalidOperationException();
                             }
-                            else if(((RtPayloadInstance)instance.facility).wapperedObject != null)
+                            else if(((RtPayloadInstance)instance).wapperedObject != null)
                             {
                                 throw new InvalidOperationException();
                             }
@@ -1116,7 +1116,7 @@ namespace juicescript.runtime.gc
                     case RtHeapTypeKind.NAMESPACE:
 
                         {
-                            RtNameSpace rtPayload = (RtNameSpace)instance.facility;
+                            RtNameSpace rtPayload = (RtNameSpace)instance;
 
                             if (rtPayload.prefixPtr > 0)
                             {
@@ -1149,7 +1149,7 @@ namespace juicescript.runtime.gc
                         //Root中的Array和Vector只有在栈上被访问到时才表示引用了对象
                         break;
                     case RtHeapTypeKind.SHAPE:
-                        RtShape shape = (RtShape)instance.facility;
+                        RtShape shape = (RtShape)instance;
                         // 标记属性名 - 支持LocalString和HeapPtr
                         if (shape.PTR_NAME.ValueType == NaNBoxing.BoxType.HeapPtr && shape.PTR_NAME.HeapPtr != 0)
                         {

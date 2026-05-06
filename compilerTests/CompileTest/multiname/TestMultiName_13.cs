@@ -217,7 +217,7 @@ var f = b.b.o.o;
 
             Assert.IsNull(ex);
 
-            var payload = (RtScriptClass)globalInstance.facility;
+            var payload = (RtScriptClass)globalInstance;
 
             NaNBoxing c = payload.ReadSlot(2);
             Assert.AreEqual(c.ValueType, NaNBoxing.BoxType.Short);

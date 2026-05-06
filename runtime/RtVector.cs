@@ -80,13 +80,13 @@ namespace juicescript.runtime
 		internal int HEAPINSTANCE_PTR;
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
-			var payload = ((RtVector)player.Context.GC.Heap[ptr].facility);
+			var payload = ((RtVector)player.Context.GC.Heap[ptr]);
 			var origin = payload;
 			target = origin;
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtVector)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtVector)player.Context.GC.Heap[ptr]);
 				target = payload;
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
 			}
@@ -215,7 +215,7 @@ namespace juicescript.runtime
                             var cache = player.Context.GC.Heap[cache_ptr];
 
                             cache.Type = element_asclass.Instance;
-                            RtInstance struct_payload = (RtInstance)cache.facility;
+                            RtInstance struct_payload = (RtInstance)cache;
                             struct_payload.HEAPINSTANCE_PTR = 0;
 
                             struct_payload.methodscopeslot_ref_state = 0;
@@ -349,7 +349,7 @@ namespace juicescript.runtime
                                 }
 #endif
 
-								RtInstance src = ((RtInstance)player.Context.GC.Heap[value.HeapPtr].facility);
+								RtInstance src = ((RtInstance)player.Context.GC.Heap[value.HeapPtr]);
                                 src.GetStoreData(player,(ASInstance)element_asclass.Instance).Slice(0, bytes.Length).CopyTo(bytes);
                                 return;
                             }
@@ -511,7 +511,7 @@ namespace juicescript.runtime
 				return 0;
 			}
 
-			((RtVector)heap_vector.facility).SetStore ( new VectorImpl.VectorStore(store));
+			((RtVector)heap_vector).SetStore ( new VectorImpl.VectorStore(store));
 
             //链接到堆对象, 堆对象此时被此对象链接
             HEAPINSTANCE_PTR = heap_ptr;

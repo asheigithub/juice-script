@@ -75,7 +75,7 @@ a.t = false;
             var globalInstance = player.Context.GC.Heap[global.__global_index__];
             Assert.IsNotNull(globalInstance);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             NaNBoxing a = rtPayload.ReadSlot(0);
 
             Assert.AreEqual(a.ValueType, NaNBoxing.BoxType.HeapPtr);
@@ -91,38 +91,38 @@ a.t = false;
 
             Assert.AreEqual("3",
                 
-                ((RtInstance)a_v.facility).ReadSlot(0, OO.Instance._link_codescope,player).LocalStringValue
+                ((RtInstance)a_v).ReadSlot(0, OO.Instance._link_codescope,player).LocalStringValue
                
                 );
 
             Assert.AreEqual("NaN",
                ((RtString)
-               player.Context.GC.Heap[((RtInstance)a_v.facility).ReadSlot(1, OO.Instance._link_codescope, player).HeapPtr].facility
+               player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(1, OO.Instance._link_codescope, player).HeapPtr]
                ).Str
                );
 
             Assert.AreEqual("Infinity",
                 ((RtString)
-                player.Context.GC.Heap[((RtInstance)a_v.facility).ReadSlot(2, OO.Instance._link_codescope, player).HeapPtr].facility
+                player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(2, OO.Instance._link_codescope, player).HeapPtr]
                 ).Str
                 );
 
             Assert.AreEqual("-Infinity",
                ((RtString)
-               player.Context.GC.Heap[((RtInstance)a_v.facility).ReadSlot(3, OO.Instance._link_codescope, player).HeapPtr].facility
+               player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(3, OO.Instance._link_codescope, player).HeapPtr]
                ).Str
                );
 
 
             Assert.AreEqual("true",
               ((RtString)
-              player.Context.GC.Heap[((RtInstance)a_v.facility).ReadSlot(4, OO.Instance._link_codescope, player).HeapPtr].facility
+              player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(4, OO.Instance._link_codescope, player).HeapPtr]
               ).Str
               );
 
             Assert.AreEqual("false",
               ((RtString)
-              player.Context.GC.Heap[((RtInstance)a_v.facility).ReadSlot(5, OO.Instance._link_codescope, player).HeapPtr].facility
+              player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(5, OO.Instance._link_codescope, player).HeapPtr]
               ).Str
               );
 

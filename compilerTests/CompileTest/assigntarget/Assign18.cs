@@ -94,7 +94,7 @@ new A().F();
 			//Assert.IsNotNull(globalInstance);
 			//Assert.IsNull(ex);
 
-			//RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+			//RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalinstance;
 
 			//NaNBoxing o = rtPayload.ReadSlot(0);
 			//Assert.AreEqual(NaNBoxing.BoxType.Short, o.ValueType);

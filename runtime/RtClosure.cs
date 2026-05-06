@@ -57,13 +57,13 @@ namespace juicescript.runtime
 
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtClosure target)
 		{
-			var payload = ((RtClosure)player.Context.GC.Heap[ptr].facility);
+			var payload = ((RtClosure)player.Context.GC.Heap[ptr]);
 			var origin = payload;
 			target = origin;
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtClosure)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtClosure)player.Context.GC.Heap[ptr]);
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转

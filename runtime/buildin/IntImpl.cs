@@ -39,7 +39,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var radix = scope.ReadSlot(0, context.player);
 
 			Debug.Assert(radix.ValueType == NaNBoxing.BoxType.Int);
@@ -156,7 +156,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var fractionDigits = scope.ReadSlot(0, context.player);
 
 			Debug.Assert(fractionDigits.ValueType == NaNBoxing.BoxType.Int);
@@ -207,7 +207,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var digits = scope.ReadSlot(0, context.player);
 
 			Debug.Assert(digits.ValueType == NaNBoxing.BoxType.Int);
@@ -300,7 +300,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var precision = scope.ReadSlot(0, context.player);
 			Debug.Assert(precision.ValueType == NaNBoxing.BoxType.Int);
 

@@ -95,16 +95,16 @@ var a;
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             
             NaNBoxing a = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, a.ValueType);
 
             RtHeapBase instance = player.Context.GC.Heap[a.HeapPtr];
             Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.TypeKind);
-            Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance.facility).StoreMode);
+            Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance).StoreMode);
 
-            Assert.AreEqual(3u, ((RtArray)instance.facility).GetLength(player));
+            Assert.AreEqual(3u, ((RtArray)instance).GetLength(player));
         }
 
 

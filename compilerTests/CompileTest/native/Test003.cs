@@ -68,7 +68,7 @@ trace( b);
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+			RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 			var a = rtPayload.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.Sbyte, a.ValueType);

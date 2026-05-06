@@ -294,7 +294,7 @@ assert.sameValue(trac, ""1234"", ""?ToPrimive(rhs) throws."");
 				Assert.IsNotNull(globalInstance);
 				Assert.IsNull(ex);
 
-				RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+				RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 				StringPrint print = (StringPrint)player.Print;
 

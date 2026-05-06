@@ -87,7 +87,7 @@ namespace juicescript.runtime
 			{
 				case RtHeapTypeKind.CLASS:
 				case RtHeapTypeKind.GLOBAL:
-					as_type = ((RtScriptClass)instance.facility).Meta;
+					as_type = ((RtScriptClass)instance).Meta;
 					break;
 				case RtHeapTypeKind.STRING:
 					as_type = Context.STRING.Instance;
@@ -152,7 +152,7 @@ namespace juicescript.runtime
 
 			unsafe
 			{
-				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance.facility).ScopePtr , ((RtClosure)funinstance.facility).ScopeType , 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
+				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr , ((RtClosure)funinstance).ScopeType , 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
 				if (error.raised)
 				{
 					return default;
@@ -211,7 +211,7 @@ namespace juicescript.runtime
 
 			unsafe
 			{
-				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance.facility).ScopePtr, ((RtClosure)funinstance.facility).ScopeType, 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
+				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr, ((RtClosure)funinstance).ScopeType, 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
 				if (error.raised)
 				{
 					return default;

@@ -124,7 +124,7 @@ var q;
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
             var o = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.Sbyte, o.ValueType);

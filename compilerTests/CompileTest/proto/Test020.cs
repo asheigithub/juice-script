@@ -130,7 +130,7 @@ o1 = null; //使GC可以回收cc.prototype.constructor
 				Assert.AreEqual(1 + 1, player.Context.GC.Heap.DumpHeap().Where(h => h.TypeKind == RtHeapTypeKind.CLOSURE && !((ASMethodBody)h.Type).Method.__is_buildin_proto).Count());
 
 
-                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 				StringPrint print = (StringPrint)player.Print;
 

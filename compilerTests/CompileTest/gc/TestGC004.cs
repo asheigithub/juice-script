@@ -105,10 +105,10 @@ var i = k.ci;
             Assert.IsNull(ex);
 
             Assert.AreEqual( 1,  player.Context.GC.Heap.DumpHeap()
-                .Where( o=> o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "a" ).Count());
+                .Where( o=> o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a" ).Count());
 
             ASClass type_a = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "a").facility).Meta;
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a")).Meta;
 
 
             var objList = player.Context.GC.Heap.DumpHeap().Where(
@@ -130,7 +130,7 @@ var i = k.ci;
                 ).Count());
 
             ASClass type_b = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "b").facility).Meta;
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "b")).Meta;
 
             Assert.AreEqual(1,
             player.Context.GC.Heap.DumpHeap().Where(
@@ -142,7 +142,7 @@ var i = k.ci;
 
             var globalInstance = FindGlobal(player);
 
-            var payload = (RtScriptClass)globalInstance.facility;
+            var payload = (RtScriptClass)globalInstance;
 
             NaNBoxing k = payload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, k.ValueType);
@@ -154,7 +154,7 @@ var i = k.ci;
 
 
             ASClass type_c = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o.facility).Meta.QName.Name == "c").facility).Meta;
+                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "c")).Meta;
 
 
             NaNBoxing i = payload.ReadSlot(2);

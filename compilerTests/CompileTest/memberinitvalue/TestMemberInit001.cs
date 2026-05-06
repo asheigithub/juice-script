@@ -82,22 +82,22 @@ var q;
 			Assert.IsNotNull(clsInstance);
 			Assert.IsNull(ex);
 
-			var ll = ((RtScriptClass)clsInstance.facility).ReadSlot(0);
+			var ll = ((RtScriptClass)clsInstance).ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, ll.ValueType);
 
-			var llm = ((RtScriptClass)clsInstance.facility).ReadSlot(1);
+			var llm = ((RtScriptClass)clsInstance).ReadSlot(1);
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, llm.ValueType);
 			var llminstance = player.Context.GC.Heap[llm.HeapPtr];
 			Assert.AreEqual(RtHeapTypeKind.STRING, llminstance.TypeKind);
-			Assert.AreEqual("abcdefg", ((RtString)llminstance.facility).Str );
+			Assert.AreEqual("abcdefg", ((RtString)llminstance).Str );
 
-			var v2 = ((RtScriptClass)clsInstance.facility).ReadSlot(2);
+			var v2 = ((RtScriptClass)clsInstance).ReadSlot(2);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, v2.ValueType);
 			Assert.AreEqual(RtHeapTypeKind.INSTANCE, player.Context.GC.Heap[v2.HeapPtr].TypeKind);
 			Assert.AreEqual(player.Context.OBJECT.Instance, player.Context.GC.Heap[v2.HeapPtr].Type);
 
-			var K = ((RtScriptClass)clsInstance.facility).ReadSlot(3);
-			var B = ((RtScriptClass)clsInstance.facility).ReadSlot(4);
+			var K = ((RtScriptClass)clsInstance).ReadSlot(3);
+			var B = ((RtScriptClass)clsInstance).ReadSlot(4);
 
 			Assert.AreEqual(llm, K);
 			Assert.AreEqual(llm, B);

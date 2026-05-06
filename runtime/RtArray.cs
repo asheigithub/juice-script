@@ -105,13 +105,13 @@ namespace juicescript.runtime
 
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
-			var payload = ((RtArray)player.Context.GC.Heap[ptr].facility);
+			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
 			var origin = payload;
 			target = origin;
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtArray)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtArray)player.Context.GC.Heap[ptr]);
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -364,7 +364,7 @@ namespace juicescript.runtime
 				return arr_ptr;
 			}
 
-			RtArray arr = (RtArray)arr_instance.facility;
+			RtArray arr = (RtArray)arr_instance;
 
 			Span<NaNBoxing> store_span;
 
@@ -694,9 +694,9 @@ namespace juicescript.runtime
 							var cacheObj = context.GC.Heap[clonedptr];
 							cacheObj.Type = check.Type;
 
-							((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-							((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-							((RtInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+							((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+							((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
 							context.StackSlots[tempSlot].SetHeapPtr(clonedptr);
 						}
@@ -874,7 +874,7 @@ namespace juicescript.runtime
 				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
 				if (error.raised) return;
 
-				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr].facility;
+				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr];
 				heap.DoSplice(context, ref error, start, deleteCount,netChange);
 				return;
 			}
@@ -923,7 +923,7 @@ namespace juicescript.runtime
 				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
 				if (error.raised) return;
 
-				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr].facility;
+				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr];
 				heap.DoSplice(context, ref error, start, deleteCount,netChange);
 				return;
 			}
@@ -1245,7 +1245,7 @@ namespace juicescript.runtime
 						return;
 					}
 
-					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr].facility;
+					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr];
 					heap.DoUnshift(player, ref error, restSpan);
 					return;
 				}
@@ -1303,7 +1303,7 @@ namespace juicescript.runtime
 						return;
 					}
 
-					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr].facility;
+					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr];
 					heap.DoUnshift(player, ref error, restSpan);
 					return;
 				}
@@ -1813,9 +1813,9 @@ namespace juicescript.runtime
 		private void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
 		{
 			dst.Type = src.Type;
-			((RtInstance)dst.facility).HEAPINSTANCE_PTR = 0;
-			((RtInstance)dst.facility).methodscopeslot_ref_state = 0;
-			((RtInstance)dst.facility).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
+			((RtInstance)dst).HEAPINSTANCE_PTR = 0;
+			((RtInstance)dst).methodscopeslot_ref_state = 0;
+			((RtInstance)dst).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
 
 		}
 

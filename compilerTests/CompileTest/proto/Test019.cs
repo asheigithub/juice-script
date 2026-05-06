@@ -121,7 +121,7 @@ trace(o2.a, o2.b);
 				Assert.AreEqual(1 + 1 , player.Context.GC.Heap.DumpHeap().Where(h => h.TypeKind == RtHeapTypeKind.CLOSURE && !((ASMethodBody)h.Type).Method.__is_buildin_proto).Count());
 
 
-                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 				StringPrint print = (StringPrint)player.Print;
 

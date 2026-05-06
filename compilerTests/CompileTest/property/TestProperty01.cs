@@ -212,7 +212,7 @@ var o;
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
                 //NaNBoxing a = rtPayload.ReadSlot(0);
                 //Assert.AreEqual(NaNBoxing.BoxType.Undefined, a.ValueType);
@@ -226,7 +226,7 @@ var o;
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
                 NaNBoxing a = rtPayload.ReadSlot(0);
                 Assert.AreEqual(NaNBoxing.BoxType.Short, a.ValueType);

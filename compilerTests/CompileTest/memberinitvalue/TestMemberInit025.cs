@@ -92,7 +92,7 @@ const G2 = int.MIN_VALUE;
 			var globalInstance = player.Context.GC.Heap[global.__global_index__];
 			Assert.IsNotNull(globalInstance);
 			
-			NaNBoxing o = ((RtScriptClass)globalInstance.facility).ReadSlot(3);
+			NaNBoxing o = ((RtScriptClass)globalInstance).ReadSlot(3);
 			Assert.AreEqual(NaNBoxing.BoxType.Int, o.ValueType); //此处AIR 运行结果是undefined .但是实际上理应已经成功计算常量。
 			Assert.AreEqual(int.MinValue, o.IntValue);
 

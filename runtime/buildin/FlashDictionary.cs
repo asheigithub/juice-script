@@ -19,7 +19,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
-			((RtInstance)this_ins.facility).wapperedObject = new Dict();
+			((RtInstance)this_ins).wapperedObject = new Dict();
 
 		}
 
@@ -73,7 +73,7 @@ namespace juicescript.runtime.buildin
 				var obj = context.GC.Heap[src.HeapPtr];
 				if (obj.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
 				{
-					((RtInstance)obj.facility).MarkFromContainer();
+					((RtInstance)obj).MarkFromContainer();
 					context.StackSlots[returnSlotIndex] = src;
 				}
 				else
@@ -96,10 +96,10 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
-			Dict dict = (Dict)((RtInstance)this_ins.facility).wapperedObject;
+			Dict dict = (Dict)((RtInstance)this_ins).wapperedObject;
 
 			NaNBoxing key = scope.ReadSlot(0, context.player);
 
@@ -108,7 +108,7 @@ namespace juicescript.runtime.buildin
 				var key_i = context.GC.Heap[key.HeapPtr];
 				if (key_i.TypeKind == RtHeapTypeKind.STRING)
 				{
-					var str = ((RtString)key_i.facility).Str;
+					var str = ((RtString)key_i).Str;
 					double v;
 					if (try_convertkey2Number(str, out v))
 					{
@@ -222,10 +222,10 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
-			Dict dict = (Dict)((RtInstance)this_ins.facility).wapperedObject;
+			Dict dict = (Dict)((RtInstance)this_ins).wapperedObject;
 
 			NaNBoxing key = scope.ReadSlot(0, context.player);
 			NaNBoxing value = scope.ReadSlot(1, context.player);
@@ -235,7 +235,7 @@ namespace juicescript.runtime.buildin
 				var key_i = context.GC.Heap[key.HeapPtr];
 				if (key_i.TypeKind == RtHeapTypeKind.STRING)
 				{
-					var str = ((RtString)key_i.facility).Str;
+					var str = ((RtString)key_i).Str;
 					double v;
 					if (try_convertkey2Number(str, out v))
 					{
@@ -309,10 +309,10 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
-			Dict dict = (Dict)((RtInstance)this_ins.facility).wapperedObject;
+			Dict dict = (Dict)((RtInstance)this_ins).wapperedObject;
 
 			NaNBoxing key = scope.ReadSlot(0, context.player);
 
@@ -321,7 +321,7 @@ namespace juicescript.runtime.buildin
 				var key_i = context.GC.Heap[key.HeapPtr];
 				if (key_i.TypeKind == RtHeapTypeKind.STRING)
 				{
-					var str = ((RtString)key_i.facility).Str;
+					var str = ((RtString)key_i).Str;
 					double v;
 					if (try_convertkey2Number(str, out v))
 					{
@@ -397,7 +397,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
 
@@ -423,19 +423,19 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
 
 			var dict_ptr = scope.ReadSlot(0, context.player);
 			var dict_ins = context.GC.Heap[dict_ptr.HeapPtr];
 
-			Dict dict = (Dict)((RtInstance)dict_ins.facility).wapperedObject;
+			Dict dict = (Dict)((RtInstance)dict_ins).wapperedObject;
 
 			var result_ptr = scope.ReadSlot(1, context.player);
 			var result = context.GC.Heap[result_ptr.HeapPtr];
-			RtInstance result_obj = (RtInstance)result.facility;
+			RtInstance result_obj = (RtInstance)result;
 
-			var index = ((RtInstance)iter_ins.facility).ReadSlot(0, iter_ins.Type._link_codescope, context.player);
+			var index = ((RtInstance)iter_ins).ReadSlot(0, iter_ins.Type._link_codescope, context.player);
 #if DEBUG
 			if (index.ValueType != NaNBoxing.BoxType.Int)
 			{
@@ -450,7 +450,7 @@ namespace juicescript.runtime.buildin
 				
 				//迭代器 递增
 				index.SetInt(i + 1);
-				((RtInstance)iter_ins.facility).SetSlot(index, 0, iter_ins.Type._link_codescope, context.player);
+				((RtInstance)iter_ins).SetSlot(index, 0, iter_ins.Type._link_codescope, context.player);
 
 
 				NaNBoxing f = default; f.SetBoolean(false);
@@ -542,10 +542,10 @@ namespace juicescript.runtime.buildin
 							return key.HeapPtr.GetHashCode();
 							
 						case RtHeapTypeKind.STRING:
-							return ((RtString)ins.facility).Str.GetHashCode();
+							return ((RtString)ins).Str.GetHashCode();
 						case RtHeapTypeKind.INSTANCE:
 							{ 
-								RtInstance rt = (RtInstance)ins.facility;
+								RtInstance rt = (RtInstance)ins;
 								if (((ASInstance)ins.Type).Flags.HasFlag(ClassFlags.Wapper))
 								{
 									return rt.wapperedObject.GetHashCode();

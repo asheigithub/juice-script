@@ -94,7 +94,7 @@ var r = new O(6).TTT.call(null,1,2,3);
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+			RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 			var o = rtPayload.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.Sbyte, o.ValueType);

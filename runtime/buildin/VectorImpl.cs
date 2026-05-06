@@ -31,7 +31,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 			//var rest = scope.ReadSlot(0, context.player);
 
@@ -43,12 +43,12 @@ namespace juicescript.runtime.buildin
 									      */
 			NaNBoxing arguments = context.StackSlots[a_ptr];
 
-			var rest_array = (RtArray)context.GC.Heap[arguments.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[arguments.HeapPtr];
 
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
 
-			var vector = (RtVector)vecinstance.facility;
+			var vector = (RtVector)vecinstance;
 
 			int element_size = VectorStore.GetElementSize(vector.element_type, vector.element_asclass);
 
@@ -178,13 +178,13 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			var isfixed = scope.ReadSlot(0, context.player);
 			Debug.Assert(isfixed.ValueType == NaNBoxing.BoxType.Boolean);
 
-			((RtVector)vecinstance.facility).GetStore(context.player).isFixed = isfixed.Boolean;
+			((RtVector)vecinstance).GetStore(context.player).isFixed = isfixed.Boolean;
 
 		}
 		//__AS3__.vec$Vector@get#fixed
@@ -195,9 +195,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
-			context.StackSlots[returnSlotIndex].SetBoolean(((RtVector)vecinstance.facility).GetStore(context.player).isFixed);
+			context.StackSlots[returnSlotIndex].SetBoolean(((RtVector)vecinstance).GetStore(context.player).isFixed);
 
 		}
 
@@ -209,11 +209,11 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 
-			int len = ((RtVector)vecinstance.facility).GetStore(context.player).length;
+			int len = ((RtVector)vecinstance).GetStore(context.player).length;
 			context.StackSlots[returnSlotIndex].SetInt(len);
 		}
 		//__AS3__.vec$Vector@set#length
@@ -224,7 +224,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			NaNBoxing newlen = scope.ReadSlot(0, context.player);
@@ -240,7 +240,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			((RtVector)vecinstance.facility).Resize(newlen.IntValue, ref error, context.player, (ASInstance)vecinstance.Type);
+			((RtVector)vecinstance).Resize(newlen.IntValue, ref error, context.player, (ASInstance)vecinstance.Type);
 			//throw new NotImplementedException();
 
 		}
@@ -261,7 +261,7 @@ namespace juicescript.runtime.buildin
 			}
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			//在目标槽初始化vector
@@ -272,11 +272,11 @@ namespace juicescript.runtime.buildin
 
 
 			instance.Type = (ASInstance)vecinstance.Type;
-			((RtVector)instance.facility).HEAPINSTANCE_PTR = 0;
-			((RtVector)instance.facility).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
-			((RtVector)instance.facility).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
-			((RtVector)instance.facility).GetStore(context.player).SetBuffer(0);
-			((RtVector)instance.facility).GetStore(context.player).length = 0;
+			((RtVector)instance).HEAPINSTANCE_PTR = 0;
+			((RtVector)instance).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
+			((RtVector)instance).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
+			((RtVector)instance).GetStore(context.player).SetBuffer(0);
+			((RtVector)instance).GetStore(context.player).length = 0;
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
 
@@ -286,7 +286,7 @@ namespace juicescript.runtime.buildin
 
 
 			var rest = scope.ReadSlot(0, context.player);
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
@@ -322,7 +322,7 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-					srcVec = (RtVector)obj.facility;
+					srcVec = (RtVector)obj;
 					srcVecPtr = RtVector.FindAndUpdateHeapInstancePtr(a.HeapPtr, context.player, out srcVec);
 
 					if (((ASInstance)vecinstance.Type)._element_class != null)
@@ -345,13 +345,13 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					srcVec = (RtVector)vecinstance.facility;
+					srcVec = (RtVector)vecinstance;
 					srcVecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out srcVec);
 				}
 
 				//pass
 
-				var dstVec = (RtVector)instance.facility;
+				var dstVec = (RtVector)instance;
 				int count = srcVec.GetStore(context.player).length;
 				dstVec.Resize(len + count, ref error, context.player, (ASInstance)instance.Type);
 				if (error.raised)
@@ -397,18 +397,18 @@ namespace juicescript.runtime.buildin
 		{
 
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			var rest = scope.ReadSlot(0, context.player);
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
 #endif
 
-			var vector = ((RtVector)vecinstance.facility);
+			var vector = ((RtVector)vecinstance);
 
 			if (vector.GetStore(context.player).isFixed)
 			{
@@ -466,7 +466,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -530,9 +530,9 @@ namespace juicescript.runtime.buildin
 						var cacheObj = context.GC.Heap[clonedptr];
 						cacheObj.Type = check.Type;
 
-						((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-						((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-						((RtInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
 						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
 
@@ -554,18 +554,18 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			var rest = scope.ReadSlot(0, context.player);
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
 #endif
 
-			var vector = ((RtVector)vecinstance.facility);
+			var vector = ((RtVector)vecinstance);
 
 			if (vector.GetStore(context.player).isFixed)
 			{
@@ -643,7 +643,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -703,9 +703,9 @@ namespace juicescript.runtime.buildin
 						var cacheObj = context.GC.Heap[clonedptr];
 						cacheObj.Type = check.Type;
 
-						((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-						((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-						((RtInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
 						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
 					}
@@ -738,7 +738,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -809,7 +809,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -876,7 +876,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -922,9 +922,9 @@ namespace juicescript.runtime.buildin
 					var cacheObj = context.GC.Heap[clonedptr];
 					cacheObj.Type = check.Type;
 
-					((RtInstance)cacheObj.facility).methodscopeslot_ref_state = 0;
-					((RtInstance)cacheObj.facility).HEAPINSTANCE_PTR = 0;
-					((RtInstance)cacheObj.facility).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+					((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+					((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+					((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
 					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr);
 				}
@@ -955,7 +955,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -1040,7 +1040,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -1094,7 +1094,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			
 			
 			RtVector vector;
@@ -1150,7 +1150,7 @@ namespace juicescript.runtime.buildin
 			if (sortBehavior.ValueType == BoxType.HeapPtr)
 			{
 				RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
-				RtClosure closure = (RtClosure)func.facility;
+				RtClosure closure = (RtClosure)func;
 
 				ASMethod method = ((ASMethodBody)func.Type).Method;
 
@@ -1298,7 +1298,7 @@ namespace juicescript.runtime.buildin
 						NaNBoxing box1 = context.StackSlots[context.StackPosition - 2];
 						if (box1.ValueType == BoxType.HeapPtr)
 						{
-							string v1 = ((RtString)context.GC.Heap[box1.HeapPtr].facility).Str;
+							string v1 = ((RtString)context.GC.Heap[box1.HeapPtr]).Str;
 							chars1 = v1.AsSpan();
 						}
 						else
@@ -1315,7 +1315,7 @@ namespace juicescript.runtime.buildin
 						ref NaNBoxing box2 = ref context.StackSlots[context.StackPosition - 1];
 						if (box2.ValueType == BoxType.HeapPtr)
 						{
-							string v = ((RtString)context.GC.Heap[box2.HeapPtr].facility).Str;
+							string v = ((RtString)context.GC.Heap[box2.HeapPtr]).Str;
 							chars2 = v.AsSpan();
 						}
 						else
@@ -1464,7 +1464,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			TypeKind elementkind =
@@ -1524,7 +1524,7 @@ namespace juicescript.runtime.buildin
 			if (scope.SlotCount > 2)
 			{
 				var rest = scope.ReadSlot(2, context.player);
-				rest_array = (RtArray)context.GC.Heap[rest.HeapPtr].facility;
+				rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 				insertCount = rest_array.stack_store.Span.Length;
 			}
 
@@ -1540,14 +1540,14 @@ namespace juicescript.runtime.buildin
 			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
 			resultInstance.Type = vType;
-			((RtVector)resultInstance.facility).HEAPINSTANCE_PTR = 0;
-			((RtVector)resultInstance.facility).element_asclass = elementcls;
-			((RtVector)resultInstance.facility).element_type = elementkind;
-			((RtVector)resultInstance.facility).GetStore(context.player).SetBuffer(0);
-			((RtVector)resultInstance.facility).GetStore(context.player).length = 0;
-			((RtVector)resultInstance.facility).GetStore(context.player).elementSize = elementSize;
+			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
+			((RtVector)resultInstance).element_asclass = elementcls;
+			((RtVector)resultInstance).element_type = elementkind;
+			((RtVector)resultInstance).GetStore(context.player).SetBuffer(0);
+			((RtVector)resultInstance).GetStore(context.player).length = 0;
+			((RtVector)resultInstance).GetStore(context.player).elementSize = elementSize;
 
-			var resultVector = (RtVector)resultInstance.facility;
+			var resultVector = (RtVector)resultInstance;
 
 			if (actualDeleteCount > 0)
 			{
@@ -1674,7 +1674,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
@@ -1703,7 +1703,7 @@ namespace juicescript.runtime.buildin
 
 			
 			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
-			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr].facility;
+			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr];
 
 			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
 			{
@@ -1794,7 +1794,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
@@ -1823,7 +1823,7 @@ namespace juicescript.runtime.buildin
 
 
 			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
-			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr].facility;
+			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr];
 
 			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
 			{
@@ -1916,7 +1916,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 			TypeKind elementkind =
 			((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
@@ -1949,7 +1949,7 @@ namespace juicescript.runtime.buildin
 
 			var _this = scope.ReadSlot(1, context.player);
 			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
-			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr].facility;
+			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr];
 
 			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
 			{
@@ -1977,14 +1977,14 @@ namespace juicescript.runtime.buildin
 			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
 			resultInstance.Type = vType;
-			((RtVector)resultInstance.facility).HEAPINSTANCE_PTR = 0;
-			((RtVector)resultInstance.facility).element_asclass = elementcls;
-			((RtVector)resultInstance.facility).element_type = elementkind;
-			((RtVector)resultInstance.facility).GetStore(context.player).SetBuffer(0);
-			((RtVector)resultInstance.facility).GetStore(context.player).length = 0;
-			((RtVector)resultInstance.facility).GetStore(context.player).elementSize = elementSize;
+			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
+			((RtVector)resultInstance).element_asclass = elementcls;
+			((RtVector)resultInstance).element_type = elementkind;
+			((RtVector)resultInstance).GetStore(context.player).SetBuffer(0);
+			((RtVector)resultInstance).GetStore(context.player).length = 0;
+			((RtVector)resultInstance).GetStore(context.player).elementSize = elementSize;
 
-			var resultVector = (RtVector)resultInstance.facility;
+			var resultVector = (RtVector)resultInstance;
 
 			int basePos = context.StackPosition;
 			var argSlots = context.StackSlots.AsSpan(basePos, 5);
@@ -2067,7 +2067,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 			TypeKind elementkind =
 			((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
@@ -2100,7 +2100,7 @@ namespace juicescript.runtime.buildin
 
 			var _this = scope.ReadSlot(1, context.player);
 			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
-			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr].facility;
+			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr];
 
 			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
 			{
@@ -2128,14 +2128,14 @@ namespace juicescript.runtime.buildin
 			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
 			resultInstance.Type = vType;
-			((RtVector)resultInstance.facility).HEAPINSTANCE_PTR = 0;
-			((RtVector)resultInstance.facility).element_asclass = elementcls;
-			((RtVector)resultInstance.facility).element_type = elementkind;
-			((RtVector)resultInstance.facility).GetStore(context.player).SetBuffer(0);
-			((RtVector)resultInstance.facility).GetStore(context.player).length = 0;
-			((RtVector)resultInstance.facility).GetStore(context.player).elementSize = elementSize;
+			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
+			((RtVector)resultInstance).element_asclass = elementcls;
+			((RtVector)resultInstance).element_type = elementkind;
+			((RtVector)resultInstance).GetStore(context.player).SetBuffer(0);
+			((RtVector)resultInstance).GetStore(context.player).length = 0;
+			((RtVector)resultInstance).GetStore(context.player).elementSize = elementSize;
 
-			var resultVector = (RtVector)resultInstance.facility;
+			var resultVector = (RtVector)resultInstance;
 
 			int basePos = context.StackPosition;
 			var argSlots = context.StackSlots.AsSpan(basePos, 6);
@@ -2223,7 +2223,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			
 
 			RtVector vector;
@@ -2261,7 +2261,7 @@ namespace juicescript.runtime.buildin
 
 
 			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
-			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr].facility;
+			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr];
 
 			if (cbmethod.__ismethod && !cbmethod.__is_call_or_apply)
 			{
@@ -2364,7 +2364,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			RtVector vector;
@@ -2433,10 +2433,10 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
-			var vector = (RtVector)vecinstance.facility;
+			var vector = (RtVector)vecinstance;
 			var store = vector.GetStore(context.player);
 			if (store.length == 0)
 			{
@@ -2770,7 +2770,7 @@ namespace juicescript.runtime.buildin
 									else
 									{
 
-										RtInstance struct_payload = (RtInstance)context.GC.Heap[rest_span[i].HeapPtr].facility;
+										RtInstance struct_payload = (RtInstance)context.GC.Heap[rest_span[i].HeapPtr];
 
 										struct_payload.GetStoreData(context.player, element.Instance).Slice(0, elementSize).CopyTo(slice);
 
@@ -3063,7 +3063,7 @@ namespace juicescript.runtime.buildin
 									}
 
 									int p = context.player.InitCacheInstance(element, context.StackPosition, false);
-									slice.CopyTo(((RtInstance)context.GC.Heap[p].facility).GetStoreData(context.player, (ASInstance)element.Instance));
+									slice.CopyTo(((RtInstance)context.GC.Heap[p]).GetStoreData(context.player, (ASInstance)element.Instance));
 
 									context.StackPosition++;
 									TopLevel.TraceElement(context.StackSlots[context.StackPosition - 1], context, stackStPos, ref error, scope_ptr, default, printer);

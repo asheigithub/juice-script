@@ -371,12 +371,12 @@ namespace juicescript.runtime
                                 return 
 
                                    (
-                                    string.IsNullOrEmpty(((RtScriptClass)instance.facility).Meta.QName.Namespace.Name) ?
+                                    string.IsNullOrEmpty(((RtScriptClass)instance).Meta.QName.Namespace.Name) ?
                                     "" :
-                                    (((RtScriptClass)instance.facility).Meta.QName.Namespace.Name + ".")
+                                    (((RtScriptClass)instance).Meta.QName.Namespace.Name + ".")
                                     )
                                     +
-                                    ((RtScriptClass)instance.facility).Meta.QName.Name +
+                                    ((RtScriptClass)instance).Meta.QName.Name +
 
                                     "$";
                                
@@ -384,7 +384,7 @@ namespace juicescript.runtime
                                return "[object global]";
                                
                             case RtHeapTypeKind.STRING:
-                                return "'" + ((RtString)instance.facility).Str + "'";
+                                return "'" + ((RtString)instance).Str + "'";
                                 
                             case RtHeapTypeKind.INSTANCE:
   
@@ -393,7 +393,7 @@ namespace juicescript.runtime
 
                             case RtHeapTypeKind.NAMESPACE:
                                 {
-                                    var ns = ((RtNameSpace)instance.facility).ASNamespace;
+                                    var ns = ((RtNameSpace)instance).ASNamespace;
                                     return string.IsNullOrEmpty(ns.def_uri)? ns.Name :ns.def_uri ;
                                 }
                             case RtHeapTypeKind.VECTOR:
@@ -669,7 +669,7 @@ namespace juicescript.runtime
 
                         if (instance.TypeKind == RtHeapTypeKind.STRING)
                         {
-                            return ((RtString)instance.facility).Str;
+                            return ((RtString)instance).Str;
                         }
                         else
                         {

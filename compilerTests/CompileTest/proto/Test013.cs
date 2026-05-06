@@ -110,7 +110,7 @@ catch(e)
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 				StringPrint print = (StringPrint)player.Print;
 
@@ -120,7 +120,7 @@ catch(e)
 				NaNBoxing a = rtPayload.ReadSlot(0);
 				Assert.AreEqual( NaNBoxing.BoxType.HeapPtr, a.ValueType );
 				Assert.AreEqual( RtHeapTypeKind.STRING , player.Context.GC.Heap[a.HeapPtr].TypeKind );
-				Assert.AreEqual("abcdefg", ((RtString)player.Context.GC.Heap[a.HeapPtr].facility).Str );
+				Assert.AreEqual("abcdefg", ((RtString)player.Context.GC.Heap[a.HeapPtr]).Str );
                 
                
 			}

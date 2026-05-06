@@ -139,7 +139,7 @@ var k5 = b['Y']::['K'];
 
             
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             NaNBoxing b = rtPayload.ReadSlot(0);
             NaNBoxing tns = rtPayload.ReadSlot(1);
             NaNBoxing L = rtPayload.ReadSlot(2);

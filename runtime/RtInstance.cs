@@ -39,7 +39,7 @@ namespace juicescript.runtime
 			
 
 
-			var payload = ((RtInstance)ref_instance.facility);
+			var payload = ((RtInstance)ref_instance);
 			var origin = payload;
 			target = origin;
 
@@ -68,7 +68,7 @@ namespace juicescript.runtime
 #endif
 
 				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtInstance)player.Context.GC.Heap[ptr].facility);
+				payload = ((RtInstance)player.Context.GC.Heap[ptr]);
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -81,7 +81,7 @@ namespace juicescript.runtime
         internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player,out RtInstance target)
         {
 			RtHeapBase tmp = player.Context.GC.Heap[ptr];
-			RtInstance check = (RtInstance)tmp.facility;
+			RtInstance check = (RtInstance)tmp;
 
 			if (((ASInstance)tmp.Type).Flags.HasFlag(ClassFlags.Struct))
 			{
@@ -94,7 +94,7 @@ namespace juicescript.runtime
 					if (tmp2.TypeKind == RtHeapTypeKind.INSTANCE && tmp2.Type != tmp.Type)
 					{
 #if DEBUG
-						if (((RtInstance)tmp2.facility).HEAPINSTANCE_PTR != 0)
+						if (((RtInstance)tmp2).HEAPINSTANCE_PTR != 0)
 						{
 							throw new InvalidOperationException();
 						}
@@ -105,7 +105,7 @@ namespace juicescript.runtime
 					else if (tmp2.TypeKind == RtHeapTypeKind.VECTOR)
 					{
 #if DEBUG
-						if (((RtVector)tmp2.facility).HEAPINSTANCE_PTR != 0)
+						if (((RtVector)tmp2).HEAPINSTANCE_PTR != 0)
 						{
 							throw new InvalidOperationException();
 						}
@@ -188,7 +188,7 @@ namespace juicescript.runtime
 						target = this;
 					}
 
-					RtVector vector = (RtVector)player.Context.GC.Heap[target.HEAPINSTANCE_PTR].facility;
+					RtVector vector = (RtVector)player.Context.GC.Heap[target.HEAPINSTANCE_PTR];
 					is_ref_vector = true;
 					is_ref_struct = false;
 
@@ -620,7 +620,7 @@ namespace juicescript.runtime
 								var cache = player.Context.GC.Heap[cache_ptr];
 
 								cache.Type = member.__rt_type_class__.Instance;
-								RtInstance struct_payload = (RtInstance)cache.facility;
+								RtInstance struct_payload = (RtInstance)cache;
 
 								struct_payload.methodscopeslot_ref_state = 0;
 								struct_payload.m_property_ptr = m_property_ptr + codescope.TypeLayout.Offset[memberIndex]; //标记index.
@@ -830,7 +830,7 @@ namespace juicescript.runtime
 				var src = contxt.GC.Heap[newValue.HeapPtr];
 				if (src.TypeKind == RtHeapTypeKind.INSTANCE)
 				{
-					RtInstance srcPayload = (RtInstance)src.facility;
+					RtInstance srcPayload = (RtInstance)src;
 
 
 					if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
@@ -878,7 +878,7 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 			}
 
-			if (facility.HEAPINSTANCE_PTR != 0 && player.Context.GC.Heap[facility.HEAPINSTANCE_PTR].facility == this)
+			if (facility.HEAPINSTANCE_PTR != 0 && player.Context.GC.Heap[facility.HEAPINSTANCE_PTR] == this)
 			{
 				throw new InvalidOperationException();
 			}
@@ -914,7 +914,7 @@ namespace juicescript.runtime
 		/// <exception cref="NotImplementedException"></exception>
 		internal void CopyFrom(RtHeapBase src,Player player,int size)
         {
-			RtInstance facility = (RtInstance)src.facility;
+			RtInstance facility = (RtInstance)src;
 			CopyFrom(facility, (ASInstance)src.Type, player, size);
 		}
 

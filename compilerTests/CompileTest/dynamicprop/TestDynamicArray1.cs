@@ -77,23 +77,23 @@ m[undefined] = 7;
             Assert.IsNull(ex);
 
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             
             NaNBoxing o = rtPayload.ReadSlot(0);
             Assert.AreEqual( RtHeapTypeKind.ARRAY , player.Context.GC.Heap[o.HeapPtr].TypeKind );
-            RtArray i_o = (RtArray)player.Context.GC.Heap[o.HeapPtr].facility;
+            RtArray i_o = (RtArray)player.Context.GC.Heap[o.HeapPtr];
             int p = i_o.PROPERTY_PTR(player);
-            RtDynamic dynamic = (RtDynamic)player.Context.GC.Heap[p].facility;
+            RtDynamic dynamic = (RtDynamic)player.Context.GC.Heap[p];
             Assert.AreEqual(3, dynamic.Slots.Count);
             Assert.AreEqual(77, dynamic.Slots[0].SByteValue);
             Assert.AreEqual(6, dynamic.Slots[1].SByteValue);
-            RtShape shape = (RtShape)player.Context.GC.Heap[ dynamic.SHAPE_PTR ].facility;
+            RtShape shape = (RtShape)player.Context.GC.Heap[ dynamic.SHAPE_PTR ];
             Assert.AreEqual("undefined", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual("null", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual("1.1", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual(true, IsShapePropertyNameEmpty(shape.PTR_NAME));
             Assert.AreEqual(0, shape.PTR_PARENT);
 
@@ -119,7 +119,7 @@ m[undefined] = 7;
             }
             else if (shapeName.ValueType == NaNBoxing.BoxType.HeapPtr && shapeName.HeapPtr != 0)
             {
-                return ((RtString)player.Context.GC.Heap[shapeName.HeapPtr].facility).Str;
+                return ((RtString)player.Context.GC.Heap[shapeName.HeapPtr]).Str;
             }
             else
             {

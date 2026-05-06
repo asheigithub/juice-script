@@ -98,7 +98,7 @@ package
 			//	Assert.IsNotNull(globalInstance);
 			//	Assert.IsNull(ex);
 
-			//	RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+			//	RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalinstance;
 
 			//	StringPrint print = (StringPrint)player.Print;
 

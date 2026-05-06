@@ -93,7 +93,7 @@ o.f( int , 5);
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             
             NaNBoxing b = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.Int, b.ValueType);
@@ -105,7 +105,7 @@ o.f( int , 5);
             RtHeapBase arr = player.Context.GC.Heap[c.HeapPtr];
             Assert.AreEqual(RtHeapTypeKind.ARRAY, arr.TypeKind);
 
-            RtArray array = (RtArray)arr.facility;
+            RtArray array = (RtArray)arr;
             Assert.AreEqual(RtArray.ArrayStoreMode.normal, array.StoreMode);
             
             NaNBoxing d = rtPayload.ReadSlot(2);

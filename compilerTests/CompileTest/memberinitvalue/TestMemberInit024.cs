@@ -119,13 +119,13 @@ var v;
 			Assert.IsNotNull(clsInstance);
 			Assert.IsNull(ex);
 
-			var K = ((RtScriptClass)clsInstance.facility).ReadSlot(2);
-			var B = ((RtScriptClass)clsInstance.facility).ReadSlot(3);
+			var K = ((RtScriptClass)clsInstance).ReadSlot(2);
+			var B = ((RtScriptClass)clsInstance).ReadSlot(3);
 
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, K.ValueType);
 			var Kinstance = player.Context.GC.Heap[K.HeapPtr];
 			Assert.AreEqual(RtHeapTypeKind.STRING, Kinstance.TypeKind);
-			Assert.AreEqual("hjk", ((RtString)Kinstance.facility).Str );
+			Assert.AreEqual("hjk", ((RtString)Kinstance).Str );
 
 			Assert.AreEqual(K, B);
 
@@ -134,37 +134,37 @@ var v;
 			var globalInstance = player.Context.GC.Heap[global.__global_index__];
 			Assert.IsNotNull(globalInstance);
 			
-			NaNBoxing o = ((RtScriptClass)globalInstance.facility).ReadSlot(3);
+			NaNBoxing o = ((RtScriptClass)globalInstance).ReadSlot(3);
 			Assert.AreEqual(NaNBoxing.BoxType.Int, o.ValueType);
 			Assert.AreEqual(int.MinValue, o.IntValue);
 
 
-			NaNBoxing p = ((RtScriptClass)globalInstance.facility).ReadSlot(4);
+			NaNBoxing p = ((RtScriptClass)globalInstance).ReadSlot(4);
 			Assert.AreEqual(-5, p.IntValue);
 
-			NaNBoxing q = ((RtScriptClass)globalInstance.facility).ReadSlot(5);
+			NaNBoxing q = ((RtScriptClass)globalInstance).ReadSlot(5);
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, q.ValueType);
 			var qinstance = player.Context.GC.Heap[q.HeapPtr];
 			Assert.AreEqual(RtHeapTypeKind.STRING, qinstance.TypeKind);
-			Assert.AreEqual("FFFF", ((RtString)qinstance.facility).Str);
+			Assert.AreEqual("FFFF", ((RtString)qinstance).Str);
 
-			NaNBoxing r = ((RtScriptClass)globalInstance.facility).ReadSlot(6);
+			NaNBoxing r = ((RtScriptClass)globalInstance).ReadSlot(6);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, r.ValueType);
 			
 
-			NaNBoxing s = ((RtScriptClass)globalInstance.facility).ReadSlot(7);
+			NaNBoxing s = ((RtScriptClass)globalInstance).ReadSlot(7);
 			Assert.AreEqual(NaNBoxing.BoxType.Sbyte, s.ValueType);
 			Assert.AreEqual(6, s.SByteValue);
 
-			NaNBoxing t = ((RtScriptClass)globalInstance.facility).ReadSlot(8);
+			NaNBoxing t = ((RtScriptClass)globalInstance).ReadSlot(8);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, t.ValueType);
 			//Assert.AreEqual(int.MinValue, t.IntValue);
 
-			NaNBoxing w = ((RtScriptClass)globalInstance.facility).ReadSlot(9);
+			NaNBoxing w = ((RtScriptClass)globalInstance).ReadSlot(9);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, w.ValueType);
 			//Assert.AreEqual(int.MinValue, w.IntValue);
 
-			NaNBoxing v = ((RtScriptClass)globalInstance.facility).ReadSlot(10);
+			NaNBoxing v = ((RtScriptClass)globalInstance).ReadSlot(10);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, v.ValueType);
 			
 

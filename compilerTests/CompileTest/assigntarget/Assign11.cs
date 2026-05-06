@@ -100,7 +100,7 @@ new A().F();
 			Assert.AreEqual("[Fault] exception,[Message]=Error: Stack overflow occurred.", ex.ToDebugMessage());
 
 			player.ForceGC();
-			//RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalInstance.facility;
+			//RtPayloadScriptClass rtPayload = (RtPayloadScriptClass)globalinstance;
 
 			//NaNBoxing o = rtPayload.ReadSlot(0);
 			//Assert.AreEqual(NaNBoxing.BoxType.Short, o.ValueType);

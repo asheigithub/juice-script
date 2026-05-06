@@ -102,7 +102,7 @@ var p=
                 .Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.DYNAMIC_PROPERTYS && ((RtShape)player.Context.GC.Heap[((RtDynamic)o.facility).SHAPE_PTR].facility).Attribute.HasFlag(RtShape.PropertyAttribute.Enumerable) ).Count());
+				.Where(o => o.TypeKind == RtHeapTypeKind.DYNAMIC_PROPERTYS && ((RtShape)player.Context.GC.Heap[((RtDynamic)o).SHAPE_PTR]).Attribute.HasFlag(RtShape.PropertyAttribute.Enumerable) ).Count());
 
 			player.ForceGC();
 
@@ -111,7 +111,7 @@ var p=
 
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.DYNAMIC_PROPERTYS && ((RtShape)player.Context.GC.Heap[((RtDynamic)o.facility).SHAPE_PTR].facility).Attribute.HasFlag(RtShape.PropertyAttribute.Enumerable)).Count());
+				.Where(o => o.TypeKind == RtHeapTypeKind.DYNAMIC_PROPERTYS && ((RtShape)player.Context.GC.Heap[((RtDynamic)o).SHAPE_PTR]).Attribute.HasFlag(RtShape.PropertyAttribute.Enumerable)).Count());
 
 
 			var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");
@@ -120,7 +120,7 @@ var p=
             Assert.IsNotNull(globalInstance);
             Assert.IsNull(ex);
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
             var o = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);

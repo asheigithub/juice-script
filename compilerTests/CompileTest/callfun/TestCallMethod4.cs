@@ -172,7 +172,7 @@ var n = new Main();
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+			RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 			NaNBoxing a = rtPayload.ReadSlot(0);
 			Assert.AreEqual(NaNBoxing.BoxType.Undefined, a.ValueType);
@@ -182,7 +182,7 @@ var n = new Main();
             Assert.AreEqual(RtHeapTypeKind.INSTANCE, player.Context.GC.Heap[n.HeapPtr].TypeKind);
             Assert.AreEqual("Main", player.Context.GC.Heap[n.HeapPtr].Type.QName.Name);
 
-			RtInstance payloadInstance = (RtInstance)player.Context.GC.Heap[n.HeapPtr].facility;
+			RtInstance payloadInstance = (RtInstance)player.Context.GC.Heap[n.HeapPtr];
 			var member = player.Context.GC.Heap[n.HeapPtr].Type._link_codescope.Members[0];
 
 			Assert.AreEqual("a", member.QName.Name);

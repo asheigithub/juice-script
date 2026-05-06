@@ -100,7 +100,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			RtInstance generator_ins = (RtInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			RtInstance generator_ins = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
 			GeneratorWapper generatorWapper = generator_ins.wapperedObject as GeneratorWapper;
 			Debug.Assert(generatorWapper !=null);
@@ -110,9 +110,9 @@ namespace juicescript.runtime.buildin
 				//需要正常让代码跑完
 				generatorWapper.state = 999;
 
-				var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+				var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 				var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
-				var iter = (RtInstance)iter_ins.facility;
+				var iter = (RtInstance)iter_ins;
 
 				var m = context.GC.Heap[generatorWapper.generator];
 
@@ -127,7 +127,7 @@ namespace juicescript.runtime.buildin
 				context.StackPosition += info.useSlots;
 
 				context.BackTraceIndex++; ;
-				((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
+				((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
 
 				Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 				slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -160,26 +160,26 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			//RtPayloadInstance generator_ins = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr].facility;
+			//RtPayloadInstance generator_ins = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr];
 
 			//GeneratorWapper generatorWapper = generator_ins.wapperedObject as GeneratorWapper;
 			//Debug.Assert(generatorWapper != null);
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr].facility;
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
-			var iter = (RtInstance)iter_ins.facility;
+			var iter = (RtInstance)iter_ins;
 
 			var _result = scope.ReadSlot(1, context.player);
 			var _obj = scope.ReadSlot(0, context.player);
 
 
 			var result_ins = context.GC.Heap[_result.HeapPtr];
-			var result = (RtInstance)result_ins.facility;
+			var result = (RtInstance)result_ins;
 			var obj_ins = context.GC.Heap[_obj.HeapPtr];
 
 			Debug.Assert(_obj.Raw == thisPtr.Raw);
 
-			RtInstance generator_ins = (RtInstance)obj_ins.facility;
+			RtInstance generator_ins = (RtInstance)obj_ins;
 			GeneratorWapper generatorWapper = generator_ins.wapperedObject as GeneratorWapper;
 			Debug.Assert(generatorWapper != null);
 
@@ -199,7 +199,7 @@ namespace juicescript.runtime.buildin
 		
 			context.BackTraceIndex++; ;
 
-			((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1].facility).EmptyStackSlot();
+			((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
 
 			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 			slots.Clear(); //栈清空 -- 防止GC时错误访问

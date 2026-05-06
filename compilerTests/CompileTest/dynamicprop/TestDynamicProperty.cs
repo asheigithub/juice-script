@@ -93,51 +93,51 @@ var b = this['LL'];
             Assert.IsNotNull(OO);
 
 
-            RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+            RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             
             NaNBoxing o = rtPayload.ReadSlot(0);
             Assert.AreEqual( OO.Instance, player.Context.GC.Heap[o.HeapPtr].Type );
-            RtInstance i_o = (RtInstance)player.Context.GC.Heap[o.HeapPtr].facility;
+            RtInstance i_o = (RtInstance)player.Context.GC.Heap[o.HeapPtr];
             int p = i_o.PROPERTY_PTR(player, OO.Instance);
-            RtDynamic dynamic = (RtDynamic)player.Context.GC.Heap[p].facility;
+            RtDynamic dynamic = (RtDynamic)player.Context.GC.Heap[p];
             Assert.AreEqual(2, dynamic.Slots.Count);
             Assert.AreEqual(5, dynamic.Slots[0].SByteValue);
             Assert.AreEqual(6, dynamic.Slots[1].SByteValue);
-            RtShape shape = (RtShape)player.Context.GC.Heap[ dynamic.SHAPE_PTR ].facility;
+            RtShape shape = (RtShape)player.Context.GC.Heap[ dynamic.SHAPE_PTR ];
             Assert.AreEqual("K", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual("U", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual(true, IsShapePropertyNameEmpty(shape.PTR_NAME));
             Assert.AreEqual(0, shape.PTR_PARENT);
 
             NaNBoxing i = rtPayload.ReadSlot(1);
             Assert.AreEqual(OO.Instance, player.Context.GC.Heap[i.HeapPtr].Type);
-            RtInstance i_i = (RtInstance)player.Context.GC.Heap[i.HeapPtr].facility;
-            dynamic = (RtDynamic)player.Context.GC.Heap[i_i.PROPERTY_PTR(player, OO.Instance)].facility;
+            RtInstance i_i = (RtInstance)player.Context.GC.Heap[i.HeapPtr];
+            dynamic = (RtDynamic)player.Context.GC.Heap[i_i.PROPERTY_PTR(player, OO.Instance)];
             Assert.AreEqual(3, dynamic.Slots.Count);
             Assert.AreEqual(9, dynamic.Slots[0].SByteValue);
             Assert.AreEqual(4, dynamic.Slots[1].SByteValue);
-            Assert.AreEqual("t", ((RtString) player.Context.GC.Heap[ dynamic.Slots[2].HeapPtr].facility).Str);
-            shape = (RtShape)player.Context.GC.Heap[dynamic.SHAPE_PTR].facility;
+            Assert.AreEqual("t", ((RtString) player.Context.GC.Heap[ dynamic.Slots[2].HeapPtr]).Str);
+            shape = (RtShape)player.Context.GC.Heap[dynamic.SHAPE_PTR];
             Assert.AreEqual("MM", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual("U", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual("K", GetShapePropertyNameAsString(player, shape.PTR_NAME));
-            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT].facility;
+            shape = (RtShape)player.Context.GC.Heap[shape.PTR_PARENT];
             Assert.AreEqual(true, IsShapePropertyNameEmpty(shape.PTR_NAME));
             Assert.AreEqual(0, shape.PTR_PARENT);
 
 
             NaNBoxing c = rtPayload.ReadSlot(2);
             Assert.AreEqual(RtHeapTypeKind.CLASS, player.Context.GC.Heap[c.HeapPtr].TypeKind);
-            RtScriptClass c_i = (RtScriptClass)player.Context.GC.Heap[c.HeapPtr].facility;
-            dynamic = (RtDynamic)player.Context.GC.Heap[c_i.PROPERTY_PTR].facility;
+            RtScriptClass c_i = (RtScriptClass)player.Context.GC.Heap[c.HeapPtr];
+            dynamic = (RtDynamic)player.Context.GC.Heap[c_i.PROPERTY_PTR];
             Assert.AreEqual(i, dynamic.Slots[0]);
             Assert.AreEqual("hh",
                 GetShapePropertyNameAsString(player,
-                ((RtShape)player.Context.GC.Heap[ dynamic.SHAPE_PTR].facility).PTR_NAME
+                ((RtShape)player.Context.GC.Heap[ dynamic.SHAPE_PTR]).PTR_NAME
                 ));
 
 
@@ -168,7 +168,7 @@ var b = this['LL'];
             }
             else if (shapeName.ValueType == NaNBoxing.BoxType.HeapPtr && shapeName.HeapPtr != 0)
             {
-                return ((RtString)player.Context.GC.Heap[shapeName.HeapPtr].facility).Str;
+                return ((RtString)player.Context.GC.Heap[shapeName.HeapPtr]).Str;
             }
             else
             {

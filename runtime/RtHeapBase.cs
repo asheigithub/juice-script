@@ -80,13 +80,7 @@ namespace juicescript.runtime
     public abstract class RtHeapBase
     {
         
-        /// <summary>
-        /// 改为返回自身
-        /// </summary>
-        public RtHeapBase facility
-        {
-            get { return this; }
-        }
+      
 
 		public ASContainer Type;
 

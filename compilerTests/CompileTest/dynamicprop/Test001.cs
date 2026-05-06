@@ -106,7 +106,7 @@ var p = delete o.B.FFF;
                 Assert.IsNotNull(globalInstance);
                 Assert.IsNull(ex);
 
-                RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+                RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
                 NaNBoxing p = rtPayload.ReadSlot(1);
                 Assert.AreEqual(NaNBoxing.BoxType.Boolean, p.ValueType);

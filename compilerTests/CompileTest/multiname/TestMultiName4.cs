@@ -130,7 +130,7 @@ var e = b['as3'];
 
             Assert.IsNull(ex);
 
-            var payload = (RtScriptClass)globalInstance.facility;
+            var payload = (RtScriptClass)globalInstance;
 
             NaNBoxing c = payload.ReadSlot(1);
             Assert.AreEqual(c.ValueType, NaNBoxing.BoxType.Sbyte);

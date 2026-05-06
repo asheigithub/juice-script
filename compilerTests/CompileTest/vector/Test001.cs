@@ -115,7 +115,7 @@ function ():void
 				Assert.IsNotNull(globalInstance);
 				Assert.IsNull(ex);
 
-				RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+				RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 				StringPrint print = (StringPrint)player.Print;
 

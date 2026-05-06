@@ -134,7 +134,7 @@ if (new Number(1) + new Boolean(true) !== 2) {
 				Assert.IsNotNull(globalInstance);
 				Assert.IsNull(ex);
 
-				RtScriptClass rtPayload = (RtScriptClass)globalInstance.facility;
+				RtScriptClass rtPayload = (RtScriptClass)globalInstance;
 
 				StringPrint print = (StringPrint)player.Print;
 

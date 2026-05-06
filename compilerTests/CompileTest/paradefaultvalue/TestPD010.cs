@@ -113,7 +113,7 @@ var q;
 			Assert.IsNotNull(globalInstance);
 			Assert.IsNull(ex);
 
-			NaNBoxing o = ((RtScriptClass)globalInstance.facility).ReadSlot(2);
+			NaNBoxing o = ((RtScriptClass)globalInstance).ReadSlot(2);
 			Assert.AreEqual(NaNBoxing.BoxType.Sbyte, o.ValueType);
 			Assert.AreEqual(7, o.SByteValue);
 
