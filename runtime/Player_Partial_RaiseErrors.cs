@@ -16,7 +16,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -28,7 +28,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -44,7 +44,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -56,7 +56,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -72,7 +72,7 @@ namespace juicescript.runtime
 		private void RaiseTypeError_Instantiation_non_constructor(ref ReceiveError error)
 		{
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -84,7 +84,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -100,7 +100,7 @@ namespace juicescript.runtime
 		{
 			// Cannot call method Function/http://adobe.com/AS3/2006/builtin::apply() as constructor.
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -112,7 +112,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -138,7 +138,7 @@ namespace juicescript.runtime
 		private void RaiseTypeError_InstanceOf(ref ReceiveError error)
 		{
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -150,7 +150,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -168,7 +168,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -284,7 +284,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -326,7 +326,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -365,7 +365,7 @@ namespace juicescript.runtime
 		{
 			//$"Cannot assign to a method { cache.Type.QName.Name } on { ((RtPayloadClosure)cache.facility)._ref_as_type.QName.Name }."
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -402,7 +402,7 @@ namespace juicescript.runtime
 		{
 			//$"Illegal write to read-only property B on Main."
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -442,7 +442,7 @@ namespace juicescript.runtime
 			error.raised = true;
 
 
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -455,7 +455,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.REFERENCE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				var debugNs = () =>
@@ -499,7 +499,7 @@ namespace juicescript.runtime
 		private void RaiseReferenceError_CanNotDeleteProperty(ref ReceiveError error, NaNBoxing refInstance)
 		{
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -537,7 +537,7 @@ namespace juicescript.runtime
 		internal void RaiseReferenceError_TypeNotFound(ref ReceiveError error, ReadOnlySpan<char> name)
 		{
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.REFERENCE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -577,7 +577,7 @@ namespace juicescript.runtime
 		private void RaiseArgumentErrorCountMisMatch(ref ReceiveError error, ASMethod method, int expected, int got)
 		{
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.ARGEMENT_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -622,7 +622,7 @@ namespace juicescript.runtime
 			//Argument name cannot be null.
 
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.ARGEMENT_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -667,7 +667,7 @@ namespace juicescript.runtime
 		internal void RaiseRangeError(ref ReceiveError error, ReadOnlySpan<char> index, long maxrange)
 		{
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.RANGE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -707,7 +707,7 @@ namespace juicescript.runtime
 		internal void RaiseRangeError(ref ReceiveError error, string index)
 		{
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.RANGE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{

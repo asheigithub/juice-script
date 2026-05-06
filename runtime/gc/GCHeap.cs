@@ -10,10 +10,10 @@ namespace juicescript.runtime.gc
 
     public class GCHeap
     {
-        private List<RtHeapInstance> Heap;
+        private List<RtHeapBase> Heap;
         private List<int> freeIndexes;
 
-        public RtHeapInstance this[int index]
+        public RtHeapBase this[int index]
         {
             get 
             { 
@@ -24,7 +24,7 @@ namespace juicescript.runtime.gc
 
         public GCHeap()
         { 
-            Heap = new List<RtHeapInstance>(65536*2);
+            Heap = new List<RtHeapBase>(65536*2);
 
 
             //此处需要1个哨兵空槽
@@ -44,12 +44,12 @@ namespace juicescript.runtime.gc
             cacheCount = Heap.Count;
         }
 
-        public IEnumerable<RtHeapInstance> DumpHeap()
+        public IEnumerable<RtHeapBase> DumpHeap()
         {
             return Heap.Skip(cacheCount).Where( o=>o != null );
         }
 
-        public bool IsClassProtoType(RtHeapInstance obj)
+        public bool IsClassProtoType(RtHeapBase obj)
         {
             return Heap.Any(
                 o => o !=null && o.TypeKind == RtHeapTypeKind.CLASS && ((RtPayloadScriptClass)o.facility).PROTO__PTR != 0 &&
@@ -57,7 +57,7 @@ namespace juicescript.runtime.gc
         }
 
         
-        internal int AddHeapInstance(RtHeapInstance instance)
+        internal int AddHeapInstance(RtHeapBase instance)
         {
 #if DEBUG
             if (instance == null)
@@ -109,7 +109,7 @@ namespace juicescript.runtime.gc
 							((RtPayloadInstance)Heap[i].facility).wapperedObject = null;
 						}
 
-                        Heap[i].facility = null;
+                        //Heap[i].facility = null;
                         Heap[i] = null;
                         freeIndexes.Add(i);
                     }

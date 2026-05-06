@@ -26,13 +26,13 @@ namespace juicescript.runtime.buildin
 		{
 			Debug.Assert(thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			RtHeapInstance _this = context.GC.Heap[thisPtr.HeapPtr];
+			RtHeapBase _this = context.GC.Heap[thisPtr.HeapPtr];
 			Debug.Assert(_this.TypeKind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(_this.Type.QName.Name == "Promise");
 
 			var executor = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 
-			RtHeapInstance executor_closure;
+			RtHeapBase executor_closure;
 			// 2. 验证executor是否为函数
 			if (!IsCallable(executor, context, out executor_closure))
 			{
@@ -372,7 +372,7 @@ namespace juicescript.runtime.buildin
 			var promiseFacility = (RtPayloadInstance)promiseInstance.facility;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
-			RtHeapInstance nextPromiseInstance;
+			RtHeapBase nextPromiseInstance;
 			var nextPromise_ptr = context.GC.AllocInstance((ASInstance)promiseInstance.Type, out nextPromiseInstance);
 			if (nextPromise_ptr == 0)
 			{
@@ -463,7 +463,7 @@ namespace juicescript.runtime.buildin
 			var promiseFacility = (RtPayloadInstance)promiseInstance.facility;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
-			RtHeapInstance nextPromiseInstance;
+			RtHeapBase nextPromiseInstance;
 			var nextPromise_ptr = context.GC.AllocInstance((ASInstance)promiseInstance.Type, out nextPromiseInstance);
 			if (nextPromise_ptr == 0)
 			{
@@ -542,7 +542,7 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			RtHeapInstance promise;
+			RtHeapBase promise;
 			var p = context.GC.AllocInstance(context.PROMISE.Instance, out promise);
 			if (p == 0)
 			{
@@ -597,7 +597,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			// 创建一个新的 Promise
-			RtHeapInstance pInstance;
+			RtHeapBase pInstance;
 			int pPtr = context.GC.AllocInstance(context.PROMISE.Instance, out pInstance);
 			if (pPtr == 0)
 			{
@@ -616,7 +616,7 @@ namespace juicescript.runtime.buildin
 		}
 
 
-		static bool IsCallable(NaNBoxing value, Context context, out RtHeapInstance closure)
+		static bool IsCallable(NaNBoxing value, Context context, out RtHeapBase closure)
 		{
 			switch (value.ValueType)
 			{
@@ -1183,7 +1183,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				// Step 7: Check if "then" is callable
-				RtHeapInstance thenClosure;
+				RtHeapBase thenClosure;
 				if (!IsCallable(thenValue, context, out thenClosure))
 				{
 					// "then" is not a function, fulfill with value
@@ -1461,7 +1461,7 @@ namespace juicescript.runtime.buildin
 
 
 				// 创建共享状态对象
-				RtHeapInstance stateObj;
+				RtHeapBase stateObj;
 				int statePtr = context.GC.AllocInstance(context.OBJECT.Instance, out stateObj);
 				if (statePtr == 0)
 				{
@@ -1606,7 +1606,7 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			internal int CreateNativePromise(Context context,out RtHeapInstance promise)
+			internal int CreateNativePromise(Context context,out RtHeapBase promise)
 			{
 				int ptr = context.GC.AllocInstance(context.PROMISE.Instance, out promise);
 				if (ptr != 0)

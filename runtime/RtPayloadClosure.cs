@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public sealed class RtPayloadClosure : FacilityBase
+    public sealed class RtPayloadClosure : RtHeapBase
     {
+		public RtPayloadClosure() : base(RtHeapTypeKind.CLOSURE) { }
+
         public override int Size => 4 + 4 + 4 + 8 + 4 + 4 + 4+ 1;
 
 		public int ScopePtr;

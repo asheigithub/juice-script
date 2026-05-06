@@ -10,8 +10,9 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-	public sealed class RtPayloadMethodScope : FacilityBase
+	public sealed class RtPayloadMethodScope : RtHeapBase
 	{
+		public RtPayloadMethodScope() : base( RtHeapTypeKind.MethodScope) { }
 
 		private Memory<NaNBoxing> Slots;
 
@@ -110,34 +111,34 @@ namespace juicescript.runtime
 
 					switch (member.TypeKind)
 					{
-						case TypeKind.Any:
+						case ABC.TypeKind.Any:
 							span[i].SetUndefined();
 							break;
-						case TypeKind.Boolean:
+						case ABC.TypeKind.Boolean:
 							span[i].SetBoolean(false);
 							break;
-						case TypeKind.SByte:
+						case ABC.TypeKind.SByte:
 							span[i].SetSByte(0);
 							break;
-						case TypeKind.Byte:
+						case ABC.TypeKind.Byte:
 							span[i].SetByte(0);
 							break;
-						case TypeKind.Short:
+						case ABC.TypeKind.Short:
 							span[i].SetShort(0);
 							break;
-						case TypeKind.UShort:
+						case ABC.TypeKind.UShort:
 							span[i].SetUShort(0);
 							break;
-						case TypeKind.Int:
+						case ABC.TypeKind.Int:
 							span[i].SetInt(0);
 							break;
-						case TypeKind.Uint:
+						case ABC.TypeKind.Uint:
 							span[i].SetUInt(0);
 							break;
-						case TypeKind.Float:
+						case ABC.TypeKind.Float:
 							span[i].SetFloat(float.NaN);
 							break;
-						case TypeKind.Number:
+						case ABC.TypeKind.Number:
 							span[i].SetNumber(double.NaN);
 							break;
 						default:

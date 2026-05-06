@@ -75,7 +75,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var find_instance_prop = (RtHeapInstance _this , ASInstance type ,string name) => 
+			var find_instance_prop = (RtHeapBase _this , ASInstance type ,string name) => 
 			{
 				//var scope = type._link_codescope;
 				//for (int i = scope.Members.Count - 1; i >= 0; i--)
@@ -106,7 +106,7 @@ namespace juicescript.runtime.buildin
 				return context.player.FindDynamicValue(_this, name, out o, out match_shape, out slot, out prop);
 			};
 
-			var find_class_prop = (RtHeapInstance _this,ASClass @class,string name) =>
+			var find_class_prop = (RtHeapBase _this,ASClass @class,string name) =>
 			{
 				//var scope = @class._link_codescope;
 				//for (int i = scope.Members.Count - 1; i >= 0; i--)
@@ -145,7 +145,7 @@ namespace juicescript.runtime.buildin
 				NaNBoxing sName = ((RtPayloadMethodScope)context.GC.Heap[scope_ptr].facility).ReadSlot(0, context.player);
 				if (sName.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					RtHeapInstance n = context.GC.Heap[sName.HeapPtr];
+					RtHeapBase n = context.GC.Heap[sName.HeapPtr];
 #if DEBUG
 					if (n.TypeKind != RtHeapTypeKind.STRING)
 					{
@@ -156,7 +156,7 @@ namespace juicescript.runtime.buildin
 					var name = ((RtPayloadString)n.facility).Str;
 
 
-					RtHeapInstance _this = context.GC.Heap[thisPtr.HeapPtr];
+					RtHeapBase _this = context.GC.Heap[thisPtr.HeapPtr];
 
 					switch (_this.TypeKind)
 					{

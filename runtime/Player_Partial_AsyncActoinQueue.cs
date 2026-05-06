@@ -88,7 +88,7 @@ namespace juicescript.runtime
 				PendingCallback callback;
 				while (TryDequeue(out callback))
 				{
-					RtHeapInstance promise_instance = context.GC.Heap[callback.PromisePtr];
+					RtHeapBase promise_instance = context.GC.Heap[callback.PromisePtr];
 
 					r.value = default;
 					r.error = default;

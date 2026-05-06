@@ -8,9 +8,11 @@ namespace juicescript.runtime
 {
 
 
-    public sealed class RtPayloadDynamic : FacilityBase
+    public sealed class RtPayloadDynamic : RtHeapBase
     {
-        public override int Size => (8 + 8) * Slots.Count + 8 + 8;
+        public RtPayloadDynamic() : base(RtHeapTypeKind.DYNAMIC_PROPERTYS) { }
+
+		public override int Size => (8 + 8) * Slots.Count + 8 + 8;
 
         /// <summary>
         /// 指向Transation链的Shape节点

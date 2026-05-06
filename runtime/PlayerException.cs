@@ -72,7 +72,7 @@ namespace juicescript.runtime
                 case NaNBoxing.BoxType.HeapPtr:
 
                     {
-                        RtHeapInstance instance = ex.player.Context.GC.Heap[ex.error.HeapPtr];
+                        RtHeapBase instance = ex.player.Context.GC.Heap[ex.error.HeapPtr];
 
                         switch (instance.TypeKind)
                         {

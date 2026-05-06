@@ -336,7 +336,7 @@ namespace juicescript.runtime
 						);
 
 						//构造实例
-						RtHeapInstance instance;
+						RtHeapBase instance;
 						int instancePtr;
 						if (cache_idx > -1)
 						{
@@ -593,7 +593,7 @@ namespace juicescript.runtime
 							if (cache_idx < 0) // 基类定义在其他文件时，有可能....
 							{
 								//构造实例
-								RtHeapInstance instance;
+								RtHeapBase instance;
 								int instancePtr;
 								if (cache_idx > -1)
 								{
@@ -631,7 +631,7 @@ namespace juicescript.runtime
 
 
 							//构造实例
-							RtHeapInstance this_instance;
+							RtHeapBase this_instance;
 							int this_instancePtr;
 
 							this_instancePtr = computemember_cacheinstance[cache_idx];
@@ -922,7 +922,7 @@ namespace juicescript.runtime
 							if (cache_idx < 0) // 基类定义在其他文件时，有可能....
 							{
 								//构造实例
-								RtHeapInstance instance;
+								RtHeapBase instance;
 								int instancePtr;
 								if (cache_idx > -1)
 								{
@@ -954,7 +954,7 @@ namespace juicescript.runtime
 							}
 
 							//构造实例
-							RtHeapInstance this_instance;
+							RtHeapBase this_instance;
 							
 							this_instancePtr = computemember_cacheinstance[cache_idx];
 							this_instance = Context.GC.Heap[this_instancePtr];

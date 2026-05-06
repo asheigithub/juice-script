@@ -88,7 +88,7 @@ var o;
             NaNBoxing o = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
 
-            RtHeapInstance instance = player.Context.GC.Heap[o.HeapPtr];
+            RtHeapBase instance = player.Context.GC.Heap[o.HeapPtr];
             Assert.AreEqual(RtHeapTypeKind.CLASS, instance.TypeKind);
             Assert.AreEqual("Main", ((RtPayloadScriptClass)instance.facility).Meta.QName.Name);
             

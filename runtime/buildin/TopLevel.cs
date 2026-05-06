@@ -117,7 +117,7 @@ namespace juicescript.runtime.buildin
 					break;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
-						RtHeapInstance instance = context.GC.Heap[arg0.HeapPtr];
+						RtHeapBase instance = context.GC.Heap[arg0.HeapPtr];
 
 						switch (instance.TypeKind)
 						{
@@ -256,7 +256,7 @@ namespace juicescript.runtime.buildin
 					break;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
-						RtHeapInstance instance = context.GC.Heap[arg0.HeapPtr];
+						RtHeapBase instance = context.GC.Heap[arg0.HeapPtr];
 
 						switch (instance.TypeKind)
 						{
@@ -1175,7 +1175,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			RtHeapInstance promise;
+			RtHeapBase promise;
 			int ptr = context.MicroTaskQueue.CreateNativePromise(context, out promise);
 			if (ptr == 0)
 			{

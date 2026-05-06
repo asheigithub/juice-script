@@ -9,7 +9,7 @@ namespace juicescript.runtime
     /// <summary>
     /// 运行时字符串负载
     /// </summary>
-    public class RtPayloadString : FacilityBase
+    public class RtPayloadString :RtHeapBase
     {
         private string _str;
         public string Str
@@ -26,7 +26,7 @@ namespace juicescript.runtime
 
         }
 
-        public RtPayloadString(string value)
+        public RtPayloadString(string value):base( RtHeapTypeKind.STRING)
         {
 #if DEBUG
             if(value == null)

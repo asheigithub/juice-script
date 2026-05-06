@@ -19,7 +19,7 @@ namespace juicescript.runtime
     /// <summary>
     /// 运行时Vector对象的负载
     /// </summary>
-    internal class RtPayloadVector : FacilityBase
+    internal class RtPayloadVector : RtHeapBase
     {
 
         /// <summary>
@@ -32,12 +32,12 @@ namespace juicescript.runtime
         public TypeKind element_type;
 
 
-        public RtPayloadVector( ASClass element_type ) 
+        public RtPayloadVector( ASClass element_type ) :base( RtHeapTypeKind.VECTOR)
         { 
             if (element_type == null)
             {
                 this.element_asclass = null;
-                this.element_type = TypeKind.Any;
+                this.element_type = ABC.TypeKind.Any;
             }
             else
             {
@@ -150,58 +150,58 @@ namespace juicescript.runtime
 
             switch (element_type)
             {
-                case TypeKind.Any:
+                case ABC.TypeKind.Any:
                     result = MemoryMarshal.Read<NaNBoxing>(bytes);
                     return result;
-                case TypeKind.Boolean:
+                case ABC.TypeKind.Boolean:
                     result.SetBoolean( MemoryMarshal.Read<bool>(bytes) );
                     return result;
                     
-                case TypeKind.SByte:
+                case ABC.TypeKind.SByte:
 					result.SetSByte(MemoryMarshal.Read<sbyte>(bytes));
 					return result;
-				case TypeKind.Byte:
+				case ABC.TypeKind.Byte:
 					result.SetByte(MemoryMarshal.Read<byte>(bytes));
 					return result;
-				case TypeKind.Short:
+				case ABC.TypeKind.Short:
 					result.SetShort(MemoryMarshal.Read<short>(bytes));
                     return result;
-                case TypeKind.UShort:
+                case ABC.TypeKind.UShort:
 					result.SetUShort(MemoryMarshal.Read<ushort>(bytes));
 					return result;
-				case TypeKind.Int:
+				case ABC.TypeKind.Int:
                     result.SetInt(MemoryMarshal.Cast<byte, int>(bytes)[0] );
                     return result;
-                case TypeKind.Uint:
+                case ABC.TypeKind.Uint:
 					result.SetUInt(MemoryMarshal.Cast<byte, uint>(bytes)[0]);
 					return result;
-				case TypeKind.Float:
+				case ABC.TypeKind.Float:
 					result.SetFloat(MemoryMarshal.Cast<byte, float>(bytes)[0]);
 					return result;
-				case TypeKind.Number:
+				case ABC.TypeKind.Number:
 					result.SetNumber(MemoryMarshal.Cast<byte, double>(bytes)[0]);
 					return result;
-                case TypeKind.Fun_Void:
-                case TypeKind.TraitDataReference:
-                case TypeKind.RTQName_MultiName_DataReference:
-                case TypeKind.CParseNS_Traits:
-                case TypeKind.RTQNameRTQNameL_N:
-                case TypeKind.SearchNameSpaceFromImports:
-                case TypeKind.Unknown:
-                case TypeKind.Null:
-				case TypeKind.Super:
+                case ABC.TypeKind.Fun_Void:
+                case ABC.TypeKind.TraitDataReference:
+                case ABC.TypeKind.RTQName_MultiName_DataReference:
+                case ABC.TypeKind.CParseNS_Traits:
+                case ABC.TypeKind.RTQNameRTQNameL_N:
+                case ABC.TypeKind.SearchNameSpaceFromImports:
+                case ABC.TypeKind.Unknown:
+                case ABC.TypeKind.Null:
+				case ABC.TypeKind.Super:
 #if DEBUG
 					throw new InvalidOperationException();
 #else
 					Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
-				case TypeKind.Object:
-                case TypeKind.Class:
-                case TypeKind.String:
-                case TypeKind.Function:
-                case TypeKind.Array:
-                case TypeKind.Vector:
-                case TypeKind.Namespace:
+				case ABC.TypeKind.Object:
+                case ABC.TypeKind.Class:
+                case ABC.TypeKind.String:
+                case ABC.TypeKind.Function:
+                case ABC.TypeKind.Array:
+                case ABC.TypeKind.Vector:
+                case ABC.TypeKind.Namespace:
                     {
                         result = MemoryMarshal.Cast<byte, NaNBoxing>(bytes)[0];
                         return result;
@@ -246,82 +246,82 @@ namespace juicescript.runtime
 
             switch (element_type)
             {
-                case TypeKind.Boolean:
+                case ABC.TypeKind.Boolean:
                     {
                         bool v = value.Boolean;
                         MemoryMarshal.Write(bytes, ref v);
                     }
                     return;
-                case TypeKind.SByte:
+                case ABC.TypeKind.SByte:
                     {
                         sbyte v = value.SByteValue;
                         MemoryMarshal.Write(bytes, ref v);
                     }
                     return;
-                case TypeKind.Byte:
+                case ABC.TypeKind.Byte:
 					{
 						byte v = value.ByteValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
 					return;
-				case TypeKind.Short:
+				case ABC.TypeKind.Short:
 					{
 						short v = value.ShortValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
                     return;
-                case TypeKind.UShort:
+                case ABC.TypeKind.UShort:
                     {
                         ushort v = value.UShortValue;
                         MemoryMarshal.Write(bytes, ref v);
                     }
                     return;
-                case TypeKind.Int:
+                case ABC.TypeKind.Int:
 					{
 						int v = value.IntValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
 					return;
-				case TypeKind.Uint:
+				case ABC.TypeKind.Uint:
 					{
 						uint v = value.UIntValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
 					return;
-				case TypeKind.Float:
+				case ABC.TypeKind.Float:
 					{
 						float v = value.FloatValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
 					return;
-				case TypeKind.Number:
+				case ABC.TypeKind.Number:
 					{
 						double v = value.Number;
 						MemoryMarshal.Write(bytes, ref v);
 					}
 					return;
-				case TypeKind.Fun_Void:
-                case TypeKind.TraitDataReference:
-                case TypeKind.RTQName_MultiName_DataReference:
-                case TypeKind.CParseNS_Traits:
-                case TypeKind.RTQNameRTQNameL_N:
-                case TypeKind.SearchNameSpaceFromImports:
-                case TypeKind.Unknown:
-				case TypeKind.Super:
-                case TypeKind.Null:
+				case ABC.TypeKind.Fun_Void:
+                case ABC.TypeKind.TraitDataReference:
+                case ABC.TypeKind.RTQName_MultiName_DataReference:
+                case ABC.TypeKind.CParseNS_Traits:
+                case ABC.TypeKind.RTQNameRTQNameL_N:
+                case ABC.TypeKind.SearchNameSpaceFromImports:
+                case ABC.TypeKind.Unknown:
+				case ABC.TypeKind.Super:
+                case ABC.TypeKind.Null:
 #if DEBUG
 					throw new InvalidOperationException();
 #else
 					Environment.FailFast("出错了，这里跑不到"); return;
 #endif
-				case TypeKind.Any:
-				case TypeKind.Object:
-                case TypeKind.Class:
-                case TypeKind.String:
-                case TypeKind.Function:
-                case TypeKind.Array:
-                case TypeKind.Vector:
-                case TypeKind.Namespace:
+				case ABC.TypeKind.Any:
+				case ABC.TypeKind.Object:
+                case ABC.TypeKind.Class:
+                case ABC.TypeKind.String:
+                case ABC.TypeKind.Function:
+                case ABC.TypeKind.Array:
+                case ABC.TypeKind.Vector:
+                case ABC.TypeKind.Namespace:
 					{
                         NaNBoxing v = player.GetSaveValue(value, ref error);
                         if (error.raised)
@@ -421,34 +421,34 @@ namespace juicescript.runtime
 
 			switch (element_type)
 			{
-				case TypeKind.Boolean:
-				case TypeKind.SByte:
-				case TypeKind.Byte:
-				case TypeKind.Short:
-				case TypeKind.UShort:
-				case TypeKind.Int:
-				case TypeKind.Uint:
-				case TypeKind.Float:
-				case TypeKind.Number:
+				case ABC.TypeKind.Boolean:
+				case ABC.TypeKind.SByte:
+				case ABC.TypeKind.Byte:
+				case ABC.TypeKind.Short:
+				case ABC.TypeKind.UShort:
+				case ABC.TypeKind.Int:
+				case ABC.TypeKind.Uint:
+				case ABC.TypeKind.Float:
+				case ABC.TypeKind.Number:
                     return;
-				case TypeKind.Any:
-				case TypeKind.Object:
-				case TypeKind.Class:
-				case TypeKind.String:
-				case TypeKind.Function:
-				case TypeKind.Array:
-				case TypeKind.Vector:
-				case TypeKind.Namespace:
+				case ABC.TypeKind.Any:
+				case ABC.TypeKind.Object:
+				case ABC.TypeKind.Class:
+				case ABC.TypeKind.String:
+				case ABC.TypeKind.Function:
+				case ABC.TypeKind.Array:
+				case ABC.TypeKind.Vector:
+				case ABC.TypeKind.Namespace:
 					break;
-				case TypeKind.Super:
-				case TypeKind.Fun_Void:
-				case TypeKind.TraitDataReference:
-				case TypeKind.RTQName_MultiName_DataReference:
-				case TypeKind.CParseNS_Traits:
-				case TypeKind.RTQNameRTQNameL_N:
-				case TypeKind.SearchNameSpaceFromImports:
-				case TypeKind.Unknown:
-				case TypeKind.Null:
+				case ABC.TypeKind.Super:
+				case ABC.TypeKind.Fun_Void:
+				case ABC.TypeKind.TraitDataReference:
+				case ABC.TypeKind.RTQName_MultiName_DataReference:
+				case ABC.TypeKind.CParseNS_Traits:
+				case ABC.TypeKind.RTQNameRTQNameL_N:
+				case ABC.TypeKind.SearchNameSpaceFromImports:
+				case ABC.TypeKind.Unknown:
+				case ABC.TypeKind.Null:
 #if DEBUG
 					throw new InvalidOperationException();
 #else
@@ -495,7 +495,7 @@ namespace juicescript.runtime
 
 		internal int ChangeStoreToHeap(ASInstance type, Player player, ref Player.ReceiveError error)
 		{
-            RtHeapInstance heap_vector;
+            RtHeapBase heap_vector;
             int heap_ptr = player.Context.GC.AllocInstance(type, out heap_vector);
             if (heap_ptr == 0)
             { 

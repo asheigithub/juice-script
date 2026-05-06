@@ -16,8 +16,12 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
-	public sealed class RtPayloadArray : FacilityBase
+	public sealed class RtPayloadArray : RtHeapBase
 	{
+		public RtPayloadArray() : base( RtHeapTypeKind.ARRAY)
+		{
+		}
+
 		/// <summary>
 		/// 缓存数组的最大缓存数量
 		/// </summary>
@@ -319,7 +323,7 @@ namespace juicescript.runtime
 					{
 						if (((ASInstance)ins.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
-							RtHeapInstance struct_instance;
+							RtHeapBase struct_instance;
 							//复制结构体
 							int struct_ptr = player.Context.GC.AllocInstance((ASInstance)ins.Type, out struct_instance);
 							if (struct_ptr == 0)
@@ -352,7 +356,7 @@ namespace juicescript.runtime
 
 		private int ChangeStoreToHeap(uint newlen, Player player, ref ReceiveError error)
 		{
-			RtHeapInstance arr_instance;
+			RtHeapBase arr_instance;
 			int arr_ptr = player.Context.GC.AllocArray(out arr_instance, ArrayStoreMode.normal);
 			if (arr_ptr == 0)
 			{
@@ -503,6 +507,8 @@ namespace juicescript.runtime
 
 
 		private short storeMode;
+
+		
 
 		public ArrayStoreMode StoreMode
 		{
@@ -1804,7 +1810,7 @@ namespace juicescript.runtime
 
 		}
 
-		private void CopyStruct(RtHeapInstance dst, RtHeapInstance src, Player player)
+		private void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
 		{
 			dst.Type = src.Type;
 			((RtPayloadInstance)dst.facility).HEAPINSTANCE_PTR = 0;
@@ -2183,7 +2189,7 @@ namespace juicescript.runtime
 
 		}
 
-		internal void Trace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapInstance arrObj, ReadOnlySpan<char> sep)
+		internal void Trace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapBase arrObj, ReadOnlySpan<char> sep)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
@@ -2197,7 +2203,7 @@ namespace juicescript.runtime
 			}
 		}
 
-		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapInstance arrObj, ReadOnlySpan<char> sep)
+		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapBase arrObj, ReadOnlySpan<char> sep)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{

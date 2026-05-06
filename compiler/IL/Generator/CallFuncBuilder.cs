@@ -950,7 +950,7 @@ namespace juicescript.compiler.IL.Generator
 														int p = m.HeapPtr;
                                                         Debug.Assert(p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method);
 														{
-															RtHeapInstance heapInstance = compileEnv.CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+															RtHeapBase heapInstance = compileEnv.CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
                                                             Debug.Assert(heapInstance.TypeKind == RtHeapTypeKind.MethodScope);
 
                                                             var cbmethod = ((ASMethodBody)heapInstance.Type).Method;

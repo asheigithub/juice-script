@@ -273,7 +273,7 @@ namespace juicescript.runtime
 					Memory<NaNBoxing> arguments = Context.StackSlots.AsMemory(Context.StackPosition, args);
 
 					int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
-					RtHeapInstance arg_rest = Context.GC.Heap[argumentsPtr];
+					RtHeapBase arg_rest = Context.GC.Heap[argumentsPtr];
 #if DEBUG
 					if (((RtPayloadArray)arg_rest.facility).StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
 					{
@@ -356,7 +356,7 @@ namespace juicescript.runtime
 				int backTraceId = Context.BackTraceIndex;
 				
 				int mScopeId = backTraceId + Context.M_MethodScopePtr;
-				RtHeapInstance mScope = Context.GC.Heap[mScopeId];
+				RtHeapBase mScope = Context.GC.Heap[mScopeId];
 
 				mScope.Type = method.Body;
 				RtPayloadMethodScope m_scopePayload = (RtPayloadMethodScope)mScope.facility;
@@ -417,7 +417,7 @@ namespace juicescript.runtime
 					if (method.Flags.HasFlag(MethodFlags.NeedArguments))
 					{
 						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
-						RtHeapInstance arg_arguments = Context.GC.Heap[argumentsPtr];
+						RtHeapBase arg_arguments = Context.GC.Heap[argumentsPtr];
 						arguments_span = ((RtPayloadArray)arg_arguments.facility).stack_store.Span;
 					}
 
@@ -435,7 +435,7 @@ namespace juicescript.runtime
 
 							int restPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 
-							RtHeapInstance arg_rest = Context.GC.Heap[restPtr];
+							RtHeapBase arg_rest = Context.GC.Heap[restPtr];
 
 #if DEBUG
 							if (((RtPayloadArray)arg_rest.facility).StoreMode != RtPayloadArray.ArrayStoreMode.cache_on_stack)
@@ -625,7 +625,7 @@ namespace juicescript.runtime
 
 					Debug.Assert(generator.QName.Name == "generator");
 
-					RtHeapInstance gen;
+					RtHeapBase gen;
 					int generator_ptr = Context.GC.AllocInstance(generator.Instance, out gen);
 
 					if (generator_ptr == 0)
@@ -745,7 +745,7 @@ namespace juicescript.runtime
 					Context.StackSlots[basePos + 1].SetHeapPtr(_this.HeapPtr); //保存防止被GC
 
 					//构造async::gen
-					RtHeapInstance gen;
+					RtHeapBase gen;
 					int generator_ptr = Context.GC.AllocInstance(Context.OBJECT.Instance, out gen);
 
 					if (generator_ptr == 0)
@@ -770,7 +770,7 @@ namespace juicescript.runtime
 					((RtPayloadInstance)gen.facility).wapperedObject = wapper;
 
 					//构造promise
-					RtHeapInstance promise;
+					RtHeapBase promise;
 					int promise_ptr = Context.GC.AllocInstance(Context.PROMISE.Instance, out promise);
 					if(promise_ptr == 0)
 					{

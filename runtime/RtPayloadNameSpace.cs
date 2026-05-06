@@ -10,9 +10,11 @@ namespace juicescript.runtime
     /// <summary>
     /// 负载Namespace实例
     /// </summary>
-    public sealed class RtPayloadNameSpace : FacilityBase
+    public sealed class RtPayloadNameSpace : RtHeapBase
     {
-        public override int Size
+        public RtPayloadNameSpace() : base( RtHeapTypeKind.NAMESPACE) { }
+
+		public override int Size
         {
             get
             {

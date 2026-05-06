@@ -270,7 +270,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			RtHeapInstance arr = context.GC.Heap[v.HeapPtr];
+			RtHeapBase arr = context.GC.Heap[v.HeapPtr];
 			Debug.Assert(arr.TypeKind == RtHeapTypeKind.ARRAY);
 
 			RtPayloadArray arr_payload = (RtPayloadArray)arr.facility;
@@ -368,7 +368,7 @@ namespace juicescript.runtime.buildin
 
 					RtPayloadArray src;
 					int src_p = RtPayloadArray.FindAndUpdateHeapInstancePtr(element.HeapPtr, context.player, out src);
-					RtHeapInstance src_instance = context.GC.Heap[src_p];
+					RtHeapBase src_instance = context.GC.Heap[src_p];
 
 
 					uint src_len = src.GetLength(context.player);
@@ -759,7 +759,7 @@ namespace juicescript.runtime.buildin
 
 			if (array.array_len > 0)
 			{
-				RtHeapInstance instance = context.GC.Heap[instancePtr];
+				RtHeapBase instance = context.GC.Heap[instancePtr];
 
 				bool isoutindex;
 				NaNBoxing e = array.ReadSlot(0, context.player, out isoutindex);
@@ -2096,7 +2096,7 @@ namespace juicescript.runtime.buildin
 			}
 
 
-			RtHeapInstance instance = context.GC.Heap[arrPtr];
+			RtHeapBase instance = context.GC.Heap[arrPtr];
 
 			bool isoutindex;
 			NaNBoxing e = array.ReadSlot((uint)index, context.player, out isoutindex);
@@ -2258,7 +2258,7 @@ namespace juicescript.runtime.buildin
 					return -1;
 				}
 
-				RtHeapInstance func = context.GC.Heap[sortBehavior.HeapPtr];
+				RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
 				RtPayloadClosure closure = (RtPayloadClosure)func.facility;
 
 				ASMethod method = ((ASMethodBody)func.Type).Method;
@@ -2634,7 +2634,7 @@ namespace juicescript.runtime.buildin
 			}
 			else if (fieldName.ValueType == BoxType.HeapPtr)
 			{
-				RtHeapInstance fn = context.GC.Heap[fieldName.HeapPtr];
+				RtHeapBase fn = context.GC.Heap[fieldName.HeapPtr];
 				if (fn.TypeKind == RtHeapTypeKind.STRING )
 				{
 					
@@ -2688,7 +2688,7 @@ namespace juicescript.runtime.buildin
 
 				if (options.ValueType == BoxType.HeapPtr)
 				{
-					RtHeapInstance op = context.GC.Heap[options.HeapPtr];
+					RtHeapBase op = context.GC.Heap[options.HeapPtr];
 					if (op.TypeKind == RtHeapTypeKind.ARRAY)
 					{
 						RtPayloadArray.FindAndUpdateHeapInstancePtr(options.HeapPtr, context.player, out option_arr);

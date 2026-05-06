@@ -77,23 +77,35 @@ namespace juicescript.runtime
     }
 
 
-    public sealed class RtHeapInstance
+    public abstract class RtHeapBase
     {
         
         /// <summary>
-        /// 指向具体实现功能的对象。例如Array,Vector,或者动态成员
+        /// 改为返回自身
         /// </summary>
-        public FacilityBase facility;
+        public RtHeapBase facility
+        {
+            get { return this; }
+        }
 
 		public ASContainer Type;
 
-		public RtHeapTypeKind TypeKind;
+		public readonly RtHeapTypeKind TypeKind;
 
 		internal bool gc_mark;
 
-        public override string ToString()
+		public abstract int Size { get; }
+
+        public RtHeapBase(RtHeapTypeKind typeKind)
         {
-            return $"{TypeKind},{facility}";
+            this.TypeKind = typeKind;
+        }
+
+
+
+		public override string ToString()
+        {
+            return $"RtHeap:{TypeKind}";
         }
 
     }

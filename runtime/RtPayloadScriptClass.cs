@@ -11,9 +11,9 @@ namespace juicescript.runtime
     /// <summary>
     /// 运行时负载Global,Class的实例
     /// </summary>
-    public sealed class RtPayloadScriptClass : FacilityBase
+    public sealed class RtPayloadScriptClass : RtHeapBase
     {
-        private NaNBoxing[] Slots;
+		private NaNBoxing[] Slots;
 
         public ASContainer Meta;
 
@@ -42,7 +42,7 @@ namespace juicescript.runtime
             }
         }
 
-        public RtPayloadScriptClass(ASClass cls, int _protoPtr)
+        public RtPayloadScriptClass(ASClass cls, int _protoPtr):base(RtHeapTypeKind.CLASS)
         {
             Meta = cls;
             Slots = new NaNBoxing[cls._link_codescope.Members.Count];
@@ -52,7 +52,7 @@ namespace juicescript.runtime
 
         }
 
-        public RtPayloadScriptClass(ASScript script)
+        public RtPayloadScriptClass(ASScript script):base(RtHeapTypeKind.GLOBAL) 
         {
             Meta = script;
             Slots = new NaNBoxing[script._link_codescope.Members.Count];
@@ -87,34 +87,34 @@ namespace juicescript.runtime
                 {
                     switch (member.TypeKind)
                     {
-                        case TypeKind.Any:
+                        case ABC.TypeKind.Any:
                             Slots[i].SetUndefined();
                             break;
-                        case TypeKind.Boolean:
+                        case ABC.TypeKind.Boolean:
                             Slots[i].SetBoolean(false);
                             break;
-                        case TypeKind.SByte:
+                        case ABC.TypeKind.SByte:
                             Slots[i].SetSByte(0);
                             break;
-                        case TypeKind.Byte:
+                        case ABC.TypeKind.Byte:
                             Slots[i].SetByte(0);
                             break;
-                        case TypeKind.Short:
+                        case ABC.TypeKind.Short:
                             Slots[i].SetShort(0);
                             break;
-                        case TypeKind.UShort:
+                        case ABC.TypeKind.UShort:
                             Slots[i].SetUShort(0);
                             break;
-                        case TypeKind.Int:
+                        case ABC.TypeKind.Int:
                             Slots[i].SetInt(0);
                             break;
-                        case TypeKind.Uint:
+                        case ABC.TypeKind.Uint:
                             Slots[i].SetUInt(0);
                             break;
-                        case TypeKind.Float:
+                        case ABC.TypeKind.Float:
                             Slots[i].SetFloat(float.NaN);
                             break;
-                        case TypeKind.Number:
+                        case ABC.TypeKind.Number:
                             Slots[i].SetNumber(double.NaN);
                             break;
                         default:

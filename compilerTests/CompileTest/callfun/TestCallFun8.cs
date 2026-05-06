@@ -101,7 +101,7 @@ c(6,7);
             NaNBoxing a = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, a.ValueType);
 
-            RtHeapInstance instance = player.Context.GC.Heap[a.HeapPtr];
+            RtHeapBase instance = player.Context.GC.Heap[a.HeapPtr];
             Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.TypeKind);
             Assert.AreEqual(RtPayloadArray.ArrayStoreMode.normal, ((RtPayloadArray)instance.facility).StoreMode);
 

@@ -56,7 +56,7 @@ namespace compilerTests
         }
 
 
-        protected virtual RtHeapInstance FindGlobal(Player player)
+        protected virtual RtHeapBase FindGlobal(Player player)
         {
             var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");
             Assert.IsNotNull(global);

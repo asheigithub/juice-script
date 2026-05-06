@@ -2564,7 +2564,7 @@ namespace juicescript.runtime
 			error.raised = true;
 
 
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2577,7 +2577,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -2635,7 +2635,7 @@ namespace juicescript.runtime
 
 			error.raised = true;
 
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2648,7 +2648,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -2673,7 +2673,7 @@ namespace juicescript.runtime
 			error.raised = true;
 
 
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2686,7 +2686,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 
@@ -2714,7 +2714,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp = null;
+			RtHeapBase _temp = null;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2726,7 +2726,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				int messagePtr = Context.GC.AllocString($"Type Coercion failed: can not convert {value.ToDebugString(this)} to {toType.ToDebugString(this)}.");
@@ -2753,7 +2753,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2765,7 +2765,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				int messagePtr = Context.GC.AllocString($"{name} is ambiguous; Found more than one matching binding.");
@@ -2790,7 +2790,7 @@ namespace juicescript.runtime
 		internal void RaiseTypeError_ConvertToPrimitive(ref ReceiveError error, NaNBoxing value)
 		{
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2802,7 +2802,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				int messagePtr = Context.GC.AllocString($"Cannot convert {value.ToDebugString(this)} to primitive.");
@@ -2828,7 +2828,7 @@ namespace juicescript.runtime
 		internal void RaiseIllegaloperationError(ref ReceiveError error, string methodkey)
 		{
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.ILLEGALOPERATION_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2840,7 +2840,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_ILLEGALOPERATION_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.ILLEGALOPERATION_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				int messagePtr = Context.GC.AllocString($"native function {methodkey} is missing.");
@@ -2867,7 +2867,7 @@ namespace juicescript.runtime
 		{
 
 			error.raised = true;
-			RtHeapInstance _temp;
+			RtHeapBase _temp;
 			int errPtr = Context.GC.AllocInstance(Context.TYPE_ERROR.Instance, out _temp);
 			if (errPtr == 0)
 			{
@@ -2879,7 +2879,7 @@ namespace juicescript.runtime
 				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
 				((RtPayloadInstance)_temp.facility).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
-				RtHeapInstance error_instance = _temp;
+				RtHeapBase error_instance = _temp;
 				RtPayloadInstance payloadInstance = (RtPayloadInstance)error_instance.facility;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
@@ -5173,7 +5173,7 @@ namespace juicescript.runtime
 			//目前为空方法，用于标记哪里写了属性，将来优化为检查是否是简单的写字段。
 		}
 
-		private void WriteFunctionProto(NaNBoxing box, ref ReceiveError error, RtHeapInstance closure, int closure_ptr)
+		private void WriteFunctionProto(NaNBoxing box, ref ReceiveError error, RtHeapBase closure, int closure_ptr)
 		{
 
 			if (((ASMethodBody)closure.Type).Method.__ismethod)
@@ -5265,7 +5265,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+				RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 
 				if (ins.TypeKind == RtHeapTypeKind.INSTANCE
 					||
@@ -5415,7 +5415,7 @@ namespace juicescript.runtime
 								}
 
 
-								RtHeapInstance prototype;
+								RtHeapBase prototype;
 								int ptr = Context.GC.AllocInstance(Context.OBJECT.Instance, out prototype);
 								if (ptr == 0)
 								{
@@ -5470,7 +5470,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal NaNBoxing LoadSlotFromArray(uint uindex, RtHeapInstance arrObj, out bool isoutofindex_or_ishole)
+		internal NaNBoxing LoadSlotFromArray(uint uindex, RtHeapBase arrObj, out bool isoutofindex_or_ishole)
 		{
 
 			NaNBoxing result = ((RtPayloadArray)arrObj.facility).ReadSlot(uindex, this, out isoutofindex_or_ishole);
@@ -5509,7 +5509,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal void SetArraySlot(NaNBoxing box, uint index, RtHeapInstance instance, ref ReceiveError error)
+		internal void SetArraySlot(NaNBoxing box, uint index, RtHeapBase instance, ref ReceiveError error)
 		{
 			if (((RtPayloadArray)instance.facility).TrySetSlotIfReplaceStructOrNotHeap(box, index, this, ref error))
 			{
@@ -5538,7 +5538,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal void VisitArrayProto(RtHeapInstance arrObj, Action<NaNBoxing, NaNBoxing> OnVisit)
+		internal void VisitArrayProto(RtHeapBase arrObj, Action<NaNBoxing, NaNBoxing> OnVisit)
 		{
 			VisitDynamicValue(arrObj, OnVisit);
 
@@ -5570,7 +5570,7 @@ namespace juicescript.runtime
 			NaNBoxing result = box;
 			if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
-				RtHeapInstance rtHeap = Context.GC.Heap[box.HeapPtr];
+				RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
 				if (rtHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 				{
 					RtPayloadStackCache _obj = (RtPayloadStackCache)rtHeap.facility;
@@ -5579,7 +5579,7 @@ namespace juicescript.runtime
 					{
 
 
-						RtHeapInstance refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+						RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
 
 						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 						{
@@ -5611,7 +5611,7 @@ namespace juicescript.runtime
 							if (_obj.searchNameSpacePtr > 0)
 							{
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
-								RtHeapInstance ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
 
 							}
@@ -5761,7 +5761,7 @@ namespace juicescript.runtime
 								else
 								{
 									NaNBoxing value; int shape_ptr; int index; RtPayloadDynamic prop;
-									RtHeapInstance proto = null;
+									RtHeapBase proto = null;
 									do
 									{
 									lbl_retry_method:  //Function.prototype 是一个function,所以这里有可能重新回来
@@ -6228,7 +6228,7 @@ namespace juicescript.runtime
 							if (_obj.searchNameSpacePtr > 0)
 							{
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
-								RtHeapInstance ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
 
 							}
@@ -6376,7 +6376,7 @@ namespace juicescript.runtime
 							if (_obj.searchNameSpacePtr > 0)
 							{
 								ns.SetHeapPtr(_obj.searchNameSpacePtr);
-								RtHeapInstance ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
 
 
@@ -6471,7 +6471,7 @@ namespace juicescript.runtime
 				{
 					//instancePtr = instance.HeapPtr;
 #if DEBUG
-					RtHeapInstance rtHeap = Context.GC.Heap[instance.HeapPtr];
+					RtHeapBase rtHeap = Context.GC.Heap[instance.HeapPtr];
 
 					if (rtHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ
 						//||
@@ -8205,7 +8205,7 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
 		{
-			RtHeapInstance to_invoke = null;
+			RtHeapBase to_invoke = null;
 			HINT hint = HINT.h_number;
 
 			if (totype_class != null && totype_class.Instance.Flags.HasFlag(ClassFlags.Vector))
@@ -9496,7 +9496,7 @@ namespace juicescript.runtime
 							{
 								if (totype == TypeKind.Function)
 								{
-									RtHeapInstance obj = Context.GC.Heap[invalue.HeapPtr];
+									RtHeapBase obj = Context.GC.Heap[invalue.HeapPtr];
 									if (obj.TypeKind == RtHeapTypeKind.CLOSURE)
 									{
 										outvalue = invalue;
@@ -9510,7 +9510,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapInstance obj = Context.GC.Heap[invalue.HeapPtr];
+									RtHeapBase obj = Context.GC.Heap[invalue.HeapPtr];
 									if (obj.TypeKind == RtHeapTypeKind.CLASS)
 									{
 										outvalue = invalue;
@@ -9559,7 +9559,7 @@ namespace juicescript.runtime
 							return;
 						case NaNBoxing.BoxType.HeapPtr:
 							{
-								RtHeapInstance obj = Context.GC.Heap[invalue.HeapPtr];
+								RtHeapBase obj = Context.GC.Heap[invalue.HeapPtr];
 								if (obj.TypeKind == RtHeapTypeKind.ARRAY)
 								{
 									outvalue = invalue;
@@ -9610,7 +9610,7 @@ namespace juicescript.runtime
 							return;
 						case NaNBoxing.BoxType.HeapPtr:
 							{
-								RtHeapInstance obj = Context.GC.Heap[invalue.HeapPtr];
+								RtHeapBase obj = Context.GC.Heap[invalue.HeapPtr];
 								if (totype == TypeKind.Namespace)
 								{
 									if (obj.TypeKind == RtHeapTypeKind.NAMESPACE)
@@ -9887,7 +9887,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					RtHeapInstance _temp;
+					RtHeapBase _temp;
 					errPtr = Context.GC.AllocInstance(totype_class.Instance, out _temp);
 					if (errPtr == 0)
 					{
@@ -10071,7 +10071,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal bool check_MultiNameLSearch_issameorinherit(NaNBoxing instance, RtHeapInstance this_ins)
+		internal bool check_MultiNameLSearch_issameorinherit(NaNBoxing instance, RtHeapBase this_ins)
 		{
 			bool issameorinherit = this_ins != null && instance.ValueType == BoxType.HeapPtr &&
 
@@ -10268,7 +10268,7 @@ namespace juicescript.runtime
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10315,7 +10315,7 @@ namespace juicescript.runtime
 				{
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10390,7 +10390,7 @@ namespace juicescript.runtime
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10440,7 +10440,7 @@ namespace juicescript.runtime
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10482,7 +10482,7 @@ namespace juicescript.runtime
 				{
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10587,7 +10587,7 @@ namespace juicescript.runtime
 
 						int ptrIndex = stackStPos + stack.index;
 						int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-						RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+						RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 						if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 						{
@@ -10676,7 +10676,7 @@ namespace juicescript.runtime
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10701,7 +10701,7 @@ namespace juicescript.runtime
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10756,7 +10756,7 @@ namespace juicescript.runtime
 				{
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10833,7 +10833,7 @@ namespace juicescript.runtime
 
 					int ptrIndex = stackStPos + stack.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-					RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 					if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
@@ -10885,7 +10885,7 @@ namespace juicescript.runtime
 		/// <param name="error"></param>
 		/// <param name="propname"></param>
 		/// <param name="value"></param>
-		internal  void CreateDynamic(ref ReceiveError error, RtHeapInstance instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
+		internal  void CreateDynamic(ref ReceiveError error, RtHeapBase instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
 		{
 			findd_lastshapeptr = 0;
 
@@ -11185,7 +11185,7 @@ namespace juicescript.runtime
 
 		}
 
-		internal int GetPropertyPtr(RtHeapInstance instance)
+		internal int GetPropertyPtr(RtHeapBase instance)
 		{
 			int PROPERTY_PTR;
 			if (instance.TypeKind == RtHeapTypeKind.INSTANCE)
@@ -11230,7 +11230,7 @@ namespace juicescript.runtime
 		
 		int findd_slot = 0;
 
-		internal bool FindDynamicValue(RtHeapInstance instance, ReadOnlySpan<char> searchName, out NaNBoxing value, out int matchShapePtr, out int slotindex, out RtPayloadDynamic prop)
+		internal bool FindDynamicValue(RtHeapBase instance, ReadOnlySpan<char> searchName, out NaNBoxing value, out int matchShapePtr, out int slotindex, out RtPayloadDynamic prop)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 			if (PROPERTY_PTR != 0)
@@ -11296,7 +11296,7 @@ namespace juicescript.runtime
 			value = default; matchShapePtr = 0; slotindex = -1; return false;
 		}
 
-		private void VisitDynamicValue(RtHeapInstance instance, Action<NaNBoxing, NaNBoxing> OnVisitProp)
+		private void VisitDynamicValue(RtHeapBase instance, Action<NaNBoxing, NaNBoxing> OnVisitProp)
 		{
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 			if (PROPERTY_PTR != 0)
@@ -11490,8 +11490,8 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe int Ld_function_and_store_member(ScopeHeapLocater heapLocater, RtHeapInstance mscope, int scope_ptr, uint fbox, ref ReceiveError error,
-			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, int* method_scopes, out RtHeapInstance closure_instance)
+		private unsafe int Ld_function_and_store_member(ScopeHeapLocater heapLocater, RtHeapBase mscope, int scope_ptr, uint fbox, ref ReceiveError error,
+			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, int* method_scopes, out RtHeapBase closure_instance)
 		{
 			if (!(heapLocater.MemberIndex == ushort.MaxValue && heapLocater.ScopeIndex == ushort.MaxValue))
 			{
@@ -11686,7 +11686,7 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe NaNBoxing Ld_ScopeH(RtHeapInstance scope, ScopeHeapLocater heapLocater, ASContainer scopeType, int returnSlotIndex)
+		private unsafe NaNBoxing Ld_ScopeH(RtHeapBase scope, ScopeHeapLocater heapLocater, ASContainer scopeType, int returnSlotIndex)
 		{
 
 			var s = scope; int _parent_ptr = 0;
@@ -11707,7 +11707,7 @@ namespace juicescript.runtime
 								throw new InvalidOperationException();
 #endif
 
-							RtHeapInstance sInstance = Context.GC.Heap[
+							RtHeapBase sInstance = Context.GC.Heap[
 							((ASScript)((RtPayloadScriptClass)s.facility).Meta._link_codescope.Parent.Container).__global_index__];
 
 							RtPayloadScriptClass heap = (RtPayloadScriptClass)sInstance.facility;
@@ -11770,7 +11770,7 @@ namespace juicescript.runtime
 							//	}
 							//} 
 
-							RtHeapInstance sInstance = Context.GC.Heap[
+							RtHeapBase sInstance = Context.GC.Heap[
 									((ASScript)(sType.Container)).__global_index__];
 
 							RtPayloadScriptClass heap = (RtPayloadScriptClass)sInstance.facility;
@@ -14194,7 +14194,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal int GetProtoPtr(RtHeapInstance obj)
+		internal int GetProtoPtr(RtHeapBase obj)
 		{
 			int o_proto;
 			switch (obj.TypeKind)
@@ -14277,7 +14277,7 @@ namespace juicescript.runtime
 		}
 
 		//private Memory<char> frame_holdchars = new Memory<char>(new char[16]);
-		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapInstance methodscope, int scope_ptr, ASContainer scopeType,
+		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapBase methodscope, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
 		{
@@ -14515,7 +14515,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 								}
 
-								RtHeapInstance instance = Context.GC.Heap[boxing.HeapPtr];
+								RtHeapBase instance = Context.GC.Heap[boxing.HeapPtr];
 								if (instance.TypeKind != RtHeapTypeKind.NAMESPACE)
 								{
 									throw new InvalidOperationException();
@@ -14539,7 +14539,7 @@ namespace juicescript.runtime
 
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
-									RtHeapInstance rtHeap = Context.GC.Heap[box.HeapPtr];
+									RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
 									if (rtHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 									{
 										RtPayloadStackCache _obj = (RtPayloadStackCache)rtHeap.facility;
@@ -14552,7 +14552,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											RtHeapInstance refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+											RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
 
 											if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 											{
@@ -14578,7 +14578,7 @@ namespace juicescript.runtime
 												if (_obj.searchNameSpacePtr > 0)
 												{
 													ns.SetHeapPtr(_obj.searchNameSpacePtr);
-													RtHeapInstance ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+													RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 													@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
 													_obj.searchNameSpacePtr = 0;
 												}
@@ -14974,7 +14974,7 @@ namespace juicescript.runtime
 									as_type = super_class.Instance;
 								}
 
-								RtHeapInstance instance = null;
+								RtHeapBase instance = null;
 
 								switch (instance_box.ValueType)
 								{
@@ -15053,7 +15053,7 @@ namespace juicescript.runtime
 									//索引器处理
 									int ptrIndex = stackStPos + stack.index;
 									int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-									RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+									RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 									if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 									{
@@ -15220,7 +15220,7 @@ namespace juicescript.runtime
 										uint array_i = (uint)index;
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -15265,7 +15265,7 @@ namespace juicescript.runtime
 								else
 								{
 									
-									RtHeapInstance _n = Context.GC.Heap[prop_name.HeapPtr];
+									RtHeapBase _n = Context.GC.Heap[prop_name.HeapPtr];
 									if (_n.TypeKind != RtHeapTypeKind.STRING)
 									{
 										if (Context.StackPosition == Context.STACK_LENGTH)
@@ -15381,7 +15381,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapInstance ns_instance = Context.GC.Heap[ns.HeapPtr];
+									RtHeapBase ns_instance = Context.GC.Heap[ns.HeapPtr];
 									if (ns_instance.TypeKind == RtHeapTypeKind.NAMESPACE)
 									{
 										searchNs = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
@@ -15400,7 +15400,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapInstance name_instance = Context.GC.Heap[name.HeapPtr];
+									RtHeapBase name_instance = Context.GC.Heap[name.HeapPtr];
 									if (name_instance.TypeKind == RtHeapTypeKind.STRING)
 									{
 										searchName = ((RtPayloadString)name_instance.facility).Str;
@@ -15441,7 +15441,7 @@ namespace juicescript.runtime
 									}
 								}
 
-								RtHeapInstance instance = null;
+								RtHeapBase instance = null;
 								var c_scope = methodscope; //Context.GC.Heap[scope_ptr];
 #if DEBUG
 								if (c_scope.TypeKind != RtHeapTypeKind.MethodScope)
@@ -15455,7 +15455,7 @@ namespace juicescript.runtime
 								bool deepsearch = false;//如果是从instance的methodscope开始查找说明要继续查找静态成员-基类静态成员
 								int instancePtr = 0;
 								int o_instancePtr = 0;
-								RtHeapInstance o_instance = null;
+								RtHeapBase o_instance = null;
 
 								CodeScope primitive_codescope = null;
 
@@ -15652,7 +15652,7 @@ namespace juicescript.runtime
 									{
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -15705,7 +15705,7 @@ namespace juicescript.runtime
 
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -15765,7 +15765,7 @@ namespace juicescript.runtime
 									{
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -15809,7 +15809,7 @@ namespace juicescript.runtime
 											//throw new NotImplementedException();
 											int ptrIndex = stackStPos + stack.index;
 											int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
-											RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+											RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 											if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 											{
@@ -15866,7 +15866,7 @@ namespace juicescript.runtime
 
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -15901,7 +15901,7 @@ namespace juicescript.runtime
 									{
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -15944,7 +15944,7 @@ namespace juicescript.runtime
 											//throw new NotImplementedException();
 											int ptrIndex = stackStPos + stack.index;
 											int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
-											RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+											RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 											if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 											{
@@ -16008,7 +16008,7 @@ namespace juicescript.runtime
 
 										int ptrIndex = stackStPos + stack.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -16135,7 +16135,7 @@ namespace juicescript.runtime
 
 										int ptrIndex = stackStPos + target.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -16170,7 +16170,7 @@ namespace juicescript.runtime
 #endif
 										int ptrIndex = stackStPos + target.index;
 										int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-										RtHeapInstance cache = Context.GC.Heap[cacheobjpointer];
+										RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
 										if (cache.TypeKind != RtHeapTypeKind.STACK_CACHE_OBJ)
 										{
@@ -16388,7 +16388,7 @@ namespace juicescript.runtime
 								if (fbox.ValueType != NaNBoxing.BoxType.Uint)
 									throw new InvalidOperationException();
 #endif
-								RtHeapInstance closure;
+								RtHeapBase closure;
 								Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
 								if (error.raised)
 								{
@@ -16488,7 +16488,7 @@ namespace juicescript.runtime
 								if (fbox.ValueType != NaNBoxing.BoxType.Uint)
 									throw new InvalidOperationException();
 #endif
-								RtHeapInstance closure;
+								RtHeapBase closure;
 								int closure_ptr = Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
 								if (error.raised)
 								{
@@ -16546,7 +16546,7 @@ namespace juicescript.runtime
 
 								NaNBoxing funValue = stackslots[function.index];
 
-								RtHeapInstance funinstance = null;
+								RtHeapBase funinstance = null;
 								if (funValue.ValueType == BoxType.HeapPtr)
 								{
 									funinstance = Context.GC.Heap[funValue.HeapPtr];
@@ -16687,7 +16687,7 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+										RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 										if (ins.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ
 											//||
 											//ins.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS
@@ -16721,7 +16721,7 @@ namespace juicescript.runtime
 
 								NaNBoxing funValue = stackslots[function.index];
 
-								RtHeapInstance funinstance = null;
+								RtHeapBase funinstance = null;
 								if (funValue.ValueType == BoxType.HeapPtr)
 								{
 									funinstance = Context.GC.Heap[funValue.HeapPtr];
@@ -16838,7 +16838,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+									RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 									if (ins.TypeKind != RtHeapTypeKind.INSTANCE)
 									{
 										throw new InvalidOperationException();
@@ -16982,7 +16982,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+									RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 
 									if (ins.TypeKind == RtHeapTypeKind.INSTANCE || ins.TypeKind == RtHeapTypeKind.VECTOR)
 									{
@@ -17130,7 +17130,7 @@ namespace juicescript.runtime
 								else
 #endif
 								{
-									RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+									RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 
 									if (ins.TypeKind == RtHeapTypeKind.INSTANCE)
 									{
@@ -17201,7 +17201,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 								}
 #endif
-								RtHeapInstance _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
+								RtHeapBase _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
 								RtPayloadClosure _methodclosure_ = (RtPayloadClosure)_method_.facility;
 								NaNBoxing result = RunMethod(((ASMethodBody)_method_.Type).Method,
 									_methodclosure_.This, _methodclosure_.ScopePtr, _methodclosure_.ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
@@ -17362,7 +17362,7 @@ namespace juicescript.runtime
 #endif
 
 								{
-									RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+									RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 
 #if DEBUG
 									if (ins.TypeKind == RtHeapTypeKind.INSTANCE)
@@ -17467,7 +17467,7 @@ namespace juicescript.runtime
 								{
 									BeforeWriteProperty();
 
-									RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+									RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 
 									if (ins.TypeKind == RtHeapTypeKind.INSTANCE
 										||
@@ -17616,7 +17616,7 @@ namespace juicescript.runtime
 								{
 									BeforeWriteProperty();
 
-									RtHeapInstance ins = Context.GC.Heap[thisValue.HeapPtr];
+									RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
 
 									if (ins.TypeKind == RtHeapTypeKind.INSTANCE)
 									{
@@ -18008,7 +18008,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 								}
 #endif
-								RtHeapInstance cache = Context.GC.Heap[stackslots[target.index].HeapPtr];
+								RtHeapBase cache = Context.GC.Heap[stackslots[target.index].HeapPtr];
 
 								if (cache.TypeKind == RtHeapTypeKind.CLOSURE)
 								{
@@ -18077,7 +18077,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapInstance instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
+									RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 
 									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString)
 									{
@@ -18116,7 +18116,7 @@ namespace juicescript.runtime
 										if (cacheObj.searchNameSpacePtr > 0)
 										{
 											ns.SetHeapPtr(cacheObj.searchNameSpacePtr);
-											RtHeapInstance ns_instance = Context.GC.Heap[cacheObj.searchNameSpacePtr];
+											RtHeapBase ns_instance = Context.GC.Heap[cacheObj.searchNameSpacePtr];
 											@namespace = ((RtPayloadNameSpace)ns_instance.facility).ASNamespace;
 
 											cacheObj.searchNameSpacePtr = 0;
@@ -18622,7 +18622,7 @@ namespace juicescript.runtime
 
 								if (type_box.ValueType == BoxType.HeapPtr)
 								{
-									RtHeapInstance type = Context.GC.Heap[type_box.HeapPtr];
+									RtHeapBase type = Context.GC.Heap[type_box.HeapPtr];
 
 									if (type.TypeKind == RtHeapTypeKind.CLASS)
 									{
@@ -18630,7 +18630,7 @@ namespace juicescript.runtime
 										ASClass @class = (ASClass)((RtPayloadScriptClass)type.facility).Meta;
 										//构造实例
 
-										RtHeapInstance instance;
+										RtHeapBase instance;
 										int instancePtr;
 
 										if (@class.Instance.Flags.HasFlag(ClassFlags.NoConstructor))
@@ -18996,7 +18996,7 @@ namespace juicescript.runtime
 										///// AIR 运行时在检测到手工把prototype赋值为空的时候会又创建一个Object
 										else if (function_proto == -1)
 										{
-											RtHeapInstance proto;
+											RtHeapBase proto;
 											function_proto = Context.GC.AllocInstance(Context.OBJECT.Instance, out proto);
 											if (function_proto == 0)
 											{
@@ -20201,7 +20201,7 @@ namespace juicescript.runtime
 										stackslots[dst.index].SetHeapPtr(TYPEOF_string_STR);
 										break;
 									case BoxType.HeapPtr:
-										RtHeapInstance instance = Context.GC.Heap[v.HeapPtr];
+										RtHeapBase instance = Context.GC.Heap[v.HeapPtr];
 										switch (instance.TypeKind)
 										{
 											case RtHeapTypeKind.STRING:
@@ -20570,7 +20570,7 @@ namespace juicescript.runtime
 
 							lbl_do_proto:
 								{
-									RtHeapInstance obj;
+									RtHeapBase obj;
 
 									bool instanceof = false;
 									int steps = 0;
@@ -21355,7 +21355,7 @@ namespace juicescript.runtime
 								//	goto flag_handle_error;
 								//}
 
-								RtHeapInstance iterctx;
+								RtHeapBase iterctx;
 								int iter_context_ptr = Context.GC.RentIterContext(out iterctx);
 								if (iter_context_ptr == 0)
 								{
@@ -21643,7 +21643,7 @@ namespace juicescript.runtime
 
 								var resulttype = Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__;
 								int result_ptr = InitCacheInstance(resulttype, stackStPos + resultLoc.index, true);
-								RtHeapInstance result = Context.GC.Heap[stackslots[resultLoc.index].HeapPtr];
+								RtHeapBase result = Context.GC.Heap[stackslots[resultLoc.index].HeapPtr];
 
 
 								int m_idx =

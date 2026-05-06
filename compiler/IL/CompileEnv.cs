@@ -642,7 +642,7 @@ namespace juicescript.compiler.IL
                     if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Namespace)
                     {
 
-                        RtHeapInstance heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+                        RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
                         if (heapInstance.TypeKind == RtHeapTypeKind.NAMESPACE
                             && ((RtPayloadNameSpace)heapInstance.facility).ASNamespace == @namespace)
                         {
@@ -683,7 +683,7 @@ namespace juicescript.compiler.IL
                     if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String)
                     {
 
-                        RtHeapInstance heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[ p & 0xffffff ];
+                        RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[ p & 0xffffff ];
                         if (heapInstance.TypeKind == RtHeapTypeKind.STRING
                             && string.Equals(((RtPayloadString)heapInstance.facility).Str, v, StringComparison.Ordinal))
                         {
@@ -721,7 +721,7 @@ namespace juicescript.compiler.IL
 					int p = Constants[i].HeapPtr;
 					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method)
 					{
-						RtHeapInstance heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+						RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
 						if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope
 							&& heapInstance.Type == method.Body )
 						{
@@ -760,7 +760,7 @@ namespace juicescript.compiler.IL
 					int p = Constants[i].HeapPtr;
 					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method)
 					{
-						RtHeapInstance heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+						RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
 						if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope
 							&& heapInstance.Type == _this_)
 						{

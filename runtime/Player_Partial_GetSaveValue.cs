@@ -30,7 +30,7 @@ namespace juicescript.runtime
 		{
 			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
-				RtHeapInstance instance = Context.GC.Heap[value.HeapPtr];
+				RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
 				
 				switch (instance.TypeKind)
 				{
@@ -45,7 +45,7 @@ namespace juicescript.runtime
 							if (((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Struct))
 							{
 								//结构体，必要复制一份。
-								RtHeapInstance heapObj;
+								RtHeapBase heapObj;
 								int ptr = Context.GC.AllocInstance((ASInstance)instance.Type, out heapObj);
 								if (ptr == 0)
 								{
@@ -63,7 +63,7 @@ namespace juicescript.runtime
 								if (src_ptr < Context.CacheInstancePtr + Context.STACK_LENGTH)
 								{
 
-									RtHeapInstance heapObj;
+									RtHeapBase heapObj;
 									int ptr = Context.GC.AllocInstance((ASInstance)instance.Type, out heapObj);
 									if (ptr == 0)
 									{
@@ -112,7 +112,7 @@ namespace juicescript.runtime
 
 
 
-									RtHeapInstance heapObj;
+									RtHeapBase heapObj;
 									int ptr = Context.GC.AllocClosure(((ASMethodBody)instance.Type).Method);
 									if (ptr == 0)
 									{
@@ -211,7 +211,7 @@ namespace juicescript.runtime
 
 									var cacheSpan = cacheMscope.__get_slots_for_gc;
 
-									RtHeapInstance heapObj;
+									RtHeapBase heapObj;
 									int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, instance.Type._link_codescope);
 									if (ptr == 0)
 									{
@@ -651,7 +651,7 @@ namespace juicescript.runtime
 											RtPayloadMethodScope cacheMscope = (RtPayloadMethodScope)scope.facility;
 											var cacheSpan = cacheMscope.__get_slots_for_gc;
 
-											RtHeapInstance heapObj;
+											RtHeapBase heapObj;
 											int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, scope.Type._link_codescope);
 											if (ptr == 0)
 											{
@@ -1727,7 +1727,7 @@ namespace juicescript.runtime
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private void prepare_savemethodscope_saveinstacne(RtPayloadMethodScope heap, ref NaNBoxing saveSlot, RtHeapInstance src, int srcPtr, ref ScopeHeapLocater heapLocater,bool is_pass_this)
+		private void prepare_savemethodscope_saveinstacne(RtPayloadMethodScope heap, ref NaNBoxing saveSlot, RtHeapBase src, int srcPtr, ref ScopeHeapLocater heapLocater,bool is_pass_this)
 		{
 			if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
 						&&
@@ -2162,7 +2162,7 @@ namespace juicescript.runtime
 													RtPayloadMethodScope cacheMscope = (RtPayloadMethodScope)scope.facility;
 													var cacheSpan = cacheMscope.__get_slots_for_gc;
 
-													RtHeapInstance heapObj;
+													RtHeapBase heapObj;
 													int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, scope.Type._link_codescope);
 													if (ptr == 0)
 													{

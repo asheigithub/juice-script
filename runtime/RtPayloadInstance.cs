@@ -16,12 +16,14 @@ namespace juicescript.runtime
     /// <summary>
     /// 负载对象实例ASInstance
     /// </summary>
-    public sealed class RtPayloadInstance : FacilityBase
+    public sealed class RtPayloadInstance : RtHeapBase
     {
-        /// <summary>
-        /// 缓存对象的最大成员大小
-        /// </summary>
-        public const int MAX_CACHEABLE_SIZE = 16 * 8;
+		public RtPayloadInstance() : base(RtHeapTypeKind.INSTANCE) { }
+
+		/// <summary>
+		/// 缓存对象的最大成员大小
+		/// </summary>
+		public const int MAX_CACHEABLE_SIZE = 16 * 8;
 
 		private static int DoFindAndUpdatePtr( int ptr, Player player, ASInstance type , out RtPayloadInstance target)
 		{
@@ -78,7 +80,7 @@ namespace juicescript.runtime
 
         internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player,out RtPayloadInstance target)
         {
-			RtHeapInstance tmp = player.Context.GC.Heap[ptr];
+			RtHeapBase tmp = player.Context.GC.Heap[ptr];
 			RtPayloadInstance check = (RtPayloadInstance)tmp.facility;
 
 			if (((ASInstance)tmp.Type).Flags.HasFlag(ClassFlags.Struct))
@@ -337,11 +339,6 @@ namespace juicescript.runtime
        
 
 
-		public RtPayloadInstance()
-        { 
-            
-        }
-        
 
         public override int Size
         {
@@ -437,58 +434,58 @@ namespace juicescript.runtime
         {
 			switch (member.TypeKind)
 			{
-				case TypeKind.Any:
+				case ABC.TypeKind.Any:
 					((NaNBoxing*)ptr)->SetUndefined();
 					break;
-				case TypeKind.Boolean:
+				case ABC.TypeKind.Boolean:
 					*(bool*)ptr = false;
 					break;
-				case TypeKind.SByte:
+				case ABC.TypeKind.SByte:
 					*(sbyte*)ptr = 0;
 					break;
-				case TypeKind.Byte:
+				case ABC.TypeKind.Byte:
 					*(byte*)ptr = 0;
 					break;
-				case TypeKind.Short:
+				case ABC.TypeKind.Short:
 					*(short*)ptr = 0;
 					break;
-				case TypeKind.UShort:
+				case ABC.TypeKind.UShort:
 					*(ushort*)ptr = 0;
 					break;
-				case TypeKind.Int:
+				case ABC.TypeKind.Int:
 					*(int*)ptr = 0;
 					break;
-				case TypeKind.Uint:
+				case ABC.TypeKind.Uint:
 					*(uint*)ptr = 0;
 					break;
-				case TypeKind.Float:
+				case ABC.TypeKind.Float:
 					*(float*)ptr = 0;
 					break;
-				case TypeKind.Number:
+				case ABC.TypeKind.Number:
 					*(double*)ptr = double.NaN;
 					break;
 
-				case TypeKind.Fun_Void:
-				case TypeKind.Unknown:
+				case ABC.TypeKind.Fun_Void:
+				case ABC.TypeKind.Unknown:
 #if DEBUG
 					throw new InvalidOperationException();
 #else
 					Environment.FailFast("出错了，这里跑不到"); return;
 #endif
 
-				case TypeKind.Null:
-				case TypeKind.String:
-				case TypeKind.Function:
-				case TypeKind.Array:
-				case TypeKind.Vector:
-				case TypeKind.Namespace:
-				case TypeKind.Object:
-				case TypeKind.Class:
+				case ABC.TypeKind.Null:
+				case ABC.TypeKind.String:
+				case ABC.TypeKind.Function:
+				case ABC.TypeKind.Array:
+				case ABC.TypeKind.Vector:
+				case ABC.TypeKind.Namespace:
+				case ABC.TypeKind.Object:
+				case ABC.TypeKind.Class:
 					((NaNBoxing*)ptr)->SetNull();
 					break;
 				default:
 #if DEBUG
-					if ((ulong)member.TypeKind < (ulong)TypeKind.Object)
+					if ((ulong)member.TypeKind < (ulong)ABC.TypeKind.Object)
 					{
 						throw new InvalidOperationException();
 					}
@@ -550,48 +547,48 @@ namespace juicescript.runtime
 
 					switch (member.TypeKind)
 					{
-						case TypeKind.Any:
+						case ABC.TypeKind.Any:
 							result = *(NaNBoxing*)ptr;
 							break;
-						case TypeKind.Boolean:
+						case ABC.TypeKind.Boolean:
 							result.SetBoolean(*(bool*)ptr);
 							break;
-						case TypeKind.SByte:
+						case ABC.TypeKind.SByte:
 							result.SetSByte(*(sbyte*)ptr);
 							break;
-						case TypeKind.Byte:
+						case ABC.TypeKind.Byte:
 							result.SetByte(*(byte*)ptr);
 							break;
-						case TypeKind.Short:
+						case ABC.TypeKind.Short:
 							result.SetShort(*(short*)ptr);
 							break;
-						case TypeKind.UShort:
+						case ABC.TypeKind.UShort:
 							result.SetUShort(*(ushort*)ptr);
 							break;
-						case TypeKind.Int:
+						case ABC.TypeKind.Int:
 							result.SetInt(*(int*)ptr);
 							break;
-						case TypeKind.Uint:
+						case ABC.TypeKind.Uint:
 							result.SetUInt(*(uint*)ptr);
 							break;
-						case TypeKind.Float:
+						case ABC.TypeKind.Float:
 							result.SetFloat(*(float*)ptr);
 							break;
-						case TypeKind.Number:
+						case ABC.TypeKind.Number:
 							result.SetNumber(*(double*)ptr);
 							break;
-						case TypeKind.Null:
-						case TypeKind.String:
-						case TypeKind.Function:
-						case TypeKind.Array:
-						case TypeKind.Vector:
-						case TypeKind.Namespace:
-						case TypeKind.Object:
-						case TypeKind.Class:
+						case ABC.TypeKind.Null:
+						case ABC.TypeKind.String:
+						case ABC.TypeKind.Function:
+						case ABC.TypeKind.Array:
+						case ABC.TypeKind.Vector:
+						case ABC.TypeKind.Namespace:
+						case ABC.TypeKind.Object:
+						case ABC.TypeKind.Class:
 							result = *(NaNBoxing*)ptr;
 							break;
-						case TypeKind.Fun_Void:
-						case TypeKind.Unknown:
+						case ABC.TypeKind.Fun_Void:
+						case ABC.TypeKind.Unknown:
 #if DEBUG
 							throw new InvalidOperationException();
 #else
@@ -676,10 +673,10 @@ namespace juicescript.runtime
 
 			switch (member.TypeKind)
 			{
-				case TypeKind.Any:
+				case ABC.TypeKind.Any:
 					*(NaNBoxing*)ptr = value;
 					break;
-				case TypeKind.Boolean:
+				case ABC.TypeKind.Boolean:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Boolean)
 						throw new InvalidOperationException();
@@ -687,7 +684,7 @@ namespace juicescript.runtime
 					*(bool*)ptr = value.Boolean;
 					break;
 
-				case TypeKind.SByte:
+				case ABC.TypeKind.SByte:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Sbyte)
 						throw new InvalidOperationException();
@@ -695,21 +692,21 @@ namespace juicescript.runtime
 					*(sbyte*)ptr = value.SByteValue;
 					break;
 
-				case TypeKind.Byte:
+				case ABC.TypeKind.Byte:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Byte)
 						throw new InvalidOperationException();
 #endif
 					*(byte*)ptr = value.ByteValue;
 					break;
-				case TypeKind.Short:
+				case ABC.TypeKind.Short:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Short)
 						throw new InvalidOperationException();
 #endif
 					*(short*)ptr = value.ShortValue;
 					break;
-				case TypeKind.UShort:
+				case ABC.TypeKind.UShort:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.UShort)
 						throw new InvalidOperationException();
@@ -717,14 +714,14 @@ namespace juicescript.runtime
 					*(ushort*)ptr = value.UShortValue;
 					break;
 
-				case TypeKind.Int:
+				case ABC.TypeKind.Int:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Int)
 						throw new InvalidOperationException();
 #endif
 					*(int*)ptr = value.IntValue;
 					break;
-				case TypeKind.Uint:
+				case ABC.TypeKind.Uint:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Uint)
 						throw new InvalidOperationException();
@@ -732,14 +729,14 @@ namespace juicescript.runtime
 					*(uint*)ptr = value.UIntValue;
 					break;
 
-				case TypeKind.Float:
+				case ABC.TypeKind.Float:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Float)
 						throw new InvalidOperationException();
 #endif
 					*(float*)ptr = value.FloatValue;
 					break;
-				case TypeKind.Number:
+				case ABC.TypeKind.Number:
 #if DEBUG
 					if (value.ValueType != NaNBoxing.BoxType.Number)
 						throw new InvalidOperationException();
@@ -747,21 +744,21 @@ namespace juicescript.runtime
 					*(double*)ptr = value.Number;
 					break;
 
-				case TypeKind.Fun_Void:
-				case TypeKind.Unknown:
+				case ABC.TypeKind.Fun_Void:
+				case ABC.TypeKind.Unknown:
 #if DEBUG
 					throw new InvalidOperationException();
 #else
 					Environment.FailFast("出错了，这里跑不到"); return;
 #endif
-				case TypeKind.Null:
-				case TypeKind.String:
-				case TypeKind.Function:
-				case TypeKind.Array:
-				case TypeKind.Vector:
-				case TypeKind.Namespace:
-				case TypeKind.Object:
-				case TypeKind.Class:
+				case ABC.TypeKind.Null:
+				case ABC.TypeKind.String:
+				case ABC.TypeKind.Function:
+				case ABC.TypeKind.Array:
+				case ABC.TypeKind.Vector:
+				case ABC.TypeKind.Namespace:
+				case ABC.TypeKind.Object:
+				case ABC.TypeKind.Class:
 					*(NaNBoxing*)ptr = value;
 					break;
 
@@ -915,7 +912,7 @@ namespace juicescript.runtime
 		/// </summary>
 		/// <param name="facility"></param>
 		/// <exception cref="NotImplementedException"></exception>
-		internal void CopyFrom(RtHeapInstance src,Player player,int size)
+		internal void CopyFrom(RtHeapBase src,Player player,int size)
         {
 			RtPayloadInstance facility = (RtPayloadInstance)src.facility;
 			CopyFrom(facility, (ASInstance)src.Type, player, size);

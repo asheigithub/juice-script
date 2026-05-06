@@ -663,7 +663,7 @@ namespace juicescript.compiler
                 }
 				else
                 {
-                    RtHeapInstance heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
+                    RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
                     if (heapInstance.TypeKind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
                     {
                         int pool_index = _stringPool_.IndexOf(((RtPayloadString)heapInstance.facility).Str);

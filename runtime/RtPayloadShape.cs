@@ -9,9 +9,12 @@ namespace juicescript.runtime
     /// <summary>
     /// 负载动态对象的Transition链节点
     /// </summary>
-    public sealed class RtPayloadShape : FacilityBase
+    public sealed class RtPayloadShape : RtHeapBase
     {
-        [Flags]
+        public RtPayloadShape() : base( RtHeapTypeKind.SHAPE) { }
+
+
+		[Flags]
         public enum PropertyAttribute
         {
             Writable = 1,

@@ -1149,7 +1149,7 @@ namespace juicescript.runtime.buildin
 		{
 			if (sortBehavior.ValueType == BoxType.HeapPtr)
 			{
-				RtHeapInstance func = context.GC.Heap[sortBehavior.HeapPtr];
+				RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
 				RtPayloadClosure closure = (RtPayloadClosure)func.facility;
 
 				ASMethod method = ((ASMethodBody)func.Type).Method;

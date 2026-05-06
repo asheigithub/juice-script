@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    internal sealed class RtPayloadStackCache : FacilityBase
+    internal sealed class RtPayloadStackCache : RtHeapBase
     {
-        public NaNBoxing RefInstance; //int RefInstance_index;
+        public RtPayloadStackCache() : base(RtHeapTypeKind.STACK_CACHE_OBJ) { }
+
+		public NaNBoxing RefInstance; //int RefInstance_index;
 
         public ushort scopemember_index;
 

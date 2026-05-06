@@ -3821,7 +3821,7 @@ namespace juicescript.compiler
 								}
 								else
 								{
-									RtHeapInstance heapInstance = context.player_for_compiler.Context.GC.Heap[ptr];
+									RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[ptr];
 									if (heapInstance.TypeKind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
 									{
 										bw.Write((byte)RtHeapTypeKind.STRING);
