@@ -119,7 +119,7 @@ namespace juicescript.runtime.buildin
 					{
 						RtHeapBase instance = context.GC.Heap[arg0.HeapPtr];
 
-						switch (instance.TypeKind)
+						switch (instance.Kind)
 						{
 							case RtHeapTypeKind.CLASS:
 								context.player.TryCreateStringValue(Extensions.ToQualifiedName(((RtScriptClass)instance).Meta.QName), out context.StackSlots[returnSlotIndex], ref error);
@@ -258,7 +258,7 @@ namespace juicescript.runtime.buildin
 					{
 						RtHeapBase instance = context.GC.Heap[arg0.HeapPtr];
 
-						switch (instance.TypeKind)
+						switch (instance.Kind)
 						{
 							case RtHeapTypeKind.CLASS:
 								context.player.TryCreateStringValue("Object", out context.StackSlots[returnSlotIndex], ref error);
@@ -933,7 +933,7 @@ namespace juicescript.runtime.buildin
 #endif
 			{
 				var instance = context.GC.Heap[arg.HeapPtr];
-				switch (instance.TypeKind)
+				switch (instance.Kind)
 				{
 					case RtHeapTypeKind.CLASS:
 						printer.Write($"[class {((RtScriptClass)instance).Meta.QName.Name}]");
@@ -967,7 +967,7 @@ namespace juicescript.runtime.buildin
 
 							var ns_set = context.GC.Heap[scope_ptr].Type._link_codescope.NamespaceSet;
 							ASContainer as_type = instance.Type;
-							int code = context.player.MultiNameLSearch(ns_set, instance.TypeKind,
+							int code = context.player.MultiNameLSearch(ns_set, instance.Kind,
 								as_type, mode, 0, new StackLocater() { index = 0 }, stackslots, stPos, arg, context.player.check_MultiNameLSearch_issameorinherit(arg, callee_bindthis.ValueType == NaNBoxing.BoxType.HeapPtr ? (context.GC.Heap[callee_bindthis.HeapPtr]) : null), ref error, true);
 							switch (code)
 							{
@@ -998,7 +998,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 							var funinstance = context.GC.Heap[fun.HeapPtr];
-							if (funinstance.TypeKind != RtHeapTypeKind.CLOSURE)
+							if (funinstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
 								context.StackPosition -= 2;
 								context.player.RaiseTypeError(ref error, fun, TypeKind.Function);

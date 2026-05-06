@@ -74,7 +74,7 @@ namespace juicescript.runtime
                     {
                         RtHeapBase instance = ex.player.Context.GC.Heap[ex.error.HeapPtr];
 
-                        switch (instance.TypeKind)
+                        switch (instance.Kind)
                         {
                             case RtHeapTypeKind.CLASS:
                                 stringBuilder.Append("[class " +
@@ -135,7 +135,7 @@ namespace juicescript.runtime
 								stringBuilder.Append("[Array]");
                                 break;
 							default:
-								stringBuilder.Append(instance.TypeKind);
+								stringBuilder.Append(instance.Kind);
 								break;
                         }
 

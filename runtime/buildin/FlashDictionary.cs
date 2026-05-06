@@ -71,7 +71,7 @@ namespace juicescript.runtime.buildin
 			if (src.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				var obj = context.GC.Heap[src.HeapPtr];
-				if (obj.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+				if (obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
 				{
 					((RtInstance)obj).MarkFromContainer();
 					context.StackSlots[returnSlotIndex] = src;
@@ -106,7 +106,7 @@ namespace juicescript.runtime.buildin
 			if (key.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				var key_i = context.GC.Heap[key.HeapPtr];
-				if (key_i.TypeKind == RtHeapTypeKind.STRING)
+				if (key_i.Kind == RtHeapTypeKind.STRING)
 				{
 					var str = ((RtString)key_i).Str;
 					double v;
@@ -233,7 +233,7 @@ namespace juicescript.runtime.buildin
 			if (key.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				var key_i = context.GC.Heap[key.HeapPtr];
-				if (key_i.TypeKind == RtHeapTypeKind.STRING)
+				if (key_i.Kind == RtHeapTypeKind.STRING)
 				{
 					var str = ((RtString)key_i).Str;
 					double v;
@@ -319,7 +319,7 @@ namespace juicescript.runtime.buildin
 			if (key.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				var key_i = context.GC.Heap[key.HeapPtr];
-				if (key_i.TypeKind == RtHeapTypeKind.STRING)
+				if (key_i.Kind == RtHeapTypeKind.STRING)
 				{
 					var str = ((RtString)key_i).Str;
 					double v;
@@ -532,7 +532,7 @@ namespace juicescript.runtime.buildin
 					//进入这里的key,肯定都经过了GetSaveValue的保存到堆操作了。
 
 					var ins = context.GC.Heap[key.HeapPtr];
-					switch (ins.TypeKind)
+					switch (ins.Kind)
 					{
 						case RtHeapTypeKind.CLASS:
 						case RtHeapTypeKind.GLOBAL:

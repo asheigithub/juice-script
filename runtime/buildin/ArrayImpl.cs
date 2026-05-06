@@ -140,7 +140,7 @@ namespace juicescript.runtime.buildin
 					if (oldv.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
 						var obj = context.GC.Heap[oldv.HeapPtr];
-						if (obj.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							int cache_struct_ptr = array.cache_structs[i];
 
@@ -271,7 +271,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			RtHeapBase arr = context.GC.Heap[v.HeapPtr];
-			Debug.Assert(arr.TypeKind == RtHeapTypeKind.ARRAY);
+			Debug.Assert(arr.Kind == RtHeapTypeKind.ARRAY);
 
 			RtArray arr_payload = (RtArray)arr;
 
@@ -363,7 +363,7 @@ namespace juicescript.runtime.buildin
 					element = rest_span[i - 1];
 				}
 
-				if (element.ValueType == NaNBoxing.BoxType.HeapPtr && context.GC.Heap[element.HeapPtr].TypeKind == RtHeapTypeKind.ARRAY) // 拆元素
+				if (element.ValueType == NaNBoxing.BoxType.HeapPtr && context.GC.Heap[element.HeapPtr].Kind == RtHeapTypeKind.ARRAY) // 拆元素
 				{
 
 					RtArray src;
@@ -499,7 +499,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. Validate thisPtr is an Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetUInt(0);
@@ -575,7 +575,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. Validate thisPtr is an Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetUndefined();
@@ -596,7 +596,7 @@ namespace juicescript.runtime.buildin
 				if (e.ValueType == BoxType.HeapPtr)
 				{
 					var check = context.GC.Heap[e.HeapPtr];
-					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
@@ -647,7 +647,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. Validate thisPtr is an Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 
 				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
@@ -745,7 +745,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. Validate thisPtr is an Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetUndefined();
@@ -768,7 +768,7 @@ namespace juicescript.runtime.buildin
 				if (e.ValueType == BoxType.HeapPtr)
 				{
 					var check = context.GC.Heap[e.HeapPtr];
-					if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
@@ -830,7 +830,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. Validate thisPtr is an Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetUndefined();
@@ -932,7 +932,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				//context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetBoolean(false);
@@ -1085,7 +1085,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				//context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetBoolean(false);
@@ -1235,7 +1235,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				//context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				context.StackSlots[returnSlotIndex].SetBoolean(false);
@@ -1370,7 +1370,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				//context.StackSlots[returnSlotIndex].SetUndefined();
@@ -1541,7 +1541,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				//context.StackSlots[returnSlotIndex].SetUndefined();
@@ -1699,7 +1699,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				return;
@@ -1762,7 +1762,7 @@ namespace juicescript.runtime.buildin
 			)
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				return;
@@ -1842,7 +1842,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. Validate thisPtr is an Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				return;
@@ -1920,7 +1920,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. 校验 this 是 Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				return;
@@ -2105,7 +2105,7 @@ namespace juicescript.runtime.buildin
 			if (e.ValueType == BoxType.HeapPtr)
 			{
 				var check = context.GC.Heap[e.HeapPtr];
-				if (check.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+				if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 				{
 					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
@@ -2145,7 +2145,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. 校验 this 是 Array
 			if (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr ||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.ARRAY)
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.ARRAY)
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.Array);
 				return;
@@ -2636,11 +2636,11 @@ namespace juicescript.runtime.buildin
 			else if (fieldName.ValueType == BoxType.HeapPtr)
 			{
 				RtHeapBase fn = context.GC.Heap[fieldName.HeapPtr];
-				if (fn.TypeKind == RtHeapTypeKind.STRING )
+				if (fn.Kind == RtHeapTypeKind.STRING )
 				{
 					
 				}
-				else if(fn.TypeKind == RtHeapTypeKind.ARRAY)
+				else if(fn.Kind == RtHeapTypeKind.ARRAY)
 				{ 
 					fieldnameisarray = true;
 					RtArray.FindAndUpdateHeapInstancePtr(fieldName.HeapPtr,context.player, out fields);
@@ -2676,7 +2676,7 @@ namespace juicescript.runtime.buildin
 					{
 
 					}
-					else if (f.ValueType == BoxType.HeapPtr && context.GC.Heap[f.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
+					else if (f.ValueType == BoxType.HeapPtr && context.GC.Heap[f.HeapPtr].Kind == RtHeapTypeKind.STRING)
 					{
 
 					}
@@ -2690,7 +2690,7 @@ namespace juicescript.runtime.buildin
 				if (options.ValueType == BoxType.HeapPtr)
 				{
 					RtHeapBase op = context.GC.Heap[options.HeapPtr];
-					if (op.TypeKind == RtHeapTypeKind.ARRAY)
+					if (op.Kind == RtHeapTypeKind.ARRAY)
 					{
 						RtArray.FindAndUpdateHeapInstancePtr(options.HeapPtr, context.player, out option_arr);
 						if (option_arr.array_len == fields.array_len)
@@ -2739,10 +2739,10 @@ namespace juicescript.runtime.buildin
 			context.StackPosition += 2;
 
 			var ns_set = context.player.nsSetIncludingPublicAndAS3;
-			ASContainer as_type = instance.TypeKind == RtHeapTypeKind.STRING? context.STRING.Instance : instance.Type;
+			ASContainer as_type = instance.Kind == RtHeapTypeKind.STRING? context.STRING.Instance : instance.Type;
 
 
-			int code = context.player.MultiNameLSearch(ns_set, instance.TypeKind,
+			int code = context.player.MultiNameLSearch(ns_set, instance.Kind,
 				as_type, mode, namestr, new StackLocater() { index = 0 }, stackslots, stPos, obj, context.player.check_MultiNameLSearch_issameorinherit(obj, null) , ref error, true);
 			switch (code)
 			{

@@ -76,10 +76,10 @@ b = new a();
             Assert.IsNull(ex);
 
             Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a").Count());
+                .Where(o => o.Kind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a").Count());
 
             ASClass @class = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a")).Meta;
+                (o => o.Kind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a")).Meta;
 
 
             var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");

@@ -660,7 +660,7 @@ namespace juicescript.compiler
 				else
                 {
                     RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
-                    if (heapInstance.TypeKind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
+                    if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
                     {
                         int pool_index = _stringPool_.IndexOf(((RtString)heapInstance).Str);
 
@@ -686,7 +686,7 @@ namespace juicescript.compiler
                     //	boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24));
 
                     //}
-                    else if (heapInstance.TypeKind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+                    else if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
                     {
                         int pool_index = _namespaces.IndexOf(((RtNameSpace)heapInstance).ASNamespace);
                         if (pool_index > 0xFFFFFF)
@@ -700,7 +700,7 @@ namespace juicescript.compiler
 
                         boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24));
                     }
-                    else if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
+                    else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
                     {
                         int pool_index = swc.Methods.IndexOf(((ASMethodBody)heapInstance.Type).Method);
 
@@ -716,7 +716,7 @@ namespace juicescript.compiler
                         boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24));
 
                     }
-                    else if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+                    else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
                     {
                         ulong type = ((ASClass)heapInstance.Type).Type_identifier;
                         int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;

@@ -88,7 +88,7 @@ a.h = '-Infinity';
             Assert.AreEqual(a.ValueType, NaNBoxing.BoxType.HeapPtr);
             RtHeapBase a_v = player.Context.GC.Heap[a.HeapPtr];
             Assert.IsNotNull(a_v);
-            Assert.AreEqual(a_v.TypeKind, RtHeapTypeKind.INSTANCE);
+            Assert.AreEqual(a_v.Kind, RtHeapTypeKind.INSTANCE);
 
             var OO = player.Context.libs.SelectMany(o => o.Classes).FirstOrDefault(o =>o != null && o.QName.Name.EndsWith( "OO"));
             Assert.IsNotNull(OO);

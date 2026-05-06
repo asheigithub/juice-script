@@ -192,7 +192,7 @@ namespace juicescript.runtime
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 									var v = Context.GC.Heap[box.HeapPtr];
-									if (v.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+									if (v.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
 									{
 										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
 										var struct_ins = Context.GC.Heap[struct_ptr];
@@ -249,7 +249,7 @@ namespace juicescript.runtime
 						if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
 							var v = Context.GC.Heap[box.HeapPtr];
-							if (v.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+							if (v.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
 							{
 								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
 								var struct_ins = Context.GC.Heap[struct_ptr];
@@ -298,7 +298,7 @@ namespace juicescript.runtime
 
 						int calleePtr = Context.M_ClosurePtr + Context.StackPosition + args + 1;
 #if DEBUG
-						if (Context.GC.Heap[calleePtr].TypeKind != RtHeapTypeKind.CLOSURE)
+						if (Context.GC.Heap[calleePtr].Kind != RtHeapTypeKind.CLOSURE)
 						{
 							throw new InvalidOperationException();
 						}
@@ -512,7 +512,7 @@ namespace juicescript.runtime
 									if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										var v = Context.GC.Heap[box.HeapPtr];
-										if (v.TypeKind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+										if (v.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
 										{
 											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,
 												Context.StackPosition - para_argcount + i //实例到arguments数组

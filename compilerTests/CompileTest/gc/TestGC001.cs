@@ -75,14 +75,14 @@ new a();
             Assert.IsNull(ex);
 
             Assert.AreEqual( 1,  player.Context.GC.Heap.DumpHeap()
-                .Where( o=> o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a" ).Count());
+                .Where( o=> o.Kind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a" ).Count());
 
             ASClass @class = (ASClass)((RtScriptClass)player.Context.GC.Heap.DumpHeap().First
-                (o => o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a")).Meta;
+                (o => o.Kind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).Meta.QName.Name == "a")).Meta;
 
 
             var objList = player.Context.GC.Heap.DumpHeap().Where(
-                o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type == @class.Instance
+                o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type == @class.Instance
                 //&&
                 //!((RtPayloadInstance)o.facility).isCache
                 );

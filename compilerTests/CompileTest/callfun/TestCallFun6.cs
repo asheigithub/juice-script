@@ -102,7 +102,7 @@ new Main().F(3);
 
 
 
-            Assert.AreEqual( RtHeapTypeKind.INSTANCE, player.Context.GC.Heap[t.HeapPtr].TypeKind);
+            Assert.AreEqual( RtHeapTypeKind.INSTANCE, player.Context.GC.Heap[t.HeapPtr].Kind);
             Assert.AreEqual( "Main", player.Context.GC.Heap[t.HeapPtr].Type.QName.Name);
 
 

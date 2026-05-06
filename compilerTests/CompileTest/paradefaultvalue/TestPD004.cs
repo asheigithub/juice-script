@@ -78,10 +78,10 @@ var q;
 			NaNBoxing p = ((RtScriptClass)globalInstance).ReadSlot(2);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, p.ValueType);
 
-			Assert.AreEqual( RtHeapTypeKind.STRING, player.Context.GC.Heap[o.HeapPtr].TypeKind );
+			Assert.AreEqual( RtHeapTypeKind.STRING, player.Context.GC.Heap[o.HeapPtr].Kind );
 			Assert.AreEqual( "", ((RtString)player.Context.GC.Heap[o.HeapPtr]).Str );
 
-			Assert.AreEqual(RtHeapTypeKind.STRING, player.Context.GC.Heap[p.HeapPtr].TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.STRING, player.Context.GC.Heap[p.HeapPtr].Kind);
 			Assert.AreEqual("2", ((RtString)player.Context.GC.Heap[p.HeapPtr]).Str);
 
 			NaNBoxing q = ((RtScriptClass)globalInstance).ReadSlot(3);

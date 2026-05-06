@@ -59,7 +59,7 @@ var b = new Main();
             Assert.AreEqual(b.ValueType, NaNBoxing.BoxType.HeapPtr);
             RtHeapBase b_v = player.Context.GC.Heap[b.HeapPtr];
             Assert.IsNotNull(b_v);
-            Assert.AreEqual(b_v.TypeKind, RtHeapTypeKind.INSTANCE);
+            Assert.AreEqual(b_v.Kind, RtHeapTypeKind.INSTANCE);
 
             Assert.AreEqual(b_v.Type.QName, global.QName);
 

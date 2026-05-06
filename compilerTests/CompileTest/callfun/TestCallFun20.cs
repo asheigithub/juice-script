@@ -89,7 +89,7 @@ var o;
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
 
             RtHeapBase instance = player.Context.GC.Heap[o.HeapPtr];
-            Assert.AreEqual(RtHeapTypeKind.INSTANCE, instance.TypeKind);
+            Assert.AreEqual(RtHeapTypeKind.INSTANCE, instance.Kind);
             Assert.AreEqual("Main", instance.Type.QName.Name);
             
         }

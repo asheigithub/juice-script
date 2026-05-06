@@ -92,13 +92,13 @@ function ():void
             Assert.IsNull(ex);
 
             Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.VECTOR).Count());
+                .Where(o => o.Kind == RtHeapTypeKind.VECTOR).Count());
 
 			
 			player.ForceGC();
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-			   .Where(o => o.TypeKind == RtHeapTypeKind.VECTOR).Count());
+			   .Where(o => o.Kind == RtHeapTypeKind.VECTOR).Count());
 
 
 			var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");

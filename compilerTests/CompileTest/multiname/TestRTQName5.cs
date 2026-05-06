@@ -136,7 +136,7 @@ var m = new Main();
             Assert.AreEqual(test.ValueType, NaNBoxing.BoxType.HeapPtr);
 
             var vs = player.Context.GC.Heap[test.HeapPtr];
-            Assert.AreEqual(vs.TypeKind, RtHeapTypeKind.VECTOR);
+            Assert.AreEqual(vs.Kind, RtHeapTypeKind.VECTOR);
             
 
         }

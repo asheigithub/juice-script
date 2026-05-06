@@ -150,7 +150,7 @@ var i = b.Y;
             Assert.AreEqual(e.ValueType, NaNBoxing.BoxType.HeapPtr);
 
             var ns_instance = player.Context.GC.Heap[e.HeapPtr];
-            Assert.AreEqual(ns_instance.TypeKind, RtHeapTypeKind.NAMESPACE);
+            Assert.AreEqual(ns_instance.Kind, RtHeapTypeKind.NAMESPACE);
             Assert.AreEqual(((RtNameSpace)ns_instance).ASNamespace.Name, ":AS3");
 
             NaNBoxing f = rtPayload.ReadSlot(4);

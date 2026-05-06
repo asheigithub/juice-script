@@ -87,14 +87,14 @@ var j = o.vvv()()()();
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, j.ValueType);
 
 			var jobj = player.Context.GC.Heap[j.HeapPtr];
-			Assert.AreEqual(RtHeapTypeKind.CLOSURE, jobj.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.CLOSURE, jobj.Kind);
 
 			var oobj = player.Context.GC.Heap[o.HeapPtr];
-			Assert.AreEqual(RtHeapTypeKind.INSTANCE, oobj.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.INSTANCE, oobj.Kind);
 
 			int prop_ptr = ((RtInstance)oobj).PROPERTY_PTR(player,(ASInstance)oobj.Type);
 			var prop = player.Context.GC.Heap[prop_ptr];
-			Assert.AreEqual(RtHeapTypeKind.DYNAMIC_PROPERTYS, prop.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.DYNAMIC_PROPERTYS, prop.Kind);
 			Assert.AreEqual( j, ((RtDynamic)prop).Slots[0]);
 
 		}

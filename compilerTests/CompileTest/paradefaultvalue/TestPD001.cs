@@ -84,7 +84,7 @@ var q;
 
 			Assert.AreEqual(o, p);
 
-			Assert.AreEqual( RtHeapTypeKind.STRING, player.Context.GC.Heap[o.HeapPtr].TypeKind );
+			Assert.AreEqual( RtHeapTypeKind.STRING, player.Context.GC.Heap[o.HeapPtr].Kind );
 			Assert.AreEqual( "", ((RtString)player.Context.GC.Heap[o.HeapPtr]).Str );
 
 

@@ -155,7 +155,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing name = ((RtScriptClass)context.GC.Heap[scriptid]).ReadSlot(0);
 
 			Debug.Assert(name.ValueType == NaNBoxing.BoxType.HeapPtr);
-			Debug.Assert(context.GC.Heap[name.HeapPtr].TypeKind == RtHeapTypeKind.STRING );
+			Debug.Assert(context.GC.Heap[name.HeapPtr].Kind == RtHeapTypeKind.STRING );
 
 			err.SetSlot(name, 1, context.ERROR.Instance._link_codescope, context.player);
 

@@ -52,7 +52,7 @@ namespace juicescript.runtime.gc
         public bool IsClassProtoType(RtHeapBase obj)
         {
             return Heap.Any(
-                o => o !=null && o.TypeKind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).PROTO__PTR != 0 &&
+                o => o !=null && o.Kind == RtHeapTypeKind.CLASS && ((RtScriptClass)o).PROTO__PTR != 0 &&
                 ReferenceEquals( Heap[((RtScriptClass)o).PROTO__PTR] , obj));
         }
 
@@ -103,7 +103,7 @@ namespace juicescript.runtime.gc
                     {
                         sub += GC.CalculMemusage(Heap[i]);
 
-                        if (Heap[i].TypeKind == RtHeapTypeKind.INSTANCE && ((RtInstance)Heap[i]).wapperedObject != null)
+                        if (Heap[i].Kind == RtHeapTypeKind.INSTANCE && ((RtInstance)Heap[i]).wapperedObject != null)
                         {
                             ((RtInstance)Heap[i]).wapperedObject.OnDelete();
 							((RtInstance)Heap[i]).wapperedObject = null;

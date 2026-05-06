@@ -1794,7 +1794,7 @@ namespace juicescript.compiler
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 									var obj = computeplayer.Context.GC.Heap[v.HeapPtr];
-									if (obj.TypeKind == RtHeapTypeKind.STRING)                        //堆中的对象只有String可以被作为初始化值
+									if (obj.Kind == RtHeapTypeKind.STRING)                        //堆中的对象只有String可以被作为初始化值
 									{
 										string str = ((RtString)obj).Str;
 
@@ -2408,7 +2408,7 @@ namespace juicescript.compiler
 									if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										var obj = computeplayer.Context.GC.Heap[value.HeapPtr];
-										if (obj.TypeKind == RtHeapTypeKind.STRING)
+										if (obj.Kind == RtHeapTypeKind.STRING)
 										{
 											string str = ((RtString)obj).Str;
 											int k = constants.FindIndex(
@@ -2416,7 +2416,7 @@ namespace juicescript.compiler
 												&&
 												n.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String
 												&&
-												context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].TypeKind == RtHeapTypeKind.STRING
+												context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].Kind == RtHeapTypeKind.STRING
 												&&
 												string.CompareOrdinal(str, ((RtString)context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff]).Str) == 0
 												);
@@ -2458,7 +2458,7 @@ namespace juicescript.compiler
 											&&
 											n.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String
 											&&
-											context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].TypeKind == RtHeapTypeKind.STRING
+											context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].Kind == RtHeapTypeKind.STRING
 											&&
 											string.CompareOrdinal(str, ((RtString)context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff]).Str) == 0
 											);
@@ -3822,7 +3822,7 @@ namespace juicescript.compiler
 								else
 								{
 									RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[ptr];
-									if (heapInstance.TypeKind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
+									if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
 									{
 										bw.Write((byte)RtHeapTypeKind.STRING);
 
@@ -3840,7 +3840,7 @@ namespace juicescript.compiler
 									//	bw.Write((byte)RtHeapTypeKind.CACHE_LD_CLASS);
 									//	bw.Write(((ASClass)heapInstance.Type).Type_identifier);
 									//}
-									else if (heapInstance.TypeKind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+									else if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
 									{
 										bw.Write((byte)RtHeapTypeKind.NAMESPACE);
 										int index = script.namespaces.IndexOf(((RtNameSpace)heapInstance).ASNamespace);
@@ -3852,7 +3852,7 @@ namespace juicescript.compiler
 										bw.Write(index);
 
 									}
-									else if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
+									else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
 									{
 										ASMethod m = ((ASMethodBody)heapInstance.Type).Method;
 
@@ -3865,7 +3865,7 @@ namespace juicescript.compiler
 										bw.Write((byte)RtHeapTypeKind.MethodScope);
 										bw.Write(index);
 									}
-									else if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+									else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
 									{
 										ASClass _this_ = (ASClass)heapInstance.Type;
 										int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;

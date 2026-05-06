@@ -84,7 +84,7 @@ namespace juicescript.runtime
 
 		public ASContainer Type;
 
-		public readonly RtHeapTypeKind TypeKind;
+		public readonly RtHeapTypeKind Kind;
 
 		internal bool gc_mark;
 
@@ -92,14 +92,14 @@ namespace juicescript.runtime
 
         public RtHeapBase(RtHeapTypeKind typeKind)
         {
-            this.TypeKind = typeKind;
+            this.Kind = typeKind;
         }
 
 
 
 		public override string ToString()
         {
-            return $"RtHeap:{TypeKind}";
+            return $"RtHeap:{Kind}";
         }
 
     }

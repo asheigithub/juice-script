@@ -95,16 +95,16 @@ package
 			Assert.IsNull(ex);
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "A").Count());
+				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "A").Count());
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "B").Count());
+				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "B").Count());
 
 			player.ForceGC();
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "A").Count());
+				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "A").Count());
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "B").Count());
+				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "B").Count());
 
 			var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");
 			Assert.IsNotNull(global);

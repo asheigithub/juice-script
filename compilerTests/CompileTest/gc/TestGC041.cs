@@ -96,13 +96,13 @@ var p=
             Assert.IsNull(ex);
 
             Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
+                .Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 			
 			player.ForceGC();
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-			   .Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
+			   .Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 
 			
@@ -117,11 +117,11 @@ var p=
 
             var o = rtPayload.ReadSlot(0);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
-            Assert.AreEqual( RtHeapTypeKind.INSTANCE , player.Context.GC.Heap[o.HeapPtr].TypeKind );
+            Assert.AreEqual( RtHeapTypeKind.INSTANCE , player.Context.GC.Heap[o.HeapPtr].Kind );
 
 			var p = rtPayload.ReadSlot(1);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, p.ValueType);
-			Assert.AreEqual(RtHeapTypeKind.CLOSURE, player.Context.GC.Heap[p.HeapPtr].TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.CLOSURE, player.Context.GC.Heap[p.HeapPtr].Kind);
 		}
 
 		[TestMethod]

@@ -114,12 +114,12 @@ var p;
             Assert.IsNull(ex);
 
             Assert.AreEqual(2, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
+                .Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 			player.ForceGC();
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-			  .Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
+			  .Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 
 			var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");

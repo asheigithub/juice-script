@@ -114,7 +114,7 @@ namespace juicescript.runtime
 						//运行函数
 						var closureinstance = context.GC.Heap[task.CallbackFunctionPtr];
 
-						Debug.Assert(closureinstance.TypeKind == RtHeapTypeKind.CLOSURE);
+						Debug.Assert(closureinstance.Kind == RtHeapTypeKind.CLOSURE);
 
 						var callmethod = ((ASMethodBody)closureinstance.Type).Method;
 

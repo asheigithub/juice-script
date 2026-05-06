@@ -142,7 +142,7 @@ Main.MFFF()();
 
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, K.ValueType);
 			var Kinstance = player.Context.GC.Heap[K.HeapPtr];
-			Assert.AreEqual(RtHeapTypeKind.STRING, Kinstance.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.STRING, Kinstance.Kind);
 			Assert.AreEqual("hjk", ((RtString)Kinstance).Str );
 
 			Assert.AreEqual(K, B);
@@ -163,7 +163,7 @@ Main.MFFF()();
 			NaNBoxing q = ((RtScriptClass)globalInstance).ReadSlot(5);
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, q.ValueType);
 			var qinstance = player.Context.GC.Heap[q.HeapPtr];
-			Assert.AreEqual(RtHeapTypeKind.STRING, qinstance.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.STRING, qinstance.Kind);
 			Assert.AreEqual("FFFF", ((RtString)qinstance).Str);
 
 			NaNBoxing r = ((RtScriptClass)globalInstance).ReadSlot(6);

@@ -88,7 +88,7 @@ var o;
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, o.ValueType);
 
             RtHeapBase instance = player.Context.GC.Heap[o.HeapPtr];
-            Assert.AreEqual(RtHeapTypeKind.INSTANCE, instance.TypeKind); //虽然从代码上看应该是Class对象，但是AIR实测是INSTANCE.估计是AIR的bug也说不定，但是这里做特殊处理
+            Assert.AreEqual(RtHeapTypeKind.INSTANCE, instance.Kind); //虽然从代码上看应该是Class对象，但是AIR实测是INSTANCE.估计是AIR的bug也说不定，但是这里做特殊处理
             Assert.AreEqual("Main", instance.Type.QName.Name);
             
         }

@@ -119,7 +119,7 @@ catch(e)
 
 				NaNBoxing a = rtPayload.ReadSlot(0);
 				Assert.AreEqual( NaNBoxing.BoxType.HeapPtr, a.ValueType );
-				Assert.AreEqual( RtHeapTypeKind.INSTANCE , player.Context.GC.Heap[a.HeapPtr].TypeKind );
+				Assert.AreEqual( RtHeapTypeKind.INSTANCE , player.Context.GC.Heap[a.HeapPtr].Kind );
 				
 			}
 

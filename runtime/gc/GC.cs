@@ -633,7 +633,7 @@ namespace juicescript.runtime.gc
             { 
                 obj.gc_mark=true;
 
-                switch (obj.TypeKind)
+                switch (obj.Kind)
                 {
                     case RtHeapTypeKind.CLASS:
                     case RtHeapTypeKind.GLOBAL:
@@ -1046,7 +1046,7 @@ namespace juicescript.runtime.gc
 #endif
                 instance.gc_mark = true;
 
-                switch (instance.TypeKind)
+                switch (instance.Kind)
                 {
                     case RtHeapTypeKind.CLASS:
                     case RtHeapTypeKind.GLOBAL:

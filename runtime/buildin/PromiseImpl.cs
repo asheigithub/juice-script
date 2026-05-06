@@ -27,7 +27,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			RtHeapBase _this = context.GC.Heap[thisPtr.HeapPtr];
-			Debug.Assert(_this.TypeKind == RtHeapTypeKind.INSTANCE);
+			Debug.Assert(_this.Kind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(_this.Type.QName.Name == "Promise");
 
 			var executor = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0, context.player);
@@ -535,7 +535,7 @@ namespace juicescript.runtime.buildin
 			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				var heapobj = context.GC.Heap[value.HeapPtr];
-				if (heapobj.TypeKind == RtHeapTypeKind.INSTANCE && heapobj.Type == context.PROMISE.Instance)
+				if (heapobj.Kind == RtHeapTypeKind.INSTANCE && heapobj.Type == context.PROMISE.Instance)
 				{
 					context.StackSlots[returnSlotIndex] = value;
 					return;
@@ -623,7 +623,7 @@ namespace juicescript.runtime.buildin
 				case NaNBoxing.BoxType.HeapPtr:
 					var heapInstance = context.GC.Heap[value.HeapPtr];
 					closure = heapInstance;
-					return heapInstance.TypeKind == RtHeapTypeKind.CLOSURE;
+					return heapInstance.Kind == RtHeapTypeKind.CLOSURE;
 				case NaNBoxing.BoxType.Null:
 				case NaNBoxing.BoxType.Undefined:
 					closure = null;
@@ -869,7 +869,7 @@ namespace juicescript.runtime.buildin
 							}
 
 							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
-							if (cbInstance.TypeKind != RtHeapTypeKind.CLOSURE)
+							if (cbInstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
 								if (context.StackPosition + 4 >= Context.STACK_LENGTH)
 								{
@@ -994,7 +994,7 @@ namespace juicescript.runtime.buildin
 							}
 
 							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
-							if (cbInstance.TypeKind != RtHeapTypeKind.CLOSURE)
+							if (cbInstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
 								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, task.Value);
@@ -1118,7 +1118,7 @@ namespace juicescript.runtime.buildin
 
 				// Step 5: Check if value is a Promise instance
 				var heapInstance = context.GC.Heap[value.HeapPtr];
-				if (heapInstance.TypeKind == RtHeapTypeKind.INSTANCE &&
+				if (heapInstance.Kind == RtHeapTypeKind.INSTANCE &&
 					heapInstance.Type is ASInstance asInstance &&
 					asInstance._link_codescope.TypeLayout.ASType.Type_identifier == context.PROMISE.Type_identifier
 					)
@@ -1237,7 +1237,7 @@ namespace juicescript.runtime.buildin
 				var heapInstance = context.GC.Heap[value.HeapPtr];
 
 				// Get type information
-				RtHeapTypeKind kind = heapInstance.TypeKind;
+				RtHeapTypeKind kind = heapInstance.Kind;
 				ASContainer as_type = heapInstance.Type as ASContainer;
 
 				if (as_type == null)
@@ -1306,7 +1306,7 @@ namespace juicescript.runtime.buildin
 					{
 						var resultHeap = context.GC.Heap[result.HeapPtr];
 
-						if (resultHeap.TypeKind == RtHeapTypeKind.STACK_CACHE_OBJ)
+						if (resultHeap.Kind == RtHeapTypeKind.STACK_CACHE_OBJ)
 						{
 							// This is a property accessor, need to invoke getter
 							var cache = (RtStackCache)resultHeap;
@@ -1369,19 +1369,19 @@ namespace juicescript.runtime.buildin
 								int protoPtr = 0;
 
 								// Get prototype based on object type
-								if (heapInstance.TypeKind == RtHeapTypeKind.INSTANCE)
+								if (heapInstance.Kind == RtHeapTypeKind.INSTANCE)
 								{
 									protoPtr = ((RtInstance)heapInstance).PROTOTYPE(context.player, (ASInstance)heapInstance.Type);
 								}
-								else if (heapInstance.TypeKind == RtHeapTypeKind.CLOSURE)
+								else if (heapInstance.Kind == RtHeapTypeKind.CLOSURE)
 								{
 									protoPtr = ((RtClosure)heapInstance).PROTOTYPE(context.player);
 								}
-								else if (heapInstance.TypeKind == RtHeapTypeKind.ARRAY)
+								else if (heapInstance.Kind == RtHeapTypeKind.ARRAY)
 								{
 									protoPtr = ((RtScriptClass)context.GC.Heap[context.ARRAY.__instance_index__]).PROTO__PTR;
 								}
-								else if (heapInstance.TypeKind == RtHeapTypeKind.GLOBAL)
+								else if (heapInstance.Kind == RtHeapTypeKind.GLOBAL)
 								{
 									protoPtr = ((RtScriptClass)context.GC.Heap[context.OBJECT.__instance_index__]).PROTO__PTR;
 								}
@@ -1400,7 +1400,7 @@ namespace juicescript.runtime.buildin
 									}
 
 									// Move to next prototype
-									if (protoObj.TypeKind == RtHeapTypeKind.INSTANCE)
+									if (protoObj.Kind == RtHeapTypeKind.INSTANCE)
 									{
 										protoPtr = ((RtInstance)protoObj).PROTOTYPE(context.player, (ASInstance)protoObj.Type);
 									}
@@ -1418,7 +1418,7 @@ namespace juicescript.runtime.buildin
 								return true;
 							}
 						}
-						else if (resultHeap.TypeKind == RtHeapTypeKind.CLOSURE)
+						else if (resultHeap.Kind == RtHeapTypeKind.CLOSURE)
 						{
 							// Found a method closure
 							thenValue = result;

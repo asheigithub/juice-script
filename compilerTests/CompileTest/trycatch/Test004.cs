@@ -103,13 +103,13 @@ package
 			Assert.IsNull(ex);
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
+				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 
 			player.ForceGC();
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-			   .Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
+			   .Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 			string output = ((StringPrint)player.Print).GetOutput();
 

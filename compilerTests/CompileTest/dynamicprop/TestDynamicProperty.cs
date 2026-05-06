@@ -131,7 +131,7 @@ var b = this['LL'];
 
 
             NaNBoxing c = rtPayload.ReadSlot(2);
-            Assert.AreEqual(RtHeapTypeKind.CLASS, player.Context.GC.Heap[c.HeapPtr].TypeKind);
+            Assert.AreEqual(RtHeapTypeKind.CLASS, player.Context.GC.Heap[c.HeapPtr].Kind);
             RtScriptClass c_i = (RtScriptClass)player.Context.GC.Heap[c.HeapPtr];
             dynamic = (RtDynamic)player.Context.GC.Heap[c_i.PROPERTY_PTR];
             Assert.AreEqual(i, dynamic.Slots[0]);

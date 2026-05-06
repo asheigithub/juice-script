@@ -118,7 +118,7 @@ trace(o2.a, o2.b);
                 Assert.IsNull(ex);
 
 				
-				Assert.AreEqual(1 + 1 , player.Context.GC.Heap.DumpHeap().Where(h => h.TypeKind == RtHeapTypeKind.CLOSURE && !((ASMethodBody)h.Type).Method.__is_buildin_proto).Count());
+				Assert.AreEqual(1 + 1 , player.Context.GC.Heap.DumpHeap().Where(h => h.Kind == RtHeapTypeKind.CLOSURE && !((ASMethodBody)h.Type).Method.__is_buildin_proto).Count());
 
 
                 RtScriptClass rtPayload = (RtScriptClass)globalInstance;

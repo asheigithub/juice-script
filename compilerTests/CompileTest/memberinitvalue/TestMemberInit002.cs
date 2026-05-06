@@ -94,7 +94,7 @@ var p;
 
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, K.ValueType);
 			var Kinstance = player.Context.GC.Heap[K.HeapPtr];
-			Assert.AreEqual(RtHeapTypeKind.STRING, Kinstance.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.STRING, Kinstance.Kind);
 			Assert.AreEqual("hjk", ((RtString)Kinstance).Str );
 
 			Assert.AreEqual(K, B);

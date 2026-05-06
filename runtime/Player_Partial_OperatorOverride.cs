@@ -551,7 +551,7 @@ namespace juicescript.runtime
 					{
 						var obj = Context.GC.Heap[v.HeapPtr];
 
-						switch (obj.TypeKind)
+						switch (obj.Kind)
 						{
 							case RtHeapTypeKind.CLASS:
 								type = null;

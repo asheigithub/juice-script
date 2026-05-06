@@ -643,7 +643,7 @@ namespace juicescript.compiler.IL
                     {
 
                         RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
-                        if (heapInstance.TypeKind == RtHeapTypeKind.NAMESPACE
+                        if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE
                             && ((RtNameSpace)heapInstance).ASNamespace == @namespace)
                         {
                             return i;
@@ -684,7 +684,7 @@ namespace juicescript.compiler.IL
                     {
 
                         RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[ p & 0xffffff ];
-                        if (heapInstance.TypeKind == RtHeapTypeKind.STRING
+                        if (heapInstance.Kind == RtHeapTypeKind.STRING
                             && string.Equals(((RtString)heapInstance).Str, v, StringComparison.Ordinal))
                         {
                             return i;
@@ -722,7 +722,7 @@ namespace juicescript.compiler.IL
 					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method)
 					{
 						RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
-						if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope
+						if (heapInstance.Kind == RtHeapTypeKind.MethodScope
 							&& heapInstance.Type == method.Body )
 						{
 							return i;
@@ -761,7 +761,7 @@ namespace juicescript.compiler.IL
 					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method)
 					{
 						RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
-						if (heapInstance.TypeKind == RtHeapTypeKind.MethodScope
+						if (heapInstance.Kind == RtHeapTypeKind.MethodScope
 							&& heapInstance.Type == _this_)
 						{
 							return i;

@@ -102,7 +102,7 @@ c(6,7);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, a.ValueType);
 
             RtHeapBase instance = player.Context.GC.Heap[a.HeapPtr];
-            Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.TypeKind);
+            Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.Kind);
             Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance).StoreMode);
 
             Assert.AreEqual(2u, ((RtArray)instance).GetLength(player));

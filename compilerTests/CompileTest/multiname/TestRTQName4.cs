@@ -159,7 +159,7 @@ var GF ;
             Assert.AreEqual(test.ValueType, NaNBoxing.BoxType.HeapPtr);
 
             var ns = player.Context.GC.Heap[test.HeapPtr];
-            Assert.AreEqual(ns.TypeKind, RtHeapTypeKind.NAMESPACE);
+            Assert.AreEqual(ns.Kind, RtHeapTypeKind.NAMESPACE);
             Assert.IsTrue(((RtNameSpace)ns).ASNamespace.Name.EndsWith(":test"));
 
             NaNBoxing c = rtPayload.ReadSlot(3);

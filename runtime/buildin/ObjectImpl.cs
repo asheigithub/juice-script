@@ -147,7 +147,7 @@ namespace juicescript.runtime.buildin
 				{
 					RtHeapBase n = context.GC.Heap[sName.HeapPtr];
 #if DEBUG
-					if (n.TypeKind != RtHeapTypeKind.STRING)
+					if (n.Kind != RtHeapTypeKind.STRING)
 					{
 						throw new InvalidOperationException();
 					}
@@ -158,7 +158,7 @@ namespace juicescript.runtime.buildin
 
 					RtHeapBase _this = context.GC.Heap[thisPtr.HeapPtr];
 
-					switch (_this.TypeKind)
+					switch (_this.Kind)
 					{
 						case RtHeapTypeKind.CLASS:
 							{
@@ -410,7 +410,7 @@ namespace juicescript.runtime.buildin
 			var obj_ins = context.GC.Heap[_obj.HeapPtr];
 
 		
-			if (obj_ins.TypeKind == RtHeapTypeKind.ARRAY)
+			if (obj_ins.Kind == RtHeapTypeKind.ARRAY)
 			{
 				if (_index.IntValue == 0 && _count.IntValue == 0) //初始进入
 				{
@@ -449,7 +449,7 @@ namespace juicescript.runtime.buildin
 				}
 				//throw new NotImplementedException();
 			}
-			else if (obj_ins.TypeKind == RtHeapTypeKind.VECTOR)
+			else if (obj_ins.Kind == RtHeapTypeKind.VECTOR)
 			{
 				var vector = (RtVector)obj_ins;
 				
@@ -486,7 +486,7 @@ namespace juicescript.runtime.buildin
 			{
 				var dynamic = context.GC.Heap[property_ptr];
 #if DEBUG
-				if (dynamic.TypeKind != RtHeapTypeKind.DYNAMIC_PROPERTYS)
+				if (dynamic.Kind != RtHeapTypeKind.DYNAMIC_PROPERTYS)
 				{
 					throw new InvalidOperationException();
 				}
@@ -514,7 +514,7 @@ namespace juicescript.runtime.buildin
 					{
 						var shape = context.GC.Heap[shape_ptr];
 #if DEBUG
-						if (shape.TypeKind != RtHeapTypeKind.SHAPE)
+						if (shape.Kind != RtHeapTypeKind.SHAPE)
 						{
 							throw new InvalidOperationException();
 						}

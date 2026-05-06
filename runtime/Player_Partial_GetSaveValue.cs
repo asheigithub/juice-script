@@ -32,7 +32,7 @@ namespace juicescript.runtime
 			{
 				RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
 				
-				switch (instance.TypeKind)
+				switch (instance.Kind)
 				{
 					case RtHeapTypeKind.CLASS:
 					case RtHeapTypeKind.GLOBAL:
@@ -357,7 +357,7 @@ namespace juicescript.runtime
 			{
 				//返回对象必定是一个调用方的栈上的Slot.
 				var obj = Context.GC.Heap[value.HeapPtr];
-				if (obj.TypeKind == RtHeapTypeKind.INSTANCE)
+				if (obj.Kind == RtHeapTypeKind.INSTANCE)
 				{
 					if (!isyieldreturn_or_holderror && obj.Type == Context.GENERATOR.Instance)
 					{
@@ -419,7 +419,7 @@ namespace juicescript.runtime
 						}
 					}
 				}
-				else if (obj.TypeKind == RtHeapTypeKind.ARRAY)
+				else if (obj.Kind == RtHeapTypeKind.ARRAY)
 				{
 					RtArray arr;
 					int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arr);
@@ -473,7 +473,7 @@ namespace juicescript.runtime
 						returnSlot.SetHeapPtr(arr_ptr);
 					}
 				}
-				else if (obj.TypeKind == RtHeapTypeKind.VECTOR)
+				else if (obj.Kind == RtHeapTypeKind.VECTOR)
 				{
 					RtVector vec;
 					int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vec);
@@ -498,7 +498,7 @@ namespace juicescript.runtime
 
 					}
 				}
-				else if (obj.TypeKind == RtHeapTypeKind.CLOSURE)
+				else if (obj.Kind == RtHeapTypeKind.CLOSURE)
 				{
 					if (!(value.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH) //堆里
 						||
@@ -531,7 +531,7 @@ namespace juicescript.runtime
 							bool needupdatescopePtr = dstClosure.ScopePtr == dstClosure.This.HeapPtr;
 
 							var _this = Context.GC.Heap[dstClosure.This.HeapPtr];
-							if (_this.TypeKind == RtHeapTypeKind.INSTANCE)
+							if (_this.Kind == RtHeapTypeKind.INSTANCE)
 							{
 								StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
 								if (needupdatescopePtr)
@@ -540,7 +540,7 @@ namespace juicescript.runtime
 								}
 
 							}
-							else if (_this.TypeKind == RtHeapTypeKind.CLOSURE)
+							else if (_this.Kind == RtHeapTypeKind.CLOSURE)
 							{
 								/* 只有apply或者call可能造成这种情况。
 								* var a:Function= function ( ...rest ):void 
@@ -556,7 +556,7 @@ namespace juicescript.runtime
 								}
 								dstClosure.This = s_this;
 							}
-							else if (_this.TypeKind == RtHeapTypeKind.ARRAY)
+							else if (_this.Kind == RtHeapTypeKind.ARRAY)
 							{
 								StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
 								if (needupdatescopePtr)
@@ -566,7 +566,7 @@ namespace juicescript.runtime
 
 								//throw new NotImplementedException();
 							}
-							else if (_this.TypeKind == RtHeapTypeKind.VECTOR)
+							else if (_this.Kind == RtHeapTypeKind.VECTOR)
 							{
 								StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
 								if (needupdatescopePtr)
@@ -577,7 +577,7 @@ namespace juicescript.runtime
 								//throw new NotImplementedException();
 							}
 #if DEBUG
-							else if (_this.TypeKind == RtHeapTypeKind.MethodScope)
+							else if (_this.Kind == RtHeapTypeKind.MethodScope)
 							{
 								throw new InvalidOperationException();
 							}
@@ -604,7 +604,7 @@ namespace juicescript.runtime
 
 									bool needbreak = (sptr == scope_ptr);
 
-									if (scope.TypeKind == RtHeapTypeKind.GLOBAL || scope.TypeKind == RtHeapTypeKind.CLASS || scope.TypeKind == RtHeapTypeKind.INSTANCE)
+									if (scope.Kind == RtHeapTypeKind.GLOBAL || scope.Kind == RtHeapTypeKind.CLASS || scope.Kind == RtHeapTypeKind.INSTANCE)
 									{
 										/*
 										 const yCombinator = function (k) {
@@ -636,7 +636,7 @@ namespace juicescript.runtime
 									}
 
 #if DEBUG
-									if (scope.TypeKind != RtHeapTypeKind.MethodScope)
+									if (scope.Kind != RtHeapTypeKind.MethodScope)
 									{
 										throw new InvalidOperationException();
 									}
@@ -963,7 +963,7 @@ namespace juicescript.runtime
 						{
 							var inmember = Context.GC.Heap[v.HeapPtr];
 
-							if (v.HeapPtr == ptr || inmember.TypeKind == RtHeapTypeKind.INSTANCE)
+							if (v.HeapPtr == ptr || inmember.Kind == RtHeapTypeKind.INSTANCE)
 							{
 								RtInstance _temp;
 								if (v.HeapPtr == ptr || RtInstance.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out _temp) == ptr)
@@ -1017,7 +1017,7 @@ namespace juicescript.runtime
 									}
 								}
 							}
-							else if (inmember.TypeKind == RtHeapTypeKind.CLOSURE)
+							else if (inmember.Kind == RtHeapTypeKind.CLOSURE)
 							{
 								var closure = inmember;
 								//lbl_flag:
@@ -1027,7 +1027,7 @@ namespace juicescript.runtime
 									bool needupdateScopePtr = This.HeapPtr == ((RtClosure)closure).ScopePtr;
 
 									var _this = Context.GC.Heap[This.HeapPtr];
-									if (_this.TypeKind == RtHeapTypeKind.INSTANCE)
+									if (_this.Kind == RtHeapTypeKind.INSTANCE)
 									{
 										RtInstance _temp;
 										if (This.HeapPtr == ptr || RtInstance.FindAndUpdateHeapInstancePtr(This.HeapPtr, this, out _temp) == ptr)
@@ -1080,7 +1080,7 @@ namespace juicescript.runtime
 										}
 									}
 #if DEBUG
-									else if (_this.TypeKind == RtHeapTypeKind.CLOSURE)
+									else if (_this.Kind == RtHeapTypeKind.CLOSURE)
 									{
 										throw new InvalidOperationException();
 										//closure = _this;
@@ -1133,7 +1133,7 @@ namespace juicescript.runtime
 			//lbl_redo:
 			int ptr = old.HeapPtr;
 			var oldObj = Context.GC.Heap[ptr];
-			if (oldObj.TypeKind == RtHeapTypeKind.INSTANCE)
+			if (oldObj.Kind == RtHeapTypeKind.INSTANCE)
 			{
 				//if (((ASInstance)oldObj.Type).Flags.HasFlag(ClassFlags.Struct))
 				//{
@@ -1166,7 +1166,7 @@ namespace juicescript.runtime
 					return ptr;
 				}
 			}
-			else if (oldObj.TypeKind == RtHeapTypeKind.CLOSURE)
+			else if (oldObj.Kind == RtHeapTypeKind.CLOSURE)
 			{
 				//更新Closure的引用
 				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.M_ClosurePtr)
@@ -1327,14 +1327,14 @@ namespace juicescript.runtime
 							if (toupate_ref.This.ValueType == NaNBoxing.BoxType.HeapPtr)
 							{
 								var newthis = Context.GC.Heap[toupate_ref.This.HeapPtr];
-								if (newthis.TypeKind == RtHeapTypeKind.INSTANCE)
+								if (newthis.Kind == RtHeapTypeKind.INSTANCE)
 								{
 									if (((RtInstance)newthis).methodscopeslot_ref_state == 1)
 									{
 										((RtInstance)newthis).methodscopeslot_ref_state = 2;
 									}
 								}
-								else if (newthis.TypeKind == RtHeapTypeKind.CLOSURE)
+								else if (newthis.Kind == RtHeapTypeKind.CLOSURE)
 								{
 									if (((RtClosure)newthis).methodscopeslot_ref_state == 1)
 									{
@@ -1355,7 +1355,7 @@ namespace juicescript.runtime
 				}
 
 			}
-			else if (oldObj.TypeKind == RtHeapTypeKind.ARRAY)
+			else if (oldObj.Kind == RtHeapTypeKind.ARRAY)
 			{
 				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.CacheArrayPtr)
 				{
@@ -1464,7 +1464,7 @@ namespace juicescript.runtime
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										var inmember = Context.GC.Heap[v.HeapPtr];
-										if (inmember.TypeKind == RtHeapTypeKind.ARRAY)
+										if (inmember.Kind == RtHeapTypeKind.ARRAY)
 										{
 											RtArray _temp;
 											if (v.HeapPtr == ptr || RtArray.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out _temp) == ptr)
@@ -1533,7 +1533,7 @@ namespace juicescript.runtime
 				}
 
 			}
-			else if (oldObj.TypeKind == RtHeapTypeKind.VECTOR)
+			else if (oldObj.Kind == RtHeapTypeKind.VECTOR)
 			{
 				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.CacheVectorPtr)
 				{
@@ -1641,7 +1641,7 @@ namespace juicescript.runtime
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										var inmember = Context.GC.Heap[v.HeapPtr];
-										if (inmember.TypeKind == RtHeapTypeKind.VECTOR)
+										if (inmember.Kind == RtHeapTypeKind.VECTOR)
 										{
 											RtVector _temp;
 											if (v.HeapPtr == ptr || RtVector.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out _temp) == ptr)
@@ -1715,7 +1715,7 @@ namespace juicescript.runtime
 			}
 
 #if DEBUG
-			else if (oldObj.TypeKind == RtHeapTypeKind.MethodScope)
+			else if (oldObj.Kind == RtHeapTypeKind.MethodScope)
 			{
 				throw new InvalidOperationException();
 			}
@@ -1860,15 +1860,15 @@ namespace juicescript.runtime
 				{
 
 					var obj = Context.GC.Heap[value.HeapPtr];
-					if (obj.TypeKind == RtHeapTypeKind.INSTANCE)
+					if (obj.Kind == RtHeapTypeKind.INSTANCE)
 					{
 						prepare_savemethodscope_saveinstacne(heap,ref value, obj, value.HeapPtr, ref heapLocater,is_pass_this);
 					}
-					else if (obj.TypeKind == RtHeapTypeKind.STRING)
+					else if (obj.Kind == RtHeapTypeKind.STRING)
 					{
 						//pass
 					}
-					else if (obj.TypeKind == RtHeapTypeKind.ARRAY)
+					else if (obj.Kind == RtHeapTypeKind.ARRAY)
 					{
 						RtArray array;
 						int array_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out array);
@@ -1923,7 +1923,7 @@ namespace juicescript.runtime
 							value.SetHeapPtr(array_ptr);
 						}
 					}
-					else if (obj.TypeKind == RtHeapTypeKind.VECTOR)
+					else if (obj.Kind == RtHeapTypeKind.VECTOR)
 					{
 						RtVector vector;
 						int vector_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vector);
@@ -1959,7 +1959,7 @@ namespace juicescript.runtime
 
 						}
 					}
-					else if (obj.TypeKind == RtHeapTypeKind.CLOSURE)
+					else if (obj.Kind == RtHeapTypeKind.CLOSURE)
 					{
 						var srcClosure = (RtClosure)obj;
 						int final_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out srcClosure);
@@ -1981,7 +1981,7 @@ namespace juicescript.runtime
 							if (srcClosure.This.ValueType == NaNBoxing.BoxType.HeapPtr)
 							{
 								var _this = Context.GC.Heap[srcClosure.This.HeapPtr];
-								if (_this.TypeKind == RtHeapTypeKind.INSTANCE)
+								if (_this.Kind == RtHeapTypeKind.INSTANCE)
 								{
 									if (((RtInstance)_this).methodscopeslot_ref_state == 1)
 									{
@@ -1989,14 +1989,14 @@ namespace juicescript.runtime
 									}
 								}
 #if DEBUG
-								else if (_this.TypeKind == RtHeapTypeKind.CLOSURE)
+								else if (_this.Kind == RtHeapTypeKind.CLOSURE)
 								{
 									if (srcClosure.This.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH)
 									{
 										throw new InvalidOperationException();
 									}
 								}
-								else if (_this.TypeKind == RtHeapTypeKind.ARRAY)
+								else if (_this.Kind == RtHeapTypeKind.ARRAY)
 								{
 
 									if (((RtArray)_this).StoreMode != RtArray.ArrayStoreMode.normal)
@@ -2004,12 +2004,12 @@ namespace juicescript.runtime
 										throw new InvalidOperationException();
 									}
 								}
-								else if (_this.TypeKind == RtHeapTypeKind.VECTOR)
+								else if (_this.Kind == RtHeapTypeKind.VECTOR)
 								{
 									throw new InvalidOperationException();
 								}
 
-								else if (_this.TypeKind == RtHeapTypeKind.MethodScope)
+								else if (_this.Kind == RtHeapTypeKind.MethodScope)
 								{
 									throw new InvalidOperationException();
 								}
@@ -2041,7 +2041,7 @@ namespace juicescript.runtime
 								bool needupdatescopePtr = dstClosure.ScopePtr == dstClosure.This.HeapPtr;
 
 								var _this = Context.GC.Heap[dstClosure.This.HeapPtr];
-								if (_this.TypeKind == RtHeapTypeKind.INSTANCE)
+								if (_this.Kind == RtHeapTypeKind.INSTANCE)
 								{
 									if (old.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
@@ -2055,7 +2055,7 @@ namespace juicescript.runtime
 										dstClosure.ScopePtr = dstClosure.This.HeapPtr;
 									}
 								}
-								else if (_this.TypeKind == RtHeapTypeKind.CLOSURE)
+								else if (_this.Kind == RtHeapTypeKind.CLOSURE)
 								{
 									/* 只有apply或者call可能造成这种情况。
 									* var a:Function= function ( ...rest ):void 
@@ -2077,7 +2077,7 @@ namespace juicescript.runtime
 										dstClosure.ScopePtr = dstClosure.This.HeapPtr;
 									}
 								}
-								else if (_this.TypeKind == RtHeapTypeKind.ARRAY)
+								else if (_this.Kind == RtHeapTypeKind.ARRAY)
 								{
 									/*
 									 *	var a = new Array(1, 2,  3 );
@@ -2097,7 +2097,7 @@ namespace juicescript.runtime
 									}
 
 								}
-								else if (_this.TypeKind == RtHeapTypeKind.VECTOR)
+								else if (_this.Kind == RtHeapTypeKind.VECTOR)
 								{
 									var v_this = GetSaveValue(dstClosure.This, ref error);
 									if (error.raised)
@@ -2114,7 +2114,7 @@ namespace juicescript.runtime
 									//throw new NotImplementedException();
 								}
 #if DEBUG
-								else if (_this.TypeKind == RtHeapTypeKind.MethodScope)
+								else if (_this.Kind == RtHeapTypeKind.MethodScope)
 								{
 									throw new InvalidOperationException();
 								}
@@ -2138,7 +2138,7 @@ namespace juicescript.runtime
 
 									lbl_parent:
 										var scope = Context.GC.Heap[sptr];
-										if (scope.TypeKind == RtHeapTypeKind.GLOBAL || scope.TypeKind == RtHeapTypeKind.CLASS || scope.TypeKind == RtHeapTypeKind.INSTANCE)
+										if (scope.Kind == RtHeapTypeKind.GLOBAL || scope.Kind == RtHeapTypeKind.CLASS || scope.Kind == RtHeapTypeKind.INSTANCE)
 										{
 											// Y组合子等：先遇到 global/class/instance，未遇到 heap。与 StoreReturnSlot 第 597 行一致。
 											if (last_scope != null)
@@ -2149,7 +2149,7 @@ namespace juicescript.runtime
 										else if (scope != heap)
 										{
 #if DEBUG
-											if (scope.TypeKind != RtHeapTypeKind.MethodScope)
+											if (scope.Kind != RtHeapTypeKind.MethodScope)
 											{
 												throw new InvalidOperationException();
 											}
@@ -2273,7 +2273,7 @@ namespace juicescript.runtime
 				var oldv = Context.GC.Heap[dst.HeapPtr];
 				var newv = Context.GC.Heap[src.HeapPtr];
 
-				if (oldv.TypeKind == newv.TypeKind && oldv.TypeKind == RtHeapTypeKind.INSTANCE)
+				if (oldv.Kind == newv.Kind && oldv.Kind == RtHeapTypeKind.INSTANCE)
 				{
 					if (((ASInstance)oldv.Type).Flags.HasFlag(ClassFlags.Struct))
 					{

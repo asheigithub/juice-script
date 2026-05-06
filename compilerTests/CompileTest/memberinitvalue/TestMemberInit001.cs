@@ -88,12 +88,12 @@ var q;
 			var llm = ((RtScriptClass)clsInstance).ReadSlot(1);
 			Assert.AreEqual(juicescript.NaNBoxing.BoxType.HeapPtr, llm.ValueType);
 			var llminstance = player.Context.GC.Heap[llm.HeapPtr];
-			Assert.AreEqual(RtHeapTypeKind.STRING, llminstance.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.STRING, llminstance.Kind);
 			Assert.AreEqual("abcdefg", ((RtString)llminstance).Str );
 
 			var v2 = ((RtScriptClass)clsInstance).ReadSlot(2);
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, v2.ValueType);
-			Assert.AreEqual(RtHeapTypeKind.INSTANCE, player.Context.GC.Heap[v2.HeapPtr].TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.INSTANCE, player.Context.GC.Heap[v2.HeapPtr].Kind);
 			Assert.AreEqual(player.Context.OBJECT.Instance, player.Context.GC.Heap[v2.HeapPtr].Type);
 
 			var K = ((RtScriptClass)clsInstance).ReadSlot(3);

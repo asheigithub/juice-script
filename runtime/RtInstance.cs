@@ -31,7 +31,7 @@ namespace juicescript.runtime
 			var ref_instance = player.Context.GC.Heap[ptr];
 
 			
-			if (ref_instance.TypeKind == RtHeapTypeKind.VECTOR)
+			if (ref_instance.Kind == RtHeapTypeKind.VECTOR)
 			{
 				target = null;
 				return 0;
@@ -61,7 +61,7 @@ namespace juicescript.runtime
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 #if DEBUG
-				if (player.Context.GC.Heap[payload.HEAPINSTANCE_PTR].TypeKind == RtHeapTypeKind.VECTOR)
+				if (player.Context.GC.Heap[payload.HEAPINSTANCE_PTR].Kind == RtHeapTypeKind.VECTOR)
 				{
 					throw new InvalidOperationException(); //vector 的struct引用不可能多次跳转
 				}
@@ -91,7 +91,7 @@ namespace juicescript.runtime
 					
 					var tmp2 = player.Context.GC.Heap[check.HEAPINSTANCE_PTR];
 
-					if (tmp2.TypeKind == RtHeapTypeKind.INSTANCE && tmp2.Type != tmp.Type)
+					if (tmp2.Kind == RtHeapTypeKind.INSTANCE && tmp2.Type != tmp.Type)
 					{
 #if DEBUG
 						if (((RtInstance)tmp2).HEAPINSTANCE_PTR != 0)
@@ -102,7 +102,7 @@ namespace juicescript.runtime
 						target = check;
 						return ptr;
 					}
-					else if (tmp2.TypeKind == RtHeapTypeKind.VECTOR)
+					else if (tmp2.Kind == RtHeapTypeKind.VECTOR)
 					{
 #if DEBUG
 						if (((RtVector)tmp2).HEAPINSTANCE_PTR != 0)
@@ -116,7 +116,7 @@ namespace juicescript.runtime
 					}
 #if DEBUG
 
-					if (tmp2.TypeKind == RtHeapTypeKind.VECTOR)
+					if (tmp2.Kind == RtHeapTypeKind.VECTOR)
 					{
 						throw new InvalidOperationException();
 					}
@@ -828,7 +828,7 @@ namespace juicescript.runtime
 			if (type.Flags.HasFlag(ClassFlags.Struct))
 			{
 				var src = contxt.GC.Heap[newValue.HeapPtr];
-				if (src.TypeKind == RtHeapTypeKind.INSTANCE)
+				if (src.Kind == RtHeapTypeKind.INSTANCE)
 				{
 					RtInstance srcPayload = (RtInstance)src;
 

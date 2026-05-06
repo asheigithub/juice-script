@@ -365,7 +365,7 @@ namespace juicescript.runtime
                     {
                         RtHeapBase instance = player.Context.GC.Heap[value.HeapPtr];
 
-                        switch (instance.TypeKind)
+                        switch (instance.Kind)
                         {
                             case RtHeapTypeKind.CLASS:
                                 return 
@@ -667,7 +667,7 @@ namespace juicescript.runtime
                         
                         var instance = (player.Context.GC.Heap[prop_name.HeapPtr]);
 
-                        if (instance.TypeKind == RtHeapTypeKind.STRING)
+                        if (instance.Kind == RtHeapTypeKind.STRING)
                         {
                             return ((RtString)instance).Str;
                         }

@@ -80,7 +80,7 @@ m[undefined] = 7;
             RtScriptClass rtPayload = (RtScriptClass)globalInstance;
             
             NaNBoxing o = rtPayload.ReadSlot(0);
-            Assert.AreEqual( RtHeapTypeKind.ARRAY , player.Context.GC.Heap[o.HeapPtr].TypeKind );
+            Assert.AreEqual( RtHeapTypeKind.ARRAY , player.Context.GC.Heap[o.HeapPtr].Kind );
             RtArray i_o = (RtArray)player.Context.GC.Heap[o.HeapPtr];
             int p = i_o.PROPERTY_PTR(player);
             RtDynamic dynamic = (RtDynamic)player.Context.GC.Heap[p];

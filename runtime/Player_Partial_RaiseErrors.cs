@@ -189,15 +189,15 @@ namespace juicescript.runtime
 				{
 					var ins = Context.GC.Heap[instance.HeapPtr];
 
-					if (ins.TypeKind == RtHeapTypeKind.CLASS)
+					if (ins.Kind == RtHeapTypeKind.CLASS)
 					{
 						messagePtr = Context.GC.AllocString($"Property {ns.ToDebugString(this)}{(string.IsNullOrEmpty(ns.ToDebugString(this)) ? "" : "::")}{searchName} not found on class {ins.Type.QName.ToDebugTypeName()} and there is no default value.");
 					}
-					else if (ins.TypeKind == RtHeapTypeKind.INSTANCE || ins.TypeKind == RtHeapTypeKind.VECTOR || ins.TypeKind == RtHeapTypeKind.STRING || ins.TypeKind == RtHeapTypeKind.ARRAY)
+					else if (ins.Kind == RtHeapTypeKind.INSTANCE || ins.Kind == RtHeapTypeKind.VECTOR || ins.Kind == RtHeapTypeKind.STRING || ins.Kind == RtHeapTypeKind.ARRAY)
 					{
 						messagePtr = Context.GC.AllocString($"Property {ns.ToDebugString(this)}{(string.IsNullOrEmpty(ns.ToDebugString(this)) ? "" : "::")}{searchName} not found on {ins.Type.QName.ToDebugTypeName()} and there is no default value.");
 					}
-					else if (ins.TypeKind == RtHeapTypeKind.CLOSURE)
+					else if (ins.Kind == RtHeapTypeKind.CLOSURE)
 					{
 						messagePtr = Context.GC.AllocString($"Property {ns.ToDebugString(this)}{(string.IsNullOrEmpty(ns.ToDebugString(this)) ? "" : "::")}{searchName} not found on builtin.as$.MethodClosure and there is no default value.");
 					}

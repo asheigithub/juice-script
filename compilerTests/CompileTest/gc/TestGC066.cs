@@ -99,7 +99,7 @@ runTest();
             Assert.IsNull(ex);
 
             Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.VECTOR).Count());
+                .Where(o => o.Kind == RtHeapTypeKind.VECTOR).Count());
 
 			
 			player.ForceGC();

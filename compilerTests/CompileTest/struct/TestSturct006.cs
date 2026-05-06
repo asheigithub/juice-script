@@ -98,7 +98,7 @@ f();
 			player.ForceGC();
 
 			Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.TypeKind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "SSS").Count());
+				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "SSS").Count());
 
 			var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");
 			Assert.IsNotNull(global);

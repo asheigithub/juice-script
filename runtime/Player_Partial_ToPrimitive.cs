@@ -40,7 +40,7 @@ namespace juicescript.runtime
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool IsPrimitive(NaNBoxing value)
 		{
-			return (value.ValueType != NaNBoxing.BoxType.HeapPtr || Context.GC.Heap[value.HeapPtr].TypeKind == RtHeapTypeKind.STRING);
+			return (value.ValueType != NaNBoxing.BoxType.HeapPtr || Context.GC.Heap[value.HeapPtr].Kind == RtHeapTypeKind.STRING);
 		}
 
 		/// <summary>
@@ -83,7 +83,7 @@ namespace juicescript.runtime
 
 			ASContainer as_type = null;
 
-			switch (instance.TypeKind)
+			switch (instance.Kind)
 			{
 				case RtHeapTypeKind.CLASS:
 				case RtHeapTypeKind.GLOBAL:
@@ -111,7 +111,7 @@ namespace juicescript.runtime
 #endif
 			}
 
-			int code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "toString":"valueOf",0, tmp, stackslots, stackStPos, value,   mcheck , ref error,true);
+			int code = MultiNameLSearch(ns_set, instance.Kind, as_type, hint == HINT.h_string ? "toString":"valueOf",0, tmp, stackslots, stackStPos, value,   mcheck , ref error,true);
 			switch (code)
 			{
 				case 0:
@@ -144,7 +144,7 @@ namespace juicescript.runtime
 			}
 
 			var funinstance = Context.GC.Heap[fun.HeapPtr];
-			if (funinstance.TypeKind != RtHeapTypeKind.CLOSURE)
+			if (funinstance.Kind != RtHeapTypeKind.CLOSURE)
 			{
 				RaiseTypeError(ref error, fun, TypeKind.Function);
 				return default;
@@ -169,7 +169,7 @@ namespace juicescript.runtime
 			}
 
 			//查找tostring,如果tostring后还不是primitive，则报错。
-			code = MultiNameLSearch(ns_set, instance.TypeKind, as_type, hint == HINT.h_string ? "valueOf" : "toString",0, tmp, stackslots, stackStPos, value,  mcheck, ref error, true);
+			code = MultiNameLSearch(ns_set, instance.Kind, as_type, hint == HINT.h_string ? "valueOf" : "toString",0, tmp, stackslots, stackStPos, value,  mcheck, ref error, true);
 			switch (code)
 			{
 				case 0:
@@ -203,7 +203,7 @@ namespace juicescript.runtime
 			}
 
 			funinstance = Context.GC.Heap[fun.HeapPtr];
-			if (funinstance.TypeKind != RtHeapTypeKind.CLOSURE)
+			if (funinstance.Kind != RtHeapTypeKind.CLOSURE)
 			{
 				RaiseTypeError(ref error, fun, TypeKind.Function);
 				return default;

@@ -125,13 +125,13 @@ trace(a,a[-1],a.callee);
             Assert.IsNull(ex);
 
             Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
-                .Where(o => o.TypeKind == RtHeapTypeKind.ARRAY).Count());
+                .Where(o => o.Kind == RtHeapTypeKind.ARRAY).Count());
 
 			
 			player.ForceGC();
 
 			Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
-			   .Where(o => o.TypeKind == RtHeapTypeKind.ARRAY).Count());
+			   .Where(o => o.Kind == RtHeapTypeKind.ARRAY).Count());
 
 
 			var global = player.Context.libs.SelectMany(o => o.Scripts).FirstOrDefault(o => o.QName.Name == "Main");

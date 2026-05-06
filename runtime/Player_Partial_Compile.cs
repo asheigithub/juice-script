@@ -331,7 +331,7 @@ namespace juicescript.runtime
 							throw new InvalidOperationException();
 						}
 
-						int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].TypeKind == RtHeapTypeKind.INSTANCE &&
+						int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].Kind == RtHeapTypeKind.INSTANCE &&
 							Context.GC.Heap[p].Type == @type.Instance
 						);
 
@@ -587,7 +587,7 @@ namespace juicescript.runtime
 						else if (scope.Kind == CodeScopeKind.Instance)
 						{
 
-							int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].TypeKind == RtHeapTypeKind.INSTANCE &&
+							int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].Kind == RtHeapTypeKind.INSTANCE &&
 							Context.GC.Heap[p].Type == scope.TypeLayout.ASType.Instance);
 
 							if (cache_idx < 0) // 基类定义在其他文件时，有可能....
@@ -916,7 +916,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].TypeKind == RtHeapTypeKind.INSTANCE &&
+							int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].Kind == RtHeapTypeKind.INSTANCE &&
 							Context.GC.Heap[p].Type == scope.TypeLayout.ASType.Instance);
 
 							if (cache_idx < 0) // 基类定义在其他文件时，有可能....

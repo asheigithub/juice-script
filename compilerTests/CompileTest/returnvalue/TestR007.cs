@@ -87,7 +87,7 @@ new A().exec();
 
 			var err = player.Context.GC.Heap[ex.error.HeapPtr];
 
-			Assert.AreEqual(RtHeapTypeKind.INSTANCE, err.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.INSTANCE, err.Kind);
 
 			Assert.AreEqual("TypeError", err.Type.QName.Name);
 
@@ -99,7 +99,7 @@ new A().exec();
 
 			var message_obj = player.Context.GC.Heap[message.HeapPtr];
 
-			Assert.AreEqual(RtHeapTypeKind.STRING, message_obj.TypeKind);
+			Assert.AreEqual(RtHeapTypeKind.STRING, message_obj.Kind);
 
 			Assert.AreEqual("F is ambiguous; Found more than one matching binding.", ((RtString)message_obj).Str);
 

@@ -36,7 +36,7 @@ namespace juicescript.runtime.buildin
 		{
 			if (thisPtr.ValueType != NaNBoxing.BoxType.LocalString && (thisPtr.ValueType != NaNBoxing.BoxType.HeapPtr
 				||
-				context.GC.Heap[thisPtr.HeapPtr].TypeKind != RtHeapTypeKind.STRING
+				context.GC.Heap[thisPtr.HeapPtr].Kind != RtHeapTypeKind.STRING
 				))
 			{
 				context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
@@ -1719,7 +1719,7 @@ namespace juicescript.runtime.buildin
 			if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
 				RtHeapBase test = context.GC.Heap[thisPtr.HeapPtr];
-				if (test.TypeKind != RtHeapTypeKind.STRING)
+				if (test.Kind != RtHeapTypeKind.STRING)
 				{
 					context.player.RaiseTypeError(ref error, thisPtr, TypeKind.String);
 					return;
@@ -1786,7 +1786,7 @@ namespace juicescript.runtime.buildin
 				if (repl.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
 					RtHeapBase replinstance = context.GC.Heap[repl.HeapPtr];
-					if (replinstance.TypeKind == RtHeapTypeKind.CLOSURE)
+					if (replinstance.Kind == RtHeapTypeKind.CLOSURE)
 					{
 						if (context.StackPosition + 4 > Context.STACK_LENGTH)
 						{
