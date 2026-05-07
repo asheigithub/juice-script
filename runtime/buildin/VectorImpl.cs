@@ -520,10 +520,10 @@ namespace juicescript.runtime.buildin
 
 				context.StackPosition--;
 
-				if (v.ValueType == BoxType.HeapPtr)
+				if (v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var check = context.GC.Heap[v.HeapPtr];
-					if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						//clone结构体
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
@@ -694,10 +694,10 @@ namespace juicescript.runtime.buildin
 
 				context.StackPosition--;
 
-				if (v.ValueType == BoxType.HeapPtr)
+				if (v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var check = context.GC.Heap[v.HeapPtr];
-					if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
@@ -913,10 +913,10 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex] = v;
 			context.StackPosition--;
 
-			if (v.ValueType == BoxType.HeapPtr)
+			if (v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 			{
 				var check = context.GC.Heap[v.HeapPtr];
-				if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+				if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 				{
 					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];

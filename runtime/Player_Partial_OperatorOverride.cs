@@ -549,9 +549,9 @@ namespace juicescript.runtime
 					return 8;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
-						var obj = Context.GC.Heap[v.HeapPtr];
+						
 
-						switch (obj.Kind)
+						switch ((RtHeapTypeKind)v.HeapKind)
 						{
 							case RtHeapTypeKind.CLASS:
 								type = null;
@@ -563,6 +563,7 @@ namespace juicescript.runtime
 								type = null;
 								return 10;
 							case RtHeapTypeKind.INSTANCE:
+								var obj = Context.GC.Heap[v.HeapPtr];
 								type = ((ASInstance)obj.Type)._operator_type;
 								return ((ASInstance)obj.Type)._operator_type_index;
 							case RtHeapTypeKind.NAMESPACE:

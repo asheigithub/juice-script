@@ -827,9 +827,10 @@ namespace juicescript.runtime
 
 			if (type.Flags.HasFlag(ClassFlags.Struct))
 			{
-				var src = contxt.GC.Heap[newValue.HeapPtr];
-				if (src.Kind == RtHeapTypeKind.INSTANCE)
+				
+				if (newValue.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
+					var src = contxt.GC.Heap[newValue.HeapPtr];
 					RtInstance srcPayload = (RtInstance)src;
 
 

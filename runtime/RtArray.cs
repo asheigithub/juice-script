@@ -318,9 +318,9 @@ namespace juicescript.runtime
 
 				if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					var ins = player.Context.GC.Heap[v.HeapPtr];
-					if (ins.Kind == RtHeapTypeKind.INSTANCE)
+					if (v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
+						var ins = player.Context.GC.Heap[v.HeapPtr];
 						if (((ASInstance)ins.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							RtHeapBase struct_instance;
@@ -685,10 +685,10 @@ namespace juicescript.runtime
 					var v1 = cache_store[st];
 					var v2 = cache_store[ed];
 
-					if (v1.ValueType == BoxType.HeapPtr)
+					if (v1.ValueType == BoxType.HeapPtr && v1.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var check = context.GC.Heap[v1.HeapPtr];
-						if (check.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							int clonedptr = tempSlot + context.CacheInstancePtr;
 							var cacheObj = context.GC.Heap[clonedptr];
@@ -964,16 +964,16 @@ namespace juicescript.runtime
 		// 辅助方法：复制 box（处理结构体）
 		private void CopyBoxTo_OnStack(Span<NaNBoxing> span, int dstIndex, NaNBoxing box, Player player)
 		{
-			if (box.ValueType == BoxType.HeapPtr)
+			if (box.ValueType == BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 			{
 				var src = player.Context.GC.Heap[box.HeapPtr];
-				if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+				if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 				{
 					var dst_v = span[dstIndex];
-					if (dst_v.ValueType == BoxType.HeapPtr)
+					if (dst_v.ValueType == BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-						if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							CopyStruct(dst, src, player);
 							span[dstIndex].SetHeapPtr(dst_v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE);
@@ -1255,16 +1255,16 @@ namespace juicescript.runtime
 				for (int i = (int)array_len - 1; i >= 0; i--)
 				{
 					var box = stack_span[i];
-					if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					if (box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var src = player.Context.GC.Heap[box.HeapPtr];
-						if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							var dst_v = stack_span[i + restSpan.Length];
-							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 							{
 								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-								if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+								if (((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 								{
 									CopyStruct(dst, src, player);
 								}
@@ -1313,16 +1313,16 @@ namespace juicescript.runtime
 				for (int i = (int)array_len - 1; i >= 0; i--)
 				{
 					var box = cache_store[i];
-					if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					if (box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var src = player.Context.GC.Heap[box.HeapPtr];
-						if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							var dst_v = cache_store[i + restSpan.Length];
-							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 							{
 								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-								if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+								if (((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 								{
 									CopyStruct(dst, src, player);
 								}
@@ -1465,18 +1465,18 @@ namespace juicescript.runtime
 				for (int i = 1; i < stack_span.Length; i++)
 				{
 					var box = stack_span[i];
-					if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					if (box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var src = player.Context.GC.Heap[box.HeapPtr];
-						if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 
 
 							var dst_v = stack_span[i - 1];
-							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 							{
 								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-								if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+								if (((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 								{
 									CopyStruct(dst, src, player);
 
@@ -1513,10 +1513,10 @@ namespace juicescript.runtime
 				for (int i = 1; i < cache_store.Length; i++)
 				{
 					var box = cache_store[i];
-					if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					if (box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var src = player.Context.GC.Heap[box.HeapPtr];
-						if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							var dst = player.Context.GC.Heap[cache_structs[i - 1]];
 							CopyStruct(dst, src, player);
@@ -1670,10 +1670,10 @@ namespace juicescript.runtime
 				var v2 = cache_store[j];
 
 				bool v1isstruct = false;
-				if (v1.ValueType == NaNBoxing.BoxType.HeapPtr)
+				if (v1.ValueType == NaNBoxing.BoxType.HeapPtr && v1.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var src = context.GC.Heap[v1.HeapPtr];
-					if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						v1isstruct = true;
 
@@ -1695,10 +1695,10 @@ namespace juicescript.runtime
 				}
 
 				//v2->v1
-				if (v2.ValueType == NaNBoxing.BoxType.HeapPtr)
+				if (v2.ValueType == NaNBoxing.BoxType.HeapPtr && v2.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var src = context.GC.Heap[v2.HeapPtr];
-					if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						var dst = context.GC.Heap[cache_structs[i]];
 						CopyStruct(dst, src, context.player);
@@ -1837,23 +1837,30 @@ namespace juicescript.runtime
 				}
 				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					var src = player.Context.GC.Heap[box.HeapPtr];
-					if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var stack_span = stack_store.Span;
-
-						var dst_v = stack_span[(int)array_index];
-						if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+						var src = player.Context.GC.Heap[box.HeapPtr];
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
-							var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-							if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+							var stack_span = stack_store.Span;
+
+							var dst_v = stack_span[(int)array_index];
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
 							{
-								CopyStruct(dst, src, player);
-								if (array_index + 1 > array_len)
+								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+								if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 								{
-									array_len = array_index + 1;
+									CopyStruct(dst, src, player);
+									if (array_index + 1 > array_len)
+									{
+										array_len = array_index + 1;
+									}
+									return true;
 								}
-								return true;
+								else
+								{
+									return false;
+								}
 							}
 							else
 							{
@@ -1898,19 +1905,26 @@ namespace juicescript.runtime
 				}
 				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					var src = player.Context.GC.Heap[box.HeapPtr];
-					if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var dst = player.Context.GC.Heap[cache_structs[array_index]];
-						CopyStruct(dst, src, player);
-						cache_store[array_index].SetHeapPtr(cache_structs[array_index], (byte)RtHeapTypeKind.INSTANCE);
-
-						if (array_index + 1 > array_len)
+						var src = player.Context.GC.Heap[box.HeapPtr];
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
-							array_len = array_index + 1;
-						}
+							var dst = player.Context.GC.Heap[cache_structs[array_index]];
+							CopyStruct(dst, src, player);
+							cache_store[array_index].SetHeapPtr(cache_structs[array_index], (byte)RtHeapTypeKind.INSTANCE);
 
-						return true;
+							if (array_index + 1 > array_len)
+							{
+								array_len = array_index + 1;
+							}
+
+							return true;
+						}
+						else
+						{
+							return false;
+						}
 					}
 					else
 					{
@@ -1945,20 +1959,27 @@ namespace juicescript.runtime
 
 				if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					var src = player.Context.GC.Heap[box.HeapPtr];
-					if (src.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
-						&&
-						array_index < array_len
-						)
+					if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var dst_v = block[array_index % SPARSE_BLOCK_SIZE];
-						if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
+						var src = player.Context.GC.Heap[box.HeapPtr];
+						if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
+							&&
+							array_index < array_len
+							)
 						{
-							var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-							if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+							var dst_v = block[array_index % SPARSE_BLOCK_SIZE];
+							if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 							{
-								CopyStruct(dst, src, player);
-								return true;
+								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+								if (((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
+								{
+									CopyStruct(dst, src, player);
+									return true;
+								}
+								else
+								{
+									return false;
+								}
 							}
 							else
 							{
@@ -1974,7 +1995,6 @@ namespace juicescript.runtime
 					{
 						return false;
 					}
-
 				}
 				else
 				{

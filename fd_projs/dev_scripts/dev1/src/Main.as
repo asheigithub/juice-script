@@ -12,10 +12,6 @@ package
        
     }
 }
-
-
-
-
 import flash.utils.getTimer;
 
 

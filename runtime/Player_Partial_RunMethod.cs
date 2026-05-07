@@ -191,9 +191,10 @@ namespace juicescript.runtime
 							{
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
-									var v = Context.GC.Heap[box.HeapPtr];
-									if (v.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+									
+									if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 									{
+										var v = Context.GC.Heap[box.HeapPtr];
 										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
 										var struct_ins = Context.GC.Heap[struct_ptr];
 
@@ -247,10 +248,10 @@ namespace juicescript.runtime
 
 						NaNBoxing box = slot[argLocater.index];
 						if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
-						{
-							var v = Context.GC.Heap[box.HeapPtr];
-							if (v.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+						{							
+							if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 							{
+								var v = Context.GC.Heap[box.HeapPtr];
 								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
 								var struct_ins = Context.GC.Heap[struct_ptr];
 
@@ -511,9 +512,10 @@ namespace juicescript.runtime
 
 									if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
-										var v = Context.GC.Heap[box.HeapPtr];
-										if (v.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)v.Type).Flags.HasFlag(ClassFlags.Struct))
+										
+										if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 										{
+											var v = Context.GC.Heap[box.HeapPtr];
 											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,
 												Context.StackPosition - para_argcount + i //实例到arguments数组
 												,false
