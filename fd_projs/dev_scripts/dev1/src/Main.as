@@ -12,6 +12,10 @@ package
        
     }
 }
+
+
+
+
 import flash.utils.getTimer;
 
 
@@ -2313,7 +2317,8 @@ const array = [
 var t:int = getTimer();
 
 
-array.sort(function(a, b) {return b.rating - a.rating});
+//array.sort(function(a, b) {return b.rating - a.rating});
+array.sortOn("rating", Array.NUMERIC);
 
 
 trace( getTimer() -t );

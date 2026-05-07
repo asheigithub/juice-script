@@ -224,7 +224,7 @@ namespace juicescript.runtime
 
 
 
-                            result.SetHeapPtr(cache_ptr);
+                            result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
                             return result;
                         }
                         else

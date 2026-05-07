@@ -62,7 +62,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 		private static string UintToString(uint n, int radix)
@@ -168,7 +168,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 		[NativeFunction(".uint$public::toFixed")]
@@ -207,7 +207,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 		private static string UintToFixed(uint n, int fractionDigits)
@@ -288,7 +288,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 			}
 			else
 			{
@@ -330,7 +330,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 			}
 		}
 	}

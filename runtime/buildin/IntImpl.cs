@@ -62,7 +62,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 		private static string IntToString(int n, int radix)
@@ -192,7 +192,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 		[NativeFunction(".int$public::toFixed")]
@@ -237,7 +237,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 		private static string IntToFixed(int n, int fractionDigits)
@@ -335,7 +335,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 			}
 			else
 			{
@@ -377,7 +377,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 			}
 		}
 	}

@@ -63,7 +63,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING );
         }
 
         private static string SByteToString(sbyte n, int radix)
@@ -193,7 +193,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
         }
 
         [NativeFunction(".sbyte$public::toFixed")]
@@ -237,7 +237,7 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
         }
 
         [NativeFunction(".sbyte$public::toPrecision")]
@@ -287,7 +287,7 @@ namespace juicescript.runtime.buildin
                     return;
                 }
 
-                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
             }
             else
             {
@@ -329,7 +329,7 @@ namespace juicescript.runtime.buildin
                     return;
                 }
 
-                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
             }
         }
     }

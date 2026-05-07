@@ -66,7 +66,7 @@ namespace juicescript.runtime.buildin
 				closure._ref_as_type = _resolve.DefineAt;
 				closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 
-				context.StackSlots[ptrIndex].SetHeapPtr(m_closurePtr);
+				context.StackSlots[ptrIndex].SetHeapPtr(m_closurePtr,(byte)RtHeapTypeKind.CLOSURE);
 			}
 			// 准备参数 _reject
 			{
@@ -82,7 +82,7 @@ namespace juicescript.runtime.buildin
 				closure._ref_as_type = _reject.DefineAt;
 				closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 
-				context.StackSlots[ptrIndex].SetHeapPtr(m_closurePtr);
+				context.StackSlots[ptrIndex].SetHeapPtr(m_closurePtr,(byte)RtHeapTypeKind.CLOSURE);
 			}
 
 			var executor_method = ((ASMethodBody)executor_closure.Type).Method;
@@ -383,7 +383,7 @@ namespace juicescript.runtime.buildin
 			PromiseWapper wapper = new PromiseWapper();
 			((RtInstance)nextPromiseInstance).wapperedObject = wapper;
 
-			NaNBoxing nextPromise = default; nextPromise.SetHeapPtr(nextPromise_ptr);
+			NaNBoxing nextPromise = default; nextPromise.SetHeapPtr(nextPromise_ptr, (byte)RtHeapTypeKind.INSTANCE);
 
 			if (promiseWapper._state == PromiseState.pending)
 			{
@@ -428,7 +428,7 @@ namespace juicescript.runtime.buildin
 				context.MicroTaskQueue.Enqueue(microTask);
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(nextPromise_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(nextPromise_ptr, (byte)RtHeapTypeKind.INSTANCE);
 
 		}
 
@@ -474,7 +474,7 @@ namespace juicescript.runtime.buildin
 			PromiseWapper wapper = new PromiseWapper();
 			((RtInstance)nextPromiseInstance).wapperedObject = wapper;
 
-			NaNBoxing nextPromise = default; nextPromise.SetHeapPtr(nextPromise_ptr);
+			NaNBoxing nextPromise = default; nextPromise.SetHeapPtr(nextPromise_ptr, (byte)RtHeapTypeKind.INSTANCE);
 
 			if (promiseWapper._state == PromiseState.pending)
 			{
@@ -519,7 +519,7 @@ namespace juicescript.runtime.buildin
 				context.MicroTaskQueue.Enqueue(microTask);
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(nextPromise_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(nextPromise_ptr, (byte)RtHeapTypeKind.INSTANCE);
 		}
 
 		[NativeFunction("$.Promise$public::resolve")]
@@ -562,7 +562,7 @@ namespace juicescript.runtime.buildin
 			wapper._state = PromiseState.pending;
 
 			NaNBoxing promise_store = default;
-			promise_store.SetHeapPtr(p);
+			promise_store.SetHeapPtr(p, (byte)RtHeapTypeKind.INSTANCE);
 
 
 			context.StackSlots[returnSlotIndex] = promise_store;
@@ -610,7 +610,7 @@ namespace juicescript.runtime.buildin
 
 			// 直接 reject
 			w.Reject(context, reason);
-			context.StackSlots[returnSlotIndex].SetHeapPtr(pPtr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(pPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 
 		}
@@ -1493,28 +1493,28 @@ namespace juicescript.runtime.buildin
 
 				RtClosure resolveClosure = (RtClosure)context.GC.Heap[resolveCb];
 				context.GC.Heap[resolveCb].Type = thenableResolve.Body;
-				resolveClosure.This.SetHeapPtr(statePtr);
+				resolveClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE);
 				resolveClosure.ScopePtr = statePtr;
 				resolveClosure.ScopeType = stateObj.Type;
 				resolveClosure._ref_as_type = context.PROMISE;
 				resolveClosure.methodscopeslot_ref_state = 0; resolveClosure.HEAPINSTANCE_PTR = 0;
 
 				NaNBoxing resolveCallback = default;
-				resolveCallback.SetHeapPtr(resolveCb);
+				resolveCallback.SetHeapPtr(resolveCb, (byte)RtHeapTypeKind.CLOSURE);
 
 				// 创建 reject 回调闭包
 				int rejectCb = context.M_ClosurePtr + basePos + 1;
 
 				RtClosure rejectClosure = (RtClosure)context.GC.Heap[rejectCb];
 				context.GC.Heap[rejectCb].Type = thenableReject.Body;
-				rejectClosure.This.SetHeapPtr(statePtr);
+				rejectClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE);
 				rejectClosure.ScopePtr = statePtr;
 				rejectClosure.ScopeType = stateObj.Type;
 				rejectClosure._ref_as_type = context.PROMISE;
 				rejectClosure.methodscopeslot_ref_state = 0; rejectClosure.HEAPINSTANCE_PTR = 0;
 
 				NaNBoxing rejectCallback = default;
-				rejectCallback.SetHeapPtr(rejectCb);
+				rejectCallback.SetHeapPtr(rejectCb, (byte)RtHeapTypeKind.CLOSURE);
 
 
 				// 将回调放到栈上
@@ -2158,7 +2158,7 @@ namespace juicescript.runtime.buildin
 
 
 					slots = context.StackSlots.AsSpan(context.StackPosition, 2);
-					slots[0].SetHeapPtr(onfulfilled);
+					slots[0].SetHeapPtr(onfulfilled, (byte)RtHeapTypeKind.CLOSURE);
 
 
 					int onrejected = context.M_ClosurePtr + context.StackPosition + 1;
@@ -2170,7 +2170,7 @@ namespace juicescript.runtime.buildin
 					onrejectedClosure._ref_as_type = context.PROMISE;
 					onrejectedClosure.methodscopeslot_ref_state = 0; onrejectedClosure.HEAPINSTANCE_PTR = 0;
 
-					slots[1].SetHeapPtr(onrejected);
+					slots[1].SetHeapPtr(onrejected, (byte)RtHeapTypeKind.CLOSURE);
 
 					context.StackPosition += 2;
 

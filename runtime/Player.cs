@@ -1089,16 +1089,16 @@ namespace juicescript.runtime
 				{
 					if (swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						b->SetHeapPtr(swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].HeapPtr);
+						b->SetHeapPtr(swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].HeapPtr, (byte)RtHeapTypeKind.STRING);
 					}
 					else
 					{
 						string str = swc.const_strings[b->HeapPtr & 0xffffff];
 						int index = Context.GC.AllocString(str); if (index == 0) { throw new LoaderException("alloc string failed,out of memory"); }
 						;
-						swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].SetHeapPtr(index);
+						swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].SetHeapPtr(index, (byte)RtHeapTypeKind.STRING);
 
-						b->SetHeapPtr(index);
+						b->SetHeapPtr(index, (byte)RtHeapTypeKind.STRING);
 						Context.GC.Root.Add(Context.GC.Heap[index]);
 
 					}
@@ -1134,7 +1134,7 @@ namespace juicescript.runtime
 
 						int index = Context.GC.AllocNamespace(@namespace, 0, uriPtr); if (index == 0) { throw new LoaderException("alloc namespace failed,out of memory"); }
 						;
-						b->SetHeapPtr(index);
+						b->SetHeapPtr(index, (byte)RtHeapTypeKind.NAMESPACE);
 
 						@namespace.__instance_index__ = index;
 
@@ -1143,7 +1143,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						b->SetHeapPtr(@namespace.__instance_index__);
+						b->SetHeapPtr(@namespace.__instance_index__, (byte)RtHeapTypeKind.NAMESPACE);
 					}
 				}
 				else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
@@ -2574,18 +2574,18 @@ namespace juicescript.runtime
 			{
 
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ERROR_NAME);
+				errName.SetHeapPtr(cache_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_STACKOVERFLOW_STR);
+				naNBoxing.SetHeapPtr(cache_STACKOVERFLOW_STR, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 
@@ -2625,7 +2625,7 @@ namespace juicescript.runtime
 				return false;
 			}
 
-			result.SetHeapPtr(strptr);
+			result.SetHeapPtr(strptr, (byte)RtHeapTypeKind.STRING);
 			return true;
 		}
 
@@ -2645,18 +2645,18 @@ namespace juicescript.runtime
 			{
 
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ERROR_NAME);
+				errName.SetHeapPtr(cache_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+				naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 
@@ -2683,7 +2683,7 @@ namespace juicescript.runtime
 			{
 
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ERROR_NAME);
+				errName.SetHeapPtr(cache_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -2694,17 +2694,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 		internal int cache_Eval_ERROR_NAME;
@@ -2723,7 +2723,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -2733,17 +2733,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 
@@ -2762,7 +2762,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -2772,17 +2772,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -2799,7 +2799,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -2809,17 +2809,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -2837,7 +2837,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ILLEGALOPERATION_ERROR_NAME);
+				errName.SetHeapPtr(cache_ILLEGALOPERATION_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.ILLEGALOPERATION_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -2847,17 +2847,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -2876,17 +2876,17 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_CANNOT_ACCESS_NULL);
+				naNBoxing.SetHeapPtr(cache_CANNOT_ACCESS_NULL, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -3086,9 +3086,9 @@ namespace juicescript.runtime
 
 				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 
-				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3120,8 +3120,8 @@ namespace juicescript.runtime
 
 				((RtClosure)Context.GC.Heap[valueof_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 
-				NaNBoxing v = default; v.SetHeapPtr(valueof_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(VALUEOF_STR);
+				NaNBoxing v = default; v.SetHeapPtr(valueof_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(VALUEOF_STR, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3164,8 +3164,8 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[hasownproperty_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[hasownproperty_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
-				NaNBoxing v = default; v.SetHeapPtr(hasownproperty_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(hasOwnProperty);
+				NaNBoxing v = default; v.SetHeapPtr(hasownproperty_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(hasOwnProperty, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 
@@ -3210,8 +3210,8 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[isprototypeof_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[isprototypeof_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
-				NaNBoxing v = default; v.SetHeapPtr(isprototypeof_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(isPrototypeOf);
+				NaNBoxing v = default; v.SetHeapPtr(isprototypeof_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(isPrototypeOf, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3250,9 +3250,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[tostring_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3297,9 +3297,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[concat_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[concat_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(concat_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(concat_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(concat_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 
 				if (error.raised) return;
@@ -3340,9 +3340,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3381,9 +3381,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3421,9 +3421,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3461,9 +3461,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3502,9 +3502,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr , (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3543,9 +3543,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3584,9 +3584,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3628,9 +3628,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3672,9 +3672,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3716,9 +3716,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3759,9 +3759,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3803,9 +3803,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3847,9 +3847,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3891,9 +3891,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.STRING._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3933,8 +3933,8 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[invokecall_ptr]).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[invokecall_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(invokecall_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(call_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(invokecall_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(call_ptr, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3960,8 +3960,8 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[invokeapply_ptr]).Set_PROTOTYPE(-1, this);
 
 
-				NaNBoxing v = default; v.SetHeapPtr(invokeapply_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(apply_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(invokeapply_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(apply_ptr, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -3988,8 +3988,8 @@ namespace juicescript.runtime
 
 				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.FUNCTION._link_codescope.Parent.Container).__global_index__;
 
-				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+				NaNBoxing v = default; v.SetHeapPtr(tostring_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4029,8 +4029,8 @@ namespace juicescript.runtime
 
 				((RtClosure)Context.GC.Heap[tostring_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 
-					NaNBoxing v = default; v.SetHeapPtr(tostring_ptr);
-					NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR);
+					NaNBoxing v = default; v.SetHeapPtr(tostring_ptr, (byte)RtHeapTypeKind.CLOSURE);
+					NaNBoxing v_str = default; v_str.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 					CreateDynamic(ref error, proto, v_str, v, false, false, true);
 					if (error.raised) return;
 				}
@@ -4076,8 +4076,8 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[concat_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[concat_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
-				NaNBoxing v = default; v.SetHeapPtr(concat_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(concat);
+				NaNBoxing v = default; v.SetHeapPtr(concat_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(concat, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 
@@ -4122,8 +4122,8 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[push_ptr]).ScopePtr = ((ASScript)Context.OBJECT._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[push_ptr]).Set_PROTOTYPE(-1, this); //设置prototype为undefined
 
-				NaNBoxing v2 = default; v2.SetHeapPtr(push_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(push);
+				NaNBoxing v2 = default; v2.SetHeapPtr(push_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(push, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v2, false, false, false);
 				if (error.raised) return;
 
@@ -4165,9 +4165,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr,  (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4209,9 +4209,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4253,9 +4253,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4297,9 +4297,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4341,9 +4341,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4384,9 +4384,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4427,9 +4427,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4470,9 +4470,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4513,9 +4513,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4556,9 +4556,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4599,9 +4599,9 @@ namespace juicescript.runtime
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
 
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
 
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4635,8 +4635,8 @@ namespace juicescript.runtime
 				}
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4670,8 +4670,8 @@ namespace juicescript.runtime
 				}
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4705,8 +4705,8 @@ namespace juicescript.runtime
 				}
 				((RtClosure)Context.GC.Heap[method_ptr]).ScopePtr = ((ASScript)Context.ARRAY._link_codescope.Parent.Container).__global_index__;
 				((RtClosure)Context.GC.Heap[method_ptr]).Set_PROTOTYPE(-1, this);
-				NaNBoxing v = default; v.SetHeapPtr(method_ptr);
-				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str);
+				NaNBoxing v = default; v.SetHeapPtr(method_ptr, (byte)RtHeapTypeKind.CLOSURE);
+				NaNBoxing v_str = default; v_str.SetHeapPtr(name_str, (byte)RtHeapTypeKind.STRING);
 				CreateDynamic(ref error, proto, v_str, v, false, false, false);
 				if (error.raised) return;
 			}
@@ -4721,6 +4721,16 @@ namespace juicescript.runtime
 
 		public void Run(Action<PlayerException> onErrorRaised)
 		{
+#if DEBUG
+			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+				if (ptr != 0 && kind != 255)
+				{
+					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
+				}
+			};
+
+#endif
+
 
 			CheckRequires();
 
@@ -5033,7 +5043,7 @@ namespace juicescript.runtime
 
 			//执行script的初始化函数
 			NaNBoxing thisPtr = new NaNBoxing();
-			thisPtr.SetHeapPtr(index);
+			thisPtr.SetHeapPtr(index, (byte)RtHeapTypeKind.GLOBAL);
 
 			unsafe
 			{
@@ -5064,8 +5074,8 @@ namespace juicescript.runtime
 
 			//构造proto的constructor, 就是Class自己。
 			var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[index]).PROTO__PTR];
-			NaNBoxing constructor = new NaNBoxing(); constructor.SetHeapPtr(index);
-			NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR);
+			NaNBoxing constructor = new NaNBoxing(); constructor.SetHeapPtr(index, (byte)RtHeapTypeKind.CLASS);
+			NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR, (byte)RtHeapTypeKind.STRING);
 			CreateDynamic(ref error, proto, v_str, constructor, true, false, true);
 			if (error.raised)
 			{
@@ -5173,7 +5183,7 @@ namespace juicescript.runtime
 			//目前为空方法，用于标记哪里写了属性，将来优化为检查是否是简单的写字段。
 		}
 
-		private void WriteFunctionProto(NaNBoxing box, ref ReceiveError error, RtHeapBase closure, int closure_ptr)
+		private void WriteFunctionProto(NaNBoxing box, ref ReceiveError error, RtHeapBase closure, NaNBoxing closure_box)
 		{
 
 			if (((ASMethodBody)closure.Type).Method.__ismethod)
@@ -5189,7 +5199,8 @@ namespace juicescript.runtime
 				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
 					//访问prototype.这时候只能把function保存到堆里了。
-					NaNBoxing v = new NaNBoxing(); v.SetHeapPtr(closure_ptr);
+					//NaNBoxing v = new NaNBoxing(); v.SetHeapPtr(closure_ptr);
+					NaNBoxing v = closure_box; //new NaNBoxing(); v.SetHeapPtr(closure_ptr);
 					NaNBoxing clouse_heap = GetSaveValue(v, ref error);
 					if (error.raised)
 					{
@@ -5304,7 +5315,9 @@ namespace juicescript.runtime
 						throw new InvalidOperationException();
 #endif
 					NaNBoxing result = new NaNBoxing();
-					result.SetHeapPtr(((RtScriptClass)ins).PROTO__PTR);
+					result.SetHeapPtr(((RtScriptClass)ins).PROTO__PTR, (byte)RtHeapTypeKind.INSTANCE );
+
+					Debug.Assert(Context.GC.Heap[((RtScriptClass)ins).PROTO__PTR].Kind == RtHeapTypeKind.INSTANCE);
 
 					return result;
 
@@ -5336,7 +5349,9 @@ namespace juicescript.runtime
 #endif
 
 						NaNBoxing result = new NaNBoxing();
-						result.SetHeapPtr(((RtScriptClass)ins).PROTO__PTR);
+						result.SetHeapPtr(((RtScriptClass)ins).PROTO__PTR, ((ASClass)@class).Type_identifier ==  (ulong)TypeKind.Function ? (byte)RtHeapTypeKind.CLOSURE : (byte)RtHeapTypeKind.INSTANCE);
+
+						Debug.Assert((byte)Context.GC.Heap[((RtScriptClass)ins).PROTO__PTR].Kind == result.HeapKind );
 
 						return result;
 					}
@@ -5424,7 +5439,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR);
+									NaNBoxing v_str = default; v_str.SetHeapPtr(CONSTRUCTOR_STR, (byte)RtHeapTypeKind.STRING);
 									//创建constructor   这个属性可以被删除。
 									CreateDynamic(ref error, prototype, v_str, closure_heap, true, false, true);
 									if (error.raised)
@@ -5434,7 +5449,7 @@ namespace juicescript.runtime
 
 									closure.Set_PROTOTYPE(ptr, this);
 									NaNBoxing r = default;
-									r.SetHeapPtr(ptr);
+									r.SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE);
 									return r;
 								}
 
@@ -5442,7 +5457,7 @@ namespace juicescript.runtime
 							else
 							{
 								NaNBoxing r = default;
-								r.SetHeapPtr(proto);
+								r.SetHeapPtr(proto, (byte)Context.GC.Heap[proto].Kind );
 								return r;
 							}
 						}
@@ -5610,7 +5625,7 @@ namespace juicescript.runtime
 							ASNamespace @namespace = null;
 							if (_obj.searchNameSpacePtr > 0)
 							{
-								ns.SetHeapPtr(_obj.searchNameSpacePtr);
+								ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE);
 								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
@@ -6081,8 +6096,9 @@ namespace juicescript.runtime
 
 									Context.StackPosition++;
 
-									NaNBoxing _this = new NaNBoxing();
-									_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
+									//NaNBoxing _this = new NaNBoxing();
+									//_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
+									NaNBoxing _this = _obj.RefInstance;
 
 									unsafe
 									{
@@ -6195,8 +6211,10 @@ namespace juicescript.runtime
 #endif
 						else
 						{
-							NaNBoxing instance = new NaNBoxing();
-							instance.SetHeapPtr(_obj.RefInstance.HeapPtr);
+							//NaNBoxing instance = new NaNBoxing();
+							//instance.SetHeapPtr(_obj.RefInstance.HeapPtr);
+
+							var instance = _obj.RefInstance;
 							result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
 
 							//throw new NotImplementedException("属性的引用未实现");
@@ -6227,7 +6245,7 @@ namespace juicescript.runtime
 							ASNamespace @namespace = null;
 							if (_obj.searchNameSpacePtr > 0)
 							{
-								ns.SetHeapPtr(_obj.searchNameSpacePtr);
+								ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE);
 								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
@@ -6375,7 +6393,7 @@ namespace juicescript.runtime
 							ASNamespace @namespace = null;
 							if (_obj.searchNameSpacePtr > 0)
 							{
-								ns.SetHeapPtr(_obj.searchNameSpacePtr);
+								ns.SetHeapPtr(_obj.searchNameSpacePtr , (byte)RtHeapTypeKind.NAMESPACE);
 								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
@@ -6567,7 +6585,9 @@ namespace juicescript.runtime
 
 
 				instance = new NaNBoxing();
-				instance.SetHeapPtr(instancePtr);
+				instance.SetHeapPtr(instancePtr,(byte)o.Kind);
+
+				Debug.Assert(Context.GC.Heap[instancePtr].Kind == o.Kind);
 
 			}
 
@@ -9149,17 +9169,17 @@ namespace juicescript.runtime
 							{
 								if (double.IsNaN(invalue.Number))
 								{
-									outvalue.SetHeapPtr(NAN_STR);
+									outvalue.SetHeapPtr(NAN_STR, (byte)RtHeapTypeKind.STRING);
 									return;
 								}
 								else if (double.IsPositiveInfinity(invalue.Number))
 								{
-									outvalue.SetHeapPtr(POSITIVEINF_STR);
+									outvalue.SetHeapPtr(POSITIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 									return;
 								}
 								else if (double.IsNegativeInfinity(invalue.Number))
 								{
-									outvalue.SetHeapPtr(NEGATIVEINF_STR);
+									outvalue.SetHeapPtr(NEGATIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 									return;
 								}
 								else
@@ -9176,7 +9196,7 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Undefined:
 							if (isRetry)
 							{
-								outvalue.SetHeapPtr( TYPEOF_undefined_STR );
+								outvalue.SetHeapPtr( TYPEOF_undefined_STR , (byte)RtHeapTypeKind.STRING);
 							}
 							else
 							{
@@ -9189,11 +9209,11 @@ namespace juicescript.runtime
 						case NaNBoxing.BoxType.Boolean:
 							if (invalue.Boolean)
 							{
-								outvalue.SetHeapPtr(TRUE_STR);
+								outvalue.SetHeapPtr(TRUE_STR, (byte)RtHeapTypeKind.STRING);
 							}
 							else
 							{
-								outvalue.SetHeapPtr(FALSE_STR);
+								outvalue.SetHeapPtr(FALSE_STR, (byte)RtHeapTypeKind.STRING);
 							}
 							return;
 						case NaNBoxing.BoxType.Int:
@@ -9260,17 +9280,17 @@ namespace juicescript.runtime
 							{
 								if (float.IsNaN(invalue.FloatValue))
 								{
-									outvalue.SetHeapPtr(NAN_STR);
+									outvalue.SetHeapPtr(NAN_STR, (byte)RtHeapTypeKind.STRING);
 									return;
 								}
 								else if (float.IsPositiveInfinity(invalue.FloatValue))
 								{
-									outvalue.SetHeapPtr(POSITIVEINF_STR);
+									outvalue.SetHeapPtr(POSITIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 									return;
 								}
 								else if (float.IsNegativeInfinity(invalue.FloatValue))
 								{
-									outvalue.SetHeapPtr(NEGATIVEINF_STR);
+									outvalue.SetHeapPtr(NEGATIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 									return;
 								}
 								else
@@ -9303,7 +9323,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												outvalue.SetHeapPtr(ptr);
+												outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 												return;
 											}
 										}
@@ -9317,7 +9337,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												outvalue.SetHeapPtr(ptr);
+												outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 												return;
 											}
 										}
@@ -9340,7 +9360,7 @@ namespace juicescript.runtime
 													}
 													else
 													{
-														outvalue.SetHeapPtr(ptr);
+														outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 														return;
 													}
 
@@ -9355,7 +9375,7 @@ namespace juicescript.runtime
 													}
 													else
 													{
-														outvalue.SetHeapPtr(ptr);
+														outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 														return;
 													}
 												}
@@ -9378,7 +9398,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												outvalue.SetHeapPtr(ptr);
+												outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 												return;
 											}
 										}
@@ -9395,7 +9415,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													outvalue.SetHeapPtr(ptr);
+													outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 													return;
 												}
 											}
@@ -9418,7 +9438,7 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													outvalue.SetHeapPtr(ptr);
+													outvalue.SetHeapPtr(ptr, (byte)RtHeapTypeKind.STRING);
 													return;
 												}
 											}
@@ -9433,7 +9453,7 @@ namespace juicescript.runtime
 										{
 											if (scope_ptr == 0)
 											{
-												outvalue.SetHeapPtr(is_from_objtostring ? OBJECT_FUNCTION_STR : FUNCTION_TOSTRING_STR);
+												outvalue.SetHeapPtr(is_from_objtostring ? OBJECT_FUNCTION_STR : FUNCTION_TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 												return;
 											}
 											else
@@ -9849,7 +9869,7 @@ namespace juicescript.runtime
 				//slots[1] = invalue;
 
 				NaNBoxing invalue = default;
-				invalue.SetHeapPtr(instancePtr);
+				invalue.SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY);
 
 				unsafe
 				{
@@ -9861,7 +9881,7 @@ namespace juicescript.runtime
 				{
 					return;
 				}
-				outvalue.SetHeapPtr(instancePtr);
+				outvalue.SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY);
 				return;
 			}
 			else if (
@@ -9897,7 +9917,7 @@ namespace juicescript.runtime
 				}
 
 				NaNBoxing invalue = default;
-				invalue.SetHeapPtr(errPtr);
+				invalue.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 				//slots[0].SetHeapPtr(errPtr);
 				//slots[1] = invalue;
@@ -9913,7 +9933,7 @@ namespace juicescript.runtime
 					return;
 				}
 
-				outvalue.SetHeapPtr(errPtr);
+				outvalue.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 
 				return;
@@ -9938,7 +9958,7 @@ namespace juicescript.runtime
 					//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
 					((RtVector)instance).GetStore(this).length = 0;
 
-					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr);
+					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr , (byte)RtHeapTypeKind.VECTOR);
 
 					RtArray srcArr;
 					RtArray.FindAndUpdateHeapInstancePtr(invalue.HeapPtr, this, out srcArr);
@@ -9982,15 +10002,15 @@ namespace juicescript.runtime
 						}
 					}
 
-					outvalue.SetHeapPtr(vptr);
+					outvalue.SetHeapPtr(vptr, (byte)RtHeapTypeKind.VECTOR);
 				}
 				else if (totype == TypeKind.String && invalue.ValueType == BoxType.Undefined )
 				{
-					outvalue.SetHeapPtr(TYPEOF_undefined_STR);
+					outvalue.SetHeapPtr(TYPEOF_undefined_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else if (totype == TypeKind.String && invalue.ValueType == BoxType.Null)
 				{
-					outvalue.SetHeapPtr(NULL_STR);
+					outvalue.SetHeapPtr(NULL_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -10283,7 +10303,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 					goto lbl_multiname_success;
 				}
@@ -10306,7 +10326,7 @@ namespace juicescript.runtime
 					closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = as_type;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-					stackslots[stack.index].SetHeapPtr(m_closurePtr);
+					stackslots[stack.index].SetHeapPtr(m_closurePtr , (byte)RtHeapTypeKind.CLOSURE);
 
 					goto lbl_multiname_success;
 
@@ -10349,7 +10369,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 					goto lbl_multiname_success;
 
@@ -10363,14 +10383,14 @@ namespace juicescript.runtime
 					//if (string.CompareOrdinal(name, "valueOf") == 0)
 					if(name.CompareTo("valueOf", StringComparison.Ordinal) == 0)
 					{
-						searchPtr.SetHeapPtr(VALUEOF_STR);
+						searchPtr.SetHeapPtr(VALUEOF_STR, (byte)RtHeapTypeKind.STRING);
 					}
 					else if (
 						//string.CompareOrdinal(name, "toString") == 0
 						name.CompareTo("toString",StringComparison.Ordinal) == 0
 						)
 					{
-						searchPtr.SetHeapPtr(TOSTRING_STR);
+						searchPtr.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 					}
 					else
 					{
@@ -10405,7 +10425,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 
 
@@ -10455,7 +10475,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 					goto lbl_multiname_success;
 				}
 				else if (m_count == 1)
@@ -10474,7 +10494,7 @@ namespace juicescript.runtime
 					closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = as_type;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-					stackslots[stack.index].SetHeapPtr(m_closurePtr);
+					stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 
 					goto lbl_multiname_success;
 				}
@@ -10516,7 +10536,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer , (byte)RtHeapTypeKind.STACK_CACHE_OBJ );
 
 					goto lbl_multiname_success;
 
@@ -10553,14 +10573,14 @@ namespace juicescript.runtime
 							name.CompareTo( "valueOf", StringComparison.Ordinal) == 0
 							)
 						{
-							searchPtr.SetHeapPtr(VALUEOF_STR);
+							searchPtr.SetHeapPtr(VALUEOF_STR, (byte)RtHeapTypeKind.STRING);
 						}
 						else if (
 							//string.CompareOrdinal(name, "toString") == 0
 							name.CompareTo( "toString", StringComparison.Ordinal) == 0
 							)
 						{
-							searchPtr.SetHeapPtr(TOSTRING_STR);
+							searchPtr.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 						}
 						else
 						{
@@ -10569,7 +10589,7 @@ namespace juicescript.runtime
 
 							if (name_strptr != 0)
 							{
-								searchPtr.SetHeapPtr(name_strptr);
+								searchPtr.SetHeapPtr(name_strptr, (byte)RtHeapTypeKind.STRING);
 							}
 							else if (!TryCreateStringValue(name, out searchPtr, ref error))
 							{
@@ -10609,7 +10629,7 @@ namespace juicescript.runtime
 							cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 							cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = searchPtr;
 
-							stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+							stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 
 						}
@@ -10623,7 +10643,7 @@ namespace juicescript.runtime
 							cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 							cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-							stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+							stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 						}
 
@@ -10649,14 +10669,14 @@ namespace juicescript.runtime
 						name.CompareTo( "valueOf", StringComparison.Ordinal) == 0
 						)
 					{
-						searchPtr.SetHeapPtr(VALUEOF_STR);
+						searchPtr.SetHeapPtr(VALUEOF_STR, (byte)RtHeapTypeKind.STRING);
 					}
 					else if (
 						//string.CompareOrdinal(name, "toString") == 0
 						name.CompareTo("toString", StringComparison.Ordinal)==0
 						)
 					{
-						searchPtr.SetHeapPtr(TOSTRING_STR);
+						searchPtr.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 					}
 					else
 					{
@@ -10691,7 +10711,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 					goto lbl_multiname_dynamicprop;
 				}
@@ -10716,7 +10736,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 					goto lbl_multiname_success;
 				}
@@ -10743,12 +10763,13 @@ namespace juicescript.runtime
 
 					Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
 					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
-					closure.This.SetHeapPtr(instance.HeapPtr);
+					//closure.This.SetHeapPtr(instance.HeapPtr);
+					closure.This = instance;
 					closure.ScopePtr = instance.HeapPtr;
 					closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = Context.FUNCTION.Instance;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-					stackslots[stack.index].SetHeapPtr(m_closurePtr);
+					stackslots[stack.index].SetHeapPtr(m_closurePtr,(byte)RtHeapTypeKind.CLOSURE);
 
 					goto lbl_multiname_success;
 				}
@@ -10790,7 +10811,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = Context.FUNCTION.Instance;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 					goto lbl_multiname_success;
 
@@ -10806,14 +10827,14 @@ namespace juicescript.runtime
 						name.CompareTo("valueOf", StringComparison.Ordinal) == 0
 						)
 					{
-						searchPtr.SetHeapPtr(VALUEOF_STR);
+						searchPtr.SetHeapPtr(VALUEOF_STR, (byte)RtHeapTypeKind.STRING);
 					}
 					else if (
 						//string.CompareOrdinal(name, "toString") == 0
 						name.CompareTo( "toString", StringComparison.Ordinal) == 0
 						)
 					{
-						searchPtr.SetHeapPtr(TOSTRING_STR);
+						searchPtr.SetHeapPtr(TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
 					}
 					else
 					{
@@ -10848,7 +10869,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName = searchPtr; cachePayload.as_type = as_type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 					goto lbl_multiname_dynamicprop;
 				}
@@ -11480,7 +11501,7 @@ namespace juicescript.runtime
 				((RtInstance)cache).Init(cscope, Context.player, initmember);
 			}
 
-			Context.StackSlots[slotindex].SetHeapPtr(cache_ptr);
+			Context.StackSlots[slotindex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
 			return cache_ptr;
 		}
 
@@ -11562,7 +11583,7 @@ namespace juicescript.runtime
 						//stackslots[target.index].SetHeapPtr(closurePtr);
 
 						NaNBoxing v = new NaNBoxing();
-						v.SetHeapPtr(closurePtr);
+						v.SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 						v = GetSaveValue(v, ref error);
 						if (error.raised)
 						{
@@ -11630,7 +11651,7 @@ namespace juicescript.runtime
 						ASTrait t = s.Type._link_codescope.Members[heapLocater.MemberIndex].trait;
 
 						NaNBoxing v = new NaNBoxing();
-						v.SetHeapPtr(closurePtr);
+						v.SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 
 						PrepareSaveMethodScope((RtMethodScope)s, ref heapLocater, ref v, m_scope, method_scopes, ref error);
 						if (error.raised)
@@ -11678,7 +11699,7 @@ namespace juicescript.runtime
 				((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
 				((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
-				stackslots[target.index].SetHeapPtr(closurePtr);
+				stackslots[target.index].SetHeapPtr(closurePtr , (byte)RtHeapTypeKind.CLOSURE);
 				closure_instance = closure;
 				return closurePtr;
 			}
@@ -11882,7 +11903,7 @@ namespace juicescript.runtime
 
 					Context.StackPosition += 2;
 
-					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS);
 					unsafe
 					{
 						StackLocater* args = stackalloc StackLocater[2];
@@ -12534,7 +12555,7 @@ namespace juicescript.runtime
 
 					Context.StackPosition += 2;
 
-					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__ , (byte)RtHeapTypeKind.CLASS );
 					unsafe
 					{
 						StackLocater* args = stackalloc StackLocater[2];
@@ -12825,7 +12846,7 @@ namespace juicescript.runtime
 
 					Context.StackPosition += 2;
 
-					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS);
 					unsafe
 					{
 						StackLocater* args = stackalloc StackLocater[2];
@@ -13018,7 +13039,7 @@ namespace juicescript.runtime
 
 					Context.StackPosition += 2;
 
-					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS );
 					unsafe
 					{
 						StackLocater* args = stackalloc StackLocater[2];
@@ -13181,7 +13202,7 @@ namespace juicescript.runtime
 
 					Context.StackPosition += 2;
 
-					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS);
 					unsafe
 					{
 						StackLocater* args = stackalloc StackLocater[2];
@@ -14467,7 +14488,7 @@ namespace juicescript.runtime
 									}
 								}
 
-								stackslots[stackLocater.index].SetHeapPtr(@class.__instance_index__);
+								stackslots[stackLocater.index].SetHeapPtr(@class.__instance_index__ , (byte)RtHeapTypeKind.CLASS);
 
 							}
 							break;
@@ -14495,7 +14516,7 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								stackslots[stackLocater.index].SetHeapPtr(vector.vector_class.__instance_index__);
+								stackslots[stackLocater.index].SetHeapPtr(vector.vector_class.__instance_index__ , (byte)RtHeapTypeKind.CLASS );
 
 							}
 							break;
@@ -14523,7 +14544,7 @@ namespace juicescript.runtime
 
 #endif
 
-								stackslots[stackLocater.index].SetHeapPtr(boxing.HeapPtr);
+								stackslots[stackLocater.index] = boxing; //.SetHeapPtr(boxing.HeapPtr);
 
 							}
 							break;
@@ -14577,7 +14598,7 @@ namespace juicescript.runtime
 												ASNamespace @namespace = null;
 												if (_obj.searchNameSpacePtr > 0)
 												{
-													ns.SetHeapPtr(_obj.searchNameSpacePtr);
+													ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE);
 													RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
 													@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 													_obj.searchNameSpacePtr = 0;
@@ -14718,7 +14739,7 @@ namespace juicescript.runtime
 
 
 														NaNBoxing _this = new NaNBoxing();
-														_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
+														_this = _obj.RefInstance; //.SetHeapPtr(_obj.RefInstance.HeapPtr);
 
 														NaNBoxing result = RunMethod(((ASInstance)refObj.Type).indexer_delete, _this,
 															_obj.RefInstance.HeapPtr, refObj.Type, 1, (byte*)tmpArgLoc, argSpan, ref error, stackStPos + stack.index);
@@ -15069,7 +15090,7 @@ namespace juicescript.runtime
 									cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 									cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = prop_name;
 
-									stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+									stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 									break;
 								}
@@ -15235,7 +15256,7 @@ namespace juicescript.runtime
 										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.SetUInt(array_i);
 
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 										break;
 
@@ -15453,8 +15474,8 @@ namespace juicescript.runtime
 								var ns_set = c_scope.Type._link_codescope.NamespaceSet;
 
 								bool deepsearch = false;//如果是从instance的methodscope开始查找说明要继续查找静态成员-基类静态成员
-								int instancePtr = 0;
-								int o_instancePtr = 0;
+								NaNBoxing instancePtr = default;instancePtr.SetNull();
+								NaNBoxing o_instancePtr =default; o_instancePtr.SetNull();
 								RtHeapBase o_instance = null;
 
 								CodeScope primitive_codescope = null;
@@ -15508,12 +15529,15 @@ namespace juicescript.runtime
 								instance = Context.GC.Heap[instance_box.HeapPtr];
 								o_instance = instance;
 
-								instancePtr = instance_box.HeapPtr;
+								instancePtr = instance_box;
 								//RTQName查找 -- 由于自定义命名空间只会在class级别定义，所以实际上只需要查找 静态成员 或者 类成员-继承的类成员-静态成员-基类静态成员找即可。
 								while (instance.Kind == RtHeapTypeKind.MethodScope)
 								{
-									instancePtr = ((RtMethodScope)instance).ParentPtr;
-									instance = Context.GC.Heap[instancePtr];
+									int parent = ((RtMethodScope)instance).ParentPtr;
+									instance = Context.GC.Heap[parent];
+
+									instancePtr.SetHeapPtr(parent, (byte)instance.Kind); //= ((RtMethodScope)instance).ParentPtr;
+									
 									deepsearch = true;
 								}
 								o_instancePtr = instancePtr;
@@ -15666,7 +15690,7 @@ namespace juicescript.runtime
 										cachePayload.scopemember_index = (ushort)i;
 										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 										goto lbl_rtqname_success;
 									}
 									else if (m_idx > -1)
@@ -15683,7 +15707,7 @@ namespace juicescript.runtime
 										closure.ScopeType = vitem.DefineAt;
 										closure._ref_as_type = as_type;
 										closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-										stackslots[stack.index].SetHeapPtr(m_closurePtr);
+										stackslots[stack.index].SetHeapPtr(m_closurePtr , (byte)RtHeapTypeKind.CLOSURE);
 									}
 									else
 									{
@@ -15718,7 +15742,7 @@ namespace juicescript.runtime
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
 										cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = primitive_codescope.TypeLayout.ASType.Instance;
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 										goto lbl_rtqname_dynamicprop;
 
@@ -15740,7 +15764,7 @@ namespace juicescript.runtime
 									if ((member == null && m_idx < 0 && g_idx < 0 && s_idx < 0) && deepsearch)
 									{
 										scope = instance.Type._link_codescope.TypeLayout.ASType._link_codescope;
-										instancePtr = instance.Type._link_codescope.TypeLayout.ASType.__instance_index__;
+										instancePtr.SetHeapPtr( instance.Type._link_codescope.TypeLayout.ASType.__instance_index__, (byte)RtHeapTypeKind.CLASS);
 
 										issameorinherit = false; //静态成员查找跳过 protected..
 										member = searchmember(scope, searchNs, searchName, out i); //查找静态成员
@@ -15754,7 +15778,7 @@ namespace juicescript.runtime
 												break;
 
 											scope = superType._link_codescope;
-											instancePtr = ((ASClass)scope.Container).__instance_index__;
+											instancePtr.SetHeapPtr( ((ASClass)scope.Container).__instance_index__, (byte)RtHeapTypeKind.CLASS  );
 											member = searchmember(scope, searchNs, searchName, out i);
 											searchvtable(scope.Container._vtable, searchNs, searchName, out m_idx, out g_idx, out s_idx);
 
@@ -15774,13 +15798,13 @@ namespace juicescript.runtime
 #endif
 
 										RtStackCache cachePayload = (RtStackCache)cache;
-										cachePayload.RefInstance.SetHeapPtr(instancePtr);
+										cachePayload.RefInstance = instancePtr ;//.SetHeapPtr(instancePtr);
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
 										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ );
 
 
 										goto lbl_rtqname_success;
@@ -15796,12 +15820,12 @@ namespace juicescript.runtime
 
 											Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
 											RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
-											closure.This.SetHeapPtr(instancePtr);
-											closure.ScopePtr = instancePtr;
+											closure.This = instancePtr; //.SetHeapPtr(instancePtr);
+											closure.ScopePtr = instancePtr.HeapPtr;
 											closure.ScopeType = vitem.DefineAt;
 											closure._ref_as_type = as_type;
 											closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-											stackslots[stack.index].SetHeapPtr(m_closurePtr);
+											stackslots[stack.index].SetHeapPtr(m_closurePtr , (byte)RtHeapTypeKind.CLOSURE );
 
 										}
 										else
@@ -15818,7 +15842,7 @@ namespace juicescript.runtime
 #endif
 
 											RtStackCache cachePayload = (RtStackCache)cache;
-											cachePayload.RefInstance.SetHeapPtr(instancePtr);
+											cachePayload.RefInstance = instancePtr; //.SetHeapPtr(instancePtr);
 											if (g_idx > -1)
 											{
 												cachePayload.trait[0] = scope.Container._vtable.Items[g_idx].Trait;
@@ -15843,7 +15867,7 @@ namespace juicescript.runtime
 											cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 											cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-											stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+											stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 										}
 										goto lbl_rtqname_success;
@@ -15875,13 +15899,13 @@ namespace juicescript.runtime
 #endif
 
 										RtStackCache cachePayload = (RtStackCache)cache;
-										cachePayload.RefInstance.SetHeapPtr(o_instancePtr);
+										cachePayload.RefInstance = o_instancePtr; //.SetHeapPtr(o_instancePtr);
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
 										cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 
 										goto lbl_rtqname_dynamicprop;
@@ -15910,12 +15934,12 @@ namespace juicescript.runtime
 #endif
 
 										RtStackCache cachePayload = (RtStackCache)cache;
-										cachePayload.RefInstance.SetHeapPtr(instancePtr);
+										cachePayload.RefInstance = instancePtr; //.SetHeapPtr(instancePtr);
 										cachePayload.trait[0] = member.trait; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = (ushort)i;
 										cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 
 										goto lbl_rtqname_success;
@@ -15932,11 +15956,11 @@ namespace juicescript.runtime
 											Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
 											RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 											closure.This.SetNull();
-											closure.ScopePtr = instancePtr;
+											closure.ScopePtr = instancePtr.HeapPtr;
 											closure.ScopeType = vitem.DefineAt;
 											closure._ref_as_type = as_type;
 											closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-											stackslots[stack.index].SetHeapPtr(m_closurePtr);
+											stackslots[stack.index].SetHeapPtr(m_closurePtr , (byte)RtHeapTypeKind.CLOSURE );
 
 										}
 										else
@@ -15953,7 +15977,7 @@ namespace juicescript.runtime
 #endif
 
 											RtStackCache cachePayload = (RtStackCache)cache;
-											cachePayload.RefInstance.SetHeapPtr(instancePtr);
+											cachePayload.RefInstance = instancePtr; //.SetHeapPtr(instancePtr);
 											if (g_idx > -1)
 											{
 												cachePayload.trait[0] = cls.Container._vtable.Items[g_idx].Trait;
@@ -15978,7 +16002,7 @@ namespace juicescript.runtime
 											cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 											cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-											stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+											stackslots[stack.index].SetHeapPtr(cacheobjpointer , (byte)RtHeapTypeKind.STACK_CACHE_OBJ );
 
 										}
 										goto lbl_rtqname_success;
@@ -16017,12 +16041,12 @@ namespace juicescript.runtime
 #endif
 
 										RtStackCache cachePayload = (RtStackCache)cache;
-										cachePayload.RefInstance.SetHeapPtr(o_instancePtr);
+										cachePayload.RefInstance = o_instancePtr;//.SetHeapPtr(o_instancePtr);
 										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 										cachePayload.scopemember_index = 0;
 										cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
-										stackslots[stack.index].SetHeapPtr(cacheobjpointer);
+										stackslots[stack.index].SetHeapPtr(cacheobjpointer , (byte)RtHeapTypeKind.STACK_CACHE_OBJ );
 
 
 										goto lbl_rtqname_dynamicprop;
@@ -16149,7 +16173,7 @@ namespace juicescript.runtime
 										cachePayload.scopemember_index = (ushort)scopemember_index;
 										cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
-										stackslots[target.index].SetHeapPtr(cacheobjpointer);
+										stackslots[target.index].SetHeapPtr(cacheobjpointer , (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 									}
 									else if (instance.Kind == RtHeapTypeKind.INSTANCE)
@@ -16185,7 +16209,7 @@ namespace juicescript.runtime
 										cachePayload.scopemember_index = (ushort)scopemember_index;
 										cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
-										stackslots[target.index].SetHeapPtr(cacheobjpointer);
+										stackslots[target.index].SetHeapPtr(cacheobjpointer , (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 									}
 #if DEBUG
@@ -16432,14 +16456,15 @@ namespace juicescript.runtime
 								//_this_.SetHeapPtr(globalptr);
 
 								var o = methodscope; //Context.GC.Heap[scope_ptr];
-								int instancePtr = scope_ptr;
+								//int instancePtr = scope_ptr;
+								NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(scope_ptr, (byte)o.Kind);
 								do
 								{
 									if (o.Kind == RtHeapTypeKind.MethodScope)
 									{
 										RtMethodScope rtPayload = (RtMethodScope)o;
 										o = Context.GC.Heap[rtPayload.ParentPtr];
-										instancePtr = rtPayload.ParentPtr;
+										instancePtr.SetHeapPtr( rtPayload.ParentPtr,(byte)o.Kind);
 									}
 									else
 									{
@@ -16449,7 +16474,7 @@ namespace juicescript.runtime
 								} while (true);
 
 								NaNBoxing _this_ = new NaNBoxing();
-								_this_.SetHeapPtr(instancePtr);
+								_this_ = instancePtr; //.SetHeapPtr(instancePtr);
 
 
 								NaNBoxing result = RunMethod(function, _this_, scope_ptr, scopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index);
@@ -16506,8 +16531,8 @@ namespace juicescript.runtime
 									}
 
 									var globalptr = ((ASScript)s.Container).__global_index__;
-									global_obj.SetHeapPtr(globalptr);
-									_this_.SetHeapPtr(globalptr);
+									global_obj.SetHeapPtr(globalptr , (byte)RtHeapTypeKind.GLOBAL);
+									_this_.SetHeapPtr(globalptr , (byte)RtHeapTypeKind.GLOBAL);
 								}
 								else
 								{
@@ -16636,8 +16661,8 @@ namespace juicescript.runtime
 										}
 
 										var globalptr = ((ASScript)s.Container).__global_index__;
-										global_obj.SetHeapPtr(globalptr);
-										_this_.SetHeapPtr(globalptr);
+										global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+										_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
 									}
 									else
 									{
@@ -16715,7 +16740,7 @@ namespace juicescript.runtime
 									var globalptr = ((ASScript)s.Container).__global_index__;
 
 									thisValue = new NaNBoxing();
-									thisValue.SetHeapPtr(globalptr);
+									thisValue.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
 								}
 
 
@@ -16871,7 +16896,7 @@ namespace juicescript.runtime
 								((RtClosure)closure)._ref_as_type = define;
 								((RtClosure)closure).methodscopeslot_ref_state = 0;
 								((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-								stackslots[target.index].SetHeapPtr(closurePtr);
+								stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 
 							}
 							break;
@@ -16896,14 +16921,15 @@ namespace juicescript.runtime
 								else
 								{
 									var o = methodscope; //Context.GC.Heap[scope_ptr];
-									int instancePtr = scope_ptr;
+														 //int instancePtr = scope_ptr;
+									NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(scope_ptr, (byte)o.Kind);
 									do
 									{
 										if (o.Kind == RtHeapTypeKind.MethodScope)
 										{
 											RtMethodScope rtPayload = (RtMethodScope)o;
 											o = Context.GC.Heap[rtPayload.ParentPtr];
-											instancePtr = rtPayload.ParentPtr;
+											instancePtr.SetHeapPtr(rtPayload.ParentPtr, (byte)o.Kind); //= rtPayload.ParentPtr;
 										}
 										else
 										{
@@ -16912,7 +16938,7 @@ namespace juicescript.runtime
 
 									} while (true);
 									thisValue = new NaNBoxing();
-									thisValue.SetHeapPtr(instancePtr);
+									thisValue = instancePtr; //.SetHeapPtr(instancePtr);
 								}
 
 
@@ -16977,7 +17003,7 @@ namespace juicescript.runtime
 									((RtClosure)closure)._ref_as_type = define;
 									((RtClosure)closure).methodscopeslot_ref_state = 0;
 									((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-									stackslots[target.index].SetHeapPtr(closurePtr);
+									stackslots[target.index].SetHeapPtr(closurePtr , (byte)RtHeapTypeKind.CLOSURE );
 
 								}
 								else
@@ -17002,7 +17028,7 @@ namespace juicescript.runtime
 										((RtClosure)closure)._ref_as_type = define;
 										((RtClosure)closure).methodscopeslot_ref_state = 0;
 										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-										stackslots[target.index].SetHeapPtr(closurePtr);
+										stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 									}
 									else if (ins.Kind == RtHeapTypeKind.STRING)
 									{
@@ -17021,7 +17047,7 @@ namespace juicescript.runtime
 										((RtClosure)closure)._ref_as_type = define;
 										((RtClosure)closure).methodscopeslot_ref_state = 0;
 										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-										stackslots[target.index].SetHeapPtr(closurePtr);
+										stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 									}
 									else if (ins.Kind == RtHeapTypeKind.CLASS)
 									{
@@ -17040,7 +17066,7 @@ namespace juicescript.runtime
 										((RtClosure)closure).methodscopeslot_ref_state = 0;
 										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
-										stackslots[target.index].SetHeapPtr(closurePtr);
+										stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 									}
 									else if (ins.Kind == RtHeapTypeKind.CLOSURE)
 									{
@@ -17057,7 +17083,7 @@ namespace juicescript.runtime
 										((RtClosure)closure)._ref_as_type = Context.FUNCTION.Instance;
 										((RtClosure)closure).methodscopeslot_ref_state = 0;
 										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-										stackslots[target.index].SetHeapPtr(closurePtr);
+										stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 									}
 									else if (ins.Kind == RtHeapTypeKind.ARRAY)
 									{
@@ -17074,7 +17100,7 @@ namespace juicescript.runtime
 										((RtClosure)closure)._ref_as_type = Context.ARRAY.Instance;
 										((RtClosure)closure).methodscopeslot_ref_state = 0;
 										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-										stackslots[target.index].SetHeapPtr(closurePtr);
+										stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 									}
 #if DEBUG
 									else
@@ -17167,7 +17193,7 @@ namespace juicescript.runtime
 										((RtClosure)closure)._ref_as_type = define;
 										((RtClosure)closure).methodscopeslot_ref_state = 0;
 										((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-										stackslots[target.index].SetHeapPtr(closurePtr);
+										stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 									}
 #if DEBUG
 									else
@@ -17286,14 +17312,15 @@ namespace juicescript.runtime
 								else
 								{
 									var o = methodscope; //Context.GC.Heap[scope_ptr];
-									int instancePtr = scope_ptr;
+									//int instancePtr = scope_ptr;
+									NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(scope_ptr, (byte)o.Kind);
 									do
 									{
 										if (o.Kind == RtHeapTypeKind.MethodScope)
 										{
 											RtMethodScope rtPayload = (RtMethodScope)o;
 											o = Context.GC.Heap[rtPayload.ParentPtr];
-											instancePtr = rtPayload.ParentPtr;
+											instancePtr.SetHeapPtr(rtPayload.ParentPtr,(byte) o.Kind); //= rtPayload.ParentPtr;
 										}
 										else
 										{
@@ -17302,7 +17329,7 @@ namespace juicescript.runtime
 
 									} while (true);
 									thisValue = new NaNBoxing();
-									thisValue.SetHeapPtr(instancePtr);
+									thisValue = instancePtr; //.SetHeapPtr(instancePtr);
 								}
 
 								if (thisValue.ValueType == NaNBoxing.BoxType.Null)
@@ -17433,14 +17460,15 @@ namespace juicescript.runtime
 								else
 								{
 									var o = methodscope; //Context.GC.Heap[scope_ptr];
-									int instancePtr = scope_ptr;
+									//int instancePtr = scope_ptr;
+									NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(scope_ptr, (byte)o.Kind);
 									do
 									{
 										if (o.Kind == RtHeapTypeKind.MethodScope)
 										{
 											RtMethodScope rtPayload = (RtMethodScope)o;
 											o = Context.GC.Heap[rtPayload.ParentPtr];
-											instancePtr = rtPayload.ParentPtr;
+											instancePtr.SetHeapPtr(rtPayload.ParentPtr, (byte)o.Kind); //= rtPayload.ParentPtr;
 										}
 										else
 										{
@@ -17449,7 +17477,7 @@ namespace juicescript.runtime
 
 									} while (true);
 									thisValue = new NaNBoxing();
-									thisValue.SetHeapPtr(instancePtr);
+									thisValue = instancePtr ;//.SetHeapPtr(instancePtr);
 								}
 
 								if (thisValue.ValueType == NaNBoxing.BoxType.Null)
@@ -17538,7 +17566,7 @@ namespace juicescript.runtime
 
 											NaNBoxing box = stackslots[argLocater.index];
 
-											WriteFunctionProto(box, ref error, ins, thisValue.HeapPtr);
+											WriteFunctionProto(box, ref error, ins, thisValue);
 											if (error.raised)
 											{
 												goto flag_handle_error;
@@ -18115,7 +18143,7 @@ namespace juicescript.runtime
 										NaNBoxing ns = new NaNBoxing();
 										if (cacheObj.searchNameSpacePtr > 0)
 										{
-											ns.SetHeapPtr(cacheObj.searchNameSpacePtr);
+											ns.SetHeapPtr(cacheObj.searchNameSpacePtr , (byte)RtHeapTypeKind.NAMESPACE);
 											RtHeapBase ns_instance = Context.GC.Heap[cacheObj.searchNameSpacePtr];
 											@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
@@ -18316,7 +18344,7 @@ namespace juicescript.runtime
 
 
 												NaNBoxing _this = new NaNBoxing();
-												_this.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
+												_this = cacheObj.RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
 
 												RunMethod(((ASInstance)instance.Type).indexer_set, _this,
 													cacheObj.RefInstance.HeapPtr, instance.Type, 2, (byte*)tmpArgLoc, argSpan, ref error, -1);
@@ -18340,7 +18368,7 @@ namespace juicescript.runtime
 											if (cacheObj.trait[1] == Context.FUNCTION.Instance._vtable.Items[1].Trait)
 											{
 												//写Function的 prototype属性。
-												WriteFunctionProto(box, ref error, Context.GC.Heap[cacheObj.RefInstance.HeapPtr], cacheObj.RefInstance.HeapPtr);
+												WriteFunctionProto(box, ref error, Context.GC.Heap[cacheObj.RefInstance.HeapPtr], cacheObj.RefInstance);
 												if (error.raised)
 												{
 													goto flag_handle_error;
@@ -18370,7 +18398,7 @@ namespace juicescript.runtime
 												Context.StackPosition++;
 
 												NaNBoxing _this = new NaNBoxing();
-												_this.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
+												_this = cacheObj.RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
 
 												RunMethod(cacheObj.trait[1].Method, _this,
 													cacheObj.RefInstance.HeapPtr, instance.Type, 1, (byte*)&argLoc, Context.StackSlots.AsSpan(stackStPos, stackslots.Length + 1), ref error, -1);
@@ -18631,7 +18659,7 @@ namespace juicescript.runtime
 										//构造实例
 
 										RtHeapBase instance;
-										int instancePtr;
+										NaNBoxing instancePtr = default;
 
 										if (@class.Instance.Flags.HasFlag(ClassFlags.NoConstructor))
 										{
@@ -18646,8 +18674,13 @@ namespace juicescript.runtime
 										{
 											int ptrIndex = stackStPos + target.index;
 
-											instancePtr = Context.CacheVectorPtr + ptrIndex;
-											instance = Context.GC.Heap[instancePtr];
+											//instancePtr = Context.CacheVectorPtr + ptrIndex;
+											//instance = Context.GC.Heap[instancePtr];
+
+											instancePtr.SetHeapPtr( Context.CacheVectorPtr + ptrIndex, (byte)RtHeapTypeKind.VECTOR);
+											instance = Context.GC.Heap[instancePtr.HeapPtr];
+
+
 
 											instance.Type = @class.Instance;
 											((RtVector)instance).HEAPINSTANCE_PTR = 0;
@@ -18656,7 +18689,7 @@ namespace juicescript.runtime
 											//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
 											((RtVector)instance).GetStore(this).length = 0;
 
-											stackslots[target.index].SetHeapPtr(instancePtr);
+											stackslots[target.index] = instancePtr; //.SetHeapPtr(instancePtr , (byte)RtHeapTypeKind.VECTOR);
 
 											//throw new NotImplementedException();
 										}
@@ -18673,9 +18706,9 @@ namespace juicescript.runtime
 										{
 											int ptrIndex = stackStPos + target.index;
 											//instancePtr = Context.CacheInstancePtr + ptrIndex;
-											instancePtr = InitCacheInstance(@class, ptrIndex, true);
+											instancePtr.SetHeapPtr( InitCacheInstance(@class, ptrIndex, true), (byte)RtHeapTypeKind.INSTANCE );
 
-											instance = Context.GC.Heap[instancePtr];
+											instance = Context.GC.Heap[instancePtr.HeapPtr];
 
 											//instance = Context.GC.Heap[instancePtr];
 											//instance.Type = @class.Instance;
@@ -18714,8 +18747,8 @@ namespace juicescript.runtime
 												if (argsCount <= RtArray.MAX_CACHE_ELEMENT + ext_slot)
 												{
 													int ptrIndex = stackStPos + target.index;
-													instancePtr = Context.CacheArrayPtr + ptrIndex;
-													instance = Context.GC.Heap[instancePtr];
+													instancePtr.SetHeapPtr( Context.CacheArrayPtr + ptrIndex, (byte)RtHeapTypeKind.ARRAY);
+													instance = Context.GC.Heap[instancePtr.HeapPtr];
 													instance.Type = Context.ARRAY.Instance;
 
 													((RtArray)instance).array_len = 0;
@@ -18726,15 +18759,15 @@ namespace juicescript.runtime
 												}
 												else
 												{
-													instancePtr = Context.GC.AllocArray(out instance, RtArray.ArrayStoreMode.normal);
+													instancePtr.SetHeapPtr( Context.GC.AllocArray(out instance, RtArray.ArrayStoreMode.normal), (byte)RtHeapTypeKind.ARRAY);
 												}
 											}
 											else if (@class.Type_identifier == (ulong)TypeKind.String)
 											{
 												if (argsCount == 0)
 												{
-													instancePtr = EMPTY_STR;
-													stackslots[target.index].SetHeapPtr(instancePtr);
+													instancePtr.SetHeapPtr( EMPTY_STR, (byte)RtHeapTypeKind.STRING);
+													stackslots[target.index] = instancePtr; //.SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.STRING);
 
 												}
 												else if (argsCount >= 1)
@@ -18927,7 +18960,7 @@ namespace juicescript.runtime
 													((RtClosure)closure)._ref_as_type = define;
 													((RtClosure)closure).methodscopeslot_ref_state = 0;
 													((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-													stackslots[target.index].SetHeapPtr(closurePtr);
+													stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE);
 
 
 													break;
@@ -18935,17 +18968,17 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												instancePtr = Context.GC.AllocInstance(@class.Instance, out instance);
+												instancePtr.SetHeapPtr( Context.GC.AllocInstance(@class.Instance, out instance), (byte)RtHeapTypeKind.INSTANCE);
 											}
 
-											if (instancePtr == 0)
+											if (instancePtr.HeapPtr == 0)
 											{
 												//throw new NotImplementedException("out of memory");
 												RaiseOutOfMemory(ref error);
 												goto flag_handle_error;
 											}
 
-											stackslots[target.index].SetHeapPtr(instancePtr);
+											stackslots[target.index] = instancePtr; //.SetHeapPtr(instancePtr);
 
 
 
@@ -18953,7 +18986,7 @@ namespace juicescript.runtime
 
 
 										//执行构造函数
-										RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
+										RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
 										if (error.raised)
 										{
 											goto flag_handle_error;
@@ -18967,7 +19000,7 @@ namespace juicescript.runtime
 										{
 											goto flag_handle_error;
 										}
-										type_box.SetHeapPtr(constructor_box.HeapPtr);
+										type_box = constructor_box; //.SetHeapPtr(constructor_box.HeapPtr);
 										var constructor_closure = Context.GC.Heap[type_box.HeapPtr];
 
 										if (((ASMethodBody)constructor_closure.Type).Method.__ismethod ||
@@ -19030,7 +19063,7 @@ namespace juicescript.runtime
 										((RtInstance)instance).Set_PROTOTYPE(function_proto, this);
 										((RtInstance)instance).methodscopeslot_ref_state = 0;
 
-										Context.StackSlots[ptrIndex].SetHeapPtr(instancePtr);
+										Context.StackSlots[ptrIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.INSTANCE);
 
 
 										var constructor = ((ASMethodBody)type.Type).Method;
@@ -19084,7 +19117,7 @@ namespace juicescript.runtime
 												((RtInstance)target_ins).methodscopeslot_ref_state = 0;
 												((RtInstance)target_ins).CopyFrom(instance, this, 0);
 
-												stackslots[target.index].SetHeapPtr(target_instancePtr);
+												stackslots[target.index].SetHeapPtr(target_instancePtr , (byte)RtHeapTypeKind.INSTANCE);
 											}
 											else
 											{
@@ -19110,7 +19143,7 @@ namespace juicescript.runtime
 
 
 #endif
-												stackslots[target.index].SetHeapPtr(src_ptr);
+												stackslots[target.index].SetHeapPtr(src_ptr, (byte)RtHeapTypeKind.INSTANCE);
 											}
 										}
 
@@ -19283,7 +19316,7 @@ namespace juicescript.runtime
 
 											Context.StackPosition += 1;
 
-											NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+											NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS);
 
 											StackLocater args = default; args.index = 0;
 											RunMethod(negmethod, cls, scope_ptr, @class, 1, (byte*)&args, slots, ref error, stackStPos + dst.index);
@@ -19397,7 +19430,7 @@ namespace juicescript.runtime
 
 											Context.StackPosition += 1;
 
-											NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__);
+											NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS);
 
 											StackLocater args = default; args.index = 0;
 											RunMethod(negmethod, cls, scope_ptr, @class, 1, (byte*)&args, slots, ref error, stackStPos + dst.index);
@@ -19827,7 +19860,7 @@ namespace juicescript.runtime
 									switch (type.ValueType)
 									{
 										case BoxType.Number:
-											type.SetHeapPtr(Context.NUMBER.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.NUMBER.__instance_index__, (byte)RtHeapTypeKind.CLASS ); isvaluebox = true;
 											break;
 										case BoxType.Undefined:
 											RaiseTypeError_ATermUndefined(ref error);
@@ -19836,28 +19869,28 @@ namespace juicescript.runtime
 											RaiseTypeError_AccessNull(ref error);
 											goto flag_handle_error;
 										case BoxType.Boolean:
-											type.SetHeapPtr(Context.BOOLEAN.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.BOOLEAN.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.Int:
-											type.SetHeapPtr(Context.INT.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.INT.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.Uint:
-											type.SetHeapPtr(Context.UINT.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.UINT.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.Sbyte:
-											type.SetHeapPtr(Context.SBYTE.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.SBYTE.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.Byte:
-											type.SetHeapPtr(Context.BYTE.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.BYTE.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.Short:
-											type.SetHeapPtr(Context.SHORT.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.SHORT.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.UShort:
-											type.SetHeapPtr(Context.USHORT.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.USHORT.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.Float:
-											type.SetHeapPtr(Context.FLOAT.__instance_index__); isvaluebox = true;
+											type.SetHeapPtr(Context.FLOAT.__instance_index__, (byte)RtHeapTypeKind.CLASS); isvaluebox = true;
 											break;
 										case BoxType.HeapPtr:
 										case BoxType.Fault:
@@ -20179,13 +20212,13 @@ namespace juicescript.runtime
 								switch (v.ValueType)
 								{
 									case BoxType.Undefined:
-										stackslots[dst.index].SetHeapPtr(TYPEOF_undefined_STR);
+										stackslots[dst.index].SetHeapPtr(TYPEOF_undefined_STR, (byte)RtHeapTypeKind.STRING);
 										break;
 									case BoxType.Null:
-										stackslots[dst.index].SetHeapPtr(TYPEOF_object_STR);
+										stackslots[dst.index].SetHeapPtr(TYPEOF_object_STR, (byte)RtHeapTypeKind.STRING);
 										break;
 									case BoxType.Boolean:
-										stackslots[dst.index].SetHeapPtr(TYPEOF_boolean_STR);
+										stackslots[dst.index].SetHeapPtr(TYPEOF_boolean_STR, (byte)RtHeapTypeKind.STRING);
 										break;
 									case BoxType.Number:
 									case BoxType.Int:
@@ -20195,17 +20228,17 @@ namespace juicescript.runtime
 									case BoxType.Short:
 									case BoxType.UShort:
 									case BoxType.Float:
-										stackslots[dst.index].SetHeapPtr(TYPEOF_number_STR);
+										stackslots[dst.index].SetHeapPtr(TYPEOF_number_STR, (byte)RtHeapTypeKind.STRING);
 										break;
 									case BoxType.LocalString:
-										stackslots[dst.index].SetHeapPtr(TYPEOF_string_STR);
+										stackslots[dst.index].SetHeapPtr(TYPEOF_string_STR, (byte)RtHeapTypeKind.STRING);
 										break;
 									case BoxType.HeapPtr:
 										RtHeapBase instance = Context.GC.Heap[v.HeapPtr];
 										switch (instance.Kind)
 										{
 											case RtHeapTypeKind.STRING:
-												stackslots[dst.index].SetHeapPtr(TYPEOF_string_STR);
+												stackslots[dst.index].SetHeapPtr(TYPEOF_string_STR, (byte)RtHeapTypeKind.STRING);
 												break;
 											case RtHeapTypeKind.CLASS:
 											case RtHeapTypeKind.GLOBAL:
@@ -20213,10 +20246,10 @@ namespace juicescript.runtime
 											case RtHeapTypeKind.NAMESPACE:
 											case RtHeapTypeKind.ARRAY:
 											case RtHeapTypeKind.VECTOR:
-												stackslots[dst.index].SetHeapPtr(TYPEOF_object_STR);
+												stackslots[dst.index].SetHeapPtr(TYPEOF_object_STR, (byte)RtHeapTypeKind.STRING);
 												break;
 											case RtHeapTypeKind.CLOSURE:
-												stackslots[dst.index].SetHeapPtr(TYPEOF_function_STR);
+												stackslots[dst.index].SetHeapPtr(TYPEOF_function_STR, (byte)RtHeapTypeKind.STRING);
 												break;
 #if DEBUG
 											case RtHeapTypeKind.STACK_CACHE_OBJ:
@@ -20919,7 +20952,7 @@ namespace juicescript.runtime
 										{
 											goto flag_handle_error;
 										}
-										stackslots[instance.index].SetHeapPtr(heaparr);
+										stackslots[instance.index].SetHeapPtr(heaparr, (byte)RtHeapTypeKind.ARRAY);
 									}
 
 									SetArraySlot(stackslots[dst_index], (uint)index, Context.GC.Heap[arr.HeapPtr], ref error);
@@ -21374,7 +21407,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 #endif
 								NaNBoxing iterCtxValue = default;
-								iterCtxValue.SetHeapPtr(iter_context_ptr);
+								iterCtxValue.SetHeapPtr(iter_context_ptr, (byte)RtHeapTypeKind.INSTANCE);
 								heap.SetSlot(iterCtxValue, iterContextVar.MemberIndex);
 							}
 							break;
@@ -21713,7 +21746,7 @@ namespace juicescript.runtime
 												((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
 												((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
 
-												key.SetHeapPtr(clonedptr);
+												key.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
 
 											}
 										}
@@ -21740,7 +21773,7 @@ namespace juicescript.runtime
 												((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
 												((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
 
-												value.SetHeapPtr(clonedptr);
+												value.SetHeapPtr(clonedptr , (byte)RtHeapTypeKind.INSTANCE);
 
 											}
 										}
@@ -21884,7 +21917,7 @@ namespace juicescript.runtime
 									{
 										if (exception_ctx->FINALLY_JUMPTO_PTR == null) //如果不为空，说明有迭代过程中出现了跳转到外部的情况
 										{
-											stackslots[insLoc.index].SetHeapPtr(proto);
+											stackslots[insLoc.index].SetHeapPtr(proto, (byte)Context.GC.Heap[proto].Kind );
 											//跳回get_iter,访问_proto_.
 											exception_ctx->FINALLY_JUMPTO_PTR = iter_ctx_wapper.PC;
 										}

@@ -1056,9 +1056,18 @@ namespace juicescript
             }
         }
 
-        public void SetHeapPtr(int indexofheap)
+#if DEBUG
+        public static Action<int,byte> _setheapptr_validator;
+#endif
+        public void SetHeapPtr(int indexofheap,byte heapkind)
         {
-            store = TAG_HEAP_POINTER | (uint)indexofheap;
+#if DEBUG
+            if (_setheapptr_validator != null)
+            { 
+                _setheapptr_validator(indexofheap, heapkind);
+            }
+#endif
+		    store = TAG_HEAP_POINTER | ((ulong)heapkind << 32)  | (uint)indexofheap;
         }
 
         public int HeapPtr
@@ -1066,6 +1075,14 @@ namespace juicescript
             get
             {
                 return (int)(store & 0xffffffff);
+            }
+        }
+
+        public byte HeapKind
+        {
+            get
+            { 
+                return (byte)((store >> 32) & 0xff);
             }
         }
 

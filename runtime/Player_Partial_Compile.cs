@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Security.Claims;
@@ -15,6 +16,17 @@ namespace juicescript.runtime
 
 		public void PrepareComputeConstExpr()
 		{
+
+#if DEBUG
+			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+				if (ptr != 0 && kind != 255)
+				{
+					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
+				}
+			};
+
+#endif
+
 			CheckRequires();
 
 			if (Context.OBJECT == null)
@@ -85,6 +97,16 @@ namespace juicescript.runtime
 
 		public void PrepareComputeMemberInitValue()
 		{
+#if DEBUG
+			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+				if (ptr != 0 && kind != 255)
+				{
+					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
+				}
+			};
+
+#endif
+
 			CheckRequires();
 
 			if (Context.OBJECT == null)
@@ -179,6 +201,17 @@ namespace juicescript.runtime
 		public NaNBoxing ComputeMemberInitValue(ScopeMember member, ASMethod method, SWCFile testswc, byte[] constpoolbytecode, 
 			List<NaNBoxing> method_const, List<Tuple<int, ASClass>> list,bool loadfromcache)
 		{
+#if DEBUG
+			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+				if (ptr != 0 && kind != 255)
+				{
+					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
+				}
+			};
+
+#endif
+
+
 			if (computemember_cacheinstance == null)
 			{
 				computemember_cacheinstance = new List<int>();
@@ -301,7 +334,7 @@ namespace juicescript.runtime
 
 						var globalinstance = Context.GC.Heap[((ASScript)c._link_codescope.Container).__global_index__];
 
-						thisP.SetHeapPtr(((ASScript)c._link_codescope.Container).__global_index__);
+						thisP.SetHeapPtr(((ASScript)c._link_codescope.Container).__global_index__, (byte)RtHeapTypeKind.GLOBAL);
 
 						try
 						{
@@ -370,7 +403,7 @@ namespace juicescript.runtime
 						{
 							Context.StackPosition++;
 							NaNBoxing thisP = default;
-							thisP.SetHeapPtr(instancePtr);
+							thisP.SetHeapPtr(instancePtr,(byte)instance.Kind);
 							RunMethod(method, thisP, instancePtr, @type.Instance, 0, null, Context.StackSlots, ref error, -1);
 							if (error.raised)
 							{
@@ -487,7 +520,7 @@ namespace juicescript.runtime
 							
 
 							var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
-							thisP.SetHeapPtr(((ASScript)scope.Container).__global_index__);
+							thisP.SetHeapPtr(((ASScript)scope.Container).__global_index__ , (byte)RtHeapTypeKind.GLOBAL);
 
 							if (info.useSlots > Context.StackSlots.Length)
 							{
@@ -645,7 +678,7 @@ namespace juicescript.runtime
 							NaNBoxing thisP = default;
 							if (!hassetparent)
 							{
-								thisP.SetHeapPtr(this_instancePtr);
+								thisP.SetHeapPtr(this_instancePtr, (byte)this_instance.Kind);
 							}
 							else
 							{
@@ -750,6 +783,16 @@ namespace juicescript.runtime
 
 		public NaNBoxing ComputeConstExpr(ASMethod method, SWCFile testswc, int compute_result_index)
 		{
+#if DEBUG
+			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+				if (ptr != 0 && kind != 255)
+				{
+					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
+				}
+			};
+
+#endif
+
 			if (computemember_cacheinstance == null)
 			{
 				computemember_cacheinstance = new List<int>();
@@ -909,10 +952,10 @@ namespace juicescript.runtime
 					}
 					else if (scope.Kind == CodeScopeKind.Instance)
 					{
-						int this_instancePtr;
+						NaNBoxing this_instancePtr = default; this_instancePtr.SetNull();
 						if (((ASInstance)scope.Container).IsInterface)
 						{
-							this_instancePtr = 0;
+							this_instancePtr.SetNull();
 						}
 						else
 						{
@@ -954,21 +997,27 @@ namespace juicescript.runtime
 							}
 
 							//构造实例
-							RtHeapBase this_instance;
-							
-							this_instancePtr = computemember_cacheinstance[cache_idx];
-							this_instance = Context.GC.Heap[this_instancePtr];
+							RtHeapBase this_instance  ;
 
-							((RtMethodScope)Context.GC.Heap[methodscopeptr]).ParentPtr = this_instancePtr;
+							//this_instancePtr = computemember_cacheinstance[cache_idx];
+							//this_instance = Context.GC.Heap[this_instancePtr];
+
+							int t = computemember_cacheinstance[cache_idx];
+							this_instance = Context.GC.Heap[t];
+							this_instancePtr.SetHeapPtr(t, (byte)this_instance.Kind);
+
+
+
+							((RtMethodScope)Context.GC.Heap[methodscopeptr]).ParentPtr = t;  //this_instancePtr;
 						}
 
 						var scopeinstance = Context.GC.Heap[run_methodscope];
 						scopeinstance.Type = method.Body;
 
 						NaNBoxing thisP = default;
-						if (!hassetparent && this_instancePtr !=0)
+						if (!hassetparent && this_instancePtr.ValueType != NaNBoxing.BoxType.Null)
 						{
-							thisP.SetHeapPtr(this_instancePtr);
+							thisP = this_instancePtr; //.SetHeapPtr(this_instancePtr);
 						}
 						else
 						{

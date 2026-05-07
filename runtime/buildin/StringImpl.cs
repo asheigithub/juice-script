@@ -222,7 +222,7 @@ namespace juicescript.runtime.buildin
 
 				if (i < 0 || i > len - 1)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -240,7 +240,7 @@ namespace juicescript.runtime.buildin
 
 				if (i < 0 || i > len - 1)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -893,7 +893,7 @@ namespace juicescript.runtime.buildin
 
 				if (startIdx >= endIdx)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -958,7 +958,7 @@ namespace juicescript.runtime.buildin
 
 				if (startIdx >= endIdx)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -1070,7 +1070,7 @@ namespace juicescript.runtime.buildin
 				((RtArray)instance).HEAPINSTANCE_PTR = 0;
 
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY);
 
 
 				var arr_payload = (RtArray)context.GC.Heap[instancePtr];
@@ -1141,7 +1141,7 @@ namespace juicescript.runtime.buildin
 							}
 							instance = context.GC.Heap[instancePtr];
 							arr_payload = (RtArray)instance;
-							context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr);
+							context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY);
 
 
 							context.GC.CheckGC(ref error);
@@ -1270,7 +1270,7 @@ namespace juicescript.runtime.buildin
 
 				if (startIdx >= endIdx)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -1322,7 +1322,7 @@ namespace juicescript.runtime.buildin
 
 				if (startIdx >= endIdx)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -1395,7 +1395,7 @@ namespace juicescript.runtime.buildin
 				if (startIdx < 0) startIdx = 0;
 				if (startIdx >= strLen)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 					return;
 				}
 
@@ -1406,7 +1406,7 @@ namespace juicescript.runtime.buildin
 
 				if (len <= 0)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -1451,7 +1451,7 @@ namespace juicescript.runtime.buildin
 				if (startIdx < 0) startIdx = 0;
 				if (startIdx >= strLen)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 					return;
 				}
 
@@ -1462,7 +1462,7 @@ namespace juicescript.runtime.buildin
 
 				if (len <= 0)
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
 				}
 				else
 				{
@@ -1983,7 +1983,7 @@ namespace juicescript.runtime.buildin
 
 			else if (val.ValueType == NaNBoxing.BoxType.Undefined)
 			{
-				val.SetHeapPtr(context.player.TYPEOF_undefined_STR);
+				val.SetHeapPtr(context.player.TYPEOF_undefined_STR, (byte)RtHeapTypeKind.STRING);
 			}
 
 

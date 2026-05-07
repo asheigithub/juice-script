@@ -64,7 +64,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING);
 		}
 
 		[NativeFunction("$geom.Vector2$private::Vec2addVec2")]

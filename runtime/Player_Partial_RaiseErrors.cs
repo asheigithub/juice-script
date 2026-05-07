@@ -25,17 +25,17 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_ATERM_UNDEFINED);
+				naNBoxing.SetHeapPtr(cache_ATERM_UNDEFINED, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -53,17 +53,17 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_MUSTVINALLA);
+				naNBoxing.SetHeapPtr(cache_MUSTVINALLA, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 		}
@@ -81,17 +81,17 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_Instantiation_non_constructor);
+				naNBoxing.SetHeapPtr(cache_Instantiation_non_constructor, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -109,7 +109,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -120,16 +120,16 @@ namespace juicescript.runtime
 				int messagePtr = Context.GC.AllocString($"Cannot call method Function/{( method.Trait == null ? GetMethodKey(method)  : method.Trait.ToDebugPropertyName() )} as constructor."); ;
 				if (messagePtr != 0)
 				{
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -147,17 +147,17 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_TYPE_ERROR_NAME);
+				errName.SetHeapPtr(cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.TYPE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
 				RtInstance payloadInstance = (RtInstance)error_instance;
 
 				NaNBoxing naNBoxing = new NaNBoxing();
-				naNBoxing.SetHeapPtr(cache_instanceof_error);
+				naNBoxing.SetHeapPtr(cache_instanceof_error, (byte)RtHeapTypeKind.STRING);
 				payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -177,7 +177,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -262,17 +262,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 			}
 
@@ -293,7 +293,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -306,17 +306,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 
@@ -335,7 +335,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -344,17 +344,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 			}
 
@@ -374,7 +374,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -383,17 +383,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 			}
 
@@ -411,7 +411,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -420,17 +420,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 			}
 
@@ -452,7 +452,7 @@ namespace juicescript.runtime
 			{
 
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ERROR_NAME);
+				errName.SetHeapPtr(cache_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, Context.REFERENCE_ERROR.Instance._link_codescope, this);
 
 				RtHeapBase error_instance = _temp;
@@ -480,17 +480,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, error_instance.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 
@@ -508,7 +508,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -517,17 +517,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 			}
 
@@ -546,7 +546,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME);
+				errName.SetHeapPtr(cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -555,17 +555,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 
 			}
 
@@ -586,7 +586,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ARGEMENT_ERROR_NAME);
+				errName.SetHeapPtr(cache_ARGEMENT_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -600,17 +600,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -631,7 +631,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_ARGEMENT_ERROR_NAME);
+				errName.SetHeapPtr(cache_ARGEMENT_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 				RtInstance payloadInstance = (RtInstance)_temp;
@@ -642,17 +642,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 		}
 
@@ -676,7 +676,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_RANGE_ERROR_NAME);
+				errName.SetHeapPtr(cache_RANGE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 
@@ -689,17 +689,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 
@@ -716,7 +716,7 @@ namespace juicescript.runtime
 			else
 			{
 				NaNBoxing errName = new NaNBoxing();
-				errName.SetHeapPtr(cache_RANGE_ERROR_NAME);
+				errName.SetHeapPtr(cache_RANGE_ERROR_NAME, (byte)RtHeapTypeKind.STRING);
 				((RtInstance)_temp).SetSlot(errName, 1, _temp.Type._link_codescope, this);
 
 
@@ -727,17 +727,17 @@ namespace juicescript.runtime
 				if (messagePtr != 0)
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(messagePtr);
+					naNBoxing.SetHeapPtr(messagePtr, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 				else
 				{
 					NaNBoxing naNBoxing = new NaNBoxing();
-					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR);
+					naNBoxing.SetHeapPtr(cache_OUTOFMEMORY_STR, (byte)RtHeapTypeKind.STRING);
 					payloadInstance.SetSlot(naNBoxing, 0, _temp.Type._link_codescope, this);
 				}
 
-				error.error.SetHeapPtr(errPtr);
+				error.error.SetHeapPtr(errPtr, (byte)RtHeapTypeKind.INSTANCE);
 			}
 
 

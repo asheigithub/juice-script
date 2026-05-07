@@ -23,10 +23,32 @@ namespace compilerTests
                 Assert.AreEqual(boxing.IntValue, i);
 
             }
+        }
 
-            
+
+        [TestMethod]
+        public void TestBoxHeapPtr()
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                for (int j = 0; j < short.MaxValue; j++)
+                {
+                    NaNBoxing boxing = new NaNBoxing();
+
+                    boxing.SetHeapPtr(j, (byte)i);
+
+                    Assert.AreEqual(boxing.HeapPtr, j);
+                    Assert.AreEqual(boxing.HeapKind, i);
+
+                }
+            }
+
 
         }
+
+
+
+
 
         //[TestMethod]
         public void TestBoxUInt()
@@ -253,7 +275,7 @@ namespace compilerTests
 
 			{
 
-                a.SetHeapPtr(0);
+                a.SetHeapPtr(0,255);
 				b.SetNumber(3);
 
 				bool eq;

@@ -61,25 +61,25 @@ namespace juicescript.runtime.buildin
 
 			if (double.IsNaN(x))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr( context.player.NAN_STR );
+				context.StackSlots[returnSlotIndex].SetHeapPtr( context.player.NAN_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
 			if (x == 0)
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.ZERO_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.ZERO_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
 			if (double.IsPositiveInfinity(x) || x >= double.MaxValue)
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.POSITIVEINF_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.POSITIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
 			if (double.IsNegativeInfinity(x) || x <= double.MinValue)
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NEGATIVEINF_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NEGATIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
@@ -92,7 +92,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 		}
 
 
@@ -117,13 +117,13 @@ namespace juicescript.runtime.buildin
 
 			if (double.IsNaN(x))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
 			if (double.IsInfinity(x))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(double.IsNegativeInfinity(x) ? context.player.NEGATIVEINF_STR : context.player.POSITIVEINF_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(double.IsNegativeInfinity(x) ? context.player.NEGATIVEINF_STR : context.player.POSITIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
@@ -156,7 +156,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 			}
 			else
 			{
@@ -204,7 +204,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 			}
 		}
 
@@ -239,7 +239,7 @@ namespace juicescript.runtime.buildin
 
 			if (double.IsNaN(x))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
@@ -298,7 +298,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 
 			;
 
@@ -330,13 +330,13 @@ namespace juicescript.runtime.buildin
 
 			if (double.IsNaN(x))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
 			if (double.IsInfinity(x))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(double.IsNegativeInfinity(x) ? context.player.NEGATIVEINF_STR : context.player.POSITIVEINF_STR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(double.IsNegativeInfinity(x) ? context.player.NEGATIVEINF_STR : context.player.POSITIVEINF_STR, (byte)RtHeapTypeKind.STRING);
 				return;
 			}
 
@@ -391,7 +391,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING);
 
 		}
 

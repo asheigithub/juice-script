@@ -333,7 +333,7 @@ namespace juicescript.runtime
 							}
 
 							CopyStruct(struct_instance, ins, player);
-							v.SetHeapPtr(struct_ptr);
+							v.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE);
 						}
 					}
 				}
@@ -413,7 +413,7 @@ namespace juicescript.runtime
 						//创建动态对象callee
 						//throw new NotImplementedException();
 
-						NaNBoxing callee_str = default; callee_str.SetHeapPtr(player.CALLEE_STR);
+						NaNBoxing callee_str = default; callee_str.SetHeapPtr(player.CALLEE_STR, (byte)RtHeapTypeKind.STRING);
 						player.CreateDynamic(ref error, arr_instance, callee_str, callee_v, true, false, true);
 						if (error.raised)
 						{
@@ -698,7 +698,7 @@ namespace juicescript.runtime
 							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
 							((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
-							context.StackSlots[tempSlot].SetHeapPtr(clonedptr);
+							context.StackSlots[tempSlot].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
 						}
 						else
 						{
@@ -976,7 +976,7 @@ namespace juicescript.runtime
 						if (dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
 						{
 							CopyStruct(dst, src, player);
-							span[dstIndex].SetHeapPtr(dst_v.HeapPtr);
+							span[dstIndex].SetHeapPtr(dst_v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE);
 							return;
 						}
 					}
@@ -1520,7 +1520,7 @@ namespace juicescript.runtime
 						{
 							var dst = player.Context.GC.Heap[cache_structs[i - 1]];
 							CopyStruct(dst, src, player);
-							cache_store[i - 1].SetHeapPtr(cache_structs[i - 1]);
+							cache_store[i - 1].SetHeapPtr(cache_structs[i - 1], (byte)RtHeapTypeKind.INSTANCE);
 						}
 						else
 						{
@@ -1681,7 +1681,7 @@ namespace juicescript.runtime
 						var dst = context.GC.Heap[clonedptr];
 
 						CopyStruct(dst, src, context.player);
-						context.StackSlots[tempslot].SetHeapPtr(clonedptr);
+						context.StackSlots[tempslot].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
 
 					}
 					else
@@ -1702,7 +1702,7 @@ namespace juicescript.runtime
 					{
 						var dst = context.GC.Heap[cache_structs[i]];
 						CopyStruct(dst, src, context.player);
-						cache_store[i].SetHeapPtr(cache_structs[i]);
+						cache_store[i].SetHeapPtr(cache_structs[i], (byte)RtHeapTypeKind.INSTANCE);
 					}
 					else
 					{
@@ -1720,7 +1720,7 @@ namespace juicescript.runtime
 					var src = context.GC.Heap[context.StackSlots[tempslot].HeapPtr];
 					var dst = context.GC.Heap[cache_structs[j]];
 					CopyStruct(dst, src, context.player);
-					cache_store[j].SetHeapPtr(cache_structs[j]);
+					cache_store[j].SetHeapPtr(cache_structs[j], (byte)RtHeapTypeKind.INSTANCE);
 
 				}
 				else
@@ -1903,7 +1903,7 @@ namespace juicescript.runtime
 					{
 						var dst = player.Context.GC.Heap[cache_structs[array_index]];
 						CopyStruct(dst, src, player);
-						cache_store[array_index].SetHeapPtr(cache_structs[array_index]);
+						cache_store[array_index].SetHeapPtr(cache_structs[array_index], (byte)RtHeapTypeKind.INSTANCE);
 
 						if (array_index + 1 > array_len)
 						{
@@ -2171,7 +2171,7 @@ namespace juicescript.runtime
 
 						CopyStruct(dst, src, player);
 
-						cache_store[i].SetHeapPtr(cache_structs[i]);
+						cache_store[i].SetHeapPtr(cache_structs[i], (byte)RtHeapTypeKind.INSTANCE);
 					}
 					else
 					{

@@ -626,7 +626,7 @@ namespace juicescript.runtime
 								struct_payload.m_property_ptr = m_property_ptr + codescope.TypeLayout.Offset[memberIndex]; //标记index.
 								struct_payload.HEAPINSTANCE_PTR = HEAPINSTANCE_PTR == 0? this_instance_Ptr : HEAPINSTANCE_PTR ; //指向当前对象.
 
-								result.SetHeapPtr(cache_ptr);
+								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
 								return result;
 
 							}
