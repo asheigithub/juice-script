@@ -993,13 +993,40 @@ namespace juicescript.runtime.gc
 			}
         }
 
-        private void Collect(ref Player.ReceiveError receiveError)
+
+        private Stack<NaNBoxing[]> temporyholder = new Stack<NaNBoxing[]>();
+
+		internal void PushTemporyHolder(NaNBoxing[] sortfields)
+		{
+			temporyholder.Push(sortfields);
+		}
+
+		internal object PopTemporyHolder()
+		{
+            return temporyholder.Pop();
+		}
+
+
+		private void Collect(ref Player.ReceiveError receiveError)
         {
 
             if (receiveError.raised && receiveError.error.ValueType == NaNBoxing.BoxType.HeapPtr)
             {
                 mark(Heap[receiveError.error.HeapPtr]);
             }
+
+            //遍历临时保持对象
+            foreach (var item in temporyholder)
+            {
+                for (int i = 0; i < item.Length; i++)
+                {
+                    if (item[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+                    {
+                        mark(Heap[item[i].HeapPtr] );
+                    }
+                }
+            }
+
 
             //遍历stackslots
             for (int i = context.StackPosition-1;i>=0;i--) 

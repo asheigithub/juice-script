@@ -152,10 +152,12 @@ namespace juicescript.runtime
 
         internal AsyncCallbackQueue AsyncCallbackQueue { get;private set; }
 
+        internal DateTime starttime;
+
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
             this.player = player;
-
+            starttime = DateTime.Now;
             
             link_const_class = new List<ASClass>();
             link_const_methods = new List<ASMethod>();

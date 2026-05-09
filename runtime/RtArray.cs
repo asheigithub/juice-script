@@ -1752,7 +1752,21 @@ namespace juicescript.runtime
 				NaNBoxing[] v2block;
 				{
 					uint block_index = j  / SPARSE_BLOCK_SIZE;
-					if (sparse_map.TryGetValue(block_index, out v2block))
+
+					if (block_index == i / SPARSE_BLOCK_SIZE)
+					{
+						if (v1.ValueType == BoxType.Fault)
+						{
+							v2block = null;
+							v2.setFault();
+						}
+						else
+						{
+							v2block = v1block;
+							v2 = v2block[j % SPARSE_BLOCK_SIZE];
+						}
+					}
+					else if (sparse_map.TryGetValue(block_index, out v2block))
 					{
 						v2 = v2block[j % SPARSE_BLOCK_SIZE];
 					}
@@ -1810,7 +1824,7 @@ namespace juicescript.runtime
 
 		}
 
-		private void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
+		internal void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
 		{
 			dst.Type = src.Type;
 			((RtInstance)dst).HEAPINSTANCE_PTR = 0;

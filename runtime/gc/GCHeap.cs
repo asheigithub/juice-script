@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,28 @@ namespace juicescript.runtime.gc
             }
         }
 
+#if DEBUG
+        private static WeakReference<GCHeap> reference;
+
+        static GCHeap()
+        {
+			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+
+				GCHeap heap;
+				if (reference !=null && reference.TryGetTarget(out heap))
+				{
+					if (ptr != 0 && kind != 255)
+					{
+						Debug.Assert((byte)heap[ptr].Kind == kind);
+					}
+				}
+			};
+		}
+
+#endif
+
+
+
 
         public GCHeap()
         { 
@@ -35,9 +58,15 @@ namespace juicescript.runtime.gc
             freeIndexes = new List<int>(65536*2);
 
             //ASClass_obj = new Dictionary<ulong, RtHeapInstance>();
-        }
 
-        private int cacheCount;
+#if DEBUG
+            reference = new WeakReference<GCHeap>(this);
+#endif
+
+
+		}
+
+		private int cacheCount;
 
         internal void MarkCaches()
         {

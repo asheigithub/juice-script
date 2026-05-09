@@ -1918,7 +1918,9 @@ namespace juicescript.runtime
 						var obj = Context.GC.Heap[value.HeapPtr];
 						prepare_savemethodscope_saveinstacne(heap,ref value, obj, value.HeapPtr, ref heapLocater,is_pass_this);
 					}
-					else if (value.HeapKind == (byte)RtHeapTypeKind.STRING)
+					else if (value.HeapKind == (byte)RtHeapTypeKind.STRING || 
+						value.HeapKind == (byte)RtHeapTypeKind.CLASS ||
+						value.HeapKind == (byte)RtHeapTypeKind.GLOBAL)
 					{
 						//pass
 					}

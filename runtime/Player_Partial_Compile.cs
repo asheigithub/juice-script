@@ -17,15 +17,6 @@ namespace juicescript.runtime
 		public void PrepareComputeConstExpr()
 		{
 
-#if DEBUG
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
-				if (ptr != 0 && kind != 255)
-				{
-					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
-				}
-			};
-
-#endif
 
 			CheckRequires();
 
@@ -97,15 +88,6 @@ namespace juicescript.runtime
 
 		public void PrepareComputeMemberInitValue()
 		{
-#if DEBUG
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
-				if (ptr != 0 && kind != 255)
-				{
-					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
-				}
-			};
-
-#endif
 
 			CheckRequires();
 
@@ -201,15 +183,6 @@ namespace juicescript.runtime
 		public NaNBoxing ComputeMemberInitValue(ScopeMember member, ASMethod method, SWCFile testswc, byte[] constpoolbytecode, 
 			List<NaNBoxing> method_const, List<Tuple<int, ASClass>> list,bool loadfromcache)
 		{
-#if DEBUG
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
-				if (ptr != 0 && kind != 255)
-				{
-					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
-				}
-			};
-
-#endif
 
 
 			if (computemember_cacheinstance == null)
@@ -783,15 +756,6 @@ namespace juicescript.runtime
 
 		public NaNBoxing ComputeConstExpr(ASMethod method, SWCFile testswc, int compute_result_index)
 		{
-#if DEBUG
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
-				if (ptr != 0 && kind != 255)
-				{
-					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
-				}
-			};
-
-#endif
 
 			if (computemember_cacheinstance == null)
 			{

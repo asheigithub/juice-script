@@ -84,7 +84,7 @@ function runTest():void {
     var sortError10:Boolean = false;
     try {
         v10.sort(function(a:int, b:int):int {
-            if (a == 3) {
+            if (a == 3 || b == 3) {
                 v10.pop();
             }
             return a - b;

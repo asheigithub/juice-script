@@ -2312,21 +2312,24 @@ const array = [
 
 var t:int = getTimer();
 
-
-//array.sort(function(a, b) {return b.rating - a.rating});
-array.sortOn("rating", Array.NUMERIC);
+for (var m:int = 0;  m< 100 ; m++) 
+{
+	//array.reverse();
+	//array.sort(function(a, b) {return b.rating - a.rating});
+	array.sortOn("rating", Array.NUMERIC);
+}
 
 
 trace( getTimer() -t );
 
-//for(var i=0;i<array.length-1;i++)
-//{
-    //if( array[i].rating < array[i+1].rating )
-    //{
-        //trace(array[i].name);
-    //}
-	//
-//}
+for(var i=0;i<array.length-1;i++)
+{
+    if( array[i].rating < array[i+1].rating )
+    {
+        trace(array[i].name);
+    }
+	
+}
 
 trace('OK');
 

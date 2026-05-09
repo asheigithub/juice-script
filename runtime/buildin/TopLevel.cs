@@ -65,7 +65,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			context.StackSlots[returnSlotIndex].SetInt((int)((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) % int.MaxValue));
+			int t = (int)(((DateTime.Now - context.starttime).TotalMilliseconds));
+			context.StackSlots[returnSlotIndex].SetInt(t);
 		}
 
 		//$__AS3__.toplevel$public::getQualifiedClassName

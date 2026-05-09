@@ -1460,14 +1460,6 @@ namespace juicescript.compiler
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
 			juicescript.runtime.Player computeplayer = new Player(int.MaxValue, true);
 
-#if DEBUG
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
-				if (ptr != 0 && kind != 255)
-				{
-					Debug.Assert((byte)computeplayer.Context.GC.Heap[ptr].Kind == kind);
-				}
-			};
-#endif
 
 
 			SWCFile testswc = computeplayer.LoadLib(testCode);

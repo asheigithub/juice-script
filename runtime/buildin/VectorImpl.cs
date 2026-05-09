@@ -1,5 +1,6 @@
 ﻿using juicescript.ABC;
 using juicescript.ABC.Locaters;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Buffers;
 using System.Collections;
@@ -1353,89 +1354,401 @@ namespace juicescript.runtime.buildin
 				var store = vpayload.GetStore(context.player);
 
 				if (store == null || store.length <= 1) return;
-				QuickSort(scope,vpayload,vecPtr, scope_ptr, 0, store.length - 1, context, ref error, sortBehavior);
+				QuickSort(scope,ref vpayload,ref vecPtr, scope_ptr, 0, store.length - 1, context, ref error, sortBehavior);
 			}
 
-			private static void QuickSort(RtMethodScope scope, RtVector vpayload, int vecptr ,int scope_ptr, int left, int right, Context context, ref ReceiveError error, NaNBoxing sortBehavior)
+			private static void QuickSort(RtMethodScope scope,ref RtVector vpayload, ref int vecptr ,int scope_ptr, int left, int right, Context context, ref ReceiveError error, NaNBoxing sortBehavior)
 			{
 				if (left >= right) return;
 
-				int pivotIndex = Partition(scope, scope_ptr, vecptr, left, right, context, ref error, sortBehavior);
-				if (error.raised)
+				if (right - left < 16)
 				{
-					return;
+					if (context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						context.player.RaiseStackOverflow(ref error);
+						return;
+					}
+
+					int basePos = context.StackPosition;
+					context.StackPosition += 2;
+					context.StackSlots.AsSpan(basePos, 2).Clear();
+
+					var store = vpayload.GetStore(context.player);
+					int olen = store.length;
+					//就地插入排序
+					for (int i = left + 1; i <= right; i++)
+					{
+						for (int j = i; j > left; j--)
+						{
+							
+							NaNBoxing val1 = vpayload.ReadSlot(j, context.player, basePos,vecptr);
+							NaNBoxing val2 = vpayload.ReadSlot((j - 1), context.player, basePos + 1, vecptr);
+
+							// 调用你的自定义比较器
+							long comp = comparer(val1, val2, sortBehavior, context, scope_ptr, ref error);
+							if (error.raised)
+							{
+								context.StackPosition = basePos;
+								return;
+							}
+							vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+							store = vpayload.GetStore(context.player);
+
+							if (store.length != olen)
+							{
+								context.StackPosition = basePos;
+								context.player.RaiseError(ref error, "vector length changed!");
+								return;
+							}
+
+							if (comp < 0)
+							{
+								Swap(store,j, (j - 1));
+								
+							}
+							else
+							{
+								// 如果当前元素不小于前一个，说明左侧已排好序，跳出内层循环
+								break;
+							}
+						}
+					}
+
+					context.StackPosition = basePos;
 				}
-
-				vecptr = RtVector.FindAndUpdateHeapInstancePtr(vecptr, context.player, out vpayload);
-
-				QuickSort(scope, vpayload,vecptr, scope_ptr, left, pivotIndex - 1, context, ref error, sortBehavior);
-				if (error.raised)
+				else
 				{
-					return;
-				}
+					if (context.StackPosition + 5 >= Context.STACK_LENGTH)
+					{
+						context.player.RaiseStackOverflow(ref error);
+						return;
+					}
 
-				QuickSort(scope,vpayload,vecptr, scope_ptr, pivotIndex + 1, right, context, ref error, sortBehavior);
-				if (error.raised)
-				{
-					return;
+					int basePos = context.StackPosition;
+					context.StackPosition += 3;
+					context.StackSlots.AsSpan(basePos, 5).Clear();
+
+
+					int pivotIndex = Partition(ref vpayload, scope, scope_ptr, ref vecptr, left, right, context, ref error, sortBehavior, basePos, basePos + 1, basePos + 2);
+					if (error.raised)
+					{
+						context.StackPosition = basePos;
+						return;
+					}
+
+
+					QuickSort(scope, ref vpayload, ref vecptr, scope_ptr, left, pivotIndex - 1, context, ref error, sortBehavior);
+					if (error.raised)
+					{
+						context.StackPosition = basePos;
+						return;
+					}
+
+					QuickSort(scope, ref vpayload, ref vecptr, scope_ptr, pivotIndex + 1, right, context, ref error, sortBehavior);
+					if (error.raised)
+					{
+						context.StackPosition = basePos;
+						return;
+					}
+
+					context.StackPosition = basePos;
 				}
 			}
 
-			private static int Partition(RtMethodScope scope, int scope_ptr, int vecptr, int left, int right,
-				Context context, ref ReceiveError error, NaNBoxing sortBehavior)
+			private static int Partition(ref RtVector vpayload, RtMethodScope scope, int scope_ptr,ref int vecptr, int left, int right,
+				Context context, ref ReceiveError error, NaNBoxing sortBehavior , int tempslot0 , int tempslot1,int tempslot2)
 			{
-				RtVector vpayload;
-				int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+
+			 	vecptr = RtVector.FindAndUpdateHeapInstancePtr(vecptr, context.player, out vpayload);
 				var store = vpayload.GetStore(context.player);
-
-
-				if (context.StackPosition + 2 >= Context.STACK_LENGTH)
+				SelectPivot(scope, vecptr, scope_ptr ,ref vpayload, context, left, right, ref error, sortBehavior, tempslot0,tempslot1,tempslot2);
+				if (error.raised)
 				{
-					context.player.RaiseStackOverflow(ref error);
 					return 0;
 				}
 
-				int basePos = context.StackPosition;
+				int i = left;
+				int j = right;
+				int keyi = left;
 
-				context.StackPosition += 2;
-				//T pivot = arr[right];
-				NaNBoxing pivot = vpayload.ReadSlot(right, context.player, basePos, vecptr);
+				NaNBoxing pivot = vpayload.ReadSlot(left, context.player, tempslot0,vecptr);
+				//context.StackSlots[tempslot0] = pivot;
 
-				int i = left - 1;
-				for (int j = left; j < right; j++)
+				//if (pivot.ValueType == BoxType.HeapPtr && pivot.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				//{
+				//	RtInstance src = (RtInstance)context.GC.Heap[pivot.HeapPtr];
+				//	if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+				//	{
+				//		int clonedptr = tempslot0 + context.CacheInstancePtr;
+				//		var dst = context.GC.Heap[clonedptr];
+
+				//		CopyStruct(dst, src, context.player);
+				//		context.StackSlots[tempslot0].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
+				//		pivot = context.StackSlots[tempslot0];
+				//	}
+
+				//}
+
+				int olen = store.length;
+				while (i < j)
 				{
-					NaNBoxing test = vpayload.ReadSlot(j, context.player, basePos + 1, vecptr);
-
-					int olen = store.length;
-
-					int comp = VectorImpl.comparer(test, pivot, sortBehavior, context, scope_ptr, ref error);
-					if (error.raised)
+					while (i < j)
 					{
-						context.StackPosition -= 2;
-						return 0;
+						NaNBoxing vj = vpayload.ReadSlot(  j, context.player, tempslot1, vecptr );
+						long comp = comparer(vj, pivot, sortBehavior, context, scope_ptr, ref error);
+						if (error.raised)
+						{
+							return 0;
+						}
+						vecptr =  RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						store = vpayload.GetStore(context.player);
+						if (store.length != olen)
+						{
+							context.player.RaiseError(ref error, "vector length changed!");
+
+							return 0;
+						}
+
+
+						if (comp >= 0)
+						{
+							j--;
+						}
+						else
+						{
+							break;
+						}
 					}
 
-					vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+					//if (i < j)
+					//{
+					//	NaNBoxing vj = vpayload.ReadSlot(j, context.player, tempslot1, vecptr);
+					//	//context.player.SetArraySlot(vj, (uint)i, vpayload, ref error);
+					//	vpayload.SetSlot(i, context.player, vecptr, vj, ref error);
+
+					//	if (error.raised)
+					//	{
+					//		return 0;
+					//	}
+					//}
+
+					while (i < j)
+					{
+						NaNBoxing vi = vpayload.ReadSlot(i, context.player, tempslot1, vecptr);
+						long comp = comparer(vi, pivot, sortBehavior, context, scope_ptr, ref error);
+						if (error.raised)
+						{
+							return 0;
+						}
+						vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						store = vpayload.GetStore(context.player);
+						if (store.length != olen)
+						{
+							context.player.RaiseError(ref error, "vector length changed!");
+
+							return 0;
+						}
+						if (comp <= 0)
+						{
+							i++;
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					//if (i < j)
+					//{
+					//	NaNBoxing vi = vpayload.ReadSlot(i, context.player, tempslot2, vecptr);
+					//	//context.player.SetArraySlot(vi, (uint)j, vpayload, ref error);
+					//	vpayload.SetSlot(j, context.player, vecptr, vi, ref error);
+
+					//	if (error.raised)
+					//	{
+					//		return 0;
+					//	}
+					//}
+
+					Swap( store, i, j);
+
+				}
+
+				//context.player.SetArraySlot(pivot, (uint)i, vpayload, ref error);
+				//vpayload.SetSlot(i, context.player, vecptr, pivot, ref error);
+
+				Swap(store, i, keyi);
+
+
+				return i;
+
+
+
+
+
+
+				//RtVector vpayload;
+				//int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+				//var store = vpayload.GetStore(context.player);
+
+
+				//if (context.StackPosition + 2 >= Context.STACK_LENGTH)
+				//{
+				//	context.player.RaiseStackOverflow(ref error);
+				//	return 0;
+				//}
+
+				//int basePos = context.StackPosition;
+
+				//context.StackPosition += 2;
+				////T pivot = arr[right];
+				//NaNBoxing pivot = vpayload.ReadSlot(right, context.player, basePos, vecptr);
+
+				//int i = left - 1;
+				//for (int j = left; j < right; j++)
+				//{
+				//	NaNBoxing test = vpayload.ReadSlot(j, context.player, basePos + 1, vecptr);
+
+				//	int olen = store.length;
+
+				//	int comp = VectorImpl.comparer(test, pivot, sortBehavior, context, scope_ptr, ref error);
+				//	if (error.raised)
+				//	{
+				//		context.StackPosition -= 2;
+				//		return 0;
+				//	}
+
+				//	vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+				//	store = vpayload.GetStore(context.player);
+				//	if (store.length != olen)
+				//	{
+				//		context.player.RaiseError(ref error, "vector length changed!");
+				//		context.StackPosition -= 2;
+				//		return 0;
+				//	}
+
+				//	if (comp < 0)
+				//	{
+				//		i++;
+				//		Swap(store, i, j);
+				//	}
+				//}
+
+				//Swap(store, i + 1, right);
+
+				//context.StackPosition -= 2;
+
+				//return i + 1;
+			}
+
+
+
+
+
+			private static void SelectPivot(RtMethodScope scope,int vectpr, int scope_ptr, ref RtVector vpayload, Context context, int left, int right, ref ReceiveError error
+				, NaNBoxing sortBehavior, int tempslot0,int tempslot1,int tempslot2
+				)
+			{
+				int mid = left + (right - left) / 2;
+
+
+				NaNBoxing l = vpayload.ReadSlot(left, context.player, tempslot0 ,vectpr);
+				NaNBoxing m = vpayload.ReadSlot(mid, context.player, tempslot1, vectpr);
+				NaNBoxing r = vpayload.ReadSlot(right, context.player, tempslot2, vectpr);
+
+				var store = vpayload.GetStore(context.player);
+				var olen = store.length;
+
+				{
+					long comp = comparer(l, m, sortBehavior, context, scope_ptr, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+					RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
 					store = vpayload.GetStore(context.player);
 					if (store.length != olen)
 					{
 						context.player.RaiseError(ref error, "vector length changed!");
-						context.StackPosition -= 2;
-						return 0;
+						return;
 					}
-
-					if (comp < 0)
+					if (comp > 0)
 					{
-						i++;
-						Swap(store, i, j);
+						Swap( store, left, mid);
+						
+						NaNBoxing temp = l;
+						l = m;
+						m = temp;
 					}
 				}
 
-				Swap(store, i + 1, right);
+				{
+					long comp = comparer(l, r, sortBehavior, context, scope_ptr, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+					RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+					store = vpayload.GetStore(context.player);
+					if (store.length != olen)
+					{
+						context.player.RaiseError(ref error, "vector length changed!");
+						return;
+					}
+					if (comp > 0)
+					{
+						Swap(store,left, right);						
+						NaNBoxing temp = l;
+						l = r;
+						r = temp;
+					}
+				}
 
-				context.StackPosition -= 2;
+				{
+					long comp = comparer(m, r, sortBehavior, context, scope_ptr, ref error);
+					if (error.raised)
+					{
+						return;
+					}
+					RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+					store = vpayload.GetStore(context.player);
+					if (store.length != olen)
+					{
+						context.player.RaiseError(ref error, "vector length changed!");
+						return;
+					}
+					if (comp > 0)
+					{
+						Swap(store,mid, right);
+						if (error.raised)
+						{
+							return;
+						}
+						NaNBoxing temp = m;
+						l = r;
+						r = temp;
+					}
+				}
 
-				return i + 1;
+				Swap(store,mid, left);
+
+				//// 排序 left, mid, right 三个位置的值
+				//if (array[left] > array[mid]) Swap(array, left, mid);
+				//if (array[left] > array[right]) Swap(array, left, right);
+				//if (array[mid] > array[right]) Swap(array, mid, right);
+
+				//// 此时 mid 位置是中位数，交换到 left 位置作为基准
+				//Swap(array, left, mid);
+			}
+
+
+			private static void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
+			{
+				dst.Type = src.Type;
+				((RtInstance)dst).HEAPINSTANCE_PTR = 0;
+				((RtInstance)dst).methodscopeslot_ref_state = 0;
+				((RtInstance)dst).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
+
 			}
 
 			private static void Swap(VectorStore store, int a, int b)

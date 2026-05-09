@@ -4721,15 +4721,7 @@ namespace juicescript.runtime
 
 		public void Run(Action<PlayerException> onErrorRaised)
 		{
-#if DEBUG
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
-				if (ptr != 0 && kind != 255)
-				{
-					Debug.Assert((byte)Context.GC.Heap[ptr].Kind == kind);
-				}
-			};
 
-#endif
 
 
 			CheckRequires();
