@@ -2314,9 +2314,9 @@ var t:int = getTimer();
 
 for (var m:int = 0;  m< 100 ; m++) 
 {
-	//array.reverse();
-	//array.sort(function(a, b) {return b.rating - a.rating});
-	array.sortOn("rating", Array.NUMERIC);
+	array.reverse();
+	array.sort(function(a, b) {return b.rating - a.rating});
+	//array.sortOn("rating", Array.NUMERIC);
 }
 
 

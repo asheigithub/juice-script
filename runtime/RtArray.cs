@@ -2494,6 +2494,81 @@ namespace juicescript.runtime
 			}
 		}
 
-		
+		internal void CopyFromArray(Span<NaNBoxing> values,Player player,ref ReceiveError error)
+		{
+			Debug.Assert(StoreMode == ArrayStoreMode.normal);
+			Debug.Assert(array_len == values.Length);
+
+
+
+			NaNBoxing[] lastblock = null;
+			uint last_block_index = uint.MaxValue;
+			for (int i = 0; i < array_len; i++)
+			{
+				var v = values[i];
+
+				uint block_index = (uint)i / SPARSE_BLOCK_SIZE;
+
+				
+				
+				if (v.ValueType != BoxType.Fault)
+				{
+					if (last_block_index == block_index && lastblock != null)
+					{
+						lastblock[i % SPARSE_BLOCK_SIZE] = v;
+					}
+					else
+					{
+
+						NaNBoxing[] block = null;
+						if (sparse_map.TryGetValue(block_index, out block))
+						{
+
+						}
+						else
+						{
+							var oldsize = Size;
+							block = GetOrCreateBlock((uint)i);
+
+							if (player.Context.GC.MemUsage - oldsize + Size >= player.Context.GC.USAGE_LIMIT)
+							{
+								player.RaiseOutOfMemory(ref error);
+								return;
+							}
+						}
+
+						block[i % SPARSE_BLOCK_SIZE] = v;
+
+						last_block_index = block_index;
+						lastblock = block;
+					}
+				}
+				else
+				{
+					if (last_block_index == block_index && lastblock != null)
+					{
+						lastblock[i % SPARSE_BLOCK_SIZE] = v;
+					}
+					else
+					{
+						NaNBoxing[] block = null;
+						if (sparse_map.TryGetValue(block_index, out block))
+						{
+							lastblock[i % SPARSE_BLOCK_SIZE] = v;
+
+							last_block_index = block_index;
+							lastblock = block;
+						}
+						else
+						{
+							last_block_index = block_index;
+							lastblock = null;
+						}
+					}
+				}
+				
+			}
+
+		}
 	}
 }
