@@ -996,8 +996,9 @@ namespace juicescript.runtime.gc
 
         private Stack<NaNBoxing[]> temporyholder = new Stack<NaNBoxing[]>();
 
-		internal void PushTemporyHolder(NaNBoxing[] sortfields)
+		internal void PushTemporyHolder(NaNBoxing[] sortfields,int len)
 		{
+            sortfields.AsSpan(len).Clear();
 			temporyholder.Push(sortfields);
 		}
 

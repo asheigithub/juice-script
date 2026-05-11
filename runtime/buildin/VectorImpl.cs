@@ -1087,6 +1087,8 @@ namespace juicescript.runtime.buildin
 			//Debug.Assert(!error.raised);
 		}
 
+		
+
 		//__AS3__.vec$Vector@sort
 		[NativeFunction("__AS3__.vec$Vector@sort")]
 		public static void Vector_sort(Context context,
@@ -1103,7 +1105,7 @@ namespace juicescript.runtime.buildin
 
 			var store = vector.GetStore(context.player);
 			int len = store.length;
-
+			
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
 
@@ -1123,9 +1125,2249 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
+			//原始数据类型,不用自定义排序方法时，可就地排序
+			//非原始数据类型，需要申请index数组进行排序
+			//原始数据类型，使用自定义排序方法时，复制一份数据排序 （避免自定义方法修改了vector.<t>的底层存储）
+
+			
+
+			switch (vector.element_type)
+			{
+				case TypeKind.Boolean:
+					{
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, bool>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<bool>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetBoolean(v1);
+											NaNBoxing b = default; b.SetBoolean(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<bool>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, bool>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 == false)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 == true)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetBoolean(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetBoolean(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+					}
+				case TypeKind.SByte:
+					{
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, sbyte>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<sbyte>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetSByte(v1);
+											NaNBoxing b = default; b.SetSByte(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<sbyte>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, sbyte>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetSByte(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetSByte(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.Byte:
+					{
+
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, byte>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<byte>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetByte(v1);
+											NaNBoxing b = default; b.SetByte(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<byte>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, byte>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetByte(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetByte(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.Short:
+					{
+
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, short>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<short>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetShort(v1);
+											NaNBoxing b = default; b.SetShort(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<short>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, short>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetShort(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetShort(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.UShort:
+					{
+						unsafe
+						{
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, ushort>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<ushort>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetUShort(v1);
+											NaNBoxing b = default; b.SetUShort(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<ushort>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, ushort>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetUShort(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetUShort(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.Int:
+					{	
+						unsafe
+						{
+							
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, int>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<int>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0,originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+								
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+										
+										unsafe
+										{
+											NaNBoxing a = default;a.SetInt(v1);
+											NaNBoxing b = default;b.SetInt(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+												
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0; 
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<int>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, int>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+								buffer.Sort(
+									(v1,v2)=>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 =default ; box1.SetInt(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetInt(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+									
+									);
+
+
+								goto lbl_done;
+							}
+						}
+					}				
+				case TypeKind.Uint:
+					{
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, uint>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<uint>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetUInt(v1);
+											NaNBoxing b = default; b.SetUInt(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<uint>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, uint>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetUInt(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetUInt(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+					}
+				case TypeKind.Float:
+					{
+
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, float>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<float>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetFloat(v1);
+											NaNBoxing b = default; b.SetFloat(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<float>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, float>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if (float.IsNaN(v1) && float.IsNaN(v2))
+											{
+												return 0;
+											}
+											else if (float.IsNaN(v1))
+											{
+												return 1;
+											}
+											else if (float.IsNaN(v2))
+											{
+												return -1;
+											}
+											else if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetFloat(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetFloat(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.Number:
+					{
+
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, double>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<double>.Shared.Rent(originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = default; a.SetNumber(v1);
+											NaNBoxing b = default; b.SetNumber(v2);
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								ArrayPool<double>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, double>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(v1, v2) =>
+									{
+										if ((option & 16) == 16)
+										{
+											if (double.IsNaN(v1) && double.IsNaN(v2))
+											{
+												return 0;
+											}
+											else if (double.IsNaN(v1))
+											{
+												return 1;
+											}
+											else if (double.IsNaN(v2))
+											{
+												return -1;
+											}
+											else if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+													return 0;
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];
+												NaNBoxing box1 = default; box1.SetNumber(v1);
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												NaNBoxing box2 = default; box2.SetNumber(v2);
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.String:
+					{
+
+						unsafe
+						{
+
+							if (sortBehavior.ValueType == BoxType.HeapPtr)
+							{
+								if (store.IsCache || store.length > 1024 * 8 * 64)
+								{
+									goto lbl_fallback;
+								}
+
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[context.StackPosition]);
+								if (error.raised)
+								{
+									goto lbl_done;
+								}
+
+								var originbuffer = MemoryMarshal.Cast<byte, NaNBoxing>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+
+								var buffer_arr = ArrayPool<NaNBoxing>.Shared.Rent(originbuffer.Length);
+
+								context.GC.PushTemporyHolder(buffer_arr,originbuffer.Length);
+
+								var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+								originbuffer.CopyTo(buffer);
+
+
+								sortBehavior = context.StackSlots[context.StackPosition];
+
+
+
+								RtHeapBase func = context.GC.Heap[sortBehavior.HeapPtr];
+								RtClosure closure = (RtClosure)func;
+								ASMethod compfunc = ((ASMethodBody)func.Type).Method;
+
+								bool shouldStop = false;
+								ReceiveError sortError = default;
+
+								buffer.Sort(
+									(v1, v2) => {
+
+										if (shouldStop)
+										{
+											return 0;
+										}
+
+
+										unsafe
+										{
+											NaNBoxing a = v1;
+											NaNBoxing b = v2;
+
+											StackLocater* args = stackalloc StackLocater[2];
+											args->index = 0;
+											(args + 1)->index = 1;
+
+											var slots = context.StackSlots.AsSpan(context.StackPosition + 1, 2);
+											slots.Clear();
+
+											slots[0] = a;
+											slots[1] = b;
+
+											int basePos = context.StackPosition;
+
+											context.StackPosition += 3;
+											ReceiveError e = default;
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.player.ConvertValueType(ref e, context.StackSlots[basePos], TypeKind.Number, context.NUMBER, ref slots[0], scope_ptr);
+											if (e.raised)
+											{
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+
+												return 0;
+											}
+
+											if (store.length != len)
+											{
+												context.player.RaiseError(ref e, "vector length changed!");
+
+												context.StackPosition = basePos;
+												shouldStop = true;
+												sortError = e;
+												return 0;
+											}
+
+											context.StackPosition = basePos;
+
+											double v = slots[0].Number;
+											if (v > 0)
+												return 1;
+											else if (v == 0 || double.IsNaN(v))
+												return 0;
+											else
+												return -1;
+
+										}
+
+
+									}
+									);
+
+								buffer.CopyTo(originbuffer);
+
+								var s_h = context.GC.PopTemporyHolder();
+								Debug.Assert(s_h == buffer_arr);
+
+								ArrayPool<NaNBoxing>.Shared.Return(buffer_arr);
+
+								if (shouldStop)
+								{
+									error = sortError;
+								}
+
+								goto lbl_done;
+							}
+							else
+							{
+								var buffer = MemoryMarshal.Cast<byte, NaNBoxing>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+								context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Int, context.INT, ref sortBehavior); //这里不可能出错
+								int option = sortBehavior.IntValue;
+
+
+								buffer.Sort(
+									(l, r) =>
+									{
+										if ((option & 16) == 16)
+										{
+											ReceiveError e = default;
+											NaNBoxing a = default;
+											context.player.ConvertValueType(ref e, l, TypeKind.Number, context.NUMBER, ref a);
+											Debug.Assert(!e.raised);
+											NaNBoxing b = default;
+											context.player.ConvertValueType(ref e, r, TypeKind.Number, context.NUMBER, ref b);
+											Debug.Assert(!e.raised);
+
+											double v1 = a.Number;
+											double v2 = b.Number;
+
+											if (double.IsNaN(v1) && double.IsNaN(v2))
+											{
+												return 0;
+											}
+											else if (double.IsNaN(v1))
+											{
+												return 1;
+											}
+											else if (double.IsNaN(v2))
+											{
+												return -1;
+											}
+											else if ((option & 2) == 2)
+											{
+												if (v1 == v2)
+												{													
+													return 0;									
+												}
+												else if (v1 < v2)
+													return 1;
+												else
+													return -1;
+											}
+											else
+											{
+												if (v1 == v2)
+												{
+													return 0;
+												}
+												else if (v1 > v2)
+													return 1;
+												else
+													return -1;
+											}
+										}
+										else
+										{
+											{
+
+
+												Span<char> temp1 = stackalloc char[16];												
+												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, l, temp1);
+
+												Span<char> temp2 = stackalloc char[16];
+												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, r, temp2);
+
+												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
+												if ((option & 2) == 2)
+													return -comp;
+												else
+													return comp;
+
+											}
+										}
+									}
+
+									);
+
+
+								goto lbl_done;
+							}
+						}
+
+					}
+				case TypeKind.Function:
+				case TypeKind.Array:
+				case TypeKind.Vector:
+				case TypeKind.Namespace:
+				case TypeKind.Object:					
+				case TypeKind.Any:
+				case TypeKind.Class:					
+				default:
+
+					if ( vector.element_type != TypeKind.Any && vector.element_asclass.Instance.Flags.HasFlag(ClassFlags.Struct))
+					{
+						
+						if (store.IsCache || store.length > 1024 * 8 * 64)
+						{
+							goto lbl_fallback;
+						}
+						else
+						{
+							//结构体 -- 需要用索引的方式。
+							var ind = ArrayPool<int>.Shared.Rent(len);
+							var inv = ArrayPool<int>.Shared.Rent(len);
+
+							for (int i = 0; i < len; i++)
+							{
+								ind[i] = i;
+							}
+
+
+							bool shouldStop = false;
+							ReceiveError sortError = default;
+
+							int reserve1 = context.StackPosition;
+							int reserve2 = context.StackPosition + 1;
+
+							context.StackSlots.AsSpan(reserve1, 2).Clear();
+							context.StackPosition += 2;
+
+
+							ind.AsSpan(0, len).Sort(
+								(l, r) => {
+
+									if (shouldStop)
+									{
+										return 0;
+									}
+
+									NaNBoxing v1 = default;
+									{
+										int cache_ptr = context.CacheInstancePtr + reserve1;
+										var cache = context.GC.Heap[cache_ptr];
+
+										cache.Type =  vector.element_asclass.Instance;
+										RtInstance struct_payload = (RtInstance)cache;
+										struct_payload.HEAPINSTANCE_PTR = 0;
+
+										struct_payload.methodscopeslot_ref_state = 0;
+										struct_payload.Set_PROPERTY_PTR(l * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
+										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+
+										v1.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
+									}
+
+									NaNBoxing v2 = default;
+									{
+										int cache_ptr = context.CacheInstancePtr + reserve2;
+										var cache = context.GC.Heap[cache_ptr];
+
+										cache.Type =  vector.element_asclass.Instance;
+										RtInstance struct_payload = (RtInstance)cache;
+										struct_payload.HEAPINSTANCE_PTR = 0;
+
+										struct_payload.methodscopeslot_ref_state = 0;
+										struct_payload.Set_PROPERTY_PTR(r * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
+										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+
+										v2.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
+									}
+
+									ReceiveError e = default;
+									int comp = comparer(v1, v2, sortBehavior, context, scope_ptr, ref e);
+
+									if (e.raised)
+									{
+
+										shouldStop = true;
+										sortError = e;
+										return 0;
+									}
+
+
+									if (store.length != len)
+									{
+										context.player.RaiseError(ref e, "vector length changed!");
+										shouldStop = true;
+										sortError = e;
+										return 0;
+									}
+
+									return comp;
+
+								}
+								);
+
+							context.StackPosition = reserve1;
+
+							if (shouldStop)
+							{
+								ArrayPool<int>.Shared.Return(ind);
+								ArrayPool<int>.Shared.Return(inv);
+
+								error = sortError;
+								goto lbl_done;
+							}
+
+							//最终排序
+							for (int i = 0; i < len; i++)
+								inv[ind[i]] = i;
+
+							for (int i = 0; i < len; i++)
+							{
+								while (inv[i] != i)
+								{
+									int target = inv[i];
+
+									// swap arr[i] <-> arr[target]
+									//(arr[i], arr[target]) = (arr[target], arr[i]);
+									//vpayload.Swap((uint)i, (uint)target, context, ref error, context.StackPosition);
+									SortHelper.Swap(store, i, target);
+
+									// swap idx[i] <-> idx[target]
+									(inv[i], inv[target]) = (inv[target], inv[i]);
+								}
+							}
+
+							ArrayPool<int>.Shared.Return(ind);
+							ArrayPool<int>.Shared.Return(inv);
+
+							goto lbl_done;
+
+						}
+					}
+					else
+					{
+						//内部是NanBoxing,且不是结构体					
+						if (store.IsCache || store.length > 1024 * 8 * 64)
+						{
+							goto lbl_fallback;
+						}
+						else
+						{
+							//已cache,那么所有对象都是堆对象（包括结构体也在堆里），所以排序后拷回去。
+							var originbuffer = MemoryMarshal.Cast<byte, NaNBoxing>(CollectionsMarshal.AsSpan(store.buffer).Slice(0, len * store.elementSize));
+							var buffer_arr = ArrayPool<NaNBoxing>.Shared.Rent(originbuffer.Length);
+
+							context.GC.PushTemporyHolder(buffer_arr, originbuffer.Length); //GC 保持，防止代码里乱改
+							var buffer = buffer_arr.AsSpan().Slice(0, originbuffer.Length);
+							originbuffer.CopyTo(buffer);
+
+
+							bool shouldStop = false;
+							ReceiveError sortError = default;
+
+							buffer.Sort(
+								(v1, v2) => {
+
+									if (shouldStop)
+									{
+										return 0;
+									}
+
+									ReceiveError e = default;
+									int comp = comparer(v1, v2, sortBehavior, context, scope_ptr, ref e);
+
+									if (e.raised)
+									{
+
+										shouldStop = true;
+										sortError = e;
+										return 0;
+									}
+
+
+									if (store.length != len)
+									{
+										context.player.RaiseError(ref e, "vector length changed!");
+										shouldStop = true;
+										sortError = e;
+										return 0;
+									}
+
+									return comp;
+
+								}
+								);
+
+							buffer.CopyTo(originbuffer);
+
+							var s_h = context.GC.PopTemporyHolder();
+							Debug.Assert(s_h == buffer_arr);
+
+							ArrayPool<NaNBoxing>.Shared.Return(buffer_arr);
+
+							if (shouldStop)
+							{
+								error = sortError;
+							}
+
+							goto lbl_done;
+						}
+
+
+
+					}
+					
+			}
+
+
+		lbl_fallback:
+
 			int basePos = context.StackPosition;
 			context.StackPosition += 1;
-
 			context.StackSlots[basePos].SetUndefined();
 
 			if (sortBehavior.ValueType == BoxType.HeapPtr)
@@ -1133,16 +3375,17 @@ namespace juicescript.runtime.buildin
 				context.player.ConvertValueType(ref error, sortBehavior, TypeKind.Function, context.FUNCTION, ref context.StackSlots[basePos]);
 				if (error.raised)
 				{
-					
+
 					context.StackPosition = basePos;
 					return;
 				}
 			}
 
 			SortHelper.QuickSort( scope, scope_ptr, context, ref error, sortBehavior);
-
 			context.StackPosition = basePos;
 
+		lbl_done:
+			;
 			
 		}
 
@@ -1751,7 +3994,7 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			private static void Swap(VectorStore store, int a, int b)
+			internal static void Swap(VectorStore store, int a, int b)
 			{
 				var span = CollectionsMarshal.AsSpan(store.buffer);
 				int elementSize = store.elementSize;

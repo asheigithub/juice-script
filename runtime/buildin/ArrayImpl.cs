@@ -2514,7 +2514,7 @@ namespace juicescript.runtime.buildin
 				context.StackSlots[context.StackPosition].SetUndefined();
 				context.StackSlots[context.StackPosition + 1].SetUndefined();
 
-				if (vpayload.array_len < 1024 * 8 * 64 && vpayload.StoreMode == RtArray.ArrayStoreMode.normal)
+				if (vpayload.array_len <= 1024 * 8 * 64 && vpayload.StoreMode == RtArray.ArrayStoreMode.normal)
 				{
 					//Sort 把数组中的所有元素拷到原生数组里排序 // 只考虑normal,其他两种反正数量不多，而且还不用管sturct缓存，normal里的对象肯定在堆里，省的麻烦。
 					int oLen = (int)vpayload.array_len;
@@ -2522,8 +2522,8 @@ namespace juicescript.runtime.buildin
 					if (sortBehavior.ValueType == BoxType.HeapPtr) //自定义排序
 					{
 						NaNBoxing[] values = ArrayPool<NaNBoxing>.Shared.Rent(oLen);
-
-						context.GC.PushTemporyHolder(values);
+						
+						context.GC.PushTemporyHolder(values,oLen);
 
 						for (int i = 0; i < oLen; i++)
 						{
@@ -2554,6 +2554,9 @@ namespace juicescript.runtime.buildin
 								stopErr = e;
 								needstop = true;
 							}
+
+							
+
 							return c;
 						}
 						);
@@ -2587,7 +2590,8 @@ namespace juicescript.runtime.buildin
 						int option = sortBehavior.IntValue;
 
 						NaNBoxing[] values = ArrayPool<NaNBoxing>.Shared.Rent(oLen);
-						context.GC.PushTemporyHolder(values);
+						
+						context.GC.PushTemporyHolder(values,oLen);
 
 						int[] ind = ArrayPool<int>.Shared.Rent(oLen);
 						for (int i = 0; i < oLen; i++)
@@ -3658,7 +3662,7 @@ namespace juicescript.runtime.buildin
 
 
 
-				if (vpayload.array_len < 1024 * 8 * 64)
+				if (vpayload.array_len <= 1024 * 8 * 64)
 				{
 					//SortOn ,按字段排序。所以我的处理就是先把字段值读出来，根据排序需求先转成字符串或者数字，然后本地排序
 					int oLen = (int)vpayload.array_len;
@@ -3692,8 +3696,8 @@ namespace juicescript.runtime.buildin
 
 					sortfields = ArrayPool<NaNBoxing>.Shared.Rent(oLen * fieldCount);
 					sortOptions = ArrayPool<int>.Shared.Rent(fieldCount);
-
-					context.GC.PushTemporyHolder(sortfields);
+					
+					context.GC.PushTemporyHolder(sortfields, oLen * fieldCount);
 
 					//读取字段值
 					int basePos = context.StackPosition;

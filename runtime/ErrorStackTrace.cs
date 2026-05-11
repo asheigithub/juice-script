@@ -99,7 +99,7 @@ namespace juicescript.runtime
 
                 if (methods[i].Flags.HasFlag(MethodFlags.Native))
                 {
-                    line =  methods[i].Token.line ;
+                    line =  methods[i].Token.line + 1 ;
                 }
                 else
                 {

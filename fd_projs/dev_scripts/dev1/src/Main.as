@@ -14,249 +14,14 @@ package
 }
 import flash.utils.getTimer;
 
+var b;
 
 
-//var __instance = new Object(42);
-//
-//__instance.charAt = String.prototype.charAt;
-//
-//if (__instance.charAt(false) + __instance.charAt(true) !== "42") {
-  //throw new Error('#1: __instance = new Object(42); __instance.charAt = String.prototype.charAt;  __instance = new Object(42); __instance.charAt = String.prototype.charAt; __instance.charAt(false)+__instance.charAt(true) === "42". Actual: ' + __instance.charAt(false) + __instance.charAt(true));
-//}
-//
-//
-//trace(String["hasOwnProperty"]("fromCharCode"));
-
-
-
-//async function asyncAdd(a:int, b:int):int {
-    //var x:int = await Promise.resolve(a);
-    //var y:int = await Promise.resolve(b);
-    //return x + y;
-//}
-//async function asyncHello():String {
-    //var result:String = await Promise.resolve("Hello");
-    //return result + " World";
-//}
-//async function returnsPromise():* {
-    //return Promise.resolve(42);
-//}
-//async function asyncVoid():void {
-    //trace("asyncVoid executing");
-//}
-//async function asyncNest():int {
-    //var inner:* = asyncInner(5);
-    //var result:int = await inner;
-    //return result * 2;
-//}
-//async function asyncInner(n:int):int {
-    //return n + 1;
-//}
-//// Test
-//var p1:* = asyncAdd(5, 3);
-//p1.then(function(v:int) { trace("asyncAdd(5,3) = " + v); });
-//var p2:* = asyncHello();
-//p2.then(function(v:String) { trace("asyncHello: " + v); });
-//var p3:* = returnsPromise();
-//p3.then(function(v:int) { trace("returnsPromise: " + v); });
-//var p4:* = asyncVoid();
-//p4.then(function(v:*) { trace("asyncVoid done"); });
-//var p5:* = asyncNest();
-//p5.then(function(v:int) { trace("asyncNest: " + v); });
-//trace("=== Init Complete ===");
-
-
-
-//import geom.Vector2;
-//var a:Vector2 = new Vector2(0,1);
-//var b = new Vector2(1,0);
-//
-//a += b;
-//
-//trace(a);
-//trace( a.dot(b) );
-//trace( a.cross(b) );
-//trace( a * 3 );
-//trace( a / 3 );
-//
-//trace( 6 * b );
-//
-//trace( +-b);   
-
-//final class BB
-//{
-	//[operator("%")]
-	//static function bsb(i:BB,j:int):String
-	//{
-		//if(true)
-		//{
-			//return "BB % " + [j, j].toString() ;
-		//}
-		//else
-		//{
-			//throw 3;
-		//}
-	//}
-//}
-//
-//
-//var c = new BB();
-//
-////var d = c / 3;
-////trace(d);
-//
-//c %= 3;
-//trace("c:",c,typeof c);
-
-
-//var v:Vector.<int> = new <int>[1,2,3,4,9,9,9,9,9,10,11,0,0,0,0,0,0,0,3+3,0,0,0];
-//trace(v);
-
-
-//
-//
-//async function Go()
-//{
-	//try
-	//{
-		//trace( await fetch("https://r.wxyfamily.duckdns.org") );	
-		//trace(2);
-	//
-	//}
-	//catch (e)
-	//{
-		//trace(e);
-		//
-		//trace( await fetch("http://oa.ofilm.com") );
-		//
-	//}
-//}
-//Go();
-//
-
-
- 
-//class Test262Error extends Error
-//{
-	//public function Test262Error(t)
-	//{
-		//super(t);
-	//}
-//}
-
-
-
-class Test262Error extends Error
+(
+function ():void 
 {
-	var a;
-	public function Test262Error(t=undefined)
-	{
-		super(t);
-	}
-}
-
-function assert(mustBeTrue, message = undefined) {
-  if (mustBeTrue === true) {
-    return;
-  }
-
-  if (message === undefined) {
-    message = 'Expected true but got ' + assert._toString(mustBeTrue);
-  }
-  throw new Test262Error(message);
-}
-
-assert._toString = function (v:String) 
-{
-	return v;
-}
-
-assert._isSameValue = function (a, b) {
-  if (a === b) {
-    // Handle +/-0 vs. -/+0
-    return a !== 0 || 1 / a === 1 / b;
-  }
-
-  // Handle NaN vs. NaN
-  return a !== a && b !== b;
-};
-
-assert.sameValue = function (actual, expected, message) {
-  try {
-    if (assert._isSameValue(actual, expected)) {
-      return;
-    }
-  } catch (error) {
-    throw new Test262Error(message + ' (_isSameValue operation threw) ' + error);
-    return;
-  }
-
-  if (message === undefined) {
-    message = '';
-  } else {
-    message += ' ';
-  }
-
-  message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(expected) + '») to be true';
-
-  throw new Test262Error(message);
-};
-
-assert.notSameValue = function (actual, unexpected, message) {
-  if (!assert._isSameValue(actual, unexpected)) {
-    return;
-  }
-
-  if (message === undefined) {
-    message = '';
-  } else {
-    message += ' ';
-  }
-
-  message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(unexpected) + '») to be false';
-
-  throw new Test262Error(message);
-};
-
-assert.throws = function (expectedErrorConstructor, func, message) {
-  var expectedName, actualName;
-  if (typeof func !== "function") {
-    throw new Test262Error('assert.throws requires two arguments: the error constructor ' +
-      'and a function to run');
-    return;
-  }
-  if (message === undefined) {
-    message = '';
-  } else {
-    message += ' ';
-  }
-
-  try {
-    func();
-  } catch (thrown) {	  
-	  trace(thrown.name); 
-    if (typeof thrown !== 'object' || thrown === null) {
-      message += 'Thrown value was not an object!';
-      throw new Test262Error(message);
-    } else if (thrown.constructor !== expectedErrorConstructor) {
-      expectedName = expectedErrorConstructor.name;
-      actualName = thrown.constructor.name;
-      if (expectedName === actualName) {
-        message += 'Expected a ' + expectedName + ' but got a different error constructor with the same name';
-      } else {
-        message += 'Expected a ' + expectedName + ' but got a ' + actualName;
-      }
-      throw new Test262Error(message);
-    }
-    return;
-  }
-
-  message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
-  throw new Test262Error(message);
-};
-
-const array = [
-  { name: 'A000', rating: 2 },
+	var a:Vector.<Object> = new <Object>[  
+			 { name: 'A000', rating: 2 },
   { name: 'A001', rating: 2 },
   { name: 'A002', rating: 2 },
   { name: 'A003', rating: 2 },
@@ -2304,32 +2069,280 @@ const array = [
   { name: 'K175', rating: 2 },
   { name: 'K176', rating: 2 },
   { name: 'K177', rating: 2 },
-];
-//assert.sameValue(array.length, 2048);
-
-// Sort the elements by `rating` in descending order.
-// (This updates `array` in place.)
-
-var t:int = getTimer();
-
-for (var m:int = 0;  m< 100 ; m++) 
-{
-	array.reverse();
-	array.sort(function(a, b) {return b.rating - a.rating});
-	//array.sortOn("rating", Array.NUMERIC);
-}
-
-
-trace( getTimer() -t );
-
-for(var i=0;i<array.length-1;i++)
-{
-    if( array[i].rating < array[i+1].rating )
-    {
-        trace(array[i].name);
-    }
+		  
+		  ];
+	b = a;
+		  
 	
+	var tt:int = getTimer();
+	
+	for (var k:int = 0;  k<100 ; k++) 
+	{
+		a.reverse();
+		a.sort(
+		function (l,r) 
+		{
+			
+			return l.rating - r.rating;
+		}
+	);
+	}
+	
+	
+	
+	trace( getTimer() - tt );
+
 }
+)();
+
+
+
+
+
+
+
+
+
+
+//var __instance = new Object(42);
+//
+//__instance.charAt = String.prototype.charAt;
+//
+//if (__instance.charAt(false) + __instance.charAt(true) !== "42") {
+  //throw new Error('#1: __instance = new Object(42); __instance.charAt = String.prototype.charAt;  __instance = new Object(42); __instance.charAt = String.prototype.charAt; __instance.charAt(false)+__instance.charAt(true) === "42". Actual: ' + __instance.charAt(false) + __instance.charAt(true));
+//}
+//
+//
+//trace(String["hasOwnProperty"]("fromCharCode"));
+
+
+
+//async function asyncAdd(a:int, b:int):int {
+    //var x:int = await Promise.resolve(a);
+    //var y:int = await Promise.resolve(b);
+    //return x + y;
+//}
+//async function asyncHello():String {
+    //var result:String = await Promise.resolve("Hello");
+    //return result + " World";
+//}
+//async function returnsPromise():* {
+    //return Promise.resolve(42);
+//}
+//async function asyncVoid():void {
+    //trace("asyncVoid executing");
+//}
+//async function asyncNest():int {
+    //var inner:* = asyncInner(5);
+    //var result:int = await inner;
+    //return result * 2;
+//}
+//async function asyncInner(n:int):int {
+    //return n + 1;
+//}
+//// Test
+//var p1:* = asyncAdd(5, 3);
+//p1.then(function(v:int) { trace("asyncAdd(5,3) = " + v); });
+//var p2:* = asyncHello();
+//p2.then(function(v:String) { trace("asyncHello: " + v); });
+//var p3:* = returnsPromise();
+//p3.then(function(v:int) { trace("returnsPromise: " + v); });
+//var p4:* = asyncVoid();
+//p4.then(function(v:*) { trace("asyncVoid done"); });
+//var p5:* = asyncNest();
+//p5.then(function(v:int) { trace("asyncNest: " + v); });
+//trace("=== Init Complete ===");
+
+
+
+//import geom.Vector2;
+//var a:Vector2 = new Vector2(0,1);
+//var b = new Vector2(1,0);
+//
+//a += b;
+//
+//trace(a);
+//trace( a.dot(b) );
+//trace( a.cross(b) );
+//trace( a * 3 );
+//trace( a / 3 );
+//
+//trace( 6 * b );
+//
+//trace( +-b);   
+
+//final class BB
+//{
+	//[operator("%")]
+	//static function bsb(i:BB,j:int):String
+	//{
+		//if(true)
+		//{
+			//return "BB % " + [j, j].toString() ;
+		//}
+		//else
+		//{
+			//throw 3;
+		//}
+	//}
+//}
+//
+//
+//var c = new BB();
+//
+////var d = c / 3;
+////trace(d);
+//
+//c %= 3;
+//trace("c:",c,typeof c);
+
+
+//var v:Vector.<int> = new <int>[1,2,3,4,9,9,9,9,9,10,11,0,0,0,0,0,0,0,3+3,0,0,0];
+//trace(v);
+
+
+//
+//
+//async function Go()
+//{
+	//try
+	//{
+		//trace( await fetch("https://r.wxyfamily.duckdns.org") );	
+		//trace(2);
+	//
+	//}
+	//catch (e)
+	//{
+		//trace(e);
+		//
+		//trace( await fetch("http://oa.ofilm.com") );
+		//
+	//}
+//}
+//Go();
+//
+
+
+ 
+//class Test262Error extends Error
+//{
+	//public function Test262Error(t)
+	//{
+		//super(t);
+	//}
+//}
+
+
+//
+//class Test262Error extends Error
+//{
+	//var a;
+	//public function Test262Error(t=undefined)
+	//{
+		//super(t);
+	//}
+//}
+//
+//function assert(mustBeTrue, message = undefined) {
+  //if (mustBeTrue === true) {
+    //return;
+  //}
+//
+  //if (message === undefined) {
+    //message = 'Expected true but got ' + assert._toString(mustBeTrue);
+  //}
+  //throw new Test262Error(message);
+//}
+//
+//assert._toString = function (v:String) 
+//{
+	//return v;
+//}
+//
+//assert._isSameValue = function (a, b) {
+  //if (a === b) {
+    //// Handle +/-0 vs. -/+0
+    //return a !== 0 || 1 / a === 1 / b;
+  //}
+//
+  //// Handle NaN vs. NaN
+  //return a !== a && b !== b;
+//};
+//
+//assert.sameValue = function (actual, expected, message) {
+  //try {
+    //if (assert._isSameValue(actual, expected)) {
+      //return;
+    //}
+  //} catch (error) {
+    //throw new Test262Error(message + ' (_isSameValue operation threw) ' + error);
+    //return;
+  //}
+//
+  //if (message === undefined) {
+    //message = '';
+  //} else {
+    //message += ' ';
+  //}
+//
+  //message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(expected) + '») to be true';
+//
+  //throw new Test262Error(message);
+//};
+//
+//assert.notSameValue = function (actual, unexpected, message) {
+  //if (!assert._isSameValue(actual, unexpected)) {
+    //return;
+  //}
+//
+  //if (message === undefined) {
+    //message = '';
+  //} else {
+    //message += ' ';
+  //}
+//
+  //message += 'Expected SameValue(«' + assert._toString(actual) + '», «' + assert._toString(unexpected) + '») to be false';
+//
+  //throw new Test262Error(message);
+//};
+//
+//assert.throws = function (expectedErrorConstructor, func, message) {
+  //var expectedName, actualName;
+  //if (typeof func !== "function") {
+    //throw new Test262Error('assert.throws requires two arguments: the error constructor ' +
+      //'and a function to run');
+    //return;
+  //}
+  //if (message === undefined) {
+    //message = '';
+  //} else {
+    //message += ' ';
+  //}
+//
+  //try {
+    //func();
+  //} catch (thrown) {	  
+	  //trace(thrown.name); 
+    //if (typeof thrown !== 'object' || thrown === null) {
+      //message += 'Thrown value was not an object!';
+      //throw new Test262Error(message);
+    //} else if (thrown.constructor !== expectedErrorConstructor) {
+      //expectedName = expectedErrorConstructor.name;
+      //actualName = thrown.constructor.name;
+      //if (expectedName === actualName) {
+        //message += 'Expected a ' + expectedName + ' but got a different error constructor with the same name';
+      //} else {
+        //message += 'Expected a ' + expectedName + ' but got a ' + actualName;
+      //}
+      //throw new Test262Error(message);
+    //}
+    //return;
+  //}
+//
+  //message += 'Expected a ' + expectedErrorConstructor.name + ' to be thrown but no exception was thrown at all';
+  //throw new Test262Error(message);
+//};
+
 
 trace('OK');
 

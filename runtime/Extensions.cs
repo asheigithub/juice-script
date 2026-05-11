@@ -1,4 +1,5 @@
 ﻿using juicescript.ABC;
+using juicescript.runtime.buildin;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -591,8 +592,8 @@ namespace juicescript.runtime
 							return "NaN";
 						}
 						else
-						{                           
-							return  v.ToString();
+						{
+                            return Numeric.ToNumberString(v); //v.ToString();
 						}
 						
 					}
