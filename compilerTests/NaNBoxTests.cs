@@ -29,16 +29,23 @@ namespace compilerTests
         [TestMethod]
         public void TestBoxHeapPtr()
         {
-            for (int i = 0; i < 256; i++)
+            for (int i = 0; i < 16; i++)
             {
                 for (int j = 0; j < short.MaxValue; j++)
                 {
-                    NaNBoxing boxing = new NaNBoxing();
+                    for (int k = 0; k < 16; k++)
+					{
+						NaNBoxing boxing = new NaNBoxing();
 
-                    boxing.SetHeapPtr(j, (byte)i);
+						boxing.SetHeapPtr(j, (byte)i, (byte)k);
 
-                    Assert.AreEqual(boxing.HeapPtr, j);
-                    Assert.AreEqual(boxing.HeapKind, i);
+						Assert.AreEqual(boxing.HeapPtr, j);
+						Assert.AreEqual(boxing.HeapKind, i);
+						Assert.AreEqual(boxing.HeapFlag, k);
+
+					}
+
+                   
 
                 }
             }

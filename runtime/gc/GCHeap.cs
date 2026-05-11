@@ -27,7 +27,7 @@ namespace juicescript.runtime.gc
 
         static GCHeap()
         {
-			NaNBoxing._setheapptr_validator = (ptr, kind) => {
+			NaNBoxing._setheapptr_validator = (ptr, kind, flag) => {
 
 				GCHeap heap;
 				if (reference !=null && reference.TryGetTarget(out heap))
@@ -35,6 +35,10 @@ namespace juicescript.runtime.gc
 					if (ptr != 0 && kind != NaNBoxing.UNKNOWN_HEAPKIND)
 					{
 						Debug.Assert((byte)heap[ptr].Kind == kind);
+                        if (kind == (byte)RtHeapTypeKind.INSTANCE )
+                        {
+                            Debug.Assert(((ASInstance)heap[ptr].Type).Flags.HasFlag(ClassFlags.Struct) == (flag == (byte)RtHeapTypeKindFlag.FLAG_STRUCT));
+                        }
 					}
 				}
 			};
