@@ -1059,6 +1059,9 @@ namespace juicescript
 #if DEBUG
         public static Action<int,byte> _setheapptr_validator;
 #endif
+
+		//未知的堆类型 实际上运行时只在GetSaveValue内部用到!
+		public const int UNKNOWN_HEAPKIND = 0x7F;  
         public void SetHeapPtr(int indexofheap,byte heapkind)
         {
 #if DEBUG

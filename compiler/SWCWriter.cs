@@ -655,7 +655,7 @@ namespace juicescript.compiler
                     if (pool_index < 0)
                         throw new InvalidOperationException();
 
-                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24),255);
+                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24),NaNBoxing.UNKNOWN_HEAPKIND);
                 }
 				else
                 {
@@ -671,7 +671,7 @@ namespace juicescript.compiler
                         if (pool_index < 0)
                             throw new InvalidOperationException();
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24), 255);
+                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24), NaNBoxing.UNKNOWN_HEAPKIND);
                     }
                     //else if (heapInstance.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS && kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
                     //{
@@ -698,7 +698,7 @@ namespace juicescript.compiler
                             throw new InvalidOperationException();
                         }
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24), 255);
+                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24), NaNBoxing.UNKNOWN_HEAPKIND);
                     }
                     else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
                     {
@@ -713,7 +713,7 @@ namespace juicescript.compiler
                             throw new InvalidOperationException();
                         }
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24), 255);
+                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24), NaNBoxing.UNKNOWN_HEAPKIND);
 
                     }
                     else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
@@ -731,7 +731,7 @@ namespace juicescript.compiler
                             throw new InvalidOperationException();
                         }
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24), 255);
+                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24), NaNBoxing.UNKNOWN_HEAPKIND);
 
                     }
                     else

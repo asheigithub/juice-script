@@ -146,7 +146,7 @@ namespace juicescript.runtime.buildin
 						{
 							int cache_struct_ptr = array.cache_structs[i];
 
-							var v_struct = context.GC.Heap[cache_struct_ptr];
+							var v_struct = context.GC.Heap[cache_struct_ptr]; 
 
 							v_struct.Type = obj.Type;
 							((RtInstance)v_struct).HEAPINSTANCE_PTR = 0;

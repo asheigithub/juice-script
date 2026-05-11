@@ -33,7 +33,7 @@ namespace juicescript.runtime
 				//RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
 
 				RtHeapTypeKind htype = (RtHeapTypeKind)value.HeapKind;
-				if ((byte)htype == 255)
+				if ((byte)htype == NaNBoxing.UNKNOWN_HEAPKIND)
 				{ 
 					htype = Context.GC.Heap[value.HeapPtr].Kind;
 				}
@@ -144,7 +144,7 @@ namespace juicescript.runtime
 									if (scope_p != 0)
 									{
 										NaNBoxing s = new NaNBoxing();
-										s.SetHeapPtr(scope_p, 255);//反正会马上递归
+										s.SetHeapPtr(scope_p, NaNBoxing.UNKNOWN_HEAPKIND);//反正会马上递归
 										s = GetSaveValue(s, ref error);
 										if (error.raised)
 										{
@@ -197,7 +197,7 @@ namespace juicescript.runtime
 									else
 									{
 										NaNBoxing p = new NaNBoxing();
-										p.SetHeapPtr(scope.ParentPtr,255);//反正马上递归
+										p.SetHeapPtr(scope.ParentPtr,NaNBoxing.UNKNOWN_HEAPKIND);//反正马上递归
 										p = GetSaveValue(p, ref error);
 										if (error.raised)
 										{
@@ -258,7 +258,7 @@ namespace juicescript.runtime
 									if (cacheMscope.ParentPtr != 0)
 									{
 										NaNBoxing p = new NaNBoxing();
-										p.SetHeapPtr(cacheMscope.ParentPtr, 255);//马上递归
+										p.SetHeapPtr(cacheMscope.ParentPtr, NaNBoxing.UNKNOWN_HEAPKIND);//马上递归
 										p = GetSaveValue(p, ref error);
 										if (error.raised)
 										{

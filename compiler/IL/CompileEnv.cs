@@ -550,7 +550,7 @@ namespace juicescript.compiler.IL
 			int ptr = (0xffffff & index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
 
 			NaNBoxing boxing = new NaNBoxing();
-			boxing.SetHeapPtr(ptr, 255);
+			boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
 			Constants.Add(boxing);
 
 			return Constants.Count - 1;
@@ -609,7 +609,7 @@ namespace juicescript.compiler.IL
 			int ptr = (0xffffff & index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
 
 			NaNBoxing boxing = new NaNBoxing();
-			boxing.SetHeapPtr(ptr, 255);
+			boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
 			Constants.Add(boxing);
 
 			return Constants.Count - 1;
@@ -664,7 +664,7 @@ namespace juicescript.compiler.IL
             int ptr = (0xffffff & heapPtr) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24);
 
             NaNBoxing boxing = new NaNBoxing();
-            boxing.SetHeapPtr(ptr, 255);
+            boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
             Constants.Add(boxing);
 
             return Constants.Count - 1;
@@ -704,7 +704,7 @@ namespace juicescript.compiler.IL
             int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
             NaNBoxing boxing = new NaNBoxing();
-            boxing.SetHeapPtr(ptr, 255);
+            boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
             Constants.Add(boxing);
             
 
@@ -744,7 +744,7 @@ namespace juicescript.compiler.IL
             int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
 
             NaNBoxing boxing = new NaNBoxing();
-            boxing.SetHeapPtr(ptr, 255);
+            boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
             Constants.Add(boxing);
 
             return Constants.Count - 1;
@@ -784,7 +784,7 @@ namespace juicescript.compiler.IL
             int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
 
             NaNBoxing boxing = new NaNBoxing();
-            boxing.SetHeapPtr(ptr, 255);
+            boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
             Constants.Add(boxing);
 
             return Constants.Count - 1;
@@ -818,7 +818,7 @@ namespace juicescript.compiler.IL
 
 			int ptr = (0xffffff & vectorIndex) | ((byte)ASMethodBody.PoolHeapPtrKind.VectorDef << 24);
             NaNBoxing boxing = new NaNBoxing();
-            boxing.SetHeapPtr(ptr, 255);
+            boxing.SetHeapPtr(ptr, NaNBoxing.UNKNOWN_HEAPKIND);
             Constants.Add(boxing);
 
             return Constants.Count - 1;
