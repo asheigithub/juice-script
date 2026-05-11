@@ -37,7 +37,7 @@ namespace juicescript.runtime.gc
 						Debug.Assert((byte)heap[ptr].Kind == kind);
                         if (kind == (byte)RtHeapTypeKind.INSTANCE )
                         {
-                            Debug.Assert(((ASInstance)heap[ptr].Type).Flags.HasFlag(ClassFlags.Struct) == (flag == (byte)RtHeapTypeKindFlag.FLAG_STRUCT));
+                            Debug.Assert(((ASInstance)heap[ptr].Type).Flags.HasFlag(ClassFlags.Struct) == ((flag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT));
                         }
 					}
 				}

@@ -37,7 +37,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.FUNCTION_TOSTRING_STR, (byte)RtHeapTypeKind.STRING);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.FUNCTION_TOSTRING_STR, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 
 		}
 
@@ -103,7 +103,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -186,7 +186,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;				
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 

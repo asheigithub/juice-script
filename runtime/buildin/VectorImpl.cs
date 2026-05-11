@@ -279,7 +279,7 @@ namespace juicescript.runtime.buildin
 			((RtVector)instance).GetStore(context.player).SetBuffer(0);
 			((RtVector)instance).GetStore(context.player).length = 0;
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 
 
@@ -489,7 +489,7 @@ namespace juicescript.runtime.buildin
 				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
 				{
 					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
-					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}
 				else
 				{
@@ -535,7 +535,7 @@ namespace juicescript.runtime.buildin
 						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
 						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
-						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 
 					}
 				}
@@ -666,7 +666,7 @@ namespace juicescript.runtime.buildin
 				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
 				{
 					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
-					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}
 				else
 				{
@@ -708,7 +708,7 @@ namespace juicescript.runtime.buildin
 						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
 						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
-						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
+						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 					}
 				}
 
@@ -927,7 +927,7 @@ namespace juicescript.runtime.buildin
 					((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
 					((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
 
-					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}
 			}
 
@@ -1107,7 +1107,7 @@ namespace juicescript.runtime.buildin
 			int len = store.length;
 			
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
+			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
 
 			if (context.StackPosition + 3 >= Context.STACK_LENGTH)
 			{
@@ -3206,7 +3206,7 @@ namespace juicescript.runtime.buildin
 										struct_payload.Set_PROPERTY_PTR(l * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
 										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
 
-										v1.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
+										v1.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 									}
 
 									NaNBoxing v2 = default;
@@ -3222,7 +3222,7 @@ namespace juicescript.runtime.buildin
 										struct_payload.Set_PROPERTY_PTR(r * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
 										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
 
-										v2.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE);
+										v2.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 									}
 
 									ReceiveError e = default;
@@ -4126,7 +4126,7 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 			if (actualDeleteCount > 0 || insertCount > 0)
 			{
@@ -4240,7 +4240,7 @@ namespace juicescript.runtime.buildin
 			
 
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
+			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
 
 			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
 			{
@@ -4279,7 +4279,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4308,7 +4308,7 @@ namespace juicescript.runtime.buildin
 
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
-					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR);
+					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos+1);
 					if (error.raised)
@@ -4360,7 +4360,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
+			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
 
 			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
 			{
@@ -4399,7 +4399,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4428,7 +4428,7 @@ namespace juicescript.runtime.buildin
 
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
-					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR);
+					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
@@ -4488,7 +4488,7 @@ namespace juicescript.runtime.buildin
 			int elementSize = store.elementSize;
 
 			
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
+			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
 
 			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
 			{
@@ -4525,7 +4525,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4546,7 +4546,7 @@ namespace juicescript.runtime.buildin
 			var argSlots = context.StackSlots.AsSpan(basePos, 5);
 			argSlots.Clear();
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 
 			context.StackPosition += 5;
@@ -4567,7 +4567,7 @@ namespace juicescript.runtime.buildin
 
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
-					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR);
+					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
@@ -4604,7 +4604,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4640,7 +4640,7 @@ namespace juicescript.runtime.buildin
 			int elementSize = store.elementSize;
 
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
+			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
 
 			if (context.StackPosition + 6 >= Context.STACK_LENGTH)
 			{
@@ -4677,7 +4677,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4698,7 +4698,7 @@ namespace juicescript.runtime.buildin
 			var argSlots = context.StackSlots.AsSpan(basePos, 6);
 			argSlots.Clear();
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 			context.StackPosition += 6;
 
@@ -4718,7 +4718,7 @@ namespace juicescript.runtime.buildin
 
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
-					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR);
+					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
@@ -4758,7 +4758,7 @@ namespace juicescript.runtime.buildin
 					
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4799,7 +4799,7 @@ namespace juicescript.runtime.buildin
 
 			int len = store.length;
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR); //保持到槽，防止GC
+			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
 
 			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
 			{
@@ -4838,7 +4838,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				var globalptr = ((ASScript)sss.Container).__global_index__;
-				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL);
+				_this.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 			}
 
@@ -4867,7 +4867,7 @@ namespace juicescript.runtime.buildin
 
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
-					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR);
+					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
@@ -4943,7 +4943,7 @@ namespace juicescript.runtime.buildin
 			string str = sb.ToString();
 			if (string.IsNullOrEmpty(str))
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 			else
 			{
@@ -4955,7 +4955,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(p, (byte)RtHeapTypeKind.VECTOR);
+					context.StackSlots[returnSlotIndex].SetHeapPtr(p, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 				}
 			}
 
@@ -4997,7 +4997,7 @@ namespace juicescript.runtime.buildin
 			var store = vector.GetStore(context.player);
 			if (store.length == 0)
 			{
-				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.EMPTY_STR, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 			else
 			{
@@ -5028,7 +5028,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING);
+				context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 
 			}
 

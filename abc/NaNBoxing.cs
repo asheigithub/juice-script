@@ -1062,7 +1062,7 @@ namespace juicescript
 
 		//未知的堆类型 实际上运行时只在GetSaveValue内部用到!
 		public const int UNKNOWN_HEAPKIND = 0xF;  
-        public void SetHeapPtr(int indexofheap,byte heapkind , byte heapflag = 0)
+        public void SetHeapPtr(int indexofheap,byte heapkind , byte heapflag)
         {
 #if DEBUG
             if (_setheapptr_validator != null)

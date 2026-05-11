@@ -879,7 +879,7 @@ namespace juicescript.compiler
 
 														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 													}
 													else if (type == (RtHeapTypeKind)10)
@@ -899,7 +899,7 @@ namespace juicescript.compiler
 														}
 
 														int heap_ptr = (index & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 														if (!context.dict_methodresolver_ldclass_map.ContainsKey(constants))
 														{
@@ -941,7 +941,7 @@ namespace juicescript.compiler
 															throw new InvalidOperationException();
 														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24);
 
-														box.SetHeapPtr(heap_ptr, NaNBoxing.UNKNOWN_HEAPKIND);
+														box.SetHeapPtr(heap_ptr, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 													}
 													else if (type == RtHeapTypeKind.VECTOR)
 													{
@@ -953,7 +953,7 @@ namespace juicescript.compiler
 														int ptr = context.vectorDefs.IndexOf(vd);
 														ptr = (ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.VectorDef << 24);
 
-														box.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+														box.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 													}
 													else if (type == RtHeapTypeKind.MethodScope)
@@ -968,7 +968,7 @@ namespace juicescript.compiler
 														context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = m.Body;
 
 														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 													}
 													else if (type == (RtHeapTypeKind)200)
 													{
@@ -991,7 +991,7 @@ namespace juicescript.compiler
 
 														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
 
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 													}
 													else
@@ -1629,7 +1629,7 @@ namespace juicescript.compiler
 															int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
 
-															dv.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+															dv.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 															dict_newstring.Add(str, dv);
 														}
 														member.trait.Value.initValue = dv;
@@ -1819,7 +1819,7 @@ namespace juicescript.compiler
 											}
 
 											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
-											v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+											v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 											dict_newstring.Add(str, v);
 										}
@@ -1848,7 +1848,7 @@ namespace juicescript.compiler
 										}
 
 										int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
-										v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+										v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 										dict_newstring.Add(str, v);
 									}
@@ -2219,7 +2219,7 @@ namespace juicescript.compiler
 											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
 											NaNBoxing boxing = new NaNBoxing();
-											boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+											boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 											constants.Add(boxing);
 										}
@@ -2444,7 +2444,7 @@ namespace juicescript.compiler
 												int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
 												NaNBoxing boxing = new NaNBoxing();
-												boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+												boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
 												constants.Add(boxing);
 												para.ValueExprIndex = constants.Count - 1;
@@ -2486,7 +2486,7 @@ namespace juicescript.compiler
 											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
 											NaNBoxing boxing = new NaNBoxing();
-											boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND);
+											boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE	);
 
 											constants.Add(boxing);
 											para.ValueExprIndex = constants.Count - 1;

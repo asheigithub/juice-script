@@ -376,7 +376,7 @@ namespace juicescript.runtime.buildin
 							}
 						}
 
-						context.StackSlots[returnSlotIndex].SetHeapPtr(c.__instance_index__, (byte)RtHeapTypeKind.CLASS);
+						context.StackSlots[returnSlotIndex].SetHeapPtr(c.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
 						return;
 					}
 				}
@@ -1292,7 +1292,7 @@ namespace juicescript.runtime.buildin
 				httpClient.Dispose();
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE);
+			context.StackSlots[returnSlotIndex].SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 
 		}
 

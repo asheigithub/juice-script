@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public enum RtHeapTypeKindFlag : byte
+    public enum HeapKindFlag : byte
     { 
         NONE = 0,
 		FLAG_STRUCT = 1,

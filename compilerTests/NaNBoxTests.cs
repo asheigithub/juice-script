@@ -282,7 +282,7 @@ namespace compilerTests
 
 			{
 
-                a.SetHeapPtr(0,255);
+                a.SetHeapPtr(0,255,0);
 				b.SetNumber(3);
 
 				bool eq;

@@ -307,7 +307,7 @@ namespace juicescript.runtime
 
 						var globalinstance = Context.GC.Heap[((ASScript)c._link_codescope.Container).__global_index__];
 
-						thisP.SetHeapPtr(((ASScript)c._link_codescope.Container).__global_index__, (byte)RtHeapTypeKind.GLOBAL);
+						thisP.SetHeapPtr(((ASScript)c._link_codescope.Container).__global_index__, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 						try
 						{
@@ -376,7 +376,7 @@ namespace juicescript.runtime
 						{
 							Context.StackPosition++;
 							NaNBoxing thisP = default;
-							thisP.SetHeapPtr(instancePtr,(byte)instance.Kind);
+							thisP.SetHeapPtr(instancePtr,(byte)instance.Kind, (byte)(instance.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 							RunMethod(method, thisP, instancePtr, @type.Instance, 0, null, Context.StackSlots, ref error, -1);
 							if (error.raised)
 							{
@@ -493,7 +493,7 @@ namespace juicescript.runtime
 							
 
 							var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
-							thisP.SetHeapPtr(((ASScript)scope.Container).__global_index__ , (byte)RtHeapTypeKind.GLOBAL);
+							thisP.SetHeapPtr(((ASScript)scope.Container).__global_index__ , (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 							if (info.useSlots > Context.StackSlots.Length)
 							{
@@ -651,7 +651,7 @@ namespace juicescript.runtime
 							NaNBoxing thisP = default;
 							if (!hassetparent)
 							{
-								thisP.SetHeapPtr(this_instancePtr, (byte)this_instance.Kind);
+								thisP.SetHeapPtr(this_instancePtr, (byte)this_instance.Kind, (byte)(this_instance.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)this_instance.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 							}
 							else
 							{
@@ -968,7 +968,7 @@ namespace juicescript.runtime
 
 							int t = computemember_cacheinstance[cache_idx];
 							this_instance = Context.GC.Heap[t];
-							this_instancePtr.SetHeapPtr(t, (byte)this_instance.Kind);
+							this_instancePtr.SetHeapPtr(t, (byte)this_instance.Kind, (byte)(this_instance.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)this_instance.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 
 
 
