@@ -4546,6 +4546,7 @@ namespace juicescript.runtime.buildin
 			var argSlots = context.StackSlots.AsSpan(basePos, 5);
 			argSlots.Clear();
 
+			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
 
 
 			context.StackPosition += 5;
@@ -4697,7 +4698,7 @@ namespace juicescript.runtime.buildin
 			var argSlots = context.StackSlots.AsSpan(basePos, 6);
 			argSlots.Clear();
 
-
+			context.StackSlots[returnSlotIndex].SetHeapPtr(resultVecPtr, (byte)RtHeapTypeKind.VECTOR);
 
 			context.StackPosition += 6;
 
