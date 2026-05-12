@@ -543,6 +543,7 @@ namespace juicescript.runtime
                 {
                     if (newlen * store.elementSize <= MAX_CACHE_SIZE)
                     {
+                        
                         store.buffer.AddRange( Enumerable.Repeat<byte>(0, (newlen - store.length) * store.elementSize) );
                         
                         store.SetDefault(element_type, element_asclass, store.length, newlen - store.length);
@@ -566,9 +567,13 @@ namespace juicescript.runtime
             {
                 goto lbl_heap;
             }
+			Debug.Assert(!(store.IsCache && newlen * store.elementSize > MAX_CACHE_SIZE));
 
-            return;
+			return;
         lbl_heap:
+
+            Debug.Assert(!(store.IsCache && newlen * store.elementSize > MAX_CACHE_SIZE));
+
 
             if (player.Context.GC.MemUsage + (newlen - store.length) * store.elementSize > player.Context.GC.USAGE_LIMIT)
             {

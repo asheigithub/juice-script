@@ -265,6 +265,10 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
+			var store = ((RtVector)vecinstance).GetStore(context.player);
+			int elementSize = store.elementSize;
+
+
 			//在目标槽初始化vector
 			int ptrIndex = returnSlotIndex;
 
@@ -278,6 +282,7 @@ namespace juicescript.runtime.buildin
 			((RtVector)instance).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
 			((RtVector)instance).GetStore(context.player).SetBuffer(0);
 			((RtVector)instance).GetStore(context.player).length = 0;
+			((RtVector)instance).GetStore(context.player).elementSize = elementSize;
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
@@ -4488,8 +4493,6 @@ namespace juicescript.runtime.buildin
 			int elementSize = store.elementSize;
 
 			
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
-
 			if (context.StackPosition + 5 >= Context.STACK_LENGTH)
 			{
 				context.player.RaiseStackOverflow(ref error);
@@ -4640,8 +4643,7 @@ namespace juicescript.runtime.buildin
 			int elementSize = store.elementSize;
 
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE); //保持到槽，防止GC
-
+			
 			if (context.StackPosition + 6 >= Context.STACK_LENGTH)
 			{
 				context.player.RaiseStackOverflow(ref error);
@@ -5093,6 +5095,7 @@ namespace juicescript.runtime.buildin
 				{
 					//throw new InvalidOperationException();
 					Debug.Assert(size < RtVector.MAX_CACHE_SIZE);
+					buffer.Clear();
 					buffer.AddRange(Enumerable.Repeat<byte>(0, size));
 
 					//buffer.Clear();
