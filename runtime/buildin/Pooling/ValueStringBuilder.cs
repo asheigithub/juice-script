@@ -15,23 +15,18 @@ namespace juicescript.runtime.buildin.Pooling
 	internal ref struct ValueStringBuilder
 	{
 
-		private char[]? _arrayToReturnToPool;
+		//private char[]? _arrayToReturnToPool;
 		private Span<char> _chars;
 		private int _pos;
 
 		public ValueStringBuilder(Span<char> initialBuffer)
 		{
-			_arrayToReturnToPool = null;
+			//_arrayToReturnToPool = null;
 			_chars = initialBuffer;
 			_pos = 0;
 		}
 
-		public ValueStringBuilder(int initialCapacity)
-		{
-			_arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
-			_chars = _arrayToReturnToPool;
-			_pos = 0;
-		}
+		
 
 		public int Length
 		{
@@ -46,15 +41,15 @@ namespace juicescript.runtime.buildin.Pooling
 
 		public int Capacity => _chars.Length;
 
-		public void EnsureCapacity(int capacity)
-		{
-			// This is not expected to be called this with negative capacity
-			Debug.Assert(capacity >= 0);
+		//public void EnsureCapacity(int capacity)
+		//{
+		//	// This is not expected to be called this with negative capacity
+		//	Debug.Assert(capacity >= 0);
 
-			// If the caller has a bug and calls this with negative capacity, make sure to call Grow to throw an exception.
-			if ((uint)capacity > (uint)_chars.Length)
-				Grow(capacity - _pos);
-		}
+		//	// If the caller has a bug and calls this with negative capacity, make sure to call Grow to throw an exception.
+		//	if ((uint)capacity > (uint)_chars.Length)
+		//		Grow(capacity - _pos);
+		//}
 
 		/// <summary>
 		/// Get a pinnable reference to the builder.
@@ -62,33 +57,33 @@ namespace juicescript.runtime.buildin.Pooling
 		/// This overload is pattern matched in the C# 7.3+ compiler so you can omit
 		/// the explicit method call, and write eg "fixed (char* c = builder)"
 		/// </summary>
-		public ref char GetPinnableReference()
-		{
-			return ref MemoryMarshal.GetReference(_chars);
-		}
+		//public ref char GetPinnableReference()
+		//{
+		//	return ref MemoryMarshal.GetReference(_chars);
+		//}
 
 		/// <summary>
 		/// Get a pinnable reference to the builder.
 		/// </summary>
 		/// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
-		public ref char GetPinnableReference(bool terminate)
-		{
-			if (terminate)
-			{
-				EnsureCapacity(Length + 1);
-				_chars[Length] = '\0';
-			}
-			return ref MemoryMarshal.GetReference(_chars);
-		}
+		//public ref char GetPinnableReference(bool terminate)
+		//{
+		//	if (terminate)
+		//	{
+		//		EnsureCapacity(Length + 1);
+		//		_chars[Length] = '\0';
+		//	}
+		//	return ref MemoryMarshal.GetReference(_chars);
+		//}
 
-		public ref char this[int index]
-		{
-			get
-			{
-				Debug.Assert(index < _pos);
-				return ref _chars[index];
-			}
-		}
+		//public ref char this[int index]
+		//{
+		//	get
+		//	{
+		//		Debug.Assert(index < _pos);
+		//		return ref _chars[index];
+		//	}
+		//}
 
 		public override string ToString()
 		{
@@ -104,21 +99,21 @@ namespace juicescript.runtime.buildin.Pooling
 
 
 		/// <summary>Returns the underlying storage of the builder.</summary>
-		public Span<char> RawChars => _chars;
+		//public Span<char> RawChars => _chars;
 
 		/// <summary>
 		/// Returns a span around the contents of the builder.
 		/// </summary>
 		/// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
-		public ReadOnlySpan<char> AsSpan(bool terminate)
-		{
-			if (terminate)
-			{
-				EnsureCapacity(Length + 1);
-				_chars[Length] = '\0';
-			}
-			return _chars.Slice(0, _pos);
-		}
+		//public ReadOnlySpan<char> AsSpan(bool terminate)
+		//{
+		//	if (terminate)
+		//	{
+		//		EnsureCapacity(Length + 1);
+		//		_chars[Length] = '\0';
+		//	}
+		//	return _chars.Slice(0, _pos);
+		//}
 
 		public ReadOnlySpan<char> AsSpan() => _chars.Slice(0, _pos);
 		public ReadOnlySpan<char> AsSpan(int start) => _chars.Slice(start, _pos - start);
@@ -129,58 +124,44 @@ namespace juicescript.runtime.buildin.Pooling
 			_chars.Slice(0, _pos).Reverse();
 		}
 
-		public bool TryCopyTo(Span<char> destination, out int charsWritten)
-		{
-			if (_chars.Slice(0, _pos).TryCopyTo(destination))
-			{
-				charsWritten = _pos;
-				Dispose();
-				return true;
-			}
-			else
-			{
-				charsWritten = 0;
-				Dispose();
-				return false;
-			}
-		}
+		
 
-		public void Insert(int index, char value, int count)
-		{
-			if (_pos > _chars.Length - count)
-			{
-				Grow(count);
-			}
+		//public void Insert(int index, char value, int count)
+		//{
+		//	if (_pos > _chars.Length - count)
+		//	{
+		//		Grow(count);
+		//	}
 
-			int remaining = _pos - index;
-			_chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
-			_chars.Slice(index, count).Fill(value);
-			_pos += count;
-		}
+		//	int remaining = _pos - index;
+		//	_chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
+		//	_chars.Slice(index, count).Fill(value);
+		//	_pos += count;
+		//}
 
-		public void Insert(int index, string? s)
-		{
-			if (s == null)
-			{
-				return;
-			}
+//		public void Insert(int index, string? s)
+//		{
+//			if (s == null)
+//			{
+//				return;
+//			}
 
-			int count = s.Length;
+//			int count = s.Length;
 
-			if (_pos > (_chars.Length - count))
-			{
-				Grow(count);
-			}
+//			if (_pos > (_chars.Length - count))
+//			{
+//				Grow(count);
+//			}
 
-			int remaining = _pos - index;
-			_chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
-			s
-#if !NETCOREAPP
-            .AsSpan()
-#endif
-				.CopyTo(_chars.Slice(index));
-			_pos += count;
-		}
+//			int remaining = _pos - index;
+//			_chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
+//			s
+//#if !NETCOREAPP
+//            .AsSpan()
+//#endif
+//				.CopyTo(_chars.Slice(index));
+//			_pos += count;
+//		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Append(char c)
@@ -194,7 +175,11 @@ namespace juicescript.runtime.buildin.Pooling
 			}
 			else
 			{
-				GrowAndAppend(c);
+#if DEBUG
+				throw new InvalidOperationException();
+#endif
+
+				//GrowAndAppend(c);
 			}
 		}
 
@@ -226,7 +211,8 @@ namespace juicescript.runtime.buildin.Pooling
 			}
 			else
 			{
-				AppendSlow(s);
+
+				//AppendSlow(s);
 			}
 		}
 
@@ -240,7 +226,7 @@ namespace juicescript.runtime.buildin.Pooling
 			}
 			else
 			{
-				Append(value.ToString());
+				//Append(value.ToString());
 			}
 		}
 #else
@@ -257,21 +243,21 @@ namespace juicescript.runtime.buildin.Pooling
     }
 #endif
 
-		private void AppendSlow(string s)
-		{
-			int pos = _pos;
-			if (pos > _chars.Length - s.Length)
-			{
-				Grow(s.Length);
-			}
+//		private void AppendSlow(string s)
+//		{
+//			int pos = _pos;
+//			if (pos > _chars.Length - s.Length)
+//			{
+//				Grow(s.Length);
+//			}
 
-			s
-#if !NETCOREAPP
-            .AsSpan()
-#endif
-				.CopyTo(_chars.Slice(pos));
-			_pos += s.Length;
-		}
+//			s
+//#if !NETCOREAPP
+//            .AsSpan()
+//#endif
+//				.CopyTo(_chars.Slice(pos));
+//			_pos += s.Length;
+//		}
 
 		public void Append(char c, int count)
 		{
@@ -288,21 +274,21 @@ namespace juicescript.runtime.buildin.Pooling
 			_pos += count;
 		}
 
-		public unsafe void Append(char* value, int length)
-		{
-			int pos = _pos;
-			if (pos > _chars.Length - length)
-			{
-				Grow(length);
-			}
+		//public unsafe void Append(char* value, int length)
+		//{
+		//	int pos = _pos;
+		//	if (pos > _chars.Length - length)
+		//	{
+		//		Grow(length);
+		//	}
 
-			Span<char> dst = _chars.Slice(_pos, length);
-			for (int i = 0; i < dst.Length; i++)
-			{
-				dst[i] = *value++;
-			}
-			_pos += length;
-		}
+		//	Span<char> dst = _chars.Slice(_pos, length);
+		//	for (int i = 0; i < dst.Length; i++)
+		//	{
+		//		dst[i] = *value++;
+		//	}
+		//	_pos += length;
+		//}
 
 		public void Append(ReadOnlySpan<char> value)
 		{
@@ -316,18 +302,18 @@ namespace juicescript.runtime.buildin.Pooling
 			_pos += value.Length;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Span<char> AppendSpan(int length)
-		{
-			int origPos = _pos;
-			if (origPos > _chars.Length - length)
-			{
-				Grow(length);
-			}
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//public Span<char> AppendSpan(int length)
+		//{
+		//	int origPos = _pos;
+		//	if (origPos > _chars.Length - length)
+		//	{
+		//		Grow(length);
+		//	}
 
-			_pos = origPos + length;
-			return _chars.Slice(origPos, length);
-		}
+		//	_pos = origPos + length;
+		//	return _chars.Slice(origPos, length);
+		//}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void GrowAndAppend(char c)
@@ -347,40 +333,42 @@ namespace juicescript.runtime.buildin.Pooling
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void Grow(int additionalCapacityBeyondPos)
 		{
-			Debug.Assert(additionalCapacityBeyondPos > 0);
-			Debug.Assert(_pos > _chars.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed.");
+			throw new InvalidOperationException();
 
-			const uint ArrayMaxLength = 0x7FFFFFC7; // same as Array.MaxLength
+			//Debug.Assert(additionalCapacityBeyondPos > 0);
+			//Debug.Assert(_pos > _chars.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed.");
 
-			// Increase to at least the required size (_pos + additionalCapacityBeyondPos), but try
-			// to double the size if possible, bounding the doubling to not go beyond the max array length.
-			int newCapacity = (int)Math.Max(
-				(uint)(_pos + additionalCapacityBeyondPos),
-				Math.Min((uint)_chars.Length * 2, ArrayMaxLength));
+			//const uint ArrayMaxLength = 0x7FFFFFC7; // same as Array.MaxLength
 
-			// Make sure to let Rent throw an exception if the caller has a bug and the desired capacity is negative.
-			// This could also go negative if the actual required length wraps around.
-			char[] poolArray = ArrayPool<char>.Shared.Rent(newCapacity);
+			//// Increase to at least the required size (_pos + additionalCapacityBeyondPos), but try
+			//// to double the size if possible, bounding the doubling to not go beyond the max array length.
+			//int newCapacity = (int)Math.Max(
+			//	(uint)(_pos + additionalCapacityBeyondPos),
+			//	Math.Min((uint)_chars.Length * 2, ArrayMaxLength));
 
-			_chars.Slice(0, _pos).CopyTo(poolArray);
+			//// Make sure to let Rent throw an exception if the caller has a bug and the desired capacity is negative.
+			//// This could also go negative if the actual required length wraps around.
+			//char[] poolArray = ArrayPool<char>.Shared.Rent(newCapacity);
 
-			char[]? toReturn = _arrayToReturnToPool;
-			_chars = _arrayToReturnToPool = poolArray;
-			if (toReturn != null)
-			{
-				ArrayPool<char>.Shared.Return(toReturn);
-			}
+			//_chars.Slice(0, _pos).CopyTo(poolArray);
+
+			////char[]? toReturn = _arrayToReturnToPool;
+			////_chars = _arrayToReturnToPool = poolArray;
+			////if (toReturn != null)
+			////{
+			////	ArrayPool<char>.Shared.Return(toReturn);
+			////}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Dispose()
 		{
-			char[]? toReturn = _arrayToReturnToPool;
-			this = default; // for safety, to avoid using pooled array if this instance is erroneously appended to again
-			if (toReturn != null)
-			{
-				ArrayPool<char>.Shared.Return(toReturn);
-			}
+			//char[]? toReturn = _arrayToReturnToPool;
+			//this = default; // for safety, to avoid using pooled array if this instance is erroneously appended to again
+			//if (toReturn != null)
+			//{
+			//	ArrayPool<char>.Shared.Return(toReturn);
+			//}
 		}
 	}
 

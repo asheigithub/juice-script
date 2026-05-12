@@ -19,15 +19,15 @@ namespace compilerTests
 		{
             public StringBuilder output = new StringBuilder();
 
-			public void Write(string message)
-			{
-				//throw new NotImplementedException();
-				output.Append(message);
-			}
+			//public void Write(string message)
+			//{
+			//	//throw new NotImplementedException();
+			//	output.Append(message);
+			//}
 
-			public void WriteLine(string message)
+			public void WriteLine(ReadOnlySpan<char> chars)
 			{
-				output.AppendLine(message);
+				output.Append(chars);output.AppendLine();
 			}
 
             public string GetOutput()

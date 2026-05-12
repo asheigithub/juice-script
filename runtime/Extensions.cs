@@ -604,9 +604,8 @@ namespace juicescript.runtime
 							return "NaN";
 						}
 						else
-						{
-							
-							return Numeric.ToNumberString(v, buffchars).ToString(); //v.ToString();
+						{					
+							return Numeric.ToNumberString(v, buffchars); //v.ToString();
 						}
 						
 					}
@@ -627,7 +626,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							return v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+							//return v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+							return  FloatImpl.FloatToString(v,10,buffchars); 
 						}
 						
 					}

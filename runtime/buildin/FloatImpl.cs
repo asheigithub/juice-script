@@ -4,6 +4,7 @@ using juicescript.runtime.buildin.Pooling;
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.Globalization;
 using static juicescript.runtime.Player;
 
 namespace juicescript.runtime.buildin
@@ -53,25 +54,34 @@ namespace juicescript.runtime.buildin
 
             float x = thisPtr.FloatValue;
 
-            string str = FloatToString(x, radixValue);
+            Span<char> buffer = stackalloc char[128];
 
-            int str_ptr = context.GC.AllocString(str);
-            if (str_ptr == 0)
-            {
-                context.player.RaiseOutOfMemory(ref error);
-                return;
-            }
+            var str = FloatToString(x, radixValue,buffer);
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-        }
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = r;
+			}
 
-        private static string FloatToString(float n, int radix)
+			//int str_ptr = context.GC.AllocString(str);
+			//if (str_ptr == 0)
+			//{
+			//    context.player.RaiseOutOfMemory(ref error);
+			//    return;
+			//}
+
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+		}
+
+        internal static ReadOnlySpan<char> FloatToString(float n, int radix,Span<char> buffer)
         {
+            Debug.Assert(buffer.Length >= 128);
+
             if (float.IsNaN(n))
             {
                 return "NaN";
             }
-
+            
             if (n == 0)
             {
                 return "0";
@@ -91,32 +101,109 @@ namespace juicescript.runtime.buildin
 
             if (radix == 10)
             {
-                return negative ? "-" + FloatToStringDecimal(n) : FloatToStringDecimal(n);
+                if (n.TryFormat(buffer.Slice(1), out int wchars, default, System.Globalization.CultureInfo.InvariantCulture))
+                {
+					for (int i = 1; i < wchars; i++)
+					{
+						if (buffer[i] == 'E') buffer[i] = 'e';
+					}
+
+					if (negative)
+                    {
+                        buffer[0]='-';
+						return buffer.Slice(0,1+ wchars);
+					}
+                    else
+                    {
+                        return buffer.Slice(1, wchars);
+                    }
+                }
+
+                if (negative)
+                {
+                    buffer[0] = '-';
+                    var r = FloatToStringDecimal(n, buffer.Slice(1));
+                    return buffer.Slice(0, r.Length + 1);
+                }
+                else
+                {
+                    return FloatToStringDecimal(n, buffer);
+                }
+
+                //return negative ? "-" + FloatToStringDecimal(n) : FloatToStringDecimal(n);
             }
 
-            int intPart = (int)MathF.Truncate(n);
+            float intPart =MathF.Truncate(n);
             float fracPart = n - intPart;
 
-            string result = IntToString(intPart, radix);
-            if (fracPart > 0)
-            {
-                result += "." + FloatFractionToString(fracPart, radix);
-            }
+            //string result = IntToString(intPart, radix);
+            //if (fracPart > 0)
+            //{
+            //    result += "." + FloatFractionToString(fracPart, radix);
+            //}
 
-            return negative ? "-" + result : result;
+            //return negative ? "-" + result : result;
+
+
+
+            if (negative)
+            {
+                buffer[0] = '-';
+
+                var result = IntToString((int)intPart, radix, buffer.Slice(1));
+
+                if (fracPart > 0)
+                {
+                    buffer[1 + result.Length] = '.';
+
+                    var p2 = FloatFractionToString(fracPart, radix, buffer.Slice(1 + result.Length + 1));
+
+                    return buffer.Slice(0, 1 + result.Length + 1 + p2.Length);
+
+                }
+                else
+                {
+                    return buffer.Slice(0, result.Length + 1);
+                }
+
+            }
+            else
+            {
+				var result = IntToString((int)intPart, radix, buffer);
+
+                if (fracPart > 0)
+                {
+                    buffer[result.Length] = '.';
+
+                    var p2 = FloatFractionToString(fracPart, radix, buffer.Slice(result.Length + 1));
+
+                    return buffer.Slice(0, 1 + result.Length + 1 + p2.Length);
+
+                }
+                else
+                {
+                    return result;
+                }
+			}
+
+
+
         }
 
-        private static string FloatToStringDecimal(float n)
+        private static ReadOnlySpan<char> FloatToStringDecimal(float n , Span<char> buffer)
         {
+            Debug.Assert(buffer.Length >= 96);
+
             if (n == 0) return "0";
 
             int intPart = (int)MathF.Truncate(n);
             float fracPart = n - intPart;
 
-            string result = intPart.ToString();
+            var result = IntToString(intPart, 10, buffer);  //intPart.ToString();
+
             if (fracPart > 0)
             {
-                var sb = new ValueStringBuilder(stackalloc char[32]);
+                var sb = new ValueStringBuilder( buffer.Slice(result.Length + 1) );//stackalloc char[32]);
                 for (int i = 0; i < 7 && fracPart > 0; i++)
                 {
                     fracPart *= 10;
@@ -124,20 +211,33 @@ namespace juicescript.runtime.buildin
                     sb.Append(Digits[digit]);
                     fracPart -= digit;
                 }
-                result = intPart.ToString() + "." + sb.ToString().TrimEnd('0');
+
+                var f = sb.ToCharSpan().TrimEnd('0');
+
+                buffer[result.Length] = '.';
+
+                result = buffer.Slice(0, result.Length + 1 + f.Length);
+
+                //result = intPart.ToString() + "." + sb.ToString().TrimEnd('0');
             }
 
             return result;
         }
 
-        private static string IntToString(int n, int radix)
+        private static ReadOnlySpan<char> IntToString(int n, int radix , Span<char> buffer  )
         {
+            Debug.Assert(buffer.Length >= 32);
+
             if (n == 0)
             {
                 return "0";
             }
+            if (n < 0)
+            {
+                n = int.MaxValue;
+            }
 
-            var sb = new ValueStringBuilder(stackalloc char[32]);
+            var sb = new ValueStringBuilder(buffer);
             while (n > 0)
             {
                 int digit = n % radix;
@@ -146,12 +246,15 @@ namespace juicescript.runtime.buildin
             }
 
             sb.Reverse();
-            return sb.ToString();
+            //return sb.ToString();
+            return sb.ToCharSpan();
         }
 
-        private static string FloatFractionToString(float n, int radix)
+        private static ReadOnlySpan<char> FloatFractionToString(float n, int radix,Span<char> buffer)
         {
-            var sb = new ValueStringBuilder(stackalloc char[32]);
+            Debug.Assert(buffer.Length >= 32);
+
+            var sb = new ValueStringBuilder(buffer);
             for (int i = 0; i < 10 && n > 0; i++)
             {
                 n *= radix;
@@ -159,15 +262,19 @@ namespace juicescript.runtime.buildin
                 sb.Append(Digits[digit]);
                 n -= digit;
             }
-            return sb.ToString();
+            return sb.ToCharSpan(); //ToString();
         }
 
-        private static string CreateExponentialRepresentation(
+        private static ReadOnlySpan<char> CreateExponentialRepresentation(
             ref DtoaBuilder buffer,
             int exponent,
             bool negative,
-            int significantDigits)
+            int significantDigits ,
+            Span<char> vsbuffer
+            )
         {
+            Debug.Assert(vsbuffer.Length >= 128);
+
             bool negativeExponent = false;
             if (exponent < 0)
             {
@@ -175,7 +282,7 @@ namespace juicescript.runtime.buildin
                 exponent = -exponent;
             }
 
-            var sb = new ValueStringBuilder(stackalloc char[128]);
+            var sb = new ValueStringBuilder(vsbuffer);
             if (negative)
             {
                 sb.Append('-');
@@ -193,7 +300,7 @@ namespace juicescript.runtime.buildin
             sb.Append(negativeExponent ? '-' : '+');
             sb.Append(exponent);
 
-            return sb.ToString();
+            return sb.ToCharSpan(); //sb.ToString();
         }
 
         [NativeFunction(".float$public::toExponential")]
@@ -220,9 +327,16 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            double x = thisPtr.FloatValue;
 
-            var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
+			double x = thisPtr.FloatValue;
+			Span<char> temp = stackalloc char[64];
+			if (thisPtr.FloatValue.TryFormat(temp, out int wchars, default, System.Globalization.CultureInfo.InvariantCulture))
+			{
+				double.TryParse(temp.Slice(0, wchars), out x);
+			}
+
+
+			var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
             DtoaNumberFormatter.DoubleToAscii(
                 ref dtoaBuilder,
                 x,
@@ -235,17 +349,25 @@ namespace juicescript.runtime.buildin
             Debug.Assert(dtoaBuilder.Length <= f + 1);
 
             int exponent = decimalPoint - 1;
-            var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1);
 
-            int str_ptr = context.GC.AllocString(result);
-            if (str_ptr == 0)
-            {
-                context.player.RaiseOutOfMemory(ref error);
-                return;
-            }
+            Span<char> buffer = stackalloc char[128];
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-        }
+            var str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1 , buffer);
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = result;
+			}
+
+			//int str_ptr = context.GC.AllocString(result);
+			//if (str_ptr == 0)
+			//{
+			//    context.player.RaiseOutOfMemory(ref error);
+			//    return;
+			//}
+
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+		}
 
         [NativeFunction(".float$public::toFixed")]
         public static void Float_toFixed(Context context,
@@ -264,75 +386,182 @@ namespace juicescript.runtime.buildin
 
             Debug.Assert(digits.ValueType == NaNBoxing.BoxType.Int);
 
-            int f = digits.IntValue;
 
-            if (f < 0 || f > 20)
-            {
-                context.player.RaiseRangeError(ref error, "digits must be between 0 and 20");
-                return;
-            }
+            double x = thisPtr.FloatValue;
+			Span<char> temp = stackalloc char[64];
+			if (thisPtr.FloatValue.TryFormat(temp, out int wchars, default, System.Globalization.CultureInfo.InvariantCulture))
+			{
+				double.TryParse(temp.Slice(0, wchars), out x);
+			}
 
-            float n = thisPtr.FloatValue;
 
-            string str = FloatToFixedString(n, f);
+			if (digits.IntValue < 0 || digits.IntValue > 20)
+			{
+				context.player.RaiseRangeError(ref error, "digits must be between 0 and 20");
+			}
 
-            int str_ptr = context.GC.AllocString(str);
-            if (str_ptr == 0)
-            {
-                context.player.RaiseOutOfMemory(ref error);
-                return;
-            }
+			int f = digits.IntValue;
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE  );
-        }
+			if (double.IsNaN(x))
+			{
+				context.StackSlots[returnSlotIndex].SetHeapPtr(context.player.NAN_STR, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+				return;
+			}
 
-        private static string FloatToFixedString(float n, int fractionDigits)
-        {
-            if (float.IsNaN(n))
-            {
-                return "NaN";
-            }
+			const double Ten21 = 1e21;
 
-            if (float.IsInfinity(n))
-            {
-                return float.IsNegativeInfinity(n) ? "-Infinity" : "Infinity";
-            }
+			//string str;
 
-            bool negative = false;
-            if (n < 0)
-            {
-                negative = true;
-                n = -n;
-            }
+			Span<char> buffer1 = stackalloc char[128];
 
-            if (fractionDigits == 0)
-            {
-                int rounded = (int)MathF.Round(n);
-                return negative ? "-" + rounded : rounded.ToString();
-            }
+			ReadOnlySpan<char> str = buffer1;
 
-            int intPart = (int)MathF.Truncate(n);
-            float fracPart = n - intPart;
 
-            var sb = new ValueStringBuilder(stackalloc char[32]);
-            if (negative)
-            {
-                sb.Append('-');
-            }
+			if (x >= Ten21 || x <= -Ten21)
+			{
+				str =  Numeric.ToNumberString(x, buffer1);
+				goto lbl_str;
+			}
 
-            sb.Append(intPart);
-            sb.Append('.');
+			bool negative = false;
+			if (x < 0)
+			{
+				negative = true;
+				x = -x;
+			}
 
-            for (int i = 0; i < fractionDigits; i++)
-            {
-                fracPart *= 10;
-                int digit = (int)MathF.Truncate(fracPart);
-                sb.Append(Digits[digit]);
-                fracPart -= digit;
-            }
+			if (f == 0)
+			{
+				// Fast path: no fractional digits
+				var rounded = System.Math.Round(x, MidpointRounding.AwayFromZero);
+				var result = negative ? "-" + ((long)rounded).ToString(CultureInfo.InvariantCulture) : ((long)rounded).ToString(CultureInfo.InvariantCulture);
+				str = result;
+				goto lbl_str;
+			}
 
-            return sb.ToString();
-        }
+			// Use .NET formatting for f <= 99 (fast path)
+			if (f <= 99)
+			{
+                Span<char> format = stackalloc char[128];
+                format[0] = 'f';
+                ReadOnlySpan<char> ff = format;
+                if (f.TryFormat(format.Slice(1), out int fw))
+                {
+                    ff = format.Slice(0, 1 + fw);
+                }
+                else
+                {
+                    ff = "f" + f;
+                }
+
+                // handle non-decimal with greater precision
+                if (System.Math.Abs(x - (long)x) < Numeric.DoubleIsIntegerTolerance)
+                {
+                    
+                    if (((long)x).TryFormat(buffer1.Slice(1), out int lc, ff, CultureInfo.InvariantCulture))
+                    {
+                        if (negative)
+                        {
+                            buffer1[0] = '-';
+                            str = buffer1.Slice(0, 1 + lc);
+                        }
+                        else
+                        {
+                            str = buffer1.Slice(1, lc);
+                        }
+                        goto lbl_str;
+                    }
+
+					var result = ((long)x).ToString("f" + f, CultureInfo.InvariantCulture);
+					str = negative ? "-" + result : result;
+				}
+
+				if (x.TryFormat(buffer1.Slice(1), out int wc, ff, CultureInfo.InvariantCulture))
+                {
+                    if (negative)
+                    {
+                        buffer1[0] = '-';
+                        str = buffer1.Slice(0, 1 + wc);
+                    }
+                    else
+                    {
+						str = buffer1.Slice(1, wc);
+					}
+                    goto lbl_str;
+                }
+
+				var formatted = x.ToString("f" + f, CultureInfo.InvariantCulture);
+				str = negative ? "-" + formatted : formatted;
+				goto lbl_str;
+			}
+
+       
+            // Use Dtoa infrastructure for f == 100 (avoids .NET format specifier limitation)
+            str = Numeric.ToFixedDtoa(x, f, negative);
+
+
+		lbl_str:
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = r;
+			}
+
+
+
+
+
+
+
+		}
+
+        //private static string FloatToFixedString(float n, int fractionDigits)
+        //{
+        //    if (float.IsNaN(n))
+        //    {
+        //        return "NaN";
+        //    }
+
+        //    if (float.IsInfinity(n))
+        //    {
+        //        return float.IsNegativeInfinity(n) ? "-Infinity" : "Infinity";
+        //    }
+
+        //    bool negative = false;
+        //    if (n < 0)
+        //    {
+        //        negative = true;
+        //        n = -n;
+        //    }
+
+        //    if (fractionDigits == 0)
+        //    {
+        //        int rounded = (int)MathF.Round(n);
+        //        return negative ? "-" + rounded : rounded.ToString();
+        //    }
+
+        //    int intPart = (int)MathF.Truncate(n);
+        //    float fracPart = n - intPart;
+
+        //    var sb = new ValueStringBuilder(stackalloc char[32]);
+        //    if (negative)
+        //    {
+        //        sb.Append('-');
+        //    }
+
+        //    sb.Append(intPart);
+        //    sb.Append('.');
+
+        //    for (int i = 0; i < fractionDigits; i++)
+        //    {
+        //        fracPart *= 10;
+        //        int digit = (int)MathF.Truncate(fracPart);
+        //        sb.Append(Digits[digit]);
+        //        fracPart -= digit;
+        //    }
+
+        //    return sb.ToString();
+        //}
 
         [NativeFunction(".float$public::toPrecision")]
         public static void Float_toPrecision(Context context,
@@ -358,8 +587,14 @@ namespace juicescript.runtime.buildin
                 return;
             }
 
-            double x = thisPtr.FloatValue;
+			double x = thisPtr.FloatValue;
+			Span<char> temp = stackalloc char[64];
+            if (thisPtr.FloatValue.TryFormat(temp, out int wchars, default, System.Globalization.CultureInfo.InvariantCulture))
+            {
+                double.TryParse(temp.Slice(0, wchars), out x);
+            }
 
+            
             var dtoaBuilder = new DtoaBuilder(stackalloc char[101]);
             DtoaNumberFormatter.DoubleToAscii(
                 ref dtoaBuilder,
@@ -372,17 +607,23 @@ namespace juicescript.runtime.buildin
             int exponent = decimalPoint - 1;
             if (exponent < -6 || exponent >= p)
             {
-                string str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p);
+                Span<char> buffer = stackalloc char[128];
 
-                int str_ptr = context.GC.AllocString(str);
-                if (str_ptr == 0)
-                {
-                    context.player.RaiseOutOfMemory(ref error);
-                    return;
-                }
+                var str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p,buffer);
+				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
+				{
+					context.StackSlots[returnSlotIndex] = result;
+				}
 
-                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-            }
+				//int str_ptr = context.GC.AllocString(str);
+				//if (str_ptr == 0)
+				//{
+				//    context.player.RaiseOutOfMemory(ref error);
+				//    return;
+				//}
+
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			}
             else
             {
                 var sb = new ValueStringBuilder(stackalloc char[128]);
@@ -414,17 +655,23 @@ namespace juicescript.runtime.buildin
                     }
                 }
 
-                string str = sb.ToString();
+                var str = sb.ToCharSpan();
+				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
+				{
+					context.StackSlots[returnSlotIndex] = result;
+				}
 
-                int str_ptr = context.GC.AllocString(str);
-                if (str_ptr == 0)
-                {
-                    context.player.RaiseOutOfMemory(ref error);
-                    return;
-                }
+				//string str = sb.ToString();
 
-                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-            }
+				//int str_ptr = context.GC.AllocString(str);
+				//if (str_ptr == 0)
+				//{
+				//    context.player.RaiseOutOfMemory(ref error);
+				//    return;
+				//}
+
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			}
         }
     }
 }

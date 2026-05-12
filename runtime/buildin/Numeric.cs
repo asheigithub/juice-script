@@ -156,7 +156,9 @@ namespace juicescript.runtime.buildin
 			int exponent = decimalPoint - 1;
 			if (exponent < -6 || exponent >= p)
 			{
-				string str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p);
+				Span<char> buffer = stackalloc char[128];
+
+				var str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p, buffer);
 
 				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 				{
@@ -210,7 +212,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				string str = sb.ToString();
+				var str = sb.ToCharSpan();
 
 				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 				{
@@ -298,11 +300,52 @@ namespace juicescript.runtime.buildin
 			// Use .NET formatting for f <= 99 (fast path)
 			if (f <= 99)
 			{
-				// handle non-decimal with greater precision
-				if (System.Math.Abs(x - (long)x) < DoubleIsIntegerTolerance)
+				Span<char> format = stackalloc char[128];
+				format[0] = 'f';
+				ReadOnlySpan<char> ff = format;
+				if (f.TryFormat(format.Slice(1), out int fw))
 				{
+					ff = format.Slice(0, 1 + fw);
+				}
+				else
+				{
+					ff = "f" + f;
+				}
+
+
+				// handle non-decimal with greater precision
+				if (System.Math.Abs(x - (long)x) < Numeric.DoubleIsIntegerTolerance)
+				{
+
+					if (((long)x).TryFormat(buffer1.Slice(1), out int lc, ff, CultureInfo.InvariantCulture))
+					{
+						if (negative)
+						{
+							buffer1[0] = '-';
+							str = buffer1.Slice(0, 1 + lc);
+						}
+						else
+						{
+							str = buffer1.Slice(1, lc);
+						}
+						goto lbl_str;
+					}
+
 					var result = ((long)x).ToString("f" + f, CultureInfo.InvariantCulture);
 					str = negative ? "-" + result : result;
+				}
+
+				if (x.TryFormat(buffer1.Slice(1), out int wc, ff, CultureInfo.InvariantCulture))
+				{
+					if (negative)
+					{
+						buffer1[0] = '-';
+						str = buffer1.Slice(0, 1 + wc);
+					}
+					else
+					{
+						str = buffer1.Slice(1, wc);
+					}
 					goto lbl_str;
 				}
 
@@ -414,23 +457,31 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(dtoaBuilder.Length <= f + 1);
 
 			int exponent = decimalPoint - 1;
-			var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, f + 1);
 
-			int str_ptr = context.GC.AllocString(result);
-			if (str_ptr == 0)
+			Span<char> buffer = stackalloc char[128];
+
+			var str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, f + 1,buffer);
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = result;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			//int str_ptr = context.GC.AllocString(result);
+			//if (str_ptr == 0)
+			//{
+			//	context.player.RaiseOutOfMemory(ref error);
+			//	return;
+			//}
+
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 
 		}
 
 
 
 
-		private static string ToFixedDtoa(double x, int fractionDigits, bool negative)
+		internal static string ToFixedDtoa(double x, int fractionDigits, bool negative)
 		{
 			if (x == 0)
 			{
@@ -502,11 +553,11 @@ namespace juicescript.runtime.buildin
 
 
 
-		private static string CreateExponentialRepresentation(
+		private static ReadOnlySpan<char> CreateExponentialRepresentation(
 		ref DtoaBuilder buffer,
 		int exponent,
 		bool negative,
-		int significantDigits)
+		int significantDigits,Span<char> valuesbbuffer)
 		{
 			bool negativeExponent = false;
 			if (exponent < 0)
@@ -515,7 +566,7 @@ namespace juicescript.runtime.buildin
 				exponent = -exponent;
 			}
 
-			var sb = new ValueStringBuilder(stackalloc char[128]);
+			var sb = new ValueStringBuilder(valuesbbuffer);
 			if (negative)
 			{
 				sb.Append('-');
@@ -533,16 +584,48 @@ namespace juicescript.runtime.buildin
 			sb.Append(negativeExponent ? '-' : '+');
 			sb.Append(exponent);
 
-			return sb.ToString();
+			//return sb.ToString();
+			return sb.ToCharSpan();
 		}
 
 		internal static ReadOnlySpan<char> ToNumberString(double x, int radix, Span<char> buffers)
 		{
+			
+			if (radix == 10)
+			{
+				if (x.TryFormat(buffers, out int wchars, default, System.Globalization.CultureInfo.InvariantCulture))
+				{
+					for (int i = 0; i < wchars; i++)
+					{
+						if (buffers[i] == 'E') buffers[i] = 'e';
+					}
+
+					return buffers.Slice(0, wchars);
+										
+				}
+				else
+				{
+					if (x < 0)
+					{
+						Span<char> vsb = stackalloc char[128];
+
+						var p = ToNumberString(-x, radix, vsb);
+
+						buffers[0] = '-';
+						p.CopyTo(buffers.Slice(1, p.Length));
+
+						return buffers.Slice(0, p.Length + 1);
+					}
+
+					return ToNumberString(x, buffers);
+				}
+			}
+
 			if (x < 0)
 			{
-				Span<char> vsb = stackalloc char[64];
+				Span<char> vsb = stackalloc char[128];
 
-				var p = ToNumberString(-x, radix,vsb);
+				var p = ToNumberString(-x, radix, vsb);
 
 				buffers[0] = '-';
 				p.CopyTo(buffers.Slice(1, p.Length));
@@ -550,32 +633,45 @@ namespace juicescript.runtime.buildin
 				return buffers.Slice(0, p.Length + 1);
 			}
 
-			if (radix == 10)
-			{
-				return ToNumberString(x,buffers);
-			}
-
-			var integer = (long)x;
+			var integer =  Math.Truncate( x);
 			var fraction = x - integer;
 
-			string result = ToBase(integer, radix);
-			if (fraction != 0)
+			//string result = ToBase(integer, radix,buffers.Slice(0,64));
+			//if (fraction != 0)
+			//{
+			//	result += "." + ToFractionBase(fraction, radix);
+			//}
+
+			//return result;
+
+			if (fraction == 0)
 			{
-				result += "." + ToFractionBase(fraction, radix);
+				return ToBase((long)integer, radix, buffers.Slice(0, 64));
+			}
+			else
+			{
+				
+				var p1 = ToBase((long)integer, radix, buffers.Slice(0, 64));
+				buffers[p1.Length] = '.';
+				var p2 = ToFractionBase(fraction, radix, buffers.Slice(p1.Length + 1));
+				return buffers.Slice(0, p1.Length + p2.Length + 1);
 			}
 
-			return result;
 		}
 
-		internal static string ToBase(long n, int radix)
+		private static ReadOnlySpan<char> ToBase(long n, int radix, Span<char> buffers)
 		{
 			const string Digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 			if (n == 0)
 			{
 				return "0";
 			}
+			if (n < 0)
+			{
+				n = long.MaxValue;
+			}
 
-			var sb = new ValueStringBuilder(stackalloc char[64]);
+			var sb = new ValueStringBuilder(buffers);
 			while (n > 0)
 			{
 				var digit = (int)(n % radix);
@@ -583,10 +679,11 @@ namespace juicescript.runtime.buildin
 				sb.Append(Digits[digit]);
 			}
 			sb.Reverse();
-			return sb.ToString();
+			//return sb.ToString();
+			return sb.ToCharSpan();
 		}
 
-		internal static string ToFractionBase(double n, int radix)
+		private static ReadOnlySpan<char> ToFractionBase(double n, int radix,Span<char> buffer)
 		{
 			// based on the repeated multiplication method
 			// http://www.mathpath.org/concepts/Num/frac.htm
@@ -597,7 +694,7 @@ namespace juicescript.runtime.buildin
 				return "0";
 			}
 
-			var result = new ValueStringBuilder(stackalloc char[64]);
+			var result = new ValueStringBuilder(buffer);
 			while (n > 0 && result.Length < 50) // arbitrary limit
 			{
 				var c = n * radix;
@@ -607,7 +704,8 @@ namespace juicescript.runtime.buildin
 				result.Append(Digits[d]);
 			}
 
-			return result.ToString();
+			//return result.ToString();
+			return result.ToCharSpan();
 		}
 
 		internal static ReadOnlySpan<char> ToNumberString(double m , Span<char> buffers )

@@ -13,38 +13,10 @@ package
     }
 }
 
-import geom.Vector2;
+var n = 12345.678891233412414;
 
-[struct]
-final class A
-{
-	public var i:int;
-	
-	
-}
+trace( n.toString(2) );
 
-
-[struct]
-final class B
-{
-	public var j:uint;
-}
-
-var a:Array = [new Vector2(1, 0), new Vector2(2, 0), new Vector2(3, 0)
-	
-	];
-function test(...rest)
-{
-	
-	
-	trace(a);
-	
-	a[1] = new A();
-	
-	trace(a);
-	
-}
-test();
 
 
 //

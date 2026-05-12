@@ -8,9 +8,9 @@ namespace juicescript.runtime
 {
 	public interface IPrint
 	{
-		public void Write(string message);
+		//public void Write(string message);
 
-		public void WriteLine(string message);
+		public void WriteLine(ReadOnlySpan<char> chars);
 
 
 		public void Write(ReadOnlySpan<char> chars);
@@ -25,14 +25,14 @@ namespace juicescript.runtime
 			Console.Out.Write(chars);
 		}
 
-		public void Write(string message)
-		{
-			Console.Write(message);
-		}
+		//public void Write(string message)
+		//{
+		//	Console.Write(message);
+		//}
 
-		public void WriteLine(string message)
+		public void WriteLine(ReadOnlySpan<char> chars)
 		{
-			Console.WriteLine(message);
+			Console.Out.WriteLine(chars);
 		}
 	}
 

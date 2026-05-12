@@ -4898,19 +4898,19 @@ namespace juicescript.runtime.buildin
 		class VectorToString : IPrint
 		{
 			internal StringBuilder sb;
-			public void Write(string message)
-			{
-				sb.Append(message);
-			}
+			//public void Write(string message)
+			//{
+			//	sb.Append(message);
+			//}
 
 			public void Write(ReadOnlySpan<char> chars)
 			{
 				sb.Append(chars);
 			}
 
-			public void WriteLine(string message)
+			public void WriteLine(ReadOnlySpan<char> chars)
 			{
-				sb.AppendLine(message);
+				sb.Append(chars);sb.AppendLine();
 			}
 		}
 
@@ -4967,19 +4967,19 @@ namespace juicescript.runtime.buildin
 		class JoinPrinter : IPrint
 		{
 			public StringBuilder stringBuilder;
-			public void Write(string message)
-			{
-				stringBuilder.Append(message);
-			}
+			//public void Write(string message)
+			//{
+			//	stringBuilder.Append(message);
+			//}
 
 			public void Write(ReadOnlySpan<char> chars)
 			{
 				stringBuilder.Append(chars);
 			}
 
-			public void WriteLine(string message)
+			public void WriteLine(ReadOnlySpan<char> chars)
 			{
-				stringBuilder.AppendLine(message);
+				stringBuilder.Append(chars);stringBuilder.AppendLine();
 			}
 		}
 

@@ -224,19 +224,19 @@ namespace juicescript.runtime.buildin
 		class ArrayToString : IPrint
 		{
 			internal StringBuilder sb;
-			public void Write(string message)
-			{
-				sb.Append(message);
-			}
+			//public void Write(string message)
+			//{
+			//	sb.Append(message);
+			//}
 
 			public void Write(ReadOnlySpan<char> chars)
 			{
 				sb.Append(chars);
 			}
 
-			public void WriteLine(string message)
+			public void WriteLine(ReadOnlySpan<char> chars)
 			{
-				sb.AppendLine(message);
+				sb.Append(chars);sb.AppendLine();
 			}
 		}
 
