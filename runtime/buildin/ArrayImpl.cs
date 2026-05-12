@@ -667,7 +667,7 @@ namespace juicescript.runtime.buildin
 			var sep = scope.ReadSlot(0, context.player);
 
 
-			Span<char> buffer = stackalloc char[16];
+			Span<char> buffer = stackalloc char[128];
 			ReadOnlySpan<char> sepstr = buffer;
 
 			if (scope.__sendargcount == 0)
@@ -2434,7 +2434,7 @@ namespace juicescript.runtime.buildin
 					{
 
 
-						Span<char> temp1 = stackalloc char[16];
+						Span<char> temp1 = stackalloc char[128];
 						ReadOnlySpan<char> chars1 = temp1;
 						NaNBoxing box1 = context.StackSlots[context.StackPosition - 2];
 						if (box1.ValueType == BoxType.HeapPtr)
@@ -2454,7 +2454,7 @@ namespace juicescript.runtime.buildin
 
 
 
-						Span<char> temp2 = stackalloc char[16];
+						Span<char> temp2 = stackalloc char[128];
 						ReadOnlySpan<char> chars2 = temp2;
 						ref NaNBoxing box2 = ref context.StackSlots[context.StackPosition - 1];
 						if (box2.ValueType == BoxType.HeapPtr)
@@ -2519,7 +2519,7 @@ namespace juicescript.runtime.buildin
 				context.StackSlots[context.StackPosition].SetUndefined();
 				context.StackSlots[context.StackPosition + 1].SetUndefined();
 
-				if (vpayload.array_len <= 1024 * 8 * 64 && vpayload.StoreMode == RtArray.ArrayStoreMode.normal)
+				if ( vpayload.array_len <= 1024 * 8 * 64 && vpayload.StoreMode == RtArray.ArrayStoreMode.normal)
 				{
 					//Sort 把数组中的所有元素拷到原生数组里排序 // 只考虑normal,其他两种反正数量不多，而且还不用管sturct缓存，normal里的对象肯定在堆里，省的麻烦。
 					int oLen = (int)vpayload.array_len;
@@ -2737,7 +2737,7 @@ namespace juicescript.runtime.buildin
 										return -1;
 									}
 
-									Span<char> temp1 = stackalloc char[16];
+									Span<char> temp1 = stackalloc char[128];
 									ReadOnlySpan<char> chars1 = temp1;
 									NaNBoxing box1 = a;
 									if (box1.ValueType == BoxType.HeapPtr)
@@ -2754,7 +2754,7 @@ namespace juicescript.runtime.buildin
 
 
 
-									Span<char> temp2 = stackalloc char[16];
+									Span<char> temp2 = stackalloc char[128];
 									ReadOnlySpan<char> chars2 = temp2;
 									NaNBoxing box2 = b;
 									if (box2.ValueType == BoxType.HeapPtr)
@@ -2852,7 +2852,7 @@ namespace juicescript.runtime.buildin
 								key = context.StackSlots[tempslot];
 							}
 						}
-
+						
 
 						j = i - 1;     // 已排序部分的最后一个元素索引
 									   // 在已排序部分中寻找插入位置
@@ -3383,7 +3383,7 @@ namespace juicescript.runtime.buildin
 
 		private static long do_sorton(NaNBoxing test, NaNBoxing pivot, NaNBoxing field, NaNBoxing option_box, Context context, int scope_ptr, ref ReceiveError error)
 		{
-			Span<char> buffer = stackalloc char[16];
+			Span<char> buffer = stackalloc char[128];
 			var name = Extensions.GetPrimitiveValueToString(context.player, field, buffer);
 
 			NaNBoxing a;
@@ -3523,7 +3523,7 @@ namespace juicescript.runtime.buildin
 				{
 
 
-					Span<char> temp1 = stackalloc char[16];
+					Span<char> temp1 = stackalloc char[128];
 					ReadOnlySpan<char> chars1 = temp1;
 					NaNBoxing box1 = context.StackSlots[context.StackPosition - 2];
 					if (box1.ValueType == BoxType.HeapPtr)
@@ -3543,7 +3543,7 @@ namespace juicescript.runtime.buildin
 
 
 
-					Span<char> temp2 = stackalloc char[16];
+					Span<char> temp2 = stackalloc char[128];
 					ReadOnlySpan<char> chars2 = temp2;
 					ref NaNBoxing box2 = ref context.StackSlots[context.StackPosition - 1];
 					if (box2.ValueType == BoxType.HeapPtr)
@@ -3710,7 +3710,7 @@ namespace juicescript.runtime.buildin
 
 					context.StackSlots[context.StackPosition].SetUndefined();
 
-					Span<char> namebuffer = stackalloc char[16];
+					Span<char> namebuffer = stackalloc char[128];
 
 					for (int j = 0; j < oLen; j++)
 					{
@@ -3908,8 +3908,8 @@ namespace juicescript.runtime.buildin
 					ind.AsSpan().Slice(0, oLen).Sort((l, r) =>
 					{
 
-						Span<char> temp1 = stackalloc char[16];
-						Span<char> temp2 = stackalloc char[16];
+						Span<char> temp1 = stackalloc char[128];
+						Span<char> temp2 = stackalloc char[128];
 
 						for (int i = 0; i < fieldCount; i++)
 						{

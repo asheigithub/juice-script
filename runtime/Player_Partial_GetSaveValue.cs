@@ -1867,22 +1867,24 @@ namespace juicescript.runtime
 			int srcPtr = saveSlot.HeapPtr;
 
 
-			if ( (saveSlot.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT  //((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
-						                                        
+			if ( //(saveSlot.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT  //((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct)
+					saveSlot.IsStruct()	                                        
 				)
 			{
-				var src = Context.GC.Heap[saveSlot.HeapPtr];
+
 				if (
 						(!is_pass_this  // 传This时传引用	
 							||
-							((RtInstance)src).IsRefVectorOrFromContainerOrRefStruct(this, (ASInstance)src.Type)
+							(((HeapKindFlag)saveSlot.HeapFlag & HeapKindFlag.FLAG_REFSTRUCT) == HeapKindFlag.FLAG_REFSTRUCT)
+						//||
+						//((RtInstance)src).IsRefVectorOrFromContainerOrRefStruct(this, (ASInstance)src.Type)
 
 						//但是对结构体内部的引用或Vector内部的结构体 ,或者刚从数组,字典等里取出的结构体是例外，
 						//类似C#处理，
 						//此时This也要直接复制结构体 
 						))
 				{
-
+					var src = Context.GC.Heap[saveSlot.HeapPtr];
 					//Clone结构体
 					int clonedptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheInstancePtr;
 					var cacheObj = Context.GC.Heap[clonedptr];
@@ -1901,6 +1903,14 @@ namespace juicescript.runtime
 
 					return;
 				}
+				else
+				{
+					Debug.Assert(((RtInstance)Context.GC.Heap[saveSlot.HeapPtr]).IsRefVectorOrFromContainerOrRefStruct(this, (ASInstance)Context.GC.Heap[saveSlot.HeapPtr].Type)
+						== ((((HeapKindFlag)saveSlot.HeapFlag & HeapKindFlag.FLAG_REFSTRUCT) == HeapKindFlag.FLAG_REFSTRUCT))
+						);
+				}
+
+
 			}
 
 

@@ -12,6 +12,11 @@ namespace juicescript.runtime
     { 
         NONE = 0,
 		FLAG_STRUCT = 1,
+
+        /// <summary>
+        /// 表示这是一个对STRUCT的引用，例如在array里，在dictionary里，在vector里，或者struct内部的子struct
+        /// </summary>
+        FLAG_REFSTRUCT = 2,
 	}
 
 

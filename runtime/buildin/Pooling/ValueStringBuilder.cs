@@ -97,6 +97,12 @@ namespace juicescript.runtime.buildin.Pooling
 			return s;
 		}
 
+		public ReadOnlySpan<char> ToCharSpan()
+		{
+			return _chars.Slice(0, _pos);
+		}
+
+
 		/// <summary>Returns the underlying storage of the builder.</summary>
 		public Span<char> RawChars => _chars;
 

@@ -224,7 +224,7 @@ namespace juicescript.runtime
 
 
 
-                            result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+                            result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT ));
                             return result;
                         }
                         else

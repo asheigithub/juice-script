@@ -105,11 +105,11 @@ namespace juicescript.runtime.buildin
 			//{
 			//	sb.Append(((RtPayloadString)context.GC.Heap[thisPtr.HeapPtr]).Str);
 			//}
-			Span<char> buffer = stackalloc char[16];
+			Span<char> buffer = stackalloc char[128];
 			sb.Append(Extensions.GetPrimitiveValueToString(context.player, context.StackSlots[returnSlotIndex], buffer));
 
 
-			Span<char> argchars = stackalloc char[16];
+			Span<char> argchars = stackalloc char[128];
 			for (int i = 0; i < arguments.Length; i++)
 			{
 				var arg = arguments[i];
@@ -1773,8 +1773,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing repl = scope.ReadSlot(1, context.player);
 
 
-			Span<char> buffer1 = stackalloc char[16];
-			Span<char> buffer2 = stackalloc char[16];
+			Span<char> buffer1 = stackalloc char[128];
+			Span<char> buffer2 = stackalloc char[128];
 
 			var thisStr = Extensions.GetPrimitiveValueToString(context.player, thisPtr,buffer1);
 			var patternStr = Extensions.GetPrimitiveValueToString(context.player, pattern,buffer2);
@@ -1846,7 +1846,7 @@ namespace juicescript.runtime.buildin
 								repl = slots[1];
 							}
 
-							Span<char> replbuffer = stackalloc char[16];
+							Span<char> replbuffer = stackalloc char[128];
 
 							var replStr = Extensions.GetPrimitiveValueToString(context.player, repl,replbuffer);
 
@@ -1905,7 +1905,7 @@ namespace juicescript.runtime.buildin
 						repl = context.StackSlots[basePos];
 					}
 
-					Span<char> replbuffer = stackalloc char[16];
+					Span<char> replbuffer = stackalloc char[128];
 
 					var replStr = Extensions.GetPrimitiveValueToString(context.player, repl,replbuffer);
 					//string final = thisStr.Substring(0, find) + replStr + thisStr.Substring(find + patternStr.Length);
@@ -2042,7 +2042,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					Span<char> buffer=stackalloc char[16];
+					Span<char> buffer=stackalloc char[128];
 					var val_char = Extensions.GetPrimitiveValueToString(context.player, val,buffer); 
 					//ReadOnlySpan<char> val_char = val_str.AsSpan();
 
@@ -2093,7 +2093,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					Span<char> buffer = stackalloc char[16];
+					Span<char> buffer = stackalloc char[128];
 					var val_str = Extensions.GetPrimitiveValueToString( context.player, val,buffer );
 
 					

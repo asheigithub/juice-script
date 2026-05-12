@@ -201,11 +201,11 @@ namespace juicescript.runtime
 			}
 		}
 
-		internal void MarkFromContainer()
-		{
-			Debug.Assert(HEAPINSTANCE_PTR == 0);
-			m_property_ptr = int.MinValue;
-		}
+		//internal void MarkFromContainer()
+		//{
+		//	Debug.Assert(HEAPINSTANCE_PTR == 0);
+		//	m_property_ptr = int.MinValue;
+		//}
 
 		internal bool IsRefVectorOrFromContainerOrRefStruct(Player player,ASInstance type)
 		{
@@ -217,8 +217,9 @@ namespace juicescript.runtime
 			
 			bool is_ref_vector;bool is_ref_struct;RtInstance target;
 			GetStoreData(player, type ,out is_ref_vector,out is_ref_struct, out target);
-			return is_ref_vector || is_ref_struct || 
-				target.m_property_ptr == int.MinValue/*标记是数组中获取的struct*/ ;
+			return is_ref_vector || is_ref_struct; 
+				//|| 
+				//target.m_property_ptr == int.MinValue/*标记是数组中获取的struct*/ ;
 		}
 
 		//internal bool IsRefStruct(Player player, ASInstance type)
@@ -626,7 +627,7 @@ namespace juicescript.runtime
 								struct_payload.m_property_ptr = m_property_ptr + codescope.TypeLayout.Offset[memberIndex]; //标记index.
 								struct_payload.HEAPINSTANCE_PTR = HEAPINSTANCE_PTR == 0? this_instance_Ptr : HEAPINSTANCE_PTR ; //指向当前对象.
 
-								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
 								return result;
 
 							}

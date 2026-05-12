@@ -873,47 +873,50 @@ namespace juicescript.runtime.buildin
 
 		private static void WritePrimitive(NaNBoxing arg, IPrint printer, Context context)
 		{
-			switch (arg.ValueType)
-			{
-				case NaNBoxing.BoxType.Number:
-					double d = arg.Number;
-					if (double.IsNaN(d)) { printer.Write("NaN"); return; }
-					if (double.IsPositiveInfinity(d)) { printer.Write("Infinity"); return; }
-					if (double.IsNegativeInfinity(d)) { printer.Write("-Infinity"); return; }
-					if (d == 0 && double.IsNegative(d)) { printer.Write("-0"); return; } // 需要你提供 IsNegative(0.0)
-					printer.Write(d.ToString(System.Globalization.CultureInfo.InvariantCulture));
-					return;
-				case NaNBoxing.BoxType.Undefined: printer.Write("undefined"); return;
-				case NaNBoxing.BoxType.Null: printer.Write("null"); return;
-				case NaNBoxing.BoxType.Boolean: printer.Write(arg.Boolean ? "true" : "false"); return;
-				case NaNBoxing.BoxType.Int:
-					printer.Write(arg.IntValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.Uint:
-					printer.Write(arg.UIntValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.Sbyte:
-					printer.Write(arg.SByteValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.Byte:
-					printer.Write(arg.ByteValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.Short:
-					printer.Write(arg.ShortValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.UShort:
-					printer.Write(arg.UShortValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.Float:
-					printer.Write(arg.FloatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
-				case NaNBoxing.BoxType.HeapPtr:
-					printer.Write(((RtString)context.GC.Heap[arg.HeapPtr]).Str); return;
-				case NaNBoxing.BoxType.LocalString:
-					{
-						Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
-						int charCount = arg.GetLocalStringChars(chars);
-						if (charCount > 0)
-						{
-							//printer.Write(new string(chars.Slice(0, charCount)));
-							printer.Write(chars.Slice(0, charCount));
-						}
-						return;
-					}
-			}
+			Span<char> chars = stackalloc char[128];
+			printer.Write(Extensions.GetPrimitiveValueToString(context.player, arg,chars));
+
+			//switch (arg.ValueType)
+			//{
+			//	case NaNBoxing.BoxType.Number:
+			//		double d = arg.Number;
+			//		if (double.IsNaN(d)) { printer.Write("NaN"); return; }
+			//		if (double.IsPositiveInfinity(d)) { printer.Write("Infinity"); return; }
+			//		if (double.IsNegativeInfinity(d)) { printer.Write("-Infinity"); return; }
+			//		if (d == 0 && double.IsNegative(d)) { printer.Write("-0"); return; } // 需要你提供 IsNegative(0.0)
+			//		printer.Write(d.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			//		return;
+			//	case NaNBoxing.BoxType.Undefined: printer.Write("undefined"); return;
+			//	case NaNBoxing.BoxType.Null: printer.Write("null"); return;
+			//	case NaNBoxing.BoxType.Boolean: printer.Write(arg.Boolean ? "true" : "false"); return;
+			//	case NaNBoxing.BoxType.Int:
+			//		printer.Write(arg.IntValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.Uint:
+			//		printer.Write(arg.UIntValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.Sbyte:
+			//		printer.Write(arg.SByteValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.Byte:
+			//		printer.Write(arg.ByteValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.Short:
+			//		printer.Write(arg.ShortValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.UShort:
+			//		printer.Write(arg.UShortValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.Float:
+			//		printer.Write(arg.FloatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
+			//	case NaNBoxing.BoxType.HeapPtr:
+			//		printer.Write(((RtString)context.GC.Heap[arg.HeapPtr]).Str); return;
+			//	case NaNBoxing.BoxType.LocalString:
+			//		{
+			//			Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
+			//			int charCount = arg.GetLocalStringChars(chars);
+			//			if (charCount > 0)
+			//			{
+			//				//printer.Write(new string(chars.Slice(0, charCount)));
+			//				printer.Write(chars.Slice(0, charCount));
+			//			}
+			//			return;
+			//		}
+			//}
 		}
 
 		internal static void TraceElement(NaNBoxing arg, Context context, int stackStPos, ref ReceiveError error, int scope_ptr, NaNBoxing callee_bindthis, IPrint printer)

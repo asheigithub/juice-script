@@ -83,16 +83,25 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			string str = ToNumberString(x, radix.IntValue);
 
-			int str_ptr = context.GC.AllocString(str);
-			if (str_ptr == 0)
+			Span<char> buffer1 = stackalloc char[128];
+			
+			ReadOnlySpan<char> str = ToNumberString(x, radix.IntValue,buffer1);
+
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = result;	
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			//int str_ptr = context.GC.AllocString(str);
+			//if (str_ptr == 0)
+			//{
+			//	context.player.RaiseOutOfMemory(ref error);
+			//	return;
+			//}
+
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
 
@@ -148,15 +157,21 @@ namespace juicescript.runtime.buildin
 			if (exponent < -6 || exponent >= p)
 			{
 				string str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p);
-				
-				int str_ptr = context.GC.AllocString(str);
-				if (str_ptr == 0)
+
+				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = result;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+
+				//int str_ptr = context.GC.AllocString(str);
+				//if (str_ptr == 0)
+				//{
+				//	context.player.RaiseOutOfMemory(ref error);
+				//	return;
+				//}
+
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 			else
 			{
@@ -197,14 +212,20 @@ namespace juicescript.runtime.buildin
 
 				string str = sb.ToString();
 
-				int str_ptr = context.GC.AllocString(str);
-				if (str_ptr == 0)
+				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = result;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+
+				//int str_ptr = context.GC.AllocString(str);
+				//if (str_ptr == 0)
+				//{
+				//	context.player.RaiseOutOfMemory(ref error);
+				//	return;
+				//}
+
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 		}
 
@@ -245,11 +266,16 @@ namespace juicescript.runtime.buildin
 
 			const double Ten21 = 1e21;
 
-			string str;
+			//string str;
+
+			Span<char> buffer1 = stackalloc char[128];
+			
+			ReadOnlySpan<char> str = buffer1;
+
 
 			if (x >= Ten21 || x <= -Ten21)
 			{
-				str = ToNumberString(x);
+				str = ToNumberString(x,buffer1);
 				goto lbl_str;
 			}
 
@@ -291,14 +317,20 @@ namespace juicescript.runtime.buildin
 
 		lbl_str:
 
-			int str_ptr = context.GC.AllocString(str);
-			if (str_ptr == 0)
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+
+			//int str_ptr = context.GC.AllocString(str);
+			//if (str_ptr == 0)
+			//{
+			//	context.player.RaiseOutOfMemory(ref error);
+			//	return;
+			//}
+
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 
 			;
 
@@ -504,16 +536,23 @@ namespace juicescript.runtime.buildin
 			return sb.ToString();
 		}
 
-		internal static string ToNumberString(double x, int radix)
+		internal static ReadOnlySpan<char> ToNumberString(double x, int radix, Span<char> buffers)
 		{
 			if (x < 0)
 			{
-				return "-" + ToNumberString(-x, radix);
+				Span<char> vsb = stackalloc char[64];
+
+				var p = ToNumberString(-x, radix,vsb);
+
+				buffers[0] = '-';
+				p.CopyTo(buffers.Slice(1, p.Length));
+
+				return buffers.Slice(0, p.Length + 1);
 			}
 
 			if (radix == 10)
 			{
-				return ToNumberString(x);
+				return ToNumberString(x,buffers);
 			}
 
 			var integer = (long)x;
@@ -571,10 +610,10 @@ namespace juicescript.runtime.buildin
 			return result.ToString();
 		}
 
-		internal static string ToNumberString(double m)
+		internal static ReadOnlySpan<char> ToNumberString(double m , Span<char> buffers )
 		{
 			 const int SmallDtoaLength = FastDtoa.KFastDtoaMaximalLength + 8;
-			
+			Debug.Assert(buffers.Length >= 64 + SmallDtoaLength);
 
 			if (double.IsNaN(m))
 			{
@@ -591,7 +630,7 @@ namespace juicescript.runtime.buildin
 				return double.IsNegativeInfinity(m) ? "-Infinity" : "Infinity";
 			}
 
-			var builder = new DtoaBuilder(stackalloc char[SmallDtoaLength]);
+			var builder = new DtoaBuilder( buffers.Slice(0,SmallDtoaLength) );// stackalloc char[SmallDtoaLength]);
 
 			DtoaNumberFormatter.DoubleToAscii(
 				ref builder,
@@ -602,7 +641,7 @@ namespace juicescript.runtime.buildin
 				out var decimal_point);
 
 
-			var stringBuilder = new Pooling.ValueStringBuilder(stackalloc char[64]);
+			var stringBuilder = new Pooling.ValueStringBuilder(buffers.Slice(SmallDtoaLength));//stackalloc char[64]);
 			if (negative)
 			{
 				stringBuilder.Append('-');
@@ -649,7 +688,8 @@ namespace juicescript.runtime.buildin
 				stringBuilder.Append(exponent);
 			}
 
-			return stringBuilder.ToString();
+			//return stringBuilder.ToString();
+			return stringBuilder.ToCharSpan();
 		}
 
 	}

@@ -526,10 +526,10 @@ namespace juicescript.runtime.buildin
 
 				context.StackPosition--;
 
-				if (v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var check = context.GC.Heap[v.HeapPtr];
-					if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						//clone结构体
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
@@ -700,10 +700,10 @@ namespace juicescript.runtime.buildin
 
 				context.StackPosition--;
 
-				if (v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var check = context.GC.Heap[v.HeapPtr];
-					if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
@@ -919,10 +919,10 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex] = v;
 			context.StackPosition--;
 
-			if (v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+			if (v.IsStruct())
 			{
 				var check = context.GC.Heap[v.HeapPtr];
-				if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+				Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 				{
 					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
@@ -1309,11 +1309,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetBoolean(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetBoolean(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -1504,11 +1504,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetSByte(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetSByte(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -1701,11 +1701,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetByte(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetByte(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -1898,11 +1898,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetShort(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetShort(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -2093,11 +2093,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetUShort(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetUShort(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -2288,11 +2288,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 =default ; box1.SetInt(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetInt(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -2482,11 +2482,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetUInt(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetUInt(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -2690,11 +2690,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetFloat(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetFloat(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -2899,11 +2899,11 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];
+												Span<char> temp1 = stackalloc char[128];
 												NaNBoxing box1 = default; box1.SetNumber(v1);
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, box1, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												NaNBoxing box2 = default; box2.SetNumber(v2);
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, box2, temp2);
 
@@ -3128,10 +3128,10 @@ namespace juicescript.runtime.buildin
 											{
 
 
-												Span<char> temp1 = stackalloc char[16];												
+												Span<char> temp1 = stackalloc char[128];												
 												ReadOnlySpan<char> chars1 = Extensions.GetPrimitiveValueToString(context.player, l, temp1);
 
-												Span<char> temp2 = stackalloc char[16];
+												Span<char> temp2 = stackalloc char[128];
 												ReadOnlySpan<char> chars2 = Extensions.GetPrimitiveValueToString(context.player, r, temp2);
 
 												int comp = chars1.CompareTo(chars2, (option & 1) == 1 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal); //.Compare(v1, v2, (option & 1) == 1);
@@ -3211,7 +3211,7 @@ namespace juicescript.runtime.buildin
 										struct_payload.Set_PROPERTY_PTR(l * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
 										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
 
-										v1.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+										v1.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT ));
 									}
 
 									NaNBoxing v2 = default;
@@ -3227,7 +3227,7 @@ namespace juicescript.runtime.buildin
 										struct_payload.Set_PROPERTY_PTR(r * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
 										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
 
-										v2.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+										v2.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT ));
 									}
 
 									ReceiveError e = default;
@@ -5003,7 +5003,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				Span<char> buffer = stackalloc char[16];
+				Span<char> buffer = stackalloc char[128];
 				ReadOnlySpan<char> sepStr = buffer;
 
 				NaNBoxing sep = scope.ReadSlot(0, context.player);

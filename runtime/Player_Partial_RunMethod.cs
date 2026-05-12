@@ -187,12 +187,12 @@ namespace juicescript.runtime
 							//	k(b);
 							//})();
 							NaNBoxing box = slot[argLocater.index];
-							if (!method.Flags.HasFlag(MethodFlags.Native)) //native代码，默认直接传引用，如果需要保存到堆自己在native里处理。
+							if (!method.Flags.HasFlag(MethodFlags.Native))
 							{
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 									
-									if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
+									if (box.IsStruct())//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 									{
 										var v = Context.GC.Heap[box.HeapPtr];
 										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
@@ -249,7 +249,7 @@ namespace juicescript.runtime
 						NaNBoxing box = slot[argLocater.index];
 						if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{							
-							if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
+							if (box.IsStruct())
 							{
 								var v = Context.GC.Heap[box.HeapPtr];
 								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
@@ -513,7 +513,7 @@ namespace juicescript.runtime
 									if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										
-										if (box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
+										if (box.IsStruct())
 										{
 											var v = Context.GC.Heap[box.HeapPtr];
 											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,

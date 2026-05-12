@@ -68,18 +68,20 @@ namespace juicescript.runtime.buildin
 
 		private static void ReturnValue(int returnSlotIndex,Context context ,NaNBoxing src )
 		{
-			if (src.ValueType == NaNBoxing.BoxType.HeapPtr)
+			if (src.IsStruct())//src.ValueType == NaNBoxing.BoxType.HeapPtr && (src.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT )
 			{
-				var obj = context.GC.Heap[src.HeapPtr];
-				if (obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
-				{
-					((RtInstance)obj).MarkFromContainer();
-					context.StackSlots[returnSlotIndex] = src;
-				}
-				else
-				{
-					context.StackSlots[returnSlotIndex] = src;
-				}
+				context.StackSlots[returnSlotIndex].SetHeapPtr(src.HeapPtr, (byte)RtHeapTypeKind.INSTANCE ,(byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+
+				//var obj = context.GC.Heap[src.HeapPtr];
+				//if (obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+				//{
+				//	((RtInstance)obj).MarkFromContainer();
+				//	context.StackSlots[returnSlotIndex] = src;
+				//}
+				//else
+				//{
+				//	context.StackSlots[returnSlotIndex] = src;
+				//}
 			}
 			else
 			{

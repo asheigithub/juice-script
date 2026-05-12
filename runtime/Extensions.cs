@@ -583,6 +583,8 @@ namespace juicescript.runtime
 
 		internal static ReadOnlySpan<char> GetPrimitiveValueToString( Player player,NaNBoxing prop_name, Span<char> buffchars)
 		{
+            Debug.Assert(buffchars.Length >= 64 + 32);
+
 			//转字符串
 			switch (prop_name.ValueType)
 			{
@@ -603,7 +605,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
-                            return Numeric.ToNumberString(v); //v.ToString();
+							
+							return Numeric.ToNumberString(v, buffchars).ToString(); //v.ToString();
 						}
 						
 					}
@@ -624,7 +627,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							return v.ToString();
+							return v.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						}
 						
 					}
@@ -640,37 +643,37 @@ namespace juicescript.runtime
 				case NaNBoxing.BoxType.Int:
 					{
 						var index = prop_name.IntValue;
-						return index.ToString();
+						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
 				case NaNBoxing.BoxType.Uint:
 					{
 						var index = prop_name.UIntValue;
-						return index.ToString();
+						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
 				case NaNBoxing.BoxType.Sbyte:
 					{
 						var index = prop_name.SByteValue;
-						return index.ToString();
+						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
 				case NaNBoxing.BoxType.Byte:
 					{
 						var index = prop_name.ByteValue;
-						return index.ToString();
+						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
 				case NaNBoxing.BoxType.Short:
 					{
 						var index = prop_name.ShortValue;
-						return index.ToString();
+						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
 				case NaNBoxing.BoxType.UShort:
 					{
 						var index = prop_name.ShortValue;
-						return index.ToString();
+						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
                 case BoxType.HeapPtr:
