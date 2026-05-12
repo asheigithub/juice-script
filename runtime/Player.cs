@@ -5188,7 +5188,10 @@ namespace juicescript.runtime
 				{
 					((RtClosure)closure).Set_PROTOTYPE(-1, this);
 				}
-				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr
+					&&
+					((box.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT) == 0) //阻止Struct作为prototype
+					)
 				{
 					//访问prototype.这时候只能把function保存到堆里了。
 					//NaNBoxing v = new NaNBoxing(); v.SetHeapPtr(closure_ptr);

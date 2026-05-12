@@ -207,7 +207,7 @@ namespace juicescript.runtime
 			m_property_ptr = int.MinValue;
 		}
 
-		internal bool IsRefVectorOrFromContainerOrStruct(Player player,ASInstance type)
+		internal bool IsRefVectorOrFromContainerOrRefStruct(Player player,ASInstance type)
 		{
 			if (!type.Flags.HasFlag(ClassFlags.Struct))
 			{

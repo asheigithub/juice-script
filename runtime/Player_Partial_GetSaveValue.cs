@@ -369,390 +369,466 @@ namespace juicescript.runtime
 				
 				if (value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
-					var obj = Context.GC.Heap[value.HeapPtr];
-					if (!isyieldreturn_or_holderror && obj.Type == Context.GENERATOR.Instance)
-					{
-						RaiseTypeError(ref error, value, TypeKind.Function);
-					}
-					else if (!(value.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH) //堆里
-						||
-						(value.HeapPtr < Context.CacheInstancePtr + calleelastpos) //传入
-						)
-					{
-						if (((RtInstance)obj).IsRefVectorOrFromContainerOrStruct(this, (ASInstance)obj.Type))
-						{
-							//Clone结构体
-							int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
-							var cacheObj = Context.GC.Heap[clonedptr];
-							cacheObj.Type = obj.Type;
 
-							((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-							((RtInstance)cacheObj).CopyFrom(obj, this, obj.Type._link_codescope.TypeLayout.Size);
+					//if (!isyieldreturn_or_holderror && obj.Type == Context.GENERATOR.Instance)
+					//{
+					//	RaiseTypeError(ref error, value, TypeKind.Function);
+					//}
+					//else 
 
-							returnSlot.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
-						}
-						else
-						{
-							RtInstance _temp;
-							int t = RtInstance.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out _temp);
-							returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.INSTANCE, value.HeapFlag);
-						}
+					if (value.IsStruct())
+					{
+						var obj = Context.GC.Heap[value.HeapPtr];
+						//Clone结构体
+						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
+						var cacheObj = Context.GC.Heap[clonedptr];
+						cacheObj.Type = obj.Type;
+
+						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						((RtInstance)cacheObj).CopyFrom(obj, this, obj.Type._link_codescope.TypeLayout.Size);
+
+						returnSlot.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 					}
 					else
 					{
-						if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+						if (!(value.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH))//堆里 --挡住后面的查询
 						{
-							//Clone结构体
-							int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
-							var cacheObj = Context.GC.Heap[clonedptr];
-							cacheObj.Type = obj.Type;
+							returnSlot = value;
+							Debug.Assert(RtInstance.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out RtInstance _temp) == returnSlot.HeapPtr);
 
-							((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-							((RtInstance)cacheObj).CopyFrom(obj, this, obj.Type._link_codescope.TypeLayout.Size);
-
-							returnSlot.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 						}
 						else
 						{
+							//查找
+							RtInstance obj;
+							int t = RtInstance.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out obj);
+							
+							if (
+								(t < Context.CacheInstancePtr + calleelastpos) //传入
+								|| !(t < Context.CacheInstancePtr + Context.STACK_LENGTH) //实际就在堆里
+							)
+							{
+								////if (((RtInstance)obj).IsRefVectorOrFromContainerOrRefStruct(this, (ASInstance)obj.Type))
+								////if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+								//{
+								//	RtInstance _temp;
+								//	int t = RtInstance.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out _temp);
+								//	returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+								//}
 
-							int dstptr = returnSlotIndex + Context.CacheInstancePtr;
-							var dstObj = Context.GC.Heap[dstptr];
+								returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+							}
+							else
+							{
+								//var obj = Context.GC.Heap[value.HeapPtr];
+								//if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+								//{
+								//	//Clone结构体
+								//	int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
+								//	var cacheObj = Context.GC.Heap[clonedptr];
+								//	cacheObj.Type = obj.Type;
 
-							dstObj.Type = obj.Type;
-							((RtInstance)dstObj).methodscopeslot_ref_state = 0;
-							((RtInstance)dstObj).HEAPINSTANCE_PTR = 0;
-							((RtInstance)dstObj).CopyFrom(obj, this, obj.Type._link_codescope.TypeLayout.Size);
+								//	((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+								//	((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+								//	((RtInstance)cacheObj).CopyFrom(obj, this, obj.Type._link_codescope.TypeLayout.Size);
 
-							((RtInstance)obj).HEAPINSTANCE_PTR = dstptr;
-							returnSlot.SetHeapPtr(dstptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+								//	returnSlot.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+								//}
+								//else
+								{
+
+									int dstptr = returnSlotIndex + Context.CacheInstancePtr;
+									var dstObj = Context.GC.Heap[dstptr];
+
+									dstObj.Type = obj.Type;
+									((RtInstance)dstObj).methodscopeslot_ref_state = 0;
+									((RtInstance)dstObj).HEAPINSTANCE_PTR = 0;
+									((RtInstance)dstObj).CopyFrom(obj, this, obj.Type._link_codescope.TypeLayout.Size);
+
+									((RtInstance)obj).HEAPINSTANCE_PTR = dstptr;
+									returnSlot.SetHeapPtr(dstptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+								}
+							}
+
+
 						}
 					}
 				}
 				else if (value.HeapKind == (byte)RtHeapTypeKind.ARRAY)
 				{
-					RtArray arr;
-					int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arr);
-
-					if (arr.StoreMode == RtArray.ArrayStoreMode.cache_on_stack)
+					if (!(value.HeapPtr < Context.CacheArrayPtr + Context.STACK_LENGTH)) //堆里
 					{
-						var method = ((ASMethodBody)Context.GC.Heap[scope_ptr].Type).Method;
-						int callee_slot_idx = stackStPos - method.Body._link_codescope.Members.Count - 2;
+						returnSlot = value;
 
-						if (arr.stack_store_startindex + arr.stack_store.Length + 1 < callee_slot_idx)
-						{
-							//传入的
-							returnSlot.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-						}
-						else
-						{
-							value = GetSaveValue(value, ref error);
-							if (error.raised)
-							{
-								return;
-							}
-							returnSlot.SetHeapPtr(value.HeapPtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-							
-						}
-					}
-					else if (arr.StoreMode == RtArray.ArrayStoreMode.cache)
-					{
-						if (arr_ptr < Context.CacheArrayPtr + calleelastpos) //传入
-						{
-							returnSlot.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-						}
-						else
-						{
-							var dstArrayPtr = returnSlotIndex + Context.CacheArrayPtr;
-							var dst = (RtArray)Context.GC.Heap[dstArrayPtr];
+#if DEBUG
+						RtArray arr;
+						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arr);
+						Debug.Assert(arr.StoreMode == RtArray.ArrayStoreMode.normal);
+						Debug.Assert(arr_ptr == returnSlot.HeapPtr);
 
-							Context.GC.Heap[dstArrayPtr].Type = Context.ARRAY.Instance;
-							dst.CopyCacheFrom(arr, this);
-							dst.HEAPINSTANCE_PTR = 0;
-							dst.methodscopeslot_ref_state = 0;
-
-							arr.HEAPINSTANCE_PTR = dstArrayPtr;
-
-							returnSlot.SetHeapPtr(dstArrayPtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-						}
+#endif
 
 					}
 					else
 					{
-						//必然是普通堆里的对象
-						returnSlot.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+						RtArray arr;
+						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arr);
+
+						if (arr.StoreMode == RtArray.ArrayStoreMode.cache_on_stack)
+						{
+							var method = ((ASMethodBody)Context.GC.Heap[scope_ptr].Type).Method;
+							int callee_slot_idx = stackStPos - method.Body._link_codescope.Members.Count - 2;
+
+							if (arr.stack_store_startindex + arr.stack_store.Length + 1 < callee_slot_idx)
+							{
+								//传入的
+								returnSlot.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+							}
+							else
+							{
+								value = GetSaveValue(value, ref error);
+								if (error.raised)
+								{
+									return;
+								}
+								returnSlot.SetHeapPtr(value.HeapPtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+
+							}
+						}
+						else if (arr.StoreMode == RtArray.ArrayStoreMode.cache)
+						{
+							if (arr_ptr < Context.CacheArrayPtr + calleelastpos) //传入
+							{
+								returnSlot.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+							}
+							else
+							{
+								var dstArrayPtr = returnSlotIndex + Context.CacheArrayPtr;
+								var dst = (RtArray)Context.GC.Heap[dstArrayPtr];
+
+								Context.GC.Heap[dstArrayPtr].Type = Context.ARRAY.Instance;
+								dst.CopyCacheFrom(arr, this);
+								dst.HEAPINSTANCE_PTR = 0;
+								dst.methodscopeslot_ref_state = 0;
+
+								arr.HEAPINSTANCE_PTR = dstArrayPtr;
+
+								returnSlot.SetHeapPtr(dstArrayPtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+							}
+
+						}
+						else
+						{
+							//必然是普通堆里的对象
+							returnSlot.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+						}
 					}
 				}
 				else if (value.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 				{
-					RtVector vec;
-					int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vec);
-					if (vec_ptr < Context.CacheVectorPtr + calleelastpos) // 传入
+					if (!(value.HeapPtr < Context.CacheVectorPtr + Context.STACK_LENGTH)
+						) //堆里
 					{
-						returnSlot.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+						returnSlot = value;
+
+						Debug.Assert(RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out RtVector _temp) == returnSlot.HeapPtr);
+
+						//returnSlot.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 					}
 					else
 					{
-						var dstVecPtr = returnSlotIndex + Context.CacheVectorPtr;
-						var dstObj = Context.GC.Heap[dstVecPtr];
-						dstObj.Type = Context.GC.Heap[vec_ptr].Type;
-						var dst = (RtVector)dstObj;
+						RtVector vec;
+						int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vec);
+						if ((vec_ptr < Context.CacheVectorPtr + calleelastpos
+							) // 传入
+							||
+							(!(vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)) //堆里
+						 )
+						{
+							returnSlot.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+						}
+						else
+						{
+							var dstVecPtr = returnSlotIndex + Context.CacheVectorPtr;
+							var dstObj = Context.GC.Heap[dstVecPtr];
+							dstObj.Type = Context.GC.Heap[vec_ptr].Type;
+							var dst = (RtVector)dstObj;
 
-						dst.HEAPINSTANCE_PTR = 0;
-						dst.CopyCacheFrom(vec, this);
-						dst.methodscopeslot_ref_state = 0;
-						
-						vec.HEAPINSTANCE_PTR += dstVecPtr;
+							dst.HEAPINSTANCE_PTR = 0;
+							dst.CopyCacheFrom(vec, this);
+							dst.methodscopeslot_ref_state = 0;
 
-						returnSlot.SetHeapPtr(dstVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+							vec.HEAPINSTANCE_PTR += dstVecPtr;
 
+							returnSlot.SetHeapPtr(dstVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+
+						}
 					}
 				}
 				else if (value.HeapKind == (byte)RtHeapTypeKind.CLOSURE)
 				{
 					if (!(value.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH) //堆里
-						||
-						(value.HeapPtr < Context.M_ClosurePtr + calleelastpos) //传入
+
 						)
 					{
-						RtClosure _temp;
-						int t = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out _temp);
+						returnSlot = value;
 
-						returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+						Debug.Assert( RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out RtClosure _temp) == returnSlot.HeapPtr);
+
+
+
+						//RtClosure _temp;
+						//int t = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out _temp);
+
+						//returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 					}
 					else
 					{
-						var obj = Context.GC.Heap[value.HeapPtr];
-						var srcClosure = (RtClosure)obj;
+						//查询
+						RtClosure obj;
+						int t = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out obj);
 
-						int dstClosurePtr = returnSlotIndex + Context.M_ClosurePtr;
-						var dstClosure = (RtClosure)Context.GC.Heap[dstClosurePtr];
-
-						Context.GC.Heap[dstClosurePtr].Type = obj.Type;
-
-						dstClosure.CopyDataFrom(srcClosure, this);
-						dstClosure.methodscopeslot_ref_state = 0;
-						dstClosure.HEAPINSTANCE_PTR = 0;
-
-						srcClosure.HEAPINSTANCE_PTR = dstClosurePtr;
-
-						//处理 This 指针
-						if (dstClosure.This.ValueType == NaNBoxing.BoxType.HeapPtr)
+						if ((t < Context.M_ClosurePtr + calleelastpos) //传入
+							||
+							!(t < Context.M_ClosurePtr + Context.STACK_LENGTH) //堆里
+																	   )
 						{
-							bool needupdatescopePtr = dstClosure.ScopePtr == dstClosure.This.HeapPtr;
-
-							//var _this = Context.GC.Heap[dstClosure.This.HeapPtr];
-							var _thisKind = (RtHeapTypeKind)dstClosure.This.HeapKind;
-							if (_thisKind == RtHeapTypeKind.INSTANCE)
-							{
-								StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
-								if (needupdatescopePtr)
-								{
-									dstClosure.ScopePtr = dstClosure.This.HeapPtr;
-								}
-
-							}
-							else if (_thisKind == RtHeapTypeKind.CLOSURE)
-							{
-								/* 只有apply或者call可能造成这种情况。
-								* var a:Function= function ( ...rest ):void 
-								*	{
-								*	};
-								*	var f1 = a.apply;
-								*/
-								//这里就只能分配到堆里了。
-								var s_this = GetSaveValue(dstClosure.This, ref error);
-								if (error.raised)
-								{
-									return;
-								}
-								dstClosure.This = s_this;
-							}
-							else if (_thisKind == RtHeapTypeKind.ARRAY)
-							{
-								StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
-								if (needupdatescopePtr)
-								{
-									dstClosure.ScopePtr = dstClosure.This.HeapPtr;
-								}
-
-								//throw new NotImplementedException();
-							}
-							else if (_thisKind == RtHeapTypeKind.VECTOR)
-							{
-								StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
-								if (needupdatescopePtr)
-								{
-									dstClosure.ScopePtr = dstClosure.This.HeapPtr;
-								}
-
-								//throw new NotImplementedException();
-							}
-#if DEBUG
-							else if (_thisKind == RtHeapTypeKind.MethodScope)
-							{
-								throw new InvalidOperationException();
-							}
-#endif
-							else
-							{
-								//pass
-							}
+							
+							returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 						}
-
-						
+						else
 						{
-							//处理MethodScope
-							if (!((ASMethodBody)obj.Type).Method.__ismethod)
+							var srcClosure = (RtClosure)obj;
+
+							int dstClosurePtr = returnSlotIndex + Context.M_ClosurePtr;
+							var dstClosure = (RtClosure)Context.GC.Heap[dstClosurePtr];
+
+							Context.GC.Heap[dstClosurePtr].Type = obj.Type;
+
+							dstClosure.CopyDataFrom(srcClosure, this);
+							dstClosure.methodscopeslot_ref_state = 0;
+							dstClosure.HEAPINSTANCE_PTR = 0;
+
+							srcClosure.HEAPINSTANCE_PTR = dstClosurePtr;
+
+							//处理 This 指针
+							if (dstClosure.This.ValueType == NaNBoxing.BoxType.HeapPtr)
 							{
-								if (dstClosure.ScopePtr != 0)
+								bool needupdatescopePtr = dstClosure.ScopePtr == dstClosure.This.HeapPtr;
+
+								//var _this = Context.GC.Heap[dstClosure.This.HeapPtr];
+								var _thisKind = (RtHeapTypeKind)dstClosure.This.HeapKind;
+								if (_thisKind == RtHeapTypeKind.INSTANCE)
 								{
-									int sptr = dstClosure.ScopePtr;
-
-									RtMethodScope last_scope = null;
-
-								lbl_parent:
-									var scope = Context.GC.Heap[sptr];
-
-									bool needbreak = (sptr == scope_ptr);
-
-									if (scope.Kind == RtHeapTypeKind.GLOBAL || scope.Kind == RtHeapTypeKind.CLASS || scope.Kind == RtHeapTypeKind.INSTANCE)
+									StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
+									if (needupdatescopePtr)
 									{
-										/*
-										 const yCombinator = function (k) {
-										  const f = function (g) {
-											return g(g);
-										  };
-
-										  const p = function (r) {
-											return function (n) {
-											  return k(r(r))(n);
-											};
-										  };
-
-										  return f(p);
-										};
-
-										const factProto = function (h) {
-										  return function (x) {
-											return x == 0 ? 1 : x * h(x - 1);
-										  };
-										};
-
-										trace(yCombinator(factProto)(5));  // 120
-										 */
-
-										//这种代码可能会有
-										needbreak = true;
-										goto lbl_break;
+										dstClosure.ScopePtr = dstClosure.This.HeapPtr;
 									}
+
+								}
+								else if (_thisKind == RtHeapTypeKind.CLOSURE)
+								{
+									/* 只有apply或者call可能造成这种情况。
+									* var a:Function= function ( ...rest ):void 
+									*	{
+									*	};
+									*	var f1 = a.apply;
+									*/
+									//这里就只能分配到堆里了。
+									var s_this = GetSaveValue(dstClosure.This, ref error);
+									if (error.raised)
+									{
+										return;
+									}
+									dstClosure.This = s_this;
+								}
+								else if (_thisKind == RtHeapTypeKind.ARRAY)
+								{
+									StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
+									if (needupdatescopePtr)
+									{
+										dstClosure.ScopePtr = dstClosure.This.HeapPtr;
+									}
+
+									//throw new NotImplementedException();
+								}
+								else if (_thisKind == RtHeapTypeKind.VECTOR)
+								{
+									StoreReturnSlot(ref dstClosure.This, stackStPos, returnSlotIndex, calleelastpos, scope_ptr, dstClosure.This, ref error);
+									if (needupdatescopePtr)
+									{
+										dstClosure.ScopePtr = dstClosure.This.HeapPtr;
+									}
+
+									//throw new NotImplementedException();
+								}
+#if DEBUG
+								else if (_thisKind == RtHeapTypeKind.MethodScope)
+								{
+									throw new InvalidOperationException();
+								}
+#endif
+								else
+								{
+									//pass
+								}
+							}
+
+
+							{
+								//处理MethodScope
+								if (!((ASMethodBody)obj.Type).Method.__ismethod)
+								{
+									if (dstClosure.ScopePtr != 0)
+									{
+										int sptr = dstClosure.ScopePtr;
+
+										RtMethodScope last_scope = null;
+
+									lbl_parent:
+										var scope = Context.GC.Heap[sptr];
+
+										bool needbreak = (sptr == scope_ptr);
+
+										if (scope.Kind == RtHeapTypeKind.GLOBAL || scope.Kind == RtHeapTypeKind.CLASS || scope.Kind == RtHeapTypeKind.INSTANCE)
+										{
+											/*
+											 const yCombinator = function (k) {
+											  const f = function (g) {
+												return g(g);
+											  };
+
+											  const p = function (r) {
+												return function (n) {
+												  return k(r(r))(n);
+												};
+											  };
+
+											  return f(p);
+											};
+
+											const factProto = function (h) {
+											  return function (x) {
+												return x == 0 ? 1 : x * h(x - 1);
+											  };
+											};
+
+											trace(yCombinator(factProto)(5));  // 120
+											 */
+
+											//这种代码可能会有
+											needbreak = true;
+											goto lbl_break;
+										}
 
 #if DEBUG
-									if (scope.Kind != RtHeapTypeKind.MethodScope)
-									{
-										throw new InvalidOperationException();
-									}
-#endif
-									
-
-									if (sptr < Context.M_ClosurePtr + Context.STACK_LENGTH)
-									{
-										if (((ASMethodBody)scope.Type).Method.Flags.HasFlag(MethodFlags.NeedActivation))
+										if (scope.Kind != RtHeapTypeKind.MethodScope)
 										{
+											throw new InvalidOperationException();
+										}
+#endif
 
-											RtMethodScope cacheMscope = (RtMethodScope)scope;
-											var cacheSpan = cacheMscope.__get_slots_for_gc;
 
-											RtHeapBase heapObj;
-											int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, scope.Type._link_codescope);
-											if (ptr == 0)
+										if (sptr < Context.M_ClosurePtr + Context.STACK_LENGTH)
+										{
+											if (((ASMethodBody)scope.Type).Method.Flags.HasFlag(MethodFlags.NeedActivation))
 											{
-												//这种情况应该为致命错误，就不要再catch了
-												RaiseFault(ref error);
-												return;
-											}
 
-											cacheMscope.cloneout_ptr = ptr;
+												RtMethodScope cacheMscope = (RtMethodScope)scope;
+												var cacheSpan = cacheMscope.__get_slots_for_gc;
 
-											heapObj = Context.GC.Heap[ptr];
-											heapObj.Type = scope.Type;
-
-											RtMethodScope heap_scope = (RtMethodScope)heapObj;
-											for (int i = 0; i < cacheSpan.Length; i++)
-											{
-												var oldSpanValue = cacheSpan[i];
-
-												NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
-												if (error.raised)
+												RtHeapBase heapObj;
+												int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, scope.Type._link_codescope);
+												if (ptr == 0)
 												{
-													cacheMscope.cloneout_ptr = 0;
+													//这种情况应该为致命错误，就不要再catch了
+													RaiseFault(ref error);
 													return;
 												}
 
-												heap_scope.SetSlot(slotV, (ushort)i);
-											}
-											cacheMscope.ChangeStore(heap_scope);
-											//cacheMscope.cloneing_ptr = 0;
+												cacheMscope.cloneout_ptr = ptr;
 
-											if (last_scope != null)
-											{
-												last_scope.ParentPtr = ptr;
+												heapObj = Context.GC.Heap[ptr];
+												heapObj.Type = scope.Type;
+
+												RtMethodScope heap_scope = (RtMethodScope)heapObj;
+												for (int i = 0; i < cacheSpan.Length; i++)
+												{
+													var oldSpanValue = cacheSpan[i];
+
+													NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
+													if (error.raised)
+													{
+														cacheMscope.cloneout_ptr = 0;
+														return;
+													}
+
+													heap_scope.SetSlot(slotV, (ushort)i);
+												}
+												cacheMscope.ChangeStore(heap_scope);
+												//cacheMscope.cloneing_ptr = 0;
+
+												if (last_scope != null)
+												{
+													last_scope.ParentPtr = ptr;
+												}
+												else
+												{
+													dstClosure.ScopePtr = ptr;
+												}
+
+												last_scope = heap_scope;
+
+												sptr = ((RtMethodScope)scope).ParentPtr;
 											}
 											else
 											{
-												dstClosure.ScopePtr = ptr;
+												sptr = ((RtMethodScope)scope).ParentPtr;
 											}
-
-											last_scope = heap_scope;
-
-											sptr = ((RtMethodScope)scope).ParentPtr;
 										}
 										else
 										{
-											sptr = ((RtMethodScope)scope).ParentPtr;
+											last_scope = (RtMethodScope)scope;
+											sptr = last_scope.ParentPtr;
 										}
-									}
-									else
-									{
-										last_scope = (RtMethodScope)scope;
-										sptr = last_scope.ParentPtr;
-									}
 
-								lbl_break:
+									lbl_break:
 
-									if (needbreak)
-									{
-										if (last_scope != null)
+										if (needbreak)
 										{
-											last_scope.ParentPtr = sptr;
+											if (last_scope != null)
+											{
+												last_scope.ParentPtr = sptr;
+											}
+											else
+											{
+												dstClosure.ScopePtr = sptr;
+											}
 										}
 										else
 										{
-											dstClosure.ScopePtr = sptr;
+											goto lbl_parent;
 										}
+
 									}
-									else
-									{
-										goto lbl_parent;
-									}
+
 
 								}
+
 
 
 							}
 
 
+							//将srcClosure覆盖为新的
+							srcClosure.This = dstClosure.This;
+							srcClosure.ScopePtr = dstClosure.ScopePtr;
 
+							value.SetHeapPtr(dstClosurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+							returnSlot = value;
 						}
-						
-
-						//将srcClosure覆盖为新的
-						srcClosure.This = dstClosure.This;
-						srcClosure.ScopePtr = dstClosure.ScopePtr;
-
-						value.SetHeapPtr(dstClosurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
-						returnSlot = value;
 					}
 				}
 				else
@@ -1008,7 +1084,7 @@ namespace juicescript.runtime
 										_toupdateref = (RtInstance)dstObj;
 
 										//更新引用
-										v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, v.HeapFlag );
+										v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE,  (byte)(v.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT ) );
 										scope.SetSlot(v, (ushort)i);
 									}
 									else
@@ -1025,7 +1101,7 @@ namespace juicescript.runtime
 										}
 
 										//更新引用
-										v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, v.HeapFlag);
+										v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(v.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
 										scope.SetSlot(v, (ushort)i);
 									}
 								}
@@ -1065,7 +1141,7 @@ namespace juicescript.runtime
 												_toupdateref = (RtInstance)dstObj;
 
 												oldPayload.HEAPINSTANCE_PTR = copyed_ptr;
-												This.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, This.HeapFlag);
+												This.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(This.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
 												if (needupdateScopePtr)
 												{
 													((RtClosure)closure).ScopePtr = copyed_ptr;
@@ -1084,7 +1160,7 @@ namespace juicescript.runtime
 													_toupdateref.methodscopeslot_ref_state = 2;
 												}
 
-												This.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, This.HeapFlag);
+												This.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(This.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
 												if (needupdateScopePtr)
 												{
 													((RtClosure)closure).ScopePtr = copyed_ptr;
@@ -1170,7 +1246,9 @@ namespace juicescript.runtime
 						//return prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, m_scope, method_scopes);
 
 						NaNBoxing r = default;
-						r.SetHeapPtr( prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, m_scope, method_scopes), (byte)RtHeapTypeKind.INSTANCE,old.HeapFlag);
+						r.SetHeapPtr( 
+							prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, m_scope, method_scopes), (byte)RtHeapTypeKind.INSTANCE,
+							(byte)(old.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
 						return r;
 					}
 					else
@@ -1797,7 +1875,7 @@ namespace juicescript.runtime
 				if (
 						(!is_pass_this  // 传This时传引用	
 							||
-							((RtInstance)src).IsRefVectorOrFromContainerOrStruct(this, (ASInstance)src.Type)
+							((RtInstance)src).IsRefVectorOrFromContainerOrRefStruct(this, (ASInstance)src.Type)
 
 						//但是对结构体内部的引用或Vector内部的结构体 ,或者刚从数组,字典等里取出的结构体是例外，
 						//类似C#处理，

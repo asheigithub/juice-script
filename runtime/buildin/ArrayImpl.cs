@@ -141,9 +141,14 @@ namespace juicescript.runtime.buildin
 					var oldv = rest_span[i];
 					if (oldv.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						var obj = context.GC.Heap[oldv.HeapPtr];
-						if (obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+						//var obj = context.GC.Heap[oldv.HeapPtr];
+						//if (obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+						if(oldv.IsStruct())
 						{
+							var obj = context.GC.Heap[oldv.HeapPtr];
+
+							Debug.Assert(obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct));
+
 							int cache_struct_ptr = array.cache_structs[i];
 
 							var v_struct = context.GC.Heap[cache_struct_ptr]; 
@@ -595,10 +600,10 @@ namespace juicescript.runtime.buildin
 				NaNBoxing e = array.ReadSlot(array.array_len - 1, context.player, out isoutindex);
 				context.StackSlots[returnSlotIndex] = e;
 
-				if (e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				if ( e.IsStruct() )//e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var check = context.GC.Heap[e.HeapPtr];
-					if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
@@ -767,10 +772,10 @@ namespace juicescript.runtime.buildin
 				NaNBoxing e = array.ReadSlot(0, context.player, out isoutindex);
 				context.StackSlots[returnSlotIndex] = e;
 
-				if (e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				if (e.IsStruct() )//e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					var check = context.GC.Heap[e.HeapPtr];
-					if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
@@ -2104,10 +2109,10 @@ namespace juicescript.runtime.buildin
 			NaNBoxing e = array.ReadSlot((uint)index, context.player, out isoutindex);
 			context.StackSlots[returnSlotIndex] = e;
 
-			if (e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+			if ( e.IsStruct() )//e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 			{
 				var check = context.GC.Heap[e.HeapPtr];
-				if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+				Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 				{
 					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
@@ -2834,10 +2839,10 @@ namespace juicescript.runtime.buildin
 						//key = arr[i];  // 当前待排序元素
 						NaNBoxing key = vpayload.ReadSlot((uint)i, context.player, out bool ishole_p);
 						context.StackSlots[tempslot] = key;
-						if (key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+						if (key.IsStruct())//key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 						{
 							RtInstance src = (RtInstance)context.GC.Heap[key.HeapPtr];
-							if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+							Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 							{
 								int clonedptr = tempslot + context.CacheInstancePtr;
 								var dst = context.GC.Heap[clonedptr];
@@ -2934,10 +2939,10 @@ namespace juicescript.runtime.buildin
 
 				NaNBoxing pivot = vpayload.ReadSlot((uint)left, context.player, out bool ishole_p);
 				context.StackSlots[tempslot] = pivot;
-				if (pivot.ValueType == BoxType.HeapPtr && pivot.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				if (pivot.IsStruct())//pivot.ValueType == BoxType.HeapPtr && pivot.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					RtInstance src = (RtInstance)context.GC.Heap[pivot.HeapPtr];
-					if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						int clonedptr = tempslot + context.CacheInstancePtr;
 						var dst = context.GC.Heap[clonedptr];
@@ -3716,10 +3721,10 @@ namespace juicescript.runtime.buildin
 						{
 							//obj保存到槽里防止GC
 							context.StackSlots[basePos] = key;
-							if (key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+							if (key.IsStruct())//key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 							{
 								RtInstance src = (RtInstance)context.GC.Heap[key.HeapPtr];
-								if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+								Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 								{
 									int clonedptr = basePos + context.CacheInstancePtr;
 									var dst = context.GC.Heap[clonedptr];
@@ -4132,10 +4137,10 @@ namespace juicescript.runtime.buildin
 						//key = arr[i];  // 当前待排序元素
 						NaNBoxing key = vpayload.ReadSlot((uint)i, context.player, out bool ishole_p);
 						context.StackSlots[tempslot] = key;
-						if (key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+						if (key.IsStruct())//key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 						{
 							RtInstance src = (RtInstance)context.GC.Heap[key.HeapPtr];
-							if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+							Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 							{
 								int clonedptr = tempslot + context.CacheInstancePtr;
 								var dst = context.GC.Heap[clonedptr];
@@ -4229,10 +4234,10 @@ namespace juicescript.runtime.buildin
 				long keyi = left;
 
 				context.StackSlots[tempslot] = pivot;
-				if (pivot.ValueType == BoxType.HeapPtr && pivot.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+				if (pivot.IsStruct())//pivot.ValueType == BoxType.HeapPtr && pivot.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 					RtInstance src = (RtInstance)context.GC.Heap[pivot.HeapPtr];
-					if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						int clonedptr = tempslot + context.CacheInstancePtr;
 						var dst = context.GC.Heap[clonedptr];

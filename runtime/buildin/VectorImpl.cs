@@ -5663,6 +5663,8 @@ namespace juicescript.runtime.buildin
 				buffer.Clear();
 				buffer.AddRange(store.buffer);
 
+				Debug.Assert(!(store.buffer.Count > RtVector.MAX_CACHE_SIZE && IsCache));
+
 			}
 
 

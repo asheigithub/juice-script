@@ -230,6 +230,8 @@ namespace juicescript.runtime
         }
 
 
+       
+
         /// <summary>
         /// 是否是数值类型
         /// </summary>
@@ -336,7 +338,15 @@ namespace juicescript.runtime
             }
         }
 
-        public static string ToDebugString(this NaNBoxing value, Player player)
+
+        public static bool IsStruct(this NaNBoxing value)
+        { 
+            return value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((HeapKindFlag)value.HeapFlag & HeapKindFlag.FLAG_STRUCT) == HeapKindFlag.FLAG_STRUCT;
+        }
+
+
+
+		public static string ToDebugString(this NaNBoxing value, Player player)
         {
             switch (value.ValueType)
             {
