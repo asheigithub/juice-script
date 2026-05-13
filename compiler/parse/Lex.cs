@@ -373,10 +373,14 @@ namespace juicescript.compiler.parse
                         {
                             result.StringValue += '\t';
                         }
+                        else if (n2 == '\n')
+                        {
+							//result.StringValue += '\n';
+						}
                         else
                         {
-							result.StringValue += '\\';
-							result.StringValue += n2;
+                            result.StringValue += '\\';
+                            result.StringValue += n2;
                         }
                     }
                     else

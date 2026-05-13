@@ -513,10 +513,15 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								//((RtPayloadScriptClass)global).computing_member = member;
+
+								Context.StackPosition += slots.Length;
+
 								Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
 							}
 							finally
 							{
+								Context.StackPosition -= slots.Length;
+
 								//((RtPayloadScriptClass)global).computing_member = null;
 								if (is_closure)
 								{
@@ -569,11 +574,13 @@ namespace juicescript.runtime
 								{
 									//iscomputintg_closure_initmember = member;
 								}
+								Context.StackPosition += slots.Length;
 								//((RtPayloadScriptClass)@class).computing_member = member;
 								Execute(ref info,scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
+								Context.StackPosition -= slots.Length;
 								//((RtPayloadScriptClass)@class).computing_member = null;
 								if (is_closure)
 								{
@@ -675,12 +682,14 @@ namespace juicescript.runtime
 								{
 									//iscomputintg_closure_initmember = member;
 								}
+								Context.StackPosition += slots.Length;
 								Execute(ref info,scopeinstance, run_methodscope, 
 									is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
 									, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
+								Context.StackPosition -= slots.Length;
 								if (is_closure)
 								{
 									//iscomputintg_closure_initmember = null;
@@ -870,9 +879,9 @@ namespace juicescript.runtime
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
 						int P_PC;
 
-						
+						Context.StackPosition += slots.Length;
 						Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
-						
+						Context.StackPosition -= slots.Length;
 						if (error.raised)
 						{
 							throw new EvalConstException();
@@ -904,9 +913,9 @@ namespace juicescript.runtime
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
 						int P_PC;
 
-						
+						Context.StackPosition += slots.Length;
 						Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
-						
+						Context.StackPosition -= slots.Length;
 
 						if (error.raised)
 						{
@@ -999,12 +1008,12 @@ namespace juicescript.runtime
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
 						int P_PC;
 
-						
+						Context.StackPosition += slots.Length;
 						Execute(ref info, scopeinstance, run_methodscope, 
 							is_closure ? scopeinstance.Type : scope.Container
 							//scope.Container
 							, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
-						
+						Context.StackPosition -= slots.Length;
 
 
 						if (error.raised)

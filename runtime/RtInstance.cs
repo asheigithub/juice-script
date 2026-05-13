@@ -237,8 +237,11 @@ namespace juicescript.runtime
 
 
 		public void GenStore(int size)
-        { 
-            store = new Memory<byte>(new byte[size]);
+        {
+			if (size > 0)
+			{
+				store = new Memory<byte>(new byte[size]);
+			}
         }
 
         private int m_property_ptr;
