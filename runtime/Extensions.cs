@@ -591,40 +591,40 @@ namespace juicescript.runtime
 				case NaNBoxing.BoxType.Number:
 					{
 						double v = prop_name.Number;
-						if (double.IsPositiveInfinity(v))
-						{
-							return "Infinity";
-						}
-						else if (double.IsNegativeInfinity(v))
-						{
-							return "-Infinity";
-						}
-						else if (double.IsNaN(v))
-						{
-							return "NaN";
-						}
-						else
-						{					
+						//if (double.IsPositiveInfinity(v))
+						//{
+						//	return "Infinity";
+						//}
+						//else if (double.IsNegativeInfinity(v))
+						//{
+						//	return "-Infinity";
+						//}
+						//else if (double.IsNaN(v))
+						//{
+						//	return "NaN";
+						//}
+						//else
+						//{					
 							return Numeric.ToNumberString(v, buffchars); //v.ToString();
-						}
+						//}
 						
 					}
 				case NaNBoxing.BoxType.Float:
 					{
 						float v = prop_name.FloatValue;
-						if (float.IsPositiveInfinity(v))
-						{
-							return "Infinity";
-						}
-						else if (float.IsNegativeInfinity(v))
-						{
-							return "-Infinity";
-						}
-						else if (float.IsNaN(v))
-						{
-							return "NaN";
-						}
-						else
+						//if (float.IsPositiveInfinity(v))
+						//{
+						//	return "Infinity";
+						//}
+						//else if (float.IsNegativeInfinity(v))
+						//{
+						//	return "-Infinity";
+						//}
+						//else if (float.IsNaN(v))
+						//{
+						//	return "NaN";
+						//}
+						//else
 						{
 							//return v.ToString(System.Globalization.CultureInfo.InvariantCulture);
 							return  FloatImpl.FloatToString(v,10,buffchars); 
@@ -632,48 +632,63 @@ namespace juicescript.runtime
 						
 					}
 				case NaNBoxing.BoxType.Undefined:
-					return "undefined";
-					
+                    "undefined".CopyTo(buffchars); //"undefined";
+                    return buffchars.Slice(0, 9);
 				case NaNBoxing.BoxType.Null:
-					return "null";
-					
+                    //return "null";
+                    "null".CopyTo(buffchars);
+                    return buffchars.Slice(0, 4);
 				case NaNBoxing.BoxType.Boolean:
-					return prop_name.Boolean ? "true" : "false";
-					
+                    //return prop_name.Boolean ? "true" : "false";
+                    {
+                        if (prop_name.Boolean)
+                        {
+							"true".CopyTo(buffchars);
+							return buffchars.Slice(0, 4);
+						}
+                        else
+                        {
+							"false".CopyTo(buffchars);
+							return buffchars.Slice(0, 5);
+						}
+                    }
+
 				case NaNBoxing.BoxType.Int:
 					{
 						var index = prop_name.IntValue;
-						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        return IntImpl.IntToString(index, 10, buffchars);  //index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 						
 					}
 				case NaNBoxing.BoxType.Uint:
 					{
 						var index = prop_name.UIntValue;
-						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
-						
+						//return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+						return UintImpl.UintToString(index,10,buffchars);
 					}
 				case NaNBoxing.BoxType.Sbyte:
 					{
 						var index = prop_name.SByteValue;
-						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
-						
+                        //return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        return IntImpl.IntToString(index, 10, buffchars);
 					}
 				case NaNBoxing.BoxType.Byte:
 					{
 						var index = prop_name.ByteValue;
-						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        //return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        return UintImpl.UintToString(index, 10, buffchars);
 						
 					}
 				case NaNBoxing.BoxType.Short:
 					{
 						var index = prop_name.ShortValue;
-						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
-						
+                        //return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        return IntImpl.IntToString(index,10,buffchars);
 					}
 				case NaNBoxing.BoxType.UShort:
 					{
-						var index = prop_name.ShortValue;
-						return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+						var index = prop_name.UShortValue;
+                        //return index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        return UintImpl.UintToString(index, 10, buffchars);
 						
 					}
                 case BoxType.HeapPtr:

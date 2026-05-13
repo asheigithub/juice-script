@@ -13,7 +13,7 @@ package
     }
 }
 
-var n = 12345.678891233412414;
+var n:float = -12345e+30;
 
 trace( n.toString(2) );
 

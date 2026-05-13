@@ -13,7 +13,7 @@ namespace juicescript.runtime.buildin
 	internal class GeomImpl
 	{
 		[NativeFunction("geom.Vector2$public::Vector2")]
-		public static void Array(Context context,
+		public static void Vector2(Context context,
 			ASMethod method,
 			int scope_ptr,
 			NaNBoxing thisPtr,
@@ -33,6 +33,8 @@ namespace juicescript.runtime.buildin
 			}
 
 #endif
+			
+			
 			((RtInstance)vector2).SetSlot(x, 0, ((ASInstance)vector2.Type)._link_codescope  , context.player);
 			((RtInstance)vector2).SetSlot(y, 1, ((ASInstance)vector2.Type)._link_codescope  , context.player);
 

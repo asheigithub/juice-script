@@ -79,17 +79,31 @@ namespace juicescript.runtime.buildin
 
             if (float.IsNaN(n))
             {
-                return "NaN";
+                "NaN".CopyTo(buffer);
+                return buffer.Slice(0, 3);
+                //return "NaN";
             }
             
             if (n == 0)
             {
-                return "0";
+                buffer[0] = '0';
+                return buffer.Slice(0, 1);
+                //return "0";
             }
 
             if (float.IsInfinity(n))
             {
-                return float.IsNegativeInfinity(n) ? "-Infinity" : "Infinity";
+                if (float.IsNegativeInfinity(n))
+                {
+                    "-Infinity".CopyTo(buffer);
+                    return buffer.Slice(0, 9);
+				}
+                else
+                {
+					"Infinity".CopyTo(buffer);
+					return buffer.Slice(0, 8);
+				}
+                //return float.IsNegativeInfinity(n) ? "-Infinity" : "Infinity";
             }
 
             bool negative = false;
@@ -144,9 +158,49 @@ namespace juicescript.runtime.buildin
 
             //return negative ? "-" + result : result;
 
+            if (intPart > int.MaxValue)
+            {
+				int k = 0;
+				while (intPart > int.MaxValue)
+				{
+					intPart = intPart / radix;
+					k++;
+				}
 
+                if (negative)
+                {
 
-            if (negative)
+                    buffer[0] = '-';
+
+                    var b = IntToString((int)intPart, radix, buffer.Slice(1));
+                    if (k < 63)
+                    {
+                        buffer.Slice(1+b.Length, k).Fill('0');
+                        return buffer.Slice(0,1+ b.Length + k);
+                    }
+                    else
+                    {
+                        return "-" + b.ToString() + "".PadRight(k, '0'); // 只能溢出了
+                        ;
+                    }
+                }
+                else
+                {
+					var b = IntToString((int)intPart, radix, buffer);
+					if (k < 64)
+					{
+						buffer.Slice(b.Length, k).Fill('0');
+						return buffer.Slice(0, b.Length + k);
+					}
+					else
+					{
+						return b.ToString() + "".PadRight(k, '0'); // 只能溢出了
+						;
+					}
+				}
+				
+            }
+            else if (negative)
             {
                 buffer[0] = '-';
 
@@ -194,7 +248,7 @@ namespace juicescript.runtime.buildin
         {
             Debug.Assert(buffer.Length >= 96);
 
-            if (n == 0) return "0";
+            if (n == 0) { buffer[0] = '0'; return buffer.Slice(0,1); }//return "0";
 
             int intPart = (int)MathF.Truncate(n);
             float fracPart = n - intPart;
@@ -230,13 +284,11 @@ namespace juicescript.runtime.buildin
 
             if (n == 0)
             {
-                return "0";
+                buffer[0] = '0';
+                return buffer.Slice(0, 1);
+                //return "0";
             }
-            if (n < 0)
-            {
-                n = int.MaxValue;
-            }
-
+            
             var sb = new ValueStringBuilder(buffer);
             while (n > 0)
             {
@@ -495,9 +547,9 @@ namespace juicescript.runtime.buildin
 				goto lbl_str;
 			}
 
-       
+            //不可能走到这里
             // Use Dtoa infrastructure for f == 100 (avoids .NET format specifier limitation)
-            str = Numeric.ToFixedDtoa(x, f, negative);
+           // str = Numeric.ToFixedDtoa(x, f, negative);
 
 
 		lbl_str:

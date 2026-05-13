@@ -354,8 +354,10 @@ namespace juicescript.runtime.buildin
 				goto lbl_str;
 			}
 
+			//这里是不可能走到的
+
 			// Use Dtoa infrastructure for f == 100 (avoids .NET format specifier limitation)
-			str = ToFixedDtoa(x, f, negative);
+			//str = ToFixedDtoa(x, f, negative);
 
 
 		lbl_str:
@@ -481,74 +483,74 @@ namespace juicescript.runtime.buildin
 
 
 
-		internal static string ToFixedDtoa(double x, int fractionDigits, bool negative)
-		{
-			if (x == 0)
-			{
-				var sb = new ValueStringBuilder(stackalloc char[128]);
-				if (negative)
-				{
-					sb.Append('-');
-				}
-				sb.Append("0.");
-				sb.Append('0', fractionDigits);
-				return sb.ToString();
-			}
+		//internal static ReadOnlySpan<char> ToFixedDtoa(double x, int fractionDigits, bool negative,Span<char> buffer)
+		//{
+		//	if (x == 0)
+		//	{
+		//		var sb = new ValueStringBuilder(buffer);
+		//		if (negative)
+		//		{
+		//			sb.Append('-');
+		//		}
+		//		sb.Append("0.");
+		//		sb.Append('0', fractionDigits);
+		//		return sb.ToString();
+		//	}
 
-			var dtoaBuilder = new DtoaBuilder(stackalloc char[fractionDigits + 50]);
-			DtoaNumberFormatter.DoubleToAscii(
-				ref dtoaBuilder,
-				x,
-				DtoaMode.Fixed,
-				fractionDigits,
-				out _,
-				out var decimalPoint);
+		//	var dtoaBuilder = new DtoaBuilder();//stackalloc char[fractionDigits + 50]);
+		//	DtoaNumberFormatter.DoubleToAscii(
+		//		ref dtoaBuilder,
+		//		x,
+		//		DtoaMode.Fixed,
+		//		fractionDigits,
+		//		out _,
+		//		out var decimalPoint);
 
-			var result2 = new ValueStringBuilder(stackalloc char[fractionDigits + 50]);
-			if (negative)
-			{
-				result2.Append('-');
-			}
+		//	var result2 = new ValueStringBuilder(stackalloc char[fractionDigits + 50]);
+		//	if (negative)
+		//	{
+		//		result2.Append('-');
+		//	}
 
-			if (decimalPoint <= 0)
-			{
-				// 0.000...digits
-				result2.Append("0.");
-				result2.Append('0', -decimalPoint);
-				result2.Append(dtoaBuilder._chars.Slice(0, dtoaBuilder.Length));
-				int remaining = fractionDigits - (-decimalPoint + dtoaBuilder.Length);
-				if (remaining > 0)
-				{
-					result2.Append('0', remaining);
-				}
-			}
-			else if (decimalPoint >= dtoaBuilder.Length)
-			{
-				// Integer part only, pad with zeros
-				result2.Append(dtoaBuilder._chars.Slice(0, dtoaBuilder.Length));
-				result2.Append('0', decimalPoint - dtoaBuilder.Length);
-				if (fractionDigits > 0)
-				{
-					result2.Append('.');
-					result2.Append('0', fractionDigits);
-				}
-			}
-			else
-			{
-				// digits split across integer and fractional part
-				result2.Append(dtoaBuilder._chars.Slice(0, decimalPoint));
-				result2.Append('.');
-				int fracDigitsFromDtoa = dtoaBuilder.Length - decimalPoint;
-				result2.Append(dtoaBuilder._chars.Slice(decimalPoint, fracDigitsFromDtoa));
-				int remaining = fractionDigits - fracDigitsFromDtoa;
-				if (remaining > 0)
-				{
-					result2.Append('0', remaining);
-				}
-			}
+		//	if (decimalPoint <= 0)
+		//	{
+		//		// 0.000...digits
+		//		result2.Append("0.");
+		//		result2.Append('0', -decimalPoint);
+		//		result2.Append(dtoaBuilder._chars.Slice(0, dtoaBuilder.Length));
+		//		int remaining = fractionDigits - (-decimalPoint + dtoaBuilder.Length);
+		//		if (remaining > 0)
+		//		{
+		//			result2.Append('0', remaining);
+		//		}
+		//	}
+		//	else if (decimalPoint >= dtoaBuilder.Length)
+		//	{
+		//		// Integer part only, pad with zeros
+		//		result2.Append(dtoaBuilder._chars.Slice(0, dtoaBuilder.Length));
+		//		result2.Append('0', decimalPoint - dtoaBuilder.Length);
+		//		if (fractionDigits > 0)
+		//		{
+		//			result2.Append('.');
+		//			result2.Append('0', fractionDigits);
+		//		}
+		//	}
+		//	else
+		//	{
+		//		// digits split across integer and fractional part
+		//		result2.Append(dtoaBuilder._chars.Slice(0, decimalPoint));
+		//		result2.Append('.');
+		//		int fracDigitsFromDtoa = dtoaBuilder.Length - decimalPoint;
+		//		result2.Append(dtoaBuilder._chars.Slice(decimalPoint, fracDigitsFromDtoa));
+		//		int remaining = fractionDigits - fracDigitsFromDtoa;
+		//		if (remaining > 0)
+		//		{
+		//			result2.Append('0', remaining);
+		//		}
+		//	}
 
-			return result2.ToString();
-		}
+		//	return result2.ToString();
+		//}
 
 
 
@@ -627,10 +629,17 @@ namespace juicescript.runtime.buildin
 
 				var p = ToNumberString(-x, radix, vsb);
 
-				buffers[0] = '-';
-				p.CopyTo(buffers.Slice(1, p.Length));
+				if (p.Length < 128)
+				{
+					buffers[0] = '-';
+					p.CopyTo(buffers.Slice(1, p.Length));
 
-				return buffers.Slice(0, p.Length + 1);
+					return buffers.Slice(0, p.Length + 1);
+				}
+				else
+				{
+					return $"-{p}";
+				}
 			}
 
 			var integer =  Math.Truncate( x);
@@ -644,7 +653,29 @@ namespace juicescript.runtime.buildin
 
 			//return result;
 
-			if (fraction == 0)
+
+			if (integer > long.MaxValue)
+			{
+				int k = 0;
+				while (integer > long.MaxValue)
+				{
+					integer = integer / radix;
+					k++;
+				}
+
+				var b = ToBase((long)integer, radix, buffers.Slice(0, 64));
+				if (k < 64)
+				{
+					buffers.Slice(b.Length, k).Fill('0');
+					return buffers.Slice(0, b.Length + k);
+				}
+				else
+				{
+					return b.ToString() + "".PadRight(k,'0'); // 只能溢出了
+					  ;
+				}
+			}
+			else if (fraction == 0)
 			{
 				return ToBase((long)integer, radix, buffers.Slice(0, 64));
 			}
@@ -664,13 +695,10 @@ namespace juicescript.runtime.buildin
 			const string Digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 			if (n == 0)
 			{
-				return "0";
+				buffers[0] = '0';return buffers.Slice(0, 1);
+				//return "0";
 			}
-			if (n < 0)
-			{
-				n = long.MaxValue;
-			}
-
+			
 			var sb = new ValueStringBuilder(buffers);
 			while (n > 0)
 			{
@@ -691,7 +719,7 @@ namespace juicescript.runtime.buildin
 			const string Digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 			if (n == 0)
 			{
-				return "0";
+				buffer[0] = '0'; return buffer.Slice(0, 1); //return "0";
 			}
 
 			var result = new ValueStringBuilder(buffer);
@@ -715,17 +743,27 @@ namespace juicescript.runtime.buildin
 
 			if (double.IsNaN(m))
 			{
-				return "NaN";
+				"NaN".CopyTo(buffers); return buffers.Slice(0, 3); //return "NaN";
 			}
 
 			if (m == 0)
 			{
-				return "0";
+				buffers[0] = '0'; return buffers.Slice(0, 1); //return "0";
 			}
 
 			if (double.IsInfinity(m))
 			{
-				return double.IsNegativeInfinity(m) ? "-Infinity" : "Infinity";
+				if (double.IsNegativeInfinity(m))
+				{
+					"-Infinity".CopyTo(buffers);
+					return buffers.Slice(0, 9);
+				}
+				else
+				{
+					"Infinity".CopyTo(buffers);
+					return buffers.Slice(0, 8);
+				}
+				//return double.IsNegativeInfinity(m) ? "-Infinity" : "Infinity";
 			}
 
 			var builder = new DtoaBuilder( buffers.Slice(0,SmallDtoaLength) );// stackalloc char[SmallDtoaLength]);

@@ -85,12 +85,12 @@ namespace juicescript.runtime.buildin.Pooling
 		//	}
 		//}
 
-		public override string ToString()
-		{
-			string s = _chars.Slice(0, _pos).ToString();
-			Dispose();
-			return s;
-		}
+		//public override string ToString()
+		//{
+		//	string s = _chars.Slice(0, _pos).ToString();
+		//	Dispose();
+		//	return s;
+		//}
 
 		public ReadOnlySpan<char> ToCharSpan()
 		{
@@ -211,8 +211,8 @@ namespace juicescript.runtime.buildin.Pooling
 			}
 			else
 			{
-
-				//AppendSlow(s);
+				
+				AppendSlow(s);
 			}
 		}
 
@@ -226,6 +226,7 @@ namespace juicescript.runtime.buildin.Pooling
 			}
 			else
 			{
+				throw new InvalidOperationException();
 				//Append(value.ToString());
 			}
 		}
@@ -243,21 +244,21 @@ namespace juicescript.runtime.buildin.Pooling
     }
 #endif
 
-//		private void AppendSlow(string s)
-//		{
-//			int pos = _pos;
-//			if (pos > _chars.Length - s.Length)
-//			{
-//				Grow(s.Length);
-//			}
+		private void AppendSlow(string s)
+		{
+			int pos = _pos;
+			if (pos > _chars.Length - s.Length)
+			{
+				Grow(s.Length);
+			}
 
-//			s
-//#if !NETCOREAPP
-//            .AsSpan()
-//#endif
-//				.CopyTo(_chars.Slice(pos));
-//			_pos += s.Length;
-//		}
+			s
+#if !NETCOREAPP
+            .AsSpan()
+#endif
+				.CopyTo(_chars.Slice(pos));
+			_pos += s.Length;
+		}
 
 		public void Append(char c, int count)
 		{
@@ -315,12 +316,12 @@ namespace juicescript.runtime.buildin.Pooling
 		//	return _chars.Slice(origPos, length);
 		//}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private void GrowAndAppend(char c)
-		{
-			Grow(1);
-			Append(c);
-		}
+		//[MethodImpl(MethodImplOptions.NoInlining)]
+		//private void GrowAndAppend(char c)
+		//{
+		//	Grow(1);
+		//	Append(c);
+		//}
 
 		/// <summary>
 		/// Resize the internal buffer either by doubling current buffer size or

@@ -53,26 +53,33 @@ namespace juicescript.runtime.buildin
 
 			uint x = thisPtr.UIntValue;
 
-			string str = UintToString(x, radixValue);
+			var str = UintToString(x, radixValue,stackalloc char[32]);
 
-			int str_ptr = context.GC.AllocString(str);
-			if (str_ptr == 0)
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			//int str_ptr = context.GC.AllocString(str);
+			//if (str_ptr == 0)
+			//{
+			//	context.player.RaiseOutOfMemory(ref error);
+			//	return;
+			//}
+
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
-		private static string UintToString(uint n, int radix)
+		internal static ReadOnlySpan<char> UintToString(uint n, int radix,Span<char> buffer)
 		{
+			Debug.Assert(buffer.Length >= 32);
 			if (n == 0)
 			{
-				return "0";
+				buffer[0]='0';
+				return buffer.Slice(0, 1);
 			}
 
-			var sb = new ValueStringBuilder(stackalloc char[32]);
+			var sb = new ValueStringBuilder(buffer);
 
 			while (n > 0)
 			{
@@ -82,42 +89,45 @@ namespace juicescript.runtime.buildin
 			}
 
 			sb.Reverse();
-			return sb.ToString();
+			return sb.AsSpan(); //sb.ToString();
 		}
 
-		private static string CreateExponentialRepresentation(
-			ref DtoaBuilder buffer,
-			int exponent,
-			bool negative,
-			int significantDigits)
-		{
-			bool negativeExponent = false;
-			if (exponent < 0)
-			{
-				negativeExponent = true;
-				exponent = -exponent;
-			}
+		//private static string CreateExponentialRepresentation(
+		//	ref DtoaBuilder buffer,
+		//	int exponent,
+		//	bool negative,
+		//	int significantDigits,
+		//	Span<char> vsbuffer
+		//	)
+		//{
+		//	Debug.Assert(vsbuffer.Length >= 128);
+		//	bool negativeExponent = false;
+		//	if (exponent < 0)
+		//	{
+		//		negativeExponent = true;
+		//		exponent = -exponent;
+		//	}
 
-			var sb = new ValueStringBuilder(stackalloc char[128]);
-			if (negative)
-			{
-				sb.Append('-');
-			}
-			sb.Append(buffer[0]);
-			if (significantDigits != 1)
-			{
-				sb.Append('.');
-				sb.Append(buffer.Slice(1, buffer.Length - 1));
-				int length = buffer.Length;
-				sb.Append('0', significantDigits - length);
-			}
+		//	var sb = new ValueStringBuilder(vsbuffer);
+		//	if (negative)
+		//	{
+		//		sb.Append('-');
+		//	}
+		//	sb.Append(buffer[0]);
+		//	if (significantDigits != 1)
+		//	{
+		//		sb.Append('.');
+		//		sb.Append(buffer.Slice(1, buffer.Length - 1));
+		//		int length = buffer.Length;
+		//		sb.Append('0', significantDigits - length);
+		//	}
 
-			sb.Append('e');
-			sb.Append(negativeExponent ? '-' : '+');
-			sb.Append(exponent);
+		//	sb.Append('e');
+		//	sb.Append(negativeExponent ? '-' : '+');
+		//	sb.Append(exponent);
 
-			return sb.ToString();
-		}
+		//	return sb.ToString();
+		//}
 
 		[NativeFunction(".uint$public::toExponential")]
 		public static void Uint_toExponential(Context context,
@@ -159,16 +169,13 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(dtoaBuilder.Length <= f + 1);
 
 			int exponent = decimalPoint - 1;
-			var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, false, f + 1);
+			var result = IntImpl.CreateExponentialRepresentation(ref dtoaBuilder, exponent, false, f + 1,stackalloc char[128]);
 
-			int str_ptr = context.GC.AllocString(result);
-			if (str_ptr == 0)
+
+			if (context.player.TryCreateStringValue(result, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
-
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
 		[NativeFunction(".uint$public::toFixed")]
@@ -198,32 +205,31 @@ namespace juicescript.runtime.buildin
 
 			uint x = thisPtr.UIntValue;
 
-			string str = UintToFixed(x, f);
+			var str = UintToFixed(x, f,stackalloc char[64]);
 
-			int str_ptr = context.GC.AllocString(str);
-			if (str_ptr == 0)
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
-
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
-		private static string UintToFixed(uint n, int fractionDigits)
+		private static ReadOnlySpan<char> UintToFixed(uint n, int fractionDigits,Span<char> vsbuffer)
 		{
+			Debug.Assert(vsbuffer.Length >= 64);
+
 			if (fractionDigits == 0)
 			{
-				return UintToString(n, 10);
+				return UintToString(n, 10,vsbuffer);
 			}
 
-			var sb = new ValueStringBuilder(stackalloc char[32]);
+			var sb = new ValueStringBuilder(vsbuffer);
 
 			if (n == 0)
 			{
 				sb.Append("0.");
 				sb.Append('0', fractionDigits);
-				return sb.ToString();
+				return sb.ToCharSpan();
 			}
 
 			while (n > 0)
@@ -237,7 +243,7 @@ namespace juicescript.runtime.buildin
 			sb.Append('.');
 			sb.Append('0', fractionDigits);
 
-			return sb.ToString();
+			return sb.ToCharSpan();
 		}
 
 		[NativeFunction(".uint$public::toPrecision")]
@@ -279,16 +285,13 @@ namespace juicescript.runtime.buildin
 			int exponent = decimalPoint - 1;
 			if (exponent < -6 || exponent >= p)
 			{
-				string str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p);
+				var str = IntImpl.CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p, stackalloc char[128]);
 
-				int str_ptr = context.GC.AllocString(str);
-				if (str_ptr == 0)
+
+				if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = r;
 				}
-
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 			else
 			{
@@ -321,16 +324,11 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				string str = sb.ToString();
-
-				int str_ptr = context.GC.AllocString(str);
-				if (str_ptr == 0)
+				var str = sb.ToCharSpan();
+				if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = r;
 				}
-
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 		}
 	}

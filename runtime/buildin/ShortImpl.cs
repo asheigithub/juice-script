@@ -68,96 +68,92 @@ namespace juicescript.runtime.buildin
 
             short x = thisPtr.ShortValue;
 
-            string str = ShortToString(x, radixValue);
+            var str = IntImpl.IntToString(x, radixValue,stackalloc char[64]);
 
-            int str_ptr = context.GC.AllocString(str);
-            if (str_ptr == 0)
-            {
-                context.player.RaiseOutOfMemory(ref error);
-                return;
-            }
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = r;
+			}
+		}
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-        }
+        //private static string ShortToString(short n, int radix)
+        //{
+        //    if (n == 0)
+        //    {
+        //        return "0";
+        //    }
 
-        private static string ShortToString(short n, int radix)
-        {
-            if (n == 0)
-            {
-                return "0";
-            }
+        //    bool negative = false;
+        //    ushort u;
 
-            bool negative = false;
-            ushort u;
+        //    if (n < 0)
+        //    {
+        //        negative = true;
+        //        if (n == short.MinValue)
+        //        {
+        //            u = 0x8000;
+        //        }
+        //        else
+        //        {
+        //            u = (ushort)(-n);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        u = (ushort)n;
+        //    }
 
-            if (n < 0)
-            {
-                negative = true;
-                if (n == short.MinValue)
-                {
-                    u = 0x8000;
-                }
-                else
-                {
-                    u = (ushort)(-n);
-                }
-            }
-            else
-            {
-                u = (ushort)n;
-            }
+        //    var sb = new ValueStringBuilder(stackalloc char[32]);
 
-            var sb = new ValueStringBuilder(stackalloc char[32]);
+        //    while (u > 0)
+        //    {
+        //        ushort digit = (ushort)(u % (ushort)radix);
+        //        sb.Append(Digits[digit]);
+        //        u /= (ushort)radix;
+        //    }
 
-            while (u > 0)
-            {
-                ushort digit = (ushort)(u % (ushort)radix);
-                sb.Append(Digits[digit]);
-                u /= (ushort)radix;
-            }
+        //    if (negative)
+        //    {
+        //        sb.Append('-');
+        //    }
 
-            if (negative)
-            {
-                sb.Append('-');
-            }
+        //    sb.Reverse();
+        //    return sb.ToString();
+        //}
 
-            sb.Reverse();
-            return sb.ToString();
-        }
+        //private static string CreateExponentialRepresentation(
+        //    ref DtoaBuilder buffer,
+        //    int exponent,
+        //    bool negative,
+        //    int significantDigits)
+        //{
+        //    bool negativeExponent = false;
+        //    if (exponent < 0)
+        //    {
+        //        negativeExponent = true;
+        //        exponent = -exponent;
+        //    }
 
-        private static string CreateExponentialRepresentation(
-            ref DtoaBuilder buffer,
-            int exponent,
-            bool negative,
-            int significantDigits)
-        {
-            bool negativeExponent = false;
-            if (exponent < 0)
-            {
-                negativeExponent = true;
-                exponent = -exponent;
-            }
+        //    var sb = new ValueStringBuilder(stackalloc char[128]);
+        //    if (negative)
+        //    {
+        //        sb.Append('-');
+        //    }
+        //    sb.Append(buffer[0]);
+        //    if (significantDigits != 1)
+        //    {
+        //        sb.Append('.');
+        //        sb.Append(buffer.Slice(1, buffer.Length - 1));
+        //        int length = buffer.Length;
+        //        sb.Append('0', significantDigits - length);
+        //    }
 
-            var sb = new ValueStringBuilder(stackalloc char[128]);
-            if (negative)
-            {
-                sb.Append('-');
-            }
-            sb.Append(buffer[0]);
-            if (significantDigits != 1)
-            {
-                sb.Append('.');
-                sb.Append(buffer.Slice(1, buffer.Length - 1));
-                int length = buffer.Length;
-                sb.Append('0', significantDigits - length);
-            }
+        //    sb.Append('e');
+        //    sb.Append(negativeExponent ? '-' : '+');
+        //    sb.Append(exponent);
 
-            sb.Append('e');
-            sb.Append(negativeExponent ? '-' : '+');
-            sb.Append(exponent);
-
-            return sb.ToString();
-        }
+        //    return sb.ToString();
+        //}
 
         [NativeFunction(".short$public::toExponential")]
         public static void Short_toExponential(Context context,
@@ -198,17 +194,13 @@ namespace juicescript.runtime.buildin
             Debug.Assert(dtoaBuilder.Length <= f + 1);
 
             int exponent = decimalPoint - 1;
-            var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1);
+            var result = IntImpl.CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1,stackalloc char[128]);
 
-            int str_ptr = context.GC.AllocString(result);
-            if (str_ptr == 0)
-            {
-                context.player.RaiseOutOfMemory(ref error);
-                return;
-            }
-
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-        }
+			if (context.player.TryCreateStringValue(result, out NaNBoxing r, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = r;
+			}
+		}
 
         [NativeFunction(".short$public::toFixed")]
         public static void Short_toFixed(Context context,
@@ -237,22 +229,24 @@ namespace juicescript.runtime.buildin
 
             short n = thisPtr.ShortValue;
 
-            string str = ShortToString(n, 10);
+			Span<char> buffer = stackalloc char[64];
+			var str = IntImpl.IntToString(n, 10, buffer);
 
-            if (f > 0)
-            {
-                str = str + "." + new string('0', f);
-            }
+			if (f > 0)
+			{
+				buffer[str.Length] = '.';
+				buffer.Slice(str.Length + 1, f).Fill('0');
 
-            int str_ptr = context.GC.AllocString(str);
-            if (str_ptr == 0)
-            {
-                context.player.RaiseOutOfMemory(ref error);
-                return;
-            }
+				str = buffer.Slice(0, str.Length + 1 + f);
 
-            context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-        }
+				//str = str + "." + new string('0', f);
+			}
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = r;
+			}
+		}
 
         [NativeFunction(".short$public::toPrecision")]
         public static void Short_toPrecision(Context context,
@@ -292,17 +286,13 @@ namespace juicescript.runtime.buildin
             int exponent = decimalPoint - 1;
             if (exponent < -6 || exponent >= p)
             {
-                string str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p);
+                var str = IntImpl.CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p, stackalloc char[128]);
 
-                int str_ptr = context.GC.AllocString(str);
-                if (str_ptr == 0)
-                {
-                    context.player.RaiseOutOfMemory(ref error);
-                    return;
-                }
-
-                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-            }
+				if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
+				{
+					context.StackSlots[returnSlotIndex] = r;
+				}
+			}
             else
             {
                 var sb = new ValueStringBuilder(stackalloc char[128]);
@@ -334,17 +324,13 @@ namespace juicescript.runtime.buildin
                     }
                 }
 
-                string str = sb.ToString();
+                var str = sb.ToCharSpan();
 
-                int str_ptr = context.GC.AllocString(str);
-                if (str_ptr == 0)
-                {
-                    context.player.RaiseOutOfMemory(ref error);
-                    return;
-                }
-
-                context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-            }
+				if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
+				{
+					context.StackSlots[returnSlotIndex] = r;
+				}
+			}
         }
     }
 }

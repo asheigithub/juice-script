@@ -53,23 +53,32 @@ namespace juicescript.runtime.buildin
 
 			int x = thisPtr.IntValue;
 
-			string str = IntToString(x, radixValue);
+			Span<char> buffer = stackalloc char[64];
 
-			int str_ptr = context.GC.AllocString(str);
-			if (str_ptr == 0)
+			var str = IntToString(x, radixValue,buffer);
+
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
+			//int str_ptr = context.GC.AllocString(str);
+			//if (str_ptr == 0)
+			//{
+			//	context.player.RaiseOutOfMemory(ref error);
+			//	return;
+			//}
 
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			//context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
-		private static string IntToString(int n, int radix)
+		internal static ReadOnlySpan<char> IntToString(int n, int radix,Span<char> buffer)
 		{
+			Debug.Assert(buffer.Length >= 64);
+
 			if (n == 0)
 			{
-				return "0";
+				buffer[0]='0';
+				return buffer.Slice(0, 1);
 			}
 
 			bool negative = false;
@@ -92,7 +101,7 @@ namespace juicescript.runtime.buildin
 				u = (uint)n;
 			}
 
-			var sb = new ValueStringBuilder(stackalloc char[32]);
+			var sb = new ValueStringBuilder(buffer);
 
 			while (u > 0)
 			{
@@ -107,15 +116,19 @@ namespace juicescript.runtime.buildin
 			}
 
 			sb.Reverse();
-			return sb.ToString();
+			return sb.ToCharSpan(); //sb.ToString();
 		}
 
-		private static string CreateExponentialRepresentation(
+		internal static ReadOnlySpan<char> CreateExponentialRepresentation(
 			ref DtoaBuilder buffer,
 			int exponent,
 			bool negative,
-			int significantDigits)
+			int significantDigits,
+			Span<char> vbuffer
+			)
 		{
+			Debug.Assert(vbuffer.Length >= 128);
+
 			bool negativeExponent = false;
 			if (exponent < 0)
 			{
@@ -123,7 +136,7 @@ namespace juicescript.runtime.buildin
 				exponent = -exponent;
 			}
 
-			var sb = new ValueStringBuilder(stackalloc char[128]);
+			var sb = new ValueStringBuilder(vbuffer);
 			if (negative)
 			{
 				sb.Append('-');
@@ -141,7 +154,7 @@ namespace juicescript.runtime.buildin
 			sb.Append(negativeExponent ? '-' : '+');
 			sb.Append(exponent);
 
-			return sb.ToString();
+			return sb.ToCharSpan();
 		}
 
 		[NativeFunction(".int$public::toExponential")]
@@ -183,16 +196,12 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(dtoaBuilder.Length <= f + 1);
 
 			int exponent = decimalPoint - 1;
-			var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1);
+			var result = CreateExponentialRepresentation(ref dtoaBuilder, exponent, x < 0, f + 1, stackalloc char[128]);
 
-			int str_ptr = context.GC.AllocString(result);
-			if (str_ptr == 0)
+			if (context.player.TryCreateStringValue(result, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
-
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
 		[NativeFunction(".int$public::toFixed")]
@@ -222,72 +231,27 @@ namespace juicescript.runtime.buildin
 			}
 
 			int n = thisPtr.IntValue;
+			Span<char> buffer = stackalloc char[64];
 
-			string str = IntToString(n, 10);
+			var str = IntToString(n, 10,buffer);
 
 			if (f > 0)
 			{
-				str = str + "." + new string('0', f);
+				buffer[str.Length] = '.';
+				buffer.Slice(str.Length + 1, f).Fill('0');
+
+				str = buffer.Slice(0, str.Length + 1 + f);
+
+				//str = str + "." + new string('0', f);
 			}
 
-			int str_ptr = context.GC.AllocString(str);
-			if (str_ptr == 0)
+			if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = r;
 			}
-
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
-		private static string IntToFixed(int n, int fractionDigits)
-		{
-			if (fractionDigits == 0)
-			{
-				return IntToString(n, 10);
-			}
-
-			var sb = new ValueStringBuilder(stackalloc char[32]);
-
-			bool negative = false;
-			ulong u;
-
-			if (n < 0)
-			{
-				negative = true;
-				u = (ulong)(-(long)n);
-			}
-			else
-			{
-				u = (ulong)n;
-			}
-
-			if (negative)
-			{
-				sb.Append('-');
-			}
-
-			if (u == 0)
-			{
-				sb.Append("0.");
-				sb.Append('0', fractionDigits);
-				return sb.ToString();
-			}
-
-			while (u > 0)
-			{
-				ulong digit = u % 10;
-				sb.Append(Digits[(int)digit]);
-				u /= 10;
-			}
-
-			sb.Reverse();
-			sb.Append('.');
-			sb.Append('0', fractionDigits);
-
-			return sb.ToString();
-		}
-
+		
 		[NativeFunction(".int$public::toPrecision")]
 		public static void Int_toPrecision(Context context,
 			ASMethod method,
@@ -326,16 +290,12 @@ namespace juicescript.runtime.buildin
 			int exponent = decimalPoint - 1;
 			if (exponent < -6 || exponent >= p)
 			{
-				string str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p);
+				var str = CreateExponentialRepresentation(ref dtoaBuilder, exponent, negative, p,stackalloc char[128]);
 
-				int str_ptr = context.GC.AllocString(str);
-				if (str_ptr == 0)
+				if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = r;
 				}
-
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 			else
 			{
@@ -368,16 +328,12 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				string str = sb.ToString();
+				var str = sb.ToCharSpan();
 
-				int str_ptr = context.GC.AllocString(str);
-				if (str_ptr == 0)
+				if (context.player.TryCreateStringValue(str, out NaNBoxing r, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = r;
 				}
-
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str_ptr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
 		}
 	}
