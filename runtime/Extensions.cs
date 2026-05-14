@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -338,8 +339,8 @@ namespace juicescript.runtime
             }
         }
 
-
-        public static bool IsStruct(this NaNBoxing value)
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		public static bool IsStruct(this NaNBoxing value)
         { 
             return value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((HeapKindFlag)value.HeapFlag & HeapKindFlag.FLAG_STRUCT) == HeapKindFlag.FLAG_STRUCT;
         }

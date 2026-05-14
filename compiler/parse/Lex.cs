@@ -581,7 +581,7 @@ namespace juicescript.compiler.parse
                             //}
                             if ( char.ToLower( nextchar) != 'f')
                             {
-                                if (!(char.IsWhiteSpace(nextchar) || nextchar == ';' || nextchar == '(' || nextchar == ')'))
+                                if (!(char.IsWhiteSpace(nextchar) || nextchar == ';' || nextchar == '(' || nextchar == ')' || nextchar == ','))
                                 {
                                     throw new LexException("Expecting either a 'semicolon' or a 'new line' here.", cline, linepos);
                                 }

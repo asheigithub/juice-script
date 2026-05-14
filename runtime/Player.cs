@@ -2,32 +2,9 @@ using juicescript.ABC;
 using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
 using juicescript.runtime.buildin;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Diagnostics.Metrics;
-using System.IO.Pipes;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters;
-using System.Security.AccessControl;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
 //using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
 
@@ -5582,6 +5559,7 @@ namespace juicescript.runtime
 		/// <param name="box"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
+		  [MethodImpl( MethodImplOptions.AggressiveOptimization)] 
 		internal NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 			NaNBoxing result = box;
@@ -6029,8 +6007,7 @@ namespace juicescript.runtime
 								{
 									v.SetUndefined();
 								}
-
-								if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+								else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
 								{
 									v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
 									//var obj = Context.GC.Heap[v.HeapPtr];

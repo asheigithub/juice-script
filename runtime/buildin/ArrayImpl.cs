@@ -167,7 +167,7 @@ namespace juicescript.runtime.buildin
 							{
 								return;
 							}
-							array.cache_store[i] = oldv;
+							array.cache_store[i] = v;
 						}
 
 					}
