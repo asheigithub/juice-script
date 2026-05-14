@@ -4,6 +4,7 @@ using juicescript.ABC.Locaters;
 using juicescript.runtime.buildin;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 //using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
@@ -5562,686 +5563,159 @@ namespace juicescript.runtime
 		  [MethodImpl( MethodImplOptions.AggressiveOptimization)] 
 		internal NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
+			if (box.ValueType != BoxType.HeapPtr) return box;
+
+			
 			NaNBoxing result = box;
-			if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+			//RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
+			RtHeapTypeKind rtHeapKind = (RtHeapTypeKind)box.HeapKind;
+			if (rtHeapKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 			{
-				//RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
-				RtHeapTypeKind rtHeapKind = (RtHeapTypeKind)box.HeapKind;
-				if (rtHeapKind == RtHeapTypeKind.STACK_CACHE_OBJ)
+				RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
+				RtStackCache _obj = (RtStackCache)rtHeap;
+
+				if (_obj.RefInstance.ValueType == BoxType.HeapPtr)
 				{
-					RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
-					RtStackCache _obj = (RtStackCache)rtHeap;
 
-					if (_obj.RefInstance.ValueType == BoxType.HeapPtr)
+
+
+					if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 					{
+						Context.GC.CheckGC(ref error);
+
+						//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
 
 
 
-						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
+						Span<char> temp = stackalloc char[16];
+						ReadOnlySpan<char> searchName = temp;
+
+						if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
 						{
-							Context.GC.CheckGC(ref error);
-
-							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
-
-
-
-							Span<char> temp = stackalloc char[16];
-							ReadOnlySpan<char> searchName = temp;
-
-							if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
-							{
-								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
-								searchName = searchName.Slice(0, l);
-
-							}
-							else
-							{
-								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str.AsSpan();
-							}
-
-
-
-
-							NaNBoxing ns = new NaNBoxing();
-							ASNamespace @namespace = null;
-							if (_obj.searchNameSpacePtr > 0)
-							{
-								ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
-								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
-
-							}
-
-							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-							if (refObj.Kind == RtHeapTypeKind.INSTANCE
-								&&
-									(
-										(((ASInstance)refObj.Type).Flags & ClassFlags.Sealed) == ClassFlags.Sealed
-										||
-										(
-											@namespace != null &&
-											@namespace.Kind != NamespaceKind.Package
-										)
-
-									)
-								)
-							{
-								if (@namespace != null)
-								{
-									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-								}
-								else
-								{
-									//到class的prototype里查找，再找不到就到Object的prototype里查找
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
-								lbl_searh_class_proto:
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-									{
-										result = value;
-									}
-									else
-									{
-										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-										if (p != 0)
-										{
-											proto = Context.GC.Heap[p];
-											goto lbl_searh_class_proto;
-										}
-
-										RaiseReferenceError_MulitNameNotFound(ref error, searchName, _obj.as_type != null ? _obj.as_type.QName : refObj.Type.QName);
-									}
-									//throw new NotImplementedException("原型链查找");
-
-								}
-							}
-							else if (refObj.Kind == RtHeapTypeKind.NAMESPACE)
-							{
-								if (@namespace != null)
-								{
-									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-								}
-								else
-								{
-									//到class的prototype里查找，再找不到就到Object的prototype里查找
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__]).PROTO__PTR];
-								lbl_searh_class_proto:
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-									{
-										result = value;
-									}
-									else
-									{
-										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-										if (p != 0)
-										{
-											proto = Context.GC.Heap[p];
-											goto lbl_searh_class_proto;
-										}
-
-										RaiseReferenceError_MulitNameNotFound(ref error, searchName, _obj.as_type != null ? _obj.as_type.QName : refObj.Type.QName);
-									}
-								}
-							}
-							else if (refObj.Kind == RtHeapTypeKind.VECTOR)
-							{
-								if (@namespace != null)
-								{
-									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-								}
-								else
-								{
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
-								lbl_searh_class_proto:
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-									{
-										result = value;
-									}
-									else
-									{
-										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-										if (p != 0)
-										{
-											proto = Context.GC.Heap[p];
-											goto lbl_searh_class_proto;
-										}
-
-										RaiseReferenceError_MulitNameNotFound(ref error, searchName, refObj.Type.QName);
-									}
-								}
-							}
-							else if (refObj.Kind == RtHeapTypeKind.STRING)
-							{
-								if (@namespace != null)
-								{
-									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-								}
-								else
-								{
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__]).PROTO__PTR];
-								lbl_searh_class_proto:
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-									{
-										result = value;
-									}
-									else
-									{
-										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-										if (p != 0)
-										{
-											proto = Context.GC.Heap[p];
-											goto lbl_searh_class_proto;
-										}
-
-										RaiseReferenceError_MulitNameNotFound(ref error, searchName, refObj.Type.QName);
-									}
-								}
-							}
-							else if (refObj.Kind == RtHeapTypeKind.ARRAY &&
-									((RtArray)refObj).isArguments()
-									&& @namespace == null
-									&& "callee".AsSpan().CompareTo(searchName, StringComparison.Ordinal) == 0
-								)
-							{
-								result = Context.StackSlots[callee_slotindex];
-							}
-							else if (refObj.Kind == RtHeapTypeKind.CLOSURE)
-							{
-								if (@namespace != null)
-								{
-									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-								}
-								else
-								{
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									RtHeapBase proto = null;
-									do
-									{
-									lbl_retry_method:  //Function.prototype 是一个function,所以这里有可能重新回来
-
-										if (!((ASMethodBody)refObj.Type).Method.__ismethod)
-										{
-											if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
-											{
-												result = value;
-												break;
-											}
-											else
-											{
-												int f_proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
-												if (f_proto <= 0)
-												{
-													proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
-												}
-												else
-												{
-													proto = Context.GC.Heap[f_proto];
-													if (refObj == proto) //Function.prototyoe是一个function,于是又转回来，这时转到OBJECT
-													{
-														proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
-
-													}
-												}
-											}
-										}
-										else
-										{
-											proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR];
-										}
-
-									lbl_searh_class_proto:
-
-										if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-										{
-											result = value;
-										}
-										else
-										{
-											if (proto.Kind == RtHeapTypeKind.CLOSURE)
-											{
-												refObj = proto;
-												goto lbl_retry_method;
-											}
-
-											int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-											if (p != 0)
-											{
-												proto = Context.GC.Heap[p];
-												goto lbl_searh_class_proto;
-											}
-
-											if (((ASMethodBody)refObj.Type).Method.__ismethod)
-											{
-												RaiseReferenceError_MulitNameNotFound(ref error, searchName, buildin_as_methodclosure);
-											}
-											else
-											{
-												result.SetUndefined();
-											}
-										}
-
-									} while (false);
-
-
-								}
-							}
-#if DEBUG
-							else if (refObj.Kind == RtHeapTypeKind.DYNAMIC_PROPERTYS || refObj.Kind == RtHeapTypeKind.SHAPE || refObj.Kind == RtHeapTypeKind.STACK_CACHE_OBJ)
-							{
-								throw new InvalidOperationException();
-							}
-#endif
-							else
-							{
-
-								if (@namespace != null)
-								{
-									RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-								}
-								else
-								{
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-
-									int step = 0;
-
-								lbl_instance_search_proto:
-
-									if (step++ < 32)
-									{
-
-										if (refObj.Kind == RtHeapTypeKind.VECTOR)
-										{
-											refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
-										}
-
-										if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
-										{
-											result = value;
-										}
-										else
-										{
-											if (refObj.Kind == RtHeapTypeKind.GLOBAL)
-											{
-												var proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
-
-												if (FindDynamicValue(Context.GC.Heap[proto], searchName, out value, out shape_ptr, out index, out prop))
-												{
-													result = value;
-												}
-												else
-												{
-													result.SetUndefined();
-												}
-											}
-											else if (refObj.Kind == RtHeapTypeKind.ARRAY)
-											{
-												var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR];
-											lbl_searh_class_proto:
-												if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-												{
-													result = value;
-												}
-												else
-												{
-													int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-													if (p != 0)
-													{
-														proto = Context.GC.Heap[p];
-														goto lbl_searh_class_proto;
-													}
-
-													result.SetUndefined();
-												}
-											}
-											else if (refObj.Kind == RtHeapTypeKind.CLASS)
-											{
-
-												var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.CLASS.__instance_index__]).PROTO__PTR];
-											lbl_searh_class_proto:
-												if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-												{
-													result = value;
-												}
-												else
-												{
-													int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-													if (p != 0)
-													{
-														proto = Context.GC.Heap[p];
-														goto lbl_searh_class_proto;
-													}
-
-													result.SetUndefined();
-													//RaiseReferenceError_MulitNameNotFound(ref error, searchName, refObj.Type.QName);
-												}
-
-
-
-											}
-											else if (refObj.Kind == RtHeapTypeKind.INSTANCE)
-											{
-												int protoptr = ((RtInstance)refObj).PROTOTYPE(this, (ASInstance)refObj.Type);
-												if (protoptr == 0)
-												{
-													result.SetUndefined();
-												}
-												else
-												{
-													refObj = Context.GC.Heap[protoptr];
-													goto lbl_instance_search_proto;
-												}
-											}
-											else if (refObj.Kind == RtHeapTypeKind.CLOSURE)
-											{
-												if (!((ASMethodBody)refObj.Type).Method.__ismethod)
-												{
-													if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
-													{
-														result = value;
-													}
-													else
-													{
-														int protoptr = ((RtClosure)refObj).PROTOTYPE(this);
-														if (protoptr <= 0)
-														{
-															protoptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
-
-															if (protoptr <= 0)
-															{
-																refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
-															}
-															else
-															{
-																refObj = Context.GC.Heap[protoptr];
-															}
-														}
-														else
-														{
-															refObj = Context.GC.Heap[((RtClosure)refObj).PROTOTYPE(this)];
-														}
-
-
-														goto lbl_instance_search_proto;
-													}
-												}
-												else
-												{
-													refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR];
-													goto lbl_instance_search_proto;
-												}
-											}
-											else
-											{
-												throw new InvalidOperationException("原型链查找");
-											}
-										}
-
-									}
-									else
-									{
-										result.SetUndefined();
-									}
-
-								}
-							}
+							int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+							searchName = searchName.Slice(0, l);
 
 						}
-						else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
-						{
-							if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)// refObj.Kind == RtHeapTypeKind.ARRAY) //通过索引下标操作
-							{
-#if DEBUG
-								if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Uint || !(_obj.trait[0] == null && _obj.trait[1] == null))
-								{
-									throw new InvalidOperationException();
-								}
-#endif
-								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-								bool isoutofindex_or_ishole;
-								var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
-
-								if (v.ValueType == BoxType.Fault)
-								{
-									v.SetUndefined();
-								}
-								else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
-								{
-									v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
-									//var obj = Context.GC.Heap[v.HeapPtr];
-									//if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
-									//{
-									//	((RtInstance)obj).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
-									//}
-								}
-
-								result = v;
-
-
-
-							}
-							else
-							{
-#if DEBUG
-								{
-									RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-									if (!(
-											(refObj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)refObj.Type).Flags.HasFlag(ClassFlags.Indexer))
-											||
-											refObj.Kind == RtHeapTypeKind.VECTOR
-
-										)
-										)
-									{
-										throw new InvalidOperationException();
-									}
-								}
-#endif
-
-								if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)//refObj.Kind == RtHeapTypeKind.VECTOR)
-								{
-#if DEBUG
-									if (!RtVector.IsValidIndexType(_obj.indexer_key))
-									{
-										throw new InvalidOperationException();
-									}
-									else
-#endif
-									{
-										RtVector vector;
-										int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
-										int maxlen; int validid;
-
-										if (!(vector.IsValidIndexRange(_obj.indexer_key, out validid, out maxlen, this)))
-										{
-											Span<char> buffers = stackalloc char[128];
-											RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), maxlen);
-											return default;
-										}
-										else
-										{
-											return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
-											//throw new NotImplementedException();
-										}
-									}
-								}
-								else
-								{
-									RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-
-									if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
-									{
-										RaiseStackOverflow(ref error);
-										return default;
-									}
-
-									var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 1);
-									argSpan[0] = _obj.indexer_key;
-									StackLocater argLoc = new StackLocater() { index = 0 };
-
-									Context.StackPosition++;
-
-									//NaNBoxing _this = new NaNBoxing();
-									//_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
-									NaNBoxing _this = _obj.RefInstance;
-
-									unsafe
-									{
-										Context.StackPosition++;
-
-										RunMethod(((ASInstance)refObj.Type).indexer_get, _this,
-											_obj.RefInstance.HeapPtr, refObj.Type, 1, (byte*)&argLoc, argSpan, ref error, Context.StackPosition - 1);
-
-										result = Context.StackSlots[Context.StackPosition - 1];
-
-										Context.StackPosition--;
-									}
-
-									Context.StackPosition--;
-									if (error.raised)
-									{
-										return default;
-									}
-
-								}
-								if (result.ValueType == BoxType.Fault) //表示需要继续原型链查找
-								{
-									Span<char> buffers = stackalloc char[128];
-									ReadOnlySpan<char> searchName = buffers;
-									//if (_obj.indexer_key.ValueType == BoxType.HeapPtr && Context.GC.Heap[_obj.indexer_key.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
-									//{
-									//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr]).Str;
-									//}
-									//else if (_obj.indexer_key.ValueType != BoxType.HeapPtr)
-									if (IsPrimitive(_obj.indexer_key))
-									{
-										searchName = Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers);
-									}
-									else
-									{
-										//这里应付有索引器的情况，所以这里不需要再触发toString了。
-										if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
-										{
-											RaiseStackOverflow(ref error);
-											return default;
-										}
-										Context.StackPosition++;
-										ConvertValueType(ref error, _obj.indexer_key, TypeKind.String, Context.STRING, ref Context.StackSlots[Context.StackPosition - 1]);
-										Context.StackPosition--;
-										if (error.raised)
-										{
-											return default;
-										}
-
-										searchName = Extensions.GetPrimitiveValueToString(this, Context.StackSlots[Context.StackPosition], buffers);
-
-										//throw new NotImplementedException();
-									}
-
-									RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-									NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-									var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
-								lbl_searh_class_proto:
-									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-									{
-										result = value;
-									}
-									else
-									{
-										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-										if (p != 0)
-										{
-											proto = Context.GC.Heap[p];
-											goto lbl_searh_class_proto;
-										}
-
-										result.SetUndefined();
-									}
-
-
-								}
-
-
-								//throw new NotImplementedException();
-							}
-						}
-						else if (_obj.trait[0] == null && _obj.trait[1] != null)
-						{
-							RaiseReferenceError_WriteToReadonlyProperty(ref error, _obj.trait[1].Method.Body, _obj.as_type.QName);
-						}
-						else if (_obj.trait[0].Kind == TraitKind.Slot || _obj.trait[0].Kind == TraitKind.Constant)
-						{
-							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-							if (refObj.Kind == RtHeapTypeKind.GLOBAL || refObj.Kind == RtHeapTypeKind.CLASS)
-							{
-								result = ((RtScriptClass)refObj).ReadSlot(_obj.scopemember_index);
-							}
-							else if (refObj.Kind == RtHeapTypeKind.INSTANCE)
-							{
-								result = ((RtInstance)refObj).ReadSlot(_obj.scopemember_index, refObj.Type._link_codescope, this, returnSlotIndex, _obj.RefInstance.HeapPtr);
-							}
-							else
-							{
-#if DEBUG
-								throw new InvalidOperationException();
-#else
-								Environment.FailFast("出错了，这里跑不到") ; return default;
-#endif
-							}
-						}
-#if DEBUG
-						else if (_obj.trait[0].Kind == TraitKind.Method && _obj.trait[1] == null)
-						{
-							throw new InvalidOperationException("Method不会构造到STACK_CACHE_OBJ中");
-
-						}
-#endif
 						else
 						{
-							//NaNBoxing instance = new NaNBoxing();
-							//instance.SetHeapPtr(_obj.RefInstance.HeapPtr);
-
-							var instance = _obj.RefInstance;
-							result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
-
-							//throw new NotImplementedException("属性的引用未实现");
+							searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str.AsSpan();
 						}
-					}
-					else if (_obj.RefInstance.ValueType == BoxType.LocalString)
-					{
 
-						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
+
+
+
+						NaNBoxing ns = new NaNBoxing();
+						ASNamespace @namespace = null;
+						if (_obj.searchNameSpacePtr > 0)
 						{
-							Context.GC.CheckGC(ref error);
+							ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+							RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+							@namespace = ((RtNameSpace)ns_instance).ASNamespace;
 
-							Span<char> temp = stackalloc char[16];
-							ReadOnlySpan<char> searchName = temp;
+						}
 
-							if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
+						RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+						if (refObj.Kind == RtHeapTypeKind.INSTANCE
+							&&
+								(
+									(((ASInstance)refObj.Type).Flags & ClassFlags.Sealed) == ClassFlags.Sealed
+									||
+									(
+										@namespace != null &&
+										@namespace.Kind != NamespaceKind.Package
+									)
+
+								)
+							)
+						{
+							if (@namespace != null)
 							{
-								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
-								searchName = temp.Slice(0, l);
-
+								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
 							}
 							else
 							{
-								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str.AsSpan();
-							}
+								//到class的prototype里查找，再找不到就到Object的prototype里查找
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
+							lbl_searh_class_proto:
+								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+								{
+									result = value;
+								}
+								else
+								{
+									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									if (p != 0)
+									{
+										proto = Context.GC.Heap[p];
+										goto lbl_searh_class_proto;
+									}
 
-							NaNBoxing ns = new NaNBoxing();
-							ASNamespace @namespace = null;
-							if (_obj.searchNameSpacePtr > 0)
+									RaiseReferenceError_MulitNameNotFound(ref error, searchName, _obj.as_type != null ? _obj.as_type.QName : refObj.Type.QName);
+								}
+								//throw new NotImplementedException("原型链查找");
+
+							}
+						}
+						else if (refObj.Kind == RtHeapTypeKind.NAMESPACE)
+						{
+							if (@namespace != null)
 							{
-								ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
-								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
-
+								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
 							}
+							else
+							{
+								//到class的prototype里查找，再找不到就到Object的prototype里查找
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.NAMESPACE.__instance_index__]).PROTO__PTR];
+							lbl_searh_class_proto:
+								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+								{
+									result = value;
+								}
+								else
+								{
+									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									if (p != 0)
+									{
+										proto = Context.GC.Heap[p];
+										goto lbl_searh_class_proto;
+									}
 
+									RaiseReferenceError_MulitNameNotFound(ref error, searchName, _obj.as_type != null ? _obj.as_type.QName : refObj.Type.QName);
+								}
+							}
+						}
+						else if (refObj.Kind == RtHeapTypeKind.VECTOR)
+						{
+							if (@namespace != null)
+							{
+								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
+							}
+							else
+							{
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
+							lbl_searh_class_proto:
+								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+								{
+									result = value;
+								}
+								else
+								{
+									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									if (p != 0)
+									{
+										proto = Context.GC.Heap[p];
+										goto lbl_searh_class_proto;
+									}
 
-
+									RaiseReferenceError_MulitNameNotFound(ref error, searchName, refObj.Type.QName);
+								}
+							}
+						}
+						else if (refObj.Kind == RtHeapTypeKind.STRING)
+						{
 							if (@namespace != null)
 							{
 								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
@@ -6264,140 +5738,414 @@ namespace juicescript.runtime
 										goto lbl_searh_class_proto;
 									}
 
-									RaiseReferenceError_MulitNameNotFound(ref error, searchName, Context.STRING.QName);
+									RaiseReferenceError_MulitNameNotFound(ref error, searchName, refObj.Type.QName);
 								}
 							}
-
-
-
 						}
-						else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
+						else if (refObj.Kind == RtHeapTypeKind.ARRAY &&
+								((RtArray)refObj).isArguments()
+								&& @namespace == null
+								&& "callee".AsSpan().CompareTo(searchName, StringComparison.Ordinal) == 0
+							)
 						{
+							result = Context.StackSlots[callee_slotindex];
+						}
+						else if (refObj.Kind == RtHeapTypeKind.CLOSURE)
+						{
+							if (@namespace != null)
+							{
+								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
+							}
+							else
+							{
+								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+								RtHeapBase proto = null;
+								do
+								{
+								lbl_retry_method:  //Function.prototype 是一个function,所以这里有可能重新回来
+
+									if (!((ASMethodBody)refObj.Type).Method.__ismethod)
+									{
+										if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
+										{
+											result = value;
+											break;
+										}
+										else
+										{
+											int f_proto = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
+											if (f_proto <= 0)
+											{
+												proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
+											}
+											else
+											{
+												proto = Context.GC.Heap[f_proto];
+												if (refObj == proto) //Function.prototyoe是一个function,于是又转回来，这时转到OBJECT
+												{
+													proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
+
+												}
+											}
+										}
+									}
+									else
+									{
+										proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR];
+									}
+
+								lbl_searh_class_proto:
+
+									if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+									{
+										result = value;
+									}
+									else
+									{
+										if (proto.Kind == RtHeapTypeKind.CLOSURE)
+										{
+											refObj = proto;
+											goto lbl_retry_method;
+										}
+
+										int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+										if (p != 0)
+										{
+											proto = Context.GC.Heap[p];
+											goto lbl_searh_class_proto;
+										}
+
+										if (((ASMethodBody)refObj.Type).Method.__ismethod)
+										{
+											RaiseReferenceError_MulitNameNotFound(ref error, searchName, buildin_as_methodclosure);
+										}
+										else
+										{
+											result.SetUndefined();
+										}
+									}
+
+								} while (false);
+
+
+							}
+						}
 #if DEBUG
+						else if (refObj.Kind == RtHeapTypeKind.DYNAMIC_PROPERTYS || refObj.Kind == RtHeapTypeKind.SHAPE || refObj.Kind == RtHeapTypeKind.STACK_CACHE_OBJ)
+						{
 							throw new InvalidOperationException();
-#else
-								Environment.FailFast("出错了，这里跑不到") ; return default;
-#endif
-
-						}
-						else if (_obj.trait[0] == null && _obj.trait[1] != null)
-						{
-							RaiseReferenceError_WriteToReadonlyProperty(ref error, _obj.trait[1].Method.Body, _obj.as_type.QName);
-						}
-						else if (_obj.trait[0].Kind == TraitKind.Slot || _obj.trait[0].Kind == TraitKind.Constant)
-						{
-#if DEBUG
-							throw new InvalidOperationException();
-#else
-								Environment.FailFast("出错了，这里跑不到") ; return default;
-#endif
-
-						}
-#if DEBUG
-						else if (_obj.trait[0].Kind == TraitKind.Method && _obj.trait[1] == null)
-						{
-							throw new InvalidOperationException("Method不会构造到STACK_CACHE_OBJ中");
-
 						}
 #endif
 						else
 						{
-							NaNBoxing instance = new NaNBoxing();
-							instance = _obj.RefInstance;
-							result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
 
-							//throw new NotImplementedException("属性的引用未实现");
-						}
-					}
-					else
-					{
-
-
-						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
-						{
-							Context.GC.CheckGC(ref error);
-
-							//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
-
-
-							Span<char> temp = stackalloc char[16];
-							ReadOnlySpan<char> searchName = temp;
-							if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
+							if (@namespace != null)
 							{
-								searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str;
-							}
-							else
-							{
-								int l = _obj.searchPropertyName.GetLocalStringChars(temp);
-								searchName = temp.Slice(0, l);
-							}
-
-
-							_obj.searchPropertyName.SetUndefined();
-
-							ASClass primitiveCls = null;
-
-							switch (_obj.RefInstance.ValueType)
-							{
-								case BoxType.Number:
-									primitiveCls = Context.NUMBER;
-									break;
-								case BoxType.Sbyte:
-									primitiveCls = Context.SBYTE;
-									break;
-								case BoxType.Byte:
-									primitiveCls = Context.BYTE;
-									break;
-								case BoxType.Short:
-									primitiveCls = Context.SHORT;
-									break;
-								case BoxType.UShort:
-									primitiveCls = Context.USHORT;
-									break;
-								case BoxType.Int:
-									primitiveCls = Context.INT;
-									break;
-								case BoxType.Uint:
-									primitiveCls = Context.UINT;
-									break;
-								case BoxType.Float:
-									primitiveCls = Context.FLOAT;
-									break;
-								case BoxType.Boolean:
-									primitiveCls = Context.BOOLEAN;
-									break;
-								case BoxType.Undefined:
-								case BoxType.Null:
-								case BoxType.HeapPtr:
-								case BoxType.Fault:
-								default:
-#if DEBUG
-									throw new InvalidOperationException();
-#else
-									Environment.FailFast("出错了，这里跑不到"); break;
-#endif
-							}
-
-							NaNBoxing ns = new NaNBoxing();
-							ASNamespace @namespace = null;
-							if (_obj.searchNameSpacePtr > 0)
-							{
-								ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
-								RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
-								@namespace = ((RtNameSpace)ns_instance).ASNamespace;
-
-
 								RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
-
 							}
 							else
 							{
-
-
-								//查找原始类型的原型链
-								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[primitiveCls.__instance_index__]).PROTO__PTR];
-							lbl_searh_class_proto:
 								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+
+								int step = 0;
+
+							lbl_instance_search_proto:
+
+								if (step++ < 32)
+								{
+
+									if (refObj.Kind == RtHeapTypeKind.VECTOR)
+									{
+										refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
+									}
+
+									if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
+									{
+										result = value;
+									}
+									else
+									{
+										if (refObj.Kind == RtHeapTypeKind.GLOBAL)
+										{
+											var proto = ((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR;
+
+											if (FindDynamicValue(Context.GC.Heap[proto], searchName, out value, out shape_ptr, out index, out prop))
+											{
+												result = value;
+											}
+											else
+											{
+												result.SetUndefined();
+											}
+										}
+										else if (refObj.Kind == RtHeapTypeKind.ARRAY)
+										{
+											var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.ARRAY.__instance_index__]).PROTO__PTR];
+										lbl_searh_class_proto:
+											if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+											{
+												result = value;
+											}
+											else
+											{
+												int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+												if (p != 0)
+												{
+													proto = Context.GC.Heap[p];
+													goto lbl_searh_class_proto;
+												}
+
+												result.SetUndefined();
+											}
+										}
+										else if (refObj.Kind == RtHeapTypeKind.CLASS)
+										{
+
+											var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.CLASS.__instance_index__]).PROTO__PTR];
+										lbl_searh_class_proto:
+											if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+											{
+												result = value;
+											}
+											else
+											{
+												int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+												if (p != 0)
+												{
+													proto = Context.GC.Heap[p];
+													goto lbl_searh_class_proto;
+												}
+
+												result.SetUndefined();
+												//RaiseReferenceError_MulitNameNotFound(ref error, searchName, refObj.Type.QName);
+											}
+
+
+
+										}
+										else if (refObj.Kind == RtHeapTypeKind.INSTANCE)
+										{
+											int protoptr = ((RtInstance)refObj).PROTOTYPE(this, (ASInstance)refObj.Type);
+											if (protoptr == 0)
+											{
+												result.SetUndefined();
+											}
+											else
+											{
+												refObj = Context.GC.Heap[protoptr];
+												goto lbl_instance_search_proto;
+											}
+										}
+										else if (refObj.Kind == RtHeapTypeKind.CLOSURE)
+										{
+											if (!((ASMethodBody)refObj.Type).Method.__ismethod)
+											{
+												if (FindDynamicValue(refObj, searchName, out value, out shape_ptr, out index, out prop))
+												{
+													result = value;
+												}
+												else
+												{
+													int protoptr = ((RtClosure)refObj).PROTOTYPE(this);
+													if (protoptr <= 0)
+													{
+														protoptr = ((RtScriptClass)Context.GC.Heap[Context.FUNCTION.__instance_index__]).PROTO__PTR;
+
+														if (protoptr <= 0)
+														{
+															refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.OBJECT.__instance_index__]).PROTO__PTR];
+														}
+														else
+														{
+															refObj = Context.GC.Heap[protoptr];
+														}
+													}
+													else
+													{
+														refObj = Context.GC.Heap[((RtClosure)refObj).PROTOTYPE(this)];
+													}
+
+
+													goto lbl_instance_search_proto;
+												}
+											}
+											else
+											{
+												refObj = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.METHOD_CLOSURE.__instance_index__]).PROTO__PTR];
+												goto lbl_instance_search_proto;
+											}
+										}
+										else
+										{
+											throw new InvalidOperationException("原型链查找");
+										}
+									}
+
+								}
+								else
+								{
+									result.SetUndefined();
+								}
+
+							}
+						}
+
+					}
+					else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
+					{
+						if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)// refObj.Kind == RtHeapTypeKind.ARRAY) //通过索引下标操作
+						{
+#if DEBUG
+							if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Uint || !(_obj.trait[0] == null && _obj.trait[1] == null))
+							{
+								throw new InvalidOperationException();
+							}
+#endif
+							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+							bool isoutofindex_or_ishole;
+							var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
+
+							if (v.ValueType == BoxType.Fault)
+							{
+								v.SetUndefined();
+							}
+							else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+							{
+								v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+								//var obj = Context.GC.Heap[v.HeapPtr];
+								//if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+								//{
+								//	((RtInstance)obj).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
+								//}
+							}
+
+							result = v;
+
+
+
+						}
+						else
+						{
+#if DEBUG
+							{
+								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+								if (!(
+										(refObj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)refObj.Type).Flags.HasFlag(ClassFlags.Indexer))
+										||
+										refObj.Kind == RtHeapTypeKind.VECTOR
+
+									)
+									)
+								{
+									throw new InvalidOperationException();
+								}
+							}
+#endif
+
+							if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)//refObj.Kind == RtHeapTypeKind.VECTOR)
+							{
+#if DEBUG
+								if (!RtVector.IsValidIndexType(_obj.indexer_key))
+								{
+									throw new InvalidOperationException();
+								}
+								else
+#endif
+								{
+									RtVector vector;
+									int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
+									int maxlen; int validid;
+
+									if (!(vector.IsValidIndexRange(_obj.indexer_key, out validid, out maxlen, this)))
+									{
+										Span<char> buffers = stackalloc char[128];
+										RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), maxlen);
+										return default;
+									}
+									else
+									{
+										return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
+										//throw new NotImplementedException();
+									}
+								}
+							}
+							else
+							{
+								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+
+								if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+								{
+									RaiseStackOverflow(ref error);
+									return default;
+								}
+
+								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 1);
+								argSpan[0] = _obj.indexer_key;
+								StackLocater argLoc = new StackLocater() { index = 0 };
+
+								Context.StackPosition++;
+
+								//NaNBoxing _this = new NaNBoxing();
+								//_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
+								NaNBoxing _this = _obj.RefInstance;
+
+								unsafe
+								{
+									Context.StackPosition++;
+
+									RunMethod(((ASInstance)refObj.Type).indexer_get, _this,
+										_obj.RefInstance.HeapPtr, refObj.Type, 1, (byte*)&argLoc, argSpan, ref error, Context.StackPosition - 1);
+
+									result = Context.StackSlots[Context.StackPosition - 1];
+
+									Context.StackPosition--;
+								}
+
+								Context.StackPosition--;
+								if (error.raised)
+								{
+									return default;
+								}
+
+							}
+							if (result.ValueType == BoxType.Fault) //表示需要继续原型链查找
+							{
+								Span<char> buffers = stackalloc char[128];
+								ReadOnlySpan<char> searchName = buffers;
+								//if (_obj.indexer_key.ValueType == BoxType.HeapPtr && Context.GC.Heap[_obj.indexer_key.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
+								//{
+								//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr]).Str;
+								//}
+								//else if (_obj.indexer_key.ValueType != BoxType.HeapPtr)
+								if (IsPrimitive(_obj.indexer_key))
+								{
+									searchName = Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers);
+								}
+								else
+								{
+									//这里应付有索引器的情况，所以这里不需要再触发toString了。
+									if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+									{
+										RaiseStackOverflow(ref error);
+										return default;
+									}
+									Context.StackPosition++;
+									ConvertValueType(ref error, _obj.indexer_key, TypeKind.String, Context.STRING, ref Context.StackSlots[Context.StackPosition - 1]);
+									Context.StackPosition--;
+									if (error.raised)
+									{
+										return default;
+									}
+
+									searchName = Extensions.GetPrimitiveValueToString(this, Context.StackSlots[Context.StackPosition], buffers);
+
+									//throw new NotImplementedException();
+								}
+
+								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
+							lbl_searh_class_proto:
 								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
 								{
 									result = value;
@@ -6411,37 +6159,336 @@ namespace juicescript.runtime
 										goto lbl_searh_class_proto;
 									}
 
-									RaiseReferenceError_MulitNameNotFound(ref error, searchName, primitiveCls.QName);
+									result.SetUndefined();
 								}
+
+
 							}
+
+
+							//throw new NotImplementedException();
+						}
+					}
+					else if (_obj.trait[0] == null && _obj.trait[1] != null)
+					{
+						RaiseReferenceError_WriteToReadonlyProperty(ref error, _obj.trait[1].Method.Body, _obj.as_type.QName);
+					}
+					else if (_obj.trait[0].Kind == TraitKind.Slot || _obj.trait[0].Kind == TraitKind.Constant)
+					{
+						RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+						if (refObj.Kind == RtHeapTypeKind.GLOBAL || refObj.Kind == RtHeapTypeKind.CLASS)
+						{
+							result = ((RtScriptClass)refObj).ReadSlot(_obj.scopemember_index);
+						}
+						else if (refObj.Kind == RtHeapTypeKind.INSTANCE)
+						{
+							result = ((RtInstance)refObj).ReadSlot(_obj.scopemember_index, refObj.Type._link_codescope, this, returnSlotIndex, _obj.RefInstance.HeapPtr);
 						}
 						else
 						{
 #if DEBUG
 							throw new InvalidOperationException();
 #else
-							Environment.FailFast("出错了，这里跑不到"); return default;
+							Environment.FailFast("出错了，这里跑不到") ; return default;
+#endif
+						}
+					}
+#if DEBUG
+					else if (_obj.trait[0].Kind == TraitKind.Method && _obj.trait[1] == null)
+					{
+						throw new InvalidOperationException("Method不会构造到STACK_CACHE_OBJ中");
+
+					}
+#endif
+					else
+					{
+						//NaNBoxing instance = new NaNBoxing();
+						//instance.SetHeapPtr(_obj.RefInstance.HeapPtr);
+
+						var instance = _obj.RefInstance;
+						result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
+
+						//throw new NotImplementedException("属性的引用未实现");
+					}
+				}
+				else if (_obj.RefInstance.ValueType == BoxType.LocalString)
+				{
+
+					if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
+					{
+						Context.GC.CheckGC(ref error);
+
+						Span<char> temp = stackalloc char[16];
+						ReadOnlySpan<char> searchName = temp;
+
+						if (_obj.searchPropertyName.ValueType == BoxType.LocalString)
+						{
+							int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+							searchName = temp.Slice(0, l);
+
+						}
+						else
+						{
+							searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str.AsSpan();
+						}
+
+						NaNBoxing ns = new NaNBoxing();
+						ASNamespace @namespace = null;
+						if (_obj.searchNameSpacePtr > 0)
+						{
+							ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+							RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+							@namespace = ((RtNameSpace)ns_instance).ASNamespace;
+
+						}
+
+
+
+						if (@namespace != null)
+						{
+							RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
+						}
+						else
+						{
+							var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[Context.STRING.__instance_index__]).PROTO__PTR];
+						lbl_searh_class_proto:
+							NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+							if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+							{
+								result = value;
+							}
+							else
+							{
+								int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+								if (p != 0)
+								{
+									proto = Context.GC.Heap[p];
+									goto lbl_searh_class_proto;
+								}
+
+								RaiseReferenceError_MulitNameNotFound(ref error, searchName, Context.STRING.QName);
+							}
+						}
+
+
+
+					}
+					else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
+					{
+#if DEBUG
+						throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到") ; return default;
+#endif
+
+					}
+					else if (_obj.trait[0] == null && _obj.trait[1] != null)
+					{
+						RaiseReferenceError_WriteToReadonlyProperty(ref error, _obj.trait[1].Method.Body, _obj.as_type.QName);
+					}
+					else if (_obj.trait[0].Kind == TraitKind.Slot || _obj.trait[0].Kind == TraitKind.Constant)
+					{
+#if DEBUG
+						throw new InvalidOperationException();
+#else
+							Environment.FailFast("出错了，这里跑不到") ; return default;
+#endif
+
+					}
+#if DEBUG
+					else if (_obj.trait[0].Kind == TraitKind.Method && _obj.trait[1] == null)
+					{
+						throw new InvalidOperationException("Method不会构造到STACK_CACHE_OBJ中");
+
+					}
+#endif
+					else
+					{
+						NaNBoxing instance = new NaNBoxing();
+						instance = _obj.RefInstance;
+						result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
+
+						//throw new NotImplementedException("属性的引用未实现");
+					}
+				}
+				else
+				{
+
+
+					if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
+					{
+						Context.GC.CheckGC(ref error);
+
+						//string searchName = ((RtPayloadString)Context.GC.Heap[_obj.searchPropertyNamePtr]).Str;
+
+
+						Span<char> temp = stackalloc char[16];
+						ReadOnlySpan<char> searchName = temp;
+						if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr)
+						{
+							searchName = ((RtString)Context.GC.Heap[_obj.searchPropertyName.HeapPtr]).Str;
+						}
+						else
+						{
+							int l = _obj.searchPropertyName.GetLocalStringChars(temp);
+							searchName = temp.Slice(0, l);
+						}
+
+
+						_obj.searchPropertyName.SetUndefined();
+
+						ASClass primitiveCls = null;
+
+						switch (_obj.RefInstance.ValueType)
+						{
+							case BoxType.Number:
+								primitiveCls = Context.NUMBER;
+								break;
+							case BoxType.Sbyte:
+								primitiveCls = Context.SBYTE;
+								break;
+							case BoxType.Byte:
+								primitiveCls = Context.BYTE;
+								break;
+							case BoxType.Short:
+								primitiveCls = Context.SHORT;
+								break;
+							case BoxType.UShort:
+								primitiveCls = Context.USHORT;
+								break;
+							case BoxType.Int:
+								primitiveCls = Context.INT;
+								break;
+							case BoxType.Uint:
+								primitiveCls = Context.UINT;
+								break;
+							case BoxType.Float:
+								primitiveCls = Context.FLOAT;
+								break;
+							case BoxType.Boolean:
+								primitiveCls = Context.BOOLEAN;
+								break;
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.HeapPtr:
+							case BoxType.Fault:
+							default:
+#if DEBUG
+								throw new InvalidOperationException();
+#else
+								Environment.FailFast("出错了，这里跑不到"); break;
 #endif
 						}
 
-						//throw new NotImplementedException("原始类型未实现");
+						NaNBoxing ns = new NaNBoxing();
+						ASNamespace @namespace = null;
+						if (_obj.searchNameSpacePtr > 0)
+						{
+							ns.SetHeapPtr(_obj.searchNameSpacePtr, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+							RtHeapBase ns_instance = Context.GC.Heap[_obj.searchNameSpacePtr];
+							@namespace = ((RtNameSpace)ns_instance).ASNamespace;
+
+
+							RaiseReferenceError_RTQNameNotFound(ref error, ns, searchName, _obj.RefInstance);
+
+						}
+						else
+						{
+
+
+							//查找原始类型的原型链
+							var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[primitiveCls.__instance_index__]).PROTO__PTR];
+						lbl_searh_class_proto:
+							NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+							if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+							{
+								result = value;
+							}
+							else
+							{
+								int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+								if (p != 0)
+								{
+									proto = Context.GC.Heap[p];
+									goto lbl_searh_class_proto;
+								}
+
+								RaiseReferenceError_MulitNameNotFound(ref error, searchName, primitiveCls.QName);
+							}
+						}
 					}
-				}
+					else
+					{
 #if DEBUG
-				else if (
-					//rtHeap.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS || 
-					rtHeapKind == RtHeapTypeKind.SHAPE)
-				{
-					throw new InvalidOperationException();
-				}
+						throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
+					}
+
+					//throw new NotImplementedException("原始类型未实现");
+				}
 			}
+#if DEBUG
+			else if (
+				//rtHeap.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS || 
+				rtHeapKind == RtHeapTypeKind.SHAPE)
+			{
+				throw new InvalidOperationException();
+			}
+#endif
 			return result;
+			
 		}
 
 
+		private ASContainer GetASTypeFromValue(NaNBoxing instance)
+		{
+			switch ((RtHeapTypeKind)instance.HeapKind)
+			{
+				case RtHeapTypeKind.CLASS:
+				case RtHeapTypeKind.GLOBAL:
+					return ((RtScriptClass)Context.GC.Heap[instance.HeapPtr]).Meta;
+					//return (RtScriptClass)instance
+					//break;
+				case RtHeapTypeKind.STRING:
+					return Context.STRING.Instance;
+					//break;
+				case RtHeapTypeKind.INSTANCE:
+					return Context.GC.Heap[instance.HeapPtr].Type;
+					//break;
+				case RtHeapTypeKind.VECTOR:
+					return Context.GC.Heap[instance.HeapPtr].Type;
+					//break;
+					
+				case RtHeapTypeKind.ARRAY:
+					return Context.ARRAY.Instance;
+					//type = Context.GC.Heap[instance.HeapPtr].Type;
+					//break;
+				case RtHeapTypeKind.MethodScope:
+					return Context.GC.Heap[instance.HeapPtr].Type;
+					//break;
+					
+				case RtHeapTypeKind.CLOSURE:
+					return Context.GC.Heap[instance.HeapPtr].Type;
+					//break;
+				case RtHeapTypeKind.NAMESPACE:
+					return Context.NAMESPACE.Instance;
+					//break;
+				//throw new NotImplementedException();
+				case RtHeapTypeKind.STACK_CACHE_OBJ:
+				//case RtHeapTypeKind.CACHE_LD_CLASS:
+				default:
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");return null;
+#endif
+					
+			}
+		}
 		private void ReadInstanceFromStacklocater(ref ReceiveError error, StackLocater src, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
-			out RtHeapTypeKind kind, out NaNBoxing instance, out ASContainer type)
+			out RtHeapTypeKind kind, out NaNBoxing instance)
 		{
 			//#if DEBUG
 			//            if (src.index >= 0)
@@ -6495,7 +6542,7 @@ namespace juicescript.runtime
 				else
 				{
 					kind = (RtHeapTypeKind)255;
-					type = null;
+					//type = null;
 					//instancePtr = 0;
 					//return instance;
 					return;
@@ -6579,51 +6626,11 @@ namespace juicescript.runtime
 				Debug.Assert(Context.GC.Heap[instancePtr].Kind == o.Kind);
 
 			}
-
+			kind = (RtHeapTypeKind)instance.HeapKind;
 			//var temp = Context.GC.Heap[instance.HeapPtr];
 			//kind = temp.Kind;
 
-			kind = (RtHeapTypeKind)instance.HeapKind;
-
-			switch (kind)
-			{
-				case RtHeapTypeKind.CLASS:
-				case RtHeapTypeKind.GLOBAL:
-					type = ((RtScriptClass)Context.GC.Heap[instance.HeapPtr]).Meta;
-					break;
-				case RtHeapTypeKind.STRING:
-					type = Context.STRING.Instance;
-					break;
-				case RtHeapTypeKind.INSTANCE:
-					type = Context.GC.Heap[instance.HeapPtr].Type;
-					break;
-				case RtHeapTypeKind.VECTOR:
-					type = Context.GC.Heap[instance.HeapPtr].Type;
-					break;
-				case RtHeapTypeKind.ARRAY:
-					type = Context.GC.Heap[instance.HeapPtr].Type;
-					break;
-				case RtHeapTypeKind.MethodScope:
-					type = Context.GC.Heap[instance.HeapPtr].Type;
-					break;
-				case RtHeapTypeKind.CLOSURE:
-					type = Context.GC.Heap[instance.HeapPtr].Type;
-					break;
-				case RtHeapTypeKind.NAMESPACE:
-					type = Context.NAMESPACE.Instance;
-					break;
-				//throw new NotImplementedException();
-				case RtHeapTypeKind.STACK_CACHE_OBJ:
-				//case RtHeapTypeKind.CACHE_LD_CLASS:
-				default:
-#if DEBUG
-					throw new InvalidOperationException();
-#else
-					Environment.FailFast("出错了，这里跑不到"); type = null; return;
-#endif
-			}
-
-			return;// instance;
+			
 		}
 
 		private static int ReadIntFromString(string str)
@@ -14856,7 +14863,7 @@ namespace juicescript.runtime
 								NaNBoxing instance;
 								RtHeapTypeKind kind;
 								ASContainer as_type;
-								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance, out as_type);
+								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14873,6 +14880,7 @@ namespace juicescript.runtime
 										RaiseTypeError_ATermUndefined(ref error);
 										goto flag_handle_error;
 									case NaNBoxing.BoxType.HeapPtr:
+										as_type = GetASTypeFromValue(instance);
 										break;
 									case NaNBoxing.BoxType.Sbyte:
 										as_type = Context.SBYTE.Instance;
@@ -14918,6 +14926,9 @@ namespace juicescript.runtime
 									case NaNBoxing.BoxType.Fault:
 									default:
 										throw new InvalidOperationException();
+#else
+									default:
+										as_type = null;break;
 #endif
 								}
 
@@ -14930,7 +14941,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 								}
 #endif
-
+								
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
 								NaNBoxing thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 								int code = MultiNameLSearch(ns_set, kind, as_type, name, constants[const_id].HeapPtr, stack, stackslots, stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
@@ -14983,9 +14994,9 @@ namespace juicescript.runtime
 
 								NaNBoxing instance_box;
 								RtHeapTypeKind kind;
-								ASContainer as_type;
+								ASContainer as_type = null;
 
-								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box, out as_type);
+								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -15006,9 +15017,10 @@ namespace juicescript.runtime
 									var super_class = Context.link_const_class[(int)vbox.UIntValue];
 
 #if DEBUG
-									if (as_type is ASInstance)
+									var check = GetASTypeFromValue(instance_box);
+									if (check is ASInstance)
 									{
-										if (!((ASInstance)as_type).IsExtend(super_class.Instance))
+										if (!((ASInstance)check).IsExtend(super_class.Instance))
 										{
 											throw new InvalidOperationException();
 										}
@@ -15081,7 +15093,7 @@ namespace juicescript.runtime
 #endif
 								}
 
-								//instance = Context.GC.Heap[instance_box.HeapPtr];
+								
 								setinstance = true;
 							lbl_instance_primitive:
 								Span<char> buffers = frame_holdchars; //stackalloc char[16];
@@ -15089,11 +15101,16 @@ namespace juicescript.runtime
 
 								NaNBoxing prop_name = stackslots[_name.index];
 
-								if (setinstance && (instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE ||
+								if (setinstance && (
+									instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE 
+									&&
+									((ASInstance)Context.GC.Heap[instance_box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Indexer)
+									)
+									||
 
 									(instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR && RtVector.IsValidIndexType(prop_name))
 
-									) && ((ASInstance)Context.GC.Heap[instance_box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Indexer))
+									)
 								{
 									//索引器处理
 									int ptrIndex = stackStPos + stack.index;
@@ -15353,6 +15370,11 @@ namespace juicescript.runtime
 								}
 #endif
 
+								if (as_type == null)
+								{									
+									as_type = GetASTypeFromValue(instance_box);
+								}
+
 								var ns_set = scope.Type._link_codescope.NamespaceSet;
 								NaNBoxing thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 								int code = MultiNameLSearch(ns_set, kind, as_type, name, 0, stack, stackslots, stackStPos, instance_box, check_MultiNameLSearch_issameorinherit(instance_box, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
@@ -15395,9 +15417,9 @@ namespace juicescript.runtime
 
 								NaNBoxing instance_box;
 								RtHeapTypeKind kind;
-								ASContainer as_type;
+								//ASContainer as_type;
 
-								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box, out as_type);
+								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -15732,7 +15754,7 @@ namespace juicescript.runtime
 										closure.This = instance_box;
 										closure.ScopePtr = 0;
 										closure.ScopeType = vitem.DefineAt;
-										closure._ref_as_type = as_type;
+										closure._ref_as_type = GetASTypeFromValue(instance_box); //as_type;
 										closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 										stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 									}
@@ -15850,7 +15872,7 @@ namespace juicescript.runtime
 											closure.This = instancePtr; //.SetHeapPtr(instancePtr);
 											closure.ScopePtr = instancePtr.HeapPtr;
 											closure.ScopeType = vitem.DefineAt;
-											closure._ref_as_type = as_type;
+											closure._ref_as_type = instance.Type;  //as_type;
 											closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 											stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
@@ -15985,7 +16007,7 @@ namespace juicescript.runtime
 											closure.This.SetNull();
 											closure.ScopePtr = instancePtr.HeapPtr;
 											closure.ScopeType = vitem.DefineAt;
-											closure._ref_as_type = as_type;
+											closure._ref_as_type = cls.Container; //as_type;
 											closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 											stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
@@ -16127,9 +16149,9 @@ namespace juicescript.runtime
 
 								NaNBoxing instance_box;
 								RtHeapTypeKind kind;
-								ASContainer as_type;
+								//ASContainer as_type;
 
-								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box, out as_type);
+								ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
 								if (error.raised)
 								{
 									goto flag_handle_error;

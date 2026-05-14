@@ -1065,7 +1065,7 @@ namespace juicescript.runtime.gc
 
 
 			//遍历Root。
-			for (int i = 0; i < Root.Count; i++)
+			for (int i = root_cache_count; i < Root.Count; i++)
             {
                 var instance = Root[i];
 
@@ -1197,7 +1197,7 @@ namespace juicescript.runtime.gc
 
 
             //清理未mark的对象
-            int released = Heap.Clean();
+            int released = Heap.Clean(root_cache_count);
             MemUsage -= released;
 
         }

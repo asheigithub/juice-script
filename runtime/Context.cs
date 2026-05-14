@@ -197,10 +197,6 @@ namespace juicescript.runtime
                     throw new LoaderException("alloc Closure failed,out of memory.");
             }
 
-
-            BlankShapePtr = GC.AllocShape();if (BlankShapePtr == 0) { throw new LoaderException("alloc BlankShapePtr failed,out of memory."); }
-
-
             RtHeapBase arr;
             M_RestArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache_on_stack);if(M_RestArrayPtr == 0) { throw new LoaderException("alloc M_RestArrayPtr failed,out of memory."); }
             for (int i = 1; i < MAX_BACKTRACE; i++)
@@ -246,7 +242,10 @@ namespace juicescript.runtime
 
             GC.MarkCaches();
 
-            StackPosition = 0;
+			BlankShapePtr = GC.AllocShape(); if (BlankShapePtr == 0) { throw new LoaderException("alloc BlankShapePtr failed,out of memory."); }
+
+
+			StackPosition = 0;
 
             //BackTrace = new BackTraceInfo[MAX_BACKTRACE];
 

@@ -124,10 +124,11 @@ namespace juicescript.runtime.gc
         /// <summary>
         /// 清除未标记对象
         /// </summary>
-        internal int Clean()
+        internal int Clean(int start)
         {
+            Debug.Assert(Heap[0] == null);
             int sub = 0;
-            for (int i = 0; i < Heap.Count; i++)
+            for (int i = 1; i < Heap.Count; i++)
             {
                 if (Heap[i] != null)
                 {
@@ -135,17 +136,16 @@ namespace juicescript.runtime.gc
                     {
                         Heap[i].gc_mark = false;
                     }
-                    else
+                    else if (i >= start)
                     {
                         sub += GC.CalculMemusage(Heap[i]);
 
                         if (Heap[i].Kind == RtHeapTypeKind.INSTANCE && ((RtInstance)Heap[i]).wapperedObject != null)
                         {
                             ((RtInstance)Heap[i]).wapperedObject.OnDelete();
-							((RtInstance)Heap[i]).wapperedObject = null;
-						}
+                            ((RtInstance)Heap[i]).wapperedObject = null;
+                        }
 
-                        //Heap[i].facility = null;
                         Heap[i] = null;
                         freeIndexes.Add(i);
                     }

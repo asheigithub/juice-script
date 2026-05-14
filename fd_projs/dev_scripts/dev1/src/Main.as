@@ -12,181 +12,73 @@ package
        
     }
 }
+import flash.utils.getTimer;
 
-var PI = 3.141592653589793;
-var SOLAR_MASS = 4 * PI * PI;
-var DAYS_PER_YEAR = 365.24;
+function fannkuch(n) {
+   var check = 0;
+   var perm = new Vector.<int>(n);
+   var perm1 = new Vector.<int>(n);
+   var count = new Vector.<int>(n);
+   var maxPerm = new Vector.<int>(n);
+   var maxFlipsCount = 0;
+   var m = n - 1;
 
-function Body(x,y,z,vx,vy,vz,mass){
-   this.x = x;
-   this.y = y;
-   this.z = z;
-   this.vx = vx;
-   this.vy = vy;
-   this.vz = vz;
-   this.mass = mass;
-   
-}
+   for (var i = 0; i < n; i++) perm1[i] = i;
+   var r = n;
 
-Body.prototype.offsetMomentum = function(px,py,pz) {
-   this.vx = -px / SOLAR_MASS;
-   this.vy = -py / SOLAR_MASS;
-   this.vz = -pz / SOLAR_MASS;
-   return this;
-}
+   while (true) {
+      // write-out the first 30 permutations
+      if (check < 30){
+         var s = "";
+         for(var i=0; i<n; i++) s += (perm1[i]+1).toString();
+         check++;
+      }
 
-function Jupiter(){
-   return new Body(
-      4.84143144246472090e+00,
-      -1.16032004402742839e+00,
-      -1.03622044471123109e-01,
-      1.66007664274403694e-03 * DAYS_PER_YEAR,
-      7.69901118419740425e-03 * DAYS_PER_YEAR,
-      -6.90460016972063023e-05 * DAYS_PER_YEAR,
-      9.54791938424326609e-04 * SOLAR_MASS
-   );
-}
+      while (r != 1) { count[r - 1] = r; r--; }
+      if (!(perm1[0] == 0 || perm1[m] == m)) {
+         for (var i = 0; i < n; i++) perm[i] = perm1[i];
 
-function Saturn(){
-   return new Body(
-      8.34336671824457987e+00,
-      4.12479856412430479e+00,
-      -4.03523417114321381e-01,
-      -2.76742510726862411e-03 * DAYS_PER_YEAR,
-      4.99852801234917238e-03 * DAYS_PER_YEAR,
-      2.30417297573763929e-05 * DAYS_PER_YEAR,
-      2.85885980666130812e-04 * SOLAR_MASS
-   );
-}
+         var flipsCount = 0;
+         var k;
 
-function Uranus(){
-   return new Body(
-      1.28943695621391310e+01,
-      -1.51111514016986312e+01,
-      -2.23307578892655734e-01,
-      2.96460137564761618e-03 * DAYS_PER_YEAR,
-      2.37847173959480950e-03 * DAYS_PER_YEAR,
-      -2.96589568540237556e-05 * DAYS_PER_YEAR,
-      4.36624404335156298e-05 * SOLAR_MASS
-   );
-}
+         while (!((k = perm[0]) == 0)) {
+            var k2 = (k + 1) >> 1;
+            for (var i = 0; i < k2; i++) {
+               var temp = perm[i]; perm[i] = perm[k - i]; perm[k - i] = temp;
+            }
+            flipsCount++;
+         }
 
-function Neptune(){
-   return new Body(
-      1.53796971148509165e+01,
-      -2.59193146099879641e+01,
-      1.79258772950371181e-01,
-      2.68067772490389322e-03 * DAYS_PER_YEAR,
-      1.62824170038242295e-03 * DAYS_PER_YEAR,
-      -9.51592254519715870e-05 * DAYS_PER_YEAR,
-      5.15138902046611451e-05 * SOLAR_MASS
-   );
-}
+         if (flipsCount > maxFlipsCount) {
+            maxFlipsCount = flipsCount;
+            for (var i = 0; i < n; i++) maxPerm[i] = perm1[i];
+         }
+      }
 
-function Sun(){
-   return new Body(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, SOLAR_MASS);
-}
+      while (true) {
+         if (r == n) return maxFlipsCount;
+         var perm0 = perm1[0];
+         var i = 0;
+         while (i < r) {
+            var j = i + 1;
+            perm1[i] = perm1[j];
+            i = j;
+         }
+         perm1[r] = perm0;
 
-
-function NBodySystem(bodies){
-   this.bodies = bodies;
-   var px = 0.0;
-   var py = 0.0;
-   var pz = 0.0;
-   var size = this.bodies.length;
-   for (var i=0; i<size; i++){
-      var b = this.bodies[i];
-      var m = b.mass;
-      px += b.vx * m;
-      py += b.vy * m;
-      pz += b.vz * m;
-   }
-   this.bodies[0].offsetMomentum(px,py,pz);
-}
-
-NBodySystem.prototype.advance = function(dt){
-   var dx, dy, dz, distance, mag;
-   var size = this.bodies.length;
-
-   for (var i=0; i<size; i++) {
-      var bodyi = this.bodies[i];
-      for (var j=i+1; j<size; j++) {
-         var bodyj = this.bodies[j];
-         dx = bodyi.x - bodyj.x;
-         dy = bodyi.y - bodyj.y;
-         dz = bodyi.z - bodyj.z;
-
-         distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
-         mag = dt / (distance * distance * distance);
-
-         bodyi.vx -= dx * bodyj.mass * mag;
-         bodyi.vy -= dy * bodyj.mass * mag;
-         bodyi.vz -= dz * bodyj.mass * mag;
-
-         bodyj.vx += dx * bodyi.mass * mag;
-         bodyj.vy += dy * bodyi.mass * mag;
-         bodyj.vz += dz * bodyi.mass * mag;
+         count[r] = count[r] - 1;
+         if (count[r] > 0) break;
+         r++;
       }
    }
-
-   for (var i=0; i<size; i++) {
-      var body = this.bodies[i];
-      body.x += dt * body.vx;
-      body.y += dt * body.vy;
-      body.z += dt * body.vz;
-   }
 }
+var st = getTimer();
+var n = 10;
+var ret = fannkuch(n);
 
-NBodySystem.prototype.energy = function(){
-   var dx, dy, dz, distance;
-   var e = 0.0;
-   var size = this.bodies.length;
-	
-   for (var i=0; i<size; i++) {
-      var bodyi = this.bodies[i];
-	
-      e += 0.5 * bodyi.mass *
-         ( bodyi.vx * bodyi.vx
-         + bodyi.vy * bodyi.vy
-         + bodyi.vz * bodyi.vz );
+trace( getTimer() - st );
 
-      for (var j=i+1; j<size; j++) {
-         var bodyj = this.bodies[j];
-         dx = bodyi.x - bodyj.x;
-         dy = bodyi.y - bodyj.y;
-         dz = bodyi.z - bodyj.z;
-
-         distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
-         e -= (bodyi.mass * bodyj.mass) / distance;
-      }
-   }
-   
-   return e;
-}
-
-var ret = 0;
-
-for ( var n = 3; n <= 24; n *= 2 ) {
-    (function(){
-        var bodies = new NBodySystem( Array(
-           Sun(),Jupiter(),Saturn(),Uranus(),Neptune()
-        ));
-        var max = n * 100;
-        
-        ret += bodies.energy();
-		
-		
-		
-		
-        for (var i=0; i<max; i++){
-            bodies.advance(0.01);
-        }
-        ret += bodies.energy();
-		
-    })();
-}
-
-var expected = -1.3524862408537381;
+var expected = 38;
 if (ret != expected)
     throw "ERROR: bad result: expected " + expected + " but got " + ret;
 
