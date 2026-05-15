@@ -690,7 +690,7 @@ namespace juicescript.runtime
 						var check = context.GC.Heap[v1.HeapPtr];
 						Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
-							int clonedptr = tempSlot + context.CacheInstancePtr;
+							int clonedptr = tempSlot + Context.CacheInstancePtr;
 							var cacheObj = context.GC.Heap[clonedptr];
 							cacheObj.Type = check.Type;
 
@@ -1689,7 +1689,7 @@ namespace juicescript.runtime
 					{
 						//v1isstruct = true;
 
-						int clonedptr = tempslot + context.CacheInstancePtr;
+						int clonedptr = tempslot + Context.CacheInstancePtr;
 						var dst = context.GC.Heap[clonedptr];
 
 						CopyStruct(dst, src, context.player);

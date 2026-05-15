@@ -99,19 +99,19 @@ namespace juicescript.runtime
         /// 由于连续创建，所以索引连续
         /// 因此当索引大于 CacheObjPointer 时，说明不是缓存的。
         /// </summary>
-        internal int M_MethodScopePtr;
+        internal const int M_MethodScopePtr = 1;
 
         /// <summary>
         /// 第一个StackCache对象的地址
         /// 由于是连续创建的，所以索引是连续的。
         /// </summary>
-        internal int CacheObjPtr;
+        internal const int CacheObjPtr = M_MethodScopePtr + MAX_BACKTRACE;
 
         /// <summary>
         /// 第一个缓存Instance的地址
         ///  由于是连续创建的，所以索引是连续的。
         /// </summary>
-        internal int CacheInstancePtr;
+        internal const int CacheInstancePtr = CacheObjPtr + STACK_LENGTH;
 
         
         //internal BackTraceInfo[] BackTrace;
@@ -124,28 +124,31 @@ namespace juicescript.runtime
         /// 由于连续创建，所以索引连续
         /// 因此当索引大于 BlankShapePtr 时，说明不是缓存的。
         /// </summary>
-        internal int M_ClosurePtr;
+        internal const int M_ClosurePtr = CacheInstancePtr + STACK_LENGTH;
 
-        /// <summary>
-        /// 根空Shape的指针
-        /// </summary>
-        internal int BlankShapePtr;
-
-
+        
         /// <summary>
         /// 第一个缓存Rest参数的Array的地址,共MAX_BACKTRACE个
         /// </summary>
-        internal int M_RestArrayPtr;
+        internal const int M_RestArrayPtr = M_ClosurePtr + STACK_LENGTH;
 
         /// <summary>
         /// 第一个缓存Array的地址
         /// </summary>
-        internal int CacheArrayPtr;
+        internal const int CacheArrayPtr = M_RestArrayPtr + MAX_BACKTRACE + STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT;
 
         /// <summary>
         /// 第一个缓存Vector的地址
         /// </summary>
-        internal int CacheVectorPtr;
+        internal const int CacheVectorPtr = CacheArrayPtr + STACK_LENGTH;
+
+
+		/// <summary>
+		/// 根空Shape的指针
+		/// </summary>
+		internal const int BlankShapePtr = CacheVectorPtr + STACK_LENGTH;
+
+
 
 		internal PromiseMicroTaskQueue MicroTaskQueue { get;private set; }
 
@@ -176,21 +179,25 @@ namespace juicescript.runtime
             GC = new gc.GC(this,gc_limit);
             StackSlots = new NaNBoxing[STACK_LENGTH];
 
-            M_MethodScopePtr = GC.AllocMethodScope(null,0,null);if (M_MethodScopePtr == 0) { throw new LoaderException("alloc Method Scope failed,out of memory."); }
+            int _MethodScopePtr = GC.AllocMethodScope(null,0,null);if (_MethodScopePtr == 0) { throw new LoaderException("alloc Method Scope failed,out of memory."); }
+            Debug.Assert(_MethodScopePtr == M_MethodScopePtr);
+
             for (int i = 1; i < MAX_BACKTRACE; i++)
             {
                 if(GC.AllocMethodScope(null, 0, null)==0)
                     throw new LoaderException("alloc Method Scope failed,out of memory.");
             }
 
-            CacheObjPtr = GC.AllocStackCache();if (CacheObjPtr == 0) { throw new LoaderException("alloc CacheObjPointer failed,out of memory."); }
+            int _CacheObjPtr = GC.AllocStackCache();if (_CacheObjPtr == 0) { throw new LoaderException("alloc CacheObjPointer failed,out of memory."); }
+            Debug.Assert(_CacheObjPtr == CacheObjPtr);
             for (int i = 1; i < STACK_LENGTH; i++)
             {
                 if (GC.AllocStackCache() == 0)
                     throw new LoaderException("alloc CacheObjPointer failed,out of memory.");
             }
 
-            CacheInstancePtr = GC.AllocCacheInstance();if (CacheInstancePtr == 0) { throw new LoaderException("alloc CacheInstancePtr failed,out of memory."); }
+            int _CacheInstancePtr = GC.AllocCacheInstance();if (_CacheInstancePtr == 0) { throw new LoaderException("alloc CacheInstancePtr failed,out of memory."); }
+            Debug.Assert(_CacheInstancePtr == CacheInstancePtr);
             for (int i = 1; i < STACK_LENGTH; i++)
             {
                 if(GC.AllocCacheInstance() == 0)
@@ -198,7 +205,9 @@ namespace juicescript.runtime
             }
 
 
-            M_ClosurePtr = GC.AllocClosure(null);if (M_ClosurePtr == 0) { throw new LoaderException("alloc Closure failed,out of memory."); }
+            int _ClosurePtr = GC.AllocClosure(null);if (_ClosurePtr == 0) { throw new LoaderException("alloc Closure failed,out of memory."); }
+            Debug.Assert(_ClosurePtr == M_ClosurePtr);
+
             for (int i = 1; i < STACK_LENGTH; i++)
             {
                 if (GC.AllocClosure(null) == 0)
@@ -206,7 +215,9 @@ namespace juicescript.runtime
             }
 
             RtHeapBase arr;
-            M_RestArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache_on_stack);if(M_RestArrayPtr == 0) { throw new LoaderException("alloc M_RestArrayPtr failed,out of memory."); }
+            int _RestArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache_on_stack);if(_RestArrayPtr == 0) { throw new LoaderException("alloc M_RestArrayPtr failed,out of memory."); }
+            Debug.Assert(_RestArrayPtr == M_RestArrayPtr);
+
             for (int i = 1; i < MAX_BACKTRACE; i++)
             {
                 if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache_on_stack) == 0)
@@ -231,14 +242,18 @@ namespace juicescript.runtime
                 }
             }
            
-            CacheArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p); if (CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
+            int _CacheArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p); if (_CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
+            Debug.Assert(_CacheArrayPtr == CacheArrayPtr);
+            
             for (int i = 1; i < STACK_LENGTH; i++)
             {
                 if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p + i* RtArray.MAX_CACHE_ELEMENT) == 0)
                     throw new LoaderException("alloc CacheArrayPtr failed,out of memory.");
             }
 
-            CacheVectorPtr = GC.AllocCacheVector();if (CacheVectorPtr == 0) { throw new LoaderException("alloc CacheVector failed,out of memory"); }
+            int _CacheVectorPtr = GC.AllocCacheVector();if (_CacheVectorPtr == 0) { throw new LoaderException("alloc CacheVector failed,out of memory"); }
+            Debug.Assert(_CacheVectorPtr == CacheVectorPtr);
+
             for (int i = 1; i < STACK_LENGTH; i++)
             {
                 if (GC.AllocCacheVector() == 0)
@@ -250,9 +265,10 @@ namespace juicescript.runtime
 
             GC.MarkCaches();
 
-			BlankShapePtr = GC.AllocShape(); if (BlankShapePtr == 0) { throw new LoaderException("alloc BlankShapePtr failed,out of memory."); }
+			int _BlankShapePtr = GC.AllocShape(); if (_BlankShapePtr == 0) { throw new LoaderException("alloc BlankShapePtr failed,out of memory."); }
 
-            Debug.Assert(BlankShapePtr == MIN_HEAPPTR);
+            Debug.Assert(_BlankShapePtr == MIN_HEAPPTR);
+            Debug.Assert(_BlankShapePtr == BlankShapePtr);
 
 			StackPosition = 0;
 

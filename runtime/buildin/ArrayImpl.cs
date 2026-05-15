@@ -337,7 +337,7 @@ namespace juicescript.runtime.buildin
 			var rest_span = rest_array.stack_store.Span;
 
 			int ptrIndex = returnSlotIndex;
-			int instancePtr = context.CacheArrayPtr + ptrIndex;
+			int instancePtr = Context.CacheArrayPtr + ptrIndex;
 			var instance = context.GC.Heap[instancePtr];
 			instance.Type = context.ARRAY.Instance;
 
@@ -605,7 +605,7 @@ namespace juicescript.runtime.buildin
 					var check = context.GC.Heap[e.HeapPtr];
 					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
-						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
 						cacheObj.Type = check.Type;
 
@@ -777,7 +777,7 @@ namespace juicescript.runtime.buildin
 					var check = context.GC.Heap[e.HeapPtr];
 					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
-						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
 						cacheObj.Type = check.Type;
 
@@ -1445,7 +1445,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int ptrIndex = returnSlotIndex;
-			int result_instancePtr = context.CacheArrayPtr + ptrIndex;
+			int result_instancePtr = Context.CacheArrayPtr + ptrIndex;
 			var result_instance = context.GC.Heap[result_instancePtr];
 			result_instance.Type = context.ARRAY.Instance;
 
@@ -1616,7 +1616,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int ptrIndex = returnSlotIndex;
-			int result_instancePtr = context.CacheArrayPtr + ptrIndex;
+			int result_instancePtr = Context.CacheArrayPtr + ptrIndex;
 			var result_instance = context.GC.Heap[result_instancePtr];
 			result_instance.Type = context.ARRAY.Instance;
 
@@ -1883,7 +1883,7 @@ namespace juicescript.runtime.buildin
 			}
 			// 5. Create new array for result
 			int ptrIndex = returnSlotIndex;
-			int result_instancePtr = context.CacheArrayPtr + ptrIndex;
+			int result_instancePtr = Context.CacheArrayPtr + ptrIndex;
 			var result_instance = context.GC.Heap[result_instancePtr];
 			result_instance.Type = context.ARRAY.Instance;
 			var result = (RtArray)result_instance;
@@ -1978,7 +1978,7 @@ namespace juicescript.runtime.buildin
 
 
 			// 6. 创建结果数组（存放被删除的元素）
-			int result_instancePtr = context.CacheArrayPtr + returnSlotIndex;
+			int result_instancePtr = Context.CacheArrayPtr + returnSlotIndex;
 			var result_instance = context.GC.Heap[result_instancePtr];
 			result_instance.Type = context.ARRAY.Instance;
 			var result = (RtArray)result_instance;
@@ -2114,7 +2114,7 @@ namespace juicescript.runtime.buildin
 				var check = context.GC.Heap[e.HeapPtr];
 				Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 				{
-					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+					int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
 					cacheObj.Type = check.Type;
 
@@ -2844,7 +2844,7 @@ namespace juicescript.runtime.buildin
 							RtInstance src = (RtInstance)context.GC.Heap[key.HeapPtr];
 							Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 							{
-								int clonedptr = tempslot + context.CacheInstancePtr;
+								int clonedptr = tempslot + Context.CacheInstancePtr;
 								var dst = context.GC.Heap[clonedptr];
 
 								vpayload.CopyStruct(dst, src, context.player);
@@ -2944,7 +2944,7 @@ namespace juicescript.runtime.buildin
 					RtInstance src = (RtInstance)context.GC.Heap[pivot.HeapPtr];
 					Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
-						int clonedptr = tempslot + context.CacheInstancePtr;
+						int clonedptr = tempslot + Context.CacheInstancePtr;
 						var dst = context.GC.Heap[clonedptr];
 
 						vpayload.CopyStruct(dst, src, context.player);
@@ -3726,7 +3726,7 @@ namespace juicescript.runtime.buildin
 								RtInstance src = (RtInstance)context.GC.Heap[key.HeapPtr];
 								Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 								{
-									int clonedptr = basePos + context.CacheInstancePtr;
+									int clonedptr = basePos + Context.CacheInstancePtr;
 									var dst = context.GC.Heap[clonedptr];
 
 									vpayload.CopyStruct(dst, src, context.player);
@@ -4142,7 +4142,7 @@ namespace juicescript.runtime.buildin
 							RtInstance src = (RtInstance)context.GC.Heap[key.HeapPtr];
 							Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 							{
-								int clonedptr = tempslot + context.CacheInstancePtr;
+								int clonedptr = tempslot + Context.CacheInstancePtr;
 								var dst = context.GC.Heap[clonedptr];
 
 								vpayload.CopyStruct(dst, src, context.player);
@@ -4239,7 +4239,7 @@ namespace juicescript.runtime.buildin
 					RtInstance src = (RtInstance)context.GC.Heap[pivot.HeapPtr];
 					Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
-						int clonedptr = tempslot + context.CacheInstancePtr;
+						int clonedptr = tempslot + Context.CacheInstancePtr;
 						var dst = context.GC.Heap[clonedptr];
 
 						vpayload.CopyStruct(dst, src, context.player);

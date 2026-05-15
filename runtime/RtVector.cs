@@ -121,11 +121,11 @@ namespace juicescript.runtime
 
 
 
-		internal Span<byte> ReadStoreAt(int validid, Player player)
-        {			
-			Span<byte> bytes = GetStore(player).ReadStoreAt(validid);
-            return bytes;
-		}
+		//internal Span<byte> ReadStoreAt(int validid, Player player)
+  //      {			
+		//	Span<byte> bytes = GetStore(player).ReadStoreAt(validid);
+  //          return bytes;
+		//}
 
         internal Span<byte> ReadStoreOffset(int offset, Player player,int size)
         {
@@ -150,7 +150,9 @@ namespace juicescript.runtime
 
         internal void SetSlot(int validid,Player player,int vector_ptr,NaNBoxing value , ref Player.ReceiveError error)
         {
-			var bytes = ReadStoreAt(validid, player);
+            Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+			var bytes = store.ReadStoreAt(validid); ;
 
             switch (element_type)
             {
@@ -282,7 +284,7 @@ namespace juicescript.runtime
 
 
 
-
+        [MethodImpl( MethodImplOptions.AggressiveOptimization)]
 		public static bool IsValidIndexType(NaNBoxing index)
         {
             switch (index.ValueType)

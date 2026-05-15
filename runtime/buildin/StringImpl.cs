@@ -1061,7 +1061,7 @@ namespace juicescript.runtime.buildin
 				}
 
 
-				var instancePtr = context.CacheArrayPtr + returnSlotIndex;
+				var instancePtr = Context.CacheArrayPtr + returnSlotIndex;
 				var instance = context.GC.Heap[instancePtr];
 				instance.Type = context.ARRAY.Instance;
 

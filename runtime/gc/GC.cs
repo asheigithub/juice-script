@@ -1041,7 +1041,7 @@ namespace juicescript.runtime.gc
             //遍历MethodScopes
             for (int i = 0; i < context.BackTraceIndex; i++)
             {
-                var methodscope = Heap[context.M_MethodScopePtr + i];
+                var methodscope = Heap[Context.M_MethodScopePtr + i];
 
                 mark(methodscope);
 

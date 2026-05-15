@@ -620,7 +620,7 @@ namespace juicescript.runtime
 									member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
 								)
 							{
-								int cache_ptr = player.Context.CacheInstancePtr + returnSlotIndex;
+								int cache_ptr = Context.CacheInstancePtr + returnSlotIndex;
 								var cache = player.Context.GC.Heap[cache_ptr];
 
 								cache.Type = member.__rt_type_class__.Instance;

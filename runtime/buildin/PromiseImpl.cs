@@ -56,7 +56,7 @@ namespace juicescript.runtime.buildin
 			{
 				var _resolve = _this.Type._vtable.Items[2];
 				int ptrIndex = stackStPos;
-				int m_closurePtr = context.M_ClosurePtr + ptrIndex;
+				int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 				context.GC.Heap[m_closurePtr].Type = _resolve.Trait.Method.Body;
 				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
@@ -72,7 +72,7 @@ namespace juicescript.runtime.buildin
 			{
 				var _reject = _this.Type._vtable.Items[3];
 				int ptrIndex = stackStPos + 1;
-				int m_closurePtr = context.M_ClosurePtr + ptrIndex;
+				int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 				context.GC.Heap[m_closurePtr].Type = _reject.Trait.Method.Body;
 				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
@@ -1489,7 +1489,7 @@ namespace juicescript.runtime.buildin
 
 
 				// 创建 resolve 回调闭包
-				int resolveCb = context.M_ClosurePtr + basePos;
+				int resolveCb = Context.M_ClosurePtr + basePos;
 
 				RtClosure resolveClosure = (RtClosure)context.GC.Heap[resolveCb];
 				context.GC.Heap[resolveCb].Type = thenableResolve.Body;
@@ -1503,7 +1503,7 @@ namespace juicescript.runtime.buildin
 				resolveCallback.SetHeapPtr(resolveCb, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 				// 创建 reject 回调闭包
-				int rejectCb = context.M_ClosurePtr + basePos + 1;
+				int rejectCb = Context.M_ClosurePtr + basePos + 1;
 
 				RtClosure rejectClosure = (RtClosure)context.GC.Heap[rejectCb];
 				context.GC.Heap[rejectCb].Type = thenableReject.Body;
@@ -2014,7 +2014,7 @@ namespace juicescript.runtime.buildin
 			context.StackPosition += 1;
 			context.StackSlots[retslot].SetUndefined();
 
-			((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+			((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
 			//if (!g_method.Flags.HasFlag(MethodFlags.Native))
 			//{
 				context.player.Execute(ref info, m, genwapper.async_body,
@@ -2146,7 +2146,7 @@ namespace juicescript.runtime.buildin
 					int then_result = context.StackPosition;
 					context.StackPosition++;
 
-					int onfulfilled = context.M_ClosurePtr + context.StackPosition;
+					int onfulfilled = Context.M_ClosurePtr + context.StackPosition;
 
 					RtClosure onfulfilledClosure = (RtClosure)context.GC.Heap[onfulfilled];
 					context.GC.Heap[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
@@ -2161,7 +2161,7 @@ namespace juicescript.runtime.buildin
 					slots[0].SetHeapPtr(onfulfilled, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 
-					int onrejected = context.M_ClosurePtr + context.StackPosition + 1;
+					int onrejected = Context.M_ClosurePtr + context.StackPosition + 1;
 					RtClosure onrejectedClosure = (RtClosure)context.GC.Heap[onrejected];
 					context.GC.Heap[onrejected].Type = context.MicroTaskQueue.async_then_onrejected.Body;
 					onrejectedClosure.This = promisePtr;

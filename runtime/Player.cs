@@ -18090,7 +18090,7 @@ namespace juicescript.runtime
 #endif
 								RtHeapBase cache = Context.GC.Heap[stackslots[target.index].HeapPtr];
 
-								if (cache.Kind == RtHeapTypeKind.CLOSURE)
+								if (stackslots[target.index].HeapKind == (byte)RtHeapTypeKind.CLOSURE)
 								{
 									RaiseReferenceError_WriteToMethod(ref error, (ASMethodBody)cache.Type, ((RtClosure)cache)._ref_as_type.QName);
 
@@ -18157,8 +18157,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
-
+									
 									if (cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString)
 									{
 										Context.GC.CheckGC(ref error); //只能在此处先GC,否则后面会意外回收searchname_ptr。 
@@ -18203,6 +18202,7 @@ namespace juicescript.runtime
 
 										}
 
+										RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 
 										if (instance.Kind == RtHeapTypeKind.INSTANCE
 											&&
@@ -18264,7 +18264,7 @@ namespace juicescript.runtime
 									{
 										if (cacheObj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
 										{
-											if (instance.Kind == RtHeapTypeKind.ARRAY)
+											if (cacheObj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)
 											{
 #if DEBUG
 												if (cacheObj.trait[0] == null && cacheObj.trait[1] == null
@@ -18275,6 +18275,7 @@ namespace juicescript.runtime
 #endif
 
 												{
+													RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 
 													SetArraySlot(box, cacheObj.indexer_key.UIntValue, instance, ref error);
 													if (error.raised)
@@ -18290,13 +18291,13 @@ namespace juicescript.runtime
 												}
 #endif
 											}
-											else if (instance.Kind == RtHeapTypeKind.VECTOR)
+											else if (cacheObj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 											{
 												//Vector不能动态创建属性
 												if (!RtVector.IsValidIndexType(cacheObj.indexer_key))
 												{
 													Span<char> buffers = frame_holdchars;
-													RaiseReferenceError_CanNotCreateProperty(ref error, null, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key, buffers), instance.Type.QName);
+													RaiseReferenceError_CanNotCreateProperty(ref error, null, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key, buffers), Context.GC.Heap[cacheObj.RefInstance.HeapPtr].Type.QName);
 													goto flag_handle_error;
 												}
 
@@ -18307,26 +18308,30 @@ namespace juicescript.runtime
 													goto flag_handle_error;
 												}
 
-												RtVector vector = ((RtVector)instance);
+												//RtVector vector = ((RtVector)instance);
+												RtVector vector;
+												RtVector.FindAndUpdateHeapInstancePtr(cacheObj.RefInstance.HeapPtr, this, out vector);
 
 												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 												Context.StackPosition++;
 
-												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv);//, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 												if (error.raised)
 												{
 													Context.StackPosition--;
 													goto flag_handle_error;
 												}
+												//为性能考虑，阻止ConvertValueType调函数
+
 
 												int validid;
-												var store = ((RtVector)instance).GetStore(this);
+												var store = ((RtVector)vector).GetStore(this);
 												if (!(store.IsValidIndexRange(cacheObj.indexer_key, out validid)))
 												{
 													int maxlen = store.length;
 													if (validid == maxlen && maxlen < int.MaxValue) //扩容
 													{
-														((RtVector)instance).Resize(validid + 1, ref error, this, (ASInstance)instance.Type);
+														((RtVector)vector).Resize(validid + 1, ref error, this, (ASInstance)vector.Type);
 
 														if (error.raised)
 														{
@@ -18356,6 +18361,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
+												RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 #if DEBUG
 												if (!(instance.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Indexer)))
 												{
@@ -18417,6 +18423,8 @@ namespace juicescript.runtime
 										}
 										else if (cacheObj.trait[1] != null)
 										{
+											RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
+
 											BeforeWriteProperty();
 
 											if (cacheObj.trait[1] == Context.FUNCTION.Instance._vtable.Items[1].Trait)
@@ -18465,8 +18473,9 @@ namespace juicescript.runtime
 											}
 
 										}
-										else if (instance.Kind == RtHeapTypeKind.GLOBAL || instance.Kind == RtHeapTypeKind.CLASS)
+										else if (cacheObj.RefInstance.HeapKind == (byte)RtHeapTypeKind.GLOBAL || cacheObj.RefInstance.HeapKind == (byte)RtHeapTypeKind.CLASS)
 										{
+											RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 											RtScriptClass payload = (RtScriptClass)instance;
 
 											ASTrait trait = cacheObj.trait[0];
@@ -18518,8 +18527,9 @@ namespace juicescript.runtime
 											}
 #endif
 										}
-										else if (instance.Kind == RtHeapTypeKind.INSTANCE)
+										else if (cacheObj.RefInstance.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 										{
+											RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 											RtInstance payload = (RtInstance)instance;
 
 											ASTrait trait = cacheObj.trait[0];
@@ -21027,6 +21037,8 @@ namespace juicescript.runtime
 									{
 										goto flag_handle_error;
 									}
+									//刚才的ConvertValueType不会导致调函数，因为没有传scope_ptr;
+
 									vec_payload.SetSlot(index, this, arr.HeapPtr, stackslots[dst_index], ref error);
 									if (error.raised)
 									{

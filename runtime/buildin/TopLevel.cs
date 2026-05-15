@@ -1084,7 +1084,7 @@ namespace juicescript.runtime.buildin
 							return;
 						}
 						context.BackTraceIndex++;
-						((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+						((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
 						((RtArray)instance).Trace(context, stackStPos, ref error, scope_ptr, printer, instance, ",");
 						context.BackTraceIndex--;
 						if (error.raised)
@@ -1104,7 +1104,7 @@ namespace juicescript.runtime.buildin
 
 						RtVector vector = (RtVector)instance;
 						context.BackTraceIndex++;
-						((RtMethodScope)context.GC.Heap[context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+						((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
 						vector.Trace(context, stackStPos, ref error, scope_ptr, printer);
 						context.BackTraceIndex--;
 						if (error.raised)

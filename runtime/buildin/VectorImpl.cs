@@ -117,7 +117,7 @@ namespace juicescript.runtime.buildin
 
 			for (int i = 0; i < rest_span.Length; i++)
 			{
-				context.player.ConvertValueType(ref error, rest_span[i], vector.element_type, vector.element_asclass, ref rest_span[i], scope_ptr, thisPtr);
+				context.player.ConvertValueType(ref error, rest_span[i], vector.element_type, vector.element_asclass, ref rest_span[i]);
 				if (error.raised)
 				{
 					return;
@@ -272,7 +272,7 @@ namespace juicescript.runtime.buildin
 			//在目标槽初始化vector
 			int ptrIndex = returnSlotIndex;
 
-			int instancePtr = context.CacheVectorPtr + ptrIndex;
+			int instancePtr = Context.CacheVectorPtr + ptrIndex;
 			var instance = context.GC.Heap[instancePtr];
 
 
@@ -438,9 +438,9 @@ namespace juicescript.runtime.buildin
 
 				context.player.ConvertValueType(ref error, a,
 					 ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-					  ((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+					  ((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex]
 					);
-
+				//不传入scope_ptr,阻止它内部调函数
 				if (error.raised)
 				{
 					return;
@@ -532,7 +532,7 @@ namespace juicescript.runtime.buildin
 					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						//clone结构体
-						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
 						cacheObj.Type = check.Type;
 
@@ -618,13 +618,14 @@ namespace juicescript.runtime.buildin
 
 				context.player.ConvertValueType(ref error, a,
 					((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-					((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+					((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex]
 				);
-
+				//不穿scope_ptr,省的它内部调函数。
 				if (error.raised)
 				{
 					return;
 				}
+				
 
 				vectorAfterResize.SetSlot(i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 
@@ -705,7 +706,7 @@ namespace juicescript.runtime.buildin
 					var check = context.GC.Heap[v.HeapPtr];
 					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
-						int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
 						cacheObj.Type = check.Type;
 
@@ -924,7 +925,7 @@ namespace juicescript.runtime.buildin
 				var check = context.GC.Heap[v.HeapPtr];
 				Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 				{
-					int clonedptr = returnSlotIndex + context.CacheInstancePtr;
+					int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
 					cacheObj.Type = check.Type;
 
@@ -990,7 +991,7 @@ namespace juicescript.runtime.buildin
 
 			context.player.ConvertValueType(ref error, element,
 				((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-				((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+				((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex]
 			);
 
 			if (error.raised)
@@ -1026,13 +1027,16 @@ namespace juicescript.runtime.buildin
 
 			context.player.ConvertValueType(ref error, value,
 				((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-				((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex], scope_ptr
+				((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex]
 			);
 
 			if (error.raised) //但是这里肯定不会失败的,因为传参时已经做过类型转换了
 			{
 				return;
 			}
+
+
+
 
 			vectorAfterResize.SetSlot(index, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 		}
@@ -3200,7 +3204,7 @@ namespace juicescript.runtime.buildin
 
 									NaNBoxing v1 = default;
 									{
-										int cache_ptr = context.CacheInstancePtr + reserve1;
+										int cache_ptr = Context.CacheInstancePtr + reserve1;
 										var cache = context.GC.Heap[cache_ptr];
 
 										cache.Type =  vector.element_asclass.Instance;
@@ -3216,7 +3220,7 @@ namespace juicescript.runtime.buildin
 
 									NaNBoxing v2 = default;
 									{
-										int cache_ptr = context.CacheInstancePtr + reserve2;
+										int cache_ptr = Context.CacheInstancePtr + reserve2;
 										var cache = context.GC.Heap[cache_ptr];
 
 										cache.Type =  vector.element_asclass.Instance;
@@ -4098,7 +4102,7 @@ namespace juicescript.runtime.buildin
 			}
 
 
-			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
+			int resultVecPtr = Context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
 			resultInstance.Type = vType;
 			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
@@ -4204,8 +4208,9 @@ namespace juicescript.runtime.buildin
 					{
 						NaNBoxing item = argsSpan[i];
 						context.player.ConvertValueType(ref error, item,
-							 elementkind, elementcls , ref context.StackSlots[basePos], scope_ptr
+							 elementkind, elementcls , ref context.StackSlots[basePos]
 						);
+						//没传scope_ptr,不会调破坏性函数
 
 						if (error.raised)
 						{
@@ -4533,7 +4538,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			//目标
-			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
+			int resultVecPtr = Context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
 			resultInstance.Type = vType;
 			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
@@ -4684,7 +4689,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			//目标
-			int resultVecPtr = context.CacheVectorPtr + returnSlotIndex;
+			int resultVecPtr = Context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
 			resultInstance.Type = vType;
 			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
@@ -5481,6 +5486,7 @@ namespace juicescript.runtime.buildin
 
 			}
 
+			[MethodImpl( MethodImplOptions.AggressiveOptimization )]
 			internal Span<byte> ReadStoreAt(int validid)
 			{
 				return CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize);
@@ -5561,7 +5567,7 @@ namespace juicescript.runtime.buildin
 							if (element_asclass.Instance.Flags.HasFlag(ClassFlags.Struct))
 							{
 								//在reseveSlot位置上
-								int cache_ptr = player.Context.CacheInstancePtr + reseveSlot;
+								int cache_ptr = Context.CacheInstancePtr + reseveSlot;
 								var cache = player.Context.GC.Heap[cache_ptr];
 
 								cache.Type = element_asclass.Instance;
