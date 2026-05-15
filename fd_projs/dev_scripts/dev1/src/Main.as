@@ -18,10 +18,10 @@ import flash.utils.getTimer;
 
 function fannkuch(n) {
    var check = 0;
-   var perm = new Vector.<int>(n);
-   var perm1 = new Vector.<int>(n);
-   var count = new Vector.<int>(n);
-   var maxPerm = new Vector.<int>(n);
+   var perm = Array(n);
+   var perm1 = Array(n);
+   var count = Array(n);
+   var maxPerm = Array(n);
    var maxFlipsCount = 0;
    var m = n - 1;
 

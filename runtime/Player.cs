@@ -5642,7 +5642,7 @@ namespace juicescript.runtime
 									RtVector vector;
 									int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
 									//int maxlen; int validid;
-									var store = vector.GetStore(this);
+									var store = vector.GetStore();
 									if ( !(store.IsValidIndexRange(_obj.indexer_key, out int validid)))
 									{
 										Span<char> buffers = stackalloc char[128];
@@ -18032,13 +18032,13 @@ namespace juicescript.runtime
 								ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 								Context.StackPosition++;
 
-								bool isheaptype = false;
+								//bool isheaptype = false;
 
 								var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 
 								if (scopemember.Kind == ScopeMemberKind.Parameter)
 								{
-									isheaptype = scopemember.TypeKind.IsHeapType();
+									//isheaptype = scopemember.TypeKind.IsHeapType();
 
 									ConvertValueType(ref error, value, scopemember.TypeKind, scopemember.__rt_type_class__, ref conv, scope_ptr, thisPtr);
 								}
@@ -18046,7 +18046,7 @@ namespace juicescript.runtime
 								{
 									ASTrait t = scopemember.trait;
 
-									isheaptype = t.TypeKind.IsHeapType();
+									//isheaptype = t.TypeKind.IsHeapType();
 
 									ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
 								}
@@ -18063,7 +18063,7 @@ namespace juicescript.runtime
 
 								RtMethodScope heap = (RtMethodScope)methodscope;
 
-								if (isheaptype)
+								//if (isheaptype)
 								{
 									int* m_scope = method_scopes;
 									*m_scope++ = scope_ptr;
@@ -18332,7 +18332,7 @@ namespace juicescript.runtime
 
 
 												int validid;
-												var store = ((RtVector)vector).GetStore(this);
+												var store = ((RtVector)vector).GetStore();
 												if (!(store.IsValidIndexRange(cacheObj.indexer_key, out validid)))
 												{
 													int maxlen = store.length;
@@ -20437,16 +20437,28 @@ namespace juicescript.runtime
 
 								if (!IsNumeric(n1))
 								{
-									ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错。
+									if (n1.ValueType == BoxType.LocalString || (n1.HeapKind == (byte)RtHeapTypeKind.STRING && n1.ValueType == BoxType.HeapPtr))
+									{
+										ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错。
+									}
+									else
+									{
+										n1.SetNumber(Extensions.GetDoubleValue(n1));
+									}
+									
 								}
 
 								NaNBoxing n2 = default; n2.SetInt(addvalue);
 
-								Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
-								if (error.raised)
-								{
-									goto flag_handle_error;
-								}
+								bool fa = NaNBoxing.FastAdd(n1, n2,out NaNBoxing r);
+								Debug.Assert(fa);
+								stackslots[dst.index] = r;
+
+								//Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+								//if (error.raised)
+								//{
+								//	goto flag_handle_error;
+								//}
 
 								if (dst.index != result.index)
 								{

@@ -62,6 +62,13 @@ namespace juicescript.runtime
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		internal VectorImpl.VectorStore GetStore()
+        {
+            Debug.Assert(HEAPINSTANCE_PTR == 0);
+            return store;
+        }
+
 
 
         public override int Size
