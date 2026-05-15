@@ -8239,10 +8239,11 @@ namespace juicescript.runtime
 			RtHeapBase to_invoke = null;
 			HINT hint = HINT.h_number;
 
-			if (totype_class != null && totype_class.Instance.Flags.HasFlag(ClassFlags.Vector))
-			{
-				totype = TypeKind.Vector;
-			}
+			//if (totype_class != null && totype_class.Instance.Flags.HasFlag(ClassFlags.Vector))
+			//{
+				
+			//	totype = TypeKind.Vector;
+			//}
 
 			bool isRetry = false;
 
@@ -13586,7 +13587,7 @@ namespace juicescript.runtime
 					n2.ValueType == BoxType.LocalString)
 				{
 					// 两个都是字符串类型，进行字符串比较
-					string str1, str2;
+					ReadOnlySpan<char> str1, str2;
 
 					if (n1.ValueType == BoxType.LocalString)
 					{
@@ -13612,7 +13613,7 @@ namespace juicescript.runtime
 						str2 = ((RtString)Context.GC.Heap[n2.HeapPtr]).Str;
 					}
 
-					int c = string.CompareOrdinal(str1, str2);
+					int c = str1.CompareTo(str2, StringComparison.Ordinal); //string.CompareOrdinal(str1, str2);
 					c_r = c;
 				}
 				else
@@ -13681,31 +13682,37 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				// 两个都不是字符串，转换为数字比较
-				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会失败
-#if DEBUG
-				if (error.raised)
-				{
-					throw new InvalidOperationException();
-				}
-#endif
-				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会失败
-#if DEBUG
-				if (error.raised)
-				{
-					throw new InvalidOperationException();
-				}
-#endif
 
-				if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
+
+				//				// 两个都不是字符串，转换为数字比较
+				//				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会失败
+				//#if DEBUG
+				//				if (error.raised)
+				//				{
+				//					throw new InvalidOperationException();
+				//				}
+				//#endif
+				//				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会失败
+				//#if DEBUG
+				//				if (error.raised)
+				//				{
+				//					throw new InvalidOperationException();
+				//				}
+				//#endif
+
+				double d1 = Extensions.GetDoubleValue(n1);
+				double d2 = Extensions.GetDoubleValue(n2);
+
+
+				if (double.IsNaN(d1) || double.IsNaN(d2))
 				{
 					stackslots[dst.index].SetBoolean(false);
 					return;
 				}
 
-				if (n1.Number < n2.Number)
+				if (d1 < d2)
 					c_r = -1;
-				else if (n1.Number == n2.Number)
+				else if (d1 == d2)
 					c_r = 0;
 				else
 					c_r = 1;

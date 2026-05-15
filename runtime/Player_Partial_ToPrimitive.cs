@@ -40,7 +40,8 @@ namespace juicescript.runtime
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool IsPrimitive(NaNBoxing value)
 		{
-			return (value.ValueType != NaNBoxing.BoxType.HeapPtr || Context.GC.Heap[value.HeapPtr].Kind == RtHeapTypeKind.STRING);
+			//return (value.ValueType != NaNBoxing.BoxType.HeapPtr || Context.GC.Heap[value.HeapPtr].Kind == RtHeapTypeKind.STRING);
+			return (value.ValueType != NaNBoxing.BoxType.HeapPtr || value.HeapKind == (byte)RtHeapTypeKind.STRING );
 		}
 
 		/// <summary>

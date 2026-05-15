@@ -124,15 +124,17 @@ namespace juicescript.runtime
 
 
 		//internal Span<byte> ReadStoreAt(int validid, Player player)
-  //      {			
+		//      {			
 		//	Span<byte> bytes = GetStore(player).ReadStoreAt(validid);
-  //          return bytes;
+		//          return bytes;
 		//}
 
-        internal Span<byte> ReadStoreOffset(int offset, Player player,int size)
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		internal Span<byte> ReadStoreOffset(int offset, Player player,int size)
         {
-            Span<byte> bytes = GetStore(player).ReadStoreOffset(offset,size);
-            return bytes;
+            Debug.Assert(HEAPINSTANCE_PTR == 0);
+            Span<byte> bytes = store.ReadStoreOffset(offset, size); //GetStore(player).ReadStoreOffset(offset,size);
+			return bytes;
 		}
 
 		/// <summary>

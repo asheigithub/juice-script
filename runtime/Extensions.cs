@@ -42,7 +42,7 @@ namespace juicescript.runtime
 			return (double)f == value;
 		}
 
-
+        [MethodImpl( MethodImplOptions.AggressiveOptimization )]
         public static double GetDoubleValue(NaNBoxing v)
         {
             switch (v.ValueType)
