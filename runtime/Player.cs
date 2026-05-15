@@ -5578,8 +5578,186 @@ namespace juicescript.runtime
 				{
 
 
+					if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
+					{
+						if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)// refObj.Kind == RtHeapTypeKind.ARRAY) //通过索引下标操作
+						{
+#if DEBUG
+							if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Uint || !(_obj.trait[0] == null && _obj.trait[1] == null))
+							{
+								throw new InvalidOperationException();
+							}
+#endif
+							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+							bool isoutofindex_or_ishole;
+							var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
 
-					if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
+							if (v.ValueType == BoxType.Fault)
+							{
+								v.SetUndefined();
+							}
+							else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+							{
+								v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+								//var obj = Context.GC.Heap[v.HeapPtr];
+								//if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
+								//{
+								//	((RtInstance)obj).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
+								//}
+							}
+
+							result = v;
+
+
+
+						}
+						else
+						{
+#if DEBUG
+							{
+								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+								if (!(
+										(refObj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)refObj.Type).Flags.HasFlag(ClassFlags.Indexer))
+										||
+										refObj.Kind == RtHeapTypeKind.VECTOR
+
+									)
+									)
+								{
+									throw new InvalidOperationException();
+								}
+							}
+#endif
+
+							if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)//refObj.Kind == RtHeapTypeKind.VECTOR)
+							{
+#if DEBUG
+								if (!RtVector.IsValidIndexType(_obj.indexer_key))
+								{
+									throw new InvalidOperationException();
+								}
+								else
+#endif
+								{
+									RtVector vector;
+									int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
+									//int maxlen; int validid;
+									var store = vector.GetStore(this);
+									if ( !(store.IsValidIndexRange(_obj.indexer_key, out int validid)))
+									{
+										Span<char> buffers = stackalloc char[128];
+										RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), store.length);
+										return default;
+									}
+									else
+									{
+										return store.ReadSlot( vector.element_type, validid, this, v_ptr, returnSlotIndex, vector.element_asclass);
+										//return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
+										//throw new NotImplementedException();
+									}
+								}
+							}
+							else
+							{
+								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+
+								if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+								{
+									RaiseStackOverflow(ref error);
+									return default;
+								}
+
+								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 1);
+								argSpan[0] = _obj.indexer_key;
+								StackLocater argLoc = new StackLocater() { index = 0 };
+
+								Context.StackPosition++;
+
+								//NaNBoxing _this = new NaNBoxing();
+								//_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
+								NaNBoxing _this = _obj.RefInstance;
+
+								unsafe
+								{
+									Context.StackPosition++;
+
+									RunMethod(((ASInstance)refObj.Type).indexer_get, _this,
+										_obj.RefInstance.HeapPtr, refObj.Type, 1, (byte*)&argLoc, argSpan, ref error, Context.StackPosition - 1);
+
+									result = Context.StackSlots[Context.StackPosition - 1];
+
+									Context.StackPosition--;
+								}
+
+								Context.StackPosition--;
+								if (error.raised)
+								{
+									return default;
+								}
+
+							}
+							if (result.ValueType == BoxType.Fault) //表示需要继续原型链查找
+							{
+								Span<char> buffers = stackalloc char[128];
+								ReadOnlySpan<char> searchName = buffers;
+								//if (_obj.indexer_key.ValueType == BoxType.HeapPtr && Context.GC.Heap[_obj.indexer_key.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
+								//{
+								//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr]).Str;
+								//}
+								//else if (_obj.indexer_key.ValueType != BoxType.HeapPtr)
+								if (IsPrimitive(_obj.indexer_key))
+								{
+									searchName = Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers);
+								}
+								else
+								{
+									//这里应付有索引器的情况，所以这里不需要再触发toString了。
+									if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+									{
+										RaiseStackOverflow(ref error);
+										return default;
+									}
+									Context.StackPosition++;
+									ConvertValueType(ref error, _obj.indexer_key, TypeKind.String, Context.STRING, ref Context.StackSlots[Context.StackPosition - 1]);
+									Context.StackPosition--;
+									if (error.raised)
+									{
+										return default;
+									}
+
+									searchName = Extensions.GetPrimitiveValueToString(this, Context.StackSlots[Context.StackPosition], buffers);
+
+									//throw new NotImplementedException();
+								}
+
+								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
+								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
+							lbl_searh_class_proto:
+								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
+								{
+									result = value;
+								}
+								else
+								{
+									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
+									if (p != 0)
+									{
+										proto = Context.GC.Heap[p];
+										goto lbl_searh_class_proto;
+									}
+
+									result.SetUndefined();
+								}
+
+
+							}
+
+
+							//throw new NotImplementedException();
+						}
+					}
+					else if (_obj.searchPropertyName.ValueType == BoxType.HeapPtr || _obj.searchPropertyName.ValueType == BoxType.LocalString) //动态属性
 					{
 						Context.GC.CheckGC(ref error);
 
@@ -5991,184 +6169,7 @@ namespace juicescript.runtime
 						}
 
 					}
-					else if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
-					{
-						if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)// refObj.Kind == RtHeapTypeKind.ARRAY) //通过索引下标操作
-						{
-#if DEBUG
-							if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Uint || !(_obj.trait[0] == null && _obj.trait[1] == null))
-							{
-								throw new InvalidOperationException();
-							}
-#endif
-							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-							bool isoutofindex_or_ishole;
-							var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
-
-							if (v.ValueType == BoxType.Fault)
-							{
-								v.SetUndefined();
-							}
-							else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
-							{
-								v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
-								//var obj = Context.GC.Heap[v.HeapPtr];
-								//if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
-								//{
-								//	((RtInstance)obj).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
-								//}
-							}
-
-							result = v;
-
-
-
-						}
-						else
-						{
-#if DEBUG
-							{
-								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-								if (!(
-										(refObj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)refObj.Type).Flags.HasFlag(ClassFlags.Indexer))
-										||
-										refObj.Kind == RtHeapTypeKind.VECTOR
-
-									)
-									)
-								{
-									throw new InvalidOperationException();
-								}
-							}
-#endif
-
-							if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)//refObj.Kind == RtHeapTypeKind.VECTOR)
-							{
-#if DEBUG
-								if (!RtVector.IsValidIndexType(_obj.indexer_key))
-								{
-									throw new InvalidOperationException();
-								}
-								else
-#endif
-								{
-									RtVector vector;
-									int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
-									int maxlen; int validid;
-
-									if (!(vector.IsValidIndexRange(_obj.indexer_key, out validid, out maxlen, this)))
-									{
-										Span<char> buffers = stackalloc char[128];
-										RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), maxlen);
-										return default;
-									}
-									else
-									{
-										return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
-										//throw new NotImplementedException();
-									}
-								}
-							}
-							else
-							{
-								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-
-								if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
-								{
-									RaiseStackOverflow(ref error);
-									return default;
-								}
-
-								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 1);
-								argSpan[0] = _obj.indexer_key;
-								StackLocater argLoc = new StackLocater() { index = 0 };
-
-								Context.StackPosition++;
-
-								//NaNBoxing _this = new NaNBoxing();
-								//_this.SetHeapPtr(_obj.RefInstance.HeapPtr);
-								NaNBoxing _this = _obj.RefInstance;
-
-								unsafe
-								{
-									Context.StackPosition++;
-
-									RunMethod(((ASInstance)refObj.Type).indexer_get, _this,
-										_obj.RefInstance.HeapPtr, refObj.Type, 1, (byte*)&argLoc, argSpan, ref error, Context.StackPosition - 1);
-
-									result = Context.StackSlots[Context.StackPosition - 1];
-
-									Context.StackPosition--;
-								}
-
-								Context.StackPosition--;
-								if (error.raised)
-								{
-									return default;
-								}
-
-							}
-							if (result.ValueType == BoxType.Fault) //表示需要继续原型链查找
-							{
-								Span<char> buffers = stackalloc char[128];
-								ReadOnlySpan<char> searchName = buffers;
-								//if (_obj.indexer_key.ValueType == BoxType.HeapPtr && Context.GC.Heap[_obj.indexer_key.HeapPtr].TypeKind == RtHeapTypeKind.STRING)
-								//{
-								//	searchName = ((RtPayloadString)Context.GC.Heap[_obj.indexer_key.HeapPtr]).Str;
-								//}
-								//else if (_obj.indexer_key.ValueType != BoxType.HeapPtr)
-								if (IsPrimitive(_obj.indexer_key))
-								{
-									searchName = Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers);
-								}
-								else
-								{
-									//这里应付有索引器的情况，所以这里不需要再触发toString了。
-									if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
-									{
-										RaiseStackOverflow(ref error);
-										return default;
-									}
-									Context.StackPosition++;
-									ConvertValueType(ref error, _obj.indexer_key, TypeKind.String, Context.STRING, ref Context.StackSlots[Context.StackPosition - 1]);
-									Context.StackPosition--;
-									if (error.raised)
-									{
-										return default;
-									}
-
-									searchName = Extensions.GetPrimitiveValueToString(this, Context.StackSlots[Context.StackPosition], buffers);
-
-									//throw new NotImplementedException();
-								}
-
-								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-								NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
-								var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[refObj.Type._link_codescope.TypeLayout.ASType.__instance_index__]).PROTO__PTR];
-							lbl_searh_class_proto:
-								if (FindDynamicValue(proto, searchName, out value, out shape_ptr, out index, out prop))
-								{
-									result = value;
-								}
-								else
-								{
-									int p = ((RtInstance)proto).PROTOTYPE(this, (ASInstance)proto.Type); //class的proto肯定是instance。
-									if (p != 0)
-									{
-										proto = Context.GC.Heap[p];
-										goto lbl_searh_class_proto;
-									}
-
-									result.SetUndefined();
-								}
-
-
-							}
-
-
-							//throw new NotImplementedException();
-						}
-					}
+					 
 					else if (_obj.trait[0] == null && _obj.trait[1] != null)
 					{
 						RaiseReferenceError_WriteToReadonlyProperty(ref error, _obj.trait[1].Method.Body, _obj.as_type.QName);
@@ -10019,8 +10020,8 @@ namespace juicescript.runtime
 
 #if DEBUG
 						NaNBoxing index = default; index.SetInt(i);
-						int _i; int max;
-						Debug.Assert(dst.IsValidIndexRange(index, out _i, out max, this));
+						int _i; 
+						Debug.Assert(dst.GetStore(this).IsValidIndexRange(index, out _i));
 #endif
 						dst.SetSlot(i, this, vptr, e, ref error);
 						if (error.raised)
@@ -18299,9 +18300,30 @@ namespace juicescript.runtime
 													goto flag_handle_error;
 												}
 
-												int maxlen; int validid;
-												if (!((RtVector)instance).IsValidIndexRange(cacheObj.indexer_key, out validid, out maxlen, this))
+												Context.GC.CheckGC(ref error);
+												if (Context.StackPosition >= Context.STACK_LENGTH)
 												{
+													RaiseStackOverflow(ref error);
+													goto flag_handle_error;
+												}
+
+												RtVector vector = ((RtVector)instance);
+
+												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+												Context.StackPosition++;
+
+												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+												if (error.raised)
+												{
+													Context.StackPosition--;
+													goto flag_handle_error;
+												}
+
+												int validid;
+												var store = ((RtVector)instance).GetStore(this);
+												if (!(store.IsValidIndexRange(cacheObj.indexer_key, out validid)))
+												{
+													int maxlen = store.length;
 													if (validid == maxlen && maxlen < int.MaxValue) //扩容
 													{
 														((RtVector)instance).Resize(validid + 1, ref error, this, (ASInstance)instance.Type);
@@ -18319,25 +18341,6 @@ namespace juicescript.runtime
 														RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, cacheObj.indexer_key, buffers), maxlen);
 														goto flag_handle_error;
 													}
-												}
-
-												RtVector vector = ((RtVector)instance);
-
-												Context.GC.CheckGC(ref error);
-												if (Context.StackPosition >= Context.STACK_LENGTH)
-												{
-													RaiseStackOverflow(ref error);
-													goto flag_handle_error;
-												}
-
-												ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
-												Context.StackPosition++;
-
-												ConvertValueType(ref error, box, vector.element_type, vector.element_asclass, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
-												if (error.raised)
-												{
-													Context.StackPosition--;
-													goto flag_handle_error;
 												}
 
 												vector.SetSlot(validid, this, cacheObj.RefInstance.HeapPtr, conv, ref error);

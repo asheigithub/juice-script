@@ -5418,7 +5418,7 @@ namespace juicescript.runtime.buildin
 			internal bool isFixed;
 
 
-
+			[MethodImpl( MethodImplOptions.AggressiveOptimization )]
 			internal bool IsValidIndexRange(NaNBoxing index, out int valided_index)
 			{
 
@@ -5490,6 +5490,114 @@ namespace juicescript.runtime.buildin
 			{
 				return CollectionsMarshal.AsSpan(buffer).Slice(offset, size);
 			}
+
+
+			internal NaNBoxing ReadSlot( TypeKind element_type, int validid, Player player, int vector_ptr, int reseveSlot, ASClass element_asclass)
+			{
+				NaNBoxing result = default;
+
+				var bytes = ReadStoreAt(validid);
+
+				switch (element_type)
+				{
+					case ABC.TypeKind.Any:
+						result = MemoryMarshal.Read<NaNBoxing>(bytes);
+						return result;
+					case ABC.TypeKind.Boolean:
+						result.SetBoolean(MemoryMarshal.Read<bool>(bytes));
+						return result;
+
+					case ABC.TypeKind.SByte:
+						result.SetSByte(MemoryMarshal.Read<sbyte>(bytes));
+						return result;
+					case ABC.TypeKind.Byte:
+						result.SetByte(MemoryMarshal.Read<byte>(bytes));
+						return result;
+					case ABC.TypeKind.Short:
+						result.SetShort(MemoryMarshal.Read<short>(bytes));
+						return result;
+					case ABC.TypeKind.UShort:
+						result.SetUShort(MemoryMarshal.Read<ushort>(bytes));
+						return result;
+					case ABC.TypeKind.Int:
+						result.SetInt(MemoryMarshal.Cast<byte, int>(bytes)[0]);
+						return result;
+					case ABC.TypeKind.Uint:
+						result.SetUInt(MemoryMarshal.Cast<byte, uint>(bytes)[0]);
+						return result;
+					case ABC.TypeKind.Float:
+						result.SetFloat(MemoryMarshal.Cast<byte, float>(bytes)[0]);
+						return result;
+					case ABC.TypeKind.Number:
+						result.SetNumber(MemoryMarshal.Cast<byte, double>(bytes)[0]);
+						return result;
+					case ABC.TypeKind.Fun_Void:
+					case ABC.TypeKind.TraitDataReference:
+					case ABC.TypeKind.RTQName_MultiName_DataReference:
+					case ABC.TypeKind.CParseNS_Traits:
+					case ABC.TypeKind.RTQNameRTQNameL_N:
+					case ABC.TypeKind.SearchNameSpaceFromImports:
+					case ABC.TypeKind.Unknown:
+					case ABC.TypeKind.Null:
+					case ABC.TypeKind.Super:
+#if DEBUG
+						throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到"); return default;
+#endif
+					case ABC.TypeKind.Object:
+					case ABC.TypeKind.Class:
+					case ABC.TypeKind.String:
+					case ABC.TypeKind.Function:
+					case ABC.TypeKind.Array:
+					case ABC.TypeKind.Vector:
+					case ABC.TypeKind.Namespace:
+						{
+							result = MemoryMarshal.Cast<byte, NaNBoxing>(bytes)[0];
+							return result;
+						}
+					default:
+						{
+							if (element_asclass.Instance.Flags.HasFlag(ClassFlags.Struct))
+							{
+								//在reseveSlot位置上
+								int cache_ptr = player.Context.CacheInstancePtr + reseveSlot;
+								var cache = player.Context.GC.Heap[cache_ptr];
+
+								cache.Type = element_asclass.Instance;
+								RtInstance struct_payload = (RtInstance)cache;
+								struct_payload.HEAPINSTANCE_PTR = 0;
+
+								struct_payload.methodscopeslot_ref_state = 0;
+								struct_payload.Set_PROPERTY_PTR(validid * bytes.Length, player, element_asclass.Instance); //标记偏移量.
+								struct_payload.HEAPINSTANCE_PTR = vector_ptr; //指向Vector.
+
+
+
+								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+								return result;
+							}
+							else
+							{
+								result = MemoryMarshal.Cast<byte, NaNBoxing>(bytes)[0];
+								return result;
+
+							}
+						}
+
+				}
+
+			}
+
+
+
+
+
+
+
+
+
+
 
 
 			internal void GCMarkAllElements(Context context)
@@ -5670,7 +5778,7 @@ namespace juicescript.runtime.buildin
 
 			}
 
-
+			
 		}
 	}
 }

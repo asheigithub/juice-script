@@ -2,6 +2,7 @@
 using juicescript.runtime.buildin;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -154,6 +155,13 @@ namespace juicescript.runtime
 
         internal DateTime starttime;
 
+
+        /// <summary>
+        /// 第一个非缓存的指针，只要小于这个的就都是缓存对象
+        /// </summary>
+        public const int MIN_HEAPPTR = 1+ MAX_BACKTRACE + STACK_LENGTH + STACK_LENGTH + STACK_LENGTH + MAX_BACKTRACE + STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT + STACK_LENGTH + STACK_LENGTH;
+
+
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
             this.player = player;
@@ -244,6 +252,7 @@ namespace juicescript.runtime
 
 			BlankShapePtr = GC.AllocShape(); if (BlankShapePtr == 0) { throw new LoaderException("alloc BlankShapePtr failed,out of memory."); }
 
+            Debug.Assert(BlankShapePtr == MIN_HEAPPTR);
 
 			StackPosition = 0;
 

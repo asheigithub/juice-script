@@ -453,8 +453,9 @@ namespace juicescript.runtime.buildin
 			{
 				var vector = (RtVector)obj_ins;
 				
-				int validid;int maxid;
-				if (vector.IsValidIndexRange(_index,out validid,out maxid,context.player))
+				int validid;//int maxid;
+				var store = vector.GetStore(context.player);
+				if (store.IsValidIndexRange(_index,out validid))
 				{					
 					var _value = vector.ReadSlot(validid, context.player, reseveSlot , _obj.HeapPtr);
 
