@@ -654,26 +654,124 @@ namespace juicescript.runtime.buildin
 			//return result;
 
 
-			if (integer > long.MaxValue)
+			if (integer > long.MaxValue >> 1)
 			{
-				int k = 0;
-				while (integer > long.MaxValue)
-				{
-					integer = integer / radix;
-					k++;
-				}
+				Span<uint> BIGNUM = stackalloc uint[32];
+				BIGNUM.Clear();
+				// 1. 提取 IEEE 754 内存结构
+				//union { double d; uint64_t u; }
+				//bits = { .d = input }
+				//;
+				//uint64_t mantissa = bits.u & 0x000FFFFFFFFFFFFFLL;
+				//int64_t exponent = (bits.u >> 52) & 0x7FF;
 
-				var b = ToBase((long)integer, radix, buffers.Slice(0, 64));
-				if (k < 64)
+				
+				ulong bits = BitConverter.DoubleToUInt64Bits(integer);
+				
+
+				ulong mantissa = bits & 0x000F_FFFF_FFFF_FFFFUL;
+				long exponent = (long)((bits >> 52) & 0x7FF);
+
+				if (exponent != 0)
 				{
-					buffers.Slice(b.Length, k).Fill('0');
-					return buffers.Slice(0, b.Length + k);
+					mantissa |= 0x0010_0000_0000_0000UL; // 隐式高位 1
+					exponent -= 1023;
 				}
 				else
 				{
-					return b.ToString() + "".PadRight(k,'0'); // 只能溢出了
-					  ;
+					// 处理次正规数（Denormal Number）或 0.0
+					exponent = -1022;
 				}
+
+				int shift = (int)exponent - 52;
+				Debug.Assert(shift >= 0);
+	
+				int block_shift = shift / 32;
+				int bit_shift = shift % 32;
+
+				ulong shiftedMantissa = mantissa << bit_shift;
+
+				// 2. 将左移后的 64 位数拆入对应的 block
+				BIGNUM[block_shift] = (uint)(shiftedMantissa & 0xFFFFFFFF);     // 低 32 位
+				BIGNUM[block_shift + 1] = (uint)(shiftedMantissa >> 32);        // 高 32 位
+				if (bit_shift > 0)
+				{
+					BIGNUM[block_shift + 2] = (uint)(mantissa >> (64 - bit_shift));
+				}
+
+				int len = block_shift + 2;
+				if (bit_shift > 0 && BIGNUM[block_shift + 2] > 0)
+				{
+					len = block_shift + 3;
+				}
+
+				//BIGNUM = BIGNUM.Slice(0, len);
+
+				if (len == 0)
+				{
+					buffers.Slice(0, 1).Fill('0');
+					return buffers.Slice(0, 1);
+				}
+				else
+				{
+					ReadOnlySpan<char> RADIX_CHAR = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+					int char_count = 0;
+
+					Span<char> temp_buf = stackalloc char[1024];
+
+					while (len > 0)
+					{
+						//uint rem = bignum_div_mod(&bn, radix);
+						ulong remainder = 0;
+						for (int i = len - 1; i >= 0; i--)
+						{
+							ulong current = (remainder << 32) | BIGNUM[i];
+							BIGNUM[i] = (uint)(current / (uint)radix);
+							remainder = current % (uint)radix;
+						}
+						while (len > 0 && BIGNUM[len - 1] == 0)
+						{
+							len--;
+							//BIGNUM = BIGNUM.Slice(0,BIGNUM.Length-1);
+						}
+						uint rem = (uint)remainder;
+						temp_buf[char_count++] = RADIX_CHAR[(int)rem];
+					}
+
+					temp_buf = temp_buf.Slice(0, char_count);
+					temp_buf.Reverse();
+
+					if (temp_buf.Length <= buffers.Length)
+					{
+						temp_buf.CopyTo(buffers.Slice(0, temp_buf.Length));
+						return buffers.Slice(0, temp_buf.Length);
+					}
+					else
+					{
+						return temp_buf.ToString();
+					}
+				}
+
+				//double todiv = 1;
+				//int k = 0;
+				//while (integer /todiv  > long.MaxValue)
+				//{
+				//	todiv = todiv * radix;
+				//	k++;
+				//}
+
+				//var b = ToBase((long)(integer/todiv), radix, buffers.Slice(0, 64));
+				//if (k < 64)
+				//{
+				//	buffers.Slice(b.Length, k).Fill('0');
+				//	return buffers.Slice(0, b.Length + k);
+				//}
+				//else
+				//{
+				//	return b.ToString() + "".PadRight(k,'0'); // 只能溢出了
+				//	  ;
+				//}
 			}
 			else if (fraction == 0)
 			{
