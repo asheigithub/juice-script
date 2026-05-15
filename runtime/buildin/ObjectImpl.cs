@@ -457,7 +457,7 @@ namespace juicescript.runtime.buildin
 				var store = vector.GetStore(context.player);
 				if (store.IsValidIndexRange(_index,out validid))
 				{					
-					var _value = vector.ReadSlot(validid, context.player, reseveSlot , _obj.HeapPtr);
+					var _value = store.ReadSlot(vector.element_type,validid, context.player, _obj.HeapPtr,reseveSlot , vector.element_asclass);
 
 					_index.SetInt(validid + 1);
 					iter.SetSlot(_index, 0, iter_ins.Type._link_codescope, context.player);

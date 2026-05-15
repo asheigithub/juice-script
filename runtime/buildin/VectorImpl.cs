@@ -445,7 +445,7 @@ namespace juicescript.runtime.buildin
 				{
 					return;
 				}
-
+				
 				int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 				vector.SetSlot(len + i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 
@@ -3711,7 +3711,11 @@ namespace juicescript.runtime.buildin
 				Context context, ref ReceiveError error, NaNBoxing sortBehavior , int tempslot0 , int tempslot1,int tempslot2)
 			{
 
-			 	vecptr = RtVector.FindAndUpdateHeapInstancePtr(vecptr, context.player, out vpayload);
+				if (vecptr < Context.MIN_HEAPPTR)
+				{
+					vecptr = RtVector.FindAndUpdateHeapInstancePtr(vecptr, context.player, out vpayload);
+				}
+
 				var store = vpayload.GetStore(context.player);
 				SelectPivot(scope, vecptr, scope_ptr ,ref vpayload, context, left, right, ref error, sortBehavior, tempslot0,tempslot1,tempslot2);
 				if (error.raised)
@@ -3752,7 +3756,10 @@ namespace juicescript.runtime.buildin
 						{
 							return 0;
 						}
-						vecptr =  RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						if (vecptr < Context.MIN_HEAPPTR)
+						{
+							vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						}
 						store = vpayload.GetStore(context.player);
 						if (store.length != olen)
 						{
@@ -3792,7 +3799,10 @@ namespace juicescript.runtime.buildin
 						{
 							return 0;
 						}
-						vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						if (vecptr < Context.MIN_HEAPPTR)
+						{
+							vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+						}
 						store = vpayload.GetStore(context.player);
 						if (store.length != olen)
 						{
@@ -3917,7 +3927,12 @@ namespace juicescript.runtime.buildin
 					{
 						return;
 					}
-					RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+
+					if (vectpr < Context.MIN_HEAPPTR)
+					{
+						RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+					}
+
 					store = vpayload.GetStore(context.player);
 					if (store.length != olen)
 					{
@@ -3940,7 +3955,12 @@ namespace juicescript.runtime.buildin
 					{
 						return;
 					}
-					RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+
+					if (vectpr < Context.MIN_HEAPPTR)
+					{
+						RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+					}
+
 					store = vpayload.GetStore(context.player);
 					if (store.length != olen)
 					{
@@ -3962,7 +3982,12 @@ namespace juicescript.runtime.buildin
 					{
 						return;
 					}
-					RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+
+					if (vectpr < Context.MIN_HEAPPTR)
+					{
+						RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
+					}
+
 					store = vpayload.GetStore(context.player);
 					if (store.length != olen)
 					{
@@ -4327,8 +4352,10 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-					
-					vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					if (vecPtr < Context.MIN_HEAPPTR)
+					{
+						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					}
 
 					store = vector.GetStore(context.player);
 					len = store.length;
@@ -4447,11 +4474,13 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
+					if (vecPtr < Context.MIN_HEAPPTR)
+					{
+						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-					vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
-
-					store = vector.GetStore(context.player);
-					len = store.length;
+						store = vector.GetStore(context.player);
+						len = store.length;
+					}
 
 					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
 					Debug.Assert(!error.raised); //转BOOLEAN不会失败
@@ -4583,8 +4612,10 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-					
-					vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					if (vecPtr < Context.MIN_HEAPPTR)
+					{
+						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					}
 
 					store = vector.GetStore(context.player);
 					len = store.length;
@@ -4733,8 +4764,10 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-
-					vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					if (vecPtr < Context.MIN_HEAPPTR)
+					{
+						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					}
 
 					store = vector.GetStore(context.player);
 					len = store.length;
@@ -4754,7 +4787,12 @@ namespace juicescript.runtime.buildin
 						context.StackPosition -= 6;
 						return;
 					}
-					resultVecPtr = RtVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
+
+					if (resultVecPtr < Context.MIN_HEAPPTR)
+					{
+						resultVecPtr = RtVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
+					}
+
 					resultVector.SetSlot(newlen, context.player, resultVecPtr, argSlots[5] , ref error);
 					if (error.raised)
 					{
@@ -4885,8 +4923,10 @@ namespace juicescript.runtime.buildin
 					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
 					Debug.Assert(!error.raised); //转BOOLEAN不会失败
 
-					//len = vector.GetStore(context.player).length;
-					vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					if (vecPtr < Context.MIN_HEAPPTR)
+					{
+						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
+					}
 
 					store = vector.GetStore(context.player);
 					len =  store.length;
@@ -5497,7 +5537,7 @@ namespace juicescript.runtime.buildin
 				return CollectionsMarshal.AsSpan(buffer).Slice(offset, size);
 			}
 
-
+			[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 			internal NaNBoxing ReadSlot( TypeKind element_type, int validid, Player player, int vector_ptr, int reseveSlot, ASClass element_asclass)
 			{
 				NaNBoxing result = default;
@@ -5575,7 +5615,7 @@ namespace juicescript.runtime.buildin
 								struct_payload.HEAPINSTANCE_PTR = 0;
 
 								struct_payload.methodscopeslot_ref_state = 0;
-								struct_payload.Set_PROPERTY_PTR(validid * bytes.Length, player, element_asclass.Instance); //标记偏移量.
+								struct_payload.Set_PROPERTY_PTR(validid * bytes.Length, null, element_asclass.Instance); //标记偏移量.
 								struct_payload.HEAPINSTANCE_PTR = vector_ptr; //指向Vector.
 
 

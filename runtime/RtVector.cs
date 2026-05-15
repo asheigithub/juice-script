@@ -56,8 +56,8 @@ namespace juicescript.runtime
 
         internal VectorImpl.VectorStore GetStore(Player player)
         {
-			RtVector target;
-			FindAndUpdateHeapInstancePtr(player, out target);
+			RtVector target;int p = 0;
+			FindAndUpdateHeapInstancePtr(player, out target,ref p);
             return target.store;
 
 		}
@@ -80,6 +80,8 @@ namespace juicescript.runtime
 		internal int HEAPINSTANCE_PTR;
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
+
+
 			var payload = ((RtVector)player.Context.GC.Heap[ptr]);
 			var origin = payload;
 			target = origin;
@@ -93,7 +95,7 @@ namespace juicescript.runtime
 			return ptr;
 		}
 
-        private void FindAndUpdateHeapInstancePtr(Player player, out RtVector target)
+        private void FindAndUpdateHeapInstancePtr(Player player, out RtVector target,ref int inout_ptr)
         {
             if (HEAPINSTANCE_PTR == 0)
             {
@@ -102,7 +104,7 @@ namespace juicescript.runtime
             }
             else
             {
-                FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				inout_ptr = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
             }
         }
 
@@ -133,18 +135,21 @@ namespace juicescript.runtime
             return bytes;
 		}
 
-        /// <summary>
-        /// reseveSlot需要外部保留一个槽，用于保存读取出的Vector中的struct结构体.
-        /// </summary>
-        /// <param name="validid"></param>
-        /// <param name="player"></param>
-        /// <param name="reseveSlot"></param>
-        /// <param name="vector_ptr"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+		/// <summary>
+		/// reseveSlot需要外部保留一个槽，用于保存读取出的Vector中的struct结构体.
+		/// </summary>
+		/// <param name="validid"></param>
+		/// <param name="player"></param>
+		/// <param name="reseveSlot"></param>
+		/// <param name="vector_ptr"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal NaNBoxing ReadSlot(int validid, Player player, int reseveSlot , int vector_ptr)
 		{
-            return GetStore(player).ReadSlot(element_type, validid, player, vector_ptr, reseveSlot, element_asclass);
+            Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+            return store.ReadSlot(element_type, validid, player, vector_ptr, reseveSlot, element_asclass);
 		}
 
 
