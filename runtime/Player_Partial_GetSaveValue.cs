@@ -327,7 +327,7 @@ namespace juicescript.runtime
 							if (vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)
 							{
 								RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-								vec_ptr = vector.ChangeStoreToHeap( (ASInstance)instance.Type ,this,ref error);
+								vec_ptr = vector.ChangeStoreToHeap( (ASInstance)instance.Type ,this,ref error,out VectorImpl.VectorStore newstore);
 								if (error.raised)
 								{ 
 									return value;	

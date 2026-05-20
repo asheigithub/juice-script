@@ -166,9 +166,9 @@ namespace juicescript.runtime
         {
             Debug.Assert(HEAPINSTANCE_PTR == 0);
 
-			var bytes = store.ReadStoreAt(validid); ;
+            var bytes = CollectionsMarshal.AsSpan(store.buffer).Slice(validid * store.elementSize, store.elementSize); //store.ReadStoreAt(validid); ;
 
-            switch (element_type)
+			switch (element_type)
             {
                 case ABC.TypeKind.Boolean:
                     {
@@ -419,13 +419,14 @@ namespace juicescript.runtime
 
 		}
 
-		internal int ChangeStoreToHeap(ASInstance type, Player player, ref Player.ReceiveError error)
+		internal int ChangeStoreToHeap(ASInstance type, Player player, ref Player.ReceiveError error,out VectorImpl.VectorStore newstore)
 		{
             RtHeapBase heap_vector;
             int heap_ptr = player.Context.GC.AllocInstance(type, out heap_vector);
             if (heap_ptr == 0)
             { 
                 player.RaiseOutOfMemory(ref error);
+                newstore = null;
                 return 0;
             }
 
@@ -434,10 +435,11 @@ namespace juicescript.runtime
 			if (player.Context.GC.MemUsage +  store.length * store.elementSize > player.Context.GC.USAGE_LIMIT)
 			{
 				player.RaiseOutOfMemory(ref error);
+                newstore = null;
 				return 0;
 			}
 
-			((RtVector)heap_vector).SetStore ( new VectorImpl.VectorStore(store));
+			((RtVector)heap_vector).SetStore (newstore = new VectorImpl.VectorStore(store));
 
             //链接到堆对象, 堆对象此时被此对象链接
             HEAPINSTANCE_PTR = heap_ptr;
@@ -445,9 +447,11 @@ namespace juicescript.runtime
             return heap_ptr;
 		}
 
-		internal void Resize(int newlen, ref Player.ReceiveError error, Player player , ASInstance vtype)
+		internal void Resize(int newlen, ref Player.ReceiveError error, Player player , ASInstance vtype,out VectorImpl.VectorStore resizedstore)
 		{
-            var store = GetStore(player);
+            Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+            //var store = GetStore();
             if (newlen <= store.length)
             {
                 store.buffer.RemoveRange(newlen * store.elementSize, (store.length - newlen) * store.elementSize);
@@ -477,13 +481,15 @@ namespace juicescript.runtime
                     }
                     else
                     {
-                        ChangeStoreToHeap(vtype, player, ref error);
+                        ChangeStoreToHeap(vtype, player, ref error, out VectorImpl.VectorStore heapstore );
                         if (error.raised)
                         {
+                            resizedstore = heapstore;
                             return;
                         }
 
-                        store = GetStore(player); //获取新的store;
+                        resizedstore = heapstore;
+                        //store = GetStore(player); //获取新的store;
                         goto lbl_heap;
 
                     }
@@ -491,28 +497,31 @@ namespace juicescript.runtime
             }
             else
             {
-                goto lbl_heap;
+				resizedstore = store;
+				goto lbl_heap;
             }
-			Debug.Assert(!(store.IsCache && newlen * store.elementSize > MAX_CACHE_SIZE));
 
+			resizedstore = store;
+			Debug.Assert(!(resizedstore.IsCache && newlen * resizedstore.elementSize > MAX_CACHE_SIZE));
+			
 			return;
         lbl_heap:
 
-            Debug.Assert(!(store.IsCache && newlen * store.elementSize > MAX_CACHE_SIZE));
+            Debug.Assert(!(resizedstore.IsCache && newlen * resizedstore.elementSize > MAX_CACHE_SIZE));
+			
 
-
-            if (player.Context.GC.MemUsage + (newlen - store.length) * store.elementSize > player.Context.GC.USAGE_LIMIT)
+			if (player.Context.GC.MemUsage + (newlen - resizedstore.length) * resizedstore.elementSize > player.Context.GC.USAGE_LIMIT)
             {
                 player.RaiseOutOfMemory(ref error);
                 return;
             }
 
-			store.buffer.AddRange(Enumerable.Repeat<byte>(0, (newlen - store.length) * store.elementSize));
-			player.Context.GC.MemUsage += (newlen - store.length) * store.elementSize; //更新内存占用计数
+			resizedstore.buffer.AddRange(Enumerable.Repeat<byte>(0, (newlen - resizedstore.length) * resizedstore.elementSize));
+			player.Context.GC.MemUsage += (newlen - resizedstore.length) * resizedstore.elementSize; //更新内存占用计数
 
 
-			store.SetDefault(element_type, element_asclass, store.length, newlen - store.length);
-			store.length = newlen;
+			resizedstore.SetDefault(element_type, element_asclass, resizedstore.length, newlen - resizedstore.length);
+			resizedstore.length = newlen;
 
             
 

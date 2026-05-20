@@ -612,7 +612,7 @@ namespace juicescript
         /// <param name="result"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static bool FastMinus(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
+        public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
             result = default;
             if (a.store == QNAN || b.store == QNAN)

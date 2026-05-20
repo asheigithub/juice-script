@@ -9985,7 +9985,7 @@ namespace juicescript.runtime
 					((RtVector)instance).element_asclass = totype_class.Instance._element_class;
 					((RtVector)instance).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
 					//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
-					((RtVector)instance).GetStore(this).length = 0;
+					((RtVector)instance).GetStore().length = 0;
 
 					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
@@ -12531,10 +12531,10 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void Exec_Sub(ref ReceiveError error, NaNBoxing n1, NaNBoxing n2, StackLocater dst, int scope_ptr, StackLocater tmp, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
-			NaNBoxing sub;
-			if (NaNBoxing.FastMinus(n1, n2, out sub))
+			//NaNBoxing sub;
+			if (NaNBoxing.FastMinus(n1, n2, ref stackslots[dst.index])) //out sub))
 			{
-				stackslots[dst.index] = sub;
+				//stackslots[dst.index] = sub;
 				return;
 			}
 
@@ -18338,7 +18338,7 @@ namespace juicescript.runtime
 													int maxlen = store.length;
 													if (validid == maxlen && maxlen < int.MaxValue) //扩容
 													{
-														((RtVector)vector).Resize(validid + 1, ref error, this, (ASInstance)vector.Type);
+														((RtVector)vector).Resize(validid + 1, ref error, this, (ASInstance)vector.Type,out VectorImpl.VectorStore resizedstore);
 
 														if (error.raised)
 														{
@@ -18757,7 +18757,7 @@ namespace juicescript.runtime
 											((RtVector)instance).element_asclass = @class.Instance._element_class;
 											((RtVector)instance).element_type = @class.Instance._element_class == null ? TypeKind.Any : (TypeKind)@class.Instance._element_class.Type_identifier;
 											//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
-											((RtVector)instance).GetStore(this).length = 0;
+											((RtVector)instance).GetStore().length = 0;
 
 											stackslots[target.index] = instancePtr; //.SetHeapPtr(instancePtr , (byte)RtHeapTypeKind.VECTOR);
 

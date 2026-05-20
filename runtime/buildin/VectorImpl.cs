@@ -83,13 +83,14 @@ namespace juicescript.runtime.buildin
 
 			if (element_size * initLen > RtVector.MAX_CACHE_SIZE) //超出缓存限制，要保存到堆
 			{
-				vector.ChangeStoreToHeap((ASInstance)vecinstance.Type, context.player, ref error);
+				VectorImpl.VectorStore store;
+				vector.ChangeStoreToHeap((ASInstance)vecinstance.Type, context.player, ref error,out store);
 				if (error.raised)
 				{
 					return;
 				}
 
-				var store = vector.GetStore(context.player);
+				
 				store.SetBuffer(element_size * (int)initLen);
 				store.length = (int)initLen;
 				store.elementSize = element_size;
@@ -145,14 +146,14 @@ namespace juicescript.runtime.buildin
 					context.player.RaiseOutOfMemory(ref error);
 					return;
 				}
-
-				vector.ChangeStoreToHeap((ASInstance)vecinstance.Type, context.player, ref error);
+				VectorImpl.VectorStore store;
+				vector.ChangeStoreToHeap((ASInstance)vecinstance.Type, context.player, ref error, out store);
 				if (error.raised)
 				{
 					return;
 				}
 
-				var store = vector.GetStore(context.player);
+				
 				store.SetBuffer(element_size * (int)initLen);
 				store.length = (int)initLen;
 				store.elementSize = element_size;
@@ -226,7 +227,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+			//var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			NaNBoxing newlen = scope.ReadSlot(0, context.player);
 #if DEBUG
@@ -241,7 +242,10 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			((RtVector)vecinstance).Resize(newlen.IntValue, ref error, context.player, (ASInstance)vecinstance.Type);
+			RtVector vecinstance;
+			RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vecinstance);
+
+			(vecinstance).Resize(newlen.IntValue, ref error, context.player, (ASInstance)vecinstance.Type,out VectorStore store);
 			//throw new NotImplementedException();
 
 		}
@@ -280,9 +284,9 @@ namespace juicescript.runtime.buildin
 			((RtVector)instance).HEAPINSTANCE_PTR = 0;
 			((RtVector)instance).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
 			((RtVector)instance).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
-			((RtVector)instance).GetStore(context.player).SetBuffer(0);
-			((RtVector)instance).GetStore(context.player).length = 0;
-			((RtVector)instance).GetStore(context.player).elementSize = elementSize;
+			((RtVector)instance).GetStore().SetBuffer(0);
+			((RtVector)instance).GetStore().length = 0;
+			((RtVector)instance).GetStore().elementSize = elementSize;
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
@@ -358,8 +362,8 @@ namespace juicescript.runtime.buildin
 				//pass
 
 				var dstVec = (RtVector)instance;
-				int count = srcVec.GetStore(context.player).length;
-				dstVec.Resize(len + count, ref error, context.player, (ASInstance)instance.Type);
+				int count = srcVec.GetStore().length;
+				dstVec.Resize(len + count, ref error, context.player, (ASInstance)instance.Type,out VectorStore dststore);
 				if (error.raised)
 				{
 					return;
@@ -404,7 +408,7 @@ namespace juicescript.runtime.buildin
 
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+			//var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			var rest = scope.ReadSlot(0, context.player);
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
@@ -414,19 +418,21 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var vector = ((RtVector)vecinstance);
+			RtVector vector;//= ((RtVector)vecinstance);
+			RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			if (vector.GetStore(context.player).isFixed)
+			var store = vector.GetStore();
+			if (store.isFixed)
 			{
 				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
 				return;
 			}
 
-			int len = vector.GetStore(context.player).length;
+			int len = store.length;
 
 			var arguments = rest_array.stack_store.Span;
 
-			vector.Resize(len + arguments.Length, ref error, context.player, (ASInstance)vecinstance.Type);
+			vector.Resize(len + arguments.Length, ref error, context.player, (ASInstance)vector.Type,out VectorStore resizedstore);
 			if (error.raised)
 			{
 				return;
@@ -437,8 +443,8 @@ namespace juicescript.runtime.buildin
 				NaNBoxing a = arguments[i];
 
 				context.player.ConvertValueType(ref error, a,
-					 ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-					  ((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex]
+					 ((ASInstance)vector.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vector.Type)._element_class.Type_identifier,
+					  ((ASInstance)vector.Type)._element_class, ref context.StackSlots[returnSlotIndex]
 					);
 				//不传入scope_ptr,阻止它内部调函数
 				if (error.raised)
@@ -478,13 +484,13 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			if (vector.GetStore(context.player).isFixed)
+			if (vector.GetStore().isFixed)
 			{
 				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
 				return;
 			}
 
-			int len = vector.GetStore(context.player).length;
+			int len = vector.GetStore().length;
 			if (len == 0)
 			{
 				if (((ASInstance)vecinstance.Type)._element_class == null)
@@ -545,7 +551,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
+				vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type,out VectorStore resizedstore);
 				Debug.Assert(!error.raised); // 这里不可能发生
 			}
 
@@ -561,7 +567,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
+			//var vecinstance = context.GC.Heap[thisPtr.HeapPtr];
 
 			var rest = scope.ReadSlot(0, context.player);
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
@@ -571,15 +577,15 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var vector = ((RtVector)vecinstance);
-
-			if (vector.GetStore(context.player).isFixed)
+			RtVector vector; RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector); // = ((RtVector)vecinstance);
+			var store = vector.GetStore();
+			if (store.isFixed)
 			{
 				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
 				return;
 			}
 
-			int len = vector.GetStore(context.player).length;
+			int len = store.length;
 			var arguments = rest_array.stack_store.Span;
 			int newElements = arguments.Length;
 
@@ -589,7 +595,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			vector.Resize(len + newElements, ref error, context.player, (ASInstance)vecinstance.Type);
+			vector.Resize(len + newElements, ref error, context.player, (ASInstance)vector.Type, out VectorStore resizedstore);
 			if (error.raised)
 			{
 				return;
@@ -598,7 +604,7 @@ namespace juicescript.runtime.buildin
 			RtVector vectorAfterResize;
 			int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
 
-			var store = vectorAfterResize.GetStore(context.player);
+			store = vectorAfterResize.GetStore();
 			var span = CollectionsMarshal.AsSpan(store.buffer);
 			int elementSize = store.elementSize;
 
@@ -617,8 +623,8 @@ namespace juicescript.runtime.buildin
 				NaNBoxing a = arguments[i];
 
 				context.player.ConvertValueType(ref error, a,
-					((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier,
-					((ASInstance)vecinstance.Type)._element_class, ref context.StackSlots[returnSlotIndex]
+					((ASInstance)vector.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vector.Type)._element_class.Type_identifier,
+					((ASInstance)vector.Type)._element_class, ref context.StackSlots[returnSlotIndex]
 				);
 				//不穿scope_ptr,省的它内部调函数。
 				if (error.raised)
@@ -656,13 +662,13 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			if (vector.GetStore(context.player).isFixed)
+			if (vector.GetStore().isFixed)
 			{
 				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
 				return;
 			}
 
-			int len = vector.GetStore(context.player).length;
+			int len = vector.GetStore().length;
 			if (len == 0)
 			{
 				if (((ASInstance)vecinstance.Type)._element_class == null)
@@ -718,7 +724,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				var store = vector.GetStore(context.player);
+				var store = vector.GetStore();
 				if (len > 1)
 				{
 					var span = CollectionsMarshal.AsSpan(store.buffer);
@@ -731,7 +737,7 @@ namespace juicescript.runtime.buildin
 					}
 				}
 
-				vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
+				vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type,out VectorStore resizedstore);
 				Debug.Assert(!error.raised);
 			}
 
@@ -750,7 +756,7 @@ namespace juicescript.runtime.buildin
 
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 
 			if (len == 0)
@@ -821,7 +827,7 @@ namespace juicescript.runtime.buildin
 
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 
 			if (len == 0)
@@ -889,13 +895,13 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			if (vector.GetStore(context.player).isFixed)
+			if (vector.GetStore().isFixed)
 			{
 				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
 				return;
 			}
 
-			int len = vector.GetStore(context.player).length;
+			int len = vector.GetStore().length;
 			int index = scope.ReadSlot(0, context.player).IntValue;
 
 			if (index < 0)
@@ -939,7 +945,7 @@ namespace juicescript.runtime.buildin
 
 			if (index < len - 1)
 			{
-				var store = vector.GetStore(context.player);
+				var store = vector.GetStore();
 				var span = CollectionsMarshal.AsSpan(store.buffer);
 				int elementSize = store.elementSize;
 				for (int i = index; i < len - 1; i++)
@@ -950,7 +956,7 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type);
+			vector.Resize(len - 1, ref error, context.player, (ASInstance)vecinstance.Type, out VectorStore resizedstore);
 			Debug.Assert(!error.raised);
 		}
 
@@ -968,13 +974,13 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			if (vector.GetStore(context.player).isFixed)
+			if (vector.GetStore().isFixed)
 			{
 				context.player.RaiseRangeError(ref error, "Cannot change the length of a fixed Vector.");
 				return;
 			}
 
-			int len = vector.GetStore(context.player).length;
+			int len = vector.GetStore().length;
 			int index = scope.ReadSlot(0, context.player).IntValue;
 			NaNBoxing element = scope.ReadSlot(1, context.player);
 
@@ -999,7 +1005,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			vector.Resize(len + 1, ref error, context.player, (ASInstance)vecinstance.Type);
+			vector.Resize(len + 1, ref error, context.player, (ASInstance)vecinstance.Type, out VectorStore resizedstore);
 			if (error.raised)
 			{
 				return;
@@ -1008,7 +1014,7 @@ namespace juicescript.runtime.buildin
 			RtVector vectorAfterResize;
 			int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
 
-			var store = vectorAfterResize.GetStore(context.player);
+			var store = vectorAfterResize.GetStore();
 			var span = CollectionsMarshal.AsSpan(store.buffer);
 			int elementSize = store.elementSize;
 
@@ -1056,11 +1062,11 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			int last = vector.GetStore(context.player).length - 1;
+			int last = vector.GetStore().length - 1;
 			int st = 0;
 
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			var span = CollectionsMarshal.AsSpan(store.buffer);
 			int elementSize = store.elementSize;
 
@@ -1112,7 +1118,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 			
 
@@ -3603,7 +3609,7 @@ namespace juicescript.runtime.buildin
 				
 				RtVector vpayload;
 				int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
-				var store = vpayload.GetStore(context.player);
+				var store = vpayload.GetStore();
 
 				if (store == null || store.length <= 1) return;
 				QuickSort(scope,ref vpayload,ref vecPtr, scope_ptr, 0, store.length - 1, context, ref error, sortBehavior);
@@ -3644,7 +3650,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 							vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
-							store = vpayload.GetStore(context.player);
+							store = vpayload.GetStore();
 
 							if (store.length != olen)
 							{
@@ -3716,7 +3722,7 @@ namespace juicescript.runtime.buildin
 					vecptr = RtVector.FindAndUpdateHeapInstancePtr(vecptr, context.player, out vpayload);
 				}
 
-				var store = vpayload.GetStore(context.player);
+				var store = vpayload.GetStore();
 				SelectPivot(scope, vecptr, scope_ptr ,ref vpayload, context, left, right, ref error, sortBehavior, tempslot0,tempslot1,tempslot2);
 				if (error.raised)
 				{
@@ -3760,7 +3766,7 @@ namespace juicescript.runtime.buildin
 						{
 							vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
 						}
-						store = vpayload.GetStore(context.player);
+						store = vpayload.GetStore();
 						if (store.length != olen)
 						{
 							context.player.RaiseError(ref error, "vector length changed!");
@@ -3803,7 +3809,7 @@ namespace juicescript.runtime.buildin
 						{
 							vecptr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
 						}
-						store = vpayload.GetStore(context.player);
+						store = vpayload.GetStore();
 						if (store.length != olen)
 						{
 							context.player.RaiseError(ref error, "vector length changed!");
@@ -3918,7 +3924,7 @@ namespace juicescript.runtime.buildin
 				NaNBoxing m = vpayload.ReadSlot(mid, context.player, tempslot1, vectpr);
 				NaNBoxing r = vpayload.ReadSlot(right, context.player, tempslot2, vectpr);
 
-				var store = vpayload.GetStore(context.player);
+				var store = vpayload.GetStore();
 				var olen = store.length;
 
 				{
@@ -3933,7 +3939,7 @@ namespace juicescript.runtime.buildin
 						RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
 					}
 
-					store = vpayload.GetStore(context.player);
+					store = vpayload.GetStore();
 					if (store.length != olen)
 					{
 						context.player.RaiseError(ref error, "vector length changed!");
@@ -3961,7 +3967,7 @@ namespace juicescript.runtime.buildin
 						RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
 					}
 
-					store = vpayload.GetStore(context.player);
+					store = vpayload.GetStore();
 					if (store.length != olen)
 					{
 						context.player.RaiseError(ref error, "vector length changed!");
@@ -3988,7 +3994,7 @@ namespace juicescript.runtime.buildin
 						RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vpayload);
 					}
 
-					store = vpayload.GetStore(context.player);
+					store = vpayload.GetStore();
 					if (store.length != olen)
 					{
 						context.player.RaiseError(ref error, "vector length changed!");
@@ -4067,7 +4073,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 			int elementSize = store.elementSize;
 
@@ -4133,23 +4139,23 @@ namespace juicescript.runtime.buildin
 			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
 			((RtVector)resultInstance).element_asclass = elementcls;
 			((RtVector)resultInstance).element_type = elementkind;
-			((RtVector)resultInstance).GetStore(context.player).SetBuffer(0);
-			((RtVector)resultInstance).GetStore(context.player).length = 0;
-			((RtVector)resultInstance).GetStore(context.player).elementSize = elementSize;
+			((RtVector)resultInstance).GetStore().SetBuffer(0);
+			((RtVector)resultInstance).GetStore().length = 0;
+			((RtVector)resultInstance).GetStore().elementSize = elementSize;
 
-			var resultVector = (RtVector)resultInstance;
+			//var resultVector = (RtVector)resultInstance;
 
 			if (actualDeleteCount > 0)
 			{
-				resultVector.Resize((int)actualDeleteCount, ref error, context.player, (ASInstance)resultInstance.Type);
+				((RtVector)resultInstance).Resize((int)actualDeleteCount, ref error, context.player, (ASInstance)resultInstance.Type,out VectorImpl.VectorStore resultStore);
 				if (error.raised)
 				{
 					return;
 				}
 
-				RtVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
+				//RtVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
 
-				var resultStore = resultVector.GetStore(context.player);
+				//var resultStore = resultVector.GetStore();
 				var resultSpan = CollectionsMarshal.AsSpan(resultStore.buffer);
 
 				for (int i = 0; i < actualDeleteCount; i++)
@@ -4175,7 +4181,7 @@ namespace juicescript.runtime.buildin
 				int moveOffset = -(int)actualDeleteCount + insertCount;
 				if (moveOffset < 0)
 				{
-					var newStore = vectorAfterResize.GetStore(context.player);
+					var newStore = vectorAfterResize.GetStore();
 					var newSpan = CollectionsMarshal.AsSpan(newStore.buffer);
 
 
@@ -4188,7 +4194,7 @@ namespace juicescript.runtime.buildin
 						srcSlice.CopyTo(dstSlice);
 					}
 
-					vectorAfterResize.Resize(newLen, ref error, context.player, (ASInstance)resultInstance.Type); //整体变少
+					vectorAfterResize.Resize(newLen, ref error, context.player, (ASInstance)resultInstance.Type, out VectorImpl.VectorStore resizedstore); //整体变少
 					if (error.raised)
 					{
 						return;
@@ -4196,12 +4202,12 @@ namespace juicescript.runtime.buildin
 				}
 				else if (moveOffset > 0)
 				{
-					vectorAfterResize.Resize(newLen, ref error, context.player, (ASInstance)resultInstance.Type); //数量变多
+					vectorAfterResize.Resize(newLen, ref error, context.player, (ASInstance)resultInstance.Type, out VectorImpl.VectorStore newStore); //数量变多
 					if (error.raised)
 					{
 						return;
 					}
-					var newStore = vectorAfterResize.GetStore(context.player);
+					//var newStore = vectorAfterResize.GetStore(context.player);
 					var newSpan = CollectionsMarshal.AsSpan(newStore.buffer);
 
 
@@ -4270,7 +4276,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 			
 
@@ -4357,7 +4363,7 @@ namespace juicescript.runtime.buildin
 						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 					}
 
-					store = vector.GetStore(context.player);
+					store = vector.GetStore();
 					len = store.length;
 
 					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
@@ -4392,7 +4398,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 
 
@@ -4478,7 +4484,7 @@ namespace juicescript.runtime.buildin
 					{
 						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-						store = vector.GetStore(context.player);
+						store = vector.GetStore();
 						len = store.length;
 					}
 
@@ -4522,7 +4528,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 			int elementSize = store.elementSize;
 
@@ -4573,9 +4579,9 @@ namespace juicescript.runtime.buildin
 			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
 			((RtVector)resultInstance).element_asclass = elementcls;
 			((RtVector)resultInstance).element_type = elementkind;
-			((RtVector)resultInstance).GetStore(context.player).SetBuffer(0);
-			((RtVector)resultInstance).GetStore(context.player).length = 0;
-			((RtVector)resultInstance).GetStore(context.player).elementSize = elementSize;
+			((RtVector)resultInstance).GetStore().SetBuffer(0);
+			((RtVector)resultInstance).GetStore().length = 0;
+			((RtVector)resultInstance).GetStore().elementSize = elementSize;
 
 			var resultVector = (RtVector)resultInstance;
 
@@ -4617,7 +4623,7 @@ namespace juicescript.runtime.buildin
 						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 					}
 
-					store = vector.GetStore(context.player);
+					store = vector.GetStore();
 					len = store.length;
 
 					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
@@ -4626,7 +4632,7 @@ namespace juicescript.runtime.buildin
 					
 					if (r.Boolean)
 					{
-						resultVector.Resize(newlen + 1, ref error, context.player, vType);
+						resultVector.Resize(newlen + 1, ref error, context.player, vType, out VectorImpl.VectorStore resizedStore);
 						if (error.raised)
 						{
 							context.StackPosition -= 5;
@@ -4674,7 +4680,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 			int len = store.length;
 			int elementSize = store.elementSize;
 
@@ -4726,9 +4732,9 @@ namespace juicescript.runtime.buildin
 			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
 			((RtVector)resultInstance).element_asclass = elementcls;
 			((RtVector)resultInstance).element_type = elementkind;
-			((RtVector)resultInstance).GetStore(context.player).SetBuffer(0);
-			((RtVector)resultInstance).GetStore(context.player).length = 0;
-			((RtVector)resultInstance).GetStore(context.player).elementSize = elementSize;
+			((RtVector)resultInstance).GetStore().SetBuffer(0);
+			((RtVector)resultInstance).GetStore().length = 0;
+			((RtVector)resultInstance).GetStore().elementSize = elementSize;
 
 			var resultVector = (RtVector)resultInstance;
 
@@ -4769,7 +4775,7 @@ namespace juicescript.runtime.buildin
 						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 					}
 
-					store = vector.GetStore(context.player);
+					store = vector.GetStore();
 					len = store.length;
 
 
@@ -4781,7 +4787,7 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-					resultVector.Resize(newlen + 1, ref error, context.player, vType);
+					resultVector.Resize(newlen + 1, ref error, context.player, vType, out VectorImpl.VectorStore resizedstore);
 					if (error.raised)
 					{
 						context.StackPosition -= 6;
@@ -4831,7 +4837,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 
 			//if (store.IsCache)
 			//{
@@ -4928,7 +4934,7 @@ namespace juicescript.runtime.buildin
 						vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 					}
 
-					store = vector.GetStore(context.player);
+					store = vector.GetStore();
 					len =  store.length;
 				}
 
@@ -4974,7 +4980,7 @@ namespace juicescript.runtime.buildin
 			RtVector vector;
 			int vecPtr = RtVector.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out vector);
 
-			var store = vector.GetStore(context.player);
+			var store = vector.GetStore();
 
 			TypeKind elementkind =
 			((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
@@ -5526,11 +5532,11 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-			internal Span<byte> ReadStoreAt(int validid)
-			{
-				return CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize);
-			}
+			//[MethodImpl( MethodImplOptions.AggressiveOptimization )]
+			//internal Span<byte> ReadStoreAt(int validid)
+			//{
+			//	return CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize);
+			//}
 
 			internal Span<byte> ReadStoreOffset(int offset, int size)
 			{
@@ -5542,7 +5548,7 @@ namespace juicescript.runtime.buildin
 			{
 				NaNBoxing result = default;
 
-				var bytes = ReadStoreAt(validid);
+				var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
 
 				switch (element_type)
 				{
