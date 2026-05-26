@@ -3365,7 +3365,7 @@ namespace juicescript.runtime.buildin
 				default:
 					throw new InvalidOperationException();
 			}
-			value = context.player.LoadValue(stackslots[0], -1, ref error, stackslots, stPos);
+			unsafe { value = stackslots[0].ValueType != BoxType.HeapPtr ? stackslots[0] : context.player.LoadValue(stackslots[0], -1, ref error, stackslots, stPos, null); }
 			if (error.raised)
 			{
 				context.StackPosition -= 2;

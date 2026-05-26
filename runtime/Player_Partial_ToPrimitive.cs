@@ -131,7 +131,14 @@ namespace juicescript.runtime
 					Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
 			}
-			NaNBoxing fun = LoadValue(stackslots[tmp.index], -1, ref error, stackslots, stackStPos + tmp.index);
+
+			if (stackslots[tmp.index].ValueType != NaNBoxing.BoxType.HeapPtr)
+			{
+				RaiseTypeError(ref error, stackslots[tmp.index], TypeKind.Function);
+				return default;
+			}
+
+			NaNBoxing fun; unsafe { fun = LoadValue(stackslots[tmp.index], -1, ref error, stackslots, stackStPos + tmp.index, null); }
 			
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧，不管了
 			{
@@ -190,7 +197,13 @@ namespace juicescript.runtime
 #endif
 			}
 
-			fun = LoadValue(stackslots[tmp.index], -1, ref error,  stackslots, stackStPos + tmp.index);
+			if (stackslots[tmp.index].ValueType != NaNBoxing.BoxType.HeapPtr)
+			{
+				RaiseTypeError(ref error, stackslots[tmp.index], TypeKind.Function);
+				return default;
+			}
+
+			unsafe { fun = LoadValue(stackslots[tmp.index], -1, ref error, stackslots, stackStPos + tmp.index,null); }
 #if DEBUG
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。
 			{

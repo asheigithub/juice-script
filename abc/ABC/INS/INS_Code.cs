@@ -270,9 +270,22 @@ namespace juicescript.ABC.INS
 
         array_vector_initelement = 120, //array push 初始值
 
+		//**specialized opcode  quickening
+
+		ld_ValueRef_ARR = 130, //从读取中引用值，如果发现失败，则回退。
+
+		ld_MultiNameL_Ref_ARR_INT = 132, //创建对数组元素的一个引用，如果失败则回退
+
+		//**specialized opcode
 
 
-        iter_initctx = 228,
+
+
+
+
+
+
+		iter_initctx = 228,
 		iter_get = 230,
         iter_close = 232,
         iter_next =234,
@@ -292,12 +305,19 @@ namespace juicescript.ABC.INS
         /// </summary>
         return_value = 242,
 
-        ///// <summary>
-        ///// 在async function中返回，任何返回值都包装为promise.
-        ///// </summary>
-        //return_async_promise = 243,
+
+
+
+
 
 		
+
+
+
+
+
+
+
 		throw_error =244,
         try_enter =245,   // try catch finall 支持
         try_exit = 246,

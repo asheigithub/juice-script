@@ -989,20 +989,30 @@ namespace juicescript.runtime.buildin
 								default:
 									throw new InvalidOperationException();
 							}
-							NaNBoxing fun = context.player.LoadValue(stackslots[0], -1, ref error, stackslots, stPos);
+
+							if (stackslots[0].ValueType != NaNBoxing.BoxType.HeapPtr)
+							{
+								context.StackPosition -= 2;
+								context.player.RaiseTypeError(ref error, stackslots[0], TypeKind.Function);
+								return;
+							}
+
+							NaNBoxing fun; unsafe { fun = context.player.LoadValue(stackslots[0], -1, ref error, stackslots, stPos, null); }
 							if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧
 							{
 								context.StackPosition -= 2;
 								return;
 							}
+
 							if (fun.ValueType != NaNBoxing.BoxType.HeapPtr)
 							{
 								context.StackPosition -= 2;
 								context.player.RaiseTypeError(ref error, fun, TypeKind.Function);
 								return;
 							}
+
 							var funinstance = context.GC.Heap[fun.HeapPtr];
-							if (funinstance.Kind != RtHeapTypeKind.CLOSURE)
+							if ( funinstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
 								context.StackPosition -= 2;
 								context.player.RaiseTypeError(ref error, fun, TypeKind.Function);
