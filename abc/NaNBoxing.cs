@@ -1010,7 +1010,7 @@ namespace juicescript
 
         public BoxType ValueType
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 			get
             {
 
@@ -1021,37 +1021,48 @@ namespace juicescript
                 else
                 {
                     uint signature = (uint)(store >> 40) & 0xF;
-
-                    switch (signature)
+                    if (signature == 3)
                     {
-                        case 1:
-                            return BoxType.Undefined;
-                        case 2:
-                            return BoxType.Null;
-                        case 3:
-                        case 4:
-                            return BoxType.Boolean;
-                        case 5:
-                            return BoxType.Int;
-                        case 6:
-                            return BoxType.Uint;
-                        case 7:
-                            return BoxType.Sbyte;
-                        case 8:
-                            return BoxType.Byte;
-                        case 9:
-                            return BoxType.Short;
-                        case 10:
-                            return BoxType.UShort;
-                        case 11:
-                            return BoxType.Float;
-                        case 12:
-                            return BoxType.HeapPtr;
-                        case 13:
-                            return BoxType.LocalString;
-                        default:
-                            return BoxType.Fault;
+                        return BoxType.Boolean;
                     }
+                    else if (signature < 14)
+                    {
+                        return (BoxType)signature;
+                    }
+                    else
+                    {
+                        return BoxType.Fault;
+                    }
+                    //switch (signature)
+                    //{
+                    //    case 1:
+                    //        return BoxType.Undefined;
+                    //    case 2:
+                    //        return BoxType.Null;
+                    //    case 3:
+                    //    case 4:
+                    //        return BoxType.Boolean;
+                    //    case 5:
+                    //        return BoxType.Int;
+                    //    case 6:
+                    //        return BoxType.Uint;
+                    //    case 7:
+                    //        return BoxType.Sbyte;
+                    //    case 8:
+                    //        return BoxType.Byte;
+                    //    case 9:
+                    //        return BoxType.Short;
+                    //    case 10:
+                    //        return BoxType.UShort;
+                    //    case 11:
+                    //        return BoxType.Float;
+                    //    case 12:
+                    //        return BoxType.HeapPtr;
+                    //    case 13:
+                    //        return BoxType.LocalString;
+                    //    default:
+                    //        return BoxType.Fault;
+                    //}
                 }
             }
         }

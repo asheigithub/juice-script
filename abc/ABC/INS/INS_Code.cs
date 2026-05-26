@@ -276,6 +276,10 @@ namespace juicescript.ABC.INS
 
 		ld_MultiNameL_Ref_ARR_INT = 132, //创建对数组元素的一个引用，如果失败则回退
 
+		storeHeapValueRef_ARR =134, //写入数组
+
+		storeMethodVariable_Any=136, //写入函数本地变量--变量类型为Any
+
 		//**specialized opcode
 
 

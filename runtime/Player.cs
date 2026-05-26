@@ -5119,6 +5119,7 @@ namespace juicescript.runtime
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void LoadStackLocater(StackLocater* stacklocatoer, byte** P)
 		{
 			stacklocatoer->index = *(int*)(*P); (*P) += 4;
@@ -8236,7 +8237,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
 		{
 			RtHeapBase to_invoke = null;
@@ -14424,7 +14425,7 @@ namespace juicescript.runtime
 					InstructionProfiler.Profile_ActionStart(opcode);
 #endif
 
-				lbl_depot:
+				lbl_retry:
 
 					switch (opcode)
 					{
@@ -15082,7 +15083,7 @@ namespace juicescript.runtime
 								*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Ref | (0xffffff00 & (*opcodePtr)));
 								PC = (byte*)(opcodePtr + 1);
 								opcode = INS_Code.ld_MultiNameL_Ref;
-								goto lbl_depot;
+								goto lbl_retry;
 
 
 							}
@@ -16542,7 +16543,7 @@ namespace juicescript.runtime
 									PC -= 4;
 									*(uint*)PC = (uint)INS_Code.ld_ValueRef | (0xffffff00 & *(uint*)PC);
 									opcode = INS_Code.ld_ValueRef;
-									goto lbl_depot;
+									goto lbl_retry;
 								}
 
 								RtStackCache _obj = (RtStackCache)Context.GC.Heap[v.HeapPtr];
@@ -16551,7 +16552,7 @@ namespace juicescript.runtime
 									PC -= 4;
 									*(uint*)PC = (uint)INS_Code.ld_ValueRef | (0xffffff00 & *(uint*)PC);
 									opcode = INS_Code.ld_ValueRef;
-									goto lbl_depot;
+									goto lbl_retry;
 								}
 
 
@@ -18197,9 +18198,40 @@ namespace juicescript.runtime
 
 							}
 							break;
+						case INS_Code.storeMethodVariable_Any:
+							{
+								//特点，不需要转换类型,不会回退
 
+								ScopeHeapLocater heapLocater;
+								{
+									heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
+									heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
+								}
+								NaNBoxing value = stackslots[dst_index]; 
+
+								
+								var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
+
+
+								RtMethodScope heap = (RtMethodScope)methodscope;
+								int* m_scope = method_scopes;
+								*m_scope++ = scope_ptr;
+								PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
+
+								if (error.raised)
+								{									
+									goto flag_handle_error;
+								}
+								
+								heap.SetSlot(value, heapLocater.MemberIndex);
+								
+
+							}
+							break;
 						case INS_Code.storeMethodVariable:
 							{
+								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
+
 								ScopeHeapLocater heapLocater;
 								{
 									heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
@@ -18214,12 +18246,12 @@ namespace juicescript.runtime
 
 								var scopemember = methodscope.Type._link_codescope.Members[heapLocater.MemberIndex];
 
-								Context.GC.CheckGC(ref error);
-								if (Context.StackPosition >= Context.STACK_LENGTH)
-								{
-									RaiseStackOverflow(ref error);
-									goto flag_handle_error;
-								}
+								//Context.GC.CheckGC(ref error);
+								//if (Context.StackPosition >= Context.STACK_LENGTH)
+								//{
+								//	RaiseStackOverflow(ref error);
+								//	goto flag_handle_error;
+								//}
 
 								ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 								Context.StackPosition++;
@@ -18239,8 +18271,25 @@ namespace juicescript.runtime
 									ASTrait t = scopemember.trait;
 
 									//isheaptype = t.TypeKind.IsHeapType();
-
 									ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+
+
+
+
+#if FORCOMPILER
+									if (!IsComputeConstExpr)
+									{
+#endif
+									if (t.TypeKind == TypeKind.Any)
+									{
+										*opcodePtr = ((uint)INS_Code.storeMethodVariable_Any | (0xffffff00 & (*opcodePtr)));
+									}
+
+#if FORCOMPILER
+									}
+#endif
+
+
 								}
 								if (error.raised)
 								{
@@ -18274,6 +18323,49 @@ namespace juicescript.runtime
 
 							}
 							break;
+						case INS_Code.storeHeapValueRef_ARR:
+							{
+								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef_ARR);
+								StackLocater target;
+								StackLocater source;
+								target.index = dst_index;
+								LoadStackLocater(&source, &PC);
+
+								//if (stackslots[target.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
+								//{
+								//	goto lbl_fallback;
+								//}
+
+								Debug.Assert(stackslots[target.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
+
+								NaNBoxing box = stackslots[source.index];
+								RtStackCache cacheObj = (RtStackCache)Context.GC.Heap[stackslots[target.index].HeapPtr];
+
+								if (cacheObj.RefInstance.HeapKind != (byte)RtHeapTypeKind.ARRAY 
+									|| cacheObj.indexer_key.ValueType != NaNBoxing.BoxType.Uint
+									|| cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString
+									)
+								{
+									goto lbl_fallback;
+								}
+
+								RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
+
+								SetArraySlot(box, cacheObj.indexer_key.UIntValue, instance, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+
+								break;
+							lbl_fallback:
+								*opcodePtr = ((uint)INS_Code.storeHeapValueRef | (0xffffff00 & (*opcodePtr)));
+								PC = (byte*)(opcodePtr + 1);
+								opcode = INS_Code.storeHeapValueRef;
+								goto lbl_retry;
+
+
+							}
 						case INS_Code.storeHeapValueRef:
 							{
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef);
@@ -18484,7 +18576,14 @@ namespace juicescript.runtime
 														goto flag_handle_error;
 													}
 
-
+#if FORCOMPILER
+													if (!IsComputeConstExpr)
+													{
+#endif
+														*opcodePtr = ((uint)INS_Code.storeHeapValueRef_ARR | (0xffffff00 & (*opcodePtr)));
+#if FORCOMPILER
+													}
+#endif
 
 
 
