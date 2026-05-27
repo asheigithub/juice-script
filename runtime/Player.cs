@@ -15542,6 +15542,505 @@ namespace juicescript.runtime
 								break;
 
 							}
+
+						case INS_Code.ld_MultiNameL_Val:
+							{
+								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Val);
+
+
+								StackLocater stack;
+								stack.index = dst_index;
+
+								StackLocater src;
+								LoadStackLocater(&src, &PC);
+
+								StackLocater _name;
+								LoadStackLocater(&_name, &PC);
+
+								int super_const_index;
+								LoadInt32(&super_const_index, &PC);
+
+
+
+								NaNBoxing instance_box;
+								RtHeapTypeKind kind;
+								ASContainer as_type = null;
+
+								if (src.index >= 0)
+								{
+									instance_box = stackslots[src.index];
+									kind = (RtHeapTypeKind)(instance_box.ValueType == BoxType.HeapPtr ? instance_box.HeapKind : 255);
+								}
+								else
+								{
+									ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+								}
+
+								if (super_const_index != 0)
+								{
+									//读基类
+									super_const_index -= 1;
+
+									var vbox = constants[super_const_index];
+
+#if DEBUG
+									if (vbox.ValueType != NaNBoxing.BoxType.Uint)
+										throw new InvalidOperationException();
+#endif
+
+									var super_class = Context.link_const_class[(int)vbox.UIntValue];
+
+#if DEBUG
+									var check = GetASTypeFromValue(instance_box);
+									if (check is ASInstance)
+									{
+										if (!((ASInstance)check).IsExtend(super_class.Instance))
+										{
+											throw new InvalidOperationException();
+										}
+									}
+
+#endif
+
+									as_type = super_class.Instance;
+								}
+
+								//RtHeapBase instance = null;
+								bool setinstance = false;
+								switch (instance_box.ValueType)
+								{
+									case NaNBoxing.BoxType.Null:
+										Context.GC.CheckGC(ref error);
+										RaiseTypeError_AccessNull(ref error);
+										goto flag_handle_error;
+									case NaNBoxing.BoxType.Undefined:
+										Context.GC.CheckGC(ref error);
+										RaiseTypeError_ATermUndefined(ref error);
+										goto flag_handle_error;
+									case NaNBoxing.BoxType.HeapPtr:
+										break;
+									case NaNBoxing.BoxType.Sbyte:
+										as_type = Context.SBYTE.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Byte:
+										as_type = Context.BYTE.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Short:
+										as_type = Context.SHORT.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.UShort:
+										as_type = Context.USHORT.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Int:
+										as_type = Context.INT.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Uint:
+										as_type = Context.UINT.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Float:
+										as_type = Context.FLOAT.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Number:
+										as_type = Context.NUMBER.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case NaNBoxing.BoxType.Boolean:
+										as_type = Context.BOOLEAN.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+									case BoxType.LocalString:
+										as_type = Context.STRING.Instance;
+										kind = (RtHeapTypeKind)255;
+										goto lbl_instance_primitive;
+
+#if DEBUG
+									case NaNBoxing.BoxType.Fault:
+									default:
+										throw new InvalidOperationException();
+#endif
+								}
+
+
+								setinstance = true;
+							lbl_instance_primitive:
+								Span<char> buffers = frame_holdchars; //stackalloc char[16];
+								ReadOnlySpan<char> name = buffers;
+
+								NaNBoxing prop_name = stackslots[_name.index];
+
+								if (setinstance && (
+									instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE
+									&&
+									((ASInstance)Context.GC.Heap[instance_box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Indexer)
+									)
+									||
+
+									(instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR && RtVector.IsValidIndexType(prop_name))
+
+									)
+								{
+									//索引器处理
+									int ptrIndex = stackStPos + stack.index;
+									int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
+									RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
+#if DEBUG
+									if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
+									{
+										throw new InvalidOperationException();
+									}
+#endif
+									if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR)
+									{
+										RtVector vector;
+										int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
+										//int maxlen; int validid;
+										var store = vector.GetStore();
+										if (!(store.IsValidIndexRange(prop_name, out int validid)))
+										{
+											RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, prop_name, buffers), store.length);
+											goto flag_handle_error;
+										}
+										else
+										{
+											stackslots[dst_index] = store.ReadSlot(vector.element_type, validid, this, v_ptr, stackStPos + dst_index, vector.element_asclass);
+										}
+									}
+									else
+									{
+										RtStackCache cachePayload = (RtStackCache)cache;
+										cachePayload.RefInstance = instance_box;
+										cachePayload.trait[0] = null; cachePayload.trait[1] = null;
+										cachePayload.scopemember_index = 0;
+										cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = Context.GC.Heap[instance_box.HeapPtr].Type;
+										cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = prop_name;
+
+										stackslots[dst_index] = LoadValue(cachePayload,
+											stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + dst_index, opcodePtr
+											);
+										if (error.raised)
+										{
+											goto flag_handle_error;
+										}
+
+									}
+
+									
+
+
+
+
+									break;
+								}
+								else if (prop_name.ValueType != NaNBoxing.BoxType.HeapPtr)
+								{
+									if (setinstance && instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY)
+									{
+										long index;
+
+										switch (prop_name.ValueType)
+										{
+											case BoxType.LocalString:
+												// Use efficient char-based extraction to avoid string allocation
+
+												int charCount = prop_name.GetLocalStringChars(frame_holdchars);
+												name = charCount > 0 ? buffers.Slice(0, charCount) : ReadOnlySpan<char>.Empty;
+												goto lbl_name_solved;
+											case NaNBoxing.BoxType.Number:
+												{
+													double v = prop_name.Number;
+													if (v >= 0 && (v == Math.Truncate(v)) && !Double.IsInfinity(v) && v < uint.MaxValue)
+													{
+														index = (long)v;
+														if (index >= 0 && index < uint.MaxValue)
+														{
+															goto array_index;
+														}
+														else
+														{
+															name = index.ToString();
+															goto array_prop;
+														}
+													}
+													else
+													{
+														name = Extensions.GetPrimitiveValueToString(this, prop_name, buffers);
+														goto array_prop;
+													}
+												}
+											case NaNBoxing.BoxType.Float:
+												{
+													double v = prop_name.FloatValue;
+													if (v >= 0 && (v == Math.Truncate(v)) && !Double.IsInfinity(v) && v < uint.MaxValue)
+													{
+														index = (long)v;
+														if (index >= 0 && index < uint.MaxValue)
+														{
+															goto array_index;
+														}
+														else
+														{
+															name = index.ToString();
+															goto array_prop;
+														}
+													}
+													else
+													{
+														name = Extensions.GetPrimitiveValueToString(this, prop_name, buffers);
+														goto array_prop;
+													}
+												}
+											case NaNBoxing.BoxType.Undefined:
+												name = "undefined";
+												goto array_prop;
+											case NaNBoxing.BoxType.Null:
+												name = "null";
+												goto array_prop;
+											case NaNBoxing.BoxType.Boolean:
+												name = prop_name.Boolean ? "true" : "false";
+												goto array_prop;
+											case NaNBoxing.BoxType.Int:
+												{
+													index = prop_name.IntValue;
+													if (index >= 0)
+													{
+														goto array_index;
+													}
+													else
+													{
+														name = index.ToString();
+														goto array_prop;
+													}
+												}
+											case NaNBoxing.BoxType.Uint:
+												{
+													index = prop_name.UIntValue;
+													if (index < uint.MaxValue)
+													{
+														goto array_index;
+													}
+													else
+													{
+														name = index.ToString();
+														goto array_prop;
+													}
+												}
+											case NaNBoxing.BoxType.Sbyte:
+												{
+													index = prop_name.SByteValue;
+													if (index >= 0)
+													{
+														goto array_index;
+													}
+													else
+													{
+														name = index.ToString();
+														goto array_prop;
+													}
+												}
+											case NaNBoxing.BoxType.Byte:
+												{
+													index = prop_name.ByteValue;
+													goto array_index;
+												}
+											case NaNBoxing.BoxType.Short:
+												{
+													index = prop_name.ShortValue;
+													if (index >= 0)
+													{
+														goto array_index;
+													}
+													else
+													{
+														name = index.ToString();
+														goto array_prop;
+													}
+												}
+											case NaNBoxing.BoxType.UShort:
+												{
+													index = prop_name.UShortValue;
+													goto array_index;
+												}
+#if DEBUG
+											case NaNBoxing.BoxType.Fault:
+											default:
+												throw new InvalidOperationException();
+#else
+											default:
+												Environment.FailFast("出错了，这里跑不到");
+
+												error.error.setFault();
+												goto flag_handle_error;
+#endif
+										}
+
+									//索引处理
+									array_index:
+										uint array_i = (uint)index;
+										//int ptrIndex = stackStPos + stack.index;
+										//int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
+										
+										bool isoutofindex_or_ishole;
+										var a_element = LoadSlotFromArray(array_i,  Context.GC.Heap[ instance_box.HeapPtr] , out isoutofindex_or_ishole);
+
+										if (a_element.ValueType == BoxType.Fault)
+										{
+											a_element.SetUndefined();
+										}
+										else if (a_element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+										{
+											a_element.SetHeapPtr(a_element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+											
+										}
+
+										stackslots[dst_index] = a_element;
+
+										//										//quickening
+										//#if FORCOMPILER
+										//										if (!IsComputeConstExpr)
+										//										{
+										//#endif
+										//											if (super_const_index == 0 && src.index >=0 && 
+										//											(prop_name.ValueType == BoxType.Int || prop_name.ValueType == BoxType.Byte 
+										//												|| prop_name.ValueType == BoxType.Sbyte || prop_name.ValueType ==  BoxType.Short || prop_name.ValueType == BoxType.UShort) )
+										//											{
+										//												*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Ref_ARR_INT | (0xffffff00 & (*opcodePtr)));
+										//											}
+
+										//#if FORCOMPILER
+										//										}
+										//#endif
+
+
+										break;
+
+									array_prop:;
+
+
+									}
+
+									else if (setinstance && instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR)
+									{
+										//不合理的索引范围
+#if DEBUG
+										if (RtVector.IsValidIndexType(prop_name))
+										{
+											throw new InvalidOperationException();
+										}
+#endif
+
+										name = Extensions.GetPrimitiveValueToString(this, prop_name, buffers);
+									}
+									else
+									{
+										name = Extensions.GetPrimitiveValueToString(this, prop_name, buffers);
+										//throw new NotImplementedException("转字符串？还是数组？");
+									}
+								}
+								else
+								{
+
+									//RtHeapBase _n = Context.GC.Heap[prop_name.HeapPtr];
+									if (prop_name.HeapKind != (byte)RtHeapTypeKind.STRING)
+									{
+										if (Context.StackPosition == Context.STACK_LENGTH)
+										{
+											RaiseStackOverflow(ref error);
+											goto flag_handle_error;
+										}
+
+										var span = Context.StackSlots.AsSpan(Context.StackPosition, 1); span.Clear();
+										StackLocater tmp = default; tmp.index = 0;
+										Context.StackPosition++;
+										NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+										if (error.raised)
+										{
+											Context.StackPosition--;
+											goto flag_handle_error;
+										}
+
+										name = Extensions.GetPrimitiveValueToString(this, primitive_name, buffers);
+										Context.StackPosition--;
+
+
+										//throw new NotImplementedException("转字符串？");
+									}
+									else
+									{
+										RtHeapBase _n = Context.GC.Heap[prop_name.HeapPtr];
+										name = ((RtString)_n).Str;
+									}
+
+								}
+
+							lbl_name_solved:
+
+								var scope = methodscope; //Context.GC.Heap[scope_ptr];
+#if DEBUG
+								if (scope.Kind != RtHeapTypeKind.MethodScope)
+								{
+									throw new InvalidOperationException();
+								}
+#endif
+
+								if (as_type == null)
+								{
+									as_type = GetASTypeFromValue(instance_box);
+								}
+
+								var ns_set = scope.Type._link_codescope.NamespaceSet;
+								NaNBoxing thisPtr = ((RtMethodScope)methodscope).ThisPtr;
+								int code = MultiNameLSearch(ns_set, kind, as_type, name, 0, stack, stackslots, stackStPos, instance_box, check_MultiNameLSearch_issameorinherit(instance_box, thisPtr.ValueType == BoxType.HeapPtr ? Context.GC.Heap[thisPtr.HeapPtr] : null), ref error);
+
+								switch (code)
+								{
+									case 0:
+
+										if (stackslots[stack.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
+										{
+											stackslots[dst_index] = LoadValue((RtStackCache)Context.GC.Heap[stackslots[stack.index].HeapPtr],
+												stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + dst_index, opcodePtr
+											);
+											if (error.raised)
+											{
+												goto flag_handle_error;
+											}
+										}
+										else
+										{
+											stackslots[dst_index] = stackslots[stack.index];
+										}
+
+										break;
+									case 1:
+										goto flag_handle_error;
+									case 2:
+										Context.GC.CheckGC(ref error);
+										RaiseTypeError_Ambiguous(ref error, name);
+										goto flag_handle_error;
+#if DEBUG
+									//case 3:
+									//    RaiseReferenceError_MulitNameNotFound(ref error, name, as_type.QName);
+									//    goto flag_handle_error;
+									default:
+										throw new InvalidOperationException();
+#endif
+								}
+
+								break;
+
+							}
+
 						case INS_Code.ld_RTQNameL_Ref:
 							{
 								StackLocater stack;

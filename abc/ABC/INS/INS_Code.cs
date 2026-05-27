@@ -58,6 +58,11 @@ namespace juicescript.ABC.INS
         /// </summary>
         ld_MultiNameL_Ref = 11,
 
+		/// <summary>
+		/// 通过MultiNameL 查找成员的值并加载。name也在运行时确定，namespace在打开的namespaceset里
+		/// </summary>
+		ld_MultiNameL_Val = 14,
+
         /// <summary>
         /// 加载this对象到栈。
         /// </summary>

@@ -104,6 +104,10 @@ namespace juicescript.compiler.IL
 				case INS_Code.ld_MultiNameL_Ref:
 					instruction = new INS_Ld_MultiNameL_Ref(token);
 					break;
+
+				case INS_Code.ld_MultiNameL_Val:
+					instruction = new INS_Ld_MultiNameL_Val(token);
+					break;
 				case INS_Code.ld_This:
 					instruction = new INS_Ld_this(token);
 					break;

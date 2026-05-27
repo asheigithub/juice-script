@@ -21,7 +21,7 @@ namespace juicescript.runtime
         public const int STACK_LENGTH = 512;
 
 #if DEBUG
-		public const int MAX_BACKTRACE = 18;
+		public const int MAX_BACKTRACE = 16;
 #else
 		public const int MAX_BACKTRACE = 50;
 #endif
