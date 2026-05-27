@@ -1096,7 +1096,7 @@ namespace juicescript
         {
             get
             { 
-                return (byte)((store >> 32) & 0xf);
+                return store < UNDEFINED ? (byte)0 : (byte)((store >> 32) & 0xf);
             }
         }
 

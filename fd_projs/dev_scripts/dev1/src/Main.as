@@ -75,7 +75,7 @@ function fannkuch(n) {
    }
 }
 var st = getTimer();
-var n = 10;
+var n = 9;
 var ret = fannkuch(n);
 
 trace( getTimer() - st );

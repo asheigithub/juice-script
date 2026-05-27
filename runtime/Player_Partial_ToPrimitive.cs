@@ -138,7 +138,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-			NaNBoxing fun; unsafe { fun = LoadValue(stackslots[tmp.index], -1, ref error, stackslots, stackStPos + tmp.index, null); }
+			NaNBoxing fun; unsafe { fun = stackslots[tmp.index].HeapKind ==(byte)RtHeapTypeKind.STACK_CACHE_OBJ ?  LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp.index].HeapPtr], -1, ref error, stackslots, stackStPos + tmp.index, null): stackslots[tmp.index] ; }
 			
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧，不管了
 			{
@@ -203,7 +203,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-			unsafe { fun = LoadValue(stackslots[tmp.index], -1, ref error, stackslots, stackStPos + tmp.index,null); }
+			unsafe { fun = stackslots[tmp.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ? LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp.index].HeapPtr], -1, ref error, stackslots, stackStPos + tmp.index,null):stackslots[tmp.index]; }
 #if DEBUG
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。
 			{

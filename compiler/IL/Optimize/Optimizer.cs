@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace juicescript.compiler.IL.Optimize
 {
-	internal class Optimizer
+	internal partial class Optimizer
 	{
 		internal static void FastPeephole(ASMethod method)
 		{
@@ -470,12 +470,22 @@ namespace juicescript.compiler.IL.Optimize
 
 			cfg.DeathCodeErase();
 
+			for (int i = 0; i < cfg.Blocks.Count; i++)
+			{
+				OptimizeBlock(cfg.Blocks[i]);
+			}
+
+
+			//着色法 槽复用
 			int maxslots = slotCount;// cfg.ReuseSlot();
 			//if (key.IndexOf("closure") != -1)
 			{
 				maxslots = cfg.GraphColoring();
 				//cfg.ReuseSlot();
 			}
+
+
+
 			if (displaycfg_files != null && displaycfg_files.Any(f => key.IndexOf(f) >= 0))
 			{
 				string cfg_display = cfg.GetMermaid(key);
@@ -500,6 +510,7 @@ namespace juicescript.compiler.IL.Optimize
 
 		}
 
+		
 
 		internal static byte[] ReUseSlots(byte[] bytecode)
 		{

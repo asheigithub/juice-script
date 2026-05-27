@@ -272,13 +272,13 @@ namespace juicescript.ABC.INS
 
 		//**specialized opcode  quickening
 
-		ld_ValueRef_ARR = 130, //从读取中引用值，如果发现失败，则回退。
+		//ld_ValueRef_ARR = 130, //从读取中引用值，如果发现失败，则回退。
 
-		ld_MultiNameL_Ref_ARR_INT = 132, //创建对数组元素的一个引用，如果失败则回退
+		//ld_MultiNameL_Ref_ARR_INT = 132, //创建对数组元素的一个引用，如果失败则回退
 
-		storeHeapValueRef_ARR =134, //写入数组
+		//storeHeapValueRef_ARR =134, //写入数组
 
-		storeMethodVariable_Any=136, //写入函数本地变量--变量类型为Any
+		//storeMethodVariable_Any=136, //写入函数本地变量--变量类型为Any
 
 		//**specialized opcode
 

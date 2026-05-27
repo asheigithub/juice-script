@@ -5563,20 +5563,20 @@ namespace juicescript.runtime
 		/// <param name="box"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		  [MethodImpl( MethodImplOptions.AggressiveOptimization)] 
-		internal unsafe NaNBoxing LoadValue(NaNBoxing box, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
+		[MethodImpl( MethodImplOptions.AggressiveOptimization)] 
+		internal unsafe NaNBoxing LoadValue(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
 		{
 			//if (box.ValueType != BoxType.HeapPtr) return box;
-			Debug.Assert(box.ValueType == BoxType.HeapPtr);
+			//Debug.Assert(box.ValueType == BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 			
-			NaNBoxing result = box;
+			NaNBoxing result = default;
 			//RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
-			RtHeapTypeKind rtHeapKind = (RtHeapTypeKind)box.HeapKind;
-			if (rtHeapKind == RtHeapTypeKind.STACK_CACHE_OBJ)
+			//RtHeapTypeKind rtHeapKind = (RtHeapTypeKind)box.HeapKind;
+			//if (rtHeapKind == RtHeapTypeKind.STACK_CACHE_OBJ)
 			{
-				RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
-				RtStackCache _obj = (RtStackCache)rtHeap;
+				//RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
+				//RtStackCache _obj = (RtStackCache)rtHeap;
 
 				if (_obj.RefInstance.ValueType == BoxType.HeapPtr)
 				{
@@ -5612,18 +5612,18 @@ namespace juicescript.runtime
 
 							result = v;
 
-#if FORCOMPILER
-							if (!IsComputeConstExpr)
-							{
-#endif
-								if (opcodePtr != null && ((*opcodePtr & 0xff) == (byte)INS_Code.ld_ValueRef))
-								{
-									*opcodePtr = ((uint)INS_Code.ld_ValueRef_ARR | (0xffffff00 & (*opcodePtr)));
-								}
+//#if FORCOMPILER
+//							if (!IsComputeConstExpr)
+//							{
+//#endif
+//								if (opcodePtr != null && ((*opcodePtr & 0xff) == (byte)INS_Code.ld_ValueRef))
+//								{
+//									*opcodePtr = ((uint)INS_Code.ld_ValueRef_ARR | (0xffffff00 & (*opcodePtr)));
+//								}
 
-#if FORCOMPILER
-							}
-#endif
+//#if FORCOMPILER
+//							}
+//#endif
 
 						}
 						else
@@ -6445,14 +6445,14 @@ namespace juicescript.runtime
 					//throw new NotImplementedException("原始类型未实现");
 				}
 			}
-#if DEBUG
-			else if (
-				//rtHeap.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS || 
-				rtHeapKind == RtHeapTypeKind.SHAPE)
-			{
-				throw new InvalidOperationException();
-			}
-#endif
+//#if DEBUG
+//			else if (
+//				//rtHeap.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS || 
+//				rtHeapKind == RtHeapTypeKind.SHAPE)
+//			{
+//				throw new InvalidOperationException();
+//			}
+//#endif
 			return result;
 			
 		}
@@ -14997,96 +14997,96 @@ namespace juicescript.runtime
 								//    RaiseTypeError_Ambiguous(ref error, name );
 								//    goto flag_handle_error;
 							}
-						case INS_Code.ld_MultiNameL_Ref_ARR_INT:
-							{
-								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Ref_ARR_INT);
-								StackLocater stack;
-								stack.index = dst_index;
+//						case INS_Code.ld_MultiNameL_Ref_ARR_INT:
+//							{
+//								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Ref_ARR_INT);
+//								StackLocater stack;
+//								stack.index = dst_index;
 
-								StackLocater src;
-								LoadStackLocater(&src, &PC);
+//								StackLocater src;
+//								LoadStackLocater(&src, &PC);
 
-								StackLocater _name;
-								LoadStackLocater(&_name, &PC);
+//								StackLocater _name;
+//								LoadStackLocater(&_name, &PC);
 
-								int super_const_index;
-								LoadInt32(&super_const_index, &PC);
+//								int super_const_index;
+//								LoadInt32(&super_const_index, &PC);
 
-								NaNBoxing instance_box;
+//								NaNBoxing instance_box;
 								
-								Debug.Assert(src.index >= 0 && super_const_index==0);
-								instance_box = stackslots[src.index];
+//								Debug.Assert(src.index >= 0 && super_const_index==0);
+//								instance_box = stackslots[src.index];
 								
-								if (instance_box.ValueType == BoxType.Null)
-								{
-									Context.GC.CheckGC(ref error);
-									RaiseTypeError_AccessNull(ref error);
-									goto flag_handle_error;
-								}
-								else if(instance_box.ValueType == BoxType.Undefined)
-								{				
-									Context.GC.CheckGC(ref error);
-									RaiseTypeError_ATermUndefined(ref error);
-									goto flag_handle_error;
-								}
+//								if (instance_box.ValueType == BoxType.Null)
+//								{
+//									Context.GC.CheckGC(ref error);
+//									RaiseTypeError_AccessNull(ref error);
+//									goto flag_handle_error;
+//								}
+//								else if(instance_box.ValueType == BoxType.Undefined)
+//								{				
+//									Context.GC.CheckGC(ref error);
+//									RaiseTypeError_ATermUndefined(ref error);
+//									goto flag_handle_error;
+//								}
 
 								
-								NaNBoxing prop_name = stackslots[_name.index];
+//								NaNBoxing prop_name = stackslots[_name.index];
 
-								if (instance_box.HeapKind != (byte)RtHeapTypeKind.ARRAY || prop_name.ValueType == NaNBoxing.BoxType.HeapPtr || 
+//								if (instance_box.HeapKind != (byte)RtHeapTypeKind.ARRAY || prop_name.ValueType == NaNBoxing.BoxType.HeapPtr || 
 									
-									(prop_name.ValueType != BoxType.Int && prop_name.ValueType != BoxType.Byte && prop_name.ValueType != BoxType.Sbyte 
-										&& prop_name.ValueType != BoxType.Short && prop_name.ValueType != BoxType.UShort
-									)
+//									(prop_name.ValueType != BoxType.Int && prop_name.ValueType != BoxType.Byte && prop_name.ValueType != BoxType.Sbyte 
+//										&& prop_name.ValueType != BoxType.Short && prop_name.ValueType != BoxType.UShort
+//									)
 									
 									
-									)
-								{
-									goto lbl_fallback;
-								}
+//									)
+//								{
+//									goto lbl_fallback;
+//								}
 
 
-								long index
-								 = prop_name.IntValue;
-								if (index >= 0)
-								{
-									goto array_index;
-								}
-								else
-								{
-									goto lbl_fallback;
-								}
-							//索引处理
-							array_index:
-								uint array_i = (uint)index;
-								int ptrIndex = stackStPos + stack.index;
-								int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-								RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
-#if DEBUG
-								if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
-								{
-									throw new InvalidOperationException();
-								}
-#endif
+//								long index
+//								 = prop_name.IntValue;
+//								if (index >= 0)
+//								{
+//									goto array_index;
+//								}
+//								else
+//								{
+//									goto lbl_fallback;
+//								}
+//							//索引处理
+//							array_index:
+//								uint array_i = (uint)index;
+//								int ptrIndex = stackStPos + stack.index;
+//								int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
+//								RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
+//#if DEBUG
+//								if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
+//								{
+//									throw new InvalidOperationException();
+//								}
+//#endif
 
-								RtStackCache cachePayload = (RtStackCache)cache;
-								cachePayload.RefInstance = instance_box;
-								cachePayload.trait[0] = null; cachePayload.trait[1] = null;
-								cachePayload.scopemember_index = 0;
-								cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = Context.GC.Heap[instance_box.HeapPtr].Type;
-								cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.SetUInt(array_i);
+//								RtStackCache cachePayload = (RtStackCache)cache;
+//								cachePayload.RefInstance = instance_box;
+//								cachePayload.trait[0] = null; cachePayload.trait[1] = null;
+//								cachePayload.scopemember_index = 0;
+//								cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = Context.GC.Heap[instance_box.HeapPtr].Type;
+//								cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.SetUInt(array_i);
 
-								stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+//								stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
-								break;
-							lbl_fallback:
-								*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Ref | (0xffffff00 & (*opcodePtr)));
-								PC = (byte*)(opcodePtr + 1);
-								opcode = INS_Code.ld_MultiNameL_Ref;
-								goto lbl_retry;
+//								break;
+//							lbl_fallback:
+//								*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Ref | (0xffffff00 & (*opcodePtr)));
+//								PC = (byte*)(opcodePtr + 1);
+//								opcode = INS_Code.ld_MultiNameL_Ref;
+//								goto lbl_retry;
 
 
-							}
+//							}
 							
 						case INS_Code.ld_MultiNameL_Ref:
 							{
@@ -15423,21 +15423,21 @@ namespace juicescript.runtime
 										stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 
-										//quickening
-#if FORCOMPILER
-										if (!IsComputeConstExpr)
-										{
-#endif
-											if (super_const_index == 0 && src.index >=0 && 
-											(prop_name.ValueType == BoxType.Int || prop_name.ValueType == BoxType.Byte 
-												|| prop_name.ValueType == BoxType.Sbyte || prop_name.ValueType ==  BoxType.Short || prop_name.ValueType == BoxType.UShort) )
-											{
-												*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Ref_ARR_INT | (0xffffff00 & (*opcodePtr)));
-											}
+//										//quickening
+//#if FORCOMPILER
+//										if (!IsComputeConstExpr)
+//										{
+//#endif
+//											if (super_const_index == 0 && src.index >=0 && 
+//											(prop_name.ValueType == BoxType.Int || prop_name.ValueType == BoxType.Byte 
+//												|| prop_name.ValueType == BoxType.Sbyte || prop_name.ValueType ==  BoxType.Short || prop_name.ValueType == BoxType.UShort) )
+//											{
+//												*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Ref_ARR_INT | (0xffffff00 & (*opcodePtr)));
+//											}
 
-#if FORCOMPILER
-										}
-#endif
+//#if FORCOMPILER
+//										}
+//#endif
 
 
 										break;
@@ -16519,7 +16519,7 @@ namespace juicescript.runtime
 								//LoadStackLocater(&target, &PC);
 								target.index = dst_index;
 
-								var v = stackslots[sourc.index].ValueType != BoxType.HeapPtr ? stackslots[sourc.index] : LoadValue(stackslots[sourc.index],
+								var v = stackslots[sourc.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[sourc.index] : LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[sourc.index].HeapPtr],
 									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index, opcodePtr);
 								if (error.raised)
 								{
@@ -16529,49 +16529,49 @@ namespace juicescript.runtime
 								stackslots[target.index] = v;
 							}
 							break;
-						case INS_Code.ld_ValueRef_ARR:
-							{
-								StackLocater sourc;
-								StackLocater target;
-								LoadStackLocater(&sourc, &PC);
-								//LoadStackLocater(&target, &PC);
-								target.index = dst_index;
+						//case INS_Code.ld_ValueRef_ARR:
+						//	{
+						//		StackLocater sourc;
+						//		StackLocater target;
+						//		LoadStackLocater(&sourc, &PC);
+						//		//LoadStackLocater(&target, &PC);
+						//		target.index = dst_index;
 
-								var v = stackslots[sourc.index];
-								if (v.ValueType != BoxType.HeapPtr || v.HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
-								{
-									PC -= 4;
-									*(uint*)PC = (uint)INS_Code.ld_ValueRef | (0xffffff00 & *(uint*)PC);
-									opcode = INS_Code.ld_ValueRef;
-									goto lbl_retry;
-								}
+						//		var v = stackslots[sourc.index];
+						//		if (v.ValueType != BoxType.HeapPtr || v.HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
+						//		{
+						//			PC -= 4;
+						//			*(uint*)PC = (uint)INS_Code.ld_ValueRef | (0xffffff00 & *(uint*)PC);
+						//			opcode = INS_Code.ld_ValueRef;
+						//			goto lbl_retry;
+						//		}
 
-								RtStackCache _obj = (RtStackCache)Context.GC.Heap[v.HeapPtr];
-								if (_obj.RefInstance.HeapKind != (byte)RtHeapTypeKind.ARRAY || _obj.indexer_key.ValueType == BoxType.Fault)
-								{
-									PC -= 4;
-									*(uint*)PC = (uint)INS_Code.ld_ValueRef | (0xffffff00 & *(uint*)PC);
-									opcode = INS_Code.ld_ValueRef;
-									goto lbl_retry;
-								}
+						//		RtStackCache _obj = (RtStackCache)Context.GC.Heap[v.HeapPtr];
+						//		if (_obj.RefInstance.HeapKind != (byte)RtHeapTypeKind.ARRAY || _obj.indexer_key.ValueType == BoxType.Fault)
+						//		{
+						//			PC -= 4;
+						//			*(uint*)PC = (uint)INS_Code.ld_ValueRef | (0xffffff00 & *(uint*)PC);
+						//			opcode = INS_Code.ld_ValueRef;
+						//			goto lbl_retry;
+						//		}
 
 
-								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-								bool isoutofindex_or_ishole;
-								var lv = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
+						//		RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+						//		bool isoutofindex_or_ishole;
+						//		var lv = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
 
-								if (lv.ValueType == BoxType.Fault)
-								{
-									lv.SetUndefined();
-								}
-								else if (lv.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
-								{
-									lv.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));									
-								}
+						//		if (lv.ValueType == BoxType.Fault)
+						//		{
+						//			lv.SetUndefined();
+						//		}
+						//		else if (lv.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+						//		{
+						//			lv.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));									
+						//		}
 
-								stackslots[target.index] = lv;
-							}
-							break;
+						//		stackslots[target.index] = lv;
+						//	}
+						//	break;
 						case INS_Code.move:
 							{
 								StackLocater sourc;
@@ -18198,36 +18198,36 @@ namespace juicescript.runtime
 
 							}
 							break;
-						case INS_Code.storeMethodVariable_Any:
-							{
-								//特点，不需要转换类型,不会回退
+						//case INS_Code.storeMethodVariable_Any:
+						//	{
+						//		//特点，不需要转换类型,不会回退
 
-								ScopeHeapLocater heapLocater;
-								{
-									heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
-									heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
-								}
-								NaNBoxing value = stackslots[dst_index]; 
+						//		ScopeHeapLocater heapLocater;
+						//		{
+						//			heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
+						//			heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
+						//		}
+						//		NaNBoxing value = stackslots[dst_index]; 
 
 								
-								var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
+						//		var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 
 
-								RtMethodScope heap = (RtMethodScope)methodscope;
-								int* m_scope = method_scopes;
-								*m_scope++ = scope_ptr;
-								PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
+						//		RtMethodScope heap = (RtMethodScope)methodscope;
+						//		int* m_scope = method_scopes;
+						//		*m_scope++ = scope_ptr;
+						//		PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
 
-								if (error.raised)
-								{									
-									goto flag_handle_error;
-								}
+						//		if (error.raised)
+						//		{									
+						//			goto flag_handle_error;
+						//		}
 								
-								heap.SetSlot(value, heapLocater.MemberIndex);
+						//		heap.SetSlot(value, heapLocater.MemberIndex);
 								
 
-							}
-							break;
+						//	}
+						//	break;
 						case INS_Code.storeMethodVariable:
 							{
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
@@ -18237,7 +18237,7 @@ namespace juicescript.runtime
 									heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
 									heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
 								}
-								NaNBoxing value = stackslots[dst_index];
+								ref NaNBoxing value = ref stackslots[dst_index];
 
 #if DEBUG
 								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
@@ -18276,18 +18276,18 @@ namespace juicescript.runtime
 
 
 
-#if FORCOMPILER
-									if (!IsComputeConstExpr)
-									{
-#endif
-									if (t.TypeKind == TypeKind.Any)
-									{
-										*opcodePtr = ((uint)INS_Code.storeMethodVariable_Any | (0xffffff00 & (*opcodePtr)));
-									}
+//#if FORCOMPILER
+//									if (!IsComputeConstExpr)
+//									{
+//#endif
+//									if (t.TypeKind == TypeKind.Any)
+//									{
+//										*opcodePtr = ((uint)INS_Code.storeMethodVariable_Any | (0xffffff00 & (*opcodePtr)));
+//									}
 
-#if FORCOMPILER
-									}
-#endif
+//#if FORCOMPILER
+//									}
+//#endif
 
 
 								}
@@ -18323,49 +18323,49 @@ namespace juicescript.runtime
 
 							}
 							break;
-						case INS_Code.storeHeapValueRef_ARR:
-							{
-								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef_ARR);
-								StackLocater target;
-								StackLocater source;
-								target.index = dst_index;
-								LoadStackLocater(&source, &PC);
+						//case INS_Code.storeHeapValueRef_ARR:
+						//	{
+						//		uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef_ARR);
+						//		StackLocater target;
+						//		StackLocater source;
+						//		target.index = dst_index;
+						//		LoadStackLocater(&source, &PC);
 
-								//if (stackslots[target.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
-								//{
-								//	goto lbl_fallback;
-								//}
+						//		//if (stackslots[target.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
+						//		//{
+						//		//	goto lbl_fallback;
+						//		//}
 
-								Debug.Assert(stackslots[target.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
+						//		Debug.Assert(stackslots[target.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
-								NaNBoxing box = stackslots[source.index];
-								RtStackCache cacheObj = (RtStackCache)Context.GC.Heap[stackslots[target.index].HeapPtr];
+						//		NaNBoxing box = stackslots[source.index];
+						//		RtStackCache cacheObj = (RtStackCache)Context.GC.Heap[stackslots[target.index].HeapPtr];
 
-								if (cacheObj.RefInstance.HeapKind != (byte)RtHeapTypeKind.ARRAY 
-									|| cacheObj.indexer_key.ValueType != NaNBoxing.BoxType.Uint
-									|| cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString
-									)
-								{
-									goto lbl_fallback;
-								}
+						//		if (cacheObj.RefInstance.HeapKind != (byte)RtHeapTypeKind.ARRAY 
+						//			|| cacheObj.indexer_key.ValueType != NaNBoxing.BoxType.Uint
+						//			|| cacheObj.searchPropertyName.ValueType == BoxType.HeapPtr || cacheObj.searchPropertyName.ValueType == BoxType.LocalString
+						//			)
+						//		{
+						//			goto lbl_fallback;
+						//		}
 
-								RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
+						//		RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
 
-								SetArraySlot(box, cacheObj.indexer_key.UIntValue, instance, ref error);
-								if (error.raised)
-								{
-									goto flag_handle_error;
-								}
+						//		SetArraySlot(box, cacheObj.indexer_key.UIntValue, instance, ref error);
+						//		if (error.raised)
+						//		{
+						//			goto flag_handle_error;
+						//		}
 
-								break;
-							lbl_fallback:
-								*opcodePtr = ((uint)INS_Code.storeHeapValueRef | (0xffffff00 & (*opcodePtr)));
-								PC = (byte*)(opcodePtr + 1);
-								opcode = INS_Code.storeHeapValueRef;
-								goto lbl_retry;
+						//		break;
+						//	lbl_fallback:
+						//		*opcodePtr = ((uint)INS_Code.storeHeapValueRef | (0xffffff00 & (*opcodePtr)));
+						//		PC = (byte*)(opcodePtr + 1);
+						//		opcode = INS_Code.storeHeapValueRef;
+						//		goto lbl_retry;
 
 
-							}
+						//	}
 						case INS_Code.storeHeapValueRef:
 							{
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef);
@@ -18576,14 +18576,14 @@ namespace juicescript.runtime
 														goto flag_handle_error;
 													}
 
-#if FORCOMPILER
-													if (!IsComputeConstExpr)
-													{
-#endif
-														*opcodePtr = ((uint)INS_Code.storeHeapValueRef_ARR | (0xffffff00 & (*opcodePtr)));
-#if FORCOMPILER
-													}
-#endif
+//#if FORCOMPILER
+//													if (!IsComputeConstExpr)
+//													{
+//#endif
+//														*opcodePtr = ((uint)INS_Code.storeHeapValueRef_ARR | (0xffffff00 & (*opcodePtr)));
+//#if FORCOMPILER
+//													}
+//#endif
 
 
 
@@ -19563,7 +19563,7 @@ namespace juicescript.runtime
 								}
 #endif
 								var @class = Context.link_const_class[(int)boxing.UIntValue];
-								var v = stackslots[value.index].ValueType != BoxType.HeapPtr ? stackslots[value.index] : LoadValue(stackslots[value.index], -1, ref error, stackslots, stackStPos + value.index, null);
+								var v = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ   ? stackslots[value.index] : LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[value.index].HeapPtr], -1, ref error, stackslots, stackStPos + value.index, null);
 
 								ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr, ((RtMethodScope)methodscope).ThisPtr, false);
 								if (error.raised)
@@ -21062,7 +21062,7 @@ namespace juicescript.runtime
 								StackLocater value;
 								value.index = dst_index;
 
-								var lv = stackslots[value.index].ValueType != BoxType.HeapPtr ? stackslots[value.index] : LoadValue(stackslots[value.index],
+								var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[value.index].HeapPtr],
 									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
 								if (error.raised)
 								{
@@ -21605,7 +21605,7 @@ namespace juicescript.runtime
 								StackLocater value;
 								value.index = dst_index;
 
-								var lv = stackslots[value.index].ValueType != BoxType.HeapPtr ? stackslots[value.index] : LoadValue(stackslots[value.index],
+								var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[value.index].HeapPtr],
 									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
 								if (error.raised)
 								{
@@ -21678,7 +21678,7 @@ namespace juicescript.runtime
 								StackLocater value;
 								value.index = dst_index;
 
-								var lv = stackslots[value.index].ValueType != BoxType.HeapPtr ? stackslots[value.index] : LoadValue(stackslots[value.index],
+								var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[value.index].HeapPtr],
 									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
 								if (error.raised)
 								{
