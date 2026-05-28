@@ -75,12 +75,12 @@ function fannkuch(n) {
    }
 }
 var st = getTimer();
-var n = 9;
+var n = 10;
 var ret = fannkuch(n);
 
 trace( getTimer() - st );
 
 var expected = 30;
 if (ret != expected)
-    throw "ERROR: bad result: expected " + expected + " but got " + ret;
+    throw "ERROR: bad result: expected " + expected + " but got " + ret + ( getTimer() - st);
 
