@@ -1,4 +1,5 @@
-﻿using juicescript.ABC.INS;
+﻿using juicescript.ABC;
+using juicescript.ABC.INS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,54 @@ namespace juicescript.compiler.IL.Optimize
 {
 	internal partial class Optimizer
 	{
-		private static void OptimizeBlock(BasicBlock basicBlock)
+		internal static void OptimizeStoreVar(BasicBlock basicBlock, ControlFlowGraph cfg)
 		{
+			//查找INS_Store_MethodVariable 。 将额外信息编码进ScopeId里。
+			{
+				for (int i = 0; i < basicBlock.Instructions.Count; i++)
+				{
+					var instruction = basicBlock.Instructions[i];
+					if (instruction.INS_Code == INS_Code.storeMethodVariable)
+					{
+						INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)instruction;
+
+						var scopeMember = cfg.Method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex];
+
+						bool encodetypekind = false;
+						TypeKind typeKind;
+						if (scopeMember.Kind == ScopeMemberKind.Parameter)
+						{
+							encodetypekind = scopeMember.TypeKind <= TypeKind.Namespace;
+							typeKind = scopeMember.TypeKind;
+						}
+						else
+						{
+							ASTrait t = scopeMember.trait;
+							encodetypekind = t.TypeKind <= TypeKind.Namespace;
+							typeKind = t.TypeKind;
+						}
+
+						if (!encodetypekind)
+						{
+							typeKind = (TypeKind)0xff;
+						}
+
+						var _heaplocater = store_MethodVariable.heap;
+						_heaplocater.ScopeIndex = (byte)typeKind;
+
+						store_MethodVariable.heap = _heaplocater;
+
+
+					}
+
+				}
+			}
+		}
+
+
+		private static void OptimizeBlock(BasicBlock basicBlock, ControlFlowGraph cfg)
+		{
+			OptimizeStoreVar(basicBlock,cfg);
 
 
 			//查找ld_MultiNameL_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面

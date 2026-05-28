@@ -18697,36 +18697,7 @@ namespace juicescript.runtime
 
 							}
 							break;
-						//case INS_Code.storeMethodVariable_Any:
-						//	{
-						//		//特点，不需要转换类型,不会回退
-
-						//		ScopeHeapLocater heapLocater;
-						//		{
-						//			heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
-						//			heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
-						//		}
-						//		NaNBoxing value = stackslots[dst_index]; 
-
-								
-						//		var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
-
-
-						//		RtMethodScope heap = (RtMethodScope)methodscope;
-						//		int* m_scope = method_scopes;
-						//		*m_scope++ = scope_ptr;
-						//		PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
-
-						//		if (error.raised)
-						//		{									
-						//			goto flag_handle_error;
-						//		}
-								
-						//		heap.SetSlot(value, heapLocater.MemberIndex);
-								
-
-						//	}
-						//	break;
+						
 						case INS_Code.storeMethodVariable:
 							{
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
@@ -18738,72 +18709,68 @@ namespace juicescript.runtime
 								}
 								ref NaNBoxing value = ref stackslots[dst_index];
 
-#if DEBUG
-								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
-									throw new InvalidOperationException();
-#endif
+								//#if DEBUG
+								//								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
+								//									throw new InvalidOperationException();
+								//#endif
 
-								var scopemember = methodscope.Type._link_codescope.Members[heapLocater.MemberIndex];
 
-								//Context.GC.CheckGC(ref error);
-								//if (Context.StackPosition >= Context.STACK_LENGTH)
-								//{
-								//	RaiseStackOverflow(ref error);
-								//	goto flag_handle_error;
-								//}
-
-								ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
-								Context.StackPosition++;
-
-								//bool isheaptype = false;
-
-								var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
-
-								if (scopemember.Kind == ScopeMemberKind.Parameter)
+								if ((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
 								{
-									//isheaptype = scopemember.TypeKind.IsHeapType();
 
-									ConvertValueType(ref error, value, scopemember.TypeKind, scopemember.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+								}
+								else if ((heapLocater.ScopeIndex & 0xff) < (byte)TypeKind.Object)
+								{
+									ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+									Context.StackPosition++;
+									ConvertValueType(ref error, value, (TypeKind)(heapLocater.ScopeIndex & 0xff), null, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+									Context.StackPosition--;
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+									value = conv;
 								}
 								else
 								{
-									ASTrait t = scopemember.trait;
+									var scopemember = methodscope.Type._link_codescope.Members[heapLocater.MemberIndex];
 
-									//isheaptype = t.TypeKind.IsHeapType();
-									ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+									ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+									Context.StackPosition++;
 
+									var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
 
-
-
-//#if FORCOMPILER
-//									if (!IsComputeConstExpr)
-//									{
-//#endif
-//									if (t.TypeKind == TypeKind.Any)
-//									{
-//										*opcodePtr = ((uint)INS_Code.storeMethodVariable_Any | (0xffffff00 & (*opcodePtr)));
-//									}
-
-//#if FORCOMPILER
-//									}
-//#endif
-
-
-								}
-								if (error.raised)
-								{
+									if (scopemember.Kind == ScopeMemberKind.Parameter)
+									{
+										//isheaptype = scopemember.TypeKind.IsHeapType();
+										ConvertValueType(ref error, value, scopemember.TypeKind, scopemember.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+									}
+									else
+									{
+										ASTrait t = scopemember.trait;
+										//isheaptype = t.TypeKind.IsHeapType();
+										ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+									}
 									Context.StackPosition--;
-									goto flag_handle_error;
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+									value = conv;
+
 								}
-
-								value = conv;
-
-
 
 
 								RtMethodScope heap = (RtMethodScope)methodscope;
 
-								//if (isheaptype)
+
+								if ( !((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+								{ 
+									
+								}
+								else
 								{
 									int* m_scope = method_scopes;
 									*m_scope++ = scope_ptr;
@@ -18811,14 +18778,14 @@ namespace juicescript.runtime
 
 									if (error.raised)
 									{
-										Context.StackPosition--;
+
 										goto flag_handle_error;
 									}
 								}
 
 
 								heap.SetSlot(value, heapLocater.MemberIndex);
-								Context.StackPosition--;
+								
 
 							}
 							break;

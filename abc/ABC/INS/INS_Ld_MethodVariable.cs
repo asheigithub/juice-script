@@ -40,7 +40,7 @@ namespace juicescript.ABC.INS
 
         public override string ToString()
         {
-            return $"Ld_MethodVar   [{dst}] <- [{heap}]";
+            return $"Ld_MethodVar   [{dst}] <- [offset:{heap.MemberIndex}]";
         }
 
         public override List<StackLocater> GetDef()

@@ -472,7 +472,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				OptimizeBlock(cfg.Blocks[i]);
+				OptimizeBlock(cfg.Blocks[i],cfg);
 			}
 
 
@@ -512,13 +512,19 @@ namespace juicescript.compiler.IL.Optimize
 
 		
 
-		internal static byte[] ReUseSlots(byte[] bytecode)
+		internal static byte[] ReUseSlotsAndOptimizeVar(byte[] bytecode, ASMethod temp)
 		{
 			//return (byte[])bytecode.Clone();
 
 			
 			Disassembler.Disassemble(bytecode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
-			var cfg = ControlFlowGraphBuilder.Build(instructions, null);
+			var cfg = ControlFlowGraphBuilder.Build(instructions, temp);
+
+			for (int i = 0; i < cfg.Blocks.Count; i++)
+			{
+				OptimizeStoreVar(cfg.Blocks[i], cfg);
+			}
+
 			int maxslots = slotCount;
 			maxslots = cfg.GraphColoring();
 			cfg.ReMapping();

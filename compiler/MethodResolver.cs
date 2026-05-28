@@ -1787,7 +1787,7 @@ namespace juicescript.compiler
 								if (!reuseslotbytecodes.TryGetValue(member, out bytecode))
 								{
 									//避免槽溢出，这里还需要先做栈槽复用									
-									bytecode = Optimizer.ReUseSlots(_temp.Body.ByteCode);
+									bytecode = Optimizer.ReUseSlotsAndOptimizeVar(_temp.Body.ByteCode,_temp);
 									reuseslotbytecodes.Add(member, bytecode);
 								}
 								else

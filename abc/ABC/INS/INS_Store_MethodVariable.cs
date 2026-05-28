@@ -12,6 +12,7 @@ namespace juicescript.ABC.INS
     /// </summary>
     public sealed class INS_Store_MethodVariable : Instruction
     {
+       
         public override INS_Code INS_Code => INS_Code.storeMethodVariable;
 
         public override int Size
@@ -23,6 +24,8 @@ namespace juicescript.ABC.INS
         }
 
         public ScopeHeapLocater heap;
+
+
 
         
 
@@ -45,7 +48,7 @@ namespace juicescript.ABC.INS
 
         public override string ToString()
         {
-            return $"Store_MethodVar   [{heap}] <- [{dst}]";
+            return $"Store_MethodVar   [offset:{heap.MemberIndex}] <- [{dst}]";
         }
 
         public override List<StackLocater> GetDef()
