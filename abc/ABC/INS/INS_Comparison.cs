@@ -49,7 +49,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"[{dst}] <- [{v1}] {( opMode==0 ? "<" : opMode == 1 ? ">" : opMode == 2 ? "<=" : ">=" )} [{v2}] ";
+			return $"logic_cmp [{dst}] <- [{v1}] {( opMode==0 ? "<" : opMode == 1 ? ">" : opMode == 2 ? "<=" : ">=" )} [{v2}] ";
 
 		}
 

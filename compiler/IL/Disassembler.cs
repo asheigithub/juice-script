@@ -268,6 +268,10 @@ namespace juicescript.compiler.IL
 				case INS_Code.if_logicOp_goto:
 					instruction = new INS_If_LogicOp_Goto(token);
 					break;
+				case INS_Code.store_MultiNameL:
+					instruction = new INS_Store_MultiNameL(token);
+					break;
+
 				//case INS_Code.return_op:
 				//	instruction = new INS_Return_Oper(token);
 				//	break;

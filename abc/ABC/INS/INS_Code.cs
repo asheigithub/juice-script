@@ -254,26 +254,25 @@ namespace juicescript.ABC.INS
         if_true_goto = 106,
 
 
-        //组合指令优化
-        //op_stack_Variable_ldconst = 110,
-
+        
         //根据逻辑指令结果跳转
         if_logicOp_goto =112,
 
-        //返回操作结果
-        //return_op = 114,
+		/// <summary>
+		/// 通过MultiNameL 查找成员,并将值保存进去。name也在运行时确定，namespace在打开的namespaceset里
+		/// </summary>
+		store_MultiNameL = 114,
 
 
-
-        //******短路径版本**********
-  //      short_ld_const =150,
+		//******短路径版本**********
+		//      short_ld_const =150,
 		//short_ld_methodVariable = 151,
-  //      short_strict_eq = 152,
-  //      short_sub = 153,
-  //      short_add = 154,
+		//      short_strict_eq = 152,
+		//      short_sub = 153,
+		//      short_add = 154,
 
 
-        array_vector_initelement = 120, //array push 初始值
+		array_vector_initelement = 120, //array push 初始值
 
 		//**specialized opcode  quickening
 

@@ -60,7 +60,7 @@ namespace juicescript.compiler.IL.Optimize
 			OptimizeStoreVar(basicBlock,cfg);
 
 
-			//查找ld_MultiNameL_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面
+			//查找ld_MultiNameL_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面,然后合并为直接存值指令
 			{
 				for (int i = 0; i < basicBlock.Instructions.Count; i++)
 				{
@@ -81,7 +81,19 @@ namespace juicescript.compiler.IL.Optimize
 
 							basicBlock.Instructions.RemoveAt(i);
 							int j = basicBlock.Instructions.IndexOf(store);
-							basicBlock.Instructions.Insert(j, instruction);
+
+							INS_Store_MultiNameL store_MultiNameL = new INS_Store_MultiNameL(store.token);
+							store_MultiNameL.dst = ((INS_Store_HeapValueRef)store).source;
+							store_MultiNameL.instance = ((INS_Ld_MultiNameL_Ref)instruction).instance;
+							store_MultiNameL.name = ((INS_Ld_MultiNameL_Ref)instruction).name;
+							store_MultiNameL.super_type_index = ((INS_Ld_MultiNameL_Ref)instruction).super_type_index;
+							store_MultiNameL.tmp_holder = ((INS_Ld_MultiNameL_Ref)instruction).dst;
+
+
+							basicBlock.Instructions.Insert(j, store_MultiNameL);
+
+							basicBlock.Instructions.Remove(store);
+
 						}
 
 					}
