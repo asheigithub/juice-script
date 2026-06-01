@@ -16711,7 +16711,7 @@ namespace juicescript.runtime
 								var obj = Context.GC.Heap[arr.HeapPtr];
 								if (obj.Kind == RtHeapTypeKind.ARRAY)
 								{
-									var arr_payload = (RtArray)Context.GC.Heap[arr.HeapPtr];
+									var arr_payload = (RtArray)obj;
 
 									Debug.Assert(arr_payload.StoreMode != RtArray.ArrayStoreMode.cache_on_stack);
 
@@ -16722,10 +16722,11 @@ namespace juicescript.runtime
 										{
 											goto flag_handle_error;
 										}
+										obj = Context.GC.Heap[heaparr];
 										stackslots[instance.index].SetHeapPtr(heaparr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 									}
 
-									SetArraySlot(stackslots[dst_index], (uint)index, Context.GC.Heap[arr.HeapPtr], ref error);
+									SetArraySlot(stackslots[dst_index], (uint)index, obj, ref error);
 									if (error.raised)
 									{
 										goto flag_handle_error;
@@ -16733,7 +16734,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									var vec_payload = (RtVector)Context.GC.Heap[arr.HeapPtr];
+									var vec_payload = (RtVector)obj;
 
 									ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref stackslots[dst_index]);
 									if (error.raised)
