@@ -114,7 +114,7 @@ namespace juicescript
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl( MethodImplOptions.AggressiveInlining)]
+        [MethodImpl( MethodImplOptions.AggressiveOptimization)]
         public bool FastTestComp(NaNBoxing other,out bool isequal)
         {
             if (store == QNAN || other.store == QNAN)

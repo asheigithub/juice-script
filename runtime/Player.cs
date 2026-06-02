@@ -13238,6 +13238,7 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.ld_function:
 							{
+
 								Ld_function(dst_index, &PC, methodscope, constants, stackslots, scope_ptr, stackStPos, method_scopes, ref error);
 								if (error.raised)
 								{
@@ -13247,6 +13248,7 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.ld_function_call: //此指令目标肯定是匿名函数，所以不需要考虑proto和动态属性问题。
 							{
+
 								Ld_function_call( &PC, dst_index, methodscope,constants, stackslots, scopeType, scope_ptr, stackStPos, ref error);
 								if (error.raised)
 								{
@@ -13257,7 +13259,13 @@ namespace juicescript.runtime
 
 						case INS_Code.ld_function_bindglobal_call:
 							{
-								
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+
+#endif
 
 								Ld_function_bindglobal_call(&PC, methodscope, dst_index,constants, stackslots, scope_ptr, stackStPos, method_scopes,
 									ref global_obj, ref error
@@ -13270,7 +13278,13 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.bindglobal_call:
 							{
-								
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+
+#endif
 								Bindglobal_call(dst_index,&PC,(RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr,  ref global_obj, ref error);
 								if (error.raised)
 								{
