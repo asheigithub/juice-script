@@ -18,7 +18,7 @@ namespace juicescript.runtime
 			h_number,
 			h_string
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal bool IsNumeric(NaNBoxing value)
 		{
 			switch (value.ValueType)

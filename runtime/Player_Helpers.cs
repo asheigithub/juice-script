@@ -21,8 +21,60 @@ namespace juicescript.runtime
 	public partial class Player
 	{
 
-		private  void POSITIVE(RtHeapBase methodscope, StackLocater src,StackLocater dst,Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr , ref ReceiveError error)
+		private unsafe void Ld_class(int dst_index,byte** PC, Span<NaNBoxing> constants,Span<NaNBoxing> stackslots,ref ReceiveError error)
 		{
+			StackLocater stackLocater;
+			stackLocater.index = dst_index;
+
+			int classid_index = 0;
+			LoadInt32(&classid_index, PC);
+
+			var boxing = constants[classid_index];
+
+
+			Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
+
+
+			//InitASClass((ASClass)instance.Type, ref error);
+			var @class = Context.link_const_class[(int)boxing.UIntValue];
+			InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
+			if (error.raised)
+			{
+				goto flag_handle_error;
+			}
+			if (@class.__instance_index__ == 0)
+			{
+				//在@class就在当前正在初始化的script中，却又没有初始化到的情况。
+				InitASClass(@class, ref error);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+			}
+
+			stackslots[stackLocater.index].SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+
+		flag_handle_error:
+			;
+
+		}
+
+
+
+
+
+
+
+
+
+
+		private unsafe void POSITIVE( int dst_index,byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr , ref ReceiveError error)
+		{
+			StackLocater dst;
+			StackLocater src;
+
+			dst.index = dst_index;
+			LoadStackLocater(&src, PC);
 
 			var v = stackslots[src.index];// LoadValue(stackslots[src.index], ref error, ref stackslots, stackStPos);
 										  //if (error.raised)
@@ -138,8 +190,16 @@ namespace juicescript.runtime
 
 
 
-		private void NEG(RtHeapBase methodscope, StackLocater src, StackLocater dst, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, ref ReceiveError error)
+		private unsafe void NEG( int dst_index,byte** PC, RtHeapBase methodscope,Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, ref ReceiveError error)
 		{
+			StackLocater dst;
+			StackLocater src;
+
+			//LoadStackLocater(&dst, &PC);
+			dst.index = dst_index;
+			LoadStackLocater(&src, PC);
+
+
 			var v = stackslots[src.index];// LoadValue(stackslots[src.index], ref error, ref stackslots, stackStPos);
 										  //if (error.raised)
 										  //{
@@ -301,8 +361,2040 @@ namespace juicescript.runtime
 		}
 
 
-		private void GET_TYPEOF(StackLocater src, StackLocater dst ,Span<NaNBoxing> stackslots)
+		
+		private unsafe void Exec_Add(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr,  Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+
+			NaNBoxing sum;
+			if (NaNBoxing.FastAdd(n1, n2, out sum))
+			{
+				stackslots[dst.index] = sum;
+				return;
+			}
+
+			ASClass t1; ASClass t2;
+			//操作符重载
+			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2, out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.add][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+
+					var @class = (ASClass)method.Container;
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+			HINT hint; //这里还是按AIR的实现来，如果有字符串则用 string
+			if ((n1.ValueType == BoxType.HeapPtr && n1.HeapKind == (byte)RtHeapTypeKind.STRING)
+				||
+				(n2.ValueType == BoxType.HeapPtr && n2.HeapKind == (byte)RtHeapTypeKind.STRING)
+				||
+				n1.ValueType == BoxType.LocalString
+				||
+				n2.ValueType == BoxType.LocalString
+				)
+			{
+				hint = HINT.h_string;
+			}
+			else
+			{
+				hint = HINT.h_number;
+			}
+
+			n1 = ToPrimitive(ref error, n1, hint, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			n2 = ToPrimitive(ref error, n2, hint, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+			if (error.raised)
+			{
+				return;
+			}
+
+			switch (n1.ValueType)
+			{
+				case NaNBoxing.BoxType.Number:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.Boolean:
+							case BoxType.Int:
+							case BoxType.Uint:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+								stackslots[dst.index].SetNumber(n1.Number + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+							case BoxType.LocalString:
+								{
+									// Use efficient char-based concatenation to avoid string allocation
+									Span<char> chars2 = stackalloc char[16];
+									int charCount2 = n2.GetLocalStringChars(chars2);
+									if (charCount2 > 0)
+									{
+										var str2 = chars2.Slice(0, charCount2);
+
+										Span<char> buffers = stackalloc char[128];
+										var concatenated = $"{Extensions.GetPrimitiveValueToString(this, n1, buffers)}{str2}";
+
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										// Empty LocalString, just convert n1 to string
+										Span<char> buffers = stackalloc char[128];
+										var concatenated = Extensions.GetPrimitiveValueToString(this, n1, buffers);
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return;
+										}
+									}
+								}
+								break;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.Undefined:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.Boolean:
+							case BoxType.Int:
+							case BoxType.Uint:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+								stackslots[dst.index].SetNumber(double.NaN + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+							case BoxType.LocalString:
+								{
+									// Use efficient char-based concatenation to avoid string allocation
+									Span<char> chars2 = stackalloc char[16];
+									int charCount2 = n2.GetLocalStringChars(chars2);
+									if (charCount2 > 0)
+									{
+										var str2 = chars2.Slice(0, charCount2);
+										Span<char> buffers = stackalloc char[128];
+										string concatenated = $"{Extensions.GetPrimitiveValueToString(this, n1, buffers)}{str2}";
+
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										Span<char> buffers = stackalloc char[128];
+										// Empty LocalString, just convert n1 to string
+										var concatenated = Extensions.GetPrimitiveValueToString(this, n1, buffers);
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return;
+										}
+									}
+								}
+								break;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.Null:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.Boolean:
+							case BoxType.Int:
+							case BoxType.Uint:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+								stackslots[dst.index].SetNumber(0.0 + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.Boolean:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+								stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.Undefined:
+								stackslots[dst.index].SetNumber(double.NaN);
+								break;
+							case BoxType.Null:
+								stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) + 0.0);
+								break;
+							case BoxType.Boolean:
+								stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) + (n2.Boolean ? 1 : 0));
+								break;
+							case BoxType.Int:
+								stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) + n2.IntValue);
+								break;
+							case BoxType.Uint:
+								stackslots[dst.index].SetNumber((n1.Boolean ? 1U : 0U) + n2.UIntValue);
+								break;
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+								stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) + Extensions.GetIntValue(n2));
+								break;
+							case BoxType.Float:
+								stackslots[dst.index].SetFloat((n1.Boolean ? 1 : 0) + n2.FloatValue);
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.Int:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Undefined:
+								stackslots[dst.index].SetNumber(double.NaN);
+								break;
+							case BoxType.Number:
+							case BoxType.Null:
+								stackslots[dst.index].SetNumber(n1.IntValue + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.Boolean:
+								stackslots[dst.index].SetInt(n1.IntValue + (n2.Boolean ? 1 : 0));
+								break;
+							case BoxType.Uint:
+								stackslots[dst.index].SetNumber((double)n1.IntValue + n2.UIntValue);
+								break;
+							case BoxType.Float:
+								stackslots[dst.index].SetFloat(n1.IntValue + n2.FloatValue);
+								break;
+							case BoxType.Int:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+								stackslots[dst.index].SetInt(n1.IntValue + Extensions.GetIntValue(n2));
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.Uint:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Undefined:
+								stackslots[dst.index].SetNumber(double.NaN);
+								break;
+							case BoxType.Number:
+							case BoxType.Null:
+								stackslots[dst.index].SetNumber(n1.UIntValue + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.Boolean:
+								stackslots[dst.index].SetNumber(n1.UIntValue + (n2.Boolean ? 1U : 0U));
+								break;
+							case BoxType.Int:
+								stackslots[dst.index].SetNumber((double)n1.UIntValue + n2.IntValue);
+								break;
+							case BoxType.Uint:
+								stackslots[dst.index].SetUInt(n1.UIntValue + n2.UIntValue);
+								break;
+							case BoxType.Sbyte:
+								stackslots[dst.index].SetNumber((double)n1.UIntValue + n2.SByteValue);
+								break;
+							case BoxType.Byte:
+								stackslots[dst.index].SetUInt(n1.UIntValue + n2.ByteValue);
+								break;
+							case BoxType.Short:
+								stackslots[dst.index].SetNumber((double)n1.UIntValue + n2.ShortValue);
+								break;
+							case BoxType.UShort:
+								stackslots[dst.index].SetUInt(n1.UIntValue + n2.UShortValue);
+								break;
+							case BoxType.Float:
+								stackslots[dst.index].SetFloat((float)n1.UIntValue + n2.FloatValue);
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.Sbyte:
+				case NaNBoxing.BoxType.Byte:
+				case NaNBoxing.BoxType.Short:
+				case NaNBoxing.BoxType.UShort:
+					switch (n2.ValueType)
+					{
+						case BoxType.Undefined:
+							stackslots[dst.index].SetNumber(double.NaN);
+							break;
+						case BoxType.Number:
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Uint:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + n2.UIntValue);
+							break;
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+						case BoxType.Boolean:
+						case BoxType.Int:
+							stackslots[dst.index].SetInt(Extensions.GetIntValue(n1) + Extensions.GetIntValue(n2));
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) + n2.FloatValue);
+							break;
+						case BoxType.HeapPtr:
+							goto lbL_primtive_add_heap;
+#if DEBUG
+						case BoxType.Fault:
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+
+					break;
+				case NaNBoxing.BoxType.Float:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+
+								stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.Boolean:
+							case BoxType.Int:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+							case BoxType.Uint:
+								stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) + Extensions.GetFloatValue(n2));
+								break;
+							case BoxType.HeapPtr:
+								goto lbL_primtive_add_heap;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.LocalString:
+					{
+						// Use efficient char-based operations to avoid string allocation
+						Span<char> chars1 = stackalloc char[16];
+						int charCount1 = n1.GetLocalStringChars(chars1);
+						var str1 = charCount1 > 0 ? chars1.Slice(0, charCount1) : ReadOnlySpan<char>.Empty;
+
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.Boolean:
+							case BoxType.Int:
+							case BoxType.Uint:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+								{
+									Span<char> buffers = stackalloc char[128];
+									var str2 = Extensions.GetPrimitiveValueToString(this, n2, buffers);
+									string concatenated = $"{str1}{str2}";
+
+									// 使用安全的字符串创建方法
+									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									{
+										return; // 错误已经在TryCreateStringValue中处理
+									}
+								}
+								break;
+							case BoxType.HeapPtr:
+								{
+									if (n2.HeapKind == (byte)RtHeapTypeKind.STRING)
+									{
+										var instance2 = Context.GC.Heap[n2.HeapPtr];
+										var str2 = ((RtString)instance2).Str;
+										string concatenated = $"{str1}{str2}";
+
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+#if DEBUG
+									else
+									{
+										throw new InvalidOperationException();
+									}
+#endif
+								}
+								break;
+							case BoxType.LocalString:
+								{
+									// Use efficient char-based concatenation for LocalString + LocalString
+									Span<char> chars2 = stackalloc char[16];
+									int charCount2 = n2.GetLocalStringChars(chars2);
+									if (charCount2 > 0)
+									{
+										ReadOnlySpan<char> str2 = chars2.Slice(0, charCount2);
+										string concatenated = $"{str1}{str2}";
+
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									else
+									{
+										// n2 is empty LocalString, result is just str1
+										if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
+										{
+											return;
+										}
+									}
+								}
+								break;
+#if DEBUG
+							case BoxType.Fault:
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+				case NaNBoxing.BoxType.HeapPtr:
+					{
+						if (n1.HeapKind == (byte)RtHeapTypeKind.STRING)
+						{
+							var instance1 = Context.GC.Heap[n1.HeapPtr];
+							var str1 = ((RtString)instance1).Str;
+
+							switch (n2.ValueType)
+							{
+								case BoxType.Number:
+								case BoxType.Undefined:
+								case BoxType.Null:
+								case BoxType.Boolean:
+								case BoxType.Int:
+								case BoxType.Uint:
+								case BoxType.Sbyte:
+								case BoxType.Byte:
+								case BoxType.Short:
+								case BoxType.UShort:
+								case BoxType.Float:
+									{
+										Span<char> buffers = stackalloc char[128];
+										var str2 = Extensions.GetPrimitiveValueToString(this, n2, buffers);
+										string concatenated = $"{str1}{str2}";
+
+										// 使用安全的字符串创建方法
+										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										{
+											return; // 错误已经在TryCreateStringValue中处理
+										}
+									}
+									break;
+								case BoxType.LocalString:
+									{
+										// Use efficient char-based concatenation to avoid string allocation
+										Span<char> chars2 = stackalloc char[16];
+										int charCount2 = n2.GetLocalStringChars(chars2);
+										if (charCount2 > 0)
+										{
+											string str2 = new string(chars2.Slice(0, charCount2));
+											string concatenated = str1 + str2;
+
+											// 使用安全的字符串创建方法
+											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+											{
+												return; // 错误已经在TryCreateStringValue中处理
+											}
+										}
+										else
+										{
+											// n2 is empty LocalString, result is just str1
+											if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
+											{
+												return;
+											}
+										}
+									}
+									break;
+								case BoxType.HeapPtr:
+									{
+										if (n2.HeapKind == (byte)RtHeapTypeKind.STRING)
+										{
+											var instance2 = Context.GC.Heap[n2.HeapPtr];
+											var str2 = ((RtString)instance2).Str;
+											string concatenated = str1 + str2;
+
+											// 使用安全的字符串创建方法
+											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+											{
+												return; // 错误已经在TryCreateStringValue中处理
+											}
+										}
+#if DEBUG
+										else
+										{
+											throw new InvalidOperationException();
+										}
+#endif
+									}
+									break;
+#if DEBUG
+								case BoxType.Fault:
+								default:
+									throw new InvalidOperationException();
+#endif
+							}
+
+						}
+#if DEBUG
+						else
+						{
+							throw new InvalidOperationException();
+						}
+#endif
+					}
+					break;
+#if DEBUG
+				case NaNBoxing.BoxType.Fault:
+				default:
+					throw new InvalidOperationException();
+#endif
+			}
+			return;
+		lbL_primtive_add_heap:;
+			{
+
+				if (n2.HeapKind == (byte)RtHeapTypeKind.STRING)
+				{
+					var instance = Context.GC.Heap[n2.HeapPtr];
+					Span<char> buffers = stackalloc char[128];
+					var str = Extensions.GetPrimitiveValueToString(this, n1, buffers);
+					var str2 = ((RtString)instance).Str;
+					Context.GC.CheckGC(ref error);
+
+					string concatenated = $"{str}{str2}";
+
+					// 使用安全的字符串创建方法
+					if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+					{
+						return; // 错误已经在TryCreateStringValue中处理
+					}
+				}
+#if DEBUG
+				else
+				{
+					throw new InvalidOperationException();
+				}
+#endif
+			}
+		}
+
+
+
+
+
+		private unsafe void Exec_Sub(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+
+			//NaNBoxing sub;
+			if (NaNBoxing.FastMinus(n1, n2, ref stackslots[dst.index])) //out sub))
+			{
+				//stackslots[dst.index] = sub;
+				return;
+			}
+
+			//操作符重载
+			ASClass t1; ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2, out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.sub][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+
+
+
+
+			if (!IsPrimitive(n1))
+			{
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n1.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错 这里肯定是字符串
+			}
+
+			if (!IsPrimitive(n2))
+			{
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n2.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会出错 这里肯定是字符串
+			}
+
+			switch (n1.ValueType)
+			{
+				case BoxType.Number:
+					stackslots[dst.index].SetNumber(n1.Number - Extensions.GetDoubleValue(n2));
+					break;
+				case BoxType.Undefined:
+					stackslots[dst.index].SetNumber(double.NaN - Extensions.GetDoubleValue(n2));
+					break;
+				case BoxType.Null:
+					stackslots[dst.index].SetNumber(0.0 - Extensions.GetDoubleValue(n2));
+					break;
+				case BoxType.Boolean:
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+							stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) - Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Undefined:
+							stackslots[dst.index].SetNumber(double.NaN);
+							break;
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) - 0.0);
+							break;
+						case BoxType.Boolean:
+							stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) - (n2.Boolean ? 1 : 0));
+							break;
+						case BoxType.Int:
+							stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) - n2.IntValue);
+							break;
+						case BoxType.Uint:
+							stackslots[dst.index].SetNumber((n1.Boolean ? 1U : 0U) - n2.UIntValue);
+							break;
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+							stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) - Extensions.GetIntValue(n2));
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat((n1.Boolean ? 1 : 0) - n2.FloatValue);
+							break;
+#if DEBUG
+						case BoxType.HeapPtr:
+						case BoxType.Fault:
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+				case BoxType.Int:
+					switch (n2.ValueType)
+					{
+						case BoxType.Undefined:
+							stackslots[dst.index].SetNumber(double.NaN);
+							break;
+						case BoxType.Number:
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber(n1.IntValue - Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Boolean:
+							stackslots[dst.index].SetInt(n1.IntValue - (n2.Boolean ? 1 : 0));
+							break;
+						case BoxType.Uint:
+							stackslots[dst.index].SetNumber((double)n1.IntValue - n2.UIntValue);
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(n1.IntValue - n2.FloatValue);
+							break;
+						case BoxType.Int:
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+							stackslots[dst.index].SetInt(n1.IntValue - Extensions.GetIntValue(n2));
+							break;
+#if DEBUG
+						case BoxType.Fault:
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+				case BoxType.Uint:
+					switch (n2.ValueType)
+					{
+						case BoxType.Undefined:
+							stackslots[dst.index].SetNumber(double.NaN);
+							break;
+						case BoxType.Number:
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber(n1.UIntValue - Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Boolean:
+							stackslots[dst.index].SetUInt(n1.UIntValue - (n2.Boolean ? 1U : 0U));
+							break;
+						case BoxType.Int:
+							stackslots[dst.index].SetNumber((double)n1.UIntValue - n2.IntValue);
+							break;
+						case BoxType.Uint:
+							stackslots[dst.index].SetUInt(n1.UIntValue - n2.UIntValue);
+							break;
+						case BoxType.Sbyte:
+							stackslots[dst.index].SetNumber((double)n1.UIntValue - n2.SByteValue);
+							break;
+						case BoxType.Byte:
+							stackslots[dst.index].SetUInt(n1.UIntValue - n2.ByteValue);
+							break;
+						case BoxType.Short:
+							stackslots[dst.index].SetNumber((double)n1.UIntValue - n2.ShortValue);
+							break;
+						case BoxType.UShort:
+							stackslots[dst.index].SetUInt(n1.UIntValue - n2.UShortValue);
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat((float)n1.UIntValue - n2.FloatValue);
+							break;
+#if DEBUG
+						case BoxType.Fault:
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+				case BoxType.Sbyte:
+				case BoxType.Byte:
+				case BoxType.Short:
+				case BoxType.UShort:
+					switch (n2.ValueType)
+					{
+						case BoxType.Undefined:
+							stackslots[dst.index].SetNumber(double.NaN);
+							break;
+						case BoxType.Number:
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) - Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Uint:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) - n2.UIntValue);
+							break;
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+						case BoxType.Boolean:
+						case BoxType.Int:
+							stackslots[dst.index].SetInt(Extensions.GetIntValue(n1) - Extensions.GetIntValue(n2));
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) - n2.FloatValue);
+							break;
+#if DEBUG
+						case BoxType.HeapPtr:
+						case BoxType.Fault:
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+				case BoxType.Float:
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+						case BoxType.Undefined:
+						case BoxType.Null:
+
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) - Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Boolean:
+						case BoxType.Int:
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+						case BoxType.Float:
+						case BoxType.Uint:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) - Extensions.GetFloatValue(n2));
+							break;
+#if DEBUG
+						case BoxType.HeapPtr:
+						case BoxType.Fault:
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+#if DEBUG
+				case BoxType.HeapPtr:
+				case BoxType.Fault:
+				default:
+					throw new InvalidOperationException();
+#endif
+			}
+
+		}
+
+
+
+		private unsafe void Exec_Multiply( int dst_index,byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+
+			//操作符重载
+			ASClass t1; ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2, out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.mul][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+
+			if (!IsPrimitive(n1))
+			{
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n1.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错 这里肯定是字符串
+			}
+
+			if (!IsPrimitive(n2))
+			{
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n2.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会出错 这里肯定是字符串
+			}
+
+			switch (n1.ValueType)
+			{
+				case BoxType.Number:
+				case BoxType.Undefined:
+				case BoxType.Null:
+					stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) * Extensions.GetDoubleValue(n2));
+					break;
+				case BoxType.Int:
+				case BoxType.Uint:
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+						case BoxType.Undefined:
+						case BoxType.Null:
+						case BoxType.Int:
+						case BoxType.Uint:
+						case BoxType.Boolean:
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) * Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) * Extensions.GetFloatValue(n2));
+							break;
+#if DEBUG
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+				case BoxType.Boolean:
+				case BoxType.Sbyte:
+				case BoxType.Byte:
+				case BoxType.Short:
+				case BoxType.UShort:
+
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+							case BoxType.Int:
+							case BoxType.Uint:
+								stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) * Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.Boolean:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+								stackslots[dst.index].SetInt(Extensions.GetIntValue(n1) * Extensions.GetIntValue(n2));
+								break;
+							case BoxType.Float:
+								stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) * Extensions.GetFloatValue(n2));
+								break;
+#if DEBUG
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+
+					break;
+				case BoxType.Float:
+					{
+						switch (n2.ValueType)
+						{
+							case BoxType.Number:
+							case BoxType.Undefined:
+							case BoxType.Null:
+								stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) * Extensions.GetDoubleValue(n2));
+								break;
+							case BoxType.Int:
+							case BoxType.Uint:
+							case BoxType.Boolean:
+							case BoxType.Sbyte:
+							case BoxType.Byte:
+							case BoxType.Short:
+							case BoxType.UShort:
+							case BoxType.Float:
+								stackslots[dst.index].SetFloat(n1.FloatValue * Extensions.GetFloatValue(n2));
+								break;
+#if DEBUG
+							default:
+								throw new InvalidOperationException();
+#endif
+						}
+					}
+					break;
+#if DEBUG
+				default:
+					throw new InvalidOperationException();
+#endif
+			}
+
+
+		}
+
+
+
+		private unsafe void Exec_Division(int dst_index,byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+			//操作符重载
+			ASClass t1; ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2, out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.div][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+
+			if (!IsPrimitive(n1))
+			{
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n1.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错 这里肯定是字符串
+			}
+
+			if (!IsPrimitive(n2))
+			{
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n2.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会出错 这里肯定是字符串
+			}
+
+			switch (n1.ValueType)
+			{
+				case BoxType.Number:
+				case BoxType.Undefined:
+				case BoxType.Null:
+					stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) / Extensions.GetDoubleValue(n2));
+					break;
+				case BoxType.Boolean:
+				case BoxType.Int:
+				case BoxType.Uint:
+				case BoxType.Sbyte:
+				case BoxType.Byte:
+				case BoxType.Short:
+				case BoxType.UShort:
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+						case BoxType.Undefined:
+						case BoxType.Null:
+						case BoxType.Boolean:
+						case BoxType.Int:
+						case BoxType.Uint:
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) / Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) / Extensions.GetFloatValue(n2));
+							break;
+#if DEBUG
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+					break;
+				case BoxType.Float:
+
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+						case BoxType.Undefined:
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) / Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Boolean:
+						case BoxType.Int:
+						case BoxType.Uint:
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) / Extensions.GetFloatValue(n2));
+							break;
+#if DEBUG
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+
+					break;
+#if DEBUG
+				default:
+					throw new InvalidOperationException();
+#endif
+			}
+
+		}
+
+		private unsafe void Exec_Modulus(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+			//操作符重载
+			ASClass t1; ASClass t2;
+			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);
+			int op_override_id2 = GetOpOverrideTypeId(n2, out t2);
+			if (op_override_id1 != -1 && op_override_id2 != -1)
+			{
+				var method = overrideOperatorMethods[(int)OverrideOperator.mod][op_override_id1][op_override_id2];
+				if (method != null)
+				{
+#if FORCOMPILER
+					if (IsComputeConstExpr)
+					{
+						throw new EvalConstException();
+					}
+#endif
+					if (t1 != null)
+					{
+						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+					if (t2 != null)
+					{
+						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
+						if (error.raised)
+						{
+							return;
+						}
+					}
+
+					var @class = (ASClass)method.Container;
+
+					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
+					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					slots[0] = n1;
+					slots[1] = n2;
+
+					Context.StackPosition += 2;
+
+					NaNBoxing cls = default; cls.SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+					unsafe
+					{
+						StackLocater* args = stackalloc StackLocater[2];
+						args->index = 0;
+						(args + 1)->index = 1;
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+					}
+					Context.StackPosition -= 2;
+
+					return;
+				}
+			}
+
+			if (!IsPrimitive(n1))
+			{
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n1.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错 这里肯定是字符串
+			}
+
+			if (!IsPrimitive(n2))
+			{
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (n2.ValueType == BoxType.HeapPtr)
+			{
+				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会出错 这里肯定是字符串
+			}
+
+			switch (n1.ValueType)
+			{
+				case BoxType.Number:
+				case BoxType.Undefined:
+				case BoxType.Null:
+					stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) % Extensions.GetDoubleValue(n2));
+					break;
+				case BoxType.Uint:
+
+				case BoxType.Byte:
+
+				case BoxType.UShort:
+
+				case BoxType.Boolean:
+				case BoxType.Int:
+				case BoxType.Sbyte:
+				case BoxType.Short:
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+						case BoxType.Undefined:
+						case BoxType.Null:
+						case BoxType.Boolean:
+						//stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) % Extensions.GetDoubleValue(n2));
+						//break;
+						case BoxType.Int:
+						case BoxType.Sbyte:
+						case BoxType.Short:
+						//stackslots[dst.index].SetNumber(n1.UIntValue % Extensions.GetIntValue(n2));
+						//break;
+						case BoxType.Uint:
+						//stackslots[dst.index].SetUInt(n1.UIntValue % n2.UIntValue);
+						//break;
+						case BoxType.Byte:
+						//stackslots[dst.index].SetUInt(n1.UIntValue % n2.ByteValue);
+						//break;
+						case BoxType.UShort:
+							//stackslots[dst.index].SetUInt(n1.UIntValue % n2.UShortValue); 因为有 % 0 除以0问题，所以只能都用Number
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) % Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) % Extensions.GetFloatValue(n2));
+							break;
+#if DEBUG
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+
+					break;
+				case BoxType.Float:
+
+					switch (n2.ValueType)
+					{
+						case BoxType.Number:
+						case BoxType.Undefined:
+						case BoxType.Null:
+							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) % Extensions.GetDoubleValue(n2));
+							break;
+						case BoxType.Boolean:
+						case BoxType.Int:
+						case BoxType.Uint:
+						case BoxType.Sbyte:
+						case BoxType.Byte:
+						case BoxType.Short:
+						case BoxType.UShort:
+						case BoxType.Float:
+							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) % Extensions.GetFloatValue(n2));
+							break;
+#if DEBUG
+						default:
+							throw new InvalidOperationException();
+#endif
+					}
+
+					break;
+#if DEBUG
+				default:
+					throw new InvalidOperationException();
+#endif
+
+			}
+
+
+		}
+
+
+
+		private unsafe void Exec_bitWise(int dst_index,byte** PC, ref ReceiveError error,int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+
+			uint v = *(uint*)*PC; *PC += 4;
+			byte opMode = (byte)(v & 0xff);
+			v1.index = (int)(v >> 8);
+
+			LoadStackLocater(&v2, PC);
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+			switch (opMode)
+			{
+				case 0: // &
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						ConvertValueType(ref error, n2, TypeKind.Uint, Context.UINT, ref n2);
+
+						stackslots[dst.index].SetInt((int)(n1.UIntValue & n2.UIntValue));
+
+					}
+					break;
+				case 1:
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
+						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
+
+						stackslots[dst.index].SetInt((int)(n1.IntValue << n2.IntValue));
+					}
+					break;
+				case 2: // ~
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
+
+
+						stackslots[dst.index].SetInt(~n1.IntValue);
+					}
+					break;
+				case 3: // |
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						ConvertValueType(ref error, n2, TypeKind.Uint, Context.UINT, ref n2);
+
+						stackslots[dst.index].SetInt((int)(n1.UIntValue | n2.UIntValue));
+					}
+					break;
+				case 4:
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
+						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
+
+
+						stackslots[dst.index].SetInt((n1.IntValue >> n2.IntValue));
+					}
+					break;
+				case 5:
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
+
+						stackslots[dst.index].SetUInt((n1.UIntValue >> n2.IntValue));
+					}
+					break;
+				case 6: //xor
+					{
+						if (!IsPrimitive(n1))
+						{
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						ConvertValueType(ref error, n2, TypeKind.Uint, Context.UINT, ref n2);
+
+						stackslots[dst.index].SetInt((int)(n1.UIntValue ^ n2.UIntValue));
+					}
+					break;
+#if DEBUG
+				default:
+					throw new NotImplementedException();
+
+#endif
+			}
+
+
+
+
+		}
+
+
+
+		private unsafe void Exec_Comparse(int dst_index,byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+
+			uint v = *(uint*)*PC; *PC += 4;
+			byte opMode = (byte)(v & 0xff);
+			v1.index = (int)(v >> 8);
+
+			LoadStackLocater(&v2, PC);
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+			if (!IsPrimitive(n1))
+			{
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (!IsPrimitive(n2))
+			{
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			int c_r;
+
+			// 处理字符串比较的各种情况
+			if ((n1.ValueType == BoxType.HeapPtr && n1.HeapKind == (byte)RtHeapTypeKind.STRING) ||
+				n1.ValueType == BoxType.LocalString)
+			{
+				if ((n2.ValueType == BoxType.HeapPtr && n2.HeapKind == (byte)RtHeapTypeKind.STRING) ||
+					n2.ValueType == BoxType.LocalString)
+				{
+					// 两个都是字符串类型，进行字符串比较
+					ReadOnlySpan<char> str1, str2;
+
+					if (n1.ValueType == BoxType.LocalString)
+					{
+						// Use efficient char-based extraction to avoid string allocation when possible
+						Span<char> chars1 = stackalloc char[16];
+						int charCount1 = n1.GetLocalStringChars(chars1);
+						str1 = charCount1 > 0 ? new string(chars1.Slice(0, charCount1)) : string.Empty;
+					}
+					else
+					{
+						str1 = ((RtString)Context.GC.Heap[n1.HeapPtr]).Str;
+					}
+
+					if (n2.ValueType == BoxType.LocalString)
+					{
+						// Use efficient char-based extraction to avoid string allocation when possible
+						Span<char> chars2 = stackalloc char[16];
+						int charCount2 = n2.GetLocalStringChars(chars2);
+						str2 = charCount2 > 0 ? new string(chars2.Slice(0, charCount2)) : string.Empty;
+					}
+					else
+					{
+						str2 = ((RtString)Context.GC.Heap[n2.HeapPtr]).Str;
+					}
+
+					int c = str1.CompareTo(str2, StringComparison.Ordinal); //string.CompareOrdinal(str1, str2);
+					c_r = c;
+				}
+				else
+				{
+					// n1是字符串，n2不是字符串，转换为数字比较
+					ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1);
+#if DEBUG
+					if (error.raised)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
+					ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2);
+#if DEBUG
+					if (error.raised)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
+
+					if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
+					{
+						stackslots[dst.index].SetBoolean(false);
+						return;
+					}
+
+					if (n1.Number < n2.Number)
+						c_r = -1;
+					else if (n1.Number == n2.Number)
+						c_r = 0;
+					else
+						c_r = 1;
+				}
+			}
+			else if ((n2.ValueType == BoxType.HeapPtr && n2.HeapKind == (byte)RtHeapTypeKind.STRING) ||
+					 n2.ValueType == BoxType.LocalString)
+			{
+				// n1不是字符串，n2是字符串，转换为数字比较
+				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1);
+#if DEBUG
+				if (error.raised)
+				{
+					throw new InvalidOperationException();
+				}
+#endif
+				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2);
+#if DEBUG
+				if (error.raised)
+				{
+					throw new InvalidOperationException();
+				}
+#endif
+
+				if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
+				{
+					stackslots[dst.index].SetBoolean(false);
+					return;
+				}
+
+				if (n1.Number < n2.Number)
+					c_r = -1;
+				else if (n1.Number == n2.Number)
+					c_r = 0;
+				else
+					c_r = 1;
+			}
+			else
+			{
+
+
+				//				// 两个都不是字符串，转换为数字比较
+				//				ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会失败
+				//#if DEBUG
+				//				if (error.raised)
+				//				{
+				//					throw new InvalidOperationException();
+				//				}
+				//#endif
+				//				ConvertValueType(ref error, n2, TypeKind.Number, Context.NUMBER, ref n2); //这里不会失败
+				//#if DEBUG
+				//				if (error.raised)
+				//				{
+				//					throw new InvalidOperationException();
+				//				}
+				//#endif
+
+				double d1 = Extensions.GetDoubleValue(n1);
+				double d2 = Extensions.GetDoubleValue(n2);
+
+
+				if (double.IsNaN(d1) || double.IsNaN(d2))
+				{
+					stackslots[dst.index].SetBoolean(false);
+					return;
+				}
+
+				if (d1 < d2)
+					c_r = -1;
+				else if (d1 == d2)
+					c_r = 0;
+				else
+					c_r = 1;
+			}
+
+			switch (opMode)
+			{
+				case 0:
+					stackslots[dst.index].SetBoolean(c_r < 0);
+					break;
+				case 1:
+					stackslots[dst.index].SetBoolean(c_r > 0);
+					break;
+				case 2:
+					stackslots[dst.index].SetBoolean((c_r <= 0));
+					break;
+				case 3:
+					stackslots[dst.index].SetBoolean((c_r >= 0));
+					break;
+				default:
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");
+					break;
+#endif
+
+			}
+
+		}
+
+
+		private unsafe void Increment_decrement(int dst_index,byte** PC, RtHeapBase methodscope ,Span<NaNBoxing> stackslots,int scope_ptr,int stackStPos,ref ReceiveError error)
+		{
+			StackLocater dst;
+			StackLocater src;
+			StackLocater result;
+
+			dst.index = dst_index;
+
+			LoadStackLocater(&src, PC);
+			LoadStackLocater(&result, PC);
+
+			int addvalue = *(int*)*PC; *PC += 4;
+			NaNBoxing n1 = stackslots[src.index];
+
+			n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, result, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+			if (error.raised)
+			{
+				goto flag_handle_error;
+			}
+
+			if (!IsNumeric(n1))
+			{
+				if (n1.ValueType == BoxType.LocalString || (n1.HeapKind == (byte)RtHeapTypeKind.STRING && n1.ValueType == BoxType.HeapPtr))
+				{
+					ConvertValueType(ref error, n1, TypeKind.Number, Context.NUMBER, ref n1); //这里不会出错。
+				}
+				else
+				{
+					n1.SetNumber(Extensions.GetDoubleValue(n1));
+				}
+
+			}
+
+			NaNBoxing n2 = default; n2.SetInt(addvalue);
+
+			bool fa = NaNBoxing.FastAdd(n1, n2, out NaNBoxing r);
+			Debug.Assert(fa);
+			stackslots[dst.index] = r;
+
+			//Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+			//if (error.raised)
+			//{
+			//	goto flag_handle_error;
+			//}
+
+			if (dst.index != result.index)
+			{
+				stackslots[result.index] = n1;
+			}
+
+		flag_handle_error:
+			;
+
+		}
+
+
+
+		private unsafe void GET_TYPEOF(int dst_index,byte** PC ,Span<NaNBoxing> stackslots)
+		{
+			StackLocater dst;
+			StackLocater src;
+
+			dst.index = dst_index;
+			LoadStackLocater(&src, PC);
+
+
 			var v = stackslots[src.index];
 
 			switch (v.ValueType)
@@ -364,6 +2456,55 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #endif
 			}
+		}
+
+
+		private unsafe void ITER_INITCTX(int dst_index, byte** PC, RtHeapBase methodscope ,ref ReceiveError error)
+		{
+			InitScript((ASScript)Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__._link_codescope.Parent.Container, ref error);
+			if (error.raised)
+			{
+				goto flag_handle_error;
+			}
+
+			// 从 dst_index 中解码 iterContextVar（复用存储空间）
+			ScopeHeapLocater iterContextVar;
+			iterContextVar.ScopeIndex = (ushort)(dst_index >> 16);
+			iterContextVar.MemberIndex = (ushort)(dst_index & 0xFFFF);
+
+			//if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
+			//{
+			//	RaiseStackOverflow(ref error);
+			//	goto flag_handle_error;
+			//}
+
+			RtHeapBase iterctx;
+			int iter_context_ptr = Context.GC.RentIterContext(out iterctx);
+			if (iter_context_ptr == 0)
+			{
+				RaiseOutOfMemory(ref error);
+				goto flag_handle_error;
+			}
+
+			//Context.StackPosition++; //执行iter.next时，保留给它当返回值槽用
+
+			((IterContxt)((RtInstance)iterctx).wapperedObject).PC = *PC;
+
+			// 将迭代器上下文存储到方法变量中
+			RtMethodScope heap = (RtMethodScope)methodscope;
+
+			Debug.Assert(methodscope.Type._link_codescope.index == iterContextVar.ScopeIndex);
+		
+
+			NaNBoxing iterCtxValue = default;
+			iterCtxValue.SetHeapPtr(iter_context_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+			heap.SetSlot(iterCtxValue, iterContextVar.MemberIndex);
+
+
+
+		flag_handle_error:
+			;
+
 		}
 
 
@@ -934,11 +3075,25 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Bindglobal_call( RtMethodScope methodscope, StackLocater function, StackLocater result ,
-			Span<NaNBoxing> stackslots, int stackStPos,int scope_ptr, int argsCount,byte* argementsPtr,
+		private unsafe void Bindglobal_call(int dst_index,byte** PC, RtMethodScope methodscope, 
+			Span<NaNBoxing> stackslots, int stackStPos,int scope_ptr,
 			ref NaNBoxing global_obj,
 			ref ReceiveError error)
 		{
+			StackLocater result;
+			result.index = dst_index;
+
+			StackLocater function;
+			LoadStackLocater(&function, PC);
+
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
+
 			NaNBoxing funValue = stackslots[function.index];
 
 			RtHeapBase funinstance = null;
@@ -1059,17 +3214,35 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Bindthis_call(RtHeapBase methodscope, StackLocater _this_,
-			StackLocater function,
-			StackLocater result,
+		private unsafe void Bindthis_call(int dst_index, byte** PC ,RtHeapBase methodscope,
+			
 			Span<NaNBoxing> stackslots,
 			int stackStPos,
 			int scope_ptr,
-			int argsCount,
-			byte* argementsPtr,
+			
+			
 			ref ReceiveError error
 			)
 		{
+
+			StackLocater result;
+			result.index = dst_index;
+
+			StackLocater function;
+			LoadStackLocater(&function, PC);
+
+			StackLocater _this_;
+			LoadStackLocater(&_this_, PC);
+
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
+
+
 			NaNBoxing thisValue;
 			if (_this_.index >= 0)
 			{
@@ -1373,11 +3546,23 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void NEW_INSTANCE(StackLocater typeLocater, StackLocater target ,int stackStPos, int scope_ptr, byte* argementsPtr, int argsCount,
+		private unsafe void NEW_INSTANCE(int dst_index,byte** PC, int stackStPos, int scope_ptr, 
 			Span<NaNBoxing> stackslots,ASContainer scopeType,
 			RtHeapBase methodscope,
 			ref ReceiveError error)
 		{
+			StackLocater target;
+			StackLocater typeLocater;
+			target.index = dst_index;
+			LoadStackLocater(&typeLocater, PC);
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//StackLocater* argements = (StackLocater*)PC;
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
 
 			NaNBoxing type_box = stackslots[typeLocater.index];
 
@@ -1916,10 +4101,106 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void DELETE( StackLocater stack, NaNBoxing box, Span<NaNBoxing> stackslots ,int stackStPos, ASMethod method , StackLocater* tmpArgLoc,  Span<char> frame_holdchars,ref ReceiveError error)
+
+		private unsafe void Type_cast(int dst_index, byte** PC ,RtHeapBase methodscope, Span<NaNBoxing> constants,Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr,ref ReceiveError error)
+		{
+			StackLocater value;
+			int classid_index;
+			LoadStackLocater(&value, PC);
+			LoadInt32(&classid_index, PC);
+
+
+			var boxing = constants[classid_index];
+#if DEBUG
+			if (boxing.ValueType != NaNBoxing.BoxType.Uint)
+			{
+				throw new InvalidOperationException();
+			}
+#endif
+			var @class = Context.link_const_class[(int)boxing.UIntValue];
+			var v = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr], -1, ref error, stackslots, stackStPos + value.index, null);
+
+			ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr, ((RtMethodScope)methodscope).ThisPtr, false);
+			
+		}
+
+		private unsafe void Create_prop(int dst_index,byte** PC,Span<NaNBoxing> stackslots,ref ReceiveError error)
+		{
+			StackLocater instance;
+			StackLocater key;
+			StackLocater value;
+
+			instance.index = dst_index;
+			LoadStackLocater(&key, PC);
+			LoadStackLocater(&value, PC);
+
+			var ins_v = stackslots[instance.index];
+			var key_v = stackslots[key.index];
+			var value_v = stackslots[value.index];
+
+#if DEBUG
+			if (ins_v.ValueType != BoxType.HeapPtr) throw new InvalidOperationException();
+			if (key_v.ValueType != BoxType.HeapPtr) throw new InvalidOperationException();
+#endif
+			var ins = Context.GC.Heap[ins_v.HeapPtr];
+
+#if DEBUG
+			var k = Context.GC.Heap[key_v.HeapPtr];
+			if (ins.Kind != RtHeapTypeKind.INSTANCE) throw new InvalidOperationException();
+			if (k.Kind != RtHeapTypeKind.STRING) throw new InvalidOperationException();
+#endif
+			CreateDynamic(ref error, ins, key_v, value_v, true, true, true);
+			
+		}
+
+		private unsafe void Super_ctor(byte** PC, RtHeapBase methodscope ,Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int scope_ptr,ref ReceiveError error)
+		{
+			//执行基类构造函数
+
+			int classid_index = 0;
+			LoadInt32(&classid_index, PC);
+
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//StackLocater* argements = (StackLocater*)PC;
+			//PC += argsCount * 4;
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
+
+
+			var boxing = constants[classid_index];
+#if DEBUG
+			if (boxing.ValueType != NaNBoxing.BoxType.Uint)
+			{
+				throw new InvalidOperationException();
+			}
+#endif
+
+			var super_class = Context.link_const_class[(int)boxing.UIntValue];
+			var ctor = super_class.Instance.Constructor;
+			RunMethod(ctor, ((RtMethodScope)methodscope).ThisPtr, scope_ptr, (super_class).Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1);
+			
+		}
+
+
+
+		private unsafe void DELETE(int dst_index, byte** PC , Span<NaNBoxing> stackslots ,int stackStPos, ASMethod method ,   ref ReceiveError error)
 		{
 			{
-				
+				Span<char> frame_holdchars = stackalloc char[128];
+				StackLocater* tmpArgLoc = stackalloc StackLocater[2];
+
+				StackLocater stack;
+				stack.index = dst_index;
+
+				StackLocater todelete;
+				LoadStackLocater(&todelete, PC);
+
+				NaNBoxing box = stackslots[todelete.index];
+
 
 				if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
@@ -2181,8 +4462,18 @@ namespace juicescript.runtime
 
 
 
-		private void GET_IN(StackLocater v1,StackLocater v2, StackLocater dst, Span<NaNBoxing> stackslots, Span<char> frame_holdchars, int stackStPos, int scope_ptr , RtHeapBase methodscope,ref ReceiveError error)
+		private unsafe void GET_IN(int dst_index,byte** PC, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr , RtHeapBase methodscope,ref ReceiveError error)
 		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+
+
 			var name_v = stackslots[v1.index];
 			NaNBoxing name_n = ToPrimitive(ref error, name_v, HINT.h_string, scope_ptr, dst, dst, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 			if (error.raised)
@@ -2190,7 +4481,7 @@ namespace juicescript.runtime
 				goto flag_handle_error;
 			}
 
-			Span<char> buffers = frame_holdchars;
+			Span<char> buffers = stackalloc char[128];
 			ReadOnlySpan<char> name = Extensions.GetPrimitiveValueToString(this, name_n, buffers);
 
 			var type = stackslots[v2.index];
@@ -2541,10 +4832,21 @@ namespace juicescript.runtime
 
 		}
 
-		private void GET_INSTANCEOF(StackLocater v1, StackLocater v2, StackLocater dst, Span<NaNBoxing> stackslots, 
+		private unsafe void GET_INSTANCEOF( int dst_index,byte** PC , Span<NaNBoxing> stackslots, 
 			ref ReceiveError error
 			)
 		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+
+
+
 			do
 			{
 
@@ -2793,8 +5095,18 @@ namespace juicescript.runtime
 
 
 
-		private void Ld_method( RtHeapBase methodscope, StackLocater instance, StackLocater target, Span<NaNBoxing> stackslots,int scope_ptr,int stackStPos , ushort vtable_index, ref ReceiveError error)
+		private unsafe void Ld_method(int dst_index,byte** PC, RtHeapBase methodscope,  Span<NaNBoxing> stackslots,int scope_ptr,int stackStPos ,  ref ReceiveError error)
 		{
+			StackLocater target;
+			target.index = dst_index;
+
+			StackLocater instance;
+			LoadStackLocater(&instance, PC);
+
+			uint vtable_ = 0;
+			LoadUInt(&vtable_, PC);
+			ushort vtable_index = (ushort)vtable_;
+
 
 			NaNBoxing thisValue;
 			if (instance.index >= 0)
@@ -3390,8 +5702,21 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Ld_memberInitValue(RtHeapBase methodscope, int* method_scopes,int scope_ptr , ScopeHeapLocater heapLocater,ASContainer scopeType,ref ReceiveError error)
+		private unsafe void Ld_memberInitValue(byte** PC, RtHeapBase methodscope, int* method_scopes,int scope_ptr , ASContainer scopeType,ref ReceiveError error)
 		{
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+				//byte* _p = (byte*)&heapLocater.ScopeIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+
+				//_p = (byte*)&heapLocater.MemberIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+			}
 
 			var s = methodscope; //Context.GC.Heap[scope_ptr];
 			int* m_scope = method_scopes;
@@ -3476,7 +5801,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Ld_MultiName_Ref( byte** PC, int dst_index, RtHeapBase methodscope,  Span<NaNBoxing> constants, Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr,ref ReceiveError error)
+		private unsafe void Ld_MultiName_Ref( int dst_index,byte** PC,  RtHeapBase methodscope,  Span<NaNBoxing> constants, Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr,ref ReceiveError error)
 		{
 			StackLocater dst;
 			dst.index = dst_index;
@@ -3620,8 +5945,23 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Ld_RTQNameL_Ref(StackLocater src, StackLocater _ns ,StackLocater _name, StackLocater stack, Span<char> frame_holdchars, RtHeapBase methodscope , Span<NaNBoxing> stackslots, int stackStPos,int scope_ptr, ref ReceiveError error )
+		private unsafe void Ld_RTQNameL_Ref(int dst_index,byte** PC , RtHeapBase methodscope , Span<NaNBoxing> stackslots, int stackStPos,int scope_ptr, ref ReceiveError error )
 		{
+
+			StackLocater stack;
+			stack.index = dst_index;
+
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			StackLocater _ns;
+			LoadStackLocater(&_ns, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+
+
 
 			NaNBoxing instance_box;
 			RtHeapTypeKind kind;
@@ -3656,7 +5996,7 @@ namespace juicescript.runtime
 
 			ASNamespace searchNs = null;
 
-			Span<char> searchNameBuffer = frame_holdchars;
+			Span<char> searchNameBuffer = stackalloc char[128];
 			ReadOnlySpan<char> searchName = searchNameBuffer;
 			if (ns.ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
@@ -4355,12 +6695,29 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void StoreScopeH( StackLocater stackLocater, ScopeHeapLocater heapLocater ,
+		private unsafe void StoreScopeH( int dst_index,byte** PC,
 			int scope_ptr,  RtHeapBase methodscope, int* method_scopes  ,Span<NaNBoxing> stackslots,
 			ASContainer scopeType,
 			ref ReceiveError error
 			)
 		{
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+
+				//byte* _p = (byte*)&heapLocater.ScopeIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+
+				//_p = (byte*)&heapLocater.MemberIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+			}
+			StackLocater stackLocater;
+			stackLocater.index = dst_index;
+
+
 			NaNBoxing value = stackslots[stackLocater.index];
 			var s = methodscope; //Context.GC.Heap[scope_ptr];
 
@@ -4601,15 +6958,28 @@ namespace juicescript.runtime
 		}
 
 
+		
 
 
 
 
-
-		private  void Ld_InstanceOrScopeMemberValueRef(StackLocater src, StackLocater target ,Span<NaNBoxing> stackslots,
-			int stackStPos,int scope_ptr,uint scopemember_index,
+		private unsafe void Ld_InstanceOrScopeMemberValueRef(int dst_index,byte** PC ,Span<NaNBoxing> stackslots,
+			int stackStPos,int scope_ptr,
 			ref ReceiveError error)
 		{
+
+			StackLocater target;
+			target.index = dst_index;
+
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			//ushort trait_index;
+			uint scopemember_index;
+
+			//LoadUShort(&trait_index, &PC);
+			LoadUInt(&scopemember_index, PC);
+
 
 			NaNBoxing instance_box;
 			RtHeapTypeKind kind;
@@ -4783,11 +7153,27 @@ namespace juicescript.runtime
 
 
 
-		private void Ld_MulitNameL_Ref(int super_const_index, Span<NaNBoxing> constants ,
-			Span<char> frame_holdchars ,StackLocater src, StackLocater _name , StackLocater stack ,Span<NaNBoxing> stackslots,
+		private unsafe void Ld_MulitNameL_Ref( int dst_index,byte** PC, Span<NaNBoxing> constants ,
+			Span<NaNBoxing> stackslots,
 			int stackStPos,int scope_ptr, RtHeapBase methodscope,
 			ref ReceiveError error)
 		{
+			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Ref);
+
+
+			StackLocater stack;
+			stack.index = dst_index;
+
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			int super_const_index;
+			LoadInt32(&super_const_index, PC);
+
+
 
 			NaNBoxing instance_box;
 			RtHeapTypeKind kind;
@@ -4901,7 +7287,7 @@ namespace juicescript.runtime
 
 			setinstance = true;
 		lbl_instance_primitive:
-			Span<char> buffers = frame_holdchars; //stackalloc char[16];
+			Span<char> buffers = stackalloc char[128];
 			ReadOnlySpan<char> name = buffers;
 
 			NaNBoxing prop_name = stackslots[_name.index];
@@ -4951,7 +7337,7 @@ namespace juicescript.runtime
 						case BoxType.LocalString:
 							// Use efficient char-based extraction to avoid string allocation
 
-							int charCount = prop_name.GetLocalStringChars(frame_holdchars);
+							int charCount = prop_name.GetLocalStringChars(buffers);
 							name = charCount > 0 ? buffers.Slice(0, charCount) : ReadOnlySpan<char>.Empty;
 							goto lbl_name_solved;
 						case NaNBoxing.BoxType.Number:
@@ -5234,7 +7620,7 @@ namespace juicescript.runtime
 
 
 		private unsafe void Store_MultiNameL( int dst_index,byte** PC , Span<NaNBoxing> constants,
-			Span<char> frame_holdchars,    Span<NaNBoxing> stackslots,
+			Span<NaNBoxing> stackslots,
 			int stackStPos, int scope_ptr, RtHeapBase methodscope,
 			ref ReceiveError error)
 		{
@@ -5370,7 +7756,7 @@ namespace juicescript.runtime
 
 			setinstance = true;
 		lbl_instance_primitive:
-			Span<char> buffers = frame_holdchars; //stackalloc char[16];
+			Span<char> buffers = stackalloc char[128];
 			ReadOnlySpan<char> name = buffers;
 
 			NaNBoxing prop_name = stackslots[_name.index];
@@ -5470,7 +7856,7 @@ namespace juicescript.runtime
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = prop_name;
 
 					
-					SaveHeapRef(cachePayload, source, stackslots, frame_holdchars, tmpArgLoc, scope_ptr, stackStPos, methodscope, ref error);
+					SaveHeapRef(cachePayload, source, stackslots, buffers, tmpArgLoc, scope_ptr, stackStPos, methodscope, ref error);
 					if (error.raised)
 					{
 						goto flag_handle_error;
@@ -5490,7 +7876,7 @@ namespace juicescript.runtime
 						case BoxType.LocalString:
 							// Use efficient char-based extraction to avoid string allocation
 
-							int charCount = prop_name.GetLocalStringChars(frame_holdchars);
+							int charCount = prop_name.GetLocalStringChars(buffers);
 							name = charCount > 0 ? buffers.Slice(0, charCount) : ReadOnlySpan<char>.Empty;
 							goto lbl_name_solved;
 						case NaNBoxing.BoxType.Number:
@@ -5756,7 +8142,7 @@ namespace juicescript.runtime
 					if (stackslots[tmp_holder.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
 					{
 
-						SaveHeapRef(Context.GC.Heap[stackslots[tmp_holder.index].HeapPtr], source, stackslots, frame_holdchars, tmpArgLoc, scope_ptr, stackStPos, methodscope, ref error);
+						SaveHeapRef(Context.GC.Heap[stackslots[tmp_holder.index].HeapPtr], source, stackslots, buffers, tmpArgLoc, scope_ptr, stackStPos, methodscope, ref error);
 
 						if (error.raised)
 						{
@@ -5802,7 +8188,7 @@ namespace juicescript.runtime
 
 
 		private unsafe void Ld_MultiNameL_Val(int dst_index,byte** PC, Span<NaNBoxing> constants,
-			Span<char> frame_holdchars, 
+			
 			ASMethod method,RtHeapBase methodscope,
 
 			Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr,ref ReceiveError error)
@@ -5935,7 +8321,7 @@ namespace juicescript.runtime
 
 			setinstance = true;
 		lbl_instance_primitive:
-			Span<char> buffers = frame_holdchars; //stackalloc char[16];
+			Span<char> buffers = stackalloc char[128];
 			ReadOnlySpan<char> name = buffers;
 
 			NaNBoxing prop_name = stackslots[_name.index];
@@ -6014,7 +8400,7 @@ namespace juicescript.runtime
 						case BoxType.LocalString:
 							// Use efficient char-based extraction to avoid string allocation
 
-							int charCount = prop_name.GetLocalStringChars(frame_holdchars);
+							int charCount = prop_name.GetLocalStringChars(buffers);
 							name = charCount > 0 ? buffers.Slice(0, charCount) : ReadOnlySpan<char>.Empty;
 							goto lbl_name_solved;
 						case NaNBoxing.BoxType.Number:
@@ -6305,6 +8691,508 @@ namespace juicescript.runtime
 
 		}
 
+
+
+		private unsafe void Ld_ScopeH( int dst_index, byte** PC, Span<NaNBoxing> stackslots ,RtHeapBase scope, ASContainer scopeType, int stackStPos)
+		{
+			StackLocater stackLocater;
+			stackLocater.index = dst_index;
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+				//byte* _p = (byte*)&heapLocater.ScopeIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+
+				//_p = (byte*)&heapLocater.MemberIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+			}
+
+
+
+
+			var s = scope; int _parent_ptr = 0;
+		label_method_parent:
+
+			switch (s.Kind)
+			{
+				case RtHeapTypeKind.CLASS:
+					{
+						var codeScope = ((RtScriptClass)s).Meta._link_codescope;
+						if (codeScope.index != heapLocater.ScopeIndex)
+						{
+							codeScope = codeScope.Parent;
+#if DEBUG
+							if (codeScope.Kind != CodeScopeKind.Script)
+								throw new InvalidOperationException();
+							if (codeScope.index != heapLocater.ScopeIndex)
+								throw new InvalidOperationException();
+#endif
+
+							RtHeapBase sInstance = Context.GC.Heap[
+							((ASScript)((RtScriptClass)s).Meta._link_codescope.Parent.Container).__global_index__];
+
+							RtScriptClass heap = (RtScriptClass)sInstance;
+							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+
+							stackslots[stackLocater.index] = value;return;
+							//return value;
+						}
+						else
+						{
+							RtScriptClass heap = (RtScriptClass)s;
+							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+
+							stackslots[stackLocater.index] = value;return;
+							//return value;
+						}
+
+					}
+
+				case RtHeapTypeKind.GLOBAL:
+					{
+#if DEBUG
+						var codeScope = ((RtScriptClass)s).Meta._link_codescope;
+						if (codeScope.index != heapLocater.ScopeIndex)
+							throw new InvalidOperationException();
+#endif
+
+						RtScriptClass heap = (RtScriptClass)s;
+						NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+
+						stackslots[stackLocater.index] = value;return;
+						//return value;
+					}
+
+				case RtHeapTypeKind.INSTANCE:
+					{
+						//考虑可能继承的情况，scopeType保存上下文堆内存用的布局类型
+						if (
+							scopeType._link_codescope.index != heapLocater.ScopeIndex
+							&&
+							s.Type._link_codescope.index != heapLocater.ScopeIndex
+							)
+						{
+							var sType = scopeType._link_codescope.Parent; //这里还是必须用scopeType来查找global.
+							while (sType.Kind != CodeScopeKind.Script)
+							{
+								sType = sType.Parent;
+							}
+
+							//const KKK = 7; 在这种情况下发生。
+							//class C extends Main
+							//{
+							//	/* INTERFACE II */
+							//	public function B()
+							//	{
+							//		return function iii()
+							//		{
+							//				o = KKK;			
+							//		}
+							//	}
+							//} 
+
+							RtHeapBase sInstance = Context.GC.Heap[
+									((ASScript)(sType.Container)).__global_index__];
+
+							RtScriptClass heap = (RtScriptClass)sInstance;
+							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+
+							stackslots[stackLocater.index] = value;
+							return;
+							//return value;
+						}
+						else
+						{
+							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex, s.Type._link_codescope, this, stackStPos + stackLocater.index, _parent_ptr);
+							stackslots[stackLocater.index] = value;
+							return;
+							//return value;
+						}
+
+					}
+
+				case RtHeapTypeKind.MethodScope:
+					{
+						if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
+						{
+							_parent_ptr = ((RtMethodScope)s).ParentPtr;
+							s = Context.GC.Heap[_parent_ptr];
+							goto label_method_parent;
+						}
+						else
+						{
+							RtMethodScope heap = (RtMethodScope)s;
+							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex
+								//#if FORCOMPILER
+								, this
+								//#endif
+								);
+
+							stackslots[stackLocater.index] = value;return;
+							//return value;
+						}
+					}
+
+				case RtHeapTypeKind.STRING:
+				//case RtHeapTypeKind.CACHE_LD_CLASS:
+				case RtHeapTypeKind.STACK_CACHE_OBJ:
+				default:
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");  return;
+#endif
+			}
+		}
+
+
+
+		private unsafe void Ld_function(int dst_index,byte** PC,RtHeapBase methodscope, Span<NaNBoxing> constants,Span<NaNBoxing> stackslots , int scope_ptr,int stackStPos,int* method_scopes,ref ReceiveError error)
+		{
+			StackLocater target;
+			target.index = dst_index;
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+				//byte* _p = (byte*)&heapLocater.ScopeIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+
+				//_p = (byte*)&heapLocater.MemberIndex;
+				//*_p++ = *PC++;
+				//*_p = *PC++;
+			}
+
+			int function_id = 0;
+			LoadInt32(&function_id, PC);
+
+			NaNBoxing fbox = constants[function_id];
+#if DEBUG
+			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
+				throw new InvalidOperationException();
+#endif
+			RtHeapBase closure;
+			Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			
+		}
+
+
+		private unsafe void Ld_supermethod(int dst_index,byte** PC,Span<NaNBoxing> stackslots,Span<NaNBoxing> constants,int stackStPos)
+		{
+			StackLocater target;
+			target.index = dst_index;
+
+			StackLocater instance;
+			LoadStackLocater(&instance, PC);
+
+			int method_id = 0;
+			LoadInt32(&method_id, PC);
+
+
+			NaNBoxing thisValue = stackslots[instance.index];
+
+#if DEBUG
+			if (thisValue.ValueType != NaNBoxing.BoxType.HeapPtr)
+			{
+				throw new InvalidOperationException();
+			}
+			else
+			{
+				RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
+				if (ins.Kind != RtHeapTypeKind.INSTANCE)
+				{
+					throw new InvalidOperationException();
+				}
+
+			}
+
+#endif
+
+			NaNBoxing fbox = constants[method_id];
+
+			Debug.Assert(fbox.ValueType == NaNBoxing.BoxType.Uint);
+
+
+			var vtableitem = Context.link_const_vtableitems[(int)fbox.UIntValue];
+			var function = vtableitem.Trait.Method;
+			var define = (ASInstance)vtableitem.DefineAt;
+
+			int ptrIndex = stackStPos + target.index;
+			int closurePtr = Context.M_ClosurePtr + ptrIndex;
+
+			var closure = Context.GC.Heap[closurePtr];
+			closure.Type = function.Body;
+			((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+			((RtClosure)closure).ScopeType = define;
+			((RtClosure)closure).This = thisValue;
+			((RtClosure)closure)._ref_as_type = define;
+			((RtClosure)closure).methodscopeslot_ref_state = 0;
+			((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+			stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+
+		}
+
+
+		private unsafe void Ld_interface_method(int dst_index, byte** PC, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos,ref ReceiveError error)
+		{
+			StackLocater target;
+			target.index = dst_index;
+
+			StackLocater instance;
+			LoadStackLocater(&instance, PC);
+
+			int class_id;
+			LoadInt32(&class_id, PC);
+
+			uint vtable_ = 0;
+			LoadUInt(&vtable_, PC);
+			ushort vtable_index = (ushort)vtable_;
+
+			NaNBoxing thisValue;
+
+			Debug.Assert(instance.index >= 0);
+
+			thisValue = stackslots[instance.index];
+
+
+			if (thisValue.ValueType == NaNBoxing.BoxType.Null)
+			{
+				RaiseTypeError_AccessNull(ref error);
+				goto flag_handle_error;
+			}
+
+
+			Debug.Assert(thisValue.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+
+
+			RtHeapBase ins = Context.GC.Heap[thisValue.HeapPtr];
+
+			Debug.Assert(ins.Kind == RtHeapTypeKind.INSTANCE);
+
+			var boxing = constants[class_id];
+
+			Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
+
+
+			var @class = Context.link_const_class[(int)boxing.UIntValue];
+
+			Debug.Assert(@class.Instance.IsInterface);
+
+			int m_idx = ((ASInstance)ins.Type)._interface_impl_.First((i) => i.interface_type == @class.Type_identifier)[vtable_index];
+
+			var vtableitem = ins.Type._vtable.Items[m_idx];
+			var function = vtableitem.Trait.Method;
+
+			var define = (ASInstance)vtableitem.DefineAt;
+
+			int ptrIndex = stackStPos + target.index;
+			int closurePtr = Context.M_ClosurePtr + ptrIndex;
+
+			var closure = Context.GC.Heap[closurePtr];
+			closure.Type = function.Body;
+			((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+			((RtClosure)closure).ScopeType = define;
+			((RtClosure)closure).This = thisValue;
+			((RtClosure)closure)._ref_as_type = define;
+			((RtClosure)closure).methodscopeslot_ref_state = 0;
+			((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+			stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+
+
+		flag_handle_error:
+			;
+
+		}
+
+
+
+		private unsafe void Ld_length(int dst_index,byte** PC,Span<NaNBoxing> stackslots,ref ReceiveError error)
+		{
+			StackLocater target;
+			target.index = dst_index;
+
+			StackLocater instance;
+			LoadStackLocater(&instance, PC);
+
+			NaNBoxing thisValue = stackslots[instance.index];
+			if (thisValue.ValueType == NaNBoxing.BoxType.Null)
+			{
+				RaiseTypeError_AccessNull(ref error);
+				goto flag_handle_error;
+			}
+			else if (thisValue.ValueType == BoxType.LocalString)
+			{
+				Span<char> temp = stackalloc char[16];
+				int len = thisValue.GetLocalStringChars(temp);
+				stackslots[target.index].SetInt(len);
+
+				return;
+			}
+
+			var obj = Context.GC.Heap[thisValue.HeapPtr];
+			if (obj.Kind == RtHeapTypeKind.ARRAY)
+			{
+				uint len = ((RtArray)obj).GetLength(this);
+				stackslots[target.index].SetUInt(len);
+			}
+			else if (obj.Kind == RtHeapTypeKind.STRING)
+			{
+				int len = ((RtString)obj).Str.Length;
+				stackslots[target.index].SetInt(len);
+			}
+			else
+			{
+				Debug.Assert(obj.Kind == RtHeapTypeKind.VECTOR);
+				int len = ((RtVector)obj).GetStore(this).length;
+				stackslots[target.index].SetInt(len);
+			}
+
+
+		flag_handle_error:
+			;
+		}
+
+
+
+
+		private unsafe void StoreMethodVariable(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots,int scope_ptr,int* method_scopes, ref ReceiveError error)
+		{
+			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+			}
+			ref NaNBoxing value = ref stackslots[dst_index];
+
+			//#if DEBUG
+			//								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
+			//									throw new InvalidOperationException();
+			//#endif
+
+
+			if ((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
+			{
+
+			}
+			else if ((heapLocater.ScopeIndex & 0xff) < (byte)TypeKind.Object)
+			{
+				ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+				Context.StackPosition++;
+				ConvertValueType(ref error, value, (TypeKind)(heapLocater.ScopeIndex & 0xff), null, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+				Context.StackPosition--;
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+				value = conv;
+			}
+			else
+			{
+				var scopemember = methodscope.Type._link_codescope.Members[heapLocater.MemberIndex];
+
+				ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+				Context.StackPosition++;
+
+				var thisPtr = ((RtMethodScope)methodscope).ThisPtr;
+
+				if (scopemember.Kind == ScopeMemberKind.Parameter)
+				{
+					//isheaptype = scopemember.TypeKind.IsHeapType();
+					ConvertValueType(ref error, value, scopemember.TypeKind, scopemember.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+				}
+				else
+				{
+					ASTrait t = scopemember.trait;
+					//isheaptype = t.TypeKind.IsHeapType();
+					ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, thisPtr);
+				}
+				Context.StackPosition--;
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+				value = conv;
+
+			}
+
+
+			RtMethodScope heap = (RtMethodScope)methodscope;
+
+
+			if (!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+			{
+
+			}
+			else
+			{
+				int* m_scope = method_scopes;
+				*m_scope++ = scope_ptr;
+				PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
+
+				if (error.raised)
+				{
+
+					goto flag_handle_error;
+				}
+			}
+
+
+			heap.SetSlot(value, heapLocater.MemberIndex);
+
+
+		flag_handle_error:
+			;
+
+
+		}
+
+
+		private unsafe void StoreHeapValueRef(int dst_index,byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos , int scope_ptr, ref ReceiveError error)
+		{
+			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef);
+
+			StackLocater target;
+			StackLocater source;
+			target.index = dst_index;
+			LoadStackLocater(&source, PC);
+
+
+			Debug.Assert(stackslots[target.index].ValueType == NaNBoxing.BoxType.HeapPtr);
+			
+
+			RtHeapBase cache = Context.GC.Heap[stackslots[target.index].HeapPtr];
+
+			if (stackslots[target.index].HeapKind == (byte)RtHeapTypeKind.CLOSURE)
+			{
+				RaiseReferenceError_WriteToMethod(ref error, (ASMethodBody)cache.Type, ((RtClosure)cache)._ref_as_type.QName);
+
+				//throw new NotImplementedException($"Cannot assign to a method { cache.Type.QName.Name } on { ((RtPayloadClosure)cache)._ref_as_type.QName.Name }.");
+				goto flag_handle_error;
+			}
+
+
+			Debug.Assert(cache.Kind == RtHeapTypeKind.STACK_CACHE_OBJ);
+
+			StackLocater* tmpArgLoc = stackalloc StackLocater[2];
+
+			SaveHeapRef(cache, source, stackslots, stackalloc char[128], tmpArgLoc, scope_ptr, stackStPos, methodscope, ref error);
+
+
+		flag_handle_error:
+			;
+
+		}
 
 
 	}

@@ -14,6 +14,29 @@ package
 }
 
 
+//function  fib(i:int):int 
+	//{
+		//if (i === 1 || i === 2)
+		//{
+			//return 1;
+		//}
+		//else 
+		//{
+			//
+			//return fib(i - 2) + fib(i-1);
+			//
+		//}	
+	//}
+	//
+	//import flash.utils.getTimer;
+	//
+	//
+	//var st = getTimer();
+//trace(fib(35),getTimer() - st );
+
+
+
+
 
 
 
@@ -78,7 +101,7 @@ function fannkuch(n) {
    }
 }
 var st = getTimer();
-var n = 9;
+var n = 10;
 var ret = fannkuch(n);
 
 trace( getTimer() - st );
