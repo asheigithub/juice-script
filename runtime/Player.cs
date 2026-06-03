@@ -7788,16 +7788,9 @@ namespace juicescript.runtime
 		}
 
 
-		internal bool IsEqual(NaNBoxing v1, NaNBoxing v2, StackLocater tempStore, ref ReceiveError error,
-			int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing caller_bindthis_ptr
-			)
+		private bool IsEqual_Slow(NaNBoxing v1, NaNBoxing v2, StackLocater tempStore, ref ReceiveError error,
+			int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing caller_bindthis_ptr)
 		{
-			bool fast_comp;
-			if (v1.FastTestComp(v2, out fast_comp))
-			{
-				return fast_comp;
-			}
-
 
 		/*
 		 如果操作数具有相同的类型，则按如下方式进行比较：
@@ -8293,6 +8286,23 @@ namespace juicescript.runtime
 
 
 			goto flag_retest;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		internal bool IsEqual(NaNBoxing v1, NaNBoxing v2, StackLocater tempStore, ref ReceiveError error,
+			int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing caller_bindthis_ptr
+			)
+		{
+			bool fast_comp;
+			if (v1.FastTestComp(v2, out fast_comp))
+			{
+				return fast_comp;
+			}
+			else
+			{ 
+				return IsEqual_Slow(v1,v2,tempStore,ref error,scope_ptr,stackslots,stackStPos,caller_bindthis_ptr);
+			}
+
 		}
 
 
