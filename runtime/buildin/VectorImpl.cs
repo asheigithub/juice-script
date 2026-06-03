@@ -5000,16 +5000,22 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				int p = context.GC.AllocString(str);
-				if (p == 0)
+				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = result;
 				}
-				else
-				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(p, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
-				}
+
+
+				//int p = context.GC.AllocString(str);
+				//if (p == 0)
+				//{
+				//	context.player.RaiseOutOfMemory(ref error);
+				//	return;
+				//}
+				//else
+				//{
+				//	context.StackSlots[returnSlotIndex].SetHeapPtr(p, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+				//}
 			}
 
 		}
@@ -5074,14 +5080,19 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 
-				int str = context.GC.AllocString(joinPrinter.stringBuilder.ToString());
-				if (str == 0)
+				if (context.player.TryCreateStringValue(joinPrinter.stringBuilder.ToString(),out NaNBoxing result,ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = result;
 				}
 
-				context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+				//int str = context.GC.AllocString(joinPrinter.stringBuilder.ToString());
+				//if (str == 0)
+				//{
+				//	context.player.RaiseOutOfMemory(ref error);
+				//	return;
+				//}
+
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 
 			}
 

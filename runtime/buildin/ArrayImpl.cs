@@ -711,16 +711,21 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				int p = context.GC.AllocString(str);
-				if (p == 0)
+				if (context.player.TryCreateStringValue(str, out NaNBoxing result, ref error))
 				{
-					context.player.RaiseOutOfMemory(ref error);
-					return;
+					context.StackSlots[returnSlotIndex] = result;
 				}
-				else
-				{
-					context.StackSlots[returnSlotIndex].SetHeapPtr(p, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-				}
+
+				//int p = context.GC.AllocString(str);
+				//if (p == 0)
+				//{
+				//	context.player.RaiseOutOfMemory(ref error);
+				//	return;
+				//}
+				//else
+				//{
+				//	context.StackSlots[returnSlotIndex].SetHeapPtr(p, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+				//}
 			}
 
 

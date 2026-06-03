@@ -2596,7 +2596,7 @@ namespace juicescript.runtime
 			{
 				return true;
 			}
-
+			
 			// 回退到堆分配
 			int strptr = Context.GC.AllocString(new string(str));
 			if (strptr == 0)

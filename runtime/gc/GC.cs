@@ -610,6 +610,7 @@ namespace juicescript.runtime.gc
         {
             //还需要额外扫描receiveError里引用的堆对象,不要忘记
 
+
 #if !DEBUG
             if (MemUsage > thresholed)
 #endif

@@ -86,13 +86,17 @@ namespace juicescript.runtime
 				ComputeConstExprOnRunMethod(method);
 			}
 #endif
+
 #if DEBUG
 			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
 			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
 			Context.GC.ForceGC(ref error);
+
+#else
+			Context.GC.CheckGC(ref error);
 #endif
 
-			
+
 
 			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			method.Body.GetInfo(ref info);
@@ -225,7 +229,7 @@ namespace juicescript.runtime
 						break;
 					}
 
-					Context.GC.CheckGC(ref error);
+					//Context.GC.CheckGC(ref error);
 
 					//改在实际传参时赋值进去
 					//由于可能 method.Parameters.Count小于 args的情况，所以这里先把超出的部分填入
