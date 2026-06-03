@@ -388,21 +388,6 @@ namespace juicescript.compiler.IL.Generator
 									//function a(){}; a();
 									//this是定义function的代码的this,可能是instance,class,global
 
-									//***当前无法处理callee这种情况，因为如果要处理，则必须要构造闭包，这对性能不利。所以这里决定不处理(
-                                    //或许可以处理为额外增加一个标志，如果都是通过AS3Function加载的，就认为是相等,但是这太麻烦了，先不去管他)
-									//function makeFact()
-									//{
-									//	return function f(n) {
-
-									//		trace(arguments.callee == f);
-
-									//		return n == 0 ? 1 : n * f(n - 1);
-									//	}
-									//	;
-									//}
-									//***
-
-
 
 									var method = compileEnv.CompileContext.dict_method_as3function[(AS3Function)findtrait.Value._value];
 
@@ -439,8 +424,8 @@ namespace juicescript.compiler.IL.Generator
                                     //compileEnv.SetCallResult(bindGlobal_Call.dst);
                                     //compileEnv.instructions.Add(bindGlobal_Call);
 
-                                    scopeHeapLocater.ScopeIndex = ushort.MaxValue;
-                                    scopeHeapLocater.MemberIndex = ushort.MaxValue;
+                                    //scopeHeapLocater.ScopeIndex = ushort.MaxValue;
+                                    //scopeHeapLocater.MemberIndex = ushort.MaxValue;
 
 
 

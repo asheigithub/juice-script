@@ -81,9 +81,9 @@ package
 	{
 		c = arguments.callee;
 		
-		//trace(arguments.callee == b);
+		trace(arguments.callee == b);
 		
-		//trace(c == b);
+		trace(c == b);
 		
 		c = null;
 		
@@ -121,10 +121,10 @@ package
 
 				StringPrint print = (StringPrint)player.Print;
 
-				//Assert.AreEqual("true\r\ntrue\r\nfunction Function() {}\r\n", print.GetOutput());
+				Assert.AreEqual("true\r\ntrue\r\nfunction Function() {}\r\n", print.GetOutput());
 				//暂时不纠结calee的问题，见CallFuncBuilder 390行，性能考虑
 
-				Assert.AreEqual("function Function() {}\r\n", print.GetOutput());
+				//Assert.AreEqual("function Function() {}\r\n", print.GetOutput());
 
 			}
 

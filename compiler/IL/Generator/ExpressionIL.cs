@@ -6773,8 +6773,52 @@ namespace juicescript.compiler.IL.Generator
 						INS_Ld_Function ld_Function = new INS_Ld_Function(token);
 						ld_Function.dst = stackLocater;
 						ld_Function.const_index = methodid;
-						ld_Function.heapLocater.ScopeIndex = ushort.MaxValue;
-						ld_Function.heapLocater.MemberIndex = ushort.MaxValue;
+
+
+						if (method.Container._link_codescope.index > ushort.MaxValue)
+						{
+							throw new ParseException("scope count > 65535");
+						}
+					
+						bool found=false;
+						for (int i = 0; i < method.Container._link_codescope.Members.Count; i++)
+						{
+							if (
+								method.Container._link_codescope.Members[i].trait !=null &&
+								method.Container._link_codescope.Members[i].trait.Value != null &&								
+								method.Container._link_codescope.Members[i].trait.Value._value == data.Data.Value)
+							{
+								if (i > ushort.MaxValue)
+								{
+									throw new ParseException("scope count > 65535");
+								}
+
+								ld_Function.heapLocater.ScopeIndex = (ushort)method.Container._link_codescope.index;
+								ld_Function.heapLocater.MemberIndex = (ushort)i;
+
+
+								found = true;
+								break;
+
+							}
+
+						}
+
+						if (!found)
+						{
+							if (method.IsAnonymous)
+							{
+
+								ld_Function.heapLocater.ScopeIndex = ushort.MaxValue;
+								ld_Function.heapLocater.MemberIndex = ushort.MaxValue;
+							}
+							else
+							{
+								throw new InvalidOperationException();
+							}
+						}
+
+
 
 						compileEnv.instructions.Add(ld_Function);
 

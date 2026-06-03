@@ -13,28 +13,37 @@ package
     }
 }
 
-                          
+ function makeFact() {
+	return function f(n) {
+		
+		trace( arguments.callee == f );
+		return n == 0 ? 1 : n * f(n - 1);
+	};
+}
+
+var fact = makeFact();
+trace(fact(5));
 
 
-function  fib(i:int):int 
-	{
-		if (i === 1 || i === 2)
-		{
-			return 1;
-		}
-		else 
-		{
-			
-			return fib(i - 2) + fib(i-1);
-			
-		}	
-	}
-	
-	import flash.utils.getTimer;
-	
-	
-	var st = getTimer();
-trace(fib(35),getTimer() - st );
+//function  fib(i:int):int 
+	//{
+		//if (i === 1 || i === 2)
+		//{
+			//return 1;
+		//}
+		//else 
+		//{
+			//
+			//return fib(i - 2) + fib(i-1);
+			//
+		//}	
+	//}
+	//
+	//import flash.utils.getTimer;
+	//
+	//
+	//var st = getTimer();
+//trace(fib(35),getTimer() - st );
 
 
 
@@ -110,5 +119,5 @@ trace(fib(35),getTimer() - st );
 //
 //var expected = 30;
 //if (ret != expected)
-    //throw "ERROR: bad result: expected " + expected + " but got " + ret + ( getTimer() - st);
-
+    //throw "ERROR: bad result: expected " + expected + " but got " + ret + " " + ( getTimer() - st);
+//

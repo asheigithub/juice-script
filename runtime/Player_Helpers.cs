@@ -3499,36 +3499,36 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 #endif
 			RtHeapBase closure;
-			//int closure_ptr = Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
-			//if (error.raised)
-			//{
-			//	goto flag_handle_error;
-			//}
-			int closure_ptr;
+			int closure_ptr = Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			if (error.raised)
 			{
-				
-				ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];  //((ASMethodBody)obj.Type).Method;
-
-				int ptrIndex = stackStPos + target.index;
-				closure_ptr = Context.M_ClosurePtr + ptrIndex;
-
-				closure = Context.GC.Heap[closure_ptr];
-				closure.Type = function.Body;
-				((RtClosure)closure).ScopePtr = scope_ptr;
-				((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
-				((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
-				((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-
-				stackslots[target.index].SetHeapPtr(closure_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
-							
+				goto flag_handle_error;
 			}
+			//int closure_ptr;
+			//{
+
+			//	ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];  //((ASMethodBody)obj.Type).Method;
+
+			//	int ptrIndex = stackStPos + target.index;
+			//	closure_ptr = Context.M_ClosurePtr + ptrIndex;
+
+			//	closure = Context.GC.Heap[closure_ptr];
+			//	closure.Type = function.Body;
+			//	((RtClosure)closure).ScopePtr = scope_ptr;
+			//	((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+			//	((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
+			//	((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+			//	stackslots[target.index].SetHeapPtr(closure_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+
+			//}
 
 
 			NaNBoxing _this_ = default;
 			if (global_obj.ValueType != BoxType.HeapPtr)
 			{
 				//加载global。
-				var s = methodscope.Type._link_codescope; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
 				while (s.Kind != CodeScopeKind.Script)
 				{
 					s = s.Parent;
