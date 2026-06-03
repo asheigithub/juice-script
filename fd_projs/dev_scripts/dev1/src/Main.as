@@ -13,16 +13,15 @@ package
     }
 }
 
- function makeFact() {
-	return function f(n) {
-		
-		trace( arguments.callee == f );
-		return n == 0 ? 1 : n * f(n - 1);
-	};
-}
+                            function makeFact() {
+                               return function f(n) {
+								   trace( arguments.callee == f );
+                                   return n == 0 ? 1 : n * f(n - 1);
+                               };
+                           }
 
-var fact = makeFact();
-trace(fact(5));
+                           var fact = makeFact();
+                           trace(fact(5));
 
 
 //function  fib(i:int):int 
@@ -49,7 +48,7 @@ trace(fact(5));
 
 
 
-
+//
 //
 //import flash.utils.getTimer;
 //

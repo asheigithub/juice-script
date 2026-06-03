@@ -468,9 +468,10 @@ namespace juicescript.runtime
 
 								NaNBoxing box = slot[argLocater.index];
 
+								
 								Context.StackPosition += method.Parameters.Count;
 								Context.BackTraceIndex++;
-								ConvertValueType(ref error, box, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i],scope_ptr,thisPtr);
+								ConvertValueType(ref error, box, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
 								Context.BackTraceIndex--;
 								Context.StackPosition -= method.Parameters.Count;
 
@@ -480,8 +481,10 @@ namespace juicescript.runtime
 
 									goto lbl_handle_arg_err;
 								}
+								
+								
 
-								if(true)
+								if (true)
 								{
 									//这里是保存到参数中，也需要预准备保存到方法体。
 									box = param_slots[i];
@@ -493,7 +496,7 @@ namespace juicescript.runtime
 										scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
 										scopeHeapLocater.MemberIndex = i;
 
-									
+
 										PrepareSaveMethodScope(m_scopePayload, ref scopeHeapLocater, ref box, null, null, ref error, false /*结构体拷贝传递*/);
 #if DEBUG
 										if (error.raised)
@@ -560,6 +563,8 @@ namespace juicescript.runtime
 							
 								Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
 								NaNBoxing value = constants[p.ValueExprIndex];
+
+								
 								ConvertValueType(ref error, value, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i]);
 
 								if (error.raised)
@@ -567,7 +572,7 @@ namespace juicescript.runtime
 									Context.StackPosition -= para_argcount;
 									goto lbl_handle_arg_err;
 								}
-
+								
 								//throw new NotImplementedException("有默认值的参数");
 								
 							}

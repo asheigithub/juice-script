@@ -10,12 +10,12 @@ namespace juicescript.ABC
     {
         Any = 0,
         Boolean = 1,
-        SByte=2,
-        Byte = 3,
-        Short = 4,
-        UShort = 5, 
-        Int =6,
-        Uint =7,
+		Int = 2,
+		Uint = 3,
+		SByte =4,
+        Byte = 5,
+        Short = 6,
+        UShort = 7,         
         Float = 8,
         Number = 9,
 

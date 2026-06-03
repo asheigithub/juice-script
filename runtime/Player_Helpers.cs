@@ -361,31 +361,13 @@ namespace juicescript.runtime
 		}
 
 
-		
-		private unsafe void Exec_Add(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr,  Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		private unsafe void Exec_AddSlow(StackLocater dst,
+		StackLocater v1,
+		StackLocater v2,
+		NaNBoxing n1,NaNBoxing n2,int scope_ptr,int stackStPos,Span<NaNBoxing> stackslots,NaNBoxing thisPtr,
+		ref ReceiveError error
+		)
 		{
-			StackLocater dst;
-			StackLocater v1;
-			StackLocater v2;
-
-
-			dst.index = dst_index;
-			LoadStackLocater(&v1, PC);
-			LoadStackLocater(&v2, PC);
-
-
-			NaNBoxing n1 = stackslots[v1.index];
-			NaNBoxing n2 = stackslots[v2.index];
-
-
-
-			NaNBoxing sum;
-			if (NaNBoxing.FastAdd(n1, n2, out sum))
-			{
-				stackslots[dst.index] = sum;
-				return;
-			}
-
 			ASClass t1; ASClass t2;
 			//操作符重载
 			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);
@@ -1030,29 +1012,43 @@ namespace juicescript.runtime
 
 
 
-
-
-		private unsafe void Exec_Sub(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Add(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr,  Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
 			StackLocater dst;
 			StackLocater v1;
 			StackLocater v2;
 
+
 			dst.index = dst_index;
 			LoadStackLocater(&v1, PC);
 			LoadStackLocater(&v2, PC);
+
 
 			NaNBoxing n1 = stackslots[v1.index];
 			NaNBoxing n2 = stackslots[v2.index];
 
 
 
-			//NaNBoxing sub;
-			if (NaNBoxing.FastMinus(n1, n2, ref stackslots[dst.index])) //out sub))
+			NaNBoxing sum;
+			if (NaNBoxing.FastAdd(n1, n2, out sum))
 			{
-				//stackslots[dst.index] = sub;
+				stackslots[dst.index] = sum;
 				return;
 			}
+			else
+			{
+				Exec_AddSlow(dst, v1, v2, n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
+			}
+			
+		}
+
+
+
+		private unsafe void Exec_SubSlow(StackLocater dst,
+		StackLocater v1,
+		StackLocater v2, NaNBoxing n1,NaNBoxing n2,int scope_ptr,int stackStPos , Span<NaNBoxing> stackslots, NaNBoxing thisPtr, ref ReceiveError error)
+		{
 
 			//操作符重载
 			ASClass t1; ASClass t2;
@@ -1338,6 +1334,34 @@ namespace juicescript.runtime
 				default:
 					throw new InvalidOperationException();
 #endif
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Sub(int dst_index,byte** PC, ref ReceiveError error,  int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		{
+			StackLocater dst;
+			StackLocater v1;
+			StackLocater v2;
+
+			dst.index = dst_index;
+			LoadStackLocater(&v1, PC);
+			LoadStackLocater(&v2, PC);
+
+			NaNBoxing n1 = stackslots[v1.index];
+			NaNBoxing n2 = stackslots[v2.index];
+
+
+
+			//NaNBoxing sub;
+			if (NaNBoxing.FastMinus(n1, n2, ref stackslots[dst.index])) //out sub))
+			{
+				//stackslots[dst.index] = sub;
+				return;
+			}
+			else
+			{ 
+				Exec_SubSlow(dst,v1,v2,n1,n2,scope_ptr,stackStPos,stackslots,thisPtr,ref error);
 			}
 
 		}
@@ -3498,30 +3522,19 @@ namespace juicescript.runtime
 			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
 				throw new InvalidOperationException();
 #endif
+
+			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
+
 			RtHeapBase closure;
-			int closure_ptr = Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			int closure_ptr;
+
+			
+			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
 			if (error.raised)
 			{
 				goto flag_handle_error;
 			}
-			//int closure_ptr;
-			//{
-
-			//	ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];  //((ASMethodBody)obj.Type).Method;
-
-			//	int ptrIndex = stackStPos + target.index;
-			//	closure_ptr = Context.M_ClosurePtr + ptrIndex;
-
-			//	closure = Context.GC.Heap[closure_ptr];
-			//	closure.Type = function.Body;
-			//	((RtClosure)closure).ScopePtr = scope_ptr;
-			//	((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
-			//	((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
-			//	((RtClosure)closure).HEAPINSTANCE_PTR = 0;
-
-			//	stackslots[target.index].SetHeapPtr(closure_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
-
-			//}
+			
 
 
 			NaNBoxing _this_ = default;
@@ -8896,9 +8909,13 @@ namespace juicescript.runtime
 			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
 				throw new InvalidOperationException();
 #endif
-			RtHeapBase closure;
-			Ld_function_and_store_member(heapLocater, methodscope, scope_ptr, fbox.UIntValue, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+
+			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
 			
+			RtHeapBase closure;
+			Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+
+
 		}
 
 

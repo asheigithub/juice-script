@@ -8296,22 +8296,8 @@ namespace juicescript.runtime
 		}
 
 
-
-		/// <summary>
-		/// 是否严格相等
-		/// </summary>
-		/// <param name="key1"></param>
-		/// <param name="key2"></param>
-		/// <returns></returns>
-		/// <exception cref="NotImplementedException"></exception>
-
-		internal bool IsStrictlyEqual(NaNBoxing key1, NaNBoxing key2)
+		private bool IsStrictlyEqSlow(NaNBoxing key1, NaNBoxing key2)
 		{
-			bool fast_comp;
-			if (key1.FastTestComp(key2, out fast_comp))
-			{
-				return fast_comp;
-			}
 
 			//如果操作数的类型不同，则返回 false。
 			//如果两个操作数都是对象，则仅当它们引用同一个对象时才返回 true。
@@ -8710,30 +8696,34 @@ namespace juicescript.runtime
 
 			//throw new NotImplementedException();
 		}
-
 		/// <summary>
-		/// 由于可能出现转换操作中内部有新增对象的情况（如 Number->String）
-		/// 在保存返回值前不能触发GC避免被异常回收
+		/// 是否严格相等
 		/// </summary>
-		/// <param name="error"></param>
-		/// <param name="value"></param>
-		/// <param name="totype"></param>
-		/// <param name="totype_class"></param>
-		/// <param name="outvalue"></param>
+		/// <param name="key1"></param>
+		/// <param name="key2"></param>
 		/// <returns></returns>
-		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
+		internal bool IsStrictlyEqual(NaNBoxing key1, NaNBoxing key2)
 		{
+			bool fast_comp;
+			if (key1.FastTestComp(key2, out fast_comp))
+			{
+				return fast_comp;
+			}
+			else
+			{ 
+				return IsStrictlyEqSlow(key1, key2);
+			}
+		}
+
+
+
+		private void ConvertValueSlow(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr , NaNBoxing callee_bindthis , bool is_from_objtostring )
+		{
+
 			RtHeapBase to_invoke = null;
 			HINT hint = HINT.h_number;
-
-			//if (totype_class != null && totype_class.Instance.Flags.HasFlag(ClassFlags.Vector))
-			//{
-
-			//	totype = TypeKind.Vector;
-			//}
 
 			bool isRetry = false;
 
@@ -10357,6 +10347,44 @@ namespace juicescript.runtime
 				//}
 			}
 			;
+		}
+
+		/// <summary>
+		/// 由于可能出现转换操作中内部有新增对象的情况（如 Number->String）
+		/// 在保存返回值前不能触发GC避免被异常回收
+		/// </summary>
+		/// <param name="error"></param>
+		/// <param name="value"></param>
+		/// <param name="totype"></param>
+		/// <param name="totype_class"></param>
+		/// <param name="outvalue"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="NotImplementedException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
+		{
+
+			if (totype == TypeKind.Any || ((byte)invalue.ValueType - 3 == (byte)totype && totype< TypeKind.Float) || (invalue.ValueType == BoxType.LocalString && totype == TypeKind.String))
+			{
+				outvalue = invalue;
+				return;
+			}
+			else if (totype == TypeKind.Int && (byte)(invalue.ValueType-1) < (byte)BoxType.UShort)
+			{
+				outvalue.SetInt(invalue.IntValue);
+				return;
+			}
+			else if (totype == TypeKind.Uint && (byte)(invalue.ValueType-1) < (byte)BoxType.UShort)
+			{
+				outvalue.SetUInt(invalue.UIntValue);
+				return;
+			}
+			else
+			{
+				ConvertValueSlow(ref error, invalue, totype, totype_class, ref outvalue, scope_ptr, callee_bindthis, is_from_objtostring);
+			}
+
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -12031,7 +12059,7 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe int Ld_function_and_store_member(ScopeHeapLocater heapLocater, RtHeapBase mscope, int scope_ptr, uint fbox, ref ReceiveError error,
+		private unsafe int Ld_function_and_store_member( ASMethod function, ScopeHeapLocater heapLocater, RtHeapBase mscope, int scope_ptr,  ref ReceiveError error,
 			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, int* method_scopes, out RtHeapBase closure_instance)
 		{
 			if (!(heapLocater.MemberIndex == ushort.MaxValue && heapLocater.ScopeIndex == ushort.MaxValue))
@@ -12088,7 +12116,7 @@ namespace juicescript.runtime
 
 					if (c.ValueType == BoxType.Undefined)
 					{
-						ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
+						//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
 
 						int ptrIndex = stackStPos + target.index;
 						int closurePtr = Context.M_ClosurePtr + ptrIndex;
@@ -12155,7 +12183,7 @@ namespace juicescript.runtime
 					var c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex, this);
 					if (c.ValueType == BoxType.Undefined)
 					{
-						ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
+						//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
 
 						int ptrIndex = stackStPos + target.index;
 						int closurePtr = Context.M_ClosurePtr + ptrIndex;
@@ -12207,7 +12235,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
+				//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
 
 				int ptrIndex = stackStPos + target.index;
 				int closurePtr = Context.M_ClosurePtr + ptrIndex;

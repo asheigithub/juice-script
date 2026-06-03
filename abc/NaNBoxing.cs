@@ -1,4 +1,5 @@
 ﻿using juicescript.ABC;
+using juicescript.ABC.INS;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -51,19 +52,19 @@ namespace juicescript
         public const ulong QNAN = 0xFFF8000000000000;
 
 
-        public const ulong UNDEFINED = 0xFFF8010000000000;
-        public const ulong NULL = 0xFFF8020000000000;
-        public const ulong TRUE = 0xFFF8030000000000;
-        public const ulong FALSE = 0xFFF8040000000000;
-        public const ulong TAG_INT = 0xFFF8050000000000;
-        public const ulong TAG_UINT = 0xFFF8060000000000;
-        public const ulong TAG_SBYTE = 0xFFF8070000000000;
-        public const ulong TAG_BYTE = 0xFFF8080000000000;
-        public const ulong TAG_SHORT = 0xFFF8090000000000;
-        public const ulong TAG_USHORT = 0xFFF80A0000000000;
-        public const ulong TAG_FLOAT = 0xFFF80B0000000000;
-        public const ulong TAG_HEAP_POINTER = 0xFFF80C0000000000;
-        public const ulong TAG_LOCAL_STRING = 0xFFF80D0000000000;
+        public const ulong UNDEFINED =          0xFFF8010000000000;
+        public const ulong NULL =               0xFFF8020000000000;
+        public const ulong TRUE =               0xFFF8030000000001;
+        public const ulong FALSE =              0xFFF8040000000000;
+        public const ulong TAG_INT =            0xFFF8050000000000;
+        public const ulong TAG_UINT =           0xFFF8060000000000;
+        public const ulong TAG_SBYTE =          0xFFF8070000000000;
+        public const ulong TAG_BYTE =           0xFFF8080000000000;
+        public const ulong TAG_SHORT =          0xFFF8090000000000;
+        public const ulong TAG_USHORT =         0xFFF80A0000000000;
+        public const ulong TAG_FLOAT =          0xFFF80B0000000000;
+        public const ulong TAG_HEAP_POINTER =   0xFFF80C0000000000;
+        public const ulong TAG_LOCAL_STRING =   0xFFF80D0000000000;
 
         //internal const ulong MASK_EXPONENT = 0x7ff0000000000000;
         //internal const ulong MASK_SIGNATURE = 0xFFFFFFFF00000000;
@@ -117,185 +118,214 @@ namespace juicescript
         [MethodImpl( MethodImplOptions.AggressiveOptimization)]
         public bool FastTestComp(NaNBoxing other,out bool isequal)
         {
-            if (store == QNAN || other.store == QNAN)
+            if ((ValueType == BoxType.Int || ValueType > BoxType.Uint) && ValueType < BoxType.Float && (other.ValueType > BoxType.Uint || other.ValueType == BoxType.Int) && other.ValueType < BoxType.Float)
             {
-                isequal = false;
+                isequal = IntValue == other.IntValue;
                 return true;
             }
-            else if (other.store < UNDEFINED && store < UNDEFINED)
+			else if (store == QNAN || other.store == QNAN)
+			{
+				isequal = false;
+				return true;
+			}
+			else if (store == other.store)
+			{
+				isequal = true;
+				return true;
+			}           
+            else
             {
+                return FastTestComp_Step2(other, out isequal);
+            }            
+		}
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private bool FastTestComp_Step2(NaNBoxing other, out bool isequal)
+        {
+			//if (store == QNAN || other.store == QNAN)
+			//{
+			//	isequal = false;
+			//	return true;
+			//}
+			//else if (store == other.store)
+			//{
+			//	isequal = true;
+			//	return true;
+			//}
+			//else 
+            if (other.store < UNDEFINED && store < UNDEFINED)
+			{
 				isequal = number == other.number;
 				return true;
 			}
-            else if (store >= UNDEFINED && other.store >= UNDEFINED)
-            {
+			else if (store >= UNDEFINED && other.store >= UNDEFINED)
+			{
 
-                uint signature1 = (uint)(store >> 40) & 0xF;
-                uint signature2 = (uint)(other.store >> 40) & 0xF;
+				uint signature1 = (uint)(store >> 40) & 0xF;
+				uint signature2 = (uint)(other.store >> 40) & 0xF;
 
-                if (signature1 < 3 && signature2 < 3)
-                {
-                    isequal = false;
-                    return false;
-                }
-                else if ((signature1 == 3 || signature1 == 4) && (signature2 == 3 || signature2 == 4))
-                {
-                    isequal = store == other.store;
-                    return true;
-                }
-                else if (signature1 < 11 && signature2 < 11 && signature1 > 4 && signature2 > 4)
-                {
+				if (signature1 < 3 && signature2 < 3)
+				{
+					isequal = false;
+					return false;
+				}
+				else if ((signature1 == 3 || signature1 == 4) && (signature2 == 3 || signature2 == 4))
+				{
+					isequal = store == other.store;
+					return true;
+				}
+				else if (signature1 < 11 && signature2 < 11 && signature1 > 4 && signature2 > 4)
+				{
 
-                    long v1;
-                    if (signature1 % 2 == 0)
-                    {
-                        v1 = (uint)(store & 0xffffffff);
-                    }
-                    else
-                    {
-                        v1 = (int)(store & 0xffffffff);
-                    }
+					long v1;
+					if (signature1 % 2 == 0)
+					{
+						v1 = (uint)(store & 0xffffffff);
+					}
+					else
+					{
+						v1 = (int)(store & 0xffffffff);
+					}
 
-                    long v2;
-                    if (signature2 % 2 == 0)
-                    {
-                        v2 = (uint)(other.store & 0xffffffff);
-                    }
-                    else
-                    {
-                        v2 = (int)(other.store & 0xffffffff);
-                    }
+					long v2;
+					if (signature2 % 2 == 0)
+					{
+						v2 = (uint)(other.store & 0xffffffff);
+					}
+					else
+					{
+						v2 = (int)(other.store & 0xffffffff);
+					}
 
-                    isequal = v1 == v2;
-                    return true;
-                }
-                else if (signature1 == 11 && signature2 == 11)
-                {
-                    float f1 = FloatValue;
-                    float f2 = other.FloatValue;
+					isequal = v1 == v2;
+					return true;
+				}
+				else
 
-                    if (float.IsNaN(f1) || float.IsNaN(f2))
-                        isequal = false;
-                    else
-                        isequal = f1 == f2;
+				if (signature1 == 11 && signature2 == 11)
+				{
+					float f1 = FloatValue;
+					float f2 = other.FloatValue;
 
-                    return true;
-                }
-                else if (signature1 == 13 && signature2 == 13)
-                {
-                    // LocalString与LocalString比较 - 使用高效的字节比较
-                    Span<byte> bytes1 = stackalloc byte[5];
-                    Span<byte> bytes2 = stackalloc byte[5];
-                    
-                    int len1 = GetLocalStringBytes(bytes1);
-                    int len2 = other.GetLocalStringBytes(bytes2);
-                    
-                    if (len1 != len2)
-                    {
-                        isequal = false;
-                    }
-                    else if (len1 == 0)
-                    {
-                        isequal = true; // 两个都是空字符串
-                    }
-                    else
-                    {
-                        isequal = bytes1.Slice(0, len1).SequenceEqual(bytes2.Slice(0, len2));
-                    }
-                    return true;
-                }
-                else if (signature1 == 13 && signature2 == 12)
-                {
-                    // LocalString与HeapPtr字符串比较 - 需要在运行时上下文中处理
-                    isequal = false;
-                    return false;
-                }
-                else if (signature1 == 12 && signature2 == 13)
-                {
-                    // HeapPtr字符串与LocalString比较 - 需要在运行时上下文中处理
-                    isequal = false;
-                    return false;
-                }
-                else
-                {
-                    isequal = false;
-                    return false;
-                }
-            }
-            else if (other.store < UNDEFINED)
-            {
-                double v2 = other.number;
-                uint signature1 = (uint)(store >> 40) & 0xF;
+					if (float.IsNaN(f1) || float.IsNaN(f2))
+						isequal = false;
+					else
+						isequal = f1 == f2;
+
+					return true;
+				}
+				else if (signature1 == 13 && signature2 == 13)
+				{
+					// LocalString与LocalString比较 - 使用高效的字节比较
+					Span<byte> bytes1 = stackalloc byte[5];
+					Span<byte> bytes2 = stackalloc byte[5];
+
+					int len1 = GetLocalStringBytes(bytes1);
+					int len2 = other.GetLocalStringBytes(bytes2);
+
+					if (len1 != len2)
+					{
+						isequal = false;
+					}
+					else if (len1 == 0)
+					{
+						isequal = true; // 两个都是空字符串
+					}
+					else
+					{
+						isequal = bytes1.Slice(0, len1).SequenceEqual(bytes2.Slice(0, len2));
+					}
+					return true;
+				}
+				else if (signature1 == 13 && signature2 == 12)
+				{
+					// LocalString与HeapPtr字符串比较 - 需要在运行时上下文中处理
+					isequal = false;
+					return false;
+				}
+				else if (signature1 == 12 && signature2 == 13)
+				{
+					// HeapPtr字符串与LocalString比较 - 需要在运行时上下文中处理
+					isequal = false;
+					return false;
+				}
+				else
+				{
+					isequal = false;
+					return false;
+				}
+			}
+			else if (other.store < UNDEFINED)
+			{
+				double v2 = other.number;
+				uint signature1 = (uint)(store >> 40) & 0xF;
 
 
-                if (signature1 < 11 && signature1 > 4)
-                {
-                    long v1;
-                    if (signature1 % 2 == 0)
-                    {
-                        v1 = (uint)(store & 0xffffffff);
-                    }
-                    else
-                    {
-                        v1 = (int)(store & 0xffffffff);
-                    }
+				if (signature1 < 11 && signature1 > 4)
+				{
+					long v1;
+					if (signature1 % 2 == 0)
+					{
+						v1 = (uint)(store & 0xffffffff);
+					}
+					else
+					{
+						v1 = (int)(store & 0xffffffff);
+					}
 
-                    isequal = v1 == v2;
-                    return true;
-                }
-                else if (signature1 == 11)
-                {
-                    float f1 = FloatValue;
-                    if (float.IsNaN(f1))
-                        isequal = false;
-                    else
-                        isequal = f1 == v2;
+					isequal = v1 == v2;
+					return true;
+				}
+				else if (signature1 == 11)
+				{
+					float f1 = FloatValue;
+					if (float.IsNaN(f1))
+						isequal = false;
+					else
+						isequal = f1 == v2;
 
-                    return true;
-                }
-                else
-                {
-                    isequal = false;
-                    return false;
-                }
-            }
-            else// if (store < UNDEFINED)
-            {
-                double v1 = number;
-                uint signature2 = (uint)(other.store >> 40) & 0xF;
-                if (signature2 < 11 && signature2 > 4)
-                {
-                    long v2;
-                    if (signature2 % 2 == 0)
-                    {
-                        v2 = (uint)(other.store & 0xffffffff);
-                    }
-                    else
-                    {
-                        v2 = (int)(other.store & 0xffffffff);
-                    }
+					return true;
+				}
+				else
+				{
+					isequal = false;
+					return false;
+				}
+			}
+			else// if (store < UNDEFINED)
+			{
+				double v1 = number;
+				uint signature2 = (uint)(other.store >> 40) & 0xF;
+				if (signature2 < 11 && signature2 > 4)
+				{
+					long v2;
+					if (signature2 % 2 == 0)
+					{
+						v2 = (uint)(other.store & 0xffffffff);
+					}
+					else
+					{
+						v2 = (int)(other.store & 0xffffffff);
+					}
 
-                    isequal = v1 == v2;
-                    return true;
-                }
-                else if (signature2 == 11)
-                {
-                    float f2 = other.FloatValue;
-                    if (float.IsNaN(f2))
-                        isequal = false;
-                    else
-                        isequal = v1 == f2;
-                    return true;
-                }
-                else
-                {
-                    isequal = false;
-                    return false;
-                }
-            }
-            
+					isequal = v1 == v2;
+					return true;
+				}
+				else if (signature2 == 11)
+				{
+					float f2 = other.FloatValue;
+					if (float.IsNaN(f2))
+						isequal = false;
+					else
+						isequal = v1 == f2;
+					return true;
+				}
+				else
+				{
+					isequal = false;
+					return false;
+				}
+			}
 		}
-
 
         /// <summary>
         /// 尝试快速加法。如果不能加，则回退到慢路径
@@ -308,7 +338,13 @@ namespace juicescript
         public static bool FastAdd(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
         {
             result = default;
-            if (a.store == QNAN || b.store == QNAN)
+
+            if ((a.ValueType == BoxType.Int || a.ValueType > BoxType.Uint) && a.ValueType < BoxType.Float && (b.ValueType > BoxType.Uint || b.ValueType == BoxType.Int) && b.ValueType < BoxType.Float)
+            {
+                result.SetInt(a.IntValue + b.IntValue);
+                return true;
+            }
+            else if (a.store == QNAN || b.store == QNAN)
             {
                 result.store = QNAN;
                 return true;
@@ -318,94 +354,110 @@ namespace juicescript
                 result.SetNumber(a.number + b.number);
                 return true;
             }
-            else if (a.store < UNDEFINED)
+            else if (a.ValueType == BoxType.Float && b.ValueType == BoxType.Float)
             {
+				result.SetFloat(a.FloatValue + b.FloatValue);
+				return true;
+			}
+            else
+            {
+                return FastAdd_Step2(a, b, out result);
+            }
+           
+        }
+
+        private static bool FastAdd_Step2(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
+        {
+			result = default;
+
+			if (a.store < UNDEFINED)
+			{
 				uint signature2 = (uint)(b.store >> 40) & 0xF;
-				if (signature2 > 11 || signature2 < 1 )
+				if (signature2 > 11 || signature2 < 1)
 				{
 					return false;
 				}
 
-                result.SetNumber( a.number + GetDouble(b) );
-                return true;
+				result.SetNumber(a.number + GetDouble(b));
+				return true;
 			}
-            else if (b.store < UNDEFINED)
-            {
+			else if (b.store < UNDEFINED)
+			{
 				uint signature1 = (uint)(a.store >> 40) & 0xF;
 				if (signature1 > 11 || signature1 < 1)
 				{
 					return false;
 				}
 
-				result.SetNumber( GetDouble(a)  + b.number);
+				result.SetNumber(GetDouble(a) + b.number);
 				return true;
 
 			}
-            else
-            {
-                uint signature1 = (uint)(a.store >> 40) & 0xF;
-                uint signature2 = (uint)(b.store >> 40) & 0xF;
+			else
+			{
+				uint signature1 = (uint)(a.store >> 40) & 0xF;
+				uint signature2 = (uint)(b.store >> 40) & 0xF;
 
-                // Handle LocalString + LocalString case for fast string concatenation
-                if (signature1 == 13 && signature2 == 13)
-                {
-                    // Both are LocalString, try to concatenate directly using bytes
-                    Span<byte> bytes1 = stackalloc byte[5];
-                    Span<byte> bytes2 = stackalloc byte[5];
-                    
-                    int len1 = a.GetLocalStringBytes(bytes1);
-                    int len2 = b.GetLocalStringBytes(bytes2);
-                    
-                    // Check if concatenated result can fit in LocalString (5 bytes max)
-                    if (len1 >= 0 && len2 >= 0 && (len1 + len2) <= 5)
-                    {
-                        // Create concatenated LocalString directly from bytes
-                        Span<byte> concatenated = stackalloc byte[len1 + len2];
-                        bytes1.Slice(0, len1).CopyTo(concatenated);
-                        bytes2.Slice(0, len2).CopyTo(concatenated.Slice(len1));
-                        
-                        result.SetLocalString(concatenated);
-                        return true;
-                    }
-                    
-                    // If result too long, fall back to slow path
-                    return false;
-                }
-                
-                // LocalString with other types should fall back to slow path for string concatenation
-                if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature2 < 1)
-                {
-                    return false;
-                }
+				// Handle LocalString + LocalString case for fast string concatenation
+				if (signature1 == 13 && signature2 == 13)
+				{
+					// Both are LocalString, try to concatenate directly using bytes
+					Span<byte> bytes1 = stackalloc byte[5];
+					Span<byte> bytes2 = stackalloc byte[5];
 
-                if (signature1 == 1 || signature2 == 1)
-                {
-                    result.store = QNAN;
-                    return true;
-                }
+					int len1 = a.GetLocalStringBytes(bytes1);
+					int len2 = b.GetLocalStringBytes(bytes2);
+
+					// Check if concatenated result can fit in LocalString (5 bytes max)
+					if (len1 >= 0 && len2 >= 0 && (len1 + len2) <= 5)
+					{
+						// Create concatenated LocalString directly from bytes
+						Span<byte> concatenated = stackalloc byte[len1 + len2];
+						bytes1.Slice(0, len1).CopyTo(concatenated);
+						bytes2.Slice(0, len2).CopyTo(concatenated.Slice(len1));
+
+						result.SetLocalString(concatenated);
+						return true;
+					}
+
+					// If result too long, fall back to slow path
+					return false;
+				}
+
+				// LocalString with other types should fall back to slow path for string concatenation
+				if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature2 < 1)
+				{
+					return false;
+				}
+
+				if (signature1 == 1 || signature2 == 1)
+				{
+					result.store = QNAN;
+					return true;
+				}
 
 
-                //数值计算
-                switch (signature1)
-                {
-                    case 2:
-                        //v1 : null
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                case 3:
-                                case 4:
-                                case 5:
-                                case 6:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                case 11:
-                                    result.SetNumber(0.0 + GetDouble(b));
-                                    break;
-                                default:
+				//数值计算
+				switch (signature1)
+				{
+					case 2:
+						//v1 : null
+						{
+							switch (signature2)
+							{
+								case 2:
+								case 3:
+								case 4:
+								case 5:
+								case 6:
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+								case 11:
+									result.SetNumber(0.0 + GetDouble(b));
+									break;
+								default:
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
@@ -413,36 +465,36 @@ namespace juicescript
 #endif
 							}
 						}
-                        break;
-                    case 3:
-                    case 4:
-                        //v1 : boolean
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber((a.Boolean ? 1 : 0) + 0.0);
-                                    break;
-                                case 3:
-                                case 4:
-                                    result.SetInt((a.Boolean ? 1 : 0) + (b.Boolean ? 1 : 0));
-                                    break;
-                                case 5:
-                                    result.SetInt((a.Boolean ? 1 : 0) + b.IntValue);
-                                    break;
-                                case 6:
-                                    result.SetNumber((a.Boolean ? 1U : 0U) + GetDouble(b));
-                                    break;
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                    result.SetInt((a.Boolean ? 1 : 0) + GetInt(b));
-                                    break;
-                                case 11:
-                                    result.SetFloat((a.Boolean ? 1 : 0) + b.FloatValue);
-                                    break;
-                                default:
+						break;
+					case 3:
+					case 4:
+						//v1 : boolean
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber((a.Boolean ? 1 : 0) + 0.0);
+									break;
+								case 3:
+								case 4:
+									result.SetInt((a.Boolean ? 1 : 0) + (b.Boolean ? 1 : 0));
+									break;
+								case 5:
+									result.SetInt((a.Boolean ? 1 : 0) + b.IntValue);
+									break;
+								case 6:
+									result.SetNumber((a.Boolean ? 1U : 0U) + GetDouble(b));
+									break;
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+									result.SetInt((a.Boolean ? 1 : 0) + GetInt(b));
+									break;
+								case 11:
+									result.SetFloat((a.Boolean ? 1 : 0) + b.FloatValue);
+									break;
+								default:
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
@@ -450,33 +502,33 @@ namespace juicescript
 #endif
 							}
 							break;
-                        }
-                    case 5:
-                        //v1 BoxType.Int;
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber(a.IntValue + GetDouble(b));
-                                    break;
-                                case 3:
-                                case 4:
-                                    result.SetInt(a.IntValue + (b.Boolean ? 1 : 0));
-                                    break;
-                                case 6:
-                                    result.SetNumber((double)a.IntValue + b.UIntValue);
-                                    break;
-                                case 11:
-                                    result.SetFloat(a.IntValue + b.FloatValue);
-                                    break;
-                                case 5:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                    result.SetInt(a.IntValue + GetInt(b));
-                                    break;
-                                default:
+						}
+					case 5:
+						//v1 BoxType.Int;
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber(a.IntValue + GetDouble(b));
+									break;
+								case 3:
+								case 4:
+									result.SetInt(a.IntValue + (b.Boolean ? 1 : 0));
+									break;
+								case 6:
+									result.SetNumber((double)a.IntValue + b.UIntValue);
+									break;
+								case 11:
+									result.SetFloat(a.IntValue + b.FloatValue);
+									break;
+								case 5:
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+									result.SetInt(a.IntValue + GetInt(b));
+									break;
+								default:
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
@@ -484,42 +536,42 @@ namespace juicescript
 #endif
 							}
 							break;
-                        }
+						}
 
-                    case 6:
-                        //v1 BoxType.Uint;
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber(a.UIntValue + GetDouble(b));
-                                    break;
-                                case 3:
-                                case 4:
-                                    result.SetNumber(a.UIntValue + GetDouble(b));
-                                    break;
-                                case 5:
-                                    result.SetNumber((double)a.UIntValue + b.IntValue);
-                                    break;
-                                case 6:
-                                    result.SetUInt(a.UIntValue + b.UIntValue);
-                                    break;
-                                case 7:
-                                    result.SetNumber((double)a.UIntValue + b.SByteValue);
-                                    break;
-                                case 8:
-                                    result.SetUInt(a.UIntValue + b.ByteValue);
-                                    break;
-                                case 9:
-                                    result.SetNumber((double)a.UIntValue + b.ShortValue);
-                                    break;
-                                case 10:
-                                    result.SetUInt(a.UIntValue + b.UShortValue);
-                                    break;
-                                case 11:
-                                    result.SetFloat((float)a.UIntValue + b.FloatValue);
-                                    break;
-                                default:
+					case 6:
+						//v1 BoxType.Uint;
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber(a.UIntValue + GetDouble(b));
+									break;
+								case 3:
+								case 4:
+									result.SetNumber(a.UIntValue + GetDouble(b));
+									break;
+								case 5:
+									result.SetNumber((double)a.UIntValue + b.IntValue);
+									break;
+								case 6:
+									result.SetUInt(a.UIntValue + b.UIntValue);
+									break;
+								case 7:
+									result.SetNumber((double)a.UIntValue + b.SByteValue);
+									break;
+								case 8:
+									result.SetUInt(a.UIntValue + b.ByteValue);
+									break;
+								case 9:
+									result.SetNumber((double)a.UIntValue + b.ShortValue);
+									break;
+								case 10:
+									result.SetUInt(a.UIntValue + b.UShortValue);
+									break;
+								case 11:
+									result.SetFloat((float)a.UIntValue + b.FloatValue);
+									break;
+								default:
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
@@ -527,37 +579,37 @@ namespace juicescript
 #endif
 							}
 						}
-                        break;
-                    case 7:
-                    //v1 BoxType.Sbyte; 
-                    case 8:
-                    //v1 BoxType.Byte;
-                    case 9:
-                    //v1 BoxType.Short;
-                    case 10:
-                        //v1 BoxType.UShort;
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber(GetDouble(a) + GetDouble(b));
-                                    break;
-                                case 6:
-                                    result.SetNumber(GetDouble(a) + b.UIntValue);
-                                    break;
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                case 3:
-                                case 4:
-                                case 5:
-                                    result.SetInt(GetInt(a) + GetInt(b));
-                                    break;
-                                case 11:
-                                    result.SetFloat(GetFloat(a) + b.FloatValue);
-                                    break;
-                                default:
+						break;
+					case 7:
+					//v1 BoxType.Sbyte; 
+					case 8:
+					//v1 BoxType.Byte;
+					case 9:
+					//v1 BoxType.Short;
+					case 10:
+						//v1 BoxType.UShort;
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber(GetDouble(a) + GetDouble(b));
+									break;
+								case 6:
+									result.SetNumber(GetDouble(a) + b.UIntValue);
+									break;
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+								case 3:
+								case 4:
+								case 5:
+									result.SetInt(GetInt(a) + GetInt(b));
+									break;
+								case 11:
+									result.SetFloat(GetFloat(a) + b.FloatValue);
+									break;
+								default:
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
@@ -565,43 +617,42 @@ namespace juicescript
 #endif
 							}
 						}
-                        break;
-                    case 11:
-                        //v1 BoxType.Float;
-                        switch (signature2)
-                        {
-                            case 2:
-                                result.SetNumber(a.FloatValue + 0.0);
-                                break;
-                            case 3:
-                            case 4:
-                            case 5:
-                            case 6:
-                            case 7:
-                            case 8:
-                            case 9:
-                            case 10:
-                            case 11:
-                                result.SetFloat(GetFloat(a) + GetFloat(b));
-                                break;
+						break;
+					case 11:
+						//v1 BoxType.Float;
+						switch (signature2)
+						{
+							case 2:
+								result.SetNumber(a.FloatValue + 0.0);
+								break;
+							case 3:
+							case 4:
+							case 5:
+							case 6:
+							case 7:
+							case 8:
+							case 9:
+							case 10:
+							case 11:
+								result.SetFloat(GetFloat(a) + GetFloat(b));
+								break;
 #if DEBUG
                             default:
                                 throw new InvalidOperationException();
 #endif
-                        }
+						}
 
-                        break;
+						break;
 #if DEBUG
                     default:
                         throw new InvalidOperationException();
 #endif
 
-                }
+				}
 
-                return true;
-            }
-
-        }
+				return true;
+			}
+		}
 
 
         /// <summary>
@@ -615,7 +666,12 @@ namespace juicescript
         public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
             result = default;
-            if (a.store == QNAN || b.store == QNAN)
+            if ((a.ValueType == BoxType.Int || a.ValueType > BoxType.Uint) && a.ValueType < BoxType.Float && (b.ValueType > BoxType.Uint || b.ValueType == BoxType.Int) && b.ValueType < BoxType.Float)
+            {
+                result.SetInt(a.IntValue - b.IntValue);
+                return true;
+            }
+            else if (a.store == QNAN || b.store == QNAN)
             {
                 result.store = QNAN;
                 return true;
@@ -625,229 +681,239 @@ namespace juicescript
                 result.SetNumber(a.number - b.number);
                 return true;
             }
-            else if (a.store < UNDEFINED)
-            {
-                uint signature2 = (uint)(b.store >> 40) & 0xF;
-                if (signature2 > 11 || signature2 < 1)
-                {
-                    return false;
-                }
-
-                result.SetNumber(a.number - GetDouble(b));
-                return true;
-            }
-            else if (b.store < UNDEFINED)
-            {
-                uint signature1 = (uint)(a.store >> 40) & 0xF;
-                if (signature1 > 11 || signature1 < 1)
-                {
-                    return false;
-                }
-
-                result.SetNumber(GetDouble(a) - b.number);
-                return true;
-
-            }
             else
-            {
-                uint signature1 = (uint)(a.store >> 40) & 0xF;
-                uint signature2 = (uint)(b.store >> 40) & 0xF;
+            { 
+                return FastMinus_Step2(a,b, ref result);    
+            }
+        }
 
-                // LocalString (signature 13) should fall back to slow path for string operations
-                if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature2 < 1)
-                {
-                    return false;
-                }
-
-                if (signature1 == 1 || signature2 == 1)
-                {
-                    result.store = QNAN;
-                    return true;
-                }
+        private static bool FastMinus_Step2(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
+        {
 
 
-                switch (signature1)
-                {
-                    case 2: // null
-                        result.SetNumber(0.0 - GetDouble(b));
-                        break;
-                    case 3:
-                    case 4: //bool
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber((a.Boolean ? 1 : 0) - 0.0);
-                                    break;
-                                case 3:
-                                case 4:
-                                    result.SetInt((a.Boolean ? 1 : 0) - (b.Boolean ? 1 : 0));
-                                    break;
-                                case 5:
-                                    result.SetInt((a.Boolean ? 1 : 0) - b.IntValue);
-                                    break;
-                                case 6:
-                                    result.SetNumber((a.Boolean ? 1U : 0U) - b.UIntValue);
-                                    break;
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                    result.SetInt((a.Boolean ? 1 : 0) - GetInt(b));
-                                    break;
-                                case 11:
-                                    result.SetFloat((a.Boolean ? 1 : 0) - b.FloatValue);
-                                    break;
-                                default:
+			if (a.store < UNDEFINED)
+			{
+				uint signature2 = (uint)(b.store >> 40) & 0xF;
+				if (signature2 > 11 || signature2 < 1)
+				{
+					return false;
+				}
+
+				result.SetNumber(a.number - GetDouble(b));
+				return true;
+			}
+			else if (b.store < UNDEFINED)
+			{
+				uint signature1 = (uint)(a.store >> 40) & 0xF;
+				if (signature1 > 11 || signature1 < 1)
+				{
+					return false;
+				}
+
+				result.SetNumber(GetDouble(a) - b.number);
+				return true;
+
+			}
+			else
+			{
+				uint signature1 = (uint)(a.store >> 40) & 0xF;
+				uint signature2 = (uint)(b.store >> 40) & 0xF;
+
+				// LocalString (signature 13) should fall back to slow path for string operations
+				if (signature1 > 11 || signature1 < 1 || signature2 > 11 || signature2 < 1)
+				{
+					return false;
+				}
+
+				if (signature1 == 1 || signature2 == 1)
+				{
+					result.store = QNAN;
+					return true;
+				}
+
+
+				switch (signature1)
+				{
+					case 2: // null
+						result.SetNumber(0.0 - GetDouble(b));
+						break;
+					case 3:
+					case 4: //bool
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber((a.Boolean ? 1 : 0) - 0.0);
+									break;
+								case 3:
+								case 4:
+									result.SetInt((a.Boolean ? 1 : 0) - (b.Boolean ? 1 : 0));
+									break;
+								case 5:
+									result.SetInt((a.Boolean ? 1 : 0) - b.IntValue);
+									break;
+								case 6:
+									result.SetNumber((a.Boolean ? 1U : 0U) - b.UIntValue);
+									break;
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+									result.SetInt((a.Boolean ? 1 : 0) - GetInt(b));
+									break;
+								case 11:
+									result.SetFloat((a.Boolean ? 1 : 0) - b.FloatValue);
+									break;
+								default:
 #if DEBUG
-					                throw new InvalidOperationException();
+									throw new InvalidOperationException();
 #else
 									Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
 							}
 						}
 
-                        break;
-                    case 5: //int
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber(a.IntValue - GetDouble(b));
-                                    break;
-                                case 3:
-                                case 4:
-                                    result.SetInt(a.IntValue - (b.Boolean ? 1 : 0));
-                                    break;
-                                case 6:
-                                    result.SetNumber((double)a.IntValue - b.UIntValue);
-                                    break;
-                                case 11:
-                                    result.SetFloat(a.IntValue - b.FloatValue);
-                                    break;
-                                case 5:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                    result.SetInt(a.IntValue - GetInt(b));
-                                    break;
-                                default:
+						break;
+					case 5: //int
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber(a.IntValue - GetDouble(b));
+									break;
+								case 3:
+								case 4:
+									result.SetInt(a.IntValue - (b.Boolean ? 1 : 0));
+									break;
+								case 6:
+									result.SetNumber((double)a.IntValue - b.UIntValue);
+									break;
+								case 11:
+									result.SetFloat(a.IntValue - b.FloatValue);
+									break;
+								case 5:
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+									result.SetInt(a.IntValue - GetInt(b));
+									break;
+								default:
 #if DEBUG
-					                throw new InvalidOperationException();
+									throw new InvalidOperationException();
 #else
 									Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
 							}
 						}
-                        break;
-                    case 6: //uint
-                        {
-                            switch (signature2)
-                            {
+						break;
+					case 6: //uint
+						{
+							switch (signature2)
+							{
 
-                                case 2:
-                                    result.SetNumber(a.UIntValue - GetDouble(b));
-                                    break;
-                                case 3:
-                                case 4:
-                                    result.SetUInt(a.UIntValue - (b.Boolean ? 1U : 0U));
-                                    break;
-                                case 5:
-                                    result.SetNumber((double)a.UIntValue - b.IntValue);
-                                    break;
-                                case 6:
-                                    result.SetUInt(a.UIntValue - b.UIntValue);
-                                    break;
-                                case 7:
-                                    result.SetNumber((double)a.UIntValue - b.SByteValue);
-                                    break;
-                                case 8:
-                                    result.SetUInt(a.UIntValue - b.ByteValue);
-                                    break;
-                                case 9:
-                                    result.SetNumber((double)a.UIntValue - b.ShortValue);
-                                    break;
-                                case 10:
-                                    result.SetUInt(a.UIntValue - b.UShortValue);
-                                    break;
-                                case 11:
-                                    result.SetFloat((float)a.UIntValue - b.FloatValue);
-                                    break;
-                                default:
+								case 2:
+									result.SetNumber(a.UIntValue - GetDouble(b));
+									break;
+								case 3:
+								case 4:
+									result.SetUInt(a.UIntValue - (b.Boolean ? 1U : 0U));
+									break;
+								case 5:
+									result.SetNumber((double)a.UIntValue - b.IntValue);
+									break;
+								case 6:
+									result.SetUInt(a.UIntValue - b.UIntValue);
+									break;
+								case 7:
+									result.SetNumber((double)a.UIntValue - b.SByteValue);
+									break;
+								case 8:
+									result.SetUInt(a.UIntValue - b.ByteValue);
+									break;
+								case 9:
+									result.SetNumber((double)a.UIntValue - b.ShortValue);
+									break;
+								case 10:
+									result.SetUInt(a.UIntValue - b.UShortValue);
+									break;
+								case 11:
+									result.SetFloat((float)a.UIntValue - b.FloatValue);
+									break;
+								default:
 #if DEBUG
-					                throw new InvalidOperationException();
+									throw new InvalidOperationException();
 #else
 									Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
 							}
 						}
-                        break;
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                        {
-                            switch (signature2)
-                            {
-                                case 2:
-                                    result.SetNumber(GetDouble(a) - GetDouble(b));
-                                    break;
-                                case 6:
-                                    result.SetNumber(GetDouble(a) - b.UIntValue);
-                                    break;
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                case 3:
-                                case 4:
-                                case 5:
-                                    result.SetInt(GetInt(a) - GetInt(b));
-                                    break;
-                                case 11:
-                                    result.SetFloat(GetFloat(a) - b.FloatValue);
-                                    break;
-                                default:
+						break;
+					case 7:
+					case 8:
+					case 9:
+					case 10:
+						{
+							switch (signature2)
+							{
+								case 2:
+									result.SetNumber(GetDouble(a) - GetDouble(b));
+									break;
+								case 6:
+									result.SetNumber(GetDouble(a) - b.UIntValue);
+									break;
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+								case 3:
+								case 4:
+								case 5:
+									result.SetInt(GetInt(a) - GetInt(b));
+									break;
+								case 11:
+									result.SetFloat(GetFloat(a) - b.FloatValue);
+									break;
+								default:
 #if DEBUG
-					                throw new InvalidOperationException();
+									throw new InvalidOperationException();
 #else
 									Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
 							}
 						}
-                        break;
-                    case 11:
-                        {
-                            switch (signature2)
-                            {
+						break;
+					case 11:
+						{
+							switch (signature2)
+							{
 
-                                case 2:
-                                    result.SetNumber(GetDouble(a) - GetDouble(b));
-                                    break;
-                                case 3:
-                                case 4:
-                                case 5:
-                                case 6:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                case 11:
-                                    result.SetFloat(GetFloat(a) - GetFloat(b));
-                                    break;
-                                default:
+								case 2:
+									result.SetNumber(GetDouble(a) - GetDouble(b));
+									break;
+								case 3:
+								case 4:
+								case 5:
+								case 6:
+								case 7:
+								case 8:
+								case 9:
+								case 10:
+								case 11:
+									result.SetFloat(GetFloat(a) - GetFloat(b));
+									break;
+								default:
 #if DEBUG
-					                throw new InvalidOperationException();
+									throw new InvalidOperationException();
 #else
 									Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
 							}
 						}
-                        break;
-                    default:
+						break;
+					default:
 #if DEBUG
-					    throw new InvalidOperationException();
+						throw new InvalidOperationException();
 #else
 						Environment.FailFast("出错了，这里跑不到"); return default;
 #endif
@@ -857,13 +923,12 @@ namespace juicescript
 
 
 				return true;
-            }
-
-        }
-
+			}
+		}
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static double GetDouble(NaNBoxing v)
         {
             if (v.store == QNAN)
@@ -912,7 +977,7 @@ namespace juicescript
 			}
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static float GetFloat(NaNBoxing v)
 		{
 			if (v.store == QNAN)
@@ -961,7 +1026,7 @@ namespace juicescript
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static int GetInt(NaNBoxing v)
         {
 #if DEBUG
