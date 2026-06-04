@@ -332,8 +332,9 @@ namespace juicescript.runtime
 								{ 
 									return value;	
 								}
-								value.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+								
 							}
+							value.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 						}
 						
 						break;

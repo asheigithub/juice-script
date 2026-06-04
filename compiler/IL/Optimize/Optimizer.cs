@@ -472,16 +472,19 @@ namespace juicescript.compiler.IL.Optimize
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				OptimizeBlock(cfg.Blocks[i],cfg);
+				OptimizeBlock(cfg.Blocks[i],cfg,constants);
 			}
+
+			RemoveBlockMove(cfg);
+
 
 
 			//着色法 槽复用
-			int maxslots = slotCount;// cfg.ReuseSlot();
+			int maxslots = slotCount;
 			//if (key.IndexOf("closure") != -1)
 			{
 				maxslots = cfg.GraphColoring();
-				//cfg.ReuseSlot();
+				
 			}
 
 

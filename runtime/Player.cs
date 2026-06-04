@@ -12999,12 +12999,7 @@ namespace juicescript.runtime
 
 							}
 							break;
-						//case INS_Code.short_ld_const:
-						//	{
-						//		int const_id = (int)((uint)dst_index >> 8);
-						//		stackslots[(int)((uint)dst_index & 0xff)] = constants[const_id];
-						//	}
-						//	break;
+						
 						case INS_Code.ld_false:
 							{
 								StackLocater stackLocater;
@@ -13215,16 +13210,7 @@ namespace juicescript.runtime
 
 							}
 							break;
-						//						case INS_Code.short_ld_methodVariable:
-						//							{
-						//								//[stack:{(uint)dst.index & 0xff}] <- [ scope:{(uint)dst.index>>16 & 0xff},member{ (uint)dst.index >> 8 & 0xff }]";
-						//#if DEBUG
-						//								if (methodscope.Type._link_codescope.index != (ushort)((uint)dst_index >> 16 & 0xff))
-						//									throw new InvalidOperationException();
-						//#endif
-						//								stackslots[(int)((uint)dst_index & 0xff)] = ((RtPayloadMethodScope)methodscope).ReadSlot((ushort)((uint)dst_index >> 8 & 0xff), this);
-						//							}
-						//							break;
+						
 						case INS_Code.ld_ValueRef:
 							{
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_ValueRef);

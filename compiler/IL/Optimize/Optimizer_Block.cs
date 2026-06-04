@@ -55,7 +55,7 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
-		private static void OptimizeBlock(BasicBlock basicBlock, ControlFlowGraph cfg)
+		private static void OptimizeBlock(BasicBlock basicBlock, ControlFlowGraph cfg, NaNBoxing[] constants)
 		{
 			OptimizeStoreVar(basicBlock,cfg);
 
@@ -222,6 +222,59 @@ namespace juicescript.compiler.IL.Optimize
 				
 			}
 		}
+
+
+
+
+
+
+		private static void RemoveBlockMove(ControlFlowGraph cfg)
+		{
+			//如果move后的结果只有一个地方用，
+			//并且只有一个move的目标是dst (也就是这不是三元运算符)
+			//则直接使用move前的slot,然后移除move
+			for (int i = 0;i< cfg.Blocks.Count ; i++)
+			{
+				var block = cfg.Blocks[i];
+				List<Instruction> toremove = new List<Instruction>();
+				
+				for (int j = 0; j < block.Instructions.Count; j++)
+				{
+					var instruction = block.Instructions[j];
+					if (instruction.INS_Code == INS_Code.move)
+					{
+						var dst = instruction.dst;
+
+						if (cfg.Blocks.SelectMany(b => b.Instructions).Count(ins => ins.dst.index == dst.index && ins.INS_Code == INS_Code.move) == 1)
+						{
+
+							var useins = cfg.Blocks.SelectMany(b => b.Instructions).Where(ins => ins.GetUse().Contains(dst)
+								&& !ins.GetUse().Contains(((INS_Move)instruction).source)
+
+								).ToArray();
+							if (useins.Length == 1)
+							{
+								Dictionary<int, int> map = new Dictionary<int, int>
+								{
+									{ dst.index, ((INS_Move)instruction).source.index }
+								};
+
+								useins[0].RemappingSlots(map);
+
+
+								toremove.Add(instruction);
+							}
+						}
+					}
+				}
+				if (toremove.Count > 0)
+				{
+					block.Instructions.RemoveAll(r => toremove.Contains(r));
+				}
+
+			}
+		}
+
 
 	}
 }
