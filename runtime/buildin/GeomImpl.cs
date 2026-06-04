@@ -56,17 +56,21 @@ namespace juicescript.runtime.buildin
 
 			NaNBoxing x = payload.ReadSlot(0, vector2.Type._link_codescope, context.player);
 			NaNBoxing y = payload.ReadSlot(1, vector2.Type._link_codescope, context.player);
-			
-			
 
-			int str = context.GC.AllocString($"({x.FloatValue.ToString("F2")},{y.FloatValue.ToString("F2")})");
-			if (str == 0)
+
+
+			//int str = context.GC.AllocString($"({x.FloatValue.ToString("F2")},{y.FloatValue.ToString("F2")})");
+			//if (str == 0)
+			//{
+			//	context.player.RaiseOutOfMemory(ref error);
+			//	return;
+			//}
+
+			if (context.player.TryCreateStringValue($"({x.FloatValue.ToString("F2")},{y.FloatValue.ToString("F2")})", out NaNBoxing result, ref error))
 			{
-				context.player.RaiseOutOfMemory(ref error);
-				return;
+				context.StackSlots[returnSlotIndex] = result;
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 			}
-
-			context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
 		}
 
 		[NativeFunction("$geom.Vector2$private::Vec2addVec2")]

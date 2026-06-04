@@ -5477,7 +5477,8 @@ namespace juicescript.runtime
 
 			if (isoutofindex_or_ishole) //如果索引超出了length或者是一个洞则查找原型链。。。
 			{
-				string searchName = uindex.ToString();
+				NaNBoxing sname = default;sname.SetUInt(uindex);
+				ReadOnlySpan<char> searchName = Extensions.GetPrimitiveValueToString(this, sname, stackalloc char[120]);  //uindex.ToString();
 				NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 
 				if (FindDynamicValue(arrObj, searchName, out value, out shape_ptr, out index, out prop))

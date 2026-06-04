@@ -2044,7 +2044,7 @@ namespace juicescript.runtime
 
 
 
-
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		public NaNBoxing ReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
 		{
 			if (HEAPINSTANCE_PTR == 0)
@@ -2060,7 +2060,7 @@ namespace juicescript.runtime
 
 		}
 
-
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private NaNBoxing DoReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)

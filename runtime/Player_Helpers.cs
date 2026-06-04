@@ -985,6 +985,7 @@ namespace juicescript.runtime
 			return;
 		lbL_primtive_add_heap:;
 			{
+				Context.GC.CheckGC(ref error);
 
 				if (n2.HeapKind == (byte)RtHeapTypeKind.STRING)
 				{
@@ -8346,19 +8347,21 @@ namespace juicescript.runtime
 			int super_const_index;
 			LoadInt32(&super_const_index, PC);
 
+			var instance_box = stackslots[src.index];
+			var name_box = stackslots[_name.index];
 
-			if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.ARRAY
-				&& stackslots[_name.index].ValueType >= BoxType.Int && stackslots[_name.index].ValueType <= BoxType.UShort &&
-				(stackslots[_name.index].IntValue >= 0 || (stackslots[_name.index].ValueType == BoxType.Uint && stackslots[_name.index].UIntValue < uint.MaxValue)))
+			if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
+				&& name_box.ValueType >= BoxType.Int && name_box.ValueType <= BoxType.UShort &&
+				(name_box.IntValue >= 0 || (name_box.ValueType == BoxType.Uint && name_box.UIntValue < uint.MaxValue)))
 			{
-				uint array_i = stackslots[_name.index].ValueType == BoxType.Uint ? stackslots[_name.index].UIntValue : (uint)stackslots[_name.index].IntValue;
-				RtHeapBase instance = Context.GC.Heap[stackslots[src.index].HeapPtr];
+				uint array_i = name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+				RtHeapBase instance = Context.GC.Heap[instance_box.HeapPtr];
 
 				SetArraySlot(stackslots[source.index], array_i, instance, ref error);
 				return;
 			}
-			else if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.VECTOR
-				&& RtVector.IsValidIndexType(stackslots[_name.index])
+			else if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
+				&& RtVector.IsValidIndexType(name_box)
 				)
 			{
 				Context.GC.CheckGC(ref error);
@@ -8370,7 +8373,7 @@ namespace juicescript.runtime
 
 				//RtVector vector = ((RtVector)instance);
 				RtVector vector;
-				int vptr = RtVector.FindAndUpdateHeapInstancePtr(stackslots[src.index].HeapPtr, this, out vector);
+				int vptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
 
 				ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 				Context.StackPosition++;
@@ -8386,7 +8389,7 @@ namespace juicescript.runtime
 
 				int validid;
 				var store = ((RtVector)vector).GetStore();
-				if (!(store.IsValidIndexRange(stackslots[_name.index], out validid)))
+				if (!(store.IsValidIndexRange(name_box, out validid)))
 				{
 					int maxlen = store.length;
 					if (validid == maxlen && maxlen < int.MaxValue) //扩容
@@ -8404,7 +8407,7 @@ namespace juicescript.runtime
 					else
 					{
 						Context.StackPosition--;
-						RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, stackslots[_name.index], stackalloc char[128]), maxlen);
+						RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128]), maxlen);
 						return;
 					}
 				}
@@ -8939,15 +8942,18 @@ namespace juicescript.runtime
 			int super_const_index;
 			LoadInt32(&super_const_index, PC);
 
-			if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.ARRAY
-				&& stackslots[_name.index].ValueType >= BoxType.Int && stackslots[_name.index].ValueType <= BoxType.UShort &&
-				(stackslots[_name.index].IntValue >= 0 || (stackslots[_name.index].ValueType == BoxType.Uint && stackslots[_name.index].UIntValue < uint.MaxValue)))
+			var instance_box = stackslots[src.index];
+			var name_box = stackslots[_name.index];
+
+			if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
+				&& name_box.ValueType >= BoxType.Int && name_box.ValueType <= BoxType.UShort &&
+				(name_box.IntValue >= 0 || (name_box.ValueType == BoxType.Uint && name_box.UIntValue < uint.MaxValue)))
 			{
 
-				uint array_i = stackslots[_name.index].ValueType == BoxType.Uint ? stackslots[_name.index].UIntValue : (uint)stackslots[_name.index].IntValue;
+				uint array_i = name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 
 				bool isoutofindex_or_ishole;
-				var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[stackslots[src.index].HeapPtr], out isoutofindex_or_ishole);
+				var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[instance_box.HeapPtr], out isoutofindex_or_ishole);
 
 				if (a_element.ValueType == BoxType.Fault)
 				{
@@ -8963,17 +8969,17 @@ namespace juicescript.runtime
 				return;
 
 			}
-			else if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.VECTOR
-				&& RtVector.IsValidIndexType(stackslots[_name.index])
+			else if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
+				&& RtVector.IsValidIndexType(name_box)
 				)
 			{
 				RtVector vector;
-				int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(stackslots[src.index].HeapPtr, this, out vector);
+				int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
 				//int maxlen; int validid;
 				var store = vector.GetStore();
-				if (!(store.IsValidIndexRange(stackslots[_name.index], out int validid)))
+				if (!(store.IsValidIndexRange(name_box, out int validid)))
 				{
-					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, stackslots[_name.index], stackalloc char[128] ), store.length);
+					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128] ), store.length);
 					return;
 				}
 				else
@@ -9364,7 +9370,7 @@ namespace juicescript.runtime
 			;
 		}
 
-		private unsafe void StoreMethodVariable_Slow(RtHeapBase methodscope, ScopeHeapLocater heapLocater,ref NaNBoxing value,ref NaNBoxing heapV,int scope_ptr,
+		private unsafe void StoreMethodVariable_Slow(RtHeapBase methodscope, ScopeHeapLocater heapLocater, NaNBoxing value,ref NaNBoxing heapV,int scope_ptr,
 			int* method_scopes,
 			ref ReceiveError error)
 		{
@@ -9454,7 +9460,7 @@ namespace juicescript.runtime
 				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
 				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
 			}
-			ref NaNBoxing value = ref stackslots[dst_index];
+			NaNBoxing value =  stackslots[dst_index];
 
 			//#if DEBUG
 			//								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
@@ -9486,7 +9492,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			StoreMethodVariable_Slow(methodscope, heapLocater, ref value, ref heapV, scope_ptr, method_scopes, ref error);
+			StoreMethodVariable_Slow(methodscope, heapLocater,  value, ref heapV, scope_ptr, method_scopes, ref error);
 
 		}
 
