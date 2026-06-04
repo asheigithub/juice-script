@@ -12211,7 +12211,7 @@ namespace juicescript.runtime
 						NaNBoxing v = new NaNBoxing();
 						v.SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
-						PrepareSaveMethodScope((RtMethodScope)s, ref heapLocater, ref v, m_scope, method_scopes, ref error);
+						PrepareSaveMethodScope((RtMethodScope)s,  heapLocater, ref v, m_scope, method_scopes, ref error);
 						if (error.raised)
 						{
 							closure_instance = null;
@@ -14826,7 +14826,7 @@ namespace juicescript.runtime
 										throw new InvalidOperationException(); // 这里的类型转换是不会失败的
 									}
 #endif
-									PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref store_err);
+									PrepareSaveMethodScope(heap,  heapLocater, ref value, m_scope, method_scopes, ref store_err);
 									if (store_err.raised)
 									{
 										error.error.setFault();

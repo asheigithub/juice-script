@@ -2726,7 +2726,7 @@ namespace juicescript.runtime
 #endif
 
 
-				PrepareSaveMethodScope(heap, ref iterSrcObj_Holder, ref ins, m_scope, method_scopes, ref error);
+				PrepareSaveMethodScope(heap, iterSrcObj_Holder, ref ins, m_scope, method_scopes, ref error);
 				if (error.raised)
 				{
 					Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -2752,7 +2752,7 @@ namespace juicescript.runtime
 						var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 						InitCacheInstance(obj_iter, iter_slot, false);
 
-						PrepareSaveMethodScope(heap, ref iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
+						PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
 						if (error.raised)
 						{
 							Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -2802,7 +2802,7 @@ namespace juicescript.runtime
 												}
 #endif
 
-							PrepareSaveMethodScope(heap, ref iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
+							PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
 							if (error.raised)
 							{
 								Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -2824,7 +2824,7 @@ namespace juicescript.runtime
 					var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 					InitCacheInstance(obj_iter, iter_slot, false);
 
-					PrepareSaveMethodScope(heap, ref iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
+					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
 					if (error.raised)
 					{
 						Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -5935,7 +5935,7 @@ namespace juicescript.runtime
 							if (t.TypeKind.IsHeapType())
 							{
 
-								PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
+								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
 #if DEBUG
 								if (error.raised) //读取初始化值这里是不可能进入出错分支的。
 								{
@@ -7092,7 +7092,7 @@ namespace juicescript.runtime
 							RtMethodScope heap = (RtMethodScope)s;
 							if (isheaptype)
 							{
-								PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
+								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
 
 								if (error.raised)
 								{
@@ -8348,14 +8348,76 @@ namespace juicescript.runtime
 
 
 			if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.ARRAY
-				&& stackslots[_name.index].ValueType >= BoxType.Int && stackslots[_name.index].ValueType <= BoxType.UShort && 
-				(stackslots[_name.index].IntValue >= 0 || (stackslots[_name.index].ValueType == BoxType.Uint && stackslots[_name.index].UIntValue< uint.MaxValue)))
+				&& stackslots[_name.index].ValueType >= BoxType.Int && stackslots[_name.index].ValueType <= BoxType.UShort &&
+				(stackslots[_name.index].IntValue >= 0 || (stackslots[_name.index].ValueType == BoxType.Uint && stackslots[_name.index].UIntValue < uint.MaxValue)))
 			{
 				uint array_i = stackslots[_name.index].ValueType == BoxType.Uint ? stackslots[_name.index].UIntValue : (uint)stackslots[_name.index].IntValue;
 				RtHeapBase instance = Context.GC.Heap[stackslots[src.index].HeapPtr];
 
 				SetArraySlot(stackslots[source.index], array_i, instance, ref error);
 				return;
+			}
+			else if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.VECTOR
+				&& RtVector.IsValidIndexType(stackslots[_name.index])
+				)
+			{
+				Context.GC.CheckGC(ref error);
+				if (Context.StackPosition >= Context.STACK_LENGTH)
+				{
+					RaiseStackOverflow(ref error);
+					return;
+				}
+
+				//RtVector vector = ((RtVector)instance);
+				RtVector vector;
+				int vptr = RtVector.FindAndUpdateHeapInstancePtr(stackslots[src.index].HeapPtr, this, out vector);
+
+				ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+				Context.StackPosition++;
+
+				ConvertValueType(ref error, stackslots[source.index], vector.element_type, vector.element_asclass, ref conv);//, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+				if (error.raised)
+				{
+					Context.StackPosition--;
+					return;
+				}
+				//为性能考虑，阻止ConvertValueType调函数
+
+
+				int validid;
+				var store = ((RtVector)vector).GetStore();
+				if (!(store.IsValidIndexRange(stackslots[_name.index], out validid)))
+				{
+					int maxlen = store.length;
+					if (validid == maxlen && maxlen < int.MaxValue) //扩容
+					{
+						((RtVector)vector).Resize(validid + 1, ref error, this, (ASInstance)vector.Type, out VectorImpl.VectorStore resizedstore);
+
+						if (error.raised)
+						{
+							Context.StackPosition--;
+							return;
+						}
+
+						//throw new NotImplementedException();
+					}
+					else
+					{
+						Context.StackPosition--;
+						RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, stackslots[_name.index], stackalloc char[128]), maxlen);
+						return;
+					}
+				}
+
+				vector.SetSlot(validid, this, vptr, conv, ref error);
+
+				Context.StackPosition--;
+
+				if (error.raised)
+				{
+					return;
+				}
+
 			}
 			else
 			{
@@ -8878,8 +8940,8 @@ namespace juicescript.runtime
 			LoadInt32(&super_const_index, PC);
 
 			if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.ARRAY
-				&& stackslots[_name.index].ValueType >= BoxType.Int && stackslots[_name.index].ValueType <= BoxType.UShort && 
-				(stackslots[_name.index].IntValue >=0 || (stackslots[_name.index].ValueType == BoxType.Uint && stackslots[_name.index].UIntValue < uint.MaxValue)))
+				&& stackslots[_name.index].ValueType >= BoxType.Int && stackslots[_name.index].ValueType <= BoxType.UShort &&
+				(stackslots[_name.index].IntValue >= 0 || (stackslots[_name.index].ValueType == BoxType.Uint && stackslots[_name.index].UIntValue < uint.MaxValue)))
 			{
 
 				uint array_i = stackslots[_name.index].ValueType == BoxType.Uint ? stackslots[_name.index].UIntValue : (uint)stackslots[_name.index].IntValue;
@@ -8901,9 +8963,28 @@ namespace juicescript.runtime
 				return;
 
 			}
+			else if (src.index >= 0 && stackslots[src.index].HeapKind == (byte)RtHeapTypeKind.VECTOR
+				&& RtVector.IsValidIndexType(stackslots[_name.index])
+				)
+			{
+				RtVector vector;
+				int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(stackslots[src.index].HeapPtr, this, out vector);
+				//int maxlen; int validid;
+				var store = vector.GetStore();
+				if (!(store.IsValidIndexRange(stackslots[_name.index], out int validid)))
+				{
+					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, stackslots[_name.index], stackalloc char[128] ), store.length);
+					return;
+				}
+				else
+				{
+					stackslots[dst_index] = store.ReadSlot(vector.element_type, validid, this, v_ptr, stackStPos + dst_index, vector.element_asclass);
+				}
+
+			}
 			else
 			{
-				Ld_MultiNameL_Val_Slow(dst_index, opcodePtr, src,  super_const_index, stack, _name, constants, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+				Ld_MultiNameL_Val_Slow(dst_index, opcodePtr, src, super_const_index, stack, _name, constants, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
 			}
 
 
@@ -9283,29 +9364,13 @@ namespace juicescript.runtime
 			;
 		}
 
-
-
-
-		private unsafe void StoreMethodVariable(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots,int scope_ptr,int* method_scopes, ref ReceiveError error)
+		private unsafe void StoreMethodVariable_Slow(RtHeapBase methodscope, ScopeHeapLocater heapLocater,ref NaNBoxing value,ref NaNBoxing heapV,int scope_ptr,
+			int* method_scopes,
+			ref ReceiveError error)
 		{
-			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
-
-			ScopeHeapLocater heapLocater;
-			{
-				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
-				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
-			}
-			ref NaNBoxing value = ref stackslots[dst_index];
-
-			//#if DEBUG
-			//								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
-			//									throw new InvalidOperationException();
-			//#endif
-
-
 			if ((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
-			{
-
+			{ 
+			
 			}
 			else if ((heapLocater.ScopeIndex & 0xff) < (byte)TypeKind.Object)
 			{
@@ -9351,10 +9416,8 @@ namespace juicescript.runtime
 			}
 
 
-			RtMethodScope heap = (RtMethodScope)methodscope;
 
-
-			if (!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+			if (value.ValueType != BoxType.HeapPtr && heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
 			{
 
 			}
@@ -9362,7 +9425,7 @@ namespace juicescript.runtime
 			{
 				int* m_scope = method_scopes;
 				*m_scope++ = scope_ptr;
-				PrepareSaveMethodScope(heap, ref heapLocater, ref value, m_scope, method_scopes, ref error);
+				PrepareSaveMethodScope((RtMethodScope)methodscope,	heapLocater, ref value, m_scope, method_scopes, ref error);
 
 				if (error.raised)
 				{
@@ -9371,13 +9434,59 @@ namespace juicescript.runtime
 				}
 			}
 
+			heapV = value;
 
-			heap.SetSlot(value, heapLocater.MemberIndex);
-
+#if FORCOMPILER
+			((RtMethodScope)methodscope).SetSlot(value, heapLocater.MemberIndex);
+#endif
 
 		flag_handle_error:
 			;
+		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void StoreMethodVariable(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots,int scope_ptr,int* method_scopes, ref ReceiveError error)
+		{
+			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+			}
+			ref NaNBoxing value = ref stackslots[dst_index];
+
+			//#if DEBUG
+			//								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
+			//									throw new InvalidOperationException();
+			//#endif
+
+
+			RtMethodScope heap = (RtMethodScope)methodscope;
+			ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+			
+
+			if (
+				(heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any 
+				|| 
+				( value.ValueType == heapV.ValueType && value.ValueType != BoxType.HeapPtr )
+								
+				)
+			{
+				if (value.ValueType != BoxType.HeapPtr && heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+				{
+					heapV = value;
+
+#if FORCOMPILER
+					((RtMethodScope)heap).SetSlot(value, heapLocater.MemberIndex);
+#endif
+
+					return;
+				}
+			}
+
+			StoreMethodVariable_Slow(methodscope, heapLocater, ref value, ref heapV, scope_ptr, method_scopes, ref error);
 
 		}
 

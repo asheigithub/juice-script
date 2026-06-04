@@ -1862,7 +1862,7 @@ namespace juicescript.runtime
 			}
 		}
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private void prepare_savemethodscope_saveinstacne(RtMethodScope heap, ref NaNBoxing saveSlot,  ref ScopeHeapLocater heapLocater,bool is_pass_this)
+		private void prepare_savemethodscope_saveinstacne(RtMethodScope heap, ref NaNBoxing saveSlot,   ScopeHeapLocater heapLocater,bool is_pass_this)
 		{
 			int srcPtr = saveSlot.HeapPtr;
 
@@ -1992,7 +1992,7 @@ namespace juicescript.runtime
 		///否则，复制到堆。
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void PrepareSaveMethodScope(RtMethodScope heap, ref ScopeHeapLocater heapLocater, ref NaNBoxing value, int* m_scope, int* method_scopes, ref ReceiveError error , bool is_pass_this = false)
+		private unsafe void PrepareSaveMethodScope(RtMethodScope heap,  ScopeHeapLocater heapLocater, ref NaNBoxing value, int* m_scope, int* method_scopes, ref ReceiveError error , bool is_pass_this = false)
 		{
 			if (heap.IsStackSlot)
 			{
@@ -2019,7 +2019,7 @@ namespace juicescript.runtime
 					if (value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						//var obj = Context.GC.Heap[value.HeapPtr];
-						prepare_savemethodscope_saveinstacne(heap,ref value, ref heapLocater,is_pass_this);
+						prepare_savemethodscope_saveinstacne(heap,ref value,  heapLocater,is_pass_this);
 					}
 					else if (value.HeapKind == (byte)RtHeapTypeKind.STRING || 
 						value.HeapKind == (byte)RtHeapTypeKind.CLASS ||
@@ -2212,7 +2212,7 @@ namespace juicescript.runtime
 										prepare_savemethodscope_beforeSave(heap, old, heapLocater, m_scope, method_scopes);
 									}
 
-									prepare_savemethodscope_saveinstacne( heap ,ref dstClosure.This, ref heapLocater,is_pass_this);
+									prepare_savemethodscope_saveinstacne( heap ,ref dstClosure.This,  heapLocater,is_pass_this);
 
 									if (needupdatescopePtr)
 									{

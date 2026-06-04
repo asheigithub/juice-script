@@ -665,7 +665,7 @@ namespace juicescript
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
-            result = default;
+           
             if ((a.ValueType == BoxType.Int || a.ValueType > BoxType.Uint) && a.ValueType < BoxType.Float && (b.ValueType > BoxType.Uint || b.ValueType == BoxType.Int) && b.ValueType < BoxType.Float)
             {
                 result.SetInt(a.IntValue - b.IntValue);

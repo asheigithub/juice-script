@@ -85,6 +85,7 @@ namespace juicescript.runtime
 		/// 后续操作将直接对堆里的对象操作了。
 		/// </summary>
 		internal int HEAPINSTANCE_PTR;
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
 
@@ -161,8 +162,8 @@ namespace juicescript.runtime
             return store.ReadSlot(element_type, validid, player, vector_ptr, reseveSlot, element_asclass);
 		}
 
-
-        internal void SetSlot(int validid,Player player,int vector_ptr,NaNBoxing value , ref Player.ReceiveError error)
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		internal void SetSlot(int validid,Player player,int vector_ptr,NaNBoxing value , ref Player.ReceiveError error)
         {
             Debug.Assert(HEAPINSTANCE_PTR == 0);
 

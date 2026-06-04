@@ -40,6 +40,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int __sendargcount;
 
+
 		public NaNBoxing ThisPtr
 		{
 			get {
@@ -194,7 +195,7 @@ namespace juicescript.runtime
 #endif
 
 		}
-		[MethodImpl( MethodImplOptions.AggressiveInlining)]
+		[MethodImpl( MethodImplOptions.AggressiveOptimization)]
 		internal NaNBoxing ReadSlot(ushort memberIndex
 //#if FORCOMPILER
 			, Player player
@@ -215,6 +216,13 @@ namespace juicescript.runtime
 
 			return Slots.Span[memberIndex];
 		}
+
+		internal ref NaNBoxing ReadSlotRef(ushort memberIndex)
+		{ 
+
+			return ref Slots.Span[memberIndex];
+		}
+
 
 		internal Span<NaNBoxing> __get_slots_for_gc
 		{
