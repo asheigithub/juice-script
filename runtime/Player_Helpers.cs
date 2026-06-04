@@ -4070,6 +4070,23 @@ namespace juicescript.runtime
 						goto flag_handle_error;
 					}
 
+					if (instancePtr.HeapKind == (byte)RtHeapTypeKind.VECTOR)
+					{
+						int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtVector t);
+						stackslots[target.index].SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+					}
+
+					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.ARRAY)
+					{
+						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtArray t);
+						stackslots[target.index].SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+					}
+					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && !instancePtr.IsStruct())
+					{ 
+						int obj_ptr = RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr,this,out RtInstance t);
+						stackslots[target.index].SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+					}
+
 				}
 				else if (type_box.HeapKind == (byte)RtHeapTypeKind.CLOSURE)
 				{
