@@ -3,6 +3,7 @@ using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
 using juicescript.runtime.buildin;
 using juicescript.runtime.gc;
+using System;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -12897,7 +12898,7 @@ namespace juicescript.runtime
 
 		}
 
-		//private Memory<char> frame_holdchars = new Memory<char>(new char[16]);
+		
 		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapBase methodscope, int scope_ptr, ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
@@ -13948,19 +13949,35 @@ namespace juicescript.runtime
 								StackLocater value;
 								value.index = dst_index;
 
-								var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr],
-									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
-								if (error.raised)
+								var v = stackslots[value.index];
+
+								if (v.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
 								{
-									goto flag_handle_error;
+									v = LoadValue((RtStackCache)Context.GC.Heap[v.HeapPtr],
+											stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
 								}
-
-								stackslots[value.index] = lv;
-
-								ref var v = ref stackslots[value.index];
 
 								if (method.Flags.HasFlag(MethodFlags.ASYNC))
 								{
+								}
+								else if (method.ReturnTypeKind == TypeKind.Any 
+									|| ((byte)v.ValueType - 3 == (byte)method.ReturnTypeKind && method.ReturnTypeKind < TypeKind.Float) 
+									|| (v.ValueType == BoxType.LocalString && method.ReturnTypeKind == TypeKind.String))
+								{
+									
+								}
+								else if (method.ReturnTypeKind == TypeKind.Int && (byte)(v.ValueType - 1) < (byte)BoxType.UShort)
+								{
+									v.SetInt(v.IntValue);
+									
+								}
+								else if (method.ReturnTypeKind == TypeKind.Uint && (byte)(v.ValueType - 1) < (byte)BoxType.UShort)
+								{
+									v.SetUInt(v.UIntValue);									
 								}
 								else
 								{
@@ -13971,12 +13988,13 @@ namespace juicescript.runtime
 									}
 								}
 
-								if (
-									v.HeapKind == (byte)RtHeapTypeKind.INSTANCE ||
-									v.HeapKind == (byte)RtHeapTypeKind.ARRAY ||
-									v.HeapKind == (byte)RtHeapTypeKind.VECTOR ||
-									v.HeapKind == (byte)RtHeapTypeKind.CLOSURE									
-									)//v.ValueType == BoxType.HeapPtr && v.HeapKind != (byte)RtHeapTypeKind.STRING)
+								if (									
+									v.ValueType == BoxType.HeapPtr &&
+									v.HeapKind >= (byte)RtHeapTypeKind.INSTANCE //||
+									//v.HeapKind == (byte)RtHeapTypeKind.ARRAY ||
+									//v.HeapKind == (byte)RtHeapTypeKind.VECTOR ||
+									//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
+									)
 								{
 									StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, v, ref error);
 									if (error.raised)
@@ -14109,56 +14127,10 @@ namespace juicescript.runtime
 								}
 #endif
 
-								StackLocater instance;
-								LoadStackLocater(&instance, &PC);
-
-								int index; LoadInt32(&index, &PC);
-
-								var arr = stackslots[instance.index];
-								Debug.Assert(arr.ValueType == BoxType.HeapPtr);
-								Debug.Assert(Context.GC.Heap[arr.HeapPtr].Kind == RtHeapTypeKind.VECTOR || Context.GC.Heap[arr.HeapPtr].Kind == RtHeapTypeKind.ARRAY);
-
-								var obj = Context.GC.Heap[arr.HeapPtr];
-								if (obj.Kind == RtHeapTypeKind.ARRAY)
+								Array_vector_initelement(dst_index, &PC, stackslots, ref error);
+								if (error.raised)
 								{
-									var arr_payload = (RtArray)obj;
-
-									Debug.Assert(arr_payload.StoreMode != RtArray.ArrayStoreMode.cache_on_stack);
-
-									if (arr_payload.StoreMode != RtArray.ArrayStoreMode.normal && index >= arr_payload.cache_store.Length)
-									{
-										int heaparr = arr_payload.ChangeStoreToHeap(Context.player, ref error);
-										if (error.raised)
-										{
-											goto flag_handle_error;
-										}
-										obj = Context.GC.Heap[heaparr];
-										stackslots[instance.index].SetHeapPtr(heaparr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-									}
-
-									SetArraySlot(stackslots[dst_index], (uint)index, obj, ref error);
-									if (error.raised)
-									{
-										goto flag_handle_error;
-									}
-								}
-								else
-								{
-									var vec_payload = (RtVector)obj;
-
-									ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref stackslots[dst_index]);
-									if (error.raised)
-									{
-										goto flag_handle_error;
-									}
-									//刚才的ConvertValueType不会导致调函数，因为没有传scope_ptr;
-
-									vec_payload.SetSlot(index, this, arr.HeapPtr, stackslots[dst_index], ref error);
-									if (error.raised)
-									{
-										goto flag_handle_error;
-									}
-
+									goto flag_handle_error;
 								}
 							}
 
@@ -14217,59 +14189,18 @@ namespace juicescript.runtime
 #endif
 
 								Debug.Assert(returnSlotIndex >= 0);
-								Context.GC.CheckGC(ref error);
 
-								StackLocater value;
-								value.index = dst_index;
-
-								var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr],
-									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
+								int refPC = 0;
+								Yield_return(dst_index, (int)(PC - PC_START), method, stackslots, stackStPos, scope_ptr, 
+									(int)(exception_ctx - exception_ctx_stack), NO_TRY, (GeneratorImpl.GeneratorWapper)resume_state,
+									returnSlotIndex, calleelastPos, ref error, ref refPC
+									);
 								if (error.raised)
 								{
-									//如果有异常，那就不会保存上下文
 									goto flag_handle_error;
 								}
 
-								if (lv.ValueType == BoxType.HeapPtr)
-								{
-									StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
-									if (error.raised)
-									{
-										Context.StackSlots[returnSlotIndex].SetUndefined();
-										goto flag_handle_error;
-									}
-								}
-								else
-								{
-									Context.StackSlots[returnSlotIndex] = lv;
-								}
-
-
-								//保存上下文状态
-								int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
-								int exception_at = (int)(exception_ctx - exception_ctx_stack);
-
-								GeneratorImpl.GeneratorWapper generatorWapper = (GeneratorImpl.GeneratorWapper)resume_state;
-								generatorWapper.exception_ctx_at = exception_at;
-								if (exception_ctx_count > 0)
-								{
-									for (int i = 1; i < exception_at + 1; i++)
-									{
-										generatorWapper.exceptionContext[i] = *(NO_TRY + i);
-#if DEBUG
-										if (stackslots[generatorWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
-										{
-											//yield禁止在catch块内使用，所以不可能有hold的异常。
-											throw new InvalidOperationException();
-										}
-#endif
-									}
-								}
-
-								generatorWapper.state = 1;
-								generatorWapper.RESUME_PC = (int)(PC - PC_START);
-
-								PC_PTR = generatorWapper.RESUME_PC;
+								PC_PTR = refPC;
 								//中断运行
 								return;
 							}
@@ -14285,59 +14216,17 @@ namespace juicescript.runtime
 								
 								Debug.Assert(returnSlotIndex >= 0);
 
-								Context.GC.CheckGC(ref error);
-
-								StackLocater value;
-								value.index = dst_index;
-
-								var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr],
-									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
+								int refPC = 0;
+								Await_return(dst_index, (int)(PC - PC_START), method, stackslots, stackStPos, scope_ptr,
+									(int)(exception_ctx - exception_ctx_stack), NO_TRY, (PromiseImpl.AsyncGenWapper)resume_state,
+									returnSlotIndex, calleelastPos, ref error, ref refPC
+									);
 								if (error.raised)
 								{
-									//如果有异常，那就不会保存上下文
 									goto flag_handle_error;
 								}
 
-								if (lv.ValueType == BoxType.HeapPtr)
-								{
-									StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
-									if (error.raised)
-									{
-										Context.StackSlots[returnSlotIndex].SetUndefined();
-										goto flag_handle_error;
-									}
-								}
-								else
-								{
-									Context.StackSlots[returnSlotIndex] = lv;
-								}
-
-
-								//保存上下文状态
-								int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
-								int exception_at = (int)(exception_ctx - exception_ctx_stack);
-
-								PromiseImpl.AsyncGenWapper asyncGenWapper = (PromiseImpl.AsyncGenWapper)resume_state;
-								asyncGenWapper.exception_ctx_at = exception_at;
-								if (exception_ctx_count > 0)
-								{
-									for (int i = 1; i < exception_at + 1; i++)
-									{
-										asyncGenWapper.exceptionContext[i] = *(NO_TRY + i);
-#if DEBUG
-										if (stackslots[asyncGenWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
-										{
-											//await禁止在finally块内使用，所以不可能有hold的异常。
-											throw new InvalidOperationException();
-										}
-#endif
-									}
-								}
-
-								asyncGenWapper.state = 1;
-								asyncGenWapper.RESUME_PC = (int)(PC - PC_START);
-
-								PC_PTR = asyncGenWapper.RESUME_PC;
+								PC_PTR = refPC;
 								//中断运行
 								return;
 

@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static juicescript.NaNBoxing;
+using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
@@ -9532,6 +9533,213 @@ namespace juicescript.runtime
 			;
 
 		}
+
+
+
+		private unsafe void Array_vector_initelement(int dst_index, byte** PC, Span<NaNBoxing> stackslots,ref ReceiveError error )
+		{
+			StackLocater instance;
+			LoadStackLocater(&instance, PC);
+
+			int index; LoadInt32(&index, PC);
+
+			var arr = stackslots[instance.index];
+			Debug.Assert(arr.ValueType == BoxType.HeapPtr);
+			Debug.Assert(Context.GC.Heap[arr.HeapPtr].Kind == RtHeapTypeKind.VECTOR || Context.GC.Heap[arr.HeapPtr].Kind == RtHeapTypeKind.ARRAY);
+
+			var obj = Context.GC.Heap[arr.HeapPtr];
+			if (obj.Kind == RtHeapTypeKind.ARRAY)
+			{
+				var arr_payload = (RtArray)obj;
+
+				Debug.Assert(arr_payload.StoreMode != RtArray.ArrayStoreMode.cache_on_stack);
+
+				if (arr_payload.StoreMode != RtArray.ArrayStoreMode.normal && index >= arr_payload.cache_store.Length)
+				{
+					int heaparr = arr_payload.ChangeStoreToHeap(Context.player, ref error);
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
+					obj = Context.GC.Heap[heaparr];
+					stackslots[instance.index].SetHeapPtr(heaparr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+				}
+
+				SetArraySlot(stackslots[dst_index], (uint)index, obj, ref error);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+			}
+			else
+			{
+				var vec_payload = (RtVector)obj;
+
+				ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref stackslots[dst_index]);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+				//刚才的ConvertValueType不会导致调函数，因为没有传scope_ptr;
+
+				vec_payload.SetSlot(index, this, arr.HeapPtr, stackslots[dst_index], ref error);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+			}
+
+
+		flag_handle_error:
+			;
+		}
+
+
+		private unsafe void Yield_return(int dst_index,int pc_sub_start, ASMethod method,  Span<NaNBoxing> stackslots,int stackStPos,int scope_ptr ,
+			//ExceptionContext* exception_ctx,
+			//ExceptionContext* exception_ctx_stack,
+			int exception_at,
+			ExceptionContext* NO_TRY,
+			
+			GeneratorImpl.GeneratorWapper resume_state,
+			int returnSlotIndex,
+			int calleelastPos,
+			ref ReceiveError error,ref int PC_PTR)
+		{
+			Context.GC.CheckGC(ref error);
+
+			StackLocater value;
+			value.index = dst_index;
+
+			var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr],
+				 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
+			if (error.raised)
+			{
+				//如果有异常，那就不会保存上下文
+				goto flag_handle_error;
+			}
+
+			if (lv.ValueType == BoxType.HeapPtr)
+			{
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
+				if (error.raised)
+				{
+					Context.StackSlots[returnSlotIndex].SetUndefined();
+					goto flag_handle_error;
+				}
+			}
+			else
+			{
+				Context.StackSlots[returnSlotIndex] = lv;
+			}
+
+
+			//保存上下文状态
+			int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
+			//int exception_at = (int)(exception_ctx - exception_ctx_stack);
+
+			GeneratorImpl.GeneratorWapper generatorWapper = (GeneratorImpl.GeneratorWapper)resume_state;
+			generatorWapper.exception_ctx_at = exception_at;
+			if (exception_ctx_count > 0)
+			{
+				for (int i = 1; i < exception_at + 1; i++)
+				{
+					generatorWapper.exceptionContext[i] = *(NO_TRY + i);
+#if DEBUG
+					if (stackslots[generatorWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
+					{
+						//yield禁止在catch块内使用，所以不可能有hold的异常。
+						throw new InvalidOperationException();
+					}
+#endif
+				}
+			}
+
+			generatorWapper.state = 1;
+			generatorWapper.RESUME_PC = (int)pc_sub_start; //(PC - PC_START);
+
+			PC_PTR = generatorWapper.RESUME_PC;
+
+
+		flag_handle_error:
+			;
+
+		}
+
+
+
+
+		private unsafe void Await_return(int dst_index, int pc_sub_start, ASMethod method, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
+			//ExceptionContext* exception_ctx,
+			//ExceptionContext* exception_ctx_stack,
+			int exception_at,
+			ExceptionContext* NO_TRY,
+
+			PromiseImpl.AsyncGenWapper resume_state,
+			int returnSlotIndex,
+			int calleelastPos,
+			ref ReceiveError error, ref int PC_PTR)
+		{
+			Context.GC.CheckGC(ref error);
+
+			StackLocater value;
+			value.index = dst_index;
+
+			var lv = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr],
+				 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
+			if (error.raised)
+			{
+				//如果有异常，那就不会保存上下文
+				goto flag_handle_error;
+			}
+
+			if (lv.ValueType == BoxType.HeapPtr)
+			{
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
+				if (error.raised)
+				{
+					Context.StackSlots[returnSlotIndex].SetUndefined();
+					goto flag_handle_error;
+				}
+			}
+			else
+			{
+				Context.StackSlots[returnSlotIndex] = lv;
+			}
+
+
+			//保存上下文状态
+			int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
+			//int exception_at = (int)(exception_ctx - exception_ctx_stack);
+
+			PromiseImpl.AsyncGenWapper asyncGenWapper = (PromiseImpl.AsyncGenWapper)resume_state;
+			asyncGenWapper.exception_ctx_at = exception_at;
+			if (exception_ctx_count > 0)
+			{
+				for (int i = 1; i < exception_at + 1; i++)
+				{
+					asyncGenWapper.exceptionContext[i] = *(NO_TRY + i);
+#if DEBUG
+					if (stackslots[asyncGenWapper.exceptionContext[i].hold_error.index].ValueType != BoxType.Fault)
+					{
+						//await禁止在finally块内使用，所以不可能有hold的异常。
+						throw new InvalidOperationException();
+					}
+#endif
+				}
+			}
+
+			asyncGenWapper.state = 1;
+			asyncGenWapper.RESUME_PC = pc_sub_start; //(int)(PC - PC_START);
+
+			PC_PTR = asyncGenWapper.RESUME_PC;
+
+		flag_handle_error:
+			;
+
+		}
+
 
 
 	}

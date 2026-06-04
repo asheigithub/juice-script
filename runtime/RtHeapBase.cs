@@ -36,25 +36,21 @@ namespace juicescript.runtime
         /// </summary>
         STRING =3,
 
-        /// <summary>
-        /// 表示对象的实例
-        /// </summary>
-        INSTANCE = 4,
-
-        ///// <summary>
-        ///// 表示用于LD_CLASS的缓存对象
-        ///// </summary>
-        //CACHE_LD_CLASS = 10,
 
         /// <summary>
         /// 表示NAMESPACE实例
         /// </summary>
-        NAMESPACE = 5,
+        NAMESPACE = 4,
 
-        /// <summary>
-        /// 表示ARRAY实例
-        /// </summary>
-        ARRAY = 6,
+		/// <summary>
+		/// 表示对象的实例
+		/// </summary>
+		INSTANCE = 5,
+
+		/// <summary>
+		/// 表示ARRAY实例
+		/// </summary>
+		ARRAY = 6,
 
         /// <summary>
         /// 表示VECTOR实例
