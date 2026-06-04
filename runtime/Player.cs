@@ -5556,29 +5556,13 @@ namespace juicescript.runtime
 		}
 
 
-		/// <summary>
-		/// 从操作数中提取实际值。
-		/// 由于有成员引用类型存在，必须先进行判断和解码
-		/// 
-		/// returnSlotIndex 用于某些ReadSlot()时必须的传入参数,和InvokeReadProperty
-		/// </summary>
-		/// <param name="box"></param>
-		/// <returns></returns>
-		/// <exception cref="InvalidOperationException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe NaNBoxing LoadValue(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
+		private unsafe NaNBoxing LoadValue_Slow(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
 		{
-			//if (box.ValueType != BoxType.HeapPtr) return box;
-			//Debug.Assert(box.ValueType == BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ);
 
 
 			NaNBoxing result = default;
-			//RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
-			//RtHeapTypeKind rtHeapKind = (RtHeapTypeKind)box.HeapKind;
-			//if (rtHeapKind == RtHeapTypeKind.STACK_CACHE_OBJ)
+
 			{
-				//RtHeapBase rtHeap = Context.GC.Heap[box.HeapPtr];
-				//RtStackCache _obj = (RtStackCache)rtHeap;
 
 				if (_obj.RefInstance.ValueType == BoxType.HeapPtr)
 				{
@@ -5586,49 +5570,37 @@ namespace juicescript.runtime
 
 					if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Fault)
 					{
-						if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)// refObj.Kind == RtHeapTypeKind.ARRAY) //通过索引下标操作
-						{
-#if DEBUG
-							if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Uint || !(_obj.trait[0] == null && _obj.trait[1] == null))
-							{
-								throw new InvalidOperationException();
-							}
-#endif
-							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
-							bool isoutofindex_or_ishole;
-							var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
+						Debug.Assert(_obj.RefInstance.HeapKind != (byte)RtHeapTypeKind.ARRAY);
 
-							if (v.ValueType == BoxType.Fault)
-							{
-								v.SetUndefined();
-							}
-							else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
-							{
-								v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
-								//var obj = Context.GC.Heap[v.HeapPtr];
-								//if (((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct))
-								//{
-								//	((RtInstance)obj).MarkFromContainer();//标记这是一个在数组里的struct。//下一步copyfrom时就会清空
-								//}
-							}
+						//						if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY)// refObj.Kind == RtHeapTypeKind.ARRAY) //通过索引下标操作
+						//						{
+						//#if DEBUG
+						//							if (_obj.indexer_key.ValueType != NaNBoxing.BoxType.Uint || !(_obj.trait[0] == null && _obj.trait[1] == null))
+						//							{
+						//								throw new InvalidOperationException();
+						//							}
 
-							result = v;
 
-							//#if FORCOMPILER
-							//							if (!IsComputeConstExpr)
-							//							{
-							//#endif
-							//								if (opcodePtr != null && ((*opcodePtr & 0xff) == (byte)INS_Code.ld_ValueRef))
-							//								{
-							//									*opcodePtr = ((uint)INS_Code.ld_ValueRef_ARR | (0xffffff00 & (*opcodePtr)));
-							//								}
+						//#endif
+						//							RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+						//							bool isoutofindex_or_ishole;
+						//							var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
 
-							//#if FORCOMPILER
-							//							}
-							//#endif
+						//							if (v.ValueType == BoxType.Fault)
+						//							{
+						//								v.SetUndefined();
+						//							}
+						//							else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+						//							{
+						//								v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
 
-						}
-						else
+						//							}
+
+						//							result = v;
+
+
+						//						}
+						//						else
 						{
 #if DEBUG
 							{
@@ -5646,35 +5618,37 @@ namespace juicescript.runtime
 							}
 #endif
 
-							if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)//refObj.Kind == RtHeapTypeKind.VECTOR)
-							{
-#if DEBUG
-								if (!RtVector.IsValidIndexType(_obj.indexer_key))
-								{
-									throw new InvalidOperationException();
-								}
-								else
-#endif
-								{
-									RtVector vector;
-									int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
-									//int maxlen; int validid;
-									var store = vector.GetStore();
-									if (!(store.IsValidIndexRange(_obj.indexer_key, out int validid)))
-									{
-										Span<char> buffers = stackalloc char[128];
-										RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), store.length);
-										return default;
-									}
-									else
-									{
-										return store.ReadSlot(vector.element_type, validid, this, v_ptr, returnSlotIndex, vector.element_asclass);
-										//return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
-										//throw new NotImplementedException();
-									}
-								}
-							}
-							else
+							Debug.Assert(_obj.RefInstance.HeapKind != (byte)RtHeapTypeKind.VECTOR);
+
+							//							if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR)//refObj.Kind == RtHeapTypeKind.VECTOR)
+							//							{
+							//#if DEBUG
+							//								if (!RtVector.IsValidIndexType(_obj.indexer_key))
+							//								{
+							//									throw new InvalidOperationException();
+							//								}
+							//								else
+							//#endif
+							//								{
+							//									RtVector vector;
+							//									int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
+							//									//int maxlen; int validid;
+							//									var store = vector.GetStore();
+							//									if (!(store.IsValidIndexRange(_obj.indexer_key, out int validid)))
+							//									{
+							//										Span<char> buffers = stackalloc char[128];
+							//										RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), store.length);
+							//										return default;
+							//									}
+							//									else
+							//									{
+							//										return store.ReadSlot(vector.element_type, validid, this, v_ptr, returnSlotIndex, vector.element_asclass);
+							//										//return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
+							//										//throw new NotImplementedException();
+							//									}
+							//								}
+							//							}
+							//							else
 							{
 								RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
 
@@ -6456,6 +6430,67 @@ namespace juicescript.runtime
 			//			}
 			//#endif
 			return result;
+
+		}
+
+		/// <summary>
+		/// 从操作数中提取实际值。
+		/// 由于有成员引用类型存在，必须先进行判断和解码
+		/// 
+		/// returnSlotIndex 用于某些ReadSlot()时必须的传入参数,和InvokeReadProperty
+		/// </summary>
+		/// <param name="box"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		internal unsafe NaNBoxing LoadValue(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
+		{
+
+
+
+			if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.ARRAY && _obj.indexer_key.ValueType == BoxType.Uint)
+			{
+				RtHeapBase refObj = Context.GC.Heap[_obj.RefInstance.HeapPtr];
+				bool isoutofindex_or_ishole;
+				var v = LoadSlotFromArray(_obj.indexer_key.UIntValue, refObj, out isoutofindex_or_ishole);
+
+				if (v.ValueType == BoxType.Fault)
+				{
+					v.SetUndefined();
+				}
+				else if (v.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+				{
+					v.SetHeapPtr(v.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+
+				}
+
+				return v;
+			}
+			else if (_obj.RefInstance.HeapKind == (byte)RtHeapTypeKind.VECTOR && _obj.indexer_key.ValueType != BoxType.Fault)
+			{
+
+				RtVector vector;
+				int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(_obj.RefInstance.HeapPtr, this, out vector);
+				//int maxlen; int validid;
+				var store = vector.GetStore();
+				if (!(store.IsValidIndexRange(_obj.indexer_key, out int validid)))
+				{
+					Span<char> buffers = stackalloc char[128];
+					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, _obj.indexer_key, buffers), store.length);
+					return default;
+				}
+				else
+				{
+					return store.ReadSlot(vector.element_type, validid, this, v_ptr, returnSlotIndex, vector.element_asclass);
+					//return vector.ReadSlot(validid, this, returnSlotIndex, v_ptr);
+					//throw new NotImplementedException();
+				}
+
+			}
+			else
+			{
+				return LoadValue_Slow(_obj, callee_slotindex, ref error, stackslots, returnSlotIndex, opcodePtr);
+			}
 
 		}
 
