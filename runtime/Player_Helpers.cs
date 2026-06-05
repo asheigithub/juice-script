@@ -5951,18 +5951,24 @@ namespace juicescript.runtime
 							RtMethodScope heap = (RtMethodScope)s;
 							NaNBoxing value = t.Value.initValue.Value;
 
-							if (t.TypeKind.IsHeapType())
+
+							ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+							if (value.ValueType != BoxType.HeapPtr && heapV.ValueType != BoxType.HeapPtr)
+							{
+								heapV = value;
+							}
+							else
 							{
 
 								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
-#if DEBUG
-								if (error.raised) //读取初始化值这里是不可能进入出错分支的。
-								{
-									throw new InvalidOperationException();
-								}
-#endif
+								Debug.Assert(!error.raised);
+								heapV = value;
 							}
-							heap.SetSlot(value, heapLocater.MemberIndex);
+
+#if FORCOMPILER
+							((RtMethodScope)heap).SetSlot(value, heapLocater.MemberIndex);
+#endif
 						}
 					}
 					break;

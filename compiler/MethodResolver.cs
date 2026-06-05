@@ -2067,42 +2067,90 @@ namespace juicescript.compiler
 						//)					
 						)
 					{
-						INS_Ld_MemberInitValue ld_MemberInitValue = new INS_Ld_MemberInitValue(scopeMember.trait.Token);
-						unsafe
+						if (container._link_codescope.Kind == CodeScopeKind.Method)
 						{
-
-							//最后一条指令肯定是store_scopeheap
-							fixed (byte* p = scopeMember.compiler_initvalue)
+							INS_Ld_MethodVariableInitValue ld_VarIntValue = new INS_Ld_MethodVariableInitValue(scopeMember.trait.Token);
+							unsafe
 							{
-								byte* PC = p + scopeMember.compiler_initvalue.Length
-									 - new INS_END().Size - new INS_Store_ScopeHeap(null).Size;
-								;
 
-								int codeanddst = *(int*)PC; PC += 4;
-
-								INS_Code opcode = (INS_Code)(codeanddst & 0xff);
-								if (opcode != INS_Code.storeScopeH && opcode != INS_Code.storeMethodVariable)
+								//最后一条指令肯定是store_scopeheap
+								fixed (byte* p = scopeMember.compiler_initvalue)
 								{
-									throw new InvalidOperationException();
-								}
-								ScopeHeapLocater heapLocater;
-								{
-									byte* _p = (byte*)&heapLocater.ScopeIndex;
-									*_p++ = *PC++;
-									*_p = *PC++;
+									byte* PC = p + scopeMember.compiler_initvalue.Length
+										 - new INS_END().Size - new INS_Store_ScopeHeap(null).Size;
+									;
 
-									_p = (byte*)&heapLocater.MemberIndex;
-									*_p++ = *PC++;
-									*_p = *PC++;
+									int codeanddst = *(int*)PC; PC += 4;
+
+									INS_Code opcode = (INS_Code)(codeanddst & 0xff);
+									if (opcode != INS_Code.storeScopeH && opcode != INS_Code.storeMethodVariable)
+									{
+										throw new InvalidOperationException();
+									}
+									ScopeHeapLocater heapLocater;
+									{
+										byte* _p = (byte*)&heapLocater.ScopeIndex;
+										*_p++ = *PC++;
+										*_p = *PC++;
+
+										_p = (byte*)&heapLocater.MemberIndex;
+										*_p++ = *PC++;
+										*_p = *PC++;
+									}
+
+									ld_VarIntValue.heap = heapLocater;
+									ld_VarIntValue.cacheraw = scopeMember.trait.Value.initValue.Value;
+									Debug.Assert(heapLocater.ScopeIndex == container._link_codescope.index && heapLocater.MemberIndex == container._link_codescope.Members.IndexOf(scopeMember));
 								}
 
-								ld_MemberInitValue.heap = heapLocater;
 							}
 
+
+
+							newinstructions.Add(ld_VarIntValue);
 						}
+						else
+						{
+							INS_Ld_MemberInitValue ld_MemberInitValue = new INS_Ld_MemberInitValue(scopeMember.trait.Token);
+							unsafe
+							{
 
-						newinstructions.Add(ld_MemberInitValue);
+								//最后一条指令肯定是store_scopeheap
+								fixed (byte* p = scopeMember.compiler_initvalue)
+								{
+									byte* PC = p + scopeMember.compiler_initvalue.Length
+										 - new INS_END().Size - new INS_Store_ScopeHeap(null).Size;
+									;
 
+									int codeanddst = *(int*)PC; PC += 4;
+
+									INS_Code opcode = (INS_Code)(codeanddst & 0xff);
+									if (opcode != INS_Code.storeScopeH && opcode != INS_Code.storeMethodVariable)
+									{
+										throw new InvalidOperationException();
+									}
+									ScopeHeapLocater heapLocater;
+									{
+										byte* _p = (byte*)&heapLocater.ScopeIndex;
+										*_p++ = *PC++;
+										*_p = *PC++;
+
+										_p = (byte*)&heapLocater.MemberIndex;
+										*_p++ = *PC++;
+										*_p = *PC++;
+									}
+
+									ld_MemberInitValue.heap = heapLocater;
+
+									Debug.Assert(heapLocater.ScopeIndex == container._link_codescope.index && heapLocater.MemberIndex == container._link_codescope.Members.IndexOf(scopeMember));
+								}
+
+							}
+
+
+
+							newinstructions.Add(ld_MemberInitValue);
+						}
 					}
 
 					lastindex = st_idx + info_src.instructions - 1;

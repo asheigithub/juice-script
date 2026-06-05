@@ -455,19 +455,14 @@ namespace juicescript.compiler.IL.Optimize
 
 		internal static void Optimize(ASMethod method, List<string> displaycfg_files, string fullPath, string outfile_base)
 		{
-			//FastPeephole(method);
-			//return;
-
-			//if (method.Name.IndexOf("SSS") >= 0)
-			//	return;
-
-
+			
+			string key = CompileContext.CleanInvalidPathChars(Player.GetMethodKey(method));
 			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
 
+			instructions = FirstStep(instructions);
+
+
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
-
-			string key = CompileContext.CleanInvalidPathChars( Player.GetMethodKey(method));
-
 			cfg.DeathCodeErase();
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
@@ -475,9 +470,16 @@ namespace juicescript.compiler.IL.Optimize
 				OptimizeBlock(cfg.Blocks[i],cfg,constants);
 			}
 
-			RemoveBlockMove(cfg);
+			OptimizeBlockLoadVariable(cfg);
 
 
+			RemoveBlockMove(cfg); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
+
+			
+
+
+
+			RemoveBarrier(cfg); 
 
 			//着色法 槽复用
 			int maxslots = slotCount;
@@ -508,7 +510,8 @@ namespace juicescript.compiler.IL.Optimize
 			cfg.ReMapping();
 
 
-			var optimizedInstructions = cfg.FlattenInstructions();		
+			var optimizedInstructions = cfg.FlattenInstructions();
+
 			method.Body.ByteCode = Assembler.Assemble(maxslots, constants, optimizedInstructions);
 
 		}

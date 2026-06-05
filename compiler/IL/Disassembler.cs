@@ -147,6 +147,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.storeHeapValueRef:
 					instruction = new INS_Store_HeapValueRef(token);
 					break;
+				case INS_Code.ld_MethodVariableInitValue:
+					instruction = new INS_Ld_MethodVariableInitValue(token);
+					break;
 				case INS_Code.ld_memberInitValue:
 					instruction = new INS_Ld_MemberInitValue(token);
 					break;

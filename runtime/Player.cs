@@ -11,6 +11,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 //using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
+using static System.Formats.Asn1.AsnWriter;
 
 
 namespace juicescript.runtime
@@ -13503,6 +13504,46 @@ namespace juicescript.runtime
 								{
 									goto flag_handle_error;
 								}
+							}
+							break;
+						case INS_Code.ld_MethodVariableInitValue:
+							{
+								ScopeHeapLocater heapLocater;
+								{
+									heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
+									heapLocater.MemberIndex = *(ushort*)PC; PC += 2;								
+								}
+
+								NaNBoxing value = *(NaNBoxing*)PC;PC += 8;
+
+								var s = methodscope; //Context.GC.Heap[scope_ptr];
+								
+								if (value.ValueType == BoxType.HeapPtr)
+								{
+									ASTrait t = s.Type._link_codescope.Members[heapLocater.MemberIndex].trait;
+									value = t.Value.initValue.Value;
+								}
+
+								RtMethodScope heap = (RtMethodScope)s;
+								ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+								if (value.ValueType != BoxType.HeapPtr && heapV.ValueType != BoxType.HeapPtr)
+								{
+									heapV = value;
+								}
+								else
+								{
+									int* m_scope = method_scopes;
+									*m_scope++ = scope_ptr;
+
+									PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
+									Debug.Assert(!error.raised);
+									heapV = value;
+								}
+
+#if FORCOMPILER
+							((RtMethodScope)heap).SetSlot(value, heapLocater.MemberIndex);
+#endif
 							}
 							break;
 						case INS_Code.ld_memberInitValue:

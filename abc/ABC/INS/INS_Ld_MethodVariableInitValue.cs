@@ -8,38 +8,46 @@ using System.Threading.Tasks;
 
 namespace juicescript.ABC.INS
 {
-	public sealed class INS_Ld_MemberInitValue : Instruction
+	public sealed class INS_Ld_MethodVariableInitValue : Instruction
 	{
-		public override INS_Code INS_Code => INS_Code.ld_memberInitValue;
+		public override INS_Code INS_Code => INS_Code.ld_MethodVariableInitValue;
 
 		public override int Size
 		{
 			get
 			{
-				return 4 + 4;
+				return 4 + 4 + 8;
 			}
 		}
 
 
 		public ScopeHeapLocater heap;
 
-		public INS_Ld_MemberInitValue(Token token) : base(token)
+		public NaNBoxing cacheraw;
+
+		public INS_Ld_MethodVariableInitValue(Token token) : base(token)
 		{
 		}
 
 		protected override void WriteByte(BinaryWriter bw)
 		{
 			heap.Write(bw);
+			bw.Write(cacheraw.Raw);
+
 		}
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
 			heap.ReadFromBinary(br);
+
+			ulong raw = br.ReadUInt64();
+			cacheraw = new NaNBoxing(raw);
+
 		}
 
 		public override string ToString()
 		{
-			return $"Ld_MemberInit   [{heap}]";
+			return $"Ld_VariableInit   [{heap}]";
 		}
 
         public override List<StackLocater> GetDef()

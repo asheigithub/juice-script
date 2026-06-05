@@ -130,6 +130,11 @@ namespace juicescript.ABC.INS
         storeHeapValueRef =32, 
 
         /// <summary>
+        /// 加载方法变量初始值
+        /// </summary>
+        ld_MethodVariableInitValue =33,
+
+        /// <summary>
         /// 加载成员初始值 const成员在初始化时就赋值，但是var变量则需要通过指令来读默认值
         /// </summary>
         ld_memberInitValue=34,
