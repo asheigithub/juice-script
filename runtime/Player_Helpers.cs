@@ -364,8 +364,7 @@ namespace juicescript.runtime
 
 
 		private unsafe void Exec_AddSlow(StackLocater dst,
-		StackLocater v1,
-		StackLocater v2,
+		
 		NaNBoxing n1,NaNBoxing n2,int scope_ptr,int stackStPos,Span<NaNBoxing> stackslots,NaNBoxing thisPtr,
 		ref ReceiveError error
 		)
@@ -412,9 +411,9 @@ namespace juicescript.runtime
 						return;
 					}
 
-					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
-					slots[0] = n1;
-					slots[1] = n2;
+					Span<NaNBoxing> runmethd_slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+					runmethd_slots[0] = n1;
+					runmethd_slots[1] = n2;
 
 					Context.StackPosition += 2;
 
@@ -424,7 +423,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+						RunMethod(method, cls, scope_ptr, @class, 2, (byte*)args, runmethd_slots, ref error, stackStPos + dst.index);
 					}
 					Context.StackPosition -= 2;
 
@@ -449,15 +448,34 @@ namespace juicescript.runtime
 				hint = HINT.h_number;
 			}
 
-			n1 = ToPrimitive(ref error, n1, hint, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
-			if (error.raised)
+
+			//不能修改v1,v2的输入值
+			if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 			{
+				RaiseStackOverflow(ref error);
 				return;
 			}
 
-			n2 = ToPrimitive(ref error, n2, hint, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+			int basePos = Context.StackPosition;
+			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+			slots.Clear();
+			Context.StackPosition += 2;
+			StackLocater conv_result1 = default;conv_result1.index = 0;
+			StackLocater conv_result2 = default;conv_result2.index = 1;
+
+
+
+			n1 = ToPrimitive(ref error, n1, hint, scope_ptr, conv_result1, conv_result1, slots, stackStPos, thisPtr);
 			if (error.raised)
 			{
+				Context.StackPosition = basePos;
+				return;
+			}
+
+			n2 = ToPrimitive(ref error, n2, hint, scope_ptr, conv_result2, conv_result2, slots, stackStPos, thisPtr);
+			if (error.raised)
+			{
+				Context.StackPosition = basePos;
 				return;
 			}
 
@@ -497,6 +515,7 @@ namespace juicescript.runtime
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
 										}
 									}
@@ -507,6 +526,7 @@ namespace juicescript.runtime
 										var concatenated = Extensions.GetPrimitiveValueToString(this, n1, buffers);
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return;
 										}
 									}
@@ -553,6 +573,7 @@ namespace juicescript.runtime
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
 										}
 									}
@@ -563,6 +584,7 @@ namespace juicescript.runtime
 										var concatenated = Extensions.GetPrimitiveValueToString(this, n1, buffers);
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return;
 										}
 									}
@@ -821,6 +843,7 @@ namespace juicescript.runtime
 									// 使用安全的字符串创建方法
 									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 									{
+										Context.StackPosition = basePos;
 										return; // 错误已经在TryCreateStringValue中处理
 									}
 								}
@@ -836,6 +859,7 @@ namespace juicescript.runtime
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
 										}
 									}
@@ -860,6 +884,7 @@ namespace juicescript.runtime
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
 										}
 									}
@@ -868,6 +893,7 @@ namespace juicescript.runtime
 										// n2 is empty LocalString, result is just str1
 										if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return;
 										}
 									}
@@ -909,6 +935,7 @@ namespace juicescript.runtime
 										// 使用安全的字符串创建方法
 										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 										{
+											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
 										}
 									}
@@ -926,6 +953,7 @@ namespace juicescript.runtime
 											// 使用安全的字符串创建方法
 											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 											{
+												Context.StackPosition = basePos;
 												return; // 错误已经在TryCreateStringValue中处理
 											}
 										}
@@ -934,6 +962,7 @@ namespace juicescript.runtime
 											// n2 is empty LocalString, result is just str1
 											if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
 											{
+												Context.StackPosition = basePos;
 												return;
 											}
 										}
@@ -950,6 +979,7 @@ namespace juicescript.runtime
 											// 使用安全的字符串创建方法
 											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 											{
+												Context.StackPosition = basePos;
 												return; // 错误已经在TryCreateStringValue中处理
 											}
 										}
@@ -983,6 +1013,7 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #endif
 			}
+			Context.StackPosition = basePos;
 			return;
 		lbL_primtive_add_heap:;
 			{
@@ -1001,6 +1032,7 @@ namespace juicescript.runtime
 					// 使用安全的字符串创建方法
 					if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
 					{
+						Context.StackPosition = basePos;
 						return; // 错误已经在TryCreateStringValue中处理
 					}
 				}
@@ -1041,7 +1073,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Exec_AddSlow(dst, v1, v2, n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
+				Exec_AddSlow(dst,  n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
 			}
 			
 		}
@@ -1120,7 +1152,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1134,7 +1166,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1449,7 +1481,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1463,7 +1495,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1656,7 +1688,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1670,7 +1702,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1829,7 +1861,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1843,7 +1875,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1967,23 +1999,24 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
 
 						if (!IsPrimitive(n2))
 						{
-							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
 
-						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						
 						ConvertValueType(ref error, n2, TypeKind.Uint, Context.UINT, ref n2);
 
 						stackslots[dst.index].SetInt((int)(n1.UIntValue & n2.UIntValue));
@@ -1994,23 +2027,21 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
-
+						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
 						if (!IsPrimitive(n2))
 						{
-							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
-
-						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
 						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
 
 						stackslots[dst.index].SetInt((int)(n1.IntValue << n2.IntValue));
@@ -2020,7 +2051,7 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
@@ -2037,16 +2068,7 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
-							if (error.raised)
-							{
-								return;
-							}
-						}
-
-						if (!IsPrimitive(n2))
-						{
-							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
@@ -2054,6 +2076,17 @@ namespace juicescript.runtime
 						}
 
 						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+
+						if (!IsPrimitive(n2))
+						{
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
+							if (error.raised)
+							{
+								return;
+							}
+						}
+
+						
 						ConvertValueType(ref error, n2, TypeKind.Uint, Context.UINT, ref n2);
 
 						stackslots[dst.index].SetInt((int)(n1.UIntValue | n2.UIntValue));
@@ -2063,23 +2096,23 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
+						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
 
 						if (!IsPrimitive(n2))
 						{
-							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
 
-						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
 						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
 
 
@@ -2090,23 +2123,24 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
 
 						if (!IsPrimitive(n2))
 						{
-							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
 
-						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						
 						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
 
 						stackslots[dst.index].SetUInt((n1.UIntValue >> n2.IntValue));
@@ -2116,23 +2150,24 @@ namespace juicescript.runtime
 					{
 						if (!IsPrimitive(n1))
 						{
-							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+							n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
+						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
 
 						if (!IsPrimitive(n2))
 						{
-							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+							n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 							if (error.raised)
 							{
 								return;
 							}
 						}
 
-						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
+						
 						ConvertValueType(ref error, n2, TypeKind.Uint, Context.UINT, ref n2);
 
 						stackslots[dst.index].SetInt((int)(n1.UIntValue ^ n2.UIntValue));
@@ -2154,25 +2189,43 @@ namespace juicescript.runtime
 		private void Comparse_Slow(
 			byte opMode,
 			StackLocater dst,
-		StackLocater v1,
-		StackLocater v2,
+		//StackLocater v1,
+		//StackLocater v2,
 		NaNBoxing n1,NaNBoxing n2, Span<NaNBoxing> stackslots,int stackStPos  ,int scope_ptr , NaNBoxing thisPtr ,ref ReceiveError error)
 		{
 
+			//不能修改v1,v2的输入值
+			if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+			{
+				RaiseStackOverflow(ref error);
+				return;
+			}
+
+			int basePos = Context.StackPosition;
+			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+			slots.Clear();
+			Context.StackPosition += 2;
+			StackLocater conv_result1 = default; conv_result1.index = 0;
+			StackLocater conv_result2 = default; conv_result2.index = 1;
+
+
+
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, v1, dst, stackslots, stackStPos, thisPtr);
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, conv_result1, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
+					Context.StackPosition = basePos;
 					return;
 				}
 			}
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, v2, dst, stackslots, stackStPos, thisPtr);
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, conv_result2, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
+					Context.StackPosition = basePos;
 					return;
 				}
 			}
@@ -2236,6 +2289,8 @@ namespace juicescript.runtime
 
 					if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
 					{
+						Context.StackPosition = basePos;
+
 						stackslots[dst.index].SetBoolean(false);
 						return;
 					}
@@ -2269,6 +2324,8 @@ namespace juicescript.runtime
 
 				if (double.IsNaN(n1.Number) || double.IsNaN(n2.Number))
 				{
+					Context.StackPosition = basePos;
+
 					stackslots[dst.index].SetBoolean(false);
 					return;
 				}
@@ -2306,6 +2363,8 @@ namespace juicescript.runtime
 
 				if (double.IsNaN(d1) || double.IsNaN(d2))
 				{
+					Context.StackPosition = basePos;
+
 					stackslots[dst.index].SetBoolean(false);
 					return;
 				}
@@ -2317,6 +2376,9 @@ namespace juicescript.runtime
 				else
 					c_r = 1;
 			}
+
+
+			Context.StackPosition = basePos;
 
 			switch (opMode)
 			{
@@ -2443,7 +2505,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Comparse_Slow(opMode, dst, v1, v2, n1, n2, stackslots, stackStPos, scope_ptr, thisPtr, ref error);
+				Comparse_Slow(opMode, dst, n1, n2, stackslots, stackStPos, scope_ptr, thisPtr, ref error);
 			}
 		}
 
@@ -4115,7 +4177,7 @@ namespace juicescript.runtime
 					if (function_proto == 0)
 					{
 						((RtClosure)constructor_closure).Set_PROTOTYPE(0, this);
-						var proto = InvokeReadProperty(ref error, constructor_box, 0, ref stackslots, -1);
+						var proto = InvokeReadProperty(ref error, constructor_box, 0,  stackslots, -1);
 						if (error.raised)
 						{
 							goto flag_handle_error;
@@ -5538,7 +5600,7 @@ namespace juicescript.runtime
 				goto flag_handle_error;
 			}
 
-			NaNBoxing result = InvokeReadProperty(ref error, thisValue, vtable_index, ref stackslots, stackStPos + target.index);
+			NaNBoxing result = InvokeReadProperty(ref error, thisValue, vtable_index,  stackslots, stackStPos + target.index);
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -6132,8 +6194,8 @@ namespace juicescript.runtime
 		private unsafe void Ld_RTQNameL_Ref(int dst_index,byte** PC , RtHeapBase methodscope , Span<NaNBoxing> stackslots, int stackStPos,int scope_ptr, ref ReceiveError error )
 		{
 
-			StackLocater stack;
-			stack.index = dst_index;
+			StackLocater dst_loc;
+			dst_loc.index = dst_index;
 
 			StackLocater src;
 			LoadStackLocater(&src, PC);
@@ -6462,7 +6524,7 @@ namespace juicescript.runtime
 
 				if (member != null)
 				{
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
 					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6478,14 +6540,14 @@ namespace juicescript.runtime
 					cachePayload.scopemember_index = (ushort)i;
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 					goto lbl_rtqname_success;
 				}
 				else if (m_idx > -1)
 				{
 					var vitem = primitive_codescope.Container._vtable.Items[m_idx];
 
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 					Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
@@ -6495,7 +6557,7 @@ namespace juicescript.runtime
 					closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = GetASTypeFromValue(instance_box); //as_type;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-					stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else
 				{
@@ -6515,7 +6577,7 @@ namespace juicescript.runtime
 					}
 
 
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
 					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6530,7 +6592,7 @@ namespace juicescript.runtime
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
 					cachePayload.scopemember_index = 0;
 					cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = primitive_codescope.TypeLayout.ASType.Instance;
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 					goto lbl_rtqname_dynamicprop;
 
@@ -6575,7 +6637,7 @@ namespace juicescript.runtime
 
 				if (member != null)
 				{
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
 					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6592,7 +6654,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 
 					goto lbl_rtqname_success;
@@ -6603,7 +6665,7 @@ namespace juicescript.runtime
 					{
 						var vitem = scope.Container._vtable.Items[m_idx];
 
-						int ptrIndex = stackStPos + stack.index;
+						int ptrIndex = stackStPos + dst_loc.index;
 						int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 						Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
@@ -6613,13 +6675,13 @@ namespace juicescript.runtime
 						closure.ScopeType = vitem.DefineAt;
 						closure._ref_as_type = instance.Type;  //as_type;
 						closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-						stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+						stackslots[dst_loc.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 					}
 					else
 					{
 						//throw new NotImplementedException();
-						int ptrIndex = stackStPos + stack.index;
+						int ptrIndex = stackStPos + dst_loc.index;
 						int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
 						RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6655,7 +6717,7 @@ namespace juicescript.runtime
 						cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 						cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-						stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+						stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 					}
 					goto lbl_rtqname_success;
@@ -6676,7 +6738,7 @@ namespace juicescript.runtime
 						goto flag_handle_error;
 					}
 
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
 					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6693,7 +6755,7 @@ namespace juicescript.runtime
 					cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = ns.HeapPtr; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 
 					goto lbl_rtqname_dynamicprop;
@@ -6711,7 +6773,7 @@ namespace juicescript.runtime
 
 				if (member != null)
 				{
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
 					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6727,7 +6789,7 @@ namespace juicescript.runtime
 					cachePayload.scopemember_index = (ushort)i;
 					cachePayload.searchPropertyName.SetUndefined(); cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 
 					goto lbl_rtqname_success;
@@ -6738,7 +6800,7 @@ namespace juicescript.runtime
 					{
 						var vitem = cls.Container._vtable.Items[m_idx];
 
-						int ptrIndex = stackStPos + stack.index;
+						int ptrIndex = stackStPos + dst_loc.index;
 						int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 						Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
@@ -6748,13 +6810,13 @@ namespace juicescript.runtime
 						closure.ScopeType = vitem.DefineAt;
 						closure._ref_as_type = cls.Container; //as_type;
 						closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
-						stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+						stackslots[dst_loc.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 					}
 					else
 					{
 						//throw new NotImplementedException();
-						int ptrIndex = stackStPos + stack.index;
+						int ptrIndex = stackStPos + dst_loc.index;
 						int cacheobjpointer = Context.CacheObjPtr + ptrIndex;
 						RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6790,7 +6852,7 @@ namespace juicescript.runtime
 						cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = instance.Type;
 						cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault();
 
-						stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+						stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 					}
 					goto lbl_rtqname_success;
@@ -6818,7 +6880,7 @@ namespace juicescript.runtime
 						goto flag_handle_error;
 					}
 
-					int ptrIndex = stackStPos + stack.index;
+					int ptrIndex = stackStPos + dst_loc.index;
 					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
 					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
 #if DEBUG
@@ -6834,7 +6896,7 @@ namespace juicescript.runtime
 					cachePayload.scopemember_index = 0;
 					cachePayload.searchPropertyName = searchPtr; cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key.setFault(); cachePayload.as_type = instance.Type;
 
-					stackslots[stack.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
+					stackslots[dst_loc.index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
 
 					goto lbl_rtqname_dynamicprop;
@@ -7801,7 +7863,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Store_MultiNameL_Slow(StackLocater source,  StackLocater src, int super_const_index, StackLocater tmp_holder, StackLocater _name, Span<NaNBoxing> constants,
+		private unsafe void Store_MultiNameL_Slow(StackLocater source,  StackLocater instance_loc, int super_const_index, StackLocater tmp_holder, StackLocater _name, Span<NaNBoxing> constants,
 			RtHeapBase methodscope,
 			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, ref ReceiveError error)
 		{
@@ -7812,14 +7874,14 @@ namespace juicescript.runtime
 			RtHeapTypeKind kind;
 			ASContainer as_type = null;
 
-			if (src.index >= 0)
+			if (instance_loc.index >= 0)
 			{
-				instance_box = stackslots[src.index];
+				instance_box = stackslots[instance_loc.index];
 				kind = (RtHeapTypeKind)(instance_box.ValueType == BoxType.HeapPtr ? instance_box.HeapKind : 255);
 			}
 			else
 			{
-				ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
+				ReadInstanceFromStacklocater(ref error, instance_loc, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -8359,8 +8421,8 @@ namespace juicescript.runtime
 			StackLocater source;
 			source.index = dst_index;
 
-			StackLocater src;
-			LoadStackLocater(&src, PC);
+			StackLocater instance_loc;
+			LoadStackLocater(&instance_loc, PC);
 
 			StackLocater _name;
 			LoadStackLocater(&_name, PC);
@@ -8371,10 +8433,10 @@ namespace juicescript.runtime
 			int super_const_index;
 			LoadInt32(&super_const_index, PC);
 
-			var instance_box = stackslots[src.index];
+			var instance_box = stackslots[instance_loc.index];
 			var name_box = stackslots[_name.index];
 
-			if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
+			if (instance_loc.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
 				&& name_box.ValueType >= BoxType.Int && name_box.ValueType <= BoxType.UShort &&
 				(name_box.IntValue >= 0 || (name_box.ValueType == BoxType.Uint && name_box.UIntValue < uint.MaxValue)))
 			{
@@ -8384,7 +8446,7 @@ namespace juicescript.runtime
 				SetArraySlot(stackslots[source.index], array_i, instance, ref error);
 				return;
 			}
-			else if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
+			else if (instance_loc.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
 				&& RtVector.IsValidIndexType(name_box)
 				)
 			{
@@ -8448,7 +8510,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(source, src, super_const_index, tmp_holder, _name, constants, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+				Store_MultiNameL_Slow(source, instance_loc, super_const_index, tmp_holder, _name, constants, methodscope, stackslots, stackStPos, scope_ptr, ref error);
 			}
 		
 
@@ -9596,20 +9658,35 @@ namespace juicescript.runtime
 			}
 			else
 			{
+				if (Context.StackPosition >= Context.STACK_LENGTH)
+				{
+					RaiseStackOverflow(ref error);
+					goto flag_handle_error;
+				}
+
+				ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];conv.SetUndefined();
+				Context.StackPosition++;
+
+
 				var vec_payload = (RtVector)obj;
 
-				ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref stackslots[dst_index]);
+				ConvertValueType(ref error, stackslots[dst_index], vec_payload.element_type, vec_payload.element_asclass, ref conv);
 				if (error.raised)
 				{
+					Context.StackPosition--;
 					goto flag_handle_error;
 				}
 				//刚才的ConvertValueType不会导致调函数，因为没有传scope_ptr;
 
-				vec_payload.SetSlot(index, this, arr.HeapPtr, stackslots[dst_index], ref error);
+				vec_payload.SetSlot(index, this, arr.HeapPtr, conv, ref error);
+				Context.StackPosition--;
+
 				if (error.raised)
-				{
+				{					
 					goto flag_handle_error;
 				}
+
+
 
 			}
 

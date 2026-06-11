@@ -5231,7 +5231,7 @@ namespace juicescript.runtime
 			}
 		}
 
-		private unsafe NaNBoxing InvokeReadProperty(ref ReceiveError error, NaNBoxing thisValue, int vtable_index, ref Span<NaNBoxing> stackslots, int returnSlotIndex)
+		private unsafe NaNBoxing InvokeReadProperty(ref ReceiveError error, NaNBoxing thisValue, int vtable_index,  Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 			if (thisValue.ValueType == BoxType.LocalString)
 			{
@@ -6201,7 +6201,7 @@ namespace juicescript.runtime
 						//instance.SetHeapPtr(_obj.RefInstance.HeapPtr);
 
 						var instance = _obj.RefInstance;
-						result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
+						result = InvokeReadProperty(ref error, instance, _obj.g_index,  stackslots, returnSlotIndex);
 
 						//throw new NotImplementedException("属性的引用未实现");
 					}
@@ -6301,7 +6301,7 @@ namespace juicescript.runtime
 					{
 						NaNBoxing instance = new NaNBoxing();
 						instance = _obj.RefInstance;
-						result = InvokeReadProperty(ref error, instance, _obj.g_index, ref stackslots, returnSlotIndex);
+						result = InvokeReadProperty(ref error, instance, _obj.g_index,  stackslots, returnSlotIndex);
 
 						//throw new NotImplementedException("属性的引用未实现");
 					}
@@ -8285,7 +8285,7 @@ namespace juicescript.runtime
 #endif
 
 				if (v1.ValueType == BoxType.HeapPtr)
-				{//v2肯定是字符串
+				{//v1肯定是字符串
 					v2 = ToPrimitive(ref error, v2, HINT.h_string, scope_ptr, tempStore, tempStore, stackslots, stackStPos, caller_bindthis_ptr);
 				}
 				else
