@@ -230,7 +230,7 @@ namespace juicescript.compiler.IL.Optimize
 		private static void OptimizeBlockLoadVariable(ControlFlowGraph cfg)
 		{
 			//基本块级优化变量读取。
-			//如果这个方法不是闭包，则变量除了赋值外不可能改变值
+			//如果这个方法不被闭包引用，则变量除了赋值外不可能改变值
 			if (!cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
 			{
 

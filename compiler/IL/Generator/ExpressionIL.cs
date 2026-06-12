@@ -1238,7 +1238,7 @@ namespace juicescript.compiler.IL.Generator
 							INS_Store_MethodVariable store_MethodVariable = new INS_Store_MethodVariable(step.token);
 							store_MethodVariable.dst = stackLocater;
 							store_MethodVariable.heap = heapLocater;
-
+							store_MethodVariable.convertedloc = compileEnv.MakeStackLocater(scopeMember.TypeKind);
 
 
 							compileEnv.instructions.Add(store_MethodVariable);
@@ -1385,6 +1385,7 @@ namespace juicescript.compiler.IL.Generator
 									INS_Store_MethodVariable store_MethodVariable = new INS_Store_MethodVariable(step.token);
 									store_MethodVariable.dst = valueLocater;
 									store_MethodVariable.heap = heapLocater;
+									store_MethodVariable.convertedloc = compileEnv.MakeStackLocater(scopeMember.TypeKind);
 
 									compileEnv.instructions.Add(store_MethodVariable);
 

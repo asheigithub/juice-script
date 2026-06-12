@@ -9546,7 +9546,12 @@ namespace juicescript.runtime
 				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
 				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
 			}
+
+			StackLocater convertedloc;LoadStackLocater(&convertedloc, PC);
+
+
 			NaNBoxing value =  stackslots[dst_index];
+
 
 			//#if DEBUG
 			//								if (methodscope.Type._link_codescope.index != heapLocater.ScopeIndex)
@@ -9569,7 +9574,7 @@ namespace juicescript.runtime
 				if (value.ValueType != BoxType.HeapPtr && heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
 				{
 					heapV = value;
-
+					stackslots[convertedloc.index] = value;
 #if FORCOMPILER
 					((RtMethodScope)heap).SetSlot(value, heapLocater.MemberIndex);
 #endif
@@ -9579,7 +9584,7 @@ namespace juicescript.runtime
 			}
 
 			StoreMethodVariable_Slow(methodscope, heapLocater,  value, ref heapV, scope_ptr, method_scopes, ref error);
-
+			stackslots[convertedloc.index] = heapV;
 		}
 
 
