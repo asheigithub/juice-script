@@ -470,7 +470,9 @@ namespace juicescript.compiler.IL.Optimize
 				OptimizeBlock(cfg.Blocks[i],cfg,constants);
 			}
 
-			OptimizeBlockLoadVariable(cfg);
+			OptimizeBlockLdConst(cfg);
+
+			OptimizeBlockAccessVariable(cfg);
 
 
 			RemoveBlockMove(cfg); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。

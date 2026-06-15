@@ -450,29 +450,28 @@ namespace juicescript.runtime
 
 
 			//不能修改v1,v2的输入值
-			if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+			if (Context.StackPosition + 3 >= Context.STACK_LENGTH)
 			{
 				RaiseStackOverflow(ref error);
 				return;
 			}
 
 			int basePos = Context.StackPosition;
-			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 3);
 			slots.Clear();
-			Context.StackPosition += 2;
+			Context.StackPosition += 3;
 			StackLocater conv_result1 = default;conv_result1.index = 0;
 			StackLocater conv_result2 = default;conv_result2.index = 1;
+			StackLocater tmpslot = default; tmpslot.index = 2;
 
-
-
-			n1 = ToPrimitive(ref error, n1, hint, scope_ptr, conv_result1, conv_result1, slots, stackStPos, thisPtr);
+			n1 = ToPrimitive(ref error, n1, hint, scope_ptr, conv_result1, tmpslot, slots, Context.StackPosition, thisPtr);
 			if (error.raised)
 			{
 				Context.StackPosition = basePos;
 				return;
 			}
 
-			n2 = ToPrimitive(ref error, n2, hint, scope_ptr, conv_result2, conv_result2, slots, stackStPos, thisPtr);
+			n2 = ToPrimitive(ref error, n2, hint, scope_ptr, conv_result2, tmpslot, slots, Context.StackPosition, thisPtr);
 			if (error.raised)
 			{
 				Context.StackPosition = basePos;
@@ -1035,6 +1034,7 @@ namespace juicescript.runtime
 						Context.StackPosition = basePos;
 						return; // 错误已经在TryCreateStringValue中处理
 					}
+					Context.StackPosition = basePos;
 				}
 #if DEBUG
 				else
@@ -2195,24 +2195,24 @@ namespace juicescript.runtime
 		{
 
 			//不能修改v1,v2的输入值
-			if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+			if (Context.StackPosition + 3 >= Context.STACK_LENGTH)
 			{
 				RaiseStackOverflow(ref error);
 				return;
 			}
 
 			int basePos = Context.StackPosition;
-			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 3);
 			slots.Clear();
-			Context.StackPosition += 2;
+			Context.StackPosition += 3;
 			StackLocater conv_result1 = default; conv_result1.index = 0;
 			StackLocater conv_result2 = default; conv_result2.index = 1;
-
+			StackLocater tempslot = default;tempslot.index = 2;
 
 
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, conv_result1, dst, stackslots, stackStPos, thisPtr);
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, conv_result1, tempslot, slots, Context.StackPosition, thisPtr);
 				if (error.raised)
 				{
 					Context.StackPosition = basePos;
@@ -2222,7 +2222,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, conv_result2, dst, stackslots, stackStPos, thisPtr);
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, conv_result2, tempslot, slots, Context.StackPosition, thisPtr);
 				if (error.raised)
 				{
 					Context.StackPosition = basePos;
@@ -7785,25 +7785,27 @@ namespace juicescript.runtime
 				//RtHeapBase _n = Context.GC.Heap[prop_name.HeapPtr];
 				if (prop_name.HeapKind != (byte)RtHeapTypeKind.STRING)
 				{
-					if (Context.StackPosition == Context.STACK_LENGTH)
+					if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
 						goto flag_handle_error;
 					}
 
-					var span = Context.StackSlots.AsSpan(Context.StackPosition, 1); span.Clear();
+					var span = Context.StackSlots.AsSpan(Context.StackPosition, 2); span.Clear();
 					StackLocater tmp = default; tmp.index = 0;
+					StackLocater tmp2 = default; tmp2.index = 1;
+
 					int stpos = Context.StackPosition;
-					Context.StackPosition++;
-					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stpos, ((RtMethodScope)methodscope).ThisPtr);
+					Context.StackPosition +=2;
+					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp2, span, stpos, ((RtMethodScope)methodscope).ThisPtr);
 					if (error.raised)
 					{
-						Context.StackPosition--;
+						Context.StackPosition=stpos;
 						goto flag_handle_error;
 					}
 
 					name = Extensions.GetPrimitiveValueToString(this, primitive_name, buffers);
-					Context.StackPosition--;
+					Context.StackPosition=stpos;
 
 
 					//throw new NotImplementedException("转字符串？");
@@ -8302,25 +8304,25 @@ namespace juicescript.runtime
 				//RtHeapBase _n = Context.GC.Heap[prop_name.HeapPtr];
 				if (prop_name.HeapKind != (byte)RtHeapTypeKind.STRING)
 				{
-					if (Context.StackPosition == Context.STACK_LENGTH)
+					if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
 						goto flag_handle_error;
 					}
 
-					var span = Context.StackSlots.AsSpan(Context.StackPosition, 1); span.Clear();
-					StackLocater tmp = default; tmp.index = 0;
+					var span = Context.StackSlots.AsSpan(Context.StackPosition, 2); span.Clear();
+					StackLocater tmp = default; tmp.index = 0; StackLocater tmp2 = default; tmp2.index = 1;
 					int stpos = Context.StackPosition;
-					Context.StackPosition++;
-					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stpos, ((RtMethodScope)methodscope).ThisPtr);
+					Context.StackPosition+=2;
+					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp2, span, stpos, ((RtMethodScope)methodscope).ThisPtr);
 					if (error.raised)
 					{
-						Context.StackPosition--;
+						Context.StackPosition = stpos;
 						goto flag_handle_error;
 					}
 
 					name = Extensions.GetPrimitiveValueToString(this, primitive_name, buffers);
-					Context.StackPosition--;
+					Context.StackPosition = stpos;
 
 
 					//throw new NotImplementedException("转字符串？");
@@ -8916,25 +8918,25 @@ namespace juicescript.runtime
 				//RtHeapBase _n = Context.GC.Heap[prop_name.HeapPtr];
 				if (prop_name.HeapKind != (byte)RtHeapTypeKind.STRING)
 				{
-					if (Context.StackPosition == Context.STACK_LENGTH)
+					if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
 						goto flag_handle_error;
 					}
 
-					var span = Context.StackSlots.AsSpan(Context.StackPosition, 1); span.Clear();
-					StackLocater tmp = default; tmp.index = 0;
+					var span = Context.StackSlots.AsSpan(Context.StackPosition, 2); span.Clear();
+					StackLocater tmp = default; tmp.index = 0; StackLocater tmp2 = default; tmp2.index = 1;
 					int stpos = Context.StackPosition;
-					Context.StackPosition++;
-					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp, span, stpos, ((RtMethodScope)methodscope).ThisPtr);
+					Context.StackPosition +=2;
+					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, scope_ptr, tmp, tmp2, span, stpos, ((RtMethodScope)methodscope).ThisPtr);
 					if (error.raised)
 					{
-						Context.StackPosition--;
+						Context.StackPosition = stpos;
 						goto flag_handle_error;
 					}
 
 					name = Extensions.GetPrimitiveValueToString(this, primitive_name, buffers);
-					Context.StackPosition--;
+					Context.StackPosition = stpos;
 
 
 					//throw new NotImplementedException("转字符串？");

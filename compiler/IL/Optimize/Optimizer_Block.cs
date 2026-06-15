@@ -227,12 +227,95 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
-		private static void OptimizeBlockLoadVariable(ControlFlowGraph cfg)
+		private static void OptimizeBlockLdConst(ControlFlowGraph cfg)
+		{
+			if (cfg.Blocks.Count == 0)
+				return;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
+				return;
+
+			
+			//如果第一个基本块有Ld_Const,那么后续的就可以全部消除为move
+			for (int i = 0; i < cfg.Blocks[0].Instructions.Count; i++)
+			{
+				if (cfg.Blocks[0].Instructions[i].INS_Code == INS_Code.ld_const)
+				{
+					INS_Ld_Const ld_Const = (INS_Ld_Const)cfg.Blocks[0].Instructions[i];
+					for (int j = i+1; j < cfg.Blocks[0].Instructions.Count; j++)
+					{
+						if (cfg.Blocks[0].Instructions[j].INS_Code == INS_Code.ld_const
+							&&
+							((INS_Ld_Const)cfg.Blocks[0].Instructions[j]).const_index == ld_Const.const_index
+							)
+						{
+							INS_Move _Move = new INS_Move(cfg.Blocks[0].Instructions[j].token );
+							_Move.source = ld_Const.dst;
+							_Move.dst = cfg.Blocks[0].Instructions[j].dst;
+
+							cfg.Blocks[0].Instructions[j] = _Move;
+						}
+					}
+
+					for (int k = 1; k < cfg.Blocks.Count; k++)
+					{
+						var block = cfg.Blocks[k];
+						for (int j = 0; j < block.Instructions.Count; j++)
+						{
+							if (block.Instructions[j].INS_Code == INS_Code.ld_const
+								&&
+								((INS_Ld_Const)block.Instructions[j]).const_index == ld_Const.const_index
+								)
+							{
+								INS_Move _Move = new INS_Move(block.Instructions[j].token);
+								_Move.source = ld_Const.dst;
+								_Move.dst = block.Instructions[j].dst;
+
+								block.Instructions[j] = _Move;
+							}
+						}
+
+					}
+
+					for (int j = 0; j < i; j++)
+					{
+						if (cfg.Blocks[0].Instructions[j].MaybeRaiseError())
+						{
+							for (int k = i; k > j; k--)
+							{
+								cfg.Blocks[0].Instructions[k] = cfg.Blocks[0].Instructions[k - 1];
+							}
+
+							cfg.Blocks[0].Instructions[j] = ld_Const;
+							break;
+						}
+					}
+
+				}
+				
+			}
+
+			
+		}
+
+		private static void OptimizeBlockAccessVariable(ControlFlowGraph cfg)
 		{
 			//基本块级优化变量读取。
-			//如果这个方法不被闭包引用，则变量除了赋值外不可能改变值
+			//如果这个方法不被闭包引用，同时也不是闭包 则变量除了赋值外不可能改变值
 			if (!cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
 			{
+				var m = cfg.Method.Body._link_codescope.Parent;
+				while (m.Kind == CodeScopeKind.Method)
+				{
+					var pm = ((ASMethodBody)m.Container).Method;
+					if (pm.Flags.HasFlag(MethodFlags.NeedActivation))
+					{
+						return;
+					}
+
+					m = pm.Body._link_codescope.Parent;
+
+				}
+
 
 				//传入参数优化。如果参数不会被赋值，而读取了多次，则将其中一次读取提前到入口，然后其他所有读取全部消除为move.
 				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
@@ -267,7 +350,7 @@ namespace juicescript.compiler.IL.Optimize
 								//由于可能调函数抛出异常，所以需要提前！
 								cfg.Blocks[0].Instructions.Remove(first_ldins);
 
-								int idx = cfg.Blocks[0].Instructions.IndexOf( cfg.Blocks[0].Instructions.First(ii => ii.MaybeRaiseError()));
+								int idx = cfg.Blocks[0].Instructions.IndexOf(cfg.Blocks[0].Instructions.First(ii => ii.MaybeRaiseError()));
 
 								cfg.Blocks[0].Instructions.Insert(idx, first_ldins);
 							}
@@ -304,46 +387,145 @@ namespace juicescript.compiler.IL.Optimize
 					}
 				}
 
-				//for (int i = 0; i < cfg.Blocks.Count; i++)
-				//{
-				//	var block = cfg.Blocks[i];
+				//第一个基本块优化
+				//如果某个变量只在第一个基本块被赋值一次，则后续所有读取都转为move
+				//由于即使是缓存，这个变量也是缓存地址位置，只要不被多次赋值，后续就是安全的
+				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
+				{
+					var scopemember = cfg.Method.Body._link_codescope.Members[i];
+					if (scopemember.Kind == ScopeMemberKind.Parameter)
+					{
+						continue;
+					}
 
-				//	for (int j = 0; j < block.Instructions.Count; j++)
-				//	{
-				//		var instruction = block.Instructions[j];
-				//		if (instruction.INS_Code == INS_Code.ld_methodVariable)
-				//		{
-				//			INS_Ld_MethodVariable ld_MethodVariable = (INS_Ld_MethodVariable)instruction;
-				//			//var t = cfg.Method.Body._link_codescope.Members[ld_MethodVariable.heap.MemberIndex];
+					if (cfg.Blocks.SelectMany(b => b.Instructions)
+						.Count(
+						ins => (ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == i)
+						||
+						(ins.INS_Code == INS_Code.ld_memberInitValue && ((INS_Ld_MemberInitValue)ins).heap.MemberIndex == i)
+						) == 1)
+					{
+						var instruction = cfg.Blocks[0].Instructions.FirstOrDefault(ins => ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == i);
+						if (instruction != null)
+						{
+							INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)instruction;
 
-				//			var next = block.Instructions.Skip(j+1).FirstOrDefault( ii=>ii.INS_Code == INS_Code.ld_methodVariable &&
-				//			 ((INS_Ld_MethodVariable)ii).heap.MemberIndex == ld_MethodVariable.heap.MemberIndex
+							var ldlist = cfg.Blocks.Skip(1).SelectMany(b => b.Instructions)
+								.Where(ins => ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == i).ToList();
 
-				//			);
+							if (ldlist.Count > 1)
+							{
+								StackLocater var_slot = store_MethodVariable.convertedloc;
+								foreach (var ld in ldlist)
+								{
+									foreach (var block in cfg.Blocks)
+									{
+										if (block.Instructions.Contains(ld))
+										{
+											int index = block.Instructions.IndexOf(ld);
 
-				//			if (next != null)
-				//			{
-				//				int next_index = block.Instructions.IndexOf(next);
-				//				if (block.Instructions.Skip(j + 1).Take(next_index - j).Any( ii=>ii.INS_Code ==  INS_Code.storeMethodVariable 
-				//					 ||
-				//					 ii.INS_Code == INS_Code.ld_MethodVariableInitValue ) //由于这里可能有GC缓存对象问题，所以只能严格判断
-				//				)
-				//				{
-				//					continue;
-				//				}
+											INS_Move _Move = new INS_Move(ld.token);
+											_Move.source = var_slot;
+											_Move.dst = ld.dst;
 
-				//				INS_Move _Move = new INS_Move(next.token);
-				//				_Move.source = ld_MethodVariable.dst;
-				//				_Move.dst = next.dst;
+											block.Instructions[index] = _Move;
+											goto lbl_nextld;
+										}
+									}
 
-				//				block.Instructions[next_index] = _Move;
-				//				j--;
-				//			}
+								lbl_nextld:
+									;
+								}
+							}
 
-				//		}
-				//	}
-				//}
+						}
+					}
+				}
+
+
+
+
+
+
+				for (int i = 0; i < cfg.Blocks.Count; i++)
+				{
+					//基本块内优化
+					var block = cfg.Blocks[i];
+
+					for (int j = 0; j < block.Instructions.Count; j++)
+					{
+						var instruction = block.Instructions[j];
+						if (instruction.INS_Code == INS_Code.ld_methodVariable)
+						{
+							INS_Ld_MethodVariable ld_MethodVariable = (INS_Ld_MethodVariable)instruction;
+
+							var next = block.Instructions.Skip(j + 1).FirstOrDefault(ii => ii.INS_Code == INS_Code.ld_methodVariable &&
+							 ((INS_Ld_MethodVariable)ii).heap.MemberIndex == ld_MethodVariable.heap.MemberIndex
+
+							);
+
+							if (next != null)
+							{
+								int next_index = block.Instructions.IndexOf(next);
+								if (block.Instructions.Skip(j + 1).Take(next_index - j).Any(ii => ii.INS_Code == INS_Code.storeMethodVariable
+									 ||
+									 ii.INS_Code == INS_Code.ld_MethodVariableInitValue //由于这里可能有GC缓存对象问题，所以只能严格判断:如果出现对variable的赋值则可能导致缓存对象改变
+									 ||
+									 ii.GetDef().Contains(ld_MethodVariable.dst) //如果修改了取出来的值
+									 )
+								)
+								{
+									continue;
+								}
+
+								INS_Move _Move = new INS_Move(next.token);
+								_Move.source = ld_MethodVariable.dst;
+								_Move.dst = next.dst;
+
+								block.Instructions[next_index] = _Move;
+								j--;
+							}
+
+						}
+						else if (instruction.INS_Code == INS_Code.storeMethodVariable)
+						{
+							INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)instruction;
+							var next = block.Instructions.Skip(j + 1).FirstOrDefault(ii => ii.INS_Code == INS_Code.ld_methodVariable &&
+							 ((INS_Ld_MethodVariable)ii).heap.MemberIndex == store_MethodVariable.heap.MemberIndex
+
+							);
+							if (next != null)
+							{
+								int next_index = block.Instructions.IndexOf(next);
+								if (block.Instructions.Skip(j + 1).Take(next_index - j).Any(ii => ii.INS_Code == INS_Code.storeMethodVariable
+									 ||
+									 ii.INS_Code == INS_Code.ld_MethodVariableInitValue //由于这里可能有GC缓存对象问题，所以只能严格判断:如果出现对variable的赋值则可能导致缓存对象改变
+									 ||
+									 ii.GetDef().Contains(store_MethodVariable.dst) //如果修改了取出来的值
+									 )
+								)
+								{
+									continue;
+								}
+
+								INS_Move _Move = new INS_Move(next.token);
+								_Move.source = store_MethodVariable.convertedloc;
+								_Move.dst = next.dst;
+
+								block.Instructions[next_index] = _Move;
+								j--;
+							}
+						}
+
+					}
+				}
 			}
+
+
+
+
+
+
 		}
 
 
@@ -360,24 +542,26 @@ namespace juicescript.compiler.IL.Optimize
 			//     移除这些move
 			// 迭代直到找不到
 
-			List<Instruction> ping_moves= new List<Instruction>();
+			List<Instruction> ping_moves = new List<Instruction>();
 
 			bool flag;
+			int i = 0;
+			int j = 0;
 			do
 			{
-				
+
 				flag = false;
-				var allins = cfg.Blocks.SelectMany(l => l.Instructions).Where( l=>l.INS_Code != INS_Code.expression_barrier );
+				var allins = cfg.Blocks.SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier);
 
 				if (!allins.Any(i => i.INS_Code == INS_Code.move && !ping_moves.Contains(i)))
 					break;
 
 
-				for (int i = 0; i < cfg.Blocks.Count; i++)
+				for (; i < cfg.Blocks.Count; i++)
 				{
 					var block = cfg.Blocks[i];
 
-					for (int j = 0; j < block.Instructions.Count; j++)
+					for (; j < block.Instructions.Count; j++)
 					{
 						var instruction = block.Instructions[j];
 						if (instruction.INS_Code == INS_Code.expression_barrier)
@@ -396,7 +580,7 @@ namespace juicescript.compiler.IL.Optimize
 							{
 								if (sources.Count == 1)
 								{
-									var toreplace = allins.Where( ii => ii.GetUse().Contains(sources[0].dst) ).ToArray();
+									var toreplace = allins.Where(ii => ii.GetUse().Contains(sources[0].dst)).ToArray();
 									if (!toreplace.Any(ii => ii.GetUse().Contains(((INS_Move)sources[0]).source)))
 									{
 
@@ -418,7 +602,7 @@ namespace juicescript.compiler.IL.Optimize
 									{
 										ping_moves.AddRange(sources);
 									}
-									
+
 								}
 								else
 								{
@@ -447,12 +631,12 @@ namespace juicescript.compiler.IL.Optimize
 									{
 										ping_moves.AddRange(sources);
 									}
-									
+
 								}
 							}
 						}
 					}
-
+					j = 0;
 				}
 
 			lbl_continue:

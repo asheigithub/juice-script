@@ -2,6 +2,7 @@
 using juicescript.ABC.Locaters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
@@ -64,6 +65,7 @@ namespace juicescript.runtime
 			Span<NaNBoxing> stackslots, int stackStPos , NaNBoxing caller_bindthis_ptr)
 		{
 
+			
 			if (IsPrimitive(value))
 			{
 				return value;

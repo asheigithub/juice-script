@@ -1860,13 +1860,51 @@ namespace juicescript.compiler.IL
 					expression_defs.Remove(ins.dst); //元素插入完毕后那个stackslot就可以释放了。
 				}
 
+				//if (ins.INS_Code == INS_Code.storeScopeH || ins.INS_Code == INS_Code.storeMethodVariable)
+				//{
+				//	expression_defs.Clear();
+				//}
+
+
+				//if (ins.INS_Code == INS_Code.method_call || 
+				//	ins.INS_Code == INS_Code.bindglobal_call ||
+				//	ins.INS_Code == INS_Code.bindthis_call || 
+				//	ins.INS_Code == INS_Code.ld_function_call ||
+				//	ins.INS_Code == INS_Code.ld_function_bindglobal_call
+				//	)
+				//{
+				//	INS_Barrier barrier = new INS_Barrier(expression.Token);
+				//	barrier.uselist = expression_defs.ToArray();
+
+				//	compileEnv.instructions.Insert(i+1,barrier);
+				//	end++;i++;
+				//}
+
+				if (ins.INS_Code == INS_Code.storeScopeH || ins.INS_Code == INS_Code.storeMethodVariable)
+				{
+					expression_defs.RemoveAll(s => ins.GetDef().Contains(s));
+					expression_defs.RemoveAll(s => ins.GetUse().Contains(s));
+					if (expression_defs.Count > 0)
+					{
+						INS_Barrier barrier = new INS_Barrier(expression.Token);
+						barrier.uselist = expression_defs.ToArray();
+
+						compileEnv.instructions.Insert(i, barrier);
+						end++;i++;
+					}
+				}
+
 			}
 
-			if (expression_defs.Count > 1 && 
+			if (expression_defs.Count > 1 
+				&& 
 				(
 				(compileEnv.instructions[end-1].INS_Code != INS_Code.storeScopeH &&
 				compileEnv.instructions[end-1].INS_Code != INS_Code.storeMethodVariable
 				)
+				//&&
+				//compileEnv.instructions[end - 1].INS_Code != INS_Code.expression_barrier
+
 				//||
 				//(!expression.Value.IsReg && expression.Value.Data.FF1Type == FF1DataValueType.as3_array ) 
 				//||

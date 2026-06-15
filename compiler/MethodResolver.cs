@@ -2135,6 +2135,11 @@ namespace juicescript.compiler
 						else
 						{
 							INS_Ld_MemberInitValue ld_MemberInitValue = new INS_Ld_MemberInitValue(scopeMember.trait.Token);
+
+							int c; NaNBoxing[] cn; Instruction[] ins;
+							Disassembler.Disassemble(scopeMember.compiler_initvalue, out c, out cn, out ins);
+
+
 							unsafe
 							{
 
