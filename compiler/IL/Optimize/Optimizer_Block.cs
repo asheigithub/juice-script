@@ -12,6 +12,74 @@ namespace juicescript.compiler.IL.Optimize
 {
 	internal partial class Optimizer
 	{
+
+		struct TryInfo
+		{
+			public int tryid;
+			/// <summary>
+			/// 0--try
+			/// 1--catch
+			/// 2--finally
+			/// </summary>
+			public int trystate;
+		}
+
+		/// <summary>
+		/// 获取某条指令所在的trycatchfinally结构
+		/// </summary>
+		/// <param name="instruction"></param>
+		/// <param name="cfg"></param>
+		/// <returns></returns>
+		private static Stack<TryInfo> GetTryStmt(Instruction instruction, ControlFlowGraph cfg)
+		{ 
+			Stack<TryInfo> trystmt = new Stack<TryInfo>();
+
+			for (int i = 0; i < cfg.Blocks.Count; i++)
+			{
+				var b = cfg.Blocks[i];
+
+				for (int j = 0; j < b.Instructions.Count; j++)
+				{
+					var ins = b.Instructions[j];
+
+					if (ins == instruction)
+					{
+						return trystmt;
+					}
+					else if (ins.INS_Code == INS_Code.try_enter)
+					{
+						trystmt.Push(new TryInfo() { tryid = ins.dst.index, trystate = 0 });
+					}
+					else if (ins.INS_Code == INS_Code.catch_enter)
+					{
+						TryInfo tryInfo = trystmt.Pop();
+						tryInfo.trystate = 1;
+						trystmt.Push(tryInfo);
+					}
+					else if (ins.INS_Code == INS_Code.finally_enter)
+					{
+						TryInfo tryInfo = trystmt.Pop();
+						tryInfo.trystate = 2;
+						trystmt.Push(tryInfo);
+					}
+					else if (ins.INS_Code == INS_Code.finally_exit)
+					{
+						trystmt.Pop();
+					}
+				}
+
+
+			}
+
+
+
+			return trystmt;
+		}
+
+
+
+
+
 		internal static void OptimizeStoreVar(BasicBlock basicBlock, ControlFlowGraph cfg)
 		{
 			//查找INS_Store_MethodVariable 。 将额外信息编码进ScopeId里。
@@ -390,6 +458,8 @@ namespace juicescript.compiler.IL.Optimize
 				//第一个基本块优化
 				//如果某个变量只在第一个基本块被赋值一次，则后续所有读取都转为move
 				//由于即使是缓存，这个变量也是缓存地址位置，只要不被多次赋值，后续就是安全的
+
+
 				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
 				{
 					var scopemember = cfg.Method.Body._link_codescope.Members[i];
@@ -415,6 +485,70 @@ namespace juicescript.compiler.IL.Optimize
 
 							if (ldlist.Count > 1)
 							{
+								
+								/*
+									* function throwErr()
+									{
+										throw 3;
+									}
+									function G()
+									{
+										try 
+										{
+											var k;
+											throwErr();        //考虑此代码，需要先在基本块顶部，预先加载store_MethodVariable.convertedloc 的初始值
+											k = {};
+		
+										}
+										finally
+										{
+											trace(k);
+											trace(k);
+										}
+									}
+									G();
+									*/
+
+								var head= cfg.Blocks[0].Instructions.TakeWhile(i => i != instruction);
+								if (head.Any(i => i.MaybeRaiseError()))
+								{
+									//如果指令在try内
+									var trystack = GetTryStmt(instruction, cfg);
+									if (trystack.Count > 0)
+									{
+										foreach (var ld in ldlist)
+										{ 
+											var ldtry = GetTryStmt(ld, cfg);
+
+											if (ldtry.Any(t => trystack.Any(tt => tt.tryid == t.tryid)))
+											{
+												var ld_info = ldtry.First(t => trystack.Any(tt => tt.tryid == t.tryid));
+												var ins_info = trystack.First(t=>t.tryid == ld_info.tryid);
+
+
+												if (ld_info.trystate != ins_info.trystate)
+												{
+													INS_Ld_MethodVariable iNS_Ld = new INS_Ld_MethodVariable(instruction.token);
+													iNS_Ld.dst = store_MethodVariable.convertedloc;
+													//iNS_Ld.heap = store_MethodVariable.heap;
+													ScopeHeapLocater heapLocater = default;
+													heapLocater.ScopeIndex = (ushort)cfg.Method.Body._link_codescope.index;
+													heapLocater.MemberIndex = store_MethodVariable.heap.MemberIndex;
+													iNS_Ld.heap = heapLocater;
+
+													cfg.Blocks[0].Instructions.Insert(0, iNS_Ld);
+
+													break;
+												}
+												
+											}
+
+										}
+									}
+								}
+
+								
+
 								StackLocater var_slot = store_MethodVariable.convertedloc;
 								foreach (var ld in ldlist)
 								{

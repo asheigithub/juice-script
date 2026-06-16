@@ -844,6 +844,7 @@ namespace juicescript.compiler.IL.Optimize
             sb.AppendLine("    <table>");
             sb.AppendLine("        <tr><th>Block</th><th>Range</th><th>Predecessors</th><th>Successors</th><th>Instructions</th></tr>");
 
+			int start_index = 0;
             foreach (var block in Blocks)
             {
                 string preds = block.Predecessors.Count == 0 ? "(none)" : string.Join(", ", block.Predecessors.Select(p => $"BB{p.BlockId}"));
@@ -853,8 +854,9 @@ namespace juicescript.compiler.IL.Optimize
                 for (int idx = 0; idx < block.Instructions.Count; idx++)
                 {
                     var ins = block.Instructions[idx];
-                    instructions += $"{block.StartIndex + idx}: {ins}<br>";
+                    instructions += $"{start_index + idx}: {ins}<br>";
                 }
+				start_index += block.Instructions.Count;
 
                 string rowClass = block.IsReachable ? "" : "class=\"unreachable-cell\"";
                 sb.AppendLine($"        <tr {rowClass}>");
