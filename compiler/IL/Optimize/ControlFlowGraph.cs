@@ -1160,7 +1160,6 @@ namespace juicescript.compiler.IL.Optimize
             return sb.ToString();
         }
 
-        
 		
 	}
 }

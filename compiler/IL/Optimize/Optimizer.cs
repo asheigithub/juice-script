@@ -465,6 +465,10 @@ namespace juicescript.compiler.IL.Optimize
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
 			cfg.DeathCodeErase();
 
+			ControlFlowGraphBuilder.BuildDomTree(cfg);
+
+
+
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
 				OptimizeBlock(cfg.Blocks[i],cfg,constants);
@@ -474,11 +478,10 @@ namespace juicescript.compiler.IL.Optimize
 
 			OptimizeBlockAccessVariable(cfg);
 
-
 			RemoveBlockMove(cfg); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
 
 			
-
+			
 
 
 			RemoveBarrier(cfg); 
@@ -487,8 +490,7 @@ namespace juicescript.compiler.IL.Optimize
 			int maxslots = slotCount;
 			//if (key.IndexOf("closure") != -1)
 			{
-				maxslots = cfg.GraphColoring();
-				
+				maxslots = cfg.GraphColoring();				
 			}
 
 

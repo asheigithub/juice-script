@@ -1478,7 +1478,137 @@ namespace juicescript.compiler.IL.Optimize
 			//tryctx.must_throw = true;
 			//throw new NotImplementedException();
 		}
+
+
+
+		/// <summary>
+		/// 计算支配树
+		/// </summary>
+		/// <param name="cfg"></param>
+		public static void BuildDomTree(ControlFlowGraph cfg)
+		{
+			if (cfg.Blocks.Count == 0)
+				return;
+
+			Dictionary<BasicBlock, int> RpoIndex;
+			Dictionary<BasicBlock, BasicBlock> Idom;
+			List<BasicBlock> RpoList;
+
+
+			void ComputeRPO(BasicBlock entry)
+			{
+				var visited = new HashSet<BasicBlock>();
+				var postorder = new List<BasicBlock>();
+
+				void DFS(BasicBlock b)
+				{
+					if (!visited.Add(b)) return;
+					foreach (var succ in b.Successors)
+						DFS(succ);
+					postorder.Add(b);
+				}
+
+				DFS(entry);
+
+				// RPO = reverse(postorder)
+				RpoList = postorder.AsEnumerable().Reverse().ToList();
+
+				RpoIndex = new Dictionary<BasicBlock, int>();
+				for (int i = 0; i < RpoList.Count; i++)
+					RpoIndex[RpoList[i]] = i;
+			}
+
+			ComputeRPO(cfg.Blocks[0]);
+
+			void ComputeDominatorTree(BasicBlock entry)
+			{
+				BasicBlock Intersect(BasicBlock b1, BasicBlock b2)
+				{
+					while (b1 != b2)
+					{
+						while (RpoIndex[b1] < RpoIndex[b2])
+							b2 = Idom[b2];
+
+						while (RpoIndex[b2] < RpoIndex[b1])
+							b1 = Idom[b1];
+					}
+					return b1;
+				}
+
+				// 初始化
+				Idom = new Dictionary<BasicBlock, BasicBlock>();
+				foreach (var b in RpoList)
+					Idom[b] = null;
+
+				Idom[entry] = entry;
+
+				bool changed = true;
+
+				while (changed)
+				{
+					changed = false;
+
+					// 从 RPO 的第二个节点开始（第一个是 entry）
+					for (int i = 1; i < RpoList.Count; i++)
+					{
+						var b = RpoList[i];
+
+						// 找到第一个已知 idom 的前驱
+						BasicBlock newIdom = null;
+						foreach (var p in b.Predecessors)
+						{
+							if (Idom[p] != null)
+							{
+								newIdom = p;
+								break;
+							}
+						}
+
+						if (newIdom == null)
+							continue;
+
+						// 与其他前驱求交
+						foreach (var p in b.Predecessors)
+						{
+							if (p == newIdom) continue;
+							if (Idom[p] != null)
+								newIdom = Intersect(p, newIdom);
+						}
+
+						if (Idom[b] != newIdom)
+						{
+							Idom[b] = newIdom;
+							changed = true;
+						}
+					}
+				}
+			}
+
+			ComputeDominatorTree(cfg.Blocks[0]);
+
+
+			for (int i = 0; i < cfg.Blocks.Count; i++)
+			{
+				if (cfg.Blocks[i].IsReachable)
+					cfg.Blocks[i].Idom = Idom[cfg.Blocks[i]];
+			}
+
+			foreach (var b in Idom)
+			{
+				if (b.Value != b.Key)
+				{
+					if (b.Value.Dominate == null)
+					{
+						b.Value.Dominate = new List<BasicBlock>();
+					}
+
+					b.Value.Dominate.Add(b.Key);
+				}
+			}
+		}
+
 	}
+
 
 	public class GraphPathFinder
 	{

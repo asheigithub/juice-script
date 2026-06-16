@@ -680,7 +680,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			bool flag;
 			int i = 0;
-			int j = 0;
+			;
 			do
 			{
 
@@ -695,7 +695,7 @@ namespace juicescript.compiler.IL.Optimize
 				{
 					var block = cfg.Blocks[i];
 
-					for (; j < block.Instructions.Count; j++)
+					for (int j = 0; j < block.Instructions.Count; j++)
 					{
 						var instruction = block.Instructions[j];
 						if (instruction.INS_Code == INS_Code.expression_barrier)
@@ -770,7 +770,7 @@ namespace juicescript.compiler.IL.Optimize
 							}
 						}
 					}
-					j = 0;
+					
 				}
 
 			lbl_continue:

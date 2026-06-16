@@ -20,8 +20,16 @@ namespace juicescript.compiler.IL.Optimize
 
 
         internal int TryBlockId;
-        
-        public bool IsReachable { get; set; }
+
+        /// <summary>
+        /// 直接支配节点
+        /// </summary>
+		internal BasicBlock Idom;
+
+        internal List<BasicBlock> Dominate;
+
+
+		public bool IsReachable { get; set; }
 
         public HashSet<int> LiveIn { get; set; }
         public HashSet<int> LiveOut { get; set; }
