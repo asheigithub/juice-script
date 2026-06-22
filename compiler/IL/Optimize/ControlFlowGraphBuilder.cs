@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace juicescript.compiler.IL.Optimize
 {
@@ -138,7 +139,7 @@ namespace juicescript.compiler.IL.Optimize
 			for (int i = 0; i < sortedIndices.Length - 1; i++)
 			{
 				BasicBlock bb = new BasicBlock();
-				bb.OriginalIndex = o_id++;
+				bb.OriginalIndex = o_id * 10; o_id++;
 				bb.StartIndex = sortedIndices[i];
 				bb.EndIndex = sortedIndices[i + 1] - 1;
 				bb.BlockId = bb.OriginalIndex;
@@ -150,7 +151,7 @@ namespace juicescript.compiler.IL.Optimize
 				cfg.Blocks.Add(bb);
 			}
 			BasicBlock end = new BasicBlock();
-			end.OriginalIndex = o_id++;
+			end.OriginalIndex = o_id * 10; o_id++;
 			end.StartIndex = instructions.Length - 1;
 			end.EndIndex = instructions.Length - 1;
 			end.BlockId = end.OriginalIndex;
@@ -1593,18 +1594,30 @@ namespace juicescript.compiler.IL.Optimize
 					cfg.Blocks[i].Idom = Idom[cfg.Blocks[i]];
 			}
 
-			foreach (var b in Idom)
+			//支配边界dominance frontier
+			Dictionary<BasicBlock, HashSet<BasicBlock>> DF = new Dictionary<BasicBlock, HashSet<BasicBlock>>();
+			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				if (b.Value != b.Key)
-				{
-					if (b.Value.Dominate == null)
-					{
-						b.Value.Dominate = new List<BasicBlock>();
-					}
+				DF[cfg.Blocks[i]] = new HashSet<BasicBlock>();
+				cfg.Blocks[i].DominanceFrontier = DF[cfg.Blocks[i]];
+			}
 
-					b.Value.Dominate.Add(b.Key);
+			foreach (var b in cfg.Blocks)
+			{
+				if (b.Predecessors.Count >= 2 && b.IsReachable)
+				{
+					foreach (var p in b.Predecessors)
+					{
+						var runner = p;
+						while (runner != Idom[b])
+						{
+							DF[runner].Add(b);
+							runner = Idom[runner];
+						}
+					}
 				}
 			}
+
 		}
 
 	}

@@ -364,6 +364,8 @@ namespace juicescript.compiler.IL.Optimize
 				blockMapping[block] = newBlock;
 			}
 
+			int totalinstructions = Blocks.Sum(b => b.Instructions.Count) + Blocks.Count;
+
 			foreach (var block in Blocks)
 			{
 				var newBlock = blockMapping[block];
@@ -391,7 +393,7 @@ namespace juicescript.compiler.IL.Optimize
 			}
 
 			var blocksToSplit = tempCFG.Blocks.Where(b => b.IsReachable && b.Instructions.Count > 1).ToList();
-
+			int seed = 0;
 			foreach (var block in blocksToSplit)
 			{
 				int idx = tempCFG.Blocks.IndexOf(block);
@@ -415,7 +417,7 @@ namespace juicescript.compiler.IL.Optimize
 					var newB = new BasicBlock
 					{
 						BlockId = tempCFG.Blocks.Count,
-						OriginalIndex = block.OriginalIndex * 1000 + i,
+						OriginalIndex =  totalinstructions  + (++seed),
 						IsReachable = block.IsReachable,
 						Instructions = new List<Instruction> { block.Instructions[i] },
 						Predecessors = new List<BasicBlock>(),
@@ -892,7 +894,7 @@ namespace juicescript.compiler.IL.Optimize
                 sb.AppendLine($"    <p><strong>Graph symmetric:</strong> {(graphSymmetric ? "YES" : "NO - ERROR!")}</p>");
 
                 sb.AppendLine("    <table>");
-                sb.AppendLine("        <tr><th>Original Slot</th><th>Conflicts With</th><th>New Slot</th><th>Degree</th></tr>");
+                sb.AppendLine("        <tr><th>Original Slot</th><th>New Slot</th><th>Degree</th><th>Conflicts With</th></tr>");
 
                 var sortedSlots = interferenceGraph.Keys.OrderBy(x => x);
                 bool coloringValid = true;
@@ -904,10 +906,10 @@ namespace juicescript.compiler.IL.Optimize
                     int newSlot = allocation != null && allocation.ContainsKey(slot) ? allocation[slot] : slot;
                     sb.AppendLine($"        <tr>");
                     sb.AppendLine($"            <td>{slot}</td>");
-                    sb.AppendLine($"            <td>{conflictStr}</td>");
                     sb.AppendLine($"            <td>{newSlot}</td>");
                     sb.AppendLine($"            <td>{degree}</td>");
-                    sb.AppendLine($"        </tr>");
+					sb.AppendLine($"            <td>{conflictStr}</td>");
+					sb.AppendLine($"        </tr>");
 
                     if (allocation != null)
                     {

@@ -1359,6 +1359,11 @@ namespace juicescript.compiler.IL
 				iter_Close.iterContextVar = iterContextVarLocater;
 				compileEnv.instructions.Add(iter_Close);
 
+
+				INS_Barrier iNS_Barrier = new INS_Barrier(goto_next.token); //hold next的变量
+				iNS_Barrier.uselist = new StackLocater[] { iter_Next.result, objLoc };
+				compileEnv.instructions.Add(iNS_Barrier);
+
 				INS_Finally_Exit finally_Exit = new INS_Finally_Exit(compileEnv.instructions.Where(i => i.token != null).GroupBy(i => i.token.line).OrderByDescending(g => g.Key).First().OrderByDescending(i => i.token.ptr).First().token.nextToken);
 				finally_Exit.HoldError = try_Enter.dst;
 				compileEnv.instructions.Add(finally_Exit);

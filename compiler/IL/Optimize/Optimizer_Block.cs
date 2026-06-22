@@ -1,12 +1,16 @@
 ﻿using juicescript.ABC;
 using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
+using juicescript.runtime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace juicescript.compiler.IL.Optimize
 {
@@ -365,10 +369,30 @@ namespace juicescript.compiler.IL.Optimize
 			
 		}
 
+
+		class PhiNode
+		{
+			internal int ResultVersion;
+			internal Dictionary<BasicBlock, int> Incoming;
+		}
+
 		private static void OptimizeBlockAccessVariable(ControlFlowGraph cfg)
 		{
+			if (cfg.Blocks.Count == 0)
+				return;
+
+			
+
 			//基本块级优化变量读取。
 			//如果这个方法不被闭包引用，同时也不是闭包 则变量除了赋值外不可能改变值
+
+			//额外，如果变量类型是基本类型，则不可能发生cache问题：
+			// var a = [1,2];
+			// var b = a;
+			// a = 1;
+			// 这种情况下，a = 1时，b的stackslot就失效了。如果b的类型是primitive,或者b的赋值来源都是primitive,则不会发生cache
+
+
 			if (!cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
 			{
 				var m = cfg.Method.Body._link_codescope.Parent;
@@ -384,7 +408,7 @@ namespace juicescript.compiler.IL.Optimize
 
 				}
 
-
+#if false
 				//传入参数优化。如果参数不会被赋值，而读取了多次，则将其中一次读取提前到入口，然后其他所有读取全部消除为move.
 				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
 				{
@@ -653,6 +677,665 @@ namespace juicescript.compiler.IL.Optimize
 
 					}
 				}
+			
+			
+#endif
+
+				/*
+				 * 
+				 * # 🧩 SSA 的整体流程（你只需要 4 步）
+
+				对每个局部变量 v：
+
+				1. **收集所有定义点（Store_MethodVar）**  
+				2. **计算支配边界（dominance frontier）**  
+				3. **在支配边界插入 φ（phi）节点**  
+				4. **做 rename pass（重命名变量版本）**  
+				   - 把所有 Ld/St 重写成 SSA 变量  
+				   - 生成 v0, v1, v2…  
+				   - φ 节点也会生成新版本  
+
+				做完这四步，你的变量就变成 SSA 形式了。
+
+				下面我给你每一步的可直接写成 C# 的版本。
+
+				---
+
+				# ① 收集变量的定义点（Store_MethodVar）
+
+				对每个函数：
+
+				```csharp
+				Dictionary<int, List<BasicBlock>> DefSites = new();
+				```
+
+				遍历所有基本块：
+
+				```csharp
+				foreach (var block in Blocks)
+				{
+					foreach (var inst in block.Instructions)
+					{
+						if (inst.Op == Store_MethodVar)
+						{
+							int varId = inst.VarIndex;
+							if (!DefSites.ContainsKey(varId))
+								DefSites[varId] = new List<BasicBlock>();
+							DefSites[varId].Add(block);
+						}
+					}
+				}
+				```
+
+				---
+
+				# ② 计算支配边界（Dominance Frontier）
+
+				你已经有支配树（idom），所以 DF 很容易算。
+
+				对每个块 b：
+
+				```csharp
+				DF[b] = new HashSet<BasicBlock>();
+				```
+
+				算法（标准版）：
+
+				```csharp
+				foreach (var b in Blocks)
+				{
+					if (b.Predecessors.Count >= 2)
+					{
+						foreach (var p in b.Predecessors)
+						{
+							var runner = p;
+							while (runner != Idom[b])
+							{
+								DF[runner].Add(b);
+								runner = Idom[runner];
+							}
+						}
+					}
+				}
+				```
+
+				这段代码你可以直接用。
+
+				---
+
+				# ③ 在支配边界插入 φ 节点
+
+				对每个变量 v：
+
+				- WorkList = 所有定义点（DefSites[v]）
+				- 已插入 φ 的集合 PhiInserted
+
+				伪代码：
+
+				```csharp
+				Queue<BasicBlock> W = new Queue<BasicBlock>(DefSites[v]);
+				HashSet<BasicBlock> PhiInserted = new();
+
+				while (W.Count > 0)
+				{
+					var b = W.Dequeue();
+					foreach (var y in DF[b])
+					{
+						if (!PhiInserted.Contains(y))
+						{
+							InsertPhi(y, v); // 在 y 的开头插入 φ
+							PhiInserted.Add(y);
+
+							// φ 本身也算一次“定义”
+							W.Enqueue(y);
+						}
+					}
+				}
+				```
+
+				`InsertPhi(y, v)` 就是在基本块 y 的开头插入：
+
+				```
+				v = φ(v_from_pred1, v_from_pred2, ...)
+				```
+
+				你可以用一个专门的 Instruction 类型表示 φ。
+
+				---
+
+				# ④ Rename Pass（重命名变量版本）
+
+				这是 SSA 的核心，也是最容易写错的地方。  
+				但我给你一个 **最小可用、完全适合你字节码的版本**。
+
+				你需要：
+
+				```csharp
+				Dictionary<int, Stack<int>> VersionStack; // varId -> stack of versions
+				Dictionary<int, int> VersionCounter;      // varId -> next version number
+				```
+
+				初始化：
+
+				```csharp
+				foreach (var varId in AllVars)
+				{
+					VersionStack[varId] = new Stack<int>();
+					VersionCounter[varId] = 0;
+
+					// 初始版本 v0
+					VersionStack[varId].Push(0);
+				}
+				```
+
+				### rename 函数（递归遍历支配树）
+
+				```csharp
+				void Rename(BasicBlock b)
+				{
+					// 1. 重写 φ 节点
+					foreach (var phi in b.PhiNodes)
+					{
+						int v = phi.VarId;
+						int newVersion = VersionCounter[v]++;
+						phi.ResultVersion = newVersion;
+						VersionStack[v].Push(newVersion);
+					}
+
+					// 2. 重写普通指令
+					foreach (var inst in b.Instructions)
+					{
+						if (inst.Op == Ld_MethodVar)
+						{
+							int v = inst.VarIndex;
+							inst.SsaVersion = VersionStack[v].Peek();
+						}
+						else if (inst.Op == Store_MethodVar)
+						{
+							int v = inst.VarIndex;
+							int newVersion = VersionCounter[v]++;
+							inst.SsaVersion = newVersion;
+							VersionStack[v].Push(newVersion);
+						}
+					}
+
+					// 3. 更新后继块的 φ 参数
+					foreach (var succ in b.Successors)
+					{
+						foreach (var phi in succ.PhiNodes)
+						{
+							int v = phi.VarId;
+							phi.AddIncoming(b, VersionStack[v].Peek());
+						}
+					}
+
+					// 4. 递归处理支配树的子节点
+					foreach (var child in DomTreeChildren[b])
+						Rename(child);
+
+					// 5. 回溯（pop）
+					foreach (var inst in b.Instructions)
+						if (inst.Op == Store_MethodVar)
+							VersionStack[inst.VarIndex].Pop();
+
+					foreach (var phi in b.PhiNodes)
+						VersionStack[phi.VarId].Pop();
+				}
+				```
+
+				这段代码你可以直接翻译成 C#。
+
+				---
+				 * 
+
+				### 一、目标再确认一下
+
+				当前状态（SSA 之后）：
+
+				- 每个变量有多个版本：`a0, a1, a2...`
+				- 合流块里有 φ：
+
+				```text
+				B1: a1 = ...
+					goto M
+
+				B2: a2 = ...
+					goto M
+
+				M:  a3 = φ(a1, a2)
+					x1 = a3 + 1
+				```
+
+				**目标：**
+
+				- 消灭所有 φ
+				- 把 SSA 变量映射回“普通变量 + 赋值”
+				- 最终字节码里只有普通指令（包括你之后的 stackSlot load/store）
+
+				---
+
+				### 二、核心思想：φ 变成前驱块里的 copy
+
+				上面这个例子，φ 的语义是：
+
+				> 如果从 B1 来，就用 a1；如果从 B2 来，就用 a2。
+
+				SSA destruction 的标准做法是：
+
+				- 在 **每个前驱块的末尾** 插入一条 copy，把对应版本写到“合流版本”上。
+
+				也就是变成：
+
+				```text
+				B1: a1 = ...
+					a3 = a1
+					goto M
+
+				B2: a2 = ...
+					a3 = a2
+					goto M
+
+				M:  x1 = a3 + 1
+				```
+
+				此时：
+
+				- φ 消失了
+				- 语义保持不变
+				- 解释器只需要执行普通赋值
+
+				---
+
+				### 三、实现步骤（按块和 φ 来处理）
+
+				假设你在 SSA 阶段有这样的结构：
+
+				```csharp
+				class Phi
+				{
+					public int VarId; // 哪个原始变量，比如 local #3
+					public int ResultVersion; // φ 产生的 SSA 版本，比如 a3
+					public List<(BasicBlock Pred, int IncomingVersion)> Inputs;
+				}
+				```
+
+				#### 步骤 1：遍历所有基本块的 φ
+
+				伪代码：
+
+				```csharp
+				foreach (var block in Blocks)
+				{
+					foreach (var phi in block.PhiNodes)
+					{
+						int targetVersion = phi.ResultVersion; // 比如 a3
+
+						foreach (var (pred, incomingVersion) in phi.Inputs)
+						{
+							// 在 pred 的末尾插入一条 copy：a3 = aX
+							InsertCopyAtEnd(pred, targetVersion, incomingVersion, block);
+						}
+					}
+
+					// φ 自己从 block.PhiNodes 里删掉
+					block.PhiNodes.Clear();
+				}
+				```
+
+				这里有两个细节要注意。
+
+				---
+
+				### 四、细节 1：避免在“关键边”上插入指令（critical edge）
+
+				如果某条边是：
+
+				- `pred.Successors.Count > 1`（pred 有多个后继）
+				- `block.Predecessors.Count > 1`（block 有多个前驱）
+
+				这条边就是 **critical edge**，在它上面插入 copy 会影响别的路径。
+
+				标准做法：
+
+				- 对每条 critical edge `pred → block`：
+				  - 新建一个中间块 `mid`
+				  - 把边改成：`pred → mid → block`
+				  - 把 copy 插到 `mid` 里
+
+				伪代码：
+
+				```csharp
+				BasicBlock EnsureNonCriticalEdge(BasicBlock pred, BasicBlock succ)
+				{
+					bool critical = pred.Successors.Count > 1 && succ.Predecessors.Count > 1;
+					if (!critical)
+						return pred;
+
+					// 创建新块 mid
+					var mid = new BasicBlock { ... };
+
+					// 修改 CFG：pred -> mid -> succ
+					pred.Successors.Remove(succ);
+					pred.Successors.Add(mid);
+					mid.Predecessors.Add(pred);
+
+					mid.Successors.Add(succ);
+					succ.Predecessors.Remove(pred);
+					succ.Predecessors.Add(mid);
+
+					// mid 里只放一条跳转到 succ 的指令
+					mid.Instructions.Add(new Instruction { Op = Jump, Target = succ });
+
+					return mid;
+				}
+				```
+
+				然后在插 copy 时：
+
+				```csharp
+				var place = EnsureNonCriticalEdge(pred, block);
+				InsertCopyAtEnd(place, targetVersion, incomingVersion);
+				```
+
+								 */
+
+
+				int SSA_slot = 0;
+				foreach (var item in cfg.Blocks.SelectMany(b=>b.Instructions))
+				{
+					foreach (var use in item.GetUse())
+					{
+						SSA_slot = Math.Max(use.index + 1, SSA_slot);
+					}
+					foreach (var def in item.GetDef())
+					{
+						SSA_slot = Math.Max(def.index + 1, SSA_slot);
+					}
+				}
+
+
+				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
+				{
+					var scopemember = cfg.Method.Body._link_codescope.Members[i];
+								
+					//SSA
+					var DefSites = new List<BasicBlock>(); //变量定义点
+					if (scopemember.Kind == ScopeMemberKind.Parameter)
+					{
+						DefSites.Add(cfg.Blocks[0]); // 参数是传入的，第一个块就是v0
+					}
+					else if ( scopemember.QName.Name.IndexOf("%&IterObjHolder%") >= 0
+						||
+						scopemember.QName.Name.IndexOf("%&IterHolder%") >=0
+						||
+						scopemember.QName.Name.IndexOf("%&IterContext%") >=0
+						)
+					{
+						continue;
+					}
+
+
+
+					foreach (var block in cfg.Blocks)
+					{
+						foreach (var inst in block.Instructions)
+						{
+							if (inst.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)inst).heap.MemberIndex == i)
+							{
+								if (!DefSites.Contains(block))
+									DefSites.Add(block);
+							}
+							else if (inst.INS_Code == INS_Code.ld_memberInitValue && ((INS_Ld_MemberInitValue)inst).heap.MemberIndex == i)
+							{
+								if (!DefSites.Contains(block))
+									DefSites.Add(block);
+							}
+						}
+					}
+
+					//在支配边界插入 φ 节点				
+					Queue<BasicBlock> W = new Queue<BasicBlock>(DefSites);
+					Dictionary<BasicBlock,PhiNode> PhiInserted = new();
+					while (W.Count > 0)
+					{
+						var b = W.Dequeue();
+						foreach (var y in b.DominanceFrontier)
+						{
+							if (!PhiInserted.ContainsKey(y))
+							{
+								//InsertPhi(y, v); // 在 y 的开头插入 φ
+								PhiInserted.Add(y, new PhiNode() {  Incoming = new Dictionary<BasicBlock, int>() });
+								// φ 本身也算一次“定义”
+								W.Enqueue(y);
+							}
+						}
+					}
+
+					//Rename Pass
+
+					Stack<int> VersionStack = new(); // varId -> stack of versions
+					VersionStack.Push(0);
+					int VersionCounter = 1;      // varId -> next version number
+												 // 由于AS3语言特性，变量没有赋值也可以使用，所以第一次赋值前，版本为0,第一次赋值版本+1。
+												 // 版本0时获取的值 如果是参数就是传入的值，否则是默认值
+					
+					Dictionary<Instruction,int> SSA_Version = new();
+					void Rename(BasicBlock b)
+					{
+						// 1. 重写 φ 节点
+						if (PhiInserted.ContainsKey(b))
+						{
+							var phi = PhiInserted[b];
+							
+							int newVersion = VersionCounter++;
+							phi.ResultVersion = newVersion;
+							VersionStack.Push(newVersion);
+							
+						}
+
+						// 2. 重写普通指令
+						foreach (var inst in b.Instructions)
+						{
+							if (inst.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)inst).heap.MemberIndex == i )
+							{
+								SSA_Version.Add(inst, VersionStack.Peek());
+								//inst.SsaVersion = VersionStack.Peek();
+							}
+							else if ((inst.INS_Code ==  INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)inst).heap.MemberIndex == i)
+								||
+								(inst.INS_Code == INS_Code.ld_MethodVariableInitValue && ((INS_Ld_MethodVariableInitValue)inst).heap.MemberIndex == i)
+								)
+							{
+								int newVersion = VersionCounter++;
+								SSA_Version.Add(inst, newVersion);
+								VersionStack.Push(newVersion);
+							}
+						}
+
+						// 3. 更新后继块的 φ 参数
+						foreach (var succ in b.Successors)
+						{
+							if (PhiInserted.ContainsKey(succ))
+							{ 
+								var phi = PhiInserted[succ];
+								phi.Incoming.Add(b,VersionStack.Peek());
+							}
+						}
+
+						// 4. 递归处理支配树的子节点
+						foreach (var child in cfg.Blocks.Where( bl=>bl.Idom ==b && bl !=b  )  )//DomTreeChildren[b])
+							Rename(child);
+
+						// 5. 回溯（pop）
+						foreach (var inst in b.Instructions)
+						{
+							if ((inst.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)inst).heap.MemberIndex == i)
+								||
+								(inst.INS_Code == INS_Code.ld_MethodVariableInitValue && ((INS_Ld_MethodVariableInitValue)inst).heap.MemberIndex == i)
+								)
+							{
+								VersionStack.Pop();
+							}
+						}
+
+						if (PhiInserted.ContainsKey(b))
+						{ 
+							VersionStack.Pop();
+						}
+					}
+
+					Rename(cfg.Blocks[0]);
+
+
+
+					//分配SSA版本的stackslot
+					foreach (var item in SSA_Version)
+					{
+						int slot = SSA_slot + item.Value;
+
+						Dictionary<int, int> replace = new Dictionary<int, int>();
+						if (item.Key.INS_Code == INS_Code.ld_methodVariable)
+						{
+							replace.Add(item.Key.dst.index, slot);
+						}
+						else if (item.Key.INS_Code == INS_Code.storeMethodVariable)
+						{
+							replace.Add(((INS_Store_MethodVariable)item.Key).convertedloc.index, slot);
+						}
+						else
+						{
+							replace.Add(((INS_Ld_MethodVariableInitValue)item.Key).dst.index, slot);
+						}
+
+						//item.Key.RemappingSlots(replace);
+						foreach (var ins in cfg.Blocks.SelectMany(b=>b.Instructions))
+						{
+							ins.RemappingSlots(replace);
+						}					
+					}
+
+					//φ改成copy
+					foreach (var phi in PhiInserted)
+					{
+						var succ = phi.Key;
+						if (succ == cfg.Blocks[cfg.Blocks.Count - 1])
+						{
+							continue;
+						}
+
+						int targetVersion = phi.Value.ResultVersion; // 比如 a3
+
+						foreach (var (pred, incomingVersion) in phi.Value.Incoming)
+						{							
+							if (incomingVersion > (SSA_Version.Count == 0 ? 0: SSA_Version.Max(s => s.Value)))
+								continue;
+							if (pred.Predecessors.Count == 0)
+								continue;
+
+							// 在 pred 的合适位置插入move
+							////if (pred.Successors.Count > 1 && succ.Predecessors.Count > 1)
+							////{
+							////	if (succ.Instructions[0].INS_Code == INS_Code.flag)
+							////	{
+							////		//跳转过来的情况
+							////		//critical edge ,需要拆边。
+							////		//Debug.Assert(pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.if_false_goto
+							////		//	||
+							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.if_true_goto
+							////		//	||
+							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.goto_flag
+							////		//	||
+							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.iter_get
+							////		//	||
+							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.iter_next
+							////		//	);
+							////	}
+							////	else if (succ.Instructions[0].INS_Code == INS_Code.finally_enter)
+							////	{
+
+							////	}
+							////	else if (succ.Instructions[0].INS_Code == INS_Code.catch_enter)
+							////	{ 
+
+							////	}
+							////	else
+							////	{
+							////		throw new NotImplementedException();
+							////	}
+							////}
+
+							//用一个简单办法：如果pred里面有 SSA_Version的指令，
+							//                            如果没有定值，就添加到最后一个ld后面，
+							//                            如果有定值,就修改定值的slot
+							//  如果没有SSA_version里的指令，则插入到第一个可能抛出异常和跳转的指令的前面
+
+							var def = pred.Instructions.FirstOrDefault( ins=> SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion  && 
+																(ins.INS_Code == INS_Code.ld_MethodVariableInitValue
+																||
+																ins.INS_Code == INS_Code.storeMethodVariable
+																) );
+
+							if (def != null)
+							{
+								Dictionary<int, int> replace = new Dictionary<int, int>();
+								replace.Add(SSA_slot + incomingVersion, SSA_slot + targetVersion);
+								foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions))
+								{
+									ins.RemappingSlots(replace);
+								}
+
+							}
+							else
+							{
+								var use = pred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
+																(ins.INS_Code == INS_Code.ld_methodVariable));
+
+								if (use != null)
+								{
+									int index = pred.Instructions.IndexOf(use);
+									INS_Move move = new INS_Move(use.token);
+									move.source.index = SSA_slot + incomingVersion;
+									move.dst.index = SSA_slot + targetVersion;
+
+									pred.Instructions.Insert(index + 1, move);
+
+								}
+								else
+								{
+									INS_Move move = new INS_Move(pred.Instructions[0].token );
+									move.source.index = SSA_slot + incomingVersion;
+									move.dst.index = SSA_slot + targetVersion;
+
+									if (pred.Instructions.Count > 0 && 
+										(pred.Instructions[0].INS_Code == INS_Code.flag
+										||
+										pred.Instructions[0].INS_Code == INS_Code.try_enter
+										||
+										pred.Instructions[0].INS_Code == INS_Code.catch_enter
+										||
+										pred.Instructions[0].INS_Code == INS_Code.finally_enter
+										)
+										)
+									{
+										pred.Instructions.Insert(1, move);
+									}
+									else
+									{
+										pred.Instructions.Insert(0, move);
+									}
+								}
+							}
+
+						}
+					}
+
+
+
+					int ssa_insmaxversion = 0;if (SSA_Version.Count > 0) ssa_insmaxversion = SSA_Version.Max(ins => ins.Value);
+					int phi_resmaxversion = 0;if (PhiInserted.Count > 0) phi_resmaxversion = PhiInserted.Max(phi => phi.Value.ResultVersion);
+					SSA_slot +=  Math.Max(ssa_insmaxversion, phi_resmaxversion)+1;
+				}
+
 			}
 
 

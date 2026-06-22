@@ -26,7 +26,7 @@ namespace juicescript.compiler.IL.Optimize
         /// </summary>
 		internal BasicBlock Idom;
 
-        internal List<BasicBlock> Dominate;
+        internal HashSet<BasicBlock> DominanceFrontier;
 
 
 		public bool IsReachable { get; set; }

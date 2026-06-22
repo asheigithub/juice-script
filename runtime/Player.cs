@@ -13524,6 +13524,8 @@ namespace juicescript.runtime
 									value = t.Value.initValue.Value;
 								}
 
+								stackslots[dst_index] = value;
+
 								RtMethodScope heap = (RtMethodScope)s;
 								ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
 

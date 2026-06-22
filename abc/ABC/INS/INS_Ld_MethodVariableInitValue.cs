@@ -47,12 +47,12 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"Ld_VariableInit   [{heap}]";
+			return $"Ld_VariableInit [{heap}] , [{dst}]<-[heap] ";
 		}
 
         public override List<StackLocater> GetDef()
         {
-            return new List<StackLocater> {  };
+            return new List<StackLocater> { dst };
         }
 
         public override List<StackLocater> GetUse()

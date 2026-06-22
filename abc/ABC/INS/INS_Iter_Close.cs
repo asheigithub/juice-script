@@ -44,12 +44,12 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"ITER_Close {holdObj}.{iterator} ctx:{iterContextVar}";
+			return $"ITER_Close {holdObj}.{iterator},iterSrcObj:[{dst}] ctx:{iterContextVar}";
 		}
 
         public override List<StackLocater> GetDef()
         {
-            return new List<StackLocater>() { dst };
+            return new List<StackLocater>() {  };
 		}
 
         public override List<StackLocater> GetUse()

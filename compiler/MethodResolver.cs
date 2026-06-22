@@ -2129,7 +2129,7 @@ namespace juicescript.compiler
 							}
 
 
-
+							ld_VarIntValue.dst.index = useslotcount++;
 							newinstructions.Add(ld_VarIntValue);
 						}
 						else

@@ -12,6 +12,47 @@ package
        
     }
 }
+
+//import flash.utils.Dictionary;
+//
+//function ccc():void 
+//{
+	//this.a = 1;
+	//
+//}
+//
+//
+//var d:Dictionary = new Dictionary();
+//
+//d["a"] = 'A';
+//
+//ccc.prototype = d ;
+//
+//Object.prototype.a = 123;
+//
+//(function()
+//{
+		//
+	//var o = new ccc();
+	//
+	//for each(var v in o)
+	//{
+		//o = {};
+		//trace(v);
+		//for(var k in o)
+		//{
+			//trace(k);
+		//}
+	//}
+//})();
+
+
+
+
+
+
+
+
 //import flash.utils.getTimer;
 
 

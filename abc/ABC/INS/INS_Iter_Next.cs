@@ -80,7 +80,7 @@ namespace juicescript.ABC.INS
 
         public override List<StackLocater> GetUse()
         {
-            return new List<StackLocater>() { result };
+            return new List<StackLocater>() {  };
         }
 
         public override bool MaybeRaiseError()

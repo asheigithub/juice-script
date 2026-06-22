@@ -71,12 +71,12 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"ITER_Get {iterVar}<-{iterSrcObj_HoldInHeap}.[iterator]  if failed GOTO Flag_{flag_end_id} ";
+			return $"ITER_Get {iterVar}<-{iterSrcObj_HoldInHeap}.[iterator] ,srcObj:[{iterSrcobj}] if failed GOTO Flag_{flag_end_id} ";
 		}
 
         public override List<StackLocater> GetDef()
         {
-            return new List<StackLocater>();
+            return new List<StackLocater>{  };
         }
 
         public override List<StackLocater> GetUse()
