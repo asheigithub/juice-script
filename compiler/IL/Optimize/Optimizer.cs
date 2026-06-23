@@ -474,16 +474,14 @@ namespace juicescript.compiler.IL.Optimize
 				OptimizeBlock(cfg.Blocks[i],cfg,constants);
 			}
 
-			OptimizeBlockLdConst(cfg);
+			slotCount = OptimizeBlockLdConst(cfg,slotCount);
 
-			OptimizeBlockAccessVariable(cfg);
+			slotCount = OptimizeBlockSSAVariable(cfg,slotCount);
 
-			RemoveBlockMove(cfg); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
+			//RemoveBlockMove(cfg); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
 
 			
 			
-
-
 			RemoveBarrier(cfg); 
 
 			//着色法 槽复用
@@ -492,7 +490,6 @@ namespace juicescript.compiler.IL.Optimize
 			{
 				maxslots = cfg.GraphColoring();				
 			}
-
 
 
 			if (displaycfg_files != null && displaycfg_files.Any(f => key.IndexOf(f) >= 0))

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Reflection.Metadata.BlobBuilder;
@@ -298,73 +299,136 @@ namespace juicescript.compiler.IL.Optimize
 			}
 		}
 
+		/// <summary>
+		/// 查找公共的支配节点
+		/// </summary>
+		/// <param name="atblocks"></param>
+		/// <returns></returns>
+		private static BasicBlock FindCommDom(List<BasicBlock> atblocks)
+		{
+			HashSet<BasicBlock> idoms = new HashSet<BasicBlock>();
+			foreach (var item in atblocks)
+			{
+				idoms.Add(item);
+			}
 
-		private static void OptimizeBlockLdConst(ControlFlowGraph cfg)
+			while (idoms.Count > 1)
+			{
+				var temp = idoms.ToList();
+				var max = temp.OrderByDescending(b => b.OriginalIndex).First();
+
+				temp.Remove(max);
+				temp.Add(max.Idom);
+
+				idoms.Clear();
+				foreach (var item in temp)
+					idoms.Add(item);
+			}
+			var dom = idoms.First();
+			if (dom.TryBlockId != 0) // try有可能意外进入catch和finally,所以需要移动到try_enter里
+			{
+				int tryid = dom.TryBlockId;
+
+				while (!(dom.Instructions.Count > 0 && dom.Instructions[0].INS_Code == INS_Code.try_enter))
+				{
+					dom = dom.Idom;
+				}
+
+				Debug.Assert(dom.TryBlockId == tryid);
+				//throw new NotImplementedException();
+			}
+
+			return dom;
+		}
+
+		private static int OptimizeBlockLdConst(ControlFlowGraph cfg,int slotcount)
 		{
 			if (cfg.Blocks.Count == 0)
-				return;
-			if (cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
-				return;
+				return slotcount;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation)) //async里有问题，yield里有问题，需要在变量里保持值
+				return slotcount;
 
-			
-			//如果第一个基本块有Ld_Const,那么后续的就可以全部消除为move
-			for (int i = 0; i < cfg.Blocks[0].Instructions.Count; i++)
+			void MoveInstructions(BasicBlock dom,List<Instruction> ld_list)
 			{
-				if (cfg.Blocks[0].Instructions[i].INS_Code == INS_Code.ld_const)
+				var ld = ld_list.First();
+				foreach (var block in cfg.Blocks)
 				{
-					INS_Ld_Const ld_Const = (INS_Ld_Const)cfg.Blocks[0].Instructions[i];
-					for (int j = i+1; j < cfg.Blocks[0].Instructions.Count; j++)
-					{
-						if (cfg.Blocks[0].Instructions[j].INS_Code == INS_Code.ld_const
-							&&
-							((INS_Ld_Const)cfg.Blocks[0].Instructions[j]).const_index == ld_Const.const_index
-							)
-						{
-							INS_Move _Move = new INS_Move(cfg.Blocks[0].Instructions[j].token );
-							_Move.source = ld_Const.dst;
-							_Move.dst = cfg.Blocks[0].Instructions[j].dst;
-
-							cfg.Blocks[0].Instructions[j] = _Move;
-						}
-					}
-
-					for (int k = 1; k < cfg.Blocks.Count; k++)
-					{
-						var block = cfg.Blocks[k];
-						for (int j = 0; j < block.Instructions.Count; j++)
-						{
-							if (block.Instructions[j].INS_Code == INS_Code.ld_const
-								&&
-								((INS_Ld_Const)block.Instructions[j]).const_index == ld_Const.const_index
-								)
-							{
-								INS_Move _Move = new INS_Move(block.Instructions[j].token);
-								_Move.source = ld_Const.dst;
-								_Move.dst = block.Instructions[j].dst;
-
-								block.Instructions[j] = _Move;
-							}
-						}
-
-					}
-
-					for (int j = 0; j < i; j++)
-					{
-						if (cfg.Blocks[0].Instructions[j].MaybeRaiseError())
-						{
-							for (int k = i; k > j; k--)
-							{
-								cfg.Blocks[0].Instructions[k] = cfg.Blocks[0].Instructions[k - 1];
-							}
-
-							cfg.Blocks[0].Instructions[j] = ld_Const;
-							break;
-						}
-					}
-
+					block.Instructions.RemoveAll(ins => ld_list.Contains(ins));
 				}
-				
+
+				int newslot = slotcount++;
+				foreach (var l in ld_list)
+				{
+					Dictionary<int, int> replace = new Dictionary<int, int> { { l.dst.index, newslot } };
+
+					foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+					{
+						ins.RemappingSlots(replace);
+					}
+				}
+
+				ld.dst.index = newslot;
+				if (dom.Instructions.Count > 0 &&
+										(dom.Instructions[0].INS_Code == INS_Code.flag
+										||
+										dom.Instructions[0].INS_Code == INS_Code.try_enter
+										||
+										dom.Instructions[0].INS_Code == INS_Code.catch_enter
+										||
+										dom.Instructions[0].INS_Code == INS_Code.finally_enter
+										)
+										)
+				{
+					dom.Instructions.Insert(1, ld);
+				}
+				else
+				{
+					dom.Instructions.Insert(0, ld);
+				}
 			}
+
+
+
+			//ld_const
+			{
+
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_const).Select(i => (INS_Ld_Const)i).ToList();
+				var const_idxs = all.GroupBy(i => i.const_index).ToList();
+				foreach (var i in const_idxs)
+				{
+					var ld_list = i.ToList();
+					if (ld_list.Count > 1)
+					{
+						var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+						var dom = FindCommDom(atblocks);
+
+						MoveInstructions(dom, ld_list.Select(i=>(Instruction)i).ToList());
+					}
+				}
+
+			}
+			//ld_class
+			{
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_class).Select(i => (INS_Ld_Class)i).ToList();
+				var classid_list = all.GroupBy(i => i.classid_index).ToList();
+				foreach (var i in classid_list)
+				{
+					var ld_list = i.ToList();
+					if (ld_list.Count > 1)
+					{
+						var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+						var dom = FindCommDom(atblocks);
+
+						MoveInstructions(dom, ld_list.Select(i => (Instruction)i).ToList());
+					}
+				}
+			}
+
+
+
+			return slotcount;
+
+
 
 			
 		}
@@ -376,12 +440,21 @@ namespace juicescript.compiler.IL.Optimize
 			internal Dictionary<BasicBlock, int> Incoming;
 		}
 
-		private static void OptimizeBlockAccessVariable(ControlFlowGraph cfg)
+		class SSA_Split
+		{
+			internal BasicBlock succ;
+			internal BasicBlock pred;
+
+			internal BasicBlock inserted;
+
+		}
+
+		private static int OptimizeBlockSSAVariable(ControlFlowGraph cfg,int slotcount)
 		{
 			if (cfg.Blocks.Count == 0)
-				return;
+				return slotcount;
 
-			
+
 
 			//基本块级优化变量读取。
 			//如果这个方法不被闭包引用，同时也不是闭包 则变量除了赋值外不可能改变值
@@ -401,7 +474,7 @@ namespace juicescript.compiler.IL.Optimize
 					var pm = ((ASMethodBody)m.Container).Method;
 					if (pm.Flags.HasFlag(MethodFlags.NeedActivation))
 					{
-						return;
+						return slotcount;
 					}
 
 					m = pm.Body._link_codescope.Parent;
@@ -1040,35 +1113,28 @@ namespace juicescript.compiler.IL.Optimize
 								 */
 
 
-				int SSA_slot = 0;
-				foreach (var item in cfg.Blocks.SelectMany(b=>b.Instructions))
-				{
-					foreach (var use in item.GetUse())
-					{
-						SSA_slot = Math.Max(use.index + 1, SSA_slot);
-					}
-					foreach (var def in item.GetDef())
-					{
-						SSA_slot = Math.Max(def.index + 1, SSA_slot);
-					}
-				}
+				int SSA_slot = slotcount;
+				var flags = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.flag).Select(i => (INS_Flag)i)
+					.Where(i => i.flag_id < 0xfffff8);
+				int flagseed = flags.Any() ? flags.Max(i => i.flag_id) + 1 : 0;
 
+				List<SSA_Split> splitblocks = new List<SSA_Split>();
 
 				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
 				{
 					var scopemember = cfg.Method.Body._link_codescope.Members[i];
-								
+
 					//SSA
 					var DefSites = new List<BasicBlock>(); //变量定义点
 					if (scopemember.Kind == ScopeMemberKind.Parameter)
 					{
 						DefSites.Add(cfg.Blocks[0]); // 参数是传入的，第一个块就是v0
 					}
-					else if ( scopemember.QName.Name.IndexOf("%&IterObjHolder%") >= 0
+					else if (scopemember.QName.Name.IndexOf("%&IterObjHolder%") >= 0
 						||
-						scopemember.QName.Name.IndexOf("%&IterHolder%") >=0
+						scopemember.QName.Name.IndexOf("%&IterHolder%") >= 0
 						||
-						scopemember.QName.Name.IndexOf("%&IterContext%") >=0
+						scopemember.QName.Name.IndexOf("%&IterContext%") >= 0
 						)
 					{
 						continue;
@@ -1095,7 +1161,7 @@ namespace juicescript.compiler.IL.Optimize
 
 					//在支配边界插入 φ 节点				
 					Queue<BasicBlock> W = new Queue<BasicBlock>(DefSites);
-					Dictionary<BasicBlock,PhiNode> PhiInserted = new();
+					Dictionary<BasicBlock, PhiNode> PhiInserted = new();
 					while (W.Count > 0)
 					{
 						var b = W.Dequeue();
@@ -1104,7 +1170,7 @@ namespace juicescript.compiler.IL.Optimize
 							if (!PhiInserted.ContainsKey(y))
 							{
 								//InsertPhi(y, v); // 在 y 的开头插入 φ
-								PhiInserted.Add(y, new PhiNode() {  Incoming = new Dictionary<BasicBlock, int>() });
+								PhiInserted.Add(y, new PhiNode() { Incoming = new Dictionary<BasicBlock, int>() });
 								// φ 本身也算一次“定义”
 								W.Enqueue(y);
 							}
@@ -1118,30 +1184,30 @@ namespace juicescript.compiler.IL.Optimize
 					int VersionCounter = 1;      // varId -> next version number
 												 // 由于AS3语言特性，变量没有赋值也可以使用，所以第一次赋值前，版本为0,第一次赋值版本+1。
 												 // 版本0时获取的值 如果是参数就是传入的值，否则是默认值
-					
-					Dictionary<Instruction,int> SSA_Version = new();
+
+					Dictionary<Instruction, int> SSA_Version = new();
 					void Rename(BasicBlock b)
 					{
 						// 1. 重写 φ 节点
 						if (PhiInserted.ContainsKey(b))
 						{
 							var phi = PhiInserted[b];
-							
+
 							int newVersion = VersionCounter++;
 							phi.ResultVersion = newVersion;
 							VersionStack.Push(newVersion);
-							
+
 						}
 
 						// 2. 重写普通指令
 						foreach (var inst in b.Instructions)
 						{
-							if (inst.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)inst).heap.MemberIndex == i )
+							if (inst.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)inst).heap.MemberIndex == i)
 							{
 								SSA_Version.Add(inst, VersionStack.Peek());
 								//inst.SsaVersion = VersionStack.Peek();
 							}
-							else if ((inst.INS_Code ==  INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)inst).heap.MemberIndex == i)
+							else if ((inst.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)inst).heap.MemberIndex == i)
 								||
 								(inst.INS_Code == INS_Code.ld_MethodVariableInitValue && ((INS_Ld_MethodVariableInitValue)inst).heap.MemberIndex == i)
 								)
@@ -1156,14 +1222,14 @@ namespace juicescript.compiler.IL.Optimize
 						foreach (var succ in b.Successors)
 						{
 							if (PhiInserted.ContainsKey(succ))
-							{ 
+							{
 								var phi = PhiInserted[succ];
-								phi.Incoming.Add(b,VersionStack.Peek());
+								phi.Incoming.Add(b, VersionStack.Peek());
 							}
 						}
 
 						// 4. 递归处理支配树的子节点
-						foreach (var child in cfg.Blocks.Where( bl=>bl.Idom ==b && bl !=b  )  )//DomTreeChildren[b])
+						foreach (var child in cfg.Blocks.Where(bl => bl.Idom == b && bl != b))//DomTreeChildren[b])
 							Rename(child);
 
 						// 5. 回溯（pop）
@@ -1179,7 +1245,7 @@ namespace juicescript.compiler.IL.Optimize
 						}
 
 						if (PhiInserted.ContainsKey(b))
-						{ 
+						{
 							VersionStack.Pop();
 						}
 					}
@@ -1208,10 +1274,10 @@ namespace juicescript.compiler.IL.Optimize
 						}
 
 						//item.Key.RemappingSlots(replace);
-						foreach (var ins in cfg.Blocks.SelectMany(b=>b.Instructions))
+						foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions))
 						{
 							ins.RemappingSlots(replace);
-						}					
+						}
 					}
 
 					//φ改成copy
@@ -1226,123 +1292,178 @@ namespace juicescript.compiler.IL.Optimize
 						int targetVersion = phi.Value.ResultVersion; // 比如 a3
 
 						foreach (var (pred, incomingVersion) in phi.Value.Incoming)
-						{							
-							if (incomingVersion > (SSA_Version.Count == 0 ? 0: SSA_Version.Max(s => s.Value)))
+						{
+							if (incomingVersion > (SSA_Version.Count == 0 ? 0 : SSA_Version.Max(s => s.Value)))
 								continue;
 							if (pred.Predecessors.Count == 0)
 								continue;
 
 							// 在 pred 的合适位置插入move
-							////if (pred.Successors.Count > 1 && succ.Predecessors.Count > 1)
-							////{
-							////	if (succ.Instructions[0].INS_Code == INS_Code.flag)
-							////	{
-							////		//跳转过来的情况
-							////		//critical edge ,需要拆边。
-							////		//Debug.Assert(pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.if_false_goto
-							////		//	||
-							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.if_true_goto
-							////		//	||
-							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.goto_flag
-							////		//	||
-							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.iter_get
-							////		//	||
-							////		//	pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.iter_next
-							////		//	);
-							////	}
-							////	else if (succ.Instructions[0].INS_Code == INS_Code.finally_enter)
-							////	{
-
-							////	}
-							////	else if (succ.Instructions[0].INS_Code == INS_Code.catch_enter)
-							////	{ 
-
-							////	}
-							////	else
-							////	{
-							////		throw new NotImplementedException();
-							////	}
-							////}
-
-							//用一个简单办法：如果pred里面有 SSA_Version的指令，
-							//                            如果没有定值，就添加到最后一个ld后面，
-							//                            如果有定值,就修改定值的slot
-							//  如果没有SSA_version里的指令，则插入到第一个可能抛出异常和跳转的指令的前面
-
-							var def = pred.Instructions.FirstOrDefault( ins=> SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion  && 
-																(ins.INS_Code == INS_Code.ld_MethodVariableInitValue
-																||
-																ins.INS_Code == INS_Code.storeMethodVariable
-																) );
-
-							if (def != null)
+							if (pred.Successors.Count > 1 && succ.Predecessors.Count > 1 &&
+								(succ.Instructions[0].INS_Code == INS_Code.flag
+									&&
+									((pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.if_false_goto
+										||
+										pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.if_true_goto
+										||
+										pred.Instructions[pred.Instructions.Count - 1].INS_Code == INS_Code.goto_flag	
+										)
+										&&
+										((INS_Flag) succ.Instructions[0] ).flag_id == ControlFlowGraphBuilder.GetFlagId(pred.Instructions[pred.Instructions.Count -1])
+										)
+									)
+								)
 							{
-								Dictionary<int, int> replace = new Dictionary<int, int>();
-								replace.Add(SSA_slot + incomingVersion, SSA_slot + targetVersion);
-								foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions))
+								//拆边。
+								
+								var ssablock = splitblocks.FirstOrDefault(s=>s.succ == succ && s.pred == pred);
+								if (ssablock == null)
 								{
-									ins.RemappingSlots(replace);
+									int flag = flagseed++;
+									BasicBlock iblock = new BasicBlock();
+									iblock.BlockId = succ.BlockId - 5;
+									iblock.OriginalIndex = succ.OriginalIndex - 5;
+									iblock.TryBlockId = pred.TryBlockId;
+									iblock.Instructions = new List<Instruction>();
+									iblock.IsReachable = true;
+									
+
+									INS_Flag _Flag = new INS_Flag(succ.Instructions[0].token);
+									_Flag.flag_id = flag;
+									iblock.Instructions.Add(_Flag);	
+
+									
+
+									ssablock = new SSA_Split() { succ = succ, pred = pred, inserted = iblock };
+									splitblocks.Add(ssablock);
 								}
+
+								INS_Move move = new INS_Move(succ.Instructions[0].token);
+								move.source.index = SSA_slot + incomingVersion;
+								move.dst.index = SSA_slot + targetVersion;
+
+								ssablock.inserted.Instructions.Insert(1, move);
 
 							}
 							else
 							{
-								var use = pred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
-																(ins.INS_Code == INS_Code.ld_methodVariable));
+								//用一个简单办法：如果pred里面有 SSA_Version的指令，
+								//                            如果没有定值，就添加到最后一个ld后面，
+								//                            如果有定值,就修改定值的slot
+								//  如果没有SSA_version里的指令，则插入到第一个可能抛出异常和跳转的指令的前面
 
-								if (use != null)
+								var def = pred.Instructions.FirstOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
+																	(ins.INS_Code == INS_Code.ld_MethodVariableInitValue
+																	||
+																	ins.INS_Code == INS_Code.storeMethodVariable
+																	));
+
+								if (def != null)
 								{
-									int index = pred.Instructions.IndexOf(use);
-									INS_Move move = new INS_Move(use.token);
-									move.source.index = SSA_slot + incomingVersion;
-									move.dst.index = SSA_slot + targetVersion;
-
-									pred.Instructions.Insert(index + 1, move);
+									Dictionary<int, int> replace = new Dictionary<int, int>();
+									replace.Add(SSA_slot + incomingVersion, SSA_slot + targetVersion);
+									foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions))
+									{
+										ins.RemappingSlots(replace);
+									}
 
 								}
 								else
 								{
-									INS_Move move = new INS_Move(pred.Instructions[0].token );
-									move.source.index = SSA_slot + incomingVersion;
-									move.dst.index = SSA_slot + targetVersion;
+									var use = pred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
+																	(ins.INS_Code == INS_Code.ld_methodVariable));
 
-									if (pred.Instructions.Count > 0 && 
-										(pred.Instructions[0].INS_Code == INS_Code.flag
-										||
-										pred.Instructions[0].INS_Code == INS_Code.try_enter
-										||
-										pred.Instructions[0].INS_Code == INS_Code.catch_enter
-										||
-										pred.Instructions[0].INS_Code == INS_Code.finally_enter
-										)
-										)
+									if (use != null)
 									{
-										pred.Instructions.Insert(1, move);
+										int index = pred.Instructions.IndexOf(use);
+										INS_Move move = new INS_Move(use.token);
+										move.source.index = SSA_slot + incomingVersion;
+										move.dst.index = SSA_slot + targetVersion;
+
+										pred.Instructions.Insert(index + 1, move);
+
 									}
 									else
 									{
-										pred.Instructions.Insert(0, move);
+										INS_Move move = new INS_Move(pred.Instructions[0].token);
+										move.source.index = SSA_slot + incomingVersion;
+										move.dst.index = SSA_slot + targetVersion;
+
+										if (pred.Instructions.Count > 0 &&
+											(pred.Instructions[0].INS_Code == INS_Code.flag
+											||
+											pred.Instructions[0].INS_Code == INS_Code.try_enter
+											||
+											pred.Instructions[0].INS_Code == INS_Code.catch_enter
+											||
+											pred.Instructions[0].INS_Code == INS_Code.finally_enter
+											)
+											)
+										{
+											pred.Instructions.Insert(1, move);
+										}
+										else
+										{
+											pred.Instructions.Insert(0, move);
+										}
 									}
 								}
 							}
-
 						}
 					}
 
-
-
-					int ssa_insmaxversion = 0;if (SSA_Version.Count > 0) ssa_insmaxversion = SSA_Version.Max(ins => ins.Value);
-					int phi_resmaxversion = 0;if (PhiInserted.Count > 0) phi_resmaxversion = PhiInserted.Max(phi => phi.Value.ResultVersion);
-					SSA_slot +=  Math.Max(ssa_insmaxversion, phi_resmaxversion)+1;
+					int ssa_insmaxversion = 0; if (SSA_Version.Count > 0) ssa_insmaxversion = SSA_Version.Max(ins => ins.Value);
+					int phi_resmaxversion = 0; if (PhiInserted.Count > 0) phi_resmaxversion = PhiInserted.Max(phi => phi.Value.ResultVersion);
+					SSA_slot += Math.Max(ssa_insmaxversion, phi_resmaxversion) + 1;
 				}
 
+				//将新增边加入cfg
+				foreach (var split in splitblocks)
+				{
+					
+					cfg.Blocks.Add(split.inserted);
+
+					split.pred.Successors.Remove(split.succ);
+					split.succ.Predecessors.Remove(split.pred);
+
+					split.inserted.Successors.Add(split.succ);
+					split.inserted.Predecessors.Add(split.pred);
+
+					split.pred.Successors.Add(split.inserted);
+					split.succ.Predecessors.Add(split.inserted);
+
+					int flag = ((INS_Flag)split.inserted.Instructions[0]).flag_id;
+
+					split.pred.JumpTargetFlagId = flag;
+
+					var ins = split.pred.Instructions[split.pred.Instructions.Count - 1];
+					if (ins.INS_Code == INS_Code.if_true_goto)
+					{
+						((INS_If_True_Goto)ins).flag_id = flag;
+					}
+					else if (ins.INS_Code == INS_Code.if_false_goto)
+					{
+						((INS_If_False_Goto)ins).flag_id = flag;
+					}
+					else if (ins.INS_Code == INS_Code.goto_flag)
+					{
+						((INS_Goto)ins).flag_id = flag;
+					}
+					else
+					{
+						throw new InvalidOperationException();
+					}
+
+				}
+				cfg.Blocks.Sort((b1, b2) => { return b1.OriginalIndex - b2.OriginalIndex; });
+
+
+				return SSA_slot;
 			}
-
-
-
-
-
-
+			else
+			{
+				return slotcount;
+			}
 		}
 
 

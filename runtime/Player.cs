@@ -10457,19 +10457,16 @@ namespace juicescript.runtime
 				((RtArray)instance).methodscopeslot_ref_state = 0;
 				((RtArray)instance).HEAPINSTANCE_PTR = 0;
 
-				//Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
-				//Context.StackPosition += 2;
-
-				//slots[0].SetHeapPtr(instancePtr);
-				//slots[1] = invalue;
-
+				
 				NaNBoxing invalue = default;
 				invalue.SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
+				Context.StackPosition += 1;
 				unsafe
 				{
 					//构造
-					RunMethod(totype_class.Instance.Constructor, invalue, instancePtr, totype_class.Instance, argsCount, (byte*)arguments, slots, ref error, Context.StackPosition - 1);
+					RunMethod(totype_class.Instance.Constructor, invalue, instancePtr, totype_class.Instance, argsCount, (byte*)arguments, slots, ref error,
+						Context.StackPosition - 1);
 				}
 				Context.StackPosition -= 1;
 				if (error.raised)

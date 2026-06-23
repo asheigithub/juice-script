@@ -167,7 +167,7 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
-		private static int GetFlagId(Instruction ins)
+		internal static int GetFlagId(Instruction ins)
 		{
 			if (ins is INS_Goto gotoIns)
 				return gotoIns.flag_id;

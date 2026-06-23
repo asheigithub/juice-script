@@ -4249,6 +4249,14 @@ namespace juicescript.runtime
 						else
 						{
 							move = false;
+							//提升到堆里, 这样优化时就不用考虑cache问题了。
+
+							stackslots[target.index] = GetSaveValue(ret_constructor, ref error);
+							if (error.raised)
+							{
+								Context.StackPosition--;
+								goto flag_handle_error;
+							}
 						}
 					}
 
