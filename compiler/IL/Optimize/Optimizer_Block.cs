@@ -423,7 +423,43 @@ namespace juicescript.compiler.IL.Optimize
 					}
 				}
 			}
+			//ld_true
+			{
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_true).Select(i => (INS_Ld_True)i).ToList();
+				
+				var ld_list = all;
+				if (ld_list.Count > 1)
+				{
+					var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+					var dom = FindCommDom(atblocks);
 
+					MoveInstructions(dom, ld_list.Select(i => (Instruction)i).ToList());
+				}			
+			}
+			{
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_false).Select(i => (INS_Ld_False)i).ToList();
+
+				var ld_list = all;
+				if (ld_list.Count > 1)
+				{
+					var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+					var dom = FindCommDom(atblocks);
+
+					MoveInstructions(dom, ld_list.Select(i => (Instruction)i).ToList());
+				}
+			}
+			{
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_undefined).Select(i => (INS_Ld_Undefined)i).ToList();
+
+				var ld_list = all;
+				if (ld_list.Count > 1)
+				{
+					var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+					var dom = FindCommDom(atblocks);
+
+					MoveInstructions(dom, ld_list.Select(i => (Instruction)i).ToList());
+				}
+			}
 
 
 			return slotcount;
