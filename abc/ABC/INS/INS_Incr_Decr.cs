@@ -42,13 +42,32 @@ namespace juicescript.ABC.INS
 
         public override List<StackLocater> GetDef()
         {
-            return new List<StackLocater>() { source, dst, result };
-        }
+			if (dst.index != result.index)
+			{
+				return new List<StackLocater>() { result,dst };
+			}
+			else
+			{
+				return new List<StackLocater>() { dst };
+			}
+
+			//return new List<StackLocater>() { };
+
+		}
 
         public override List<StackLocater> GetUse()
         {
-            return new List<StackLocater> { source ,result};
-        }
+			if (dst.index != result.index)
+			{
+				return new List<StackLocater>() { source };
+			}
+			else
+			{
+				return new List<StackLocater>() { source };
+			}
+
+			//return new List<StackLocater> { source ,result , dst};
+		}
 
         public override bool MaybeRaiseError()
         {

@@ -102,6 +102,8 @@ function fannkuch(n) {
          var s = "";
          for(var i=0; i<n; i++) s += (perm1[i]+1).toString();
          check++;
+		 
+		 
       }
 
       while (r != 1) { count[r - 1] = r; r--; }
@@ -152,5 +154,8 @@ var expected = 30;
 if (ret != expected)
     throw "ERROR: bad result: expected " + expected + " but got " + ret + " " + ( getTimer() - st);
 
+	
+	
+	
 	
 	

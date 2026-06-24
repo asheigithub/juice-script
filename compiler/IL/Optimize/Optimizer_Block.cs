@@ -482,6 +482,7 @@ namespace juicescript.compiler.IL.Optimize
 			internal BasicBlock pred;
 
 			internal BasicBlock inserted;
+			internal BasicBlock beforeinserted;
 
 		}
 
@@ -516,279 +517,6 @@ namespace juicescript.compiler.IL.Optimize
 					m = pm.Body._link_codescope.Parent;
 
 				}
-
-#if false
-				//传入参数优化。如果参数不会被赋值，而读取了多次，则将其中一次读取提前到入口，然后其他所有读取全部消除为move.
-				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
-				{
-					var scopemember = cfg.Method.Body._link_codescope.Members[i];
-					if (scopemember.Kind != ScopeMemberKind.Parameter)
-					{
-						break;
-					}
-
-					if (cfg.Blocks.SelectMany(b => b.Instructions)
-						.Any(ins => ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == i))
-					{
-						//有赋值，跳过
-						continue;
-					}
-
-					var ldlist = cfg.Blocks.SelectMany(b => b.Instructions)
-						.Where(ins => ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == i).ToList();
-
-					if (ldlist.Count > 1)
-					{
-						StackLocater var_slot;
-
-						if (cfg.Blocks[0].Instructions.Any(ld => ldlist.Contains(ld)))
-						{
-							var first_ldins = cfg.Blocks[0].Instructions.First(ld => ldlist.Contains(ld));
-							ldlist.Remove(first_ldins);
-
-							if (cfg.Blocks[0].Instructions.Take(cfg.Blocks[0].Instructions.IndexOf(first_ldins)).Any(ii => ii.MaybeRaiseError()))
-							{
-								//由于可能调函数抛出异常，所以需要提前！
-								cfg.Blocks[0].Instructions.Remove(first_ldins);
-
-								int idx = cfg.Blocks[0].Instructions.IndexOf(cfg.Blocks[0].Instructions.First(ii => ii.MaybeRaiseError()));
-
-								cfg.Blocks[0].Instructions.Insert(idx, first_ldins);
-							}
-
-							var_slot = first_ldins.dst;
-
-							foreach (var ld in ldlist)
-							{
-								foreach (var block in cfg.Blocks)
-								{
-									if (block.Instructions.Contains(ld))
-									{
-										int index = block.Instructions.IndexOf(ld);
-
-										INS_Move _Move = new INS_Move(ld.token);
-										_Move.source = var_slot;
-										_Move.dst = ld.dst;
-
-										block.Instructions[index] = _Move;
-										goto lbl_nextld;
-									}
-								}
-
-							lbl_nextld:
-								;
-							}
-						}
-						else
-						{
-							//非首块有，后续考虑。
-
-						}
-
-					}
-				}
-
-				//第一个基本块优化
-				//如果某个变量只在第一个基本块被赋值一次，则后续所有读取都转为move
-				//由于即使是缓存，这个变量也是缓存地址位置，只要不被多次赋值，后续就是安全的
-
-
-				for (int i = 0; i < cfg.Method.Body._link_codescope.Members.Count; i++)
-				{
-					var scopemember = cfg.Method.Body._link_codescope.Members[i];
-					if (scopemember.Kind == ScopeMemberKind.Parameter)
-					{
-						continue;
-					}
-
-					if (cfg.Blocks.SelectMany(b => b.Instructions)
-						.Count(
-						ins => (ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == i)
-						||
-						(ins.INS_Code == INS_Code.ld_memberInitValue && ((INS_Ld_MemberInitValue)ins).heap.MemberIndex == i)
-						) == 1)
-					{
-						var instruction = cfg.Blocks[0].Instructions.FirstOrDefault(ins => ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == i);
-						if (instruction != null)
-						{
-							INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)instruction;
-
-							var ldlist = cfg.Blocks.Skip(1).SelectMany(b => b.Instructions)
-								.Where(ins => ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == i).ToList();
-
-							if (ldlist.Count > 1)
-							{
-								
-								/*
-									* function throwErr()
-									{
-										throw 3;
-									}
-									function G()
-									{
-										try 
-										{
-											var k;
-											throwErr();        //考虑此代码，需要先在基本块顶部，预先加载store_MethodVariable.convertedloc 的初始值
-											k = {};
-		
-										}
-										finally
-										{
-											trace(k);
-											trace(k);
-										}
-									}
-									G();
-									*/
-
-								var head= cfg.Blocks[0].Instructions.TakeWhile(i => i != instruction);
-								if (head.Any(i => i.MaybeRaiseError()))
-								{
-									//如果指令在try内
-									var trystack = GetTryStmt(instruction, cfg);
-									if (trystack.Count > 0)
-									{
-										foreach (var ld in ldlist)
-										{ 
-											var ldtry = GetTryStmt(ld, cfg);
-
-											if (ldtry.Any(t => trystack.Any(tt => tt.tryid == t.tryid)))
-											{
-												var ld_info = ldtry.First(t => trystack.Any(tt => tt.tryid == t.tryid));
-												var ins_info = trystack.First(t=>t.tryid == ld_info.tryid);
-
-
-												if (ld_info.trystate != ins_info.trystate)
-												{
-													INS_Ld_MethodVariable iNS_Ld = new INS_Ld_MethodVariable(instruction.token);
-													iNS_Ld.dst = store_MethodVariable.convertedloc;
-													//iNS_Ld.heap = store_MethodVariable.heap;
-													ScopeHeapLocater heapLocater = default;
-													heapLocater.ScopeIndex = (ushort)cfg.Method.Body._link_codescope.index;
-													heapLocater.MemberIndex = store_MethodVariable.heap.MemberIndex;
-													iNS_Ld.heap = heapLocater;
-
-													cfg.Blocks[0].Instructions.Insert(0, iNS_Ld);
-
-													break;
-												}
-												
-											}
-
-										}
-									}
-								}
-
-								
-
-								StackLocater var_slot = store_MethodVariable.convertedloc;
-								foreach (var ld in ldlist)
-								{
-									foreach (var block in cfg.Blocks)
-									{
-										if (block.Instructions.Contains(ld))
-										{
-											int index = block.Instructions.IndexOf(ld);
-
-											INS_Move _Move = new INS_Move(ld.token);
-											_Move.source = var_slot;
-											_Move.dst = ld.dst;
-
-											block.Instructions[index] = _Move;
-											goto lbl_nextld;
-										}
-									}
-
-								lbl_nextld:
-									;
-								}
-							}
-
-						}
-					}
-				}
-
-
-
-
-
-
-				for (int i = 0; i < cfg.Blocks.Count; i++)
-				{
-					//基本块内优化
-					var block = cfg.Blocks[i];
-
-					for (int j = 0; j < block.Instructions.Count; j++)
-					{
-						var instruction = block.Instructions[j];
-						if (instruction.INS_Code == INS_Code.ld_methodVariable)
-						{
-							INS_Ld_MethodVariable ld_MethodVariable = (INS_Ld_MethodVariable)instruction;
-
-							var next = block.Instructions.Skip(j + 1).FirstOrDefault(ii => ii.INS_Code == INS_Code.ld_methodVariable &&
-							 ((INS_Ld_MethodVariable)ii).heap.MemberIndex == ld_MethodVariable.heap.MemberIndex
-
-							);
-
-							if (next != null)
-							{
-								int next_index = block.Instructions.IndexOf(next);
-								if (block.Instructions.Skip(j + 1).Take(next_index - j).Any(ii => ii.INS_Code == INS_Code.storeMethodVariable
-									 ||
-									 ii.INS_Code == INS_Code.ld_MethodVariableInitValue //由于这里可能有GC缓存对象问题，所以只能严格判断:如果出现对variable的赋值则可能导致缓存对象改变
-									 ||
-									 ii.GetDef().Contains(ld_MethodVariable.dst) //如果修改了取出来的值
-									 )
-								)
-								{
-									continue;
-								}
-
-								INS_Move _Move = new INS_Move(next.token);
-								_Move.source = ld_MethodVariable.dst;
-								_Move.dst = next.dst;
-
-								block.Instructions[next_index] = _Move;
-								j--;
-							}
-
-						}
-						else if (instruction.INS_Code == INS_Code.storeMethodVariable)
-						{
-							INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)instruction;
-							var next = block.Instructions.Skip(j + 1).FirstOrDefault(ii => ii.INS_Code == INS_Code.ld_methodVariable &&
-							 ((INS_Ld_MethodVariable)ii).heap.MemberIndex == store_MethodVariable.heap.MemberIndex
-
-							);
-							if (next != null)
-							{
-								int next_index = block.Instructions.IndexOf(next);
-								if (block.Instructions.Skip(j + 1).Take(next_index - j).Any(ii => ii.INS_Code == INS_Code.storeMethodVariable
-									 ||
-									 ii.INS_Code == INS_Code.ld_MethodVariableInitValue //由于这里可能有GC缓存对象问题，所以只能严格判断:如果出现对variable的赋值则可能导致缓存对象改变
-									 ||
-									 ii.GetDef().Contains(store_MethodVariable.dst) //如果修改了取出来的值
-									 )
-								)
-								{
-									continue;
-								}
-
-								INS_Move _Move = new INS_Move(next.token);
-								_Move.source = store_MethodVariable.convertedloc;
-								_Move.dst = next.dst;
-
-								block.Instructions[next_index] = _Move;
-								j--;
-							}
-						}
-
-					}
-				}
-			
-			
-#endif
 
 				/*
 				 * 
@@ -1149,6 +877,9 @@ namespace juicescript.compiler.IL.Optimize
 								 */
 
 
+				Dictionary<int, Dictionary<Instruction, int>> variables_ssa = new Dictionary<int, Dictionary<Instruction, int>>();
+				Dictionary<int , Dictionary<BasicBlock, PhiNode>> variables_phi = new Dictionary<int, Dictionary<BasicBlock, PhiNode>>();
+
 				int SSA_slot = slotcount;
 				var flags = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.flag).Select(i => (INS_Flag)i)
 					.Where(i => i.flag_id < 0xfffff8);
@@ -1171,6 +902,7 @@ namespace juicescript.compiler.IL.Optimize
 						scopemember.QName.Name.IndexOf("%&IterHolder%") >= 0
 						||
 						scopemember.QName.Name.IndexOf("%&IterContext%") >= 0
+						
 						)
 					{
 						continue;
@@ -1222,6 +954,8 @@ namespace juicescript.compiler.IL.Optimize
 												 // 版本0时获取的值 如果是参数就是传入的值，否则是默认值
 
 					Dictionary<Instruction, int> SSA_Version = new();
+
+					
 					void Rename(BasicBlock b)
 					{
 						// 1. 重写 φ 节点
@@ -1291,30 +1025,43 @@ namespace juicescript.compiler.IL.Optimize
 
 
 					//分配SSA版本的stackslot
-					foreach (var item in SSA_Version)
 					{
-						int slot = SSA_slot + item.Value;
-
 						Dictionary<int, int> replace = new Dictionary<int, int>();
-						if (item.Key.INS_Code == INS_Code.ld_methodVariable)
+						foreach (var item in SSA_Version)
 						{
-							replace.Add(item.Key.dst.index, slot);
-						}
-						else if (item.Key.INS_Code == INS_Code.storeMethodVariable)
-						{
-							replace.Add(((INS_Store_MethodVariable)item.Key).convertedloc.index, slot);
-						}
-						else
-						{
-							replace.Add(((INS_Ld_MethodVariableInitValue)item.Key).dst.index, slot);
+							int slot = SSA_slot + item.Value;
+
+
+							if (item.Key.INS_Code == INS_Code.ld_methodVariable)
+							{
+								replace.Add(item.Key.dst.index, slot);
+							}
+							else if (item.Key.INS_Code == INS_Code.storeMethodVariable)
+							{
+								replace.Add(((INS_Store_MethodVariable)item.Key).convertedloc.index, slot);
+							}
+							else
+							{
+								replace.Add(((INS_Ld_MethodVariableInitValue)item.Key).dst.index, slot);
+							}
+
 						}
 
-						//item.Key.RemappingSlots(replace);
+						if (cfg.Blocks.SelectMany(b => b.Instructions).Any(ii => ii.INS_Code == INS_Code.iter_get &&
+							ii.GetUse().Any(d => replace.ContainsKey(d.index)) //iter_get是特殊情况，暂时不能SSA
+						))
+						{
+							continue;
+						}
+
 						foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions))
 						{
 							ins.RemappingSlots(replace);
 						}
 					}
+
+					variables_ssa.Add(i, SSA_Version);
+					variables_phi.Add(i, PhiInserted);
 
 					//φ改成copy
 					foreach (var phi in PhiInserted)
@@ -1329,11 +1076,7 @@ namespace juicescript.compiler.IL.Optimize
 
 						foreach (var (pred, incomingVersion) in phi.Value.Incoming)
 						{
-							if (incomingVersion > (SSA_Version.Count == 0 ? 0 : SSA_Version.Max(s => s.Value)))
-								continue;
-							if (pred.Predecessors.Count == 0)
-								continue;
-
+							
 							// 在 pred 的合适位置插入move
 							if (pred.Successors.Count > 1 && succ.Predecessors.Count > 1 &&
 								(succ.Instructions[0].INS_Code == INS_Code.flag
@@ -1362,15 +1105,32 @@ namespace juicescript.compiler.IL.Optimize
 									iblock.TryBlockId = pred.TryBlockId;
 									iblock.Instructions = new List<Instruction>();
 									iblock.IsReachable = true;
-									
+
 
 									INS_Flag _Flag = new INS_Flag(succ.Instructions[0].token);
 									_Flag.flag_id = flag;
-									iblock.Instructions.Add(_Flag);	
+									iblock.Instructions.Add(_Flag);
 
-									
 
-									ssablock = new SSA_Split() { succ = succ, pred = pred, inserted = iblock };
+									BasicBlock gotoblock = new BasicBlock();
+									gotoblock.BlockId = iblock.BlockId - 1;
+									gotoblock.OriginalIndex = iblock.OriginalIndex - 1;
+									gotoblock.TryBlockId = iblock.TryBlockId;
+									gotoblock.Instructions = new List<Instruction>();
+									gotoblock.IsReachable = true;
+
+									INS_Goto _Goto = new INS_Goto(succ.Instructions[0].token);
+									_Goto.flag_id = ((INS_Flag)succ.Instructions[0]).flag_id;
+									gotoblock.Instructions.Add(_Goto);
+									gotoblock.JumpTargetFlagId = _Goto.flag_id;
+
+
+
+									iblock.Predecessors.Add(gotoblock);
+									gotoblock.Successors.Add(iblock);
+
+
+									ssablock = new SSA_Split() { succ = succ, pred = pred, inserted = iblock,beforeinserted = gotoblock };
 									splitblocks.Add(ssablock);
 								}
 
@@ -1403,6 +1163,12 @@ namespace juicescript.compiler.IL.Optimize
 										ins.RemappingSlots(replace);
 									}
 
+									//int index = pred.Instructions.IndexOf(def);
+									//INS_Move move = new INS_Move(def.token);
+									//move.source.index = SSA_slot + incomingVersion;
+									//move.dst.index = SSA_slot + targetVersion;
+
+									//pred.Instructions.Insert(index + 1, move);
 								}
 								else
 								{
@@ -1456,16 +1222,16 @@ namespace juicescript.compiler.IL.Optimize
 				//将新增边加入cfg
 				foreach (var split in splitblocks)
 				{
-					
+					cfg.Blocks.Add(split.beforeinserted);
 					cfg.Blocks.Add(split.inserted);
 
 					split.pred.Successors.Remove(split.succ);
 					split.succ.Predecessors.Remove(split.pred);
 
 					split.inserted.Successors.Add(split.succ);
-					split.inserted.Predecessors.Add(split.pred);
+					split.beforeinserted.Predecessors.Add(split.pred);
 
-					split.pred.Successors.Add(split.inserted);
+					split.pred.Successors.Add(split.beforeinserted);
 					split.succ.Predecessors.Add(split.inserted);
 
 					int flag = ((INS_Flag)split.inserted.Instructions[0]).flag_id;
@@ -1491,10 +1257,171 @@ namespace juicescript.compiler.IL.Optimize
 					}
 
 				}
+
+
+				slotcount = SSA_slot;
+
+				//SSA优化
+				foreach (var item in variables_ssa)
+				{
+					var SSA = item.Value;
+					var scopemember = cfg.Method.Body._link_codescope.Members[item.Key];
+
+					
+
+					//version 0: 版本0，可以像ld_const那样优化					
+					{
+						var zero = SSA.Where(s => s.Value == 0).Select(i => i.Key).ToList();
+						if (zero.Count > 1 && 
+							!(scopemember.Kind == ScopeMemberKind.Slot && scopemember.QName.Name.StartsWith("%")) //排除 catch(e)
+							)
+						{
+							Debug.Assert(zero.All(i => i.INS_Code == INS_Code.ld_methodVariable));
+
+							var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => zero.Contains(i))).ToList();
+							var dom = FindCommDom(atblocks);
+
+							var ld = zero.First();
+							foreach (var block in cfg.Blocks)
+							{
+								block.Instructions.RemoveAll(ins => zero.Contains(ins));
+							}
+
+							int newslot = slotcount++;
+							foreach (var l in zero)
+							{
+								Dictionary<int, int> replace = new Dictionary<int, int> { { l.dst.index, newslot } };
+
+								foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+								{
+									ins.RemappingSlots(replace);
+								}
+							}
+
+							ld.dst.index = newslot;
+							if (dom.Instructions.Count > 0 &&
+													(dom.Instructions[0].INS_Code == INS_Code.flag
+													||
+													dom.Instructions[0].INS_Code == INS_Code.try_enter
+													||
+													dom.Instructions[0].INS_Code == INS_Code.catch_enter
+													||
+													dom.Instructions[0].INS_Code == INS_Code.finally_enter
+													)
+													)
+							{
+								dom.Instructions.Insert(1, ld);
+							}
+							else
+							{
+								dom.Instructions.Insert(0, ld);
+							}
+
+
+						}
+
+					}
+					if (SSA.Count > 0)
+					{
+						
+						int maxversion = SSA.Max(s => s.Value);
+
+						for (int v = 1; v < maxversion + 1; v++)
+						{
+							var version_ins = SSA.Where(s => s.Value == v).Select(i => i.Key).ToList();
+							if (version_ins.Count > 1)
+							{
+								//{
+								//	var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable).ToList();
+								//	foreach (var block in cfg.Blocks)
+								//	{
+								//		block.Instructions.RemoveAll(ins => toremove.Contains(ins));
+								//	}
+								//}
+
+
+
+								var def = version_ins.FirstOrDefault(i => i.INS_Code == INS_Code.ld_MethodVariableInitValue || i.INS_Code == INS_Code.storeMethodVariable);
+								if (def != null)
+								{
+
+
+
+									var deftry = GetTryStmt(def, cfg);
+									bool IsTrySafe(Instruction instruction) //还必须考虑Try Catch的影响！
+									{
+										if (deftry.Count == 0)
+										{
+											return true;
+										}
+										else
+										{
+
+											var itry = GetTryStmt(instruction, cfg);
+
+											if (itry.Count < deftry.Count)
+												return false;
+
+											var ii = itry.Peek();
+											return deftry.Any(d => d.tryid == ii.tryid && d.trystate == ii.trystate);
+										}
+									}
+
+
+									var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable && IsTrySafe(i)).ToList();
+									if (def.INS_Code == INS_Code.ld_MethodVariableInitValue)
+									{
+										foreach (var block in cfg.Blocks)
+										{
+											block.Instructions.RemoveAll(ins => toremove.Contains(ins));
+										}
+									}
+									else
+									{
+										var src = ((INS_Store_MethodVariable)def).dst;
+										//朔源
+										var srcdef = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(i => i.GetDef().Contains(src));
+										if (srcdef.All(i => i.INS_Code == INS_Code.new_instance
+											|| i.INS_Code == INS_Code.ld_const
+											|| i.INS_Code == INS_Code.ld_class
+											|| i.INS_Code == INS_Code.ld_true
+											|| i.INS_Code == INS_Code.ld_false
+											|| i.INS_Code == INS_Code.ld_undefined
+											|| i.INS_Code == INS_Code.ld_MethodVariableInitValue
+											|| i.INS_Code == INS_Code.increment_decrement
+											))
+										{
+											foreach (var block in cfg.Blocks)
+											{
+												block.Instructions.RemoveAll(ins => toremove.Contains(ins));
+											}
+										}
+										else
+										{
+
+										}
+									}
+
+
+								}
+								else
+								{
+									//从phi中来
+								}
+
+
+							}
+
+						}
+					}
+				}
+
+
+
+
 				cfg.Blocks.Sort((b1, b2) => { return b1.OriginalIndex - b2.OriginalIndex; });
 
-
-				return SSA_slot;
+				return slotcount;
 			}
 			else
 			{
@@ -1506,6 +1433,102 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static void RemoveBlockMove(ControlFlowGraph cfg)
 		{
+			//移除无用的move
+
+			var all = cfg.Blocks.SelectMany(bb => bb.Instructions).Where( i=>i.INS_Code == INS_Code.move ).ToList();
+
+			var itemuse_kv = cfg.Blocks.SelectMany(bb => bb.Instructions).Select(i => new KeyValuePair<Instruction, List<StackLocater>>(i, i.GetUse()));
+			Dictionary<Instruction,List<StackLocater>> itemuse= new Dictionary<Instruction, List<StackLocater>>(itemuse_kv);
+
+			var itemdef_kv = cfg.Blocks.SelectMany(bb => bb.Instructions).Select(i => new KeyValuePair<Instruction, List<StackLocater>>(i, i.GetDef()));
+			Dictionary<Instruction, List<StackLocater>> itemdef = new Dictionary<Instruction, List<StackLocater>>(itemdef_kv);
+
+
+			bool flag = false;
+
+			do
+			{
+				flag = false;
+
+				foreach (var mv in all)
+				{
+					bool found = false;
+					foreach (var item in cfg.Blocks.SelectMany(bb => bb.Instructions))
+					{
+						if (itemuse[item].Any(u => u.index == mv.dst.index))
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (found)
+					{
+						//mv的source必须有定义，否则也移除
+						
+						//HashSet<Instruction> temp = new HashSet<Instruction>();
+
+						//bool FindSrc(Instruction src)
+						//{
+						//	temp.Add(src);
+						//	do
+						//	{
+						//		var deflist = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(
+						//			d => !temp.Contains(d) && itemdef[d].Any(k => k.index == ((INS_Move)src).source.index)).ToList();
+
+						//		if (deflist.Count == 0)
+						//		{
+						//			return false;
+						//		}
+						//		else if (deflist.All(i => i.INS_Code == INS_Code.move))
+						//		{
+						//			foreach (var def in deflist)
+						//			{
+						//				if (FindSrc(def))
+						//				{
+						//					return true;
+						//				}
+						//			}
+						//			return false;
+
+						//		}
+						//		else
+						//		{
+						//			return true;
+						//		}
+
+						//	} while (true);
+						//}
+
+
+						//found = FindSrc(mv);
+						found = cfg.Blocks.SelectMany(bb => bb.Instructions).Any(d => itemdef[d].Any(k=>k.index == ((INS_Move)mv).source.index));						
+					}
+
+
+					if (!found)
+					{
+						flag = true;
+
+						all.Remove(mv);
+
+						foreach (var b in cfg.Blocks)
+						{
+							if (b.Instructions.Remove(mv))
+							{
+								break;
+							}
+						}
+
+						break;
+					}
+				}
+
+			} while (flag);
+
+
+
+#if false
 
 			//查找每条指令的每个use
 			//设有use [A],[A]的来源都是move 
@@ -1617,6 +1640,10 @@ namespace juicescript.compiler.IL.Optimize
 				;
 
 			} while (flag);
+		
+#endif
+			
+		
 		}
 
 
