@@ -13,6 +13,14 @@ package
     }
 }
 
+//import com.adobe.serialization.json.JSON;
+//
+//var obj = JSON.decode('{"a":1,"b":2}');
+//obj.c = obj.a + obj.b;
+//trace(JSON.encode(obj));
+
+
+
 //import flash.utils.Dictionary;
 //
 //function ccc():void 

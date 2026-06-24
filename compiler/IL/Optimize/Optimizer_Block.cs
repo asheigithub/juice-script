@@ -897,7 +897,8 @@ namespace juicescript.compiler.IL.Optimize
 					{
 						DefSites.Add(cfg.Blocks[0]); // 参数是传入的，第一个块就是v0
 					}
-					else if (scopemember.QName.Name.IndexOf("%&IterObjHolder%") >= 0
+					else if (
+						scopemember.QName.Name.IndexOf("%&IterObjHolder%") >= 0
 						||
 						scopemember.QName.Name.IndexOf("%&IterHolder%") >= 0
 						||
@@ -1020,8 +1021,15 @@ namespace juicescript.compiler.IL.Optimize
 						}
 					}
 
-					Rename(cfg.Blocks[0]);
-
+					if (scopemember.Kind == ScopeMemberKind.Slot && scopemember.QName.Name.StartsWith("%") && !scopemember.QName.Name.EndsWith("@--"))
+					{
+						var catchblock = cfg.Blocks.First(b => b.Instructions.Count > 0 && b.Instructions[0].INS_Code == INS_Code.catch_enter && ((INS_Catch_Enter)b.Instructions[0]).catch_exception.MemberIndex == i);
+						Rename(catchblock);
+					}
+					else
+					{
+						Rename(cfg.Blocks[0]);
+					}
 
 
 					//分配SSA版本的stackslot
@@ -1117,7 +1125,7 @@ namespace juicescript.compiler.IL.Optimize
 									gotoblock.OriginalIndex = iblock.OriginalIndex - 1;
 									gotoblock.TryBlockId = iblock.TryBlockId;
 									gotoblock.Instructions = new List<Instruction>();
-									gotoblock.IsReachable = true;
+									
 
 									INS_Goto _Goto = new INS_Goto(succ.Instructions[0].token);
 									_Goto.flag_id = ((INS_Flag)succ.Instructions[0]).flag_id;
@@ -1126,8 +1134,8 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
-									iblock.Predecessors.Add(gotoblock);
-									gotoblock.Successors.Add(iblock);
+									//iblock.Predecessors.Add(gotoblock);
+									gotoblock.Successors.Add(succ);
 
 
 									ssablock = new SSA_Split() { succ = succ, pred = pred, inserted = iblock,beforeinserted = gotoblock };
@@ -1229,10 +1237,32 @@ namespace juicescript.compiler.IL.Optimize
 					split.succ.Predecessors.Remove(split.pred);
 
 					split.inserted.Successors.Add(split.succ);
-					split.beforeinserted.Predecessors.Add(split.pred);
+					split.inserted.Predecessors.Add(split.pred);
 
-					split.pred.Successors.Add(split.beforeinserted);
+					split.pred.Successors.Add(split.inserted);
 					split.succ.Predecessors.Add(split.inserted);
+
+					
+
+					foreach (var pre in split.succ.Predecessors)
+					{
+						if (pre.OriginalIndex == split.succ.OriginalIndex - 10)
+						{
+							pre.Successors.Add(split.beforeinserted);
+							pre.Successors.Remove(split.succ);
+							
+							split.beforeinserted.Predecessors.Add(pre);
+
+							split.beforeinserted.IsReachable = true;
+
+							split.succ.Predecessors.Add(split.beforeinserted);
+
+							break;
+						}
+					}
+
+
+
 
 					int flag = ((INS_Flag)split.inserted.Instructions[0]).flag_id;
 
@@ -1261,19 +1291,121 @@ namespace juicescript.compiler.IL.Optimize
 
 				slotcount = SSA_slot;
 
+				//查询变量类型是否安全。
+				HashSet<Instruction> safeInstructions = new(); //安全类型
+				HashSet<Instruction> newinstanceDefSite = new(); //使用newinstance初始化值
+
+				bool changed = false;
+				do
+				{
+					changed = false;
+
+					foreach (var item in variables_ssa)
+					{
+						var SSA = item.Value;
+						var scopemember = cfg.Method.Body._link_codescope.Members[item.Key];
+						if (!scopemember.TypeKind.IsHeapType() || scopemember.TypeKind == TypeKind.String)
+						{							
+							//类型安全。
+							foreach (var ins in SSA.Keys)
+							{
+								changed = safeInstructions.Add(ins);
+							}
+							continue;
+						}
+
+
+
+						foreach (var testIns in SSA.Keys.Where(i => i.INS_Code == INS_Code.ld_MethodVariableInitValue || i.INS_Code == INS_Code.storeMethodVariable))
+						{
+							if (safeInstructions.Contains(testIns) || newinstanceDefSite.Contains(testIns)) 
+								continue;
+
+							if (testIns.INS_Code == INS_Code.ld_MethodVariableInitValue)
+							{
+								changed = true;
+								safeInstructions.Add(testIns);
+								continue;
+							}
+
+							INS_Store_MethodVariable storeVar = (INS_Store_MethodVariable)testIns;
+							
+							Stack<StackLocater> source = new Stack<StackLocater>();
+							source.Push(storeVar.dst);
+
+							HashSet<int> searched=new HashSet<int>(); 
+							List<Instruction> defsourcelist = new List<Instruction>();
+
+							while (source.Count>0)
+							{
+								var test = source.Pop();
+								if (searched.Contains(test.index))
+									continue;
+
+								searched.Add(test.index);
+
+								var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index));
+								defsourcelist.AddRange( deflist.Where( i=>i.INS_Code != INS_Code.move ) );
+
+								foreach (var def in defsourcelist.Where( i=>i.INS_Code == INS_Code.move  ))
+								{
+									source.Push(((INS_Move)def).source);
+								}
+							}
+
+							if (defsourcelist.All(i => i.INS_Code == INS_Code.new_instance))
+							{
+								newinstanceDefSite.Add(testIns);
+								changed = true;
+							}
+							else if( defsourcelist.All( i=> safeInstructions.Contains(i)								
+												|| i.INS_Code == INS_Code.ld_const
+												|| i.INS_Code == INS_Code.ld_class
+												|| i.INS_Code == INS_Code.ld_true
+												|| i.INS_Code == INS_Code.ld_false
+												|| i.INS_Code == INS_Code.ld_undefined
+												|| i.INS_Code == INS_Code.ld_MethodVariableInitValue
+												|| i.INS_Code == INS_Code.increment_decrement
+												|| i.INS_Code == INS_Code.delete
+												|| i.INS_Code == INS_Code.get_is
+												|| i.INS_Code == INS_Code.get_in
+												|| i.INS_Code == INS_Code.get_instanceof
+												|| i.INS_Code== INS_Code.bitwise
+												|| i.INS_Code == INS_Code.logic_comparison
+												|| i.INS_Code == INS_Code.logic_not
+												|| i.INS_Code == INS_Code.strict_eq
+												|| i.INS_Code == INS_Code.strict_neq
+												|| i.INS_Code == INS_Code.equal
+												|| i.INS_Code == INS_Code.neg
+												
+							) )
+							{
+								safeInstructions.Add(storeVar);								
+								changed = true;
+							}
+
+
+						}
+
+
+					}
+
+
+				} while (changed);
+
+				
+
 				//SSA优化
 				foreach (var item in variables_ssa)
 				{
 					var SSA = item.Value;
 					var scopemember = cfg.Method.Body._link_codescope.Members[item.Key];
 
-					
-
 					//version 0: 版本0，可以像ld_const那样优化					
 					{
 						var zero = SSA.Where(s => s.Value == 0).Select(i => i.Key).ToList();
 						if (zero.Count > 1 && 
-							!(scopemember.Kind == ScopeMemberKind.Slot && scopemember.QName.Name.StartsWith("%")) //排除 catch(e)
+							!(scopemember.Kind == ScopeMemberKind.Slot && scopemember.QName.Name.StartsWith("%") && !scopemember.QName.Name.EndsWith("@--")) //排除 catch(e)
 							)
 						{
 							Debug.Assert(zero.All(i => i.INS_Code == INS_Code.ld_methodVariable));
@@ -1331,85 +1463,111 @@ namespace juicescript.compiler.IL.Optimize
 							var version_ins = SSA.Where(s => s.Value == v).Select(i => i.Key).ToList();
 							if (version_ins.Count > 1)
 							{
-								//{
-								//	var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable).ToList();
-								//	foreach (var block in cfg.Blocks)
-								//	{
-								//		block.Instructions.RemoveAll(ins => toremove.Contains(ins));
-								//	}
-								//}
-
-
-
-								var def = version_ins.FirstOrDefault(i => i.INS_Code == INS_Code.ld_MethodVariableInitValue || i.INS_Code == INS_Code.storeMethodVariable);
-								if (def != null)
+								var vdefs = SSA.Select(k => k.Key).Where(i => i.INS_Code != INS_Code.ld_methodVariable);
+								if ( vdefs.Count() >0 &&  vdefs.All( d=>safeInstructions.Contains(d) ) )
 								{
-
-
-
-									var deftry = GetTryStmt(def, cfg);
-									bool IsTrySafe(Instruction instruction) //还必须考虑Try Catch的影响！
+									var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable).ToList();
+									foreach (var block in cfg.Blocks)
 									{
-										if (deftry.Count == 0)
-										{
-											return true;
-										}
-										else
-										{
-
-											var itry = GetTryStmt(instruction, cfg);
-
-											if (itry.Count < deftry.Count)
-												return false;
-
-											var ii = itry.Peek();
-											return deftry.Any(d => d.tryid == ii.tryid && d.trystate == ii.trystate);
-										}
+										block.Instructions.RemoveAll(ins => toremove.Contains(ins));
 									}
-
-
-									var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable && IsTrySafe(i)).ToList();
-									if (def.INS_Code == INS_Code.ld_MethodVariableInitValue)
+								}
+								else
+								{
+									var def = version_ins.FirstOrDefault(i => i.INS_Code == INS_Code.ld_MethodVariableInitValue || i.INS_Code == INS_Code.storeMethodVariable);
+									if (def != null)
 									{
-										foreach (var block in cfg.Blocks)
+										var deftry = GetTryStmt(def, cfg);
+										bool IsTrySafe(Instruction instruction) //还必须考虑Try Catch的影响！
 										{
-											block.Instructions.RemoveAll(ins => toremove.Contains(ins));
+											if (deftry.Count == 0)
+											{
+												return true;
+											}
+											else
+											{
+
+												var itry = GetTryStmt(instruction, cfg);
+
+												if (itry.Count < deftry.Count)
+													return false;
+
+												var ii = itry.Peek();
+												return deftry.Any(d => d.tryid == ii.tryid && d.trystate == ii.trystate);
+											}
 										}
-									}
-									else
-									{
-										var src = ((INS_Store_MethodVariable)def).dst;
-										//朔源
-										var srcdef = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(i => i.GetDef().Contains(src));
-										if (srcdef.All(i => i.INS_Code == INS_Code.new_instance
-											|| i.INS_Code == INS_Code.ld_const
-											|| i.INS_Code == INS_Code.ld_class
-											|| i.INS_Code == INS_Code.ld_true
-											|| i.INS_Code == INS_Code.ld_false
-											|| i.INS_Code == INS_Code.ld_undefined
-											|| i.INS_Code == INS_Code.ld_MethodVariableInitValue
-											|| i.INS_Code == INS_Code.increment_decrement
-											))
+
+										if (safeInstructions.Contains(def) || newinstanceDefSite.Contains(def))
 										{
+											var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable && IsTrySafe(i)).ToList();
 											foreach (var block in cfg.Blocks)
 											{
 												block.Instructions.RemoveAll(ins => toremove.Contains(ins));
 											}
 										}
 										else
-										{
+										{ 
+											//单block优化
 
 										}
 									}
+									else
+									{
+										//从phi中来
+										var phi = variables_phi[item.Key].Where( p=>p.Value.ResultVersion == v ).ToList();
+										Debug.Assert(phi.Count == 1);
 
+										var incoming_vers = phi[0].Value.Incoming.Values.Where(v=>v>0).ToList(); //v0没有定值位置
+										
+										List<Instruction> income_def = new List<Instruction>();
+
+										HashSet<int> visited = new HashSet<int>();
+
+										while (incoming_vers.Count > 0)
+										{
+											int ver = incoming_vers[0];
+											incoming_vers.RemoveAt(0);
+
+											visited.Add(ver);
+
+
+											var defsite = SSA.Where(s => s.Value == ver).Select(ssa_list => ssa_list.Key)
+												.Where(i => i.INS_Code == INS_Code.ld_MethodVariableInitValue || i.INS_Code == INS_Code.storeMethodVariable).ToList()
+												;
+											if (defsite.Count > 0)
+											{
+												income_def.AddRange(defsite);
+											}
+											else
+											{
+												var nphi = variables_phi[item.Key].Where(p => p.Value.ResultVersion == ver).ToList();
+												Debug.Assert(nphi.Count == 1);
+
+												foreach (var come in nphi[0].Value.Incoming.Values.Where(v => v > 0))
+												{
+													if (!visited.Contains(come))
+													{
+														incoming_vers.Add(come);
+														visited.Add(come);
+													}
+												}
+											}
+										}
+
+										Debug.Assert(income_def.Count > 0);
+
+										if (income_def.All(d => safeInstructions.Contains(d) || newinstanceDefSite.Contains(d) ))
+										{
+											var toremove = version_ins.Where(i => i.INS_Code == INS_Code.ld_methodVariable).ToList();
+											foreach (var block in cfg.Blocks)
+											{
+												block.Instructions.RemoveAll(ins => toremove.Contains(ins));
+											}
+										}
+
+									}
 
 								}
-								else
-								{
-									//从phi中来
-								}
-
-
 							}
 
 						}
