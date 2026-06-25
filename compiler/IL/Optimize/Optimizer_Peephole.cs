@@ -85,7 +85,7 @@ namespace juicescript.compiler.IL.Optimize
 		private static void RemoveBarrier(ControlFlowGraph cfg)
 		{
 			//移除无用的barrier,使得图着色正确
-			var instructions = cfg.Blocks.OrderBy(b=>b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructions = cfg.Blocks.OrderBy(b=>b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier ).ToArray();
 
 			var barriers = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code == INS_Code.expression_barrier);
 			foreach (var barrier in barriers)

@@ -13151,7 +13151,50 @@ namespace juicescript.runtime
 								break;
 
 							}
+						//case INS_Code.ld_ARR_V:
+						//	{
+						//		uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_ARR_V);
+						//		StackLocater stack;
+						//		stack.index = dst_index;
 
+						//		StackLocater src;
+						//		LoadStackLocater(&src, &PC);
+						//		StackLocater _name;
+						//		LoadStackLocater(&_name, &PC);
+
+						//		int super_const_index;
+						//		LoadInt32(&super_const_index, &PC);
+						//		var instance_box = stackslots[src.index];
+						//		var name_box = stackslots[_name.index];
+
+						//		if (!(instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
+						//			&& name_box.ValueType >= BoxType.Int && name_box.ValueType <= BoxType.UShort &&
+						//			(name_box.IntValue >= 0 || (name_box.ValueType == BoxType.Uint && name_box.UIntValue < uint.MaxValue))))
+						//		{
+						//			*opcodePtr = ((uint)INS_Code.ld_MultiNameL_Val | (0xffffff00 & (*opcodePtr)));
+						//			PC = (byte*)(opcodePtr + 1);
+						//			opcode = INS_Code.ld_MultiNameL_Val;
+						//			goto lbl_retry;
+						//		}
+
+						//		uint array_i = name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+
+						//		bool isoutofindex_or_ishole;
+						//		var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[instance_box.HeapPtr], out isoutofindex_or_ishole);
+
+						//		if (a_element.ValueType == BoxType.Fault)
+						//		{
+						//			a_element.SetUndefined();
+						//		}
+						//		else if (a_element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+						//		{
+						//			a_element.SetHeapPtr(a_element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+						//		}
+
+						//		stackslots[dst_index] = a_element;
+
+						//		break;
+						//	}
 						case INS_Code.store_MultiNameL:
 							{
 

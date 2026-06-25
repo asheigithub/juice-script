@@ -292,7 +292,7 @@ namespace juicescript.ABC.INS
 		//**specialized opcode
 
 
-
+        //ld_ARR_V = 130, //从数组中读取值
 
 
 

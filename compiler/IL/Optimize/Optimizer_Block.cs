@@ -1679,219 +1679,63 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
-		private static void RemoveBlockMove(ControlFlowGraph cfg)
+		private static int RemoveBlockMove(ControlFlowGraph cfg,int slotCount)
 		{
-			//移除无用的move
-
-			var all = cfg.Blocks.SelectMany(bb => bb.Instructions).Where( i=>i.INS_Code == INS_Code.move ).ToList();
-
-			var itemuse_kv = cfg.Blocks.SelectMany(bb => bb.Instructions).Select(i => new KeyValuePair<Instruction, List<StackLocater>>(i, i.GetUse()));
-			Dictionary<Instruction,List<StackLocater>> itemuse= new Dictionary<Instruction, List<StackLocater>>(itemuse_kv);
-
-			var itemdef_kv = cfg.Blocks.SelectMany(bb => bb.Instructions).Select(i => new KeyValuePair<Instruction, List<StackLocater>>(i, i.GetDef()));
-			Dictionary<Instruction, List<StackLocater>> itemdef = new Dictionary<Instruction, List<StackLocater>>(itemdef_kv);
+			//算法：用干涉图计算 mv 的src和dst之间是不是没有干涉。如果没有，则直接使用同一个槽然后把mv删掉。
 
 
-			bool flag = false;
-
-			do
+			var tmp = cfg.BuildTemporaryCFGForInstructionLevel();
+			//tmp中移除所有的move。然后计算干涉图
+			foreach (var block in tmp.Blocks)
 			{
-				flag = false;
+				block.Instructions.RemoveAll(i => i.INS_Code == INS_Code.move);
+			}
+			var interference =  tmp.ComputeInterferenceGraph();
 
-				foreach (var mv in all)
+			var all = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(i => i.INS_Code == INS_Code.move).Select(i=>(INS_Move)i).ToList();
+			var toremove = new List<INS_Move>();
+
+			foreach (var mv in all)
+			{
+				if (!interference.ContainsKey(mv.source.index))
 				{
-					bool found = false;
-					foreach (var item in cfg.Blocks.SelectMany(bb => bb.Instructions))
+					toremove.Add(mv);
+				}
+				else
+				{
+					if (!interference[mv.source.index].Contains(mv.dst.index))
 					{
-						if (itemuse[item].Any(u => u.index == mv.dst.index))
-						{
-							found = true;
-							break;
-						}
-					}
-
-					if (found)
-					{
-						//mv的source必须有定义，否则也移除
-						
-						//HashSet<Instruction> temp = new HashSet<Instruction>();
-
-						//bool FindSrc(Instruction src)
-						//{
-						//	temp.Add(src);
-						//	do
-						//	{
-						//		var deflist = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(
-						//			d => !temp.Contains(d) && itemdef[d].Any(k => k.index == ((INS_Move)src).source.index)).ToList();
-
-						//		if (deflist.Count == 0)
-						//		{
-						//			return false;
-						//		}
-						//		else if (deflist.All(i => i.INS_Code == INS_Code.move))
-						//		{
-						//			foreach (var def in deflist)
-						//			{
-						//				if (FindSrc(def))
-						//				{
-						//					return true;
-						//				}
-						//			}
-						//			return false;
-
-						//		}
-						//		else
-						//		{
-						//			return true;
-						//		}
-
-						//	} while (true);
-						//}
-
-
-						//found = FindSrc(mv);
-						found = cfg.Blocks.SelectMany(bb => bb.Instructions).Any(d => itemdef[d].Any(k=>k.index == ((INS_Move)mv).source.index));						
-					}
-
-
-					if (!found)
-					{
-						flag = true;
-
-						all.Remove(mv);
-
-						foreach (var b in cfg.Blocks)
-						{
-							if (b.Instructions.Remove(mv))
-							{
-								break;
-							}
-						}
-
-						break;
+						toremove.Add(mv);
 					}
 				}
+			}
 
-			} while (flag);
-
-
-
-#if false
-
-			//查找每条指令的每个use
-			//设有use [A],[A]的来源都是move 
-			// 如果move只有一条，对所有使用[A]的instruction(可能有多个，可能来自switch): 该指令没有使用move.的source,   则把A改成move.source,删除move
-			//
-			// 如果move有多条 （） 这些move，每个move的来源指令只有一条 move的来源没有被其他地方使用
-			//     将这些move来源的dst修改为[A]
-			//     移除这些move
-			// 迭代直到找不到
-
-			List<Instruction> ping_moves = new List<Instruction>();
-
-			bool flag;
-			int i = 0;
-			;
-			do
+			foreach (var mv in toremove.Select(r=>new Tuple<int,int>( r.source.index,r.dst.index )).ToArray() )
 			{
-
-				flag = false;
-				var allins = cfg.Blocks.SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier);
-
-				if (!allins.Any(i => i.INS_Code == INS_Code.move && !ping_moves.Contains(i)))
-					break;
-
-
-				for (; i < cfg.Blocks.Count; i++)
+				if (mv.Item1 != mv.Item2)
 				{
-					var block = cfg.Blocks[i];
+					int newslot = slotCount++;
 
-					for (int j = 0; j < block.Instructions.Count; j++)
+					Dictionary<int, int> toreplace = new Dictionary<int, int>();
+					toreplace.Add(mv.Item1, newslot);
+					toreplace.Add(mv.Item2, newslot);
+
+					foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
 					{
-						var instruction = block.Instructions[j];
-						if (instruction.INS_Code == INS_Code.expression_barrier)
-							continue;
-
-						var uselist = instruction.GetUse();
-						for (int k = 0; k < uselist.Count; k++)
-						{
-							var A = uselist[k];
-
-							var sources = allins.Where(ins => ins.GetDef().Contains(A)).ToList();
-							if (sources.Count > 0 && sources.All(ins => ins.INS_Code == INS_Code.move)
-								&&
-								sources.All(ins => allins.Count(ii => ii.GetDef().Contains(((INS_Move)ins).source) && ii.GetDef().Count == 1) == 1)
-								)
-							{
-								if (sources.Count == 1)
-								{
-									var toreplace = allins.Where(ii => ii.GetUse().Contains(sources[0].dst)).ToArray();
-									if (!toreplace.Any(ii => ii.GetUse().Contains(((INS_Move)sources[0]).source)))
-									{
-
-										foreach (var item in toreplace)
-										{
-											item.RemappingSlots(new Dictionary<int, int>() { { sources[0].dst.index, ((INS_Move)sources[0]).source.index } });
-										}
-
-										flag = true;
-										var toremove = sources.ToArray();
-										foreach (var b in cfg.Blocks)
-										{
-											b.Instructions.RemoveAll(p => toremove.Contains(p));
-										}
-
-										goto lbl_continue;
-									}
-									else
-									{
-										ping_moves.AddRange(sources);
-									}
-
-								}
-								else
-								{
-									var otheruse = sources.SelectMany(mv => allins.Where(ii => ii != mv && ii.GetUse().Contains(((INS_Move)mv).source))).ToArray();
-
-									if (otheruse.Length == 0)
-									{
-										//修改指令目标
-										var movelist = sources.Select(mv => allins.First(ii => ii.GetDef().Contains(((INS_Move)mv).source))).ToList();
-
-										foreach (var v in movelist)
-										{
-											v.RemappingSlots(new Dictionary<int, int>() { { v.GetDef()[0].index, A.index } });
-										}
-
-										flag = true;
-										var toremove = sources.ToArray();
-										foreach (var b in cfg.Blocks)
-										{
-											b.Instructions.RemoveAll(p => toremove.Contains(p));
-										}
-
-										goto lbl_continue;
-									}
-									else
-									{
-										ping_moves.AddRange(sources);
-									}
-
-								}
-							}
-						}
+						b.RemappingSlots(toreplace);
 					}
-					
 				}
+			}
 
-			lbl_continue:
-				;
+			foreach (var b in cfg.Blocks)
+			{
+				b.Instructions.RemoveAll(i=>toremove.Contains(i));
+			}
 
-			} while (flag);
-		
-#endif
-			
-		
+
+			return slotCount;
+
+
 		}
 
 

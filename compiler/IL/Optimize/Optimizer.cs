@@ -478,7 +478,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			slotCount = OptimizeBlockSSAVariable(cfg,slotCount);
 
-			RemoveBlockMove(cfg); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
+			slotCount = RemoveBlockMove(cfg,slotCount); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
 
 			
 			

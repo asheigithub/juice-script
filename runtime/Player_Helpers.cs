@@ -8460,6 +8460,11 @@ namespace juicescript.runtime
 				&& RtVector.IsValidIndexType(name_box)
 				)
 			{
+				//打补丁
+				//*opcodePtr = ((uint)INS_Code.store_Vector | (0xffffff00 & (*opcodePtr)));
+
+
+
 				Context.GC.CheckGC(ref error);
 				if (Context.StackPosition >= Context.STACK_LENGTH)
 				{
@@ -9061,6 +9066,10 @@ namespace juicescript.runtime
 				}
 
 				stackslots[dst_index] = a_element;
+
+
+				//打补丁
+				//*opcodePtr = ((uint)INS_Code.ld_ARR_V | (0xffffff00 & (*opcodePtr)));
 
 				return;
 

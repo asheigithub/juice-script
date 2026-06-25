@@ -74,11 +74,6 @@ namespace juicescript.compiler.IL.Optimize
 		/// <returns></returns>
 		internal int GraphColoring()
 		{
-			var sortedBlocks = Blocks.OrderByDescending(b => b.OriginalIndex).ToArray();
-            if (sortedBlocks.Length == 0)
-                return 0;
-
-			//ComputeLiveness(sortedBlocks);
 			BuildInterferenceGraph();
 			ColorGraph();
 
@@ -87,6 +82,102 @@ namespace juicescript.compiler.IL.Optimize
 			return allocation.Values.Max() + 1;
 
 		}
+
+		internal Dictionary<int, HashSet<int>> ComputeInterferenceGraph()
+		{
+
+			interferenceGraph = new Dictionary<int, HashSet<int>>();
+			
+			ComputeLivenessForAllBlocks();
+
+			foreach (var block in Blocks.Where(b => b.IsReachable && b.Instructions.Count > 0))
+			{
+
+				var ins = block.Instructions[0];
+				var defs = ins.GetDef();
+				var uses = ins.GetUse();
+
+				HashSet<int> allSlotsInInstruction = new HashSet<int>();
+
+				if (defs != null)
+				{
+					foreach (var d in defs)
+					{
+						if (d.index >= 0) allSlotsInInstruction.Add(d.index);
+					}
+				}
+				if (uses != null)
+				{
+					foreach (var u in uses)
+					{
+						if (u.index >= 0) allSlotsInInstruction.Add(u.index);
+					}
+				}
+
+				foreach (var d in allSlotsInInstruction)
+				{
+					foreach (var other in allSlotsInInstruction)
+					{
+						if (d != other)
+						{
+							AddInterferenceEdge(d, other);
+						}
+					}
+				}
+
+				if (defs != null)
+				{
+					foreach (var d in defs)
+					{
+						if (d.index < 0) continue;
+						foreach (var l in block.LiveIn)
+						{
+							if (l < 0) continue;
+							if (d.index != l)
+							{
+								AddInterferenceEdge(d.index, l);
+							}
+						}
+					}
+				}
+			}
+
+			HashSet<int> allUsedSlots = new HashSet<int>();
+			foreach (var block in Blocks.Where(b => b.IsReachable))
+			{
+				foreach (var ins in block.Instructions)
+				{
+					var defs = ins.GetDef();
+					if (defs != null)
+					{
+						foreach (var d in defs)
+						{
+							if (d.index >= 0)
+								allUsedSlots.Add(d.index);
+						}
+					}
+					var uses = ins.GetUse();
+					if (uses != null)
+					{
+						foreach (var u in uses)
+						{
+							if (u.index >= 0)
+								allUsedSlots.Add(u.index);
+						}
+					}
+				}
+			}
+
+			foreach (var slot in allUsedSlots)
+			{
+				if (!interferenceGraph.ContainsKey(slot))
+					interferenceGraph[slot] = new HashSet<int>();
+			}
+
+			return interferenceGraph;
+
+		}
+
 
 		internal void ReMapping()
 		{
@@ -101,6 +192,8 @@ namespace juicescript.compiler.IL.Optimize
 			}
 		}
 
+
+		
 
 		private void BuildInterferenceGraph()
 		{
@@ -341,7 +434,7 @@ namespace juicescript.compiler.IL.Optimize
 			}
 		}
 
-		private ControlFlowGraph BuildTemporaryCFGForInstructionLevel()
+		internal ControlFlowGraph BuildTemporaryCFGForInstructionLevel()
 		{
 			var tempCFG = new ControlFlowGraph(Method);
 
