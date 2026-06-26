@@ -465,9 +465,15 @@ namespace juicescript.compiler.IL.Optimize
 			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
 			cfg.DeathCodeErase();
 
+			cfg.FindNaturalLoop(true);
+
+			//拆节点后，很难重建正确的关系，干脆重算
+			var inssplited = cfg.FlattenInstructions();
+			cfg = ControlFlowGraphBuilder.Build(inssplited, method);
+			cfg.FindNaturalLoop(false);
+
+
 			ControlFlowGraphBuilder.BuildDomTree(cfg);
-
-
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{

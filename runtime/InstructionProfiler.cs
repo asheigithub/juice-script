@@ -16,6 +16,8 @@ namespace juicescript.runtime
 			public long Count;
 			public long TotalTicks;
 
+			public INS_Code code;
+
 			public void Record(long ticks)
 			{
 				Count++;
@@ -28,7 +30,7 @@ namespace juicescript.runtime
 
 		}
 
-		public static Dictionary<INS_Code, InstructionStats> Stats = new();
+		public static  InstructionStats[] Stats = new InstructionStats[256];
 
 		private static InstructionStats current_stats;
 		public static void Profile_ActionStart(INS_Code code)
@@ -39,10 +41,13 @@ namespace juicescript.runtime
 			}
 
 
-			if (!Stats.TryGetValue(code, out var stat))
+			//if (!Stats.TryGetValue(code, out var stat))
+			var stat = Stats[(byte)code];
+			if ( stat== null)
 			{
 				stat = new InstructionStats();
-				Stats[code] = stat;
+				stat.code = code;
+				Stats[(byte)code] = stat;
 				stat.stopwatch = new Stopwatch();
 
 			}
@@ -66,9 +71,9 @@ namespace juicescript.runtime
 
 		public static void OutPutProfile()
 		{
-			foreach (var kv in Stats.OrderByDescending(kv => kv.Value.TotalTicks))
+			foreach (var kv in Stats.Where(s=>s != null).OrderByDescending(kv => kv.TotalTicks))
 			{
-				Console.WriteLine($"{kv.Key}: Count={kv.Value.Count}, AvgTicks={kv.Value.AvgTicks:F2}, TotalTicks={kv.Value.TotalTicks}");
+				Console.WriteLine($"{kv.code}: Count={kv.Count}, AvgTicks={kv.AvgTicks:F2}, TotalTicks={kv.TotalTicks}");
 			}
 		}
 

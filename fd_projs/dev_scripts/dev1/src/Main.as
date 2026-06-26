@@ -87,8 +87,8 @@ trace(fib(35),getTimer() - st );
 
 
 
-
-
+//
+//
 //
 //import flash.utils.getTimer;
 //
@@ -164,5 +164,5 @@ trace(fib(35),getTimer() - st );
 //
 	//
 	//
-	
+	//
 	

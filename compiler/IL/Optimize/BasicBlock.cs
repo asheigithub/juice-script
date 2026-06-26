@@ -19,7 +19,7 @@ namespace juicescript.compiler.IL.Optimize
         public bool HasFallThrough { get; set; }
 
 
-        internal int TryBlockId;
+        internal int TryStmtId;
 
         /// <summary>
         /// 直接支配节点
@@ -27,6 +27,11 @@ namespace juicescript.compiler.IL.Optimize
 		internal BasicBlock Idom;
 
         internal HashSet<BasicBlock> DominanceFrontier;
+
+
+        
+
+        //internal List<BasicBlock> Dom_Nodes;
 
 
 		public bool IsReachable { get; set; }
@@ -44,7 +49,7 @@ namespace juicescript.compiler.IL.Optimize
             IsReachable = false;
             HasFallThrough = false;
             JumpTargetFlagId = null;
-            TryBlockId = 0;
+            TryStmtId = 0;
             LiveIn = new HashSet<int>();
             LiveOut = new HashSet<int>();
             InstructionLive = new Dictionary<int, HashSet<int>>();

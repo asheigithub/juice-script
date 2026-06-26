@@ -41,11 +41,11 @@ namespace juicescript.compiler.IL.Optimize
 
                     if (block.Instructions[0].INS_Code == INS_Code.try_enter)
                     {
-                        unReachableTry.Add(block.TryBlockId);
+                        unReachableTry.Add(block.TryStmtId);
                         
                     }
 
-                    if (unReachableTry.Contains(block.TryBlockId))
+                    if (unReachableTry.Contains(block.TryStmtId))
                     {
                         block.Instructions.Clear();
                     }
@@ -67,6 +67,375 @@ namespace juicescript.compiler.IL.Optimize
                 }
             }
 		}
+
+
+
+
+		internal void FindNaturalLoop(bool split)
+		{
+			Dictionary<BasicBlock, List<BasicBlock>> In_Doms = new Dictionary<BasicBlock, List<BasicBlock>>();
+			Dictionary<BasicBlock, List<BasicBlock>> Out_Doms = new Dictionary<BasicBlock, List<BasicBlock>>();
+
+			Dictionary<BasicBlock,List<BasicBlock>> Predecessors = new Dictionary<BasicBlock, List<BasicBlock>>();
+			Dictionary<BasicBlock,List<BasicBlock>> Dom_Nodes = new Dictionary<BasicBlock, List<BasicBlock>>();
+
+			foreach (var item in Blocks)
+			{
+				In_Doms[item] = new List<BasicBlock>();
+				Out_Doms[item] = new List<BasicBlock>();
+
+				Predecessors[item] = item.Predecessors.Where(pred=>!(pred.Instructions.Count>0 
+						&& pred.Instructions.Last().INS_Code == INS_Code.flag
+						&& ((INS_Flag)pred.Instructions.Last()).flag_id == 0xffffff && item.OriginalIndex != pred.OriginalIndex + 10 )).ToList();
+
+
+
+				Dom_Nodes[item] = new List<BasicBlock>();
+			}
+
+			for (int i = 1; i < Blocks.Count - 1; i++)
+			{
+				var b = Blocks[i];
+				Out_Doms[b].AddRange(Blocks);
+			}
+			bool flag = true;
+			while (flag)
+			{
+				flag = false;
+				for (int i = 1; i < Blocks.Count ; i++)
+				{
+					var B = Blocks[i];
+
+					var in_d = new List<BasicBlock>();
+					if (Predecessors[B].Count > 0)
+					{
+						in_d.AddRange( Out_Doms[ Predecessors[B][0]]);
+					}
+					for (int j = 1; j < Predecessors[B].Count; j++)
+					{
+						in_d = in_d.Intersect ( Out_Doms[ Predecessors[B][j]]).ToList();
+					}
+
+					In_Doms[B] = in_d;
+
+					var out_d = new List<BasicBlock>();
+					out_d.AddRange(in_d);
+					out_d.Add(B);
+
+					if (Out_Doms[B].Union(out_d).Distinct().Count()
+						!=
+						Out_Doms[B].Intersect(out_d).Distinct().Count())
+					{
+						flag = true;
+						Out_Doms[B] = out_d;
+					}
+
+				}
+			}
+
+			foreach (var item in Blocks)
+			{
+				Dom_Nodes[item] = Blocks.Where((o) => { return Out_Doms[o].Contains(item); }).ToList();
+			}
+
+
+
+			//取回边
+			List<BackEdge> backEdges = new List<BackEdge>();
+			foreach (var item in Blocks)
+			{
+				foreach (var s in Dom_Nodes[item])
+				{
+					if ( s.Successors.Contains(item))
+					{
+						if (s.Instructions[s.Instructions.Count - 1].INS_Code != INS_Code.finally_exit)
+						{
+
+							BackEdge backEdge = new BackEdge();
+							backEdge.from = s;
+							backEdge.to = item;
+							backEdges.Add(backEdge);
+
+							Debug.Assert(item.Instructions[0].INS_Code == INS_Code.flag);
+						}
+					}
+				}
+			}
+
+			var _loops = new List<NaturalLoop>();
+			foreach (var edge in backEdges)
+			{
+				Stack<BasicBlock> stack = new Stack<BasicBlock>();
+				NaturalLoop naturalLoop = new NaturalLoop();
+				naturalLoop.backedges = new List<BackEdge>();
+				naturalLoop.backedges.Add(edge);
+				naturalLoop.nodes = new List<BasicBlock>();
+				naturalLoop.nodes.Add(edge.to);
+
+				if (edge.from != edge.to)
+				{
+					naturalLoop.nodes.Add(edge.from);
+					stack.Push(edge.from);
+
+					while (stack.Count > 0)
+					{
+						var m = stack.Pop();
+						foreach (var pred in m.Predecessors)
+						{
+							if (!naturalLoop.nodes.Contains(pred))
+							{
+								naturalLoop.nodes.Add(pred);
+								stack.Push(pred);
+							}
+						}
+					}
+				}
+				naturalLoop.nodes.Sort((a, b) => { return a.OriginalIndex - b.OriginalIndex; });
+				_loops.Add(naturalLoop);
+			}
+
+			
+			naturalloops = new List<NaturalLoop>();
+			//合并有相同头节点的自然循环
+			var headers = _loops.GroupBy((o) => { return o.firstNode; });
+			foreach (var item in headers)
+			{
+				var l = item.ToArray();
+				if (l.Length == 1)
+				{
+					naturalloops.Add(l[0]);
+				}
+				else
+				{
+					NaturalLoop naturalLoop = new NaturalLoop();
+					naturalLoop.nodes = new List<BasicBlock>();
+					naturalLoop.backedges = new List<BackEdge>();
+					foreach (var e in l)
+					{
+						naturalLoop.backedges.AddRange(e.backedges);
+						naturalLoop.nodes.AddRange(e.nodes);
+
+						naturalLoop.nodes = naturalLoop.nodes.Distinct().ToList();
+					}
+
+					naturalloops.Add(naturalLoop);
+
+					
+
+				}
+			}
+			toplevelloops = getTopLoopList();
+
+
+			//将循环头拆开。循环头里放外提的字节码。
+			if (split)
+			{
+				var flags = Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.flag).Select(i => (INS_Flag)i)
+						.Where(i => i.flag_id < 0xfffff8);
+				int flagseed = flags.Any() ? flags.Max(i => i.flag_id) + 1 : 0;
+				foreach (var nloop in naturalloops)
+				{
+					
+					Debug.Assert(nloop.firstNode.Instructions[0].INS_Code == INS_Code.flag);
+
+					var firstnode = nloop.firstNode;
+
+					//所有后续node的id + 10
+					foreach (var b in Blocks.Where(b => b.BlockId > firstnode.BlockId))
+					{
+						b.BlockId += 20;
+						b.OriginalIndex += 20;
+					}
+
+					//Debug.Assert(!Blocks.Any(b => b.BlockId == firstnode.BlockId + 10));
+
+					int flag_id = flagseed++;
+
+					var loopheader = new BasicBlock();
+					loopheader.BlockId = firstnode.BlockId + 10;
+					loopheader.OriginalIndex = firstnode.OriginalIndex + 10;
+					loopheader.TryStmtId = firstnode.TryStmtId;
+					loopheader.IsReachable = firstnode.IsReachable;
+					loopheader.Instructions = new List<Instruction>();
+					loopheader.Instructions.Add(new INS_Flag(firstnode.Instructions[0].token) { flag_id = flag_id });
+
+
+
+					flag_id = flagseed++;
+					var block = new BasicBlock();
+					block.BlockId = firstnode.BlockId + 20;
+					block.OriginalIndex = firstnode.OriginalIndex + 20;
+					block.TryStmtId = firstnode.TryStmtId;
+					block.IsReachable = firstnode.IsReachable;
+
+					//block.Successors.AddRange(firstnode.Successors.Where( s => nloop.nodes.Contains(s) ));
+					//block.Predecessors.Add(firstnode);
+					
+					block.Instructions = new List<Instruction>();
+					block.Instructions.Add(new INS_Flag(firstnode.Instructions[0].token) { flag_id = flag_id });
+					block.Instructions.AddRange(firstnode.Instructions.Skip(1));
+
+					//block.JumpTargetFlagId = firstnode.JumpTargetFlagId;
+					//block.HasFallThrough = firstnode.HasFallThrough;
+
+					firstnode.Instructions.RemoveRange(1, firstnode.Instructions.Count - 1);
+					//firstnode.Successors.RemoveAll( s => nloop.nodes.Contains(s) );
+					//firstnode.Successors.Add(block);
+					//firstnode.JumpTargetFlagId = null;
+					//firstnode.HasFallThrough = false;
+					
+
+
+					//nloop.nodes.Add(block);
+					//nloop.nodes.Sort((a, b) => { return a.OriginalIndex - b.OriginalIndex; });
+
+					//nloop.nodes.Remove(firstnode);
+
+					//foreach (var node in block.Successors)
+					//{
+					//	node.Predecessors.Remove(firstnode);
+					//	node.Predecessors.Add(block);
+
+					//	node.JumpTargetFlagId = flag_id;
+					//}
+
+
+					foreach (var edge in nloop.backedges)
+					{
+						if (edge.from == edge.to)
+						{
+							edge.from = block;
+						}
+
+						var ins = edge.from.Instructions[edge.from.Instructions.Count - 1];
+						if (ins.INS_Code == INS_Code.if_true_goto)
+						{
+							((INS_If_True_Goto)ins).flag_id = flag_id;
+						}
+						else if (ins.INS_Code == INS_Code.if_false_goto)
+						{
+							((INS_If_False_Goto)ins).flag_id = flag_id;
+						}
+						else if (ins.INS_Code == INS_Code.goto_flag)
+						{
+							((INS_Goto)ins).flag_id = flag_id;
+						}
+						else
+						{
+							throw new InvalidOperationException();
+						}
+
+						//Debug.Assert(edge.from.Successors.Contains(block));
+
+						//edge.from.Successors.Remove(firstnode);
+						//edge.from.Successors.Add(block);
+						//edge.from.JumpTargetFlagId = flag_id;
+						//edge.to = block;
+
+						
+
+						//firstnode.Predecessors.Remove(edge.from);
+						//block.Predecessors.Add(edge.from);
+					}
+
+
+					Blocks.Add(loopheader);
+					Blocks.Add(block);
+
+				}
+			}
+
+			Blocks.Sort((a, b) => { return a.OriginalIndex - b.OriginalIndex; });
+			
+
+		}
+		List<NaturalLoop> naturalloops; 
+
+
+		/// <summary>
+		/// 顶级循环
+		/// </summary>
+		internal List<looptreenode> toplevelloops;
+		internal class looptreenode
+		{
+			public NaturalLoop loop;
+			public List<looptreenode> children;
+			public int id;
+
+			public string getMermaidStr(ControlFlowGraph cfg)
+			{
+				StringBuilder sb = new StringBuilder();
+
+				sb.AppendLine("subgraph Loop" + id);
+
+				foreach (var n in loop.nodes.OrderBy((k) => k.OriginalIndex))
+				{
+					if (children.Any((c) => c.loop.nodes.Contains(n)))
+					{
+
+					}
+					else
+					{
+						sb.AppendLine("BB" + n.BlockId);
+					}
+
+				}
+
+				foreach (var c in children)
+				{
+					sb.Append(c.getMermaidStr(cfg));
+				}
+
+
+				sb.AppendLine("end");
+
+				return sb.ToString();
+			}
+
+
+		}
+
+		List<looptreenode> getTopLoopList()
+		{
+			Dictionary<NaturalLoop, looptreenode> nodes = new Dictionary<NaturalLoop, looptreenode>();
+
+			int idseed = 0;
+			foreach (var item in naturalloops)
+			{
+				nodes.Add(item, new looptreenode() { children = new List<looptreenode>(), loop = item, id = ++idseed });
+			}
+
+
+			List<looptreenode> result = new List<looptreenode>();
+
+			foreach (var item in naturalloops)
+			{
+				var parents = naturalloops.Where(
+					(n) => item.nodes.All((o) => item != n && n.nodes.Contains(o))
+					).OrderBy((o) => o.nodes.Count).ToList();
+
+				if (parents.Count == 0)
+				{
+					result.Add(nodes[item]);
+				}
+				else
+				{
+					nodes[parents[0]].children.Add(nodes[item]);
+				}
+			}
+
+
+
+			return result;
+		}
+
+
+
+
+
+
+
+
 
 		/// <summary>
 		/// 活跃槽分析+图着色
@@ -932,7 +1301,12 @@ namespace juicescript.compiler.IL.Optimize
                 }
             }
 
-            sb.AppendLine("    </div>");
+			foreach (var item in toplevelloops)
+			{
+				sb.Append(item.getMermaidStr(this));
+			}
+
+			sb.AppendLine("    </div>");
 
             // Block details table
             sb.AppendLine("    <h2>Block Details</h2>");
@@ -1254,6 +1628,11 @@ namespace juicescript.compiler.IL.Optimize
 
             return sb.ToString();
         }
+
+
+
+
+
 
 		
 	}

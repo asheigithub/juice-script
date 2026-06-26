@@ -223,17 +223,17 @@ namespace juicescript.compiler.IL.Optimize
 				if (ins.INS_Code == INS_Code.try_enter)
 				{
 					tryid++;
-					sortedblocks[i].TryBlockId = tryid;
+					sortedblocks[i].TryStmtId = tryid;
 
 				}
 				else if (ins.INS_Code == INS_Code.finally_exit)
 				{
-					sortedblocks[i].TryBlockId = tryid;
+					sortedblocks[i].TryStmtId = tryid;
 					tryid--;
 				}
 				else
 				{
-					sortedblocks[i].TryBlockId = tryid;
+					sortedblocks[i].TryStmtId = tryid;
 				}
 			}
 
@@ -313,7 +313,7 @@ namespace juicescript.compiler.IL.Optimize
 				{
 					if (i > 0 || try_States.Count == 0)
 					{
-						int tryid = blocks[i].TryBlockId;
+						int tryid = blocks[i].TryStmtId;
 						TryCtx tryCtx = new TryCtx();
 						tryCtx.state = try_state.Try;
 						tryCtx.tryid = tryid;
@@ -327,7 +327,7 @@ namespace juicescript.compiler.IL.Optimize
 						{
 							childcfg.Add(blocks[++i]);
 						}
-						while (!(blocks[i].TryBlockId == tryid && blocks[i].Instructions[0].INS_Code == INS_Code.finally_exit));
+						while (!(blocks[i].TryStmtId == tryid && blocks[i].Instructions[0].INS_Code == INS_Code.finally_exit));
 
 						tryCtx.cfg_blocks =childcfg.ToArray();
 						ComputeBlockList(tryCtx.cfg_blocks, try_States);
@@ -366,13 +366,13 @@ namespace juicescript.compiler.IL.Optimize
 										var try_state = try_States.Peek();
 										if (try_state.state == ControlFlowGraphBuilder.try_state.Try || try_state.state == ControlFlowGraphBuilder.try_state.Catch)
 										{
-											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 											blocks[i].Successors.Add(f);
 										}
 										else
 										{
 											Debug.Assert(try_state.state == ControlFlowGraphBuilder.try_state.Finally);
-											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 											blocks[i].Successors.Add(f);
 										}
 
@@ -394,13 +394,13 @@ namespace juicescript.compiler.IL.Optimize
 										var try_state = try_States.Peek();
 										if (try_state.state == ControlFlowGraphBuilder.try_state.Try || try_state.state == ControlFlowGraphBuilder.try_state.Catch)
 										{
-											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 											blocks[i].Successors.Add(f);
 										}
 										else
 										{
 											Debug.Assert(try_state.state == ControlFlowGraphBuilder.try_state.Finally);
-											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+											var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 											blocks[i].Successors.Add(f);
 										}
 
@@ -432,7 +432,7 @@ namespace juicescript.compiler.IL.Optimize
 					Debug.Assert(i == blocks.Length - 1);
 					var tryctx = try_States.Peek();
 					//确定子控制流状态
-					UpdateTryCtxState(tryctx, blocks, blocks[0].TryBlockId,dict_childcfg);
+					UpdateTryCtxState(tryctx, blocks, blocks[0].TryStmtId,dict_childcfg);
 
 					return;
 				}
@@ -458,14 +458,14 @@ namespace juicescript.compiler.IL.Optimize
 						var try_state = try_States.Peek();
 						if (try_state.state == ControlFlowGraphBuilder.try_state.Try || try_state.state == ControlFlowGraphBuilder.try_state.Catch)
 						{
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 							blocks[i].Successors.Add(f);
 
 						}
 						else
 						{
 							Debug.Assert(try_state.state == ControlFlowGraphBuilder.try_state.Finally);
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 							blocks[i].Successors.Add(f);
 						}
 
@@ -493,11 +493,11 @@ namespace juicescript.compiler.IL.Optimize
 						var try_state = try_States.Peek();
 						if (try_state.state == ControlFlowGraphBuilder.try_state.Try)
 						{
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);
 							blocks[i].Successors.Add(f);
 							for (int j = i + 1; j < blocks.Length - 1; j++)
 							{
-								if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryBlockId == try_state.tryid)
+								if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryStmtId == try_state.tryid)
 								{
 									blocks[i].Successors.Add(blocks[j]);
 								}
@@ -506,13 +506,13 @@ namespace juicescript.compiler.IL.Optimize
 						}
 						else if (try_state.state == ControlFlowGraphBuilder.try_state.Catch)
 						{
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);
 							blocks[i].Successors.Add(f);
 						}
 						else
 						{
 							Debug.Assert(try_state.state == ControlFlowGraphBuilder.try_state.Finally);
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 							blocks[i].Successors.Add(f);
 						}
 
@@ -530,13 +530,13 @@ namespace juicescript.compiler.IL.Optimize
 						var try_state = try_States.Peek();
 						if (try_state.state == ControlFlowGraphBuilder.try_state.Try)
 						{
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);
 							blocks[i].Successors.Add(f);
 
 
 							for (int j = i + 1; j < blocks.Length - 1; j++)
 							{
-								if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryBlockId == try_state.tryid)
+								if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryStmtId == try_state.tryid)
 								{
 									blocks[i].Successors.Add(blocks[j]);
 								}
@@ -545,13 +545,13 @@ namespace juicescript.compiler.IL.Optimize
 						}
 						else if (try_state.state == ControlFlowGraphBuilder.try_state.Catch)
 						{
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_state.tryid);
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_state.tryid);
 							blocks[i].Successors.Add(f);
 						}
 						else
 						{
 							Debug.Assert(try_state.state == ControlFlowGraphBuilder.try_state.Finally);
-							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryBlockId == try_state.tryid);//最后一个才是匹配的
+							var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_exit && b.TryStmtId == try_state.tryid);//最后一个才是匹配的
 							blocks[i].Successors.Add(f);
 						}
 
@@ -564,12 +564,12 @@ namespace juicescript.compiler.IL.Optimize
 				}
 				else if (lastOpCode == INS_Code.try_exit)
 				{
-					var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_States.Peek().tryid);//最后一个才是匹配的
+					var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_States.Peek().tryid);//最后一个才是匹配的
 					blocks[i].Successors.Add(f);
 
 					for (int j = i + 1; j < blocks.Length - 1; j++)
 					{
-						if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryBlockId == try_States.Peek().tryid)
+						if (blocks[j].Instructions[0].INS_Code == INS_Code.catch_enter && blocks[j].TryStmtId == try_States.Peek().tryid)
 						{
 							blocks[i].Successors.Add(blocks[j]);
 						}
@@ -578,7 +578,7 @@ namespace juicescript.compiler.IL.Optimize
 				}
 				else if (lastOpCode == INS_Code.catch_exit)
 				{
-					var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == try_States.Peek().tryid);//最后一个才是匹配的
+					var f = blocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == try_States.Peek().tryid);//最后一个才是匹配的
 					blocks[i].Successors.Add(f);
 				}
 				else if (i < blocks.Length - 1)
@@ -612,7 +612,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			{ //finally path
 				Debug.Assert(cfgblocks[0].Instructions[0].INS_Code == INS_Code.try_enter);
-				var finallypass = cfgblocks.SkipWhile(b => !(b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == TryId)).ToArray();
+				var finallypass = cfgblocks.SkipWhile(b => !(b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == TryId)).ToArray();
 
 
 				List<BasicBlock> throwblocks = new List<BasicBlock>();
@@ -639,7 +639,7 @@ namespace juicescript.compiler.IL.Optimize
 							}
 						}
 					}
-					else if(b.TryBlockId == tryctx.tryid)
+					else if(b.TryStmtId == tryctx.tryid)
 					{
 						
 						for (int ii = 0; ii < b.Instructions.Count; ii++)
@@ -1014,7 +1014,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			if(flag_needchecktry)
 			{
-				var f_enter = cfgblocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryBlockId == TryId);
+				var f_enter = cfgblocks.First(b => b.Instructions[0].INS_Code == INS_Code.finally_enter && b.TryStmtId == TryId);
 				
 				var try_catch_pass = cfgblocks.Take( Array.IndexOf(cfgblocks,f_enter) + 1 ).ToArray();
 
@@ -1038,7 +1038,7 @@ namespace juicescript.compiler.IL.Optimize
 							}
 							else if (try_ == try_state.Try)
 							{
-								if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
+								if (try_catch_pass.Any(k => k.TryStmtId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
 								{
 
 								}
@@ -1059,7 +1059,7 @@ namespace juicescript.compiler.IL.Optimize
 							}
 						}
 					}
-					else if(b.TryBlockId == tryctx.tryid)
+					else if(b.TryStmtId == tryctx.tryid)
 					{
 						//Debug.Assert(b.TryBlockId == tryctx.tryid);
 						for (int ii = 0; ii < b.Instructions.Count; ii++)
@@ -1089,7 +1089,7 @@ namespace juicescript.compiler.IL.Optimize
 								}
 								else if (try_ == try_state.Try)
 								{
-									if (try_catch_pass.Any(k => k.TryBlockId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
+									if (try_catch_pass.Any(k => k.TryStmtId == tryctx.tryid && k.Instructions[0].INS_Code == INS_Code.catch_enter))
 									{
 
 									}
@@ -1617,6 +1617,9 @@ namespace juicescript.compiler.IL.Optimize
 					}
 				}
 			}
+
+			
+
 
 		}
 

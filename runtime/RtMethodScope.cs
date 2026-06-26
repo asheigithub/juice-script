@@ -66,17 +66,28 @@ namespace juicescript.runtime
 
 			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count + 1);
 
-			Slots.Span[codescope.Members.Count].SetUndefined(); //此处槽保留this
-
 			cloneout_ptr = 0;
 #if FORCOMPILER
+
+			
+
 			if (isCompiling)
 			{
 				hasSetData = new bool[Slots.Length];
 				scope = codescope;
 			}
+
+#else
+			if (!codescope._rt_cache_init_data.IsEmpty)
+			{
+				codescope._rt_cache_init_data.Span.CopyTo(Slots.Span);
+				return;
+			}
+
+
 #endif
 
+			Slots.Span[codescope.Members.Count].SetUndefined(); //此处槽保留this
 
 			var span = Slots.Span;
 			for (int i = codescope.ParameterCout; i < span.Length - 1; i++)
@@ -149,6 +160,17 @@ namespace juicescript.runtime
 				}
 
 			}
+
+
+
+#if !FORCOMPILER
+		
+		codescope._rt_cache_init_data = new Memory<NaNBoxing>(new NaNBoxing[codescope.Members.Count+1]);
+		span.CopyTo(codescope._rt_cache_init_data.Span);
+		
+#endif
+
+
 
 		}
 

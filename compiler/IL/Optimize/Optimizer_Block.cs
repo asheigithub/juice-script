@@ -252,16 +252,16 @@ namespace juicescript.compiler.IL.Optimize
 					idoms.Add(item);
 			}
 			var dom = idoms.First();
-			if (dom.TryBlockId != 0) // try有可能意外进入catch和finally,所以需要移动到try_enter里
+			if (dom.TryStmtId != 0) // try有可能意外进入catch和finally,所以需要移动到try_enter里
 			{
-				int tryid = dom.TryBlockId;
+				int tryid = dom.TryStmtId;
 
 				while (!(dom.Instructions.Count > 0 && dom.Instructions[0].INS_Code == INS_Code.try_enter))
 				{
 					dom = dom.Idom;
 				}
 
-				Debug.Assert(dom.TryBlockId == tryid);
+				Debug.Assert(dom.TryStmtId == tryid);
 				//throw new NotImplementedException();
 			}
 
@@ -272,11 +272,17 @@ namespace juicescript.compiler.IL.Optimize
 		{
 			if (cfg.Blocks.Count == 0)
 				return slotcount;
-			if (cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation)) //async里有问题，yield里有问题，需要在变量里保持值
+			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag( MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
 				return slotcount;
 
 			void MoveInstructions(BasicBlock dom,List<Instruction> ld_list)
 			{
+				var loop = cfg.toplevelloops.FirstOrDefault(l => l.loop.nodes.Contains(dom));
+				if (loop != null)
+				{
+					dom = loop.loop.firstNode.Idom;
+				}
+
 				var ld = ld_list.First();
 				foreach (var block in cfg.Blocks)
 				{
@@ -788,7 +794,7 @@ namespace juicescript.compiler.IL.Optimize
 			// 这种情况下，a = 1时，b的stackslot就失效了。如果b的类型是primitive,或者b的赋值来源都是primitive,则不会发生cache
 
 
-			if (!cfg.Method.Flags.HasFlag( MethodFlags.Generator | MethodFlags.ASYNC ))//!cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
+			if (!cfg.Method.Flags.HasFlag( MethodFlags.Generator )|| cfg.Method.Flags.HasFlag( MethodFlags.ASYNC ))//!cfg.Method.Flags.HasFlag(MethodFlags.NeedActivation))
 			{
 				
 
@@ -1140,7 +1146,7 @@ namespace juicescript.compiler.IL.Optimize
 									BasicBlock iblock = new BasicBlock();
 									iblock.BlockId = succ.BlockId - 5;
 									iblock.OriginalIndex = succ.OriginalIndex - 5;
-									iblock.TryBlockId = pred.TryBlockId;
+									iblock.TryStmtId = pred.TryStmtId;
 									iblock.Instructions = new List<Instruction>();
 									iblock.IsReachable = true;
 
@@ -1153,7 +1159,7 @@ namespace juicescript.compiler.IL.Optimize
 									BasicBlock gotoblock = new BasicBlock();
 									gotoblock.BlockId = iblock.BlockId - 1;
 									gotoblock.OriginalIndex = iblock.OriginalIndex - 1;
-									gotoblock.TryBlockId = iblock.TryBlockId;
+									gotoblock.TryStmtId = iblock.TryStmtId;
 									gotoblock.Instructions = new List<Instruction>();
 									
 

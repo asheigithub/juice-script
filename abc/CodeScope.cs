@@ -107,7 +107,10 @@ namespace juicescript
         /// </summary>
         public int index;
 
-       
+
+        public Memory<NaNBoxing> _rt_cache_init_data;
+
+
         public override string ToString()
         {
             return $"Scope {Container},Members:{Members.Count},Kind:{Kind}";
