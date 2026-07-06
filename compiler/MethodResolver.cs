@@ -1421,7 +1421,7 @@ namespace juicescript.compiler
 					ASMethod method = script.scriptMethods[i];
 					if (!method.Flags.HasFlag(MethodFlags.Native))
 					{
-						Optimizer.Optimize(method, displaycfg_files, script.fullPath, outfile_base);
+						Optimizer.Optimize(method, displaycfg_files, script.fullPath, outfile_base,context);
 						ComputeJump(method, true);
 					}
 				}

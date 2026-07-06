@@ -86,7 +86,7 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
-		internal static void OptimizeStoreVar(BasicBlock basicBlock, ControlFlowGraph cfg)
+		internal static void EncodeMessageIntoStoreVar(BasicBlock basicBlock, ControlFlowGraph cfg)
 		{
 			//查找INS_Store_MethodVariable 。 将额外信息编码进ScopeId里。
 			{
@@ -131,9 +131,9 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
-		private static void OptimizeBlock(BasicBlock basicBlock, ControlFlowGraph cfg, NaNBoxing[] constants)
+		private static void OptimizeAndEncodeInstruction(BasicBlock basicBlock, ControlFlowGraph cfg, NaNBoxing[] constants)
 		{
-			OptimizeStoreVar(basicBlock, cfg);
+			EncodeMessageIntoStoreVar(basicBlock, cfg);
 
 
 			//查找ld_MultiNameL_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面,然后合并为直接存值指令
@@ -777,7 +777,7 @@ namespace juicescript.compiler.IL.Optimize
 
 						 */
 
-		private static int OptimizeBlockSSAVariable(ControlFlowGraph cfg,int slotcount)
+		private static int OptimizeBlockSSAVariable(ControlFlowGraph cfg,int slotcount , CompileContext context)
 		{
 			if (cfg.Blocks.Count == 0)
 				return slotcount;
@@ -1326,6 +1326,10 @@ namespace juicescript.compiler.IL.Optimize
 
 
 				slotcount = SSA_slot;
+
+
+
+				var instructionType = DetectType( cfg.Method ,cfg.Blocks.OrderBy(b=>b.OriginalIndex).SelectMany(b => b.Instructions).ToList(), context);
 
 				
 				HashSet<Instruction> safeInstructions = new(); //安全类型

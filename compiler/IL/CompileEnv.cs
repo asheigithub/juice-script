@@ -758,7 +758,7 @@ namespace juicescript.compiler.IL
 				if (Constants[i].ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
 					int p = Constants[i].HeapPtr;
-					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method)
+					if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.SuperMethod)
 					{
 						RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
 						if (heapInstance.Kind == RtHeapTypeKind.MethodScope

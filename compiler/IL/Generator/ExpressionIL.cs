@@ -3182,7 +3182,12 @@ namespace juicescript.compiler.IL.Generator
 
 							if (container is ASInstance && ((ASInstance)container).IsInterface)
 							{
-								ASClass astype = compileEnv.CompileContext.dict_typelayout[container.QName].ASType;
+								var alltypes = compileEnv.CompileContext.scriptDefs.SelectMany(
+										s => s.scriptClasses).Union(
+									compileEnv.CompileContext.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+
+								ASClass astype = alltypes.FirstOrDefault( c=>c.QName.Equals( container.QName ) );  //compileEnv.CompileContext.dict_typelayout[container.QName].ASType;
 
 								int class_id = compileEnv.AddConstClassId(astype);
 

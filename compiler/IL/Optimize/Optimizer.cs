@@ -453,7 +453,7 @@ namespace juicescript.compiler.IL.Optimize
 
 		}
 
-		internal static void Optimize(ASMethod method, List<string> displaycfg_files, string fullPath, string outfile_base)
+		internal static void Optimize(ASMethod method, List<string> displaycfg_files, string fullPath, string outfile_base, CompileContext context)
 		{
 			
 			string key = CompileContext.CleanInvalidPathChars(Player.GetMethodKey(method));
@@ -477,12 +477,15 @@ namespace juicescript.compiler.IL.Optimize
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				OptimizeBlock(cfg.Blocks[i],cfg,constants);
+				OptimizeAndEncodeInstruction(cfg.Blocks[i],cfg,constants);
 			}
+
+			
+
 
 			slotCount = OptimizeBlockLdConst(cfg,slotCount);
 
-			slotCount = OptimizeBlockSSAVariable(cfg,slotCount);
+			slotCount = OptimizeBlockSSAVariable(cfg,slotCount,context);
 
 			slotCount = RemoveBlockMove(cfg,slotCount); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
 
@@ -535,7 +538,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				OptimizeStoreVar(cfg.Blocks[i], cfg);
+				EncodeMessageIntoStoreVar(cfg.Blocks[i], cfg);
 			}
 
 			int maxslots = slotCount;

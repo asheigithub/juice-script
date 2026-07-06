@@ -30,7 +30,7 @@ namespace juicescript.ABC.INS
         /// </summary>
         ld_ScopeH = 5,   
         /// <summary>
-        /// 加载slot或const成员的引用到栈。如果instance为负数,表示从当前scope链查找scope_id等于-(-1-instance.index)的scope，否则从instance加载
+        /// 加载slot或const成员的引用到栈。如果instance为负数,表示从当前scope链查找scope_id等于-instance.index - 1的scope，否则从instance加载
         /// </summary>
         ld_InstanceOrScopeMemberValueRef = 6, 
         
