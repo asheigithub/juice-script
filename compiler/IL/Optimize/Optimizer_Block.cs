@@ -1338,10 +1338,10 @@ namespace juicescript.compiler.IL.Optimize
 
 				#region 查询变量类型是否安全。
 
-				bool changed = false;
-				do
+				//bool changed = false;
+				//do
 				{
-					changed = false;
+					//changed = false;
 
 					foreach (var item in variables_ssa)
 					{
@@ -1352,7 +1352,8 @@ namespace juicescript.compiler.IL.Optimize
 							//类型安全。
 							foreach (var ins in SSA.Keys)
 							{
-								changed = safeInstructions.Add(ins);
+								//changed = safeInstructions.Add(ins);
+								safeInstructions.Add(ins);
 							}
 							continue;
 						}
@@ -1366,7 +1367,7 @@ namespace juicescript.compiler.IL.Optimize
 
 							if (testIns.INS_Code == INS_Code.ld_MethodVariableInitValue)
 							{
-								changed = true;
+								//changed = true;
 								safeInstructions.Add(testIns);
 								continue;
 							}
@@ -1377,7 +1378,7 @@ namespace juicescript.compiler.IL.Optimize
 							source.Push(storeVar.dst);
 
 							HashSet<int> searched=new HashSet<int>(); 
-							List<Instruction> defsourcelist = new List<Instruction>();
+							List< Tuple< Instruction,int>> defsourcelist = new List<Tuple<Instruction, int>>();
 
 							while (source.Count>0)
 							{
@@ -1388,46 +1389,59 @@ namespace juicescript.compiler.IL.Optimize
 								searched.Add(test.index);
 
 								var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index));
-								defsourcelist.AddRange( deflist.Where( i=>i.INS_Code != INS_Code.move ) );
+								defsourcelist.AddRange( deflist.Where( i=>i.INS_Code != INS_Code.move ).Select( i=> new Tuple<Instruction, int>(i,i.GetDef().IndexOf(test)) ) );
 
-								foreach (var def in defsourcelist.Where( i=>i.INS_Code == INS_Code.move  ))
+								foreach (var def in defsourcelist.Where( i=>i.Item1.INS_Code == INS_Code.move  ))
 								{
-									source.Push(((INS_Move)def).source);
+									source.Push(((INS_Move)def.Item1).source);
 								}
 							}
 
-							if (defsourcelist.All(i => i.INS_Code == INS_Code.new_instance))
+							if (defsourcelist.All(i => i.Item1.INS_Code == INS_Code.new_instance))
 							{
 								//if (!isModifyParentVar)
 								{
 									newinstanceDefSite.Add(testIns);
-									changed = true;
+									//changed = true;
 								}
 							}
-							else if( defsourcelist.All( i=> safeInstructions.Contains(i)								
-												|| i.INS_Code == INS_Code.ld_const
-												|| i.INS_Code == INS_Code.ld_class
-												|| i.INS_Code == INS_Code.ld_true
-												|| i.INS_Code == INS_Code.ld_false
-												|| i.INS_Code == INS_Code.ld_undefined
-												|| i.INS_Code == INS_Code.ld_MethodVariableInitValue
-												|| i.INS_Code == INS_Code.increment_decrement
-												|| i.INS_Code == INS_Code.delete
-												|| i.INS_Code == INS_Code.get_is
-												|| i.INS_Code == INS_Code.get_in
-												|| i.INS_Code == INS_Code.get_instanceof
-												|| i.INS_Code== INS_Code.bitwise
-												|| i.INS_Code == INS_Code.logic_comparison
-												|| i.INS_Code == INS_Code.logic_not
-												|| i.INS_Code == INS_Code.strict_eq
-												|| i.INS_Code == INS_Code.strict_neq
-												|| i.INS_Code == INS_Code.equal
-												|| i.INS_Code == INS_Code.neg
+							else if( 
+							//	defsourcelist.All( i=> safeInstructions.Contains(i)								
+							//					|| i.INS_Code == INS_Code.ld_const
+							//					|| i.INS_Code == INS_Code.ld_class
+							//					|| i.INS_Code == INS_Code.ld_true
+							//					|| i.INS_Code == INS_Code.ld_false
+							//					|| i.INS_Code == INS_Code.ld_undefined
+							//					|| i.INS_Code == INS_Code.ld_MethodVariableInitValue
+							//					|| i.INS_Code == INS_Code.increment_decrement
+							//					|| i.INS_Code == INS_Code.delete
+							//					|| i.INS_Code == INS_Code.get_is
+							//					|| i.INS_Code == INS_Code.get_in
+							//					|| i.INS_Code == INS_Code.get_instanceof
+							//					|| i.INS_Code== INS_Code.bitwise
+							//					|| i.INS_Code == INS_Code.logic_comparison
+							//					|| i.INS_Code == INS_Code.logic_not
+							//					|| i.INS_Code == INS_Code.strict_eq
+							//					|| i.INS_Code == INS_Code.strict_neq
+							//					|| i.INS_Code == INS_Code.equal
 												
-							) )
+												
+							//) 
+								
+								defsourcelist.All( i=> safeInstructions.Contains(i.Item1) || ( instructionType.ContainsKey(i.Item1) &&(
+													instructionType[i.Item1][i.Item2].DefType == InstructionDefType.primitive	||							
+													instructionType[i.Item1][i.Item2].DefType == InstructionDefType.Struct	||							
+													instructionType[i.Item1][i.Item2].DefType == InstructionDefType.obj	||							
+													instructionType[i.Item1][i.Item2].DefType == InstructionDefType.global	||							
+													instructionType[i.Item1][i.Item2].DefType == InstructionDefType.asclass							
+								)) )
+
+								)
 							{
+								
+
 								safeInstructions.Add(storeVar);								
-								changed = true;
+								//changed = true;
 							}
 
 
@@ -1437,7 +1451,7 @@ namespace juicescript.compiler.IL.Optimize
 					}
 
 
-				} while (changed);
+				}// while (changed);
 
 				#endregion
 
