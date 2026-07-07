@@ -1555,7 +1555,8 @@ namespace juicescript.runtime
 				if (!Context.Vectors.Contains(item))
 				{
 					Context.Vectors.Add(item);
-				}
+				}				
+				MakeVectorType(item);
 			}
 
 
