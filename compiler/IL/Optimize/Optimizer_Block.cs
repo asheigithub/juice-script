@@ -274,7 +274,7 @@ namespace juicescript.compiler.IL.Optimize
 				return slotcount;
 			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag( MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
 				return slotcount;
-
+			
 			void MoveInstructions(BasicBlock dom,List<Instruction> ld_list)
 			{
 				var loop = cfg.toplevelloops.FirstOrDefault(l => l.loop.nodes.Contains(dom));

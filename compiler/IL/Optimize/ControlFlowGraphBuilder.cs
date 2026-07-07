@@ -135,7 +135,7 @@ namespace juicescript.compiler.IL.Optimize
 			}
 
 			var sortedIndices = enterIndices.ToArray().OrderBy(i => i).ToArray();
-			int o_id = 0;
+			int o_id = 1;
 			for (int i = 0; i < sortedIndices.Length - 1; i++)
 			{
 				BasicBlock bb = new BasicBlock();
@@ -160,6 +160,19 @@ namespace juicescript.compiler.IL.Optimize
 
 
 			ComputeFlow(cfg);
+
+			if (cfg.Blocks[0].Instructions[0].INS_Code != INS_Code.expression_barrier) //加入头,避免第一个基本块循环不识别
+			{
+				BasicBlock head = new BasicBlock();
+				head.OriginalIndex = 0;
+				head.BlockId = head.OriginalIndex;
+				head.Successors.Add(cfg.Blocks[0]);
+				head.IsReachable = true;
+				head.Instructions.Add(new INS_Barrier(cfg.Method.Token) { uselist = new ABC.Locaters.StackLocater[0]  });
+				cfg.Blocks[0].Predecessors.Add(head);
+
+				cfg.Blocks.Insert(0, head);
+			}
 
 			return cfg;
 		}
