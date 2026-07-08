@@ -362,6 +362,31 @@ namespace juicescript.compiler.IL.Optimize
 			public List<looptreenode> children;
 			public int id;
 
+			public looptreenode parent;
+
+
+
+			public looptreenode FindLoop(BasicBlock block)
+			{
+				if (loop.nodes.Contains(block))
+				{
+					return this;
+				}
+				else 
+				{
+					foreach (var child in children)
+					{
+						var n = child.FindLoop(block);
+						if (n != null)
+							return n;
+					}
+
+					return null;
+				}
+				
+			}
+
+
 			public string getMermaidStr(ControlFlowGraph cfg)
 			{
 				StringBuilder sb = new StringBuilder();
@@ -420,6 +445,7 @@ namespace juicescript.compiler.IL.Optimize
 				}
 				else
 				{
+					nodes[item].parent = nodes[parents[0]];
 					nodes[parents[0]].children.Add(nodes[item]);
 				}
 			}

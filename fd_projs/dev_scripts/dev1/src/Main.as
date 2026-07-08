@@ -173,7 +173,7 @@ function ():void
 	{
 			var a;
 			
-			var b = a;
+			var b = 2;
 			b + 1;
 			
 			
