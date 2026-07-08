@@ -19,21 +19,21 @@ namespace juicescript.ABC.INS
         {
             get
             {
-                return 4 + 4 + 4 + 4;
+                return 4 + 4 + 4;// + 4;
             }
         }
 
         
         public StackLocater instance;
         public StackLocater name;
-        public int super_type_index;
+        //public int super_type_index;
 
         protected override void WriteByte(BinaryWriter bw)
         {
             
             instance.Write(bw);
             name.Write(bw);
-            bw.Write(super_type_index); 
+            //bw.Write(super_type_index); 
         }
 
 		protected override void ReadFromBinary(BinaryReader br)
@@ -41,12 +41,12 @@ namespace juicescript.ABC.INS
 			
             instance.ReadFromBinary(br);
             name.ReadFromBinary(br);
-            super_type_index = br.ReadInt32();
+            //super_type_index = br.ReadInt32();
 		}
 
         public override string ToString()
         {
-            return $"Ld_MultiNameL_Val [{dst}] <- [(({super_type_index}){instance}).{name}]";
+            return $"Ld_MultiNameL_Val [{dst}] <- [({instance}).{name}]";
         }
 
         public override List<StackLocater> GetDef()

@@ -187,6 +187,10 @@ namespace juicescript.compiler.IL.Optimize
 					{
 						if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index
 							&&
+							((INS_Ld_MultiNameL_Ref)instruction).super_type_index == 0
+							&&
+							((INS_Ld_MultiNameL_Ref)instruction).instance.index >=0
+							&&
 							!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
 							)
 						{
@@ -198,7 +202,7 @@ namespace juicescript.compiler.IL.Optimize
 							ld_MultiNameL_Val.dst = next.dst;
 							ld_MultiNameL_Val.instance = ((INS_Ld_MultiNameL_Ref)instruction).instance;
 							ld_MultiNameL_Val.name = ((INS_Ld_MultiNameL_Ref)instruction).name;
-							ld_MultiNameL_Val.super_type_index = ((INS_Ld_MultiNameL_Ref)instruction).super_type_index;
+							//ld_MultiNameL_Val.super_type_index = ((INS_Ld_MultiNameL_Ref)instruction).super_type_index;
 
 							basicBlock.Instructions[i] = ld_MultiNameL_Val;
 
@@ -1640,20 +1644,25 @@ namespace juicescript.compiler.IL.Optimize
 										var first = b.Instructions.FirstOrDefault( i=>version_ins.Contains(i) );
 										if (first != null)
 										{
+											
 											int index = b.Instructions.IndexOf(first);
-											for (int i = index+1; i < b.Instructions.Count ; i++)
+											
+
+											void DoRemove(int stindex,BasicBlock bb)
 											{
-												var ins = b.Instructions[i];
-												if (version_ins.Contains(ins))
+												int i = stindex + 1;
+												for (; i < bb.Instructions.Count; i++)
 												{
-													b.Instructions.Remove(ins);
-													i--;
-												}
-												else
-												{
-													//如果是危险代码，则break.
-													if (!isModifyParentVar && refByChild.Count == 0)
+													var ins = bb.Instructions[i];
+													if (version_ins.Contains(ins))
 													{
+														bb.Instructions.Remove(ins);
+														i--;
+													}
+													else
+													{
+														//如果是危险代码，则break.
+
 														//对其他变量的赋值都是危险代码。（在非闭包且没有下级闭包引用时，除了这2个指令没有其他方法可以修改其他变量,）
 														if ((ins.INS_Code == INS_Code.ld_MethodVariableInitValue || ins.INS_Code == INS_Code.storeMethodVariable)
 															&&
@@ -1662,18 +1671,38 @@ namespace juicescript.compiler.IL.Optimize
 														{
 															break;
 														}
-													}
-													else
-													{
-														if (ins.MaybeRaiseError())
-															break;
+
+														if (!isModifyParentVar && refByChild.Count == 0)
+														{
+
+														}
+														else
+														{
+															//如果必须保守，那么抛异常同意危险
+															if (ins.MaybeRaiseError())
+																break;
+														}
+
 													}
 
+												}
+
+												if (i == bb.Instructions.Count) //正常结束，可以带到后续
+												{
+
+													foreach (var dom in bb.Successors.Where(c => c.Idom == bb && c != bb))
+													{ 
+														DoRemove(-1,dom);
+													}
 												}
 
 											}
 
 
+											DoRemove(index, b);
+											
+											
+											
 										}
 									}
 

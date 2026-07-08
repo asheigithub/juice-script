@@ -8532,7 +8532,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Ld_MultiNameL_Val_Slow(int dst_index,uint* opcodePtr, StackLocater src, int super_const_index, StackLocater stack,StackLocater _name, Span<NaNBoxing> constants,
+		private unsafe void Ld_MultiNameL_Val_Slow(int dst_index,uint* opcodePtr, StackLocater src, StackLocater stack,StackLocater _name, Span<NaNBoxing> constants,
 
 			ASMethod method, RtHeapBase methodscope,
 
@@ -8544,48 +8544,48 @@ namespace juicescript.runtime
 			RtHeapTypeKind kind;
 			ASContainer as_type = null;
 
-			if (src.index >= 0)
+			//if (src.index >= 0)
 			{
 				instance_box = stackslots[src.index];
 				kind = (RtHeapTypeKind)(instance_box.ValueType == BoxType.HeapPtr ? instance_box.HeapKind : 255);
 			}
-			else
-			{
-				ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
-				if (error.raised)
-				{
-					goto flag_handle_error;
-				}
-			}
+			//else
+			//{
+			//	ReadInstanceFromStacklocater(ref error, src, stackslots, stackStPos, scope_ptr, out kind, out instance_box);
+			//	if (error.raised)
+			//	{
+			//		goto flag_handle_error;
+			//	}
+			//}
 
-			if (super_const_index != 0)
-			{
-				//读基类
-				super_const_index -= 1;
+//			if (super_const_index != 0)
+//			{
+//				//读基类
+//				super_const_index -= 1;
 
-				var vbox = constants[super_const_index];
+//				var vbox = constants[super_const_index];
 
-#if DEBUG
-				if (vbox.ValueType != NaNBoxing.BoxType.Uint)
-					throw new InvalidOperationException();
-#endif
+//#if DEBUG
+//				if (vbox.ValueType != NaNBoxing.BoxType.Uint)
+//					throw new InvalidOperationException();
+//#endif
 
-				var super_class = Context.link_const_class[(int)vbox.UIntValue];
+//				var super_class = Context.link_const_class[(int)vbox.UIntValue];
 
-#if DEBUG
-				var check = GetASTypeFromValue(instance_box);
-				if (check is ASInstance)
-				{
-					if (!((ASInstance)check).IsExtend(super_class.Instance))
-					{
-						throw new InvalidOperationException();
-					}
-				}
+//#if DEBUG
+//				var check = GetASTypeFromValue(instance_box);
+//				if (check is ASInstance)
+//				{
+//					if (!((ASInstance)check).IsExtend(super_class.Instance))
+//					{
+//						throw new InvalidOperationException();
+//					}
+//				}
 
-#endif
+//#endif
 
-				as_type = super_class.Instance;
-			}
+//				as_type = super_class.Instance;
+//			}
 
 			//RtHeapBase instance = null;
 			bool setinstance = false;
@@ -9040,13 +9040,17 @@ namespace juicescript.runtime
 			StackLocater _name;
 			LoadStackLocater(&_name, PC);
 
-			int super_const_index;
-			LoadInt32(&super_const_index, PC);
+			//int super_const_index;
+			//LoadInt32(&super_const_index, PC);
 
 			var instance_box = stackslots[src.index];
 			var name_box = stackslots[_name.index];
 
-			if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
+			Debug.Assert(src.index >= 0);
+
+			if (//src.index >= 0 && 
+				
+				instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
 				&& name_box.ValueType >= BoxType.Int && name_box.ValueType <= BoxType.UShort &&
 				(name_box.IntValue >= 0 || (name_box.ValueType == BoxType.Uint && name_box.UIntValue < uint.MaxValue)))
 			{
@@ -9074,7 +9078,7 @@ namespace juicescript.runtime
 				return;
 
 			}
-			else if (src.index >= 0 && instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
+			else if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
 				&& RtVector.IsValidIndexType(name_box)
 				)
 			{
@@ -9095,7 +9099,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Ld_MultiNameL_Val_Slow(dst_index, opcodePtr, src, super_const_index, stack, _name, constants, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+				Ld_MultiNameL_Val_Slow(dst_index, opcodePtr, src,  stack, _name, constants, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
 			}
 
 
