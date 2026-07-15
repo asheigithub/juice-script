@@ -3370,7 +3370,7 @@ namespace juicescript.runtime.buildin
 				default:
 					throw new InvalidOperationException();
 			}
-			unsafe { value = stackslots[0].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[0] : context.player.LoadValue( (RtStackCache)context.GC.Heap[ stackslots[0].HeapPtr], -1, ref error, stackslots, stPos, null); }
+			unsafe { value = stackslots[0].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[0] : context.player.LoadValue( (RtStackCache)context.GC.Heap[ stackslots[0].HeapPtr], -1, ref error, stackslots, stPos); }
 			if (error.raised)
 			{
 				context.StackPosition -= 2;

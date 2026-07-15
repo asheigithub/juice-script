@@ -145,6 +145,8 @@ namespace juicescript.compiler.IL.Optimize
 					{
 						var store = basicBlock.Instructions.Skip(i + 1).FirstOrDefault(
 							(s) => s.INS_Code == INS_Code.storeHeapValueRef && s.dst.index == instruction.dst.index
+							&&
+							((INS_Ld_MultiNameL_Ref)instruction).instance.index >= 0
 							);
 
 						if (store != null)
@@ -176,7 +178,7 @@ namespace juicescript.compiler.IL.Optimize
 				}
 			}
 
-			//查找ld_MultiNameL_Ref,在查找后面是否是Ld_ValueRef 。合并为直接读取值,并且move结果
+			//查找ld_MultiNameL_Ref,在查找后面是否是Ld_ValueRef 。合并为直接读取值
 			{
 				List<Instruction> toremove = new List<Instruction>();
 				for (int i = 0; i < basicBlock.Instructions.Count - 1; i++)
@@ -202,7 +204,7 @@ namespace juicescript.compiler.IL.Optimize
 							ld_MultiNameL_Val.dst = next.dst;
 							ld_MultiNameL_Val.instance = ((INS_Ld_MultiNameL_Ref)instruction).instance;
 							ld_MultiNameL_Val.name = ((INS_Ld_MultiNameL_Ref)instruction).name;
-							//ld_MultiNameL_Val.super_type_index = ((INS_Ld_MultiNameL_Ref)instruction).super_type_index;
+							ld_MultiNameL_Val.refholder = ((INS_Ld_MultiNameL_Ref)instruction).dst;
 
 							basicBlock.Instructions[i] = ld_MultiNameL_Val;
 
@@ -227,6 +229,90 @@ namespace juicescript.compiler.IL.Optimize
 					//}
 				}
 			}
+
+			//查找ld_MultiName_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面,然后合并为直接存值指令
+			{
+				for (int i = 0; i < basicBlock.Instructions.Count; i++)
+				{
+					var instruction = basicBlock.Instructions[i];
+					if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiName_Ref)
+					{
+						var store = basicBlock.Instructions.Skip(i + 1).FirstOrDefault(
+							(s) => s.INS_Code == INS_Code.storeHeapValueRef && s.dst.index == instruction.dst.index
+							&&
+							((INS_Ld_MultiName_Ref)instruction).instance.index >= 0
+							);
+
+						if (store != null)
+						{
+							int k = basicBlock.Instructions.IndexOf(store);
+							if (basicBlock.Instructions.Skip(i).Take(k - i).Any((ins) => ins.GetUse().Contains(instruction.dst)))
+							{
+								continue;
+							}
+
+							basicBlock.Instructions.RemoveAt(i);
+							int j = basicBlock.Instructions.IndexOf(store);
+
+							INS_Store_MultiName store_MultiName = new INS_Store_MultiName(store.token);
+							store_MultiName.dst = ((INS_Store_HeapValueRef)store).source;
+							store_MultiName.instance = ((INS_Ld_MultiName_Ref)instruction).instance;
+							store_MultiName.name_index = ((INS_Ld_MultiName_Ref)instruction).name_index;							
+							store_MultiName.refholder = ((INS_Ld_MultiName_Ref)instruction).dst;
+
+
+							basicBlock.Instructions.Insert(j, store_MultiName);
+							basicBlock.Instructions.Remove(store);
+
+						}
+
+					}
+				}
+			}
+
+			//Ld_MultiName_Ref + Ld_ValueRef 
+			{
+				List<Instruction> toremove = new List<Instruction>();
+				for (int i = 0; i < basicBlock.Instructions.Count - 1; i++)
+				{
+					var instruction = basicBlock.Instructions[i];
+					var next = basicBlock.Instructions[i + 1];
+					if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiName_Ref && next.INS_Code == INS_Code.ld_ValueRef)
+					{
+						if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index					
+							&&
+							((INS_Ld_MultiName_Ref)instruction).instance.index >= 0
+							&&
+							!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
+							)
+						{
+							toremove.Add(next);
+							
+							INS_Ld_MultiName_Val ld_MultiName_Val = new INS_Ld_MultiName_Val(instruction.token);
+							ld_MultiName_Val.dst = next.dst;
+							ld_MultiName_Val.instance = ((INS_Ld_MultiName_Ref)instruction).instance;
+							ld_MultiName_Val.name_index = ((INS_Ld_MultiName_Ref)instruction).name_index;
+							ld_MultiName_Val.refholder = ((INS_Ld_MultiName_Ref)instruction).dst;
+
+							basicBlock.Instructions[i] = ld_MultiName_Val;
+
+						}
+
+
+					}
+				}
+
+				if (toremove.Count > 0)
+				{
+					basicBlock.Instructions.RemoveAll(r => toremove.Contains(r));
+					//foreach (var ins in basicBlock.Instructions)
+					//{
+					//	ins.RemappingSlots(mapping);
+					//}
+				}
+			}
+
+
 
 		}
 
@@ -1674,7 +1760,7 @@ namespace juicescript.compiler.IL.Optimize
 
 														if (!isModifyParentVar && refByChild.Count == 0)
 														{
-
+															//在非闭包且没有下级闭包引用
 														}
 														else
 														{

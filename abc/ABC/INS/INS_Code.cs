@@ -58,6 +58,12 @@ namespace juicescript.ABC.INS
         /// </summary>
         ld_MultiNameL_Ref = 11,
 
+
+		/// <summary>
+		/// 通过MultiName查找成员的值并且加载。 name确定，namespace在打开的namespaceset里
+		/// </summary>
+		ld_MultiName_Val = 12,
+
 		/// <summary>
 		/// 通过MultiNameL 查找成员的值并加载。name也在运行时确定，namespace在打开的namespaceset里
 		/// </summary>
@@ -267,6 +273,12 @@ namespace juicescript.ABC.INS
 		/// 通过MultiNameL 查找成员,并将值保存进去。name也在运行时确定，namespace在打开的namespaceset里
 		/// </summary>
 		store_MultiNameL = 114,
+
+
+		/// <summary>
+		/// 通过MultiName 查找成员,并将值保存进去。name确定，namespace在打开的namespaceset里
+		/// </summary>
+		store_MultiName = 115,
 
 
 		//******短路径版本**********

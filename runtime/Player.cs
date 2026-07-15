@@ -5560,7 +5560,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe NaNBoxing LoadValue_Slow(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
+		private unsafe NaNBoxing LoadValue_Slow(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 
 
@@ -6447,7 +6447,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe NaNBoxing LoadValue(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex, uint* opcodePtr)
+		internal unsafe NaNBoxing LoadValue(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 
 
@@ -6493,7 +6493,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				return LoadValue_Slow(_obj, callee_slotindex, ref error, stackslots, returnSlotIndex, opcodePtr);
+				return LoadValue_Slow(_obj, callee_slotindex, ref error, stackslots, returnSlotIndex);
 			}
 
 		}
@@ -6982,7 +6982,7 @@ namespace juicescript.runtime
 
 
 
-
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private ASContainer GetASTypeFromValue(NaNBoxing instance)
 		{
 			switch ((RtHeapTypeKind)instance.HeapKind)
@@ -13138,7 +13138,16 @@ namespace juicescript.runtime
 								break;
 
 							}
+						case INS_Code.ld_MultiName_Val:
+							{
+								Ld_MultiName_Val(dst_index,&PC, method,methodscope,constants,stackslots,stackStPos,scope_ptr,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
 
+								break;
+							}
 						case INS_Code.ld_MultiNameL_Val:
 							{
 								
@@ -13208,6 +13217,17 @@ namespace juicescript.runtime
 
 
 							}
+						case INS_Code.store_MultiName:
+							{
+
+								Store_MultiName(dst_index, &PC, constants, stackslots, stackStPos, scope_ptr, methodscope, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+
+								break;
+							}
 						case INS_Code.ld_RTQNameL_Ref:
 							{
 								
@@ -13264,7 +13284,7 @@ namespace juicescript.runtime
 								target.index = dst_index;
 
 								var v = stackslots[sourc.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[sourc.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[sourc.index].HeapPtr],
-									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index, opcodePtr);
+									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14024,7 +14044,7 @@ namespace juicescript.runtime
 								if (v.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
 								{
 									v = LoadValue((RtStackCache)Context.GC.Heap[v.HeapPtr],
-											stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index, null);
+											stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index);
 									if (error.raised)
 									{
 										goto flag_handle_error;

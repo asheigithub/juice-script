@@ -997,7 +997,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 
-							NaNBoxing fun; unsafe { fun = stackslots[0].HeapKind==(byte) RtHeapTypeKind.STACK_CACHE_OBJ ?  context.player.LoadValue( (RtStackCache)context.GC.Heap[ stackslots[0].HeapPtr], -1, ref error, stackslots, stPos, null) : stackslots[0] ; }
+							NaNBoxing fun; unsafe { fun = stackslots[0].HeapKind==(byte) RtHeapTypeKind.STACK_CACHE_OBJ ?  context.player.LoadValue( (RtStackCache)context.GC.Heap[ stackslots[0].HeapPtr], -1, ref error, stackslots, stPos) : stackslots[0] ; }
 							if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧
 							{
 								context.StackPosition -= 2;

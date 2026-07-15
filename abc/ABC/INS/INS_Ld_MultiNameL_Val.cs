@@ -19,21 +19,21 @@ namespace juicescript.ABC.INS
         {
             get
             {
-                return 4 + 4 + 4;// + 4;
+                return 4 + 4 + 4 + 4;
             }
         }
 
         
         public StackLocater instance;
         public StackLocater name;
-        //public int super_type_index;
+        public StackLocater refholder;
 
         protected override void WriteByte(BinaryWriter bw)
         {
             
             instance.Write(bw);
             name.Write(bw);
-            //bw.Write(super_type_index); 
+            refholder.Write(bw); 
         }
 
 		protected override void ReadFromBinary(BinaryReader br)
@@ -41,7 +41,7 @@ namespace juicescript.ABC.INS
 			
             instance.ReadFromBinary(br);
             name.ReadFromBinary(br);
-            //super_type_index = br.ReadInt32();
+			refholder.ReadFromBinary(br);
 		}
 
         public override string ToString()
@@ -56,7 +56,7 @@ namespace juicescript.ABC.INS
 
         public override List<StackLocater> GetUse()
         {
-            return new List<StackLocater> { instance, name };
+            return new List<StackLocater> { instance, name,refholder };
         }
 
         public override bool MaybeRaiseError()
@@ -72,7 +72,10 @@ namespace juicescript.ABC.INS
                 instance.index = newIndex1;
             if (mapping.TryGetValue(name.index, out int newIndex2))
                 name.index = newIndex2;
-        }
+			if (mapping.TryGetValue(refholder.index, out int newIndex3))
+				refholder.index = newIndex3;
+
+		}
 
 
 
