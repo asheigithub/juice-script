@@ -1,9 +1,11 @@
 ﻿using juicescript.ABC;
 using juicescript.ABC.INS;
+using juicescript.ABC.Locaters;
 using juicescript.runtime;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Reflection;
@@ -359,6 +361,12 @@ namespace juicescript.compiler.IL.Optimize
 							}
 							break;
 						case INS_Code.ld_MultiNameL_Val:
+							{
+								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+								flag = true;
+							}
+							break;
+						case INS_Code.ld_MultiName_Val:
 							{
 								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
 								flag = true;
@@ -1676,6 +1684,58 @@ namespace juicescript.compiler.IL.Optimize
 								//无定值
 							}
 							break;
+
+						case INS_Code.O_ld_function_bindGlobal:
+							{
+								INS_O_Ld_Function_BindGLobal ld_Function = (INS_O_Ld_Function_BindGLobal)instruction;
+								var boxing = constants[ld_Function.const_index];
+
+								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
+
+								int ptr = boxing.HeapPtr & 0xFFFFFF;
+								var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
+
+								var m = ((ASMethodBody)methodscope.Type).Method;
+
+								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.method, m) });
+								flag = true;
+
+							}
+							break;
+						case INS_Code.O_Call:
+							{
+								INS_O_Call o_Call = (INS_O_Call)instruction;
+								if (result.Any((r => r.Key.GetDef().Contains(o_Call.function))))
+								{
+									var kv = result.First(r => r.Key.GetDef().Contains(o_Call.function));
+									int index = kv.Key.GetDef().IndexOf(o_Call.function);
+									var typeDef = kv.Value[index];
+
+									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
+									{
+										result.Add(instruction, new List<InstructionDef>() { FromTypeKind( ((ASMethod)typeDef.Obj).ReturnTypeKind ) });
+										flag = true;
+									}
+									else
+									{
+										result.Add(instruction, new List<InstructionDef>() {
+										new InstructionDef(InstructionDefType.unkown,null)
+									});
+										flag = true;
+									}
+
+								}
+								else
+								{
+									//等下一轮
+								}
+
+							}
+							break;
+
+
 						case INS_Code.iter_initctx:
 
 						case INS_Code.iter_get:
@@ -1775,6 +1835,50 @@ namespace juicescript.compiler.IL.Optimize
 
 			return result;
 		}
+
+
+
+
+
+
+		/// <summary>
+		/// 查找某个槽在哪些地方被定义
+		/// 返回定义它的指令，已经那个指令的GetDef()列表中的序号
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="cfg"></param>
+		/// <returns></returns>
+		private static List<Tuple<Instruction, int>> FindStackSlotDefAt(StackLocater target, ControlFlowGraph cfg )
+		{
+			Stack<StackLocater> source = new Stack<StackLocater>();
+			source.Push(target);
+
+			HashSet<int> searched = new HashSet<int>();
+			List<Tuple<Instruction, int>> defsourcelist = new List<Tuple<Instruction, int>>();
+
+			while (source.Count > 0)
+			{
+				var test = source.Pop();
+				if (searched.Contains(test.index))
+					continue;
+
+				searched.Add(test.index);
+
+				var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index));
+				defsourcelist.AddRange(deflist.Where(i => i.INS_Code != INS_Code.move).Select(i => new Tuple<Instruction, int>(i, i.GetDef().IndexOf(test))));
+
+				foreach (var def in deflist.Where(i => i.INS_Code == INS_Code.move))
+				{
+					source.Push(((INS_Move)def).source);
+				}
+			}
+
+			return defsourcelist;
+
+		}
+
+
+
 
 	}
 }

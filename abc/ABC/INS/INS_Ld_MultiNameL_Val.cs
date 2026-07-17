@@ -51,12 +51,12 @@ namespace juicescript.ABC.INS
 
         public override List<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+            return new List<StackLocater> { dst};
         }
 
         public override List<StackLocater> GetUse()
         {
-            return new List<StackLocater> { instance, name,refholder };
+            return new List<StackLocater> { instance, name, refholder };
         }
 
         public override bool MaybeRaiseError()

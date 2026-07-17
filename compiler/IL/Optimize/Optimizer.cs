@@ -485,13 +485,15 @@ namespace juicescript.compiler.IL.Optimize
 
 			slotCount = OptimizeBlockLdConst(cfg,slotCount);
 
+			slotCount = OptimizeLdStaticMember(cfg,slotCount,context); //外提静态成员。
+
+			slotCount = OptimizeLdFunctionBindGlobal(cfg,slotCount);//提取ld_function_bindglobal的公共部分.
+
 			slotCount = OptimizeBlockSSAVariable(cfg,slotCount,context);
+				
+			slotCount = RemoveBlockMove(cfg,slotCount); //干涉图移除move
 
-			slotCount = RemoveBlockMove(cfg,slotCount); //初步移除move。这是个粗略的移除，依赖于未优化前肯定正确的执行顺序。
-
-			
-			
-			RemoveBarrier(cfg); 
+			RemoveBarrier(cfg,context); 
 
 			//着色法 槽复用
 			int maxslots = slotCount;

@@ -302,6 +302,12 @@ namespace juicescript.compiler.IL
 				case INS_Code.array_vector_initelement:
 					instruction = new INS_Array_Vector_InitElement(token);
 					break;
+				case INS_Code.O_ld_function_bindGlobal:
+					instruction = new INS_O_Ld_Function_BindGLobal(token);
+					break;
+				case INS_Code.O_Call:
+					instruction = new INS_O_Call(token);
+					break;
 				case INS_Code.iter_initctx:
 					instruction = new INS_Iter_GetCtx(token);
 					break;

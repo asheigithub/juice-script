@@ -3288,6 +3288,46 @@ namespace juicescript.runtime
 		}
 
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void M_Call(int dst_index, byte** PC, RtMethodScope methodscope,
+			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
+			ref NaNBoxing global_obj,
+			ref ReceiveError error)
+		{
+			StackLocater target;
+			target.index = dst_index;
+
+			StackLocater function;
+			LoadStackLocater(&function, PC);
+
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
+
+			Debug.Assert(stackslots[function.index].ValueType == NaNBoxing.BoxType.HeapPtr);
+
+
+			RtHeapBase _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
+			RtClosure _methodclosure_ = (RtClosure)_method_;
+			NaNBoxing result = RunMethod(((ASMethodBody)_method_.Type).Method,
+				_methodclosure_.This, _methodclosure_.ScopePtr, _methodclosure_.ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
+
+			if (error.raised)
+			{
+				goto flag_handle_error;
+			}
+
+			stackslots[target.index] = result;
+
+		flag_handle_error:
+			;
+
+		}
+
 
 
 		private unsafe void Bindglobal_call(int dst_index,byte** PC, RtMethodScope methodscope, 
@@ -3765,6 +3805,78 @@ namespace juicescript.runtime
 
 		}
 
+
+		private unsafe void O_Ld_function_bindglobal(byte** PC, RtHeapBase methodscope,
+			int dst_index,
+			Span<NaNBoxing> constants,
+			Span<NaNBoxing> stackslots,
+			int scope_ptr, int stackStPos,
+
+			int* method_scopes,
+			ref NaNBoxing global_obj,
+			ref ReceiveError error)
+		{
+
+			StackLocater target;
+			target.index = dst_index;
+
+			
+			ScopeHeapLocater heapLocater = *(ScopeHeapLocater*)(*PC); *PC += 4;
+
+			int function_id; LoadInt32(&function_id, PC);
+
+
+			NaNBoxing fbox = constants[function_id];
+
+
+#if DEBUG
+			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
+				throw new InvalidOperationException();
+#endif
+
+			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
+
+			RtHeapBase closure;
+			int closure_ptr;
+
+
+			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			if (error.raised)
+			{
+				goto flag_handle_error;
+			}
+
+
+
+			NaNBoxing _this_ = default;
+			if (global_obj.ValueType != BoxType.HeapPtr)
+			{
+				//加载global。
+				var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				while (s.Kind != CodeScopeKind.Script)
+				{
+					s = s.Parent;
+				}
+
+				var globalptr = ((ASScript)s.Container).__global_index__;
+				global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+				_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+			}
+			else
+			{
+				_this_ = global_obj;
+			}
+
+
+			((RtClosure)closure).This = global_obj;
+			((RtClosure)closure).ScopeType = methodscope.Type;
+
+			stackslots[dst_index].SetHeapPtr(closure_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+
+		flag_handle_error:
+			;
+
+		}
 
 
 

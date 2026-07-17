@@ -291,6 +291,13 @@ namespace juicescript.ABC.INS
 
 		array_vector_initelement = 120, //array push 初始值
 
+        //****优化******
+
+        O_ld_function_bindGlobal = 122, //加载function的闭包并绑定global.
+        O_Call =125,                    //直接调缓存优化的闭包                   
+
+
+
 		//**specialized opcode  quickening
 
 		//ld_ValueRef_ARR = 130, //从读取中引用值，如果发现失败，则回退。
@@ -305,6 +312,8 @@ namespace juicescript.ABC.INS
 
 
         //ld_ARR_V = 130, //从数组中读取值
+
+
 
 
 

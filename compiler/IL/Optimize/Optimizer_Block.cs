@@ -590,6 +590,270 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
+		private static int OptimizeLdStaticMember(ControlFlowGraph cfg, int slotcount,CompileContext context)
+		{
+			if (cfg.Blocks.Count == 0)
+				return slotcount;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+				return slotcount;
+
+
+			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
+
+			var all = cfg.Blocks.SelectMany(b => b.Instructions)
+				.Where(i => i.INS_Code == INS_Code.ld_method)
+				.Select(i => (INS_Ld_Method)i)
+				.Where( (k)=> 
+				{ 
+					var deflist = FindStackSlotDefAt(k.instance,cfg);
+					return deflist.Count > 0 && deflist.All(
+						d=>
+						instructionType.ContainsKey(d.Item1) && (												
+												instructionType[d.Item1][d.Item2].DefType == InstructionDefType.asclass
+							)
+
+						);
+				
+				} )
+				.ToList();
+
+			var groupbyclass = all.GroupBy(c => c.instance);
+			foreach (var group in groupbyclass)
+			{
+				var ld_cls = FindStackSlotDefAt(group.Key,cfg);
+				Debug.Assert(ld_cls.Count == 1);
+				var ld_cls_block = cfg.Blocks.First(b => b.Instructions.Contains(ld_cls[0].Item1) );
+
+
+				void MoveLdStaticMethod(BasicBlock dom, List<Instruction> ld_list)
+				{
+					var tdom = dom;
+					while (tdom != ld_cls_block) //class必须已经加载
+					{
+						tdom = tdom.Idom;
+						if (tdom == null)
+						{
+							throw new InvalidOperationException();
+						}
+					}
+
+
+					var ld = ld_list.First();
+					foreach (var block in cfg.Blocks)
+					{
+						block.Instructions.RemoveAll(ins => ld_list.Contains(ins));
+					}
+
+					int newslot = slotcount++;
+					foreach (var l in ld_list)
+					{
+						Dictionary<int, int> replace = new Dictionary<int, int> { { l.dst.index, newslot } };
+
+						foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+						{
+							ins.RemappingSlots(replace);
+						}
+					}
+
+					ld.dst.index = newslot;
+
+					if (dom.Instructions.Contains(ld_cls[0].Item1))
+					{
+						int _at = dom.Instructions.IndexOf(ld_cls[0].Item1);
+
+						_at++;
+
+						if (_at < dom.Instructions.Count)
+						{
+							dom.Instructions.Insert(_at, ld);
+						}
+						else
+						{
+							dom.Instructions.Add(ld);
+						}
+
+					}
+					else if (dom.Instructions.Count > 0 &&
+											(dom.Instructions[0].INS_Code == INS_Code.flag
+											||
+											dom.Instructions[0].INS_Code == INS_Code.try_enter
+											||
+											dom.Instructions[0].INS_Code == INS_Code.catch_enter
+											||
+											dom.Instructions[0].INS_Code == INS_Code.finally_enter
+											)
+											)
+					{
+						dom.Instructions.Insert(1, ld);
+					}
+					else
+					{
+						dom.Instructions.Insert(0, ld);
+					}
+				}
+
+
+
+
+
+
+
+				var groupbymember = group.GroupBy(c => c.const_index);
+				foreach (var staticmethod in groupbymember)
+				{
+					var ld_list = staticmethod.ToList();
+					if (ld_list.Count > 1)
+					{
+						var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+						var dom = FindCommDom(atblocks);
+
+						var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
+						if (loop != null)
+						{
+							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+							dom = loop.loop.firstNode.Idom;
+						}
+
+						MoveLdStaticMethod(dom, ld_list.Select(i => (Instruction)i).ToList());
+					}
+					else if (ld_list.Count == 1)
+					{
+						var at = cfg.Blocks.First(b => b.Instructions.Any(i => ld_list.Contains(i)));
+
+						var loop = cfg.toplevelloops.Where(l => l.FindLoop(at) != null).FirstOrDefault();
+						if (loop != null)
+						{
+							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+
+							MoveLdStaticMethod(loop.loop.firstNode.Idom, ld_list.Select(i => (Instruction)i).ToList());
+
+						}
+					}
+				}
+			}		
+			return slotcount;
+		}
+
+
+
+
+		private static int OptimizeLdFunctionBindGlobal(ControlFlowGraph cfg, int slotcount)
+		{
+			if (cfg.Blocks.Count == 0)
+				return slotcount;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+				return slotcount;
+
+
+			var all = cfg.Blocks.SelectMany(b => b.Instructions)
+				.Where(i => i.INS_Code == INS_Code.ld_function_bindglobal_call)
+				.Select(i => (INS_Ld_Function_BindGlobal_Call)i)
+				.ToList();
+
+			var groups = all.GroupBy(i=>i.const_index); //实际上function和heaplocater是绑死的
+			foreach (var group in groups)
+			{
+				
+				{
+					var heap = group.First().heapLocater;
+					Debug.Assert(group.All(i => i.heapLocater.ScopeIndex == heap.ScopeIndex && i.heapLocater.MemberIndex == heap.MemberIndex));
+
+
+					var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => group.Contains(i))).ToList();
+
+
+					var dom = FindCommDom(atblocks);
+
+					var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
+					if (loop != null)
+					{
+						Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+						dom = loop.loop.firstNode.Idom;
+					}
+					else
+					{
+						//非循环量，不必要的修改取消
+						if (atblocks.Count == 1 && group.Count() < 3)
+						{
+							continue;
+						}
+					}
+
+					var lineat = dom.Instructions.FirstOrDefault(i => group.Contains(i));
+
+					int newslot = slotcount++;
+					INS_O_Ld_Function_BindGLobal o_Ld_Function_BindGLobal = new INS_O_Ld_Function_BindGLobal(group.First().token);
+					o_Ld_Function_BindGLobal.heapLocater = heap;
+					o_Ld_Function_BindGLobal.const_index = group.Key;
+					o_Ld_Function_BindGLobal.dst.index = newslot; 
+
+					if (lineat != null)
+					{
+						int insert_at = dom.Instructions.IndexOf(lineat);
+						dom.Instructions.Insert(insert_at, o_Ld_Function_BindGLobal);
+					}
+					else
+					{
+						if (dom.Instructions.Count > 0 &&
+										(dom.Instructions[0].INS_Code == INS_Code.flag
+										||
+										dom.Instructions[0].INS_Code == INS_Code.try_enter
+										||
+										dom.Instructions[0].INS_Code == INS_Code.catch_enter
+										||
+										dom.Instructions[0].INS_Code == INS_Code.finally_enter
+										)
+										)
+						{
+							dom.Instructions.Insert(1, o_Ld_Function_BindGLobal);
+						}
+						else
+						{
+							dom.Instructions.Insert(0, o_Ld_Function_BindGLobal);
+						}
+
+
+
+					}
+
+					//将所有INS_Ld_Function_BindGlobal_Call 替换为INS_Method_Call ,省去查找function。
+					foreach (var ins in group)
+					{
+						var block = cfg.Blocks.First(b => b.Instructions.Contains(ins));
+						int at = block.Instructions.IndexOf(ins);
+
+						INS_O_Call method_Call = new INS_O_Call(ins.token);
+						method_Call.dst = ins.dst;
+						method_Call.function = o_Ld_Function_BindGLobal.dst;
+						method_Call.args = ins.args;
+						
+						block.Instructions.Insert(at, method_Call);
+
+						block.Instructions.Remove(ins);
+
+					}
+
+
+				}
+
+			}
+
+
+
+			return slotcount;
+		}
+
+
+
+
+
+
+
+
+
+
+
 		class PhiNode
 		{
 			internal int ResultVersion;
@@ -1560,29 +1824,10 @@ namespace juicescript.compiler.IL.Optimize
 							}
 
 							INS_Store_MethodVariable storeVar = (INS_Store_MethodVariable)testIns;
-							
-							Stack<StackLocater> source = new Stack<StackLocater>();
-							source.Push(storeVar.dst);
 
-							HashSet<int> searched=new HashSet<int>(); 
-							List< Tuple< Instruction,int>> defsourcelist = new List<Tuple<Instruction, int>>();
+							var defsourcelist = FindStackSlotDefAt(storeVar.dst,cfg);
 
-							while (source.Count>0)
-							{
-								var test = source.Pop();
-								if (searched.Contains(test.index))
-									continue;
-
-								searched.Add(test.index);
-
-								var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index));
-								defsourcelist.AddRange( deflist.Where( i=>i.INS_Code != INS_Code.move ).Select( i=> new Tuple<Instruction, int>(i,i.GetDef().IndexOf(test)) ) );
-
-								foreach (var def in defsourcelist.Where( i=>i.Item1.INS_Code == INS_Code.move  ))
-								{
-									source.Push(((INS_Move)def.Item1).source);
-								}
-							}
+							Debug.Assert(defsourcelist.Count > 0);
 
 							if (defsourcelist.All(i => i.Item1.INS_Code == INS_Code.new_instance))
 							{

@@ -12241,12 +12241,12 @@ namespace juicescript.runtime
 						((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
 						((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
-						//保存到method的成员中，可以考虑到缓存
-						ASTrait t = s.Type._link_codescope.Members[heapLocater.MemberIndex].trait;
-
+						
+						
 						NaNBoxing v = new NaNBoxing();
 						v.SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
+						//保存到method的成员中，可以考虑到缓存
 						PrepareSaveMethodScope((RtMethodScope)s,  heapLocater, ref v, m_scope, method_scopes, ref error);
 						if (error.raised)
 						{
@@ -13451,34 +13451,40 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.method_call:
 							{
-								StackLocater target;
-								target.index = dst_index;
+								//StackLocater target;
+								//target.index = dst_index;
 
-								StackLocater function;
-								LoadStackLocater(&function, &PC);
+								//StackLocater function;
+								//LoadStackLocater(&function, &PC);
 
-								int argsCount;
-								LoadInt32(&argsCount, &PC);
+								//int argsCount;
+								//LoadInt32(&argsCount, &PC);
 
-								//!!需要考虑对齐问题
-								byte* argementsPtr = PC;
-								PC += argsCount * 4;
+								////!!需要考虑对齐问题
+								//byte* argementsPtr = PC;
+								//PC += argsCount * 4;
 
 
-								Debug.Assert(stackslots[function.index].ValueType == NaNBoxing.BoxType.HeapPtr);
-								
+								//Debug.Assert(stackslots[function.index].ValueType == NaNBoxing.BoxType.HeapPtr);
 
-								RtHeapBase _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
-								RtClosure _methodclosure_ = (RtClosure)_method_;
-								NaNBoxing result = RunMethod(((ASMethodBody)_method_.Type).Method,
-									_methodclosure_.This, _methodclosure_.ScopePtr, _methodclosure_.ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
 
+								//RtHeapBase _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
+								//RtClosure _methodclosure_ = (RtClosure)_method_;
+								//NaNBoxing result = RunMethod(((ASMethodBody)_method_.Type).Method,
+								//	_methodclosure_.This, _methodclosure_.ScopePtr, _methodclosure_.ScopeType, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
+
+								//if (error.raised)
+								//{
+								//	goto flag_handle_error;
+								//}
+
+								//stackslots[target.index] = result;
+
+								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, ref global_obj, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
 								}
-
-								stackslots[target.index] = result;
 
 							}
 							break;
@@ -13990,6 +13996,38 @@ namespace juicescript.runtime
 								}
 							}
 							break;
+						case INS_Code.O_ld_function_bindGlobal:
+							{
+
+#if FORCOMPILER
+								if (IsComputeConstExpr)
+								{
+									throw new EvalConstException();
+								}
+
+#endif
+
+								O_Ld_function_bindglobal(&PC, methodscope, dst_index, constants, stackslots, scope_ptr, stackStPos, method_scopes,
+									ref global_obj, ref error
+									);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+
+
+							}
+							break;
+						case INS_Code.O_Call:
+							{
+								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, ref global_obj, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+
 						case INS_Code.return_void:
 
 

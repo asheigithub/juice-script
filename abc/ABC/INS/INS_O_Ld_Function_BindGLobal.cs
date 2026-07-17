@@ -7,46 +7,45 @@ using System.Threading.Tasks;
 
 namespace juicescript.ABC.INS
 {
-	public sealed class INS_Ld_MultiName_Val : Instruction
+	public sealed class INS_O_Ld_Function_BindGLobal : Instruction
 	{
-		public INS_Ld_MultiName_Val(Token token) : base(token)
+		public INS_O_Ld_Function_BindGLobal(Token token) : base(token)
 		{
 		}
 
-		public override INS_Code INS_Code => INS_Code.ld_MultiName_Val;
+		public override INS_Code INS_Code => INS_Code.O_ld_function_bindGlobal;
 
 		public override int Size
 		{
 			get
 			{
-				return 4 + 4 + 4 + 4;
+				return 4 + 4 + 4;
 			}
 		}
 
 
-		public StackLocater instance;
-		public int name_index;
-		public StackLocater refholder;
+		public ScopeHeapLocater heapLocater;
+		public int const_index;
+
 
 		protected override void WriteByte(BinaryWriter bw)
 		{
 
-			instance.Write(bw);
-			bw.Write(name_index);
-			refholder.Write(bw);
+			heapLocater.Write(bw);
+			bw.Write(const_index);
 		}
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
 
-			instance.ReadFromBinary(br);
-			name_index = br.ReadInt32();
-			refholder.ReadFromBinary(br);
+			heapLocater.ReadFromBinary(br);
+			const_index = br.ReadInt32();
 		}
+
 
 		public override string ToString()
 		{
-			return $"Ld_MultiName_Val [{dst}] <- [{instance}.(name_index:{name_index})]";
+			return $"O_Ld_Function_bindGlobal   [{dst}] <- [function: {const_index} at {heapLocater}]";
 		}
 
 		public override List<StackLocater> GetDef()
@@ -56,7 +55,7 @@ namespace juicescript.ABC.INS
 
 		public override List<StackLocater> GetUse()
 		{
-			return new List<StackLocater> { instance, refholder };
+			return new List<StackLocater>();
 		}
 
 		public override bool MaybeRaiseError()
@@ -68,16 +67,7 @@ namespace juicescript.ABC.INS
 		{
 			if (mapping.TryGetValue(dst.index, out int newIndex))
 				dst.index = newIndex;
-			if (mapping.TryGetValue(instance.index, out int newIndex1))
-				instance.index = newIndex1;
-
-			if (mapping.TryGetValue(refholder.index, out int newIndex2))
-				refholder.index = newIndex2;
-
-
 		}
 
-
 	}
-
 }
