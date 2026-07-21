@@ -477,11 +477,8 @@ namespace juicescript.compiler.IL.Optimize
 
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				OptimizeAndEncodeInstruction(cfg.Blocks[i],cfg,constants);
+				OptimizeAndEncodeInstruction(cfg.Blocks[i], cfg, constants);
 			}
-
-			
-
 
 			slotCount = OptimizeBlockLdConst(cfg,slotCount);
 
@@ -490,7 +487,12 @@ namespace juicescript.compiler.IL.Optimize
 			slotCount = OptimizeLdFunctionBindGlobal(cfg,slotCount);//提取ld_function_bindglobal的公共部分.
 
 			slotCount = OptimizeBlockSSAVariable(cfg,slotCount,context);
-				
+
+			////SSA后,获得methodVar SSA版本，于是对methdVar 进行 ld_method 的结果可视为公共表达式
+			slotCount = OptimizeLdMethod(cfg, slotCount, context);
+			slotCount = OptimizeLdInterfaceMethod(cfg, slotCount, context);
+
+
 			slotCount = RemoveBlockMove(cfg,slotCount); //干涉图移除move
 
 			RemoveBarrier(cfg,context); 

@@ -4,14 +4,17 @@ using juicescript.ABC.Locaters;
 using juicescript.runtime;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Reflection.Metadata.BlobBuilder;
 
 namespace juicescript.compiler.IL.Optimize
@@ -171,7 +174,7 @@ namespace juicescript.compiler.IL.Optimize
 							basicBlock.Instructions.Insert(j, store_MultiNameL);
 
 							basicBlock.Instructions.Remove(store);
-
+							i--;
 						}
 
 					}
@@ -180,54 +183,95 @@ namespace juicescript.compiler.IL.Optimize
 
 			//查找ld_MultiNameL_Ref,在查找后面是否是Ld_ValueRef 。合并为直接读取值
 			{
-				List<Instruction> toremove = new List<Instruction>();
+				//List<Instruction> toremove = new List<Instruction>();
 				for (int i = 0; i < basicBlock.Instructions.Count - 1; i++)
 				{
 					var instruction = basicBlock.Instructions[i];
-					var next = basicBlock.Instructions[i + 1];
-					if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiNameL_Ref && next.INS_Code == INS_Code.ld_ValueRef)
+					if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiNameL_Ref)
 					{
-						if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index
+						var ld = basicBlock.Instructions.Skip(i).FirstOrDefault(
+							(s) => s.INS_Code == INS_Code.ld_ValueRef && ((INS_Ld_ValueRef)s).source.index == instruction.dst.index
 							&&
 							((INS_Ld_MultiNameL_Ref)instruction).super_type_index == 0
 							&&
-							((INS_Ld_MultiNameL_Ref)instruction).instance.index >=0
-							&&
-							!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
-							)
-						{
-							toremove.Add(next);
+							((INS_Ld_MultiNameL_Ref)instruction).instance.index >= 0
+							);
 
-							//mapping.Add(next.dst.index, instruction.dst.index);
+						if (ld != null)
+						{
+							int k = basicBlock.Instructions.IndexOf(ld);
+							if (basicBlock.Instructions.Skip(i).Take(k - i).Any((ins) => ins.GetUse().Contains(instruction.dst)))
+							{
+								continue;
+							}
+							if (basicBlock.Instructions.Skip(k + 1).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier))
+							{
+								continue;
+							}
+
+
+							basicBlock.Instructions.RemoveAt(i);
+							int j = basicBlock.Instructions.IndexOf(ld);
 
 							INS_Ld_MultiNameL_Val ld_MultiNameL_Val = new INS_Ld_MultiNameL_Val(instruction.token);
-							ld_MultiNameL_Val.dst = next.dst;
+							ld_MultiNameL_Val.dst = ld.dst;
 							ld_MultiNameL_Val.instance = ((INS_Ld_MultiNameL_Ref)instruction).instance;
 							ld_MultiNameL_Val.name = ((INS_Ld_MultiNameL_Ref)instruction).name;
 							ld_MultiNameL_Val.refholder = ((INS_Ld_MultiNameL_Ref)instruction).dst;
 
-							basicBlock.Instructions[i] = ld_MultiNameL_Val;
 
-							//INS_Move move = new INS_Move(next.token);
-							//move.dst = next.dst;
-							//move.source = instruction.dst;
-
-							//basicBlock.Instructions[i+1]=move;
-
+							basicBlock.Instructions.Insert(i, ld_MultiNameL_Val);
+							basicBlock.Instructions.Remove(ld);
 						}
 
-
 					}
+
+
+
+					//var next = basicBlock.Instructions[i + 1];
+					//if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiNameL_Ref && next.INS_Code == INS_Code.ld_ValueRef)
+					//{
+					//	if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index
+					//		&&
+					//		((INS_Ld_MultiNameL_Ref)instruction).super_type_index == 0
+					//		&&
+					//		((INS_Ld_MultiNameL_Ref)instruction).instance.index >=0
+					//		&&
+					//		!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
+					//		)
+					//	{
+					//		toremove.Add(next);
+
+						//		//mapping.Add(next.dst.index, instruction.dst.index);
+
+						//		INS_Ld_MultiNameL_Val ld_MultiNameL_Val = new INS_Ld_MultiNameL_Val(instruction.token);
+						//		ld_MultiNameL_Val.dst = next.dst;
+						//		ld_MultiNameL_Val.instance = ((INS_Ld_MultiNameL_Ref)instruction).instance;
+						//		ld_MultiNameL_Val.name = ((INS_Ld_MultiNameL_Ref)instruction).name;
+						//		ld_MultiNameL_Val.refholder = ((INS_Ld_MultiNameL_Ref)instruction).dst;
+
+						//		basicBlock.Instructions[i] = ld_MultiNameL_Val;
+
+						//		//INS_Move move = new INS_Move(next.token);
+						//		//move.dst = next.dst;
+						//		//move.source = instruction.dst;
+
+						//		//basicBlock.Instructions[i+1]=move;
+
+						//	}
+
+
+						//}
 				}
 
-				if (toremove.Count > 0)
-				{
-					basicBlock.Instructions.RemoveAll(r => toremove.Contains(r));
-					//foreach (var ins in basicBlock.Instructions)
-					//{
-					//	ins.RemappingSlots(mapping);
-					//}
-				}
+				//if (toremove.Count > 0)
+				//{
+				//	basicBlock.Instructions.RemoveAll(r => toremove.Contains(r));
+				//	//foreach (var ins in basicBlock.Instructions)
+				//	//{
+				//	//	ins.RemappingSlots(mapping);
+				//	//}
+				//}
 			}
 
 			//查找ld_MultiName_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面,然后合并为直接存值指令
@@ -263,7 +307,7 @@ namespace juicescript.compiler.IL.Optimize
 
 							basicBlock.Instructions.Insert(j, store_MultiName);
 							basicBlock.Instructions.Remove(store);
-
+							i--;
 						}
 
 					}
@@ -272,47 +316,187 @@ namespace juicescript.compiler.IL.Optimize
 
 			//Ld_MultiName_Ref + Ld_ValueRef 
 			{
-				List<Instruction> toremove = new List<Instruction>();
+				//List<Instruction> toremove = new List<Instruction>();
 				for (int i = 0; i < basicBlock.Instructions.Count - 1; i++)
 				{
 					var instruction = basicBlock.Instructions[i];
-					var next = basicBlock.Instructions[i + 1];
-					if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiName_Ref && next.INS_Code == INS_Code.ld_ValueRef)
+					//var next = basicBlock.Instructions[i + 1];
+					if (instruction.INS_Code == ABC.INS.INS_Code.ld_MultiName_Ref)// && next.INS_Code == INS_Code.ld_ValueRef)
 					{
-						if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index					
+						var ld = basicBlock.Instructions.Skip(i).FirstOrDefault(
+							(s) => s.INS_Code == INS_Code.ld_ValueRef && ((INS_Ld_ValueRef)s).source.index == instruction.dst.index
 							&&
 							((INS_Ld_MultiName_Ref)instruction).instance.index >= 0
-							&&
-							!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
-							)
+							);
+
+						if (ld != null)
 						{
-							toremove.Add(next);
+							int k = basicBlock.Instructions.IndexOf(ld);
+							if (basicBlock.Instructions.Skip(i).Take(k - i).Any((ins) => ins.GetUse().Contains(instruction.dst)))
+							{
+								continue;
+							}
+							if (basicBlock.Instructions.Skip(k + 1).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier))
+							{
+								continue;
+							}
 							
+
+							basicBlock.Instructions.RemoveAt(i);
+							int j = basicBlock.Instructions.IndexOf(ld);
+
 							INS_Ld_MultiName_Val ld_MultiName_Val = new INS_Ld_MultiName_Val(instruction.token);
-							ld_MultiName_Val.dst = next.dst;
+							ld_MultiName_Val.dst = ld.dst;
 							ld_MultiName_Val.instance = ((INS_Ld_MultiName_Ref)instruction).instance;
 							ld_MultiName_Val.name_index = ((INS_Ld_MultiName_Ref)instruction).name_index;
 							ld_MultiName_Val.refholder = ((INS_Ld_MultiName_Ref)instruction).dst;
 
-							basicBlock.Instructions[i] = ld_MultiName_Val;
+
+							basicBlock.Instructions.Insert(i, ld_MultiName_Val);
+							basicBlock.Instructions.Remove(ld);
+							
 
 						}
+
+
+						//if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index					
+						//	&&
+						//	((INS_Ld_MultiName_Ref)instruction).instance.index >= 0
+						//	&&
+						//	!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
+						//	)
+						//{
+						//	toremove.Add(next);
+
+						//	INS_Ld_MultiName_Val ld_MultiName_Val = new INS_Ld_MultiName_Val(instruction.token);
+						//	ld_MultiName_Val.dst = next.dst;
+						//	ld_MultiName_Val.instance = ((INS_Ld_MultiName_Ref)instruction).instance;
+						//	ld_MultiName_Val.name_index = ((INS_Ld_MultiName_Ref)instruction).name_index;
+						//	ld_MultiName_Val.refholder = ((INS_Ld_MultiName_Ref)instruction).dst;
+
+						//	basicBlock.Instructions[i] = ld_MultiName_Val;
+
+						//}
 
 
 					}
 				}
 
-				if (toremove.Count > 0)
-				{
-					basicBlock.Instructions.RemoveAll(r => toremove.Contains(r));
-					//foreach (var ins in basicBlock.Instructions)
-					//{
-					//	ins.RemappingSlots(mapping);
-					//}
-				}
+				//if (toremove.Count > 0)
+				//{
+				//	basicBlock.Instructions.RemoveAll(r => toremove.Contains(r));
+				//	//foreach (var ins in basicBlock.Instructions)
+				//	//{
+				//	//	ins.RemappingSlots(mapping);
+				//	//}
+				//}
 			}
 
+			//ld_InstanceOrScopeMemberValueRef +Ld_ValueRef 
+			{
+				
+				for (int i = 0; i < basicBlock.Instructions.Count - 1; i++)
+				{
+					var instruction = basicBlock.Instructions[i];
+					//var next = basicBlock.Instructions[i + 1];
 
+					if (instruction.INS_Code == ABC.INS.INS_Code.ld_InstanceOrScopeMemberValueRef)// && next.INS_Code == INS_Code.ld_ValueRef)
+					{
+						var ld = basicBlock.Instructions.Skip(i ).FirstOrDefault(
+							(s) => s.INS_Code == INS_Code.ld_ValueRef && ((INS_Ld_ValueRef)s).source.index == instruction.dst.index
+							&&
+							((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance.index >= 0
+							);
+
+						if (ld != null)
+						{
+							int k = basicBlock.Instructions.IndexOf(ld);
+							if (basicBlock.Instructions.Skip(i).Take(k - i).Any((ins) => ins.GetUse().Contains(instruction.dst)))
+							{
+								continue;
+							}
+							if (basicBlock.Instructions.Skip(k + 1).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier))
+							{
+								continue;
+							}
+
+
+							basicBlock.Instructions.RemoveAt(i);
+							int j = basicBlock.Instructions.IndexOf(ld);
+
+							INS_Ld_InstanceMember_Val ld_InstanceMember_Val = new INS_Ld_InstanceMember_Val(instruction.token);
+							ld_InstanceMember_Val.dst = ld.dst;
+							ld_InstanceMember_Val.instance = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance;
+							ld_InstanceMember_Val.scopemember_index = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
+
+
+							basicBlock.Instructions.Insert(i, ld_InstanceMember_Val);
+							basicBlock.Instructions.Remove(ld);
+							
+						}
+
+						//if (((INS_Ld_ValueRef)next).source.index == instruction.dst.index
+						//	&&
+						//	((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance.index >= 0
+						//	&&
+						//	!basicBlock.Instructions.Skip(i + 2).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier)
+						//	)
+						//{
+						//	toremove.Add(next);
+
+						//	INS_Ld_InstanceMember_Val ld_InstanceMember_Val = new INS_Ld_InstanceMember_Val(instruction.token);
+						//	ld_InstanceMember_Val.dst = next.dst;
+						//	ld_InstanceMember_Val.instance = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance;
+						//	ld_InstanceMember_Val.scopemember_index = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
+							
+						//	basicBlock.Instructions[i] = ld_InstanceMember_Val;
+
+						//}
+					}
+				}
+
+				
+
+			}
+
+			//ld_InstanceOrScopeMemberValueRef,再查找后续是否把值保存到引用里.如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面,然后合并为直接存值指令
+			{
+				for (int i = 0; i < basicBlock.Instructions.Count; i++)
+				{
+					var instruction = basicBlock.Instructions[i];
+					if (instruction.INS_Code == ABC.INS.INS_Code.ld_InstanceOrScopeMemberValueRef)
+					{
+						var store = basicBlock.Instructions.Skip(i + 1).FirstOrDefault(
+							(s) => s.INS_Code == INS_Code.storeHeapValueRef && s.dst.index == instruction.dst.index
+							&&
+							((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance.index >= 0
+							);
+
+						if (store != null)
+						{
+							int k = basicBlock.Instructions.IndexOf(store);
+							if (basicBlock.Instructions.Skip(i).Take(k - i).Any((ins) => ins.GetUse().Contains(instruction.dst)))
+							{
+								continue;
+							}
+
+							basicBlock.Instructions.RemoveAt(i);
+							int j = basicBlock.Instructions.IndexOf(store);
+
+							INS_Store_InstanceMember store_InstanceMember = new INS_Store_InstanceMember(store.token);
+							store_InstanceMember.dst = ((INS_Store_HeapValueRef)store).source;
+							store_InstanceMember.instance = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance;
+							store_InstanceMember.scopemember_index = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
+
+
+							basicBlock.Instructions.Insert(j, store_InstanceMember);
+							basicBlock.Instructions.Remove(store);
+							i--;
+						}
+
+					}
+				}
+			}
 
 		}
 
@@ -601,137 +785,285 @@ namespace juicescript.compiler.IL.Optimize
 			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
 			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
 
-			var all = cfg.Blocks.SelectMany(b => b.Instructions)
-				.Where(i => i.INS_Code == INS_Code.ld_method)
-				.Select(i => (INS_Ld_Method)i)
-				.Where( (k)=> 
-				{ 
-					var deflist = FindStackSlotDefAt(k.instance,cfg);
-					return deflist.Count > 0 && deflist.All(
-						d=>
-						instructionType.ContainsKey(d.Item1) && (												
-												instructionType[d.Item1][d.Item2].DefType == InstructionDefType.asclass
-							)
 
-						);
-				
-				} )
-				.ToList();
-
-			var groupbyclass = all.GroupBy(c => c.instance);
-			foreach (var group in groupbyclass)
+			//静态方法
 			{
-				var ld_cls = FindStackSlotDefAt(group.Key,cfg);
-				Debug.Assert(ld_cls.Count == 1);
-				var ld_cls_block = cfg.Blocks.First(b => b.Instructions.Contains(ld_cls[0].Item1) );
+				var all = cfg.Blocks.SelectMany(b => b.Instructions)
+					.Where(i => i.INS_Code == INS_Code.ld_method)
+					.Select(i => (INS_Ld_Method)i)
+					.Where((k) =>
+					{
+						var deflist = FindStackSlotDefAt(k.instance, cfg);
+						return deflist.Count > 0 && deflist.All(
+							d =>
+							instructionType.ContainsKey(d.Item1) && (
+													instructionType[d.Item1][d.Item2].DefType == InstructionDefType.asclass
+								)
 
+							);
 
-				void MoveLdStaticMethod(BasicBlock dom, List<Instruction> ld_list)
+					})
+					.ToList();
+
+				var groupbyclass = all.GroupBy(c => c.instance);
+				foreach (var group in groupbyclass)
 				{
-					var tdom = dom;
-					while (tdom != ld_cls_block) //class必须已经加载
+					var ld_cls = FindStackSlotDefAt(group.Key, cfg);
+					Debug.Assert(ld_cls.Count == 1);
+					var ld_cls_block = cfg.Blocks.First(b => b.Instructions.Contains(ld_cls[0].Item1));
+
+
+					void MoveLdStaticMethod(BasicBlock dom, List<Instruction> ld_list)
 					{
-						tdom = tdom.Idom;
-						if (tdom == null)
+						var tdom = dom;
+						while (tdom != ld_cls_block) //class必须已经加载
 						{
-							throw new InvalidOperationException();
+							tdom = tdom.Idom;
+							if (tdom == null)
+							{
+								throw new InvalidOperationException();
+							}
 						}
-					}
 
 
-					var ld = ld_list.First();
-					foreach (var block in cfg.Blocks)
-					{
-						block.Instructions.RemoveAll(ins => ld_list.Contains(ins));
-					}
-
-					int newslot = slotcount++;
-					foreach (var l in ld_list)
-					{
-						Dictionary<int, int> replace = new Dictionary<int, int> { { l.dst.index, newslot } };
-
-						foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+						var ld = ld_list.First();
+						foreach (var block in cfg.Blocks)
 						{
-							ins.RemappingSlots(replace);
+							block.Instructions.RemoveAll(ins => ld_list.Contains(ins));
 						}
-					}
 
-					ld.dst.index = newslot;
-
-					if (dom.Instructions.Contains(ld_cls[0].Item1))
-					{
-						int _at = dom.Instructions.IndexOf(ld_cls[0].Item1);
-
-						_at++;
-
-						if (_at < dom.Instructions.Count)
+						int newslot = slotcount++;
+						foreach (var l in ld_list)
 						{
-							dom.Instructions.Insert(_at, ld);
+							Dictionary<int, int> replace = new Dictionary<int, int> { { l.dst.index, newslot } };
+
+							foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+							{
+								ins.RemappingSlots(replace);
+							}
+						}
+
+						ld.dst.index = newslot;
+
+						if (dom.Instructions.Contains(ld_cls[0].Item1))
+						{
+							int _at = dom.Instructions.IndexOf(ld_cls[0].Item1);
+
+							_at++;
+
+							if (_at < dom.Instructions.Count)
+							{
+								dom.Instructions.Insert(_at, ld);
+							}
+							else
+							{
+								dom.Instructions.Add(ld);
+							}
+
+						}
+						else if (dom.Instructions.Count > 0 &&
+												(dom.Instructions[0].INS_Code == INS_Code.flag
+												||
+												dom.Instructions[0].INS_Code == INS_Code.try_enter
+												||
+												dom.Instructions[0].INS_Code == INS_Code.catch_enter
+												||
+												dom.Instructions[0].INS_Code == INS_Code.finally_enter
+												)
+												)
+						{
+							dom.Instructions.Insert(1, ld);
 						}
 						else
 						{
-							dom.Instructions.Add(ld);
+							dom.Instructions.Insert(0, ld);
 						}
+					}
 
-					}
-					else if (dom.Instructions.Count > 0 &&
-											(dom.Instructions[0].INS_Code == INS_Code.flag
-											||
-											dom.Instructions[0].INS_Code == INS_Code.try_enter
-											||
-											dom.Instructions[0].INS_Code == INS_Code.catch_enter
-											||
-											dom.Instructions[0].INS_Code == INS_Code.finally_enter
-											)
-											)
+
+
+
+
+
+
+					var groupbymember = group.GroupBy(c => c.const_index);
+					foreach (var staticmethod in groupbymember)
 					{
-						dom.Instructions.Insert(1, ld);
-					}
-					else
-					{
-						dom.Instructions.Insert(0, ld);
+						var ld_list = staticmethod.ToList();
+						if (ld_list.Count > 1)
+						{
+							var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+							var dom = FindCommDom(atblocks);
+
+							var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
+							if (loop != null)
+							{
+								Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+								dom = loop.loop.firstNode.Idom;
+							}
+
+							MoveLdStaticMethod(dom, ld_list.Select(i => (Instruction)i).ToList());
+						}
+						else if (ld_list.Count == 1)
+						{
+							var at = cfg.Blocks.First(b => b.Instructions.Any(i => ld_list.Contains(i)));
+
+							var loop = cfg.toplevelloops.Where(l => l.FindLoop(at) != null).FirstOrDefault();
+							if (loop != null)
+							{
+								Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+
+								MoveLdStaticMethod(loop.loop.firstNode.Idom, ld_list.Select(i => (Instruction)i).ToList());
+
+							}
+						}
 					}
 				}
+			}
 
+			//静态常量
+			{
+				var all = cfg.Blocks.SelectMany(b => b.Instructions)
+					.Where(i => i.INS_Code == INS_Code.ld_instacneMember_Val)
+					.Select(i=> (INS_Ld_InstanceMember_Val)i)
+					.Where((k) => {
 
+						var deflist = FindStackSlotDefAt(k.instance, cfg);
+						if (deflist.Count == 1 && instructionType.ContainsKey(deflist[0].Item1  ))
+						{
+							var deftype = instructionType[ deflist[0].Item1][deflist[0].Item2 ];
 
+							if (deftype.DefType == InstructionDefType.asclass)
+							{
+								ASClass @class = (ASClass)deftype.Obj;
+								var member = @class._link_codescope.Members[(int)k.scopemember_index];
+								return member.trait.Kind == TraitKind.Constant;
 
+							}
+							else
+							{
+								return false;
+							}
 
+						}
+						else
+						{
+							return false;
+						}
+					}).ToList()					
+					;
 
-
-				var groupbymember = group.GroupBy(c => c.const_index);
-				foreach (var staticmethod in groupbymember)
+				var groupbyclass = all.GroupBy(c => c.instance);
+				foreach (var group in groupbyclass)
 				{
-					var ld_list = staticmethod.ToList();
-					if (ld_list.Count > 1)
-					{
-						var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
-						var dom = FindCommDom(atblocks);
+					var ld_cls = FindStackSlotDefAt(group.Key, cfg);
+					Debug.Assert(ld_cls.Count == 1);
+					var ld_cls_block = cfg.Blocks.First(b => b.Instructions.Contains(ld_cls[0].Item1));
 
-						var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
-						if (loop != null)
+
+
+					void MoveLdStaticConst(BasicBlock dom, List<Instruction> ld_list)
+					{
+						var tdom = dom;
+						while (tdom != ld_cls_block) //class必须已经加载
 						{
-							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
-							dom = loop.loop.firstNode.Idom;
+							tdom = tdom.Idom;
+							if (tdom == null)
+							{
+								throw new InvalidOperationException();
+							}
 						}
 
-						MoveLdStaticMethod(dom, ld_list.Select(i => (Instruction)i).ToList());
-					}
-					else if (ld_list.Count == 1)
-					{
-						var at = cfg.Blocks.First(b => b.Instructions.Any(i => ld_list.Contains(i)));
 
-						var loop = cfg.toplevelloops.Where(l => l.FindLoop(at) != null).FirstOrDefault();
-						if (loop != null)
+						var ld = ld_list.First();
+						foreach (var block in cfg.Blocks)
 						{
-							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+							block.Instructions.RemoveAll(ins => ld_list.Contains(ins));
+						}
 
-							MoveLdStaticMethod(loop.loop.firstNode.Idom, ld_list.Select(i => (Instruction)i).ToList());
+						int newslot = slotcount++;
+						foreach (var l in ld_list)
+						{
+							Dictionary<int, int> replace = new Dictionary<int, int> { { l.dst.index, newslot } };
 
+							foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+							{
+								ins.RemappingSlots(replace);
+							}
+						}
+
+						ld.dst.index = newslot;
+
+						if (dom.Instructions.Contains(ld_cls[0].Item1))
+						{
+							int _at = dom.Instructions.IndexOf(ld_cls[0].Item1);
+
+							_at++;
+
+							if (_at < dom.Instructions.Count)
+							{
+								dom.Instructions.Insert(_at, ld);
+							}
+							else
+							{
+								dom.Instructions.Add(ld);
+							}
+
+						}
+						else if (dom.Instructions.Count > 0 &&
+												(dom.Instructions[0].INS_Code == INS_Code.flag
+												||
+												dom.Instructions[0].INS_Code == INS_Code.try_enter
+												||
+												dom.Instructions[0].INS_Code == INS_Code.catch_enter
+												||
+												dom.Instructions[0].INS_Code == INS_Code.finally_enter
+												)
+												)
+						{
+							dom.Instructions.Insert(1, ld);
+						}
+						else
+						{
+							dom.Instructions.Insert(0, ld);
+						}
+					}
+
+
+					var groupbyconst = group.GroupBy(c => c.scopemember_index);
+					foreach (var static_const in groupbyconst)
+					{
+						var ld_list = static_const.ToList();
+						if (ld_list.Count > 1)
+						{
+							var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+							var dom = FindCommDom(atblocks);
+
+							var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
+							if (loop != null)
+							{
+								Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+								dom = loop.loop.firstNode.Idom;
+							}
+							MoveLdStaticConst(dom, ld_list.Select(i => (Instruction)i).ToList());
+						}
+						else if (ld_list.Count == 1)
+						{
+							var at = cfg.Blocks.First(b => b.Instructions.Any(i => ld_list.Contains(i)));
+
+							var loop = cfg.toplevelloops.Where(l => l.FindLoop(at) != null).FirstOrDefault();
+							if (loop != null)
+							{
+								Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+								MoveLdStaticConst(loop.loop.firstNode.Idom, ld_list.Select(i => (Instruction)i).ToList());
+							}
 						}
 					}
 				}
-			}		
+			}
+
+
+
 			return slotcount;
 		}
 
@@ -847,8 +1179,365 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
+		private static int OptimizeLdMethod(ControlFlowGraph cfg, int slotCount, CompileContext context)
+		{
+			//这个步骤在SSA后。
+			if (cfg.Blocks.Count == 0)
+				return slotCount;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+				return slotCount;
 
 
+			var call = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.method_call).Select(i=>(INS_Method_Call)i).ToList();
+
+			//查询instance来源是 ld_methodvar 或者 store_methodvar
+			//如果数量多，则在每个来源处ld_method,然后复用。
+			var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_method)
+				.Select(i => (INS_Ld_Method)i)
+				.Where((i) =>
+				{
+					var defat = FindStackSlotDefAt(i.instance, cfg);
+
+					//若instance小于0，则在上下文读取，那么绝不可能被改变。
+
+					return i.instance.index<0 || (defat.Count == 1 && (defat.All(d => d.Item1.INS_Code == INS_Code.ld_methodVariable
+					|| d.Item1.INS_Code == INS_Code.ld_MethodVariableInitValue
+					|| d.Item1.INS_Code == INS_Code.storeMethodVariable
+					))
+					);
+
+
+				})
+				.Where((i) => {
+					//它被INS_Method_Call 引用。
+					return call.Any(c => c.function.index == i.dst.index);
+
+				})
+
+				.ToList()
+				;
+
+#if DEBUG
+			// ---从当前字节码生成方式来看，如果被 methoc_call引用了，那么就不可能被其他类型指令引用。确保这点成立
+			foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code != INS_Code.method_call && i.INS_Code != INS_Code.expression_barrier))
+			{
+				var use = ins.GetUse();
+				foreach (var item in all)
+				{
+					if (use.Contains(item.dst))
+						throw new InvalidOperationException();
+				}
+			}
+
+#endif
+
+
+			var groupbyinstance = all.GroupBy(i => i.instance);
+			foreach (var instance_group in groupbyinstance)
+			{
+				var instance = instance_group.Key;
+
+				var groupby_method = instance_group.GroupBy(i => i.const_index).ToList();
+
+				var instancedef = FindStackSlotDefAt(instance,cfg);
+
+				Debug.Assert(instancedef.Count == 1 || instance.index< 0);
+
+				foreach (var method in groupby_method)
+				{
+					
+					if (method.Count() < 2)
+					{
+						//是否在循环里！
+						if (instance.index >= 0)
+						{
+							var ib = cfg.Blocks.Where(b => b.Instructions.Contains(instancedef[0].Item1)).First();
+							var ibatloop = cfg.toplevelloops.Where(l => l.FindLoop(ib) != null).Select(l => l.FindLoop(ib)).FirstOrDefault();
+
+							var useat = cfg.Blocks.Where(b => b.Instructions.Any(i => method.Contains(i)));
+							var useatloop = useat.Select(u => cfg.toplevelloops.Where(l => l.FindLoop(u) != null).Select(l => l.FindLoop(u)).FirstOrDefault());
+
+							if (useatloop.Any(u => u != ibatloop)) //call在循环里，外提!
+							{
+
+							}
+							else
+							{
+								continue;
+							}
+						}
+						else
+						{
+							var useat = cfg.Blocks.Where(b => b.Instructions.Any(i => method.Contains(i)));
+							var useatloop = useat.Select(u => cfg.toplevelloops.Where(l => l.FindLoop(u) != null).Select(l => l.FindLoop(u)).FirstOrDefault());
+
+							if (useatloop.Any(u => u != null)) //call在循环里，外提!
+							{
+
+							}
+							else
+							{
+								continue;
+							}
+						}
+					}
+
+					var methodid = method.Key;
+
+
+					//新建一个O_ld_method,并放置到instancedef[0]的后面 | 如果instance.index<0,则放到 idom.（O_ld_method 不检查instance是否为null,等后面O_call时再抛）
+					int newslotindex = slotCount++;
+
+					INS_O_Ld_Method o_Ld_Method = new INS_O_Ld_Method(method.First().token);
+					o_Ld_Method.dst.index = newslotindex;
+					o_Ld_Method.instance = instance;
+					o_Ld_Method.const_index = method.Key;
+
+					if (instance.index < 0)
+					{
+						var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => method.Contains(i))).ToList();
+						var dom = FindCommDom(atblocks);
+
+						var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
+						if (loop != null)
+						{
+							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+							dom = loop.loop.firstNode.Idom;
+						}
+						var lineat = dom.Instructions.FirstOrDefault(i => method.Contains(i));
+
+						if (lineat != null)
+						{
+							int insert_at = dom.Instructions.IndexOf(lineat);
+							dom.Instructions.Insert(insert_at, o_Ld_Method);
+						}
+						else
+						{
+							if (dom.Instructions.Count > 0 &&
+											(dom.Instructions[0].INS_Code == INS_Code.flag
+											||
+											dom.Instructions[0].INS_Code == INS_Code.try_enter
+											||
+											dom.Instructions[0].INS_Code == INS_Code.catch_enter
+											||
+											dom.Instructions[0].INS_Code == INS_Code.finally_enter
+											)
+											)
+							{
+								dom.Instructions.Insert(1, o_Ld_Method);
+							}
+							else
+							{
+								dom.Instructions.Insert(0, o_Ld_Method);
+							}
+
+
+
+						}
+
+
+						//throw new NotImplementedException();
+					}
+					else
+					{
+						var b = cfg.Blocks.Where(b => b.Instructions.Contains(instancedef[0].Item1 )).First();
+
+						int at = b.Instructions.IndexOf(instancedef[0].Item1) + 1;
+
+						b.Instructions.Insert(at, o_Ld_Method);
+
+
+					}
+
+
+					//删除所有原ld_method
+					foreach (var b in cfg.Blocks)
+					{
+						b.Instructions.RemoveAll(i => method.Contains(i));
+					}
+
+
+					//查找引用它的INS_Method_Call,将此INS_Method_Call替换为O_call。
+					var toreplace = call.Where(c => method.Any(l => l.dst.index == c.function.index)).ToList();
+					Debug.Assert(toreplace.Count == method.Count());
+
+					foreach (var mcall in toreplace)
+					{
+						var b = cfg.Blocks.Where(b => b.Instructions.Contains(mcall)).First();
+
+						int at = b.Instructions.IndexOf(mcall);
+
+						INS_O_Call method_Call = new INS_O_Call(mcall.token);
+						method_Call.dst = mcall.dst;
+						method_Call.function.index = newslotindex ;
+						method_Call.args = mcall.args;
+
+						b.Instructions.Insert(at, method_Call);
+
+						b.Instructions.Remove(mcall);
+
+					}
+
+
+
+				}
+
+
+			}
+
+
+
+			return slotCount;
+		}
+
+		private static int OptimizeLdInterfaceMethod(ControlFlowGraph cfg, int slotCount, CompileContext context)
+		{
+			if (cfg.Blocks.Count == 0)
+				return slotCount;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+				return slotCount;
+
+			var call = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.method_call).Select(i => (INS_Method_Call)i).ToList();
+
+
+			//查询instance来源是 ld_methodvar 或者 store_methodvar
+			//如果数量多，则在每个来源处ld_method,然后复用。
+			var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_interface_method)
+				.Select(i => (INS_Ld_Method_Interface)i)
+				.Where((i) =>
+				{
+					var defat = FindStackSlotDefAt(i.instance, cfg);
+
+					return (defat.Count == 1 && (defat.All(d => d.Item1.INS_Code == INS_Code.ld_methodVariable
+					|| d.Item1.INS_Code == INS_Code.ld_MethodVariableInitValue
+					|| d.Item1.INS_Code == INS_Code.storeMethodVariable
+					))
+					);
+
+
+				})
+				.Where((i) => {
+					//它被INS_Method_Call 引用。
+					return call.Any(c => c.function.index == i.dst.index);
+
+				})
+
+				.ToList()
+				;
+
+#if DEBUG
+			// ---从当前字节码生成方式来看，如果被 methoc_call引用了，那么就不可能被其他类型指令引用。确保这点成立
+			foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code != INS_Code.method_call && i.INS_Code != INS_Code.expression_barrier))
+			{
+				var use = ins.GetUse();
+				foreach (var item in all)
+				{
+					if (use.Contains(item.dst))
+						throw new InvalidOperationException();
+				}
+			}
+
+#endif
+
+			var groupbyinstance = all.GroupBy(i => i.instance);
+			foreach (var instance_group in groupbyinstance)
+			{
+				var instance = instance_group.Key;
+
+				var groupby_method = instance_group.GroupBy(i => i.const_index).ToList();
+
+				var instancedef = FindStackSlotDefAt(instance, cfg);
+
+				Debug.Assert(instancedef.Count == 1);
+
+
+				foreach (var method in groupby_method)
+				{
+					var ib = cfg.Blocks.Where(b => b.Instructions.Contains(instancedef[0].Item1)).First();
+
+					if (method.Count() < 2)
+					{
+						//是否在循环里！
+
+						var ibatloop = cfg.toplevelloops.Where(l => l.FindLoop(ib) != null).Select(l => l.FindLoop(ib)).FirstOrDefault();
+
+						var useat = cfg.Blocks.Where( b=>b.Instructions.Any( i => method.Contains(i) ) );
+						var useatloop = useat.Select( u=> cfg.toplevelloops.Where( l=>l.FindLoop(u) != null ).Select( l=>l.FindLoop(u) ).FirstOrDefault() );
+
+						if (useatloop.Any(u => u != ibatloop)) //call在循环里，外提!
+						{
+
+						}
+						else
+						{
+							continue;
+						}
+					}
+					int class_id = method.First().class_id;
+					Debug.Assert(method.All(m => m.class_id == class_id));
+
+
+
+
+					var methodid = method.Key;
+
+
+					//新建一个O_ld_interface_method,并放置到instancedef[0]的后面 | 如果instance.index<0,则放到 idom.（O_ld_method 不检查instance是否为null,等后面O_call时再抛）
+					int newslotindex = slotCount++;
+
+					INS_O_Ld_Method_Interface o_Ld_InterfaceMethod = new INS_O_Ld_Method_Interface(method.First().token);
+					o_Ld_InterfaceMethod.dst.index = newslotindex;
+					o_Ld_InterfaceMethod.instance = instance;
+					o_Ld_InterfaceMethod.const_index = method.Key;
+					o_Ld_InterfaceMethod.class_id = class_id;
+
+					
+					int i_at = ib.Instructions.IndexOf(instancedef[0].Item1) + 1;
+					ib.Instructions.Insert(i_at, o_Ld_InterfaceMethod);
+
+
+					//删除所有原ld_method
+					foreach (var b in cfg.Blocks)
+					{
+						b.Instructions.RemoveAll(i => method.Contains(i));
+					}
+
+
+					//查找引用它的INS_Method_Call,将此INS_Method_Call替换为O_call。
+					var toreplace = call.Where(c => method.Any(l => l.dst.index == c.function.index)).ToList();
+					Debug.Assert(toreplace.Count == method.Count());
+
+					foreach (var mcall in toreplace)
+					{
+						var b = cfg.Blocks.Where(b => b.Instructions.Contains(mcall)).First();
+
+						int at = b.Instructions.IndexOf(mcall);
+
+						INS_O_Call method_Call = new INS_O_Call(mcall.token);
+						method_Call.dst = mcall.dst;
+						method_Call.function.index = newslotindex;
+						method_Call.args = mcall.args;
+
+						b.Instructions.Insert(at, method_Call);
+
+						b.Instructions.Remove(mcall);
+
+					}
+
+
+
+				}
+
+
+
+
+
+
+			}
+
+
+			return slotCount;
+		}
 
 
 
@@ -2201,15 +2890,15 @@ namespace juicescript.compiler.IL.Optimize
 				}
 			}
 
-			foreach (var mv in toremove.Select(r=>new Tuple<int,int>( r.source.index,r.dst.index )).ToArray() )
+			foreach (var mv in toremove)
 			{
-				if (mv.Item1 != mv.Item2)
+				if (mv.source.index != mv.dst.index)
 				{
 					int newslot = slotCount++;
 
 					Dictionary<int, int> toreplace = new Dictionary<int, int>();
-					toreplace.Add(mv.Item1, newslot);
-					toreplace.Add(mv.Item2, newslot);
+					toreplace.Add(mv.source.index, newslot);
+					toreplace.Add(mv.dst.index, newslot);
 
 					foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
 					{
@@ -2220,8 +2909,45 @@ namespace juicescript.compiler.IL.Optimize
 
 			foreach (var b in cfg.Blocks)
 			{
-				b.Instructions.RemoveAll(i=>toremove.Contains(i));
+				b.Instructions.RemoveAll(i => toremove.Contains(i));
 			}
+
+
+
+			//foreach (var mv in toremove.Select(r=>new Tuple<int,int>( r.source.index,r.dst.index )).ToArray() )
+			//{
+			//	if (mv.Item1 != mv.Item2)
+			//	{
+			//		var insmv = toremove.Where( r=>r.source.index == mv.Item1 && r.dst.index == mv.Item2 ).ToArray();
+
+			//		int newslot = slotCount++;
+
+			//		Dictionary<int, int> toreplace = new Dictionary<int, int>();
+			//		toreplace.Add(mv.Item1, newslot);
+			//		toreplace.Add(mv.Item2, newslot);
+
+			//		foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
+			//		{
+
+			//			b.RemappingSlots(toreplace);
+
+			//		}
+
+			//		foreach (var b in cfg.Blocks)
+			//		{
+			//			b.Instructions.Remove(insmv[0]);
+			//		}
+
+
+
+			//	}
+			//}
+
+
+			//foreach (var b in cfg.Blocks)
+			//{
+			//	b.Instructions.RemoveAll(i => toremove.Contains(i) );
+			//}
 
 
 			return slotCount;

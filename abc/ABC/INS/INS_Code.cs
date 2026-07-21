@@ -67,7 +67,14 @@ namespace juicescript.ABC.INS
 		/// <summary>
 		/// 通过MultiNameL 查找成员的值并加载。name也在运行时确定，namespace在打开的namespaceset里
 		/// </summary>
-		ld_MultiNameL_Val = 14,
+		ld_MultiNameL_Val = 13,
+
+
+        /// <summary>
+        /// 从instance的slot或者const中取值
+        /// </summary>
+        ld_instacneMember_Val = 14,
+
 
         /// <summary>
         /// 加载this对象到栈。
@@ -280,6 +287,11 @@ namespace juicescript.ABC.INS
 		/// </summary>
 		store_MultiName = 115,
 
+        /// <summary>
+        /// 将值保存到instance成员内
+        /// </summary>
+        store_instanceMember = 116,
+
 
 		//******短路径版本**********
 		//      short_ld_const =150,
@@ -294,6 +306,8 @@ namespace juicescript.ABC.INS
         //****优化******
 
         O_ld_function_bindGlobal = 122, //加载function的闭包并绑定global.
+        O_ld_method =123,               //加载确认的instance相同，method相同的公共method
+        O_ld_interface_method =124,     //加载接口方法，instance相同的公共method
         O_Call =125,                    //直接调缓存优化的闭包                   
 
 

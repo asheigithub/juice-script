@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace juicescript.compiler.IL
@@ -109,6 +110,9 @@ namespace juicescript.compiler.IL
 					break;
 				case INS_Code.ld_MultiNameL_Val:
 					instruction = new INS_Ld_MultiNameL_Val(token);
+					break;
+				case INS_Code.ld_instacneMember_Val:
+					instruction = new INS_Ld_InstanceMember_Val(token);
 					break;
 				case INS_Code.ld_This:
 					instruction = new INS_Ld_this(token);
@@ -279,6 +283,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.store_MultiName:
 					instruction = new INS_Store_MultiName(token);
 					break;
+				case INS_Code.store_instanceMember:
+					instruction = new INS_Store_InstanceMember(token);
+					break;
 
 				//case INS_Code.return_op:
 				//	instruction = new INS_Return_Oper(token);
@@ -304,6 +311,12 @@ namespace juicescript.compiler.IL
 					break;
 				case INS_Code.O_ld_function_bindGlobal:
 					instruction = new INS_O_Ld_Function_BindGLobal(token);
+					break;
+				case INS_Code.O_ld_method:
+					instruction = new INS_O_Ld_Method(token);
+					break;
+				case INS_Code.O_ld_interface_method:
+					instruction = new INS_O_Ld_Method_Interface(token);
 					break;
 				case INS_Code.O_Call:
 					instruction = new INS_O_Call(token);

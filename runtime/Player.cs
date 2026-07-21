@@ -13228,6 +13228,15 @@ namespace juicescript.runtime
 
 								break;
 							}
+						case INS_Code.store_instanceMember:
+							{
+								Store_InstanceMember(dst_index, &PC, stackslots, stackStPos, scope_ptr,methodscope , ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
 						case INS_Code.ld_RTQNameL_Ref:
 							{
 								
@@ -13249,6 +13258,15 @@ namespace juicescript.runtime
 								}
 							}
 							break;
+						case INS_Code.ld_instacneMember_Val:
+							{
+								Ld_InstanceMemberVal(dst_index, &PC, stackslots, stackStPos, scope_ptr,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
 						case INS_Code.ld_ScopeH:
 							{
 								Ld_ScopeH(dst_index, &PC, stackslots, methodscope, scopeType, stackStPos);
@@ -14018,6 +14036,17 @@ namespace juicescript.runtime
 
 							}
 							break;
+						case INS_Code.O_ld_method:
+							{
+								O_ld_method(dst_index, &PC, methodscope, stackslots, scope_ptr,stackStPos);
+
+								break;
+							}
+						case INS_Code.O_ld_interface_method:
+							{
+								O_Ld_interface_method(dst_index, &PC, stackslots, constants, stackStPos);
+								break;
+							}
 						case INS_Code.O_Call:
 							{
 								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, ref global_obj, ref error);

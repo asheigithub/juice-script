@@ -75,6 +75,10 @@ namespace juicescript.compiler.IL.Optimize
 
 			public InstructionDef(InstructionDefType type, object obj)
 			{
+				Debug.Assert( (type == InstructionDefType.method && (obj is ASMethod || obj is null)) || type != InstructionDefType.method );
+
+
+
 				this.DefType = type;
 				this.Obj = obj;
 			}
@@ -238,93 +242,8 @@ namespace juicescript.compiler.IL.Optimize
 							break;
 						case INS_Code.ld_InstanceOrScopeMemberValueRef:
 							{
-								INS_Ld_InstanceOrSocpeMemberRef ld_InstanceOrSocpeMemberRef = (INS_Ld_InstanceOrSocpeMemberRef)instruction;
-								if (ld_InstanceOrSocpeMemberRef.instance.index < 0)
-								{
-									int scopeid = -ld_InstanceOrSocpeMemberRef.instance.index - 1;
-									var scope = method.Body._link_codescope;
-
-									while (scope.index != scopeid)
-									{
-										scope = scope.Parent;
-									}
-
-									switch (scope.Kind)
-									{
-										case CodeScopeKind.Script:
-											result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.global, scope.Container) });
-											flag = true;
-											break;
-										case CodeScopeKind.Instance:
-											{
-												var asinstance = (ASInstance)scope.Container;
-												if (asinstance.Flags.HasFlag(ClassFlags.Struct))
-												{
-													result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.Struct, asinstance) });
-													flag = true;
-												}
-												else if (asinstance.Flags.HasFlag(ClassFlags.Vector))
-												{
-													throw new InvalidOperationException();
-												}
-												else
-												{
-													result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.obj_maybeCacheable, scope.Container) });
-													flag = true;
-												}
-											}
-											break;
-										case CodeScopeKind.Class:
-											result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.asclass, scope.Container) });
-											flag = true;
-											break;
-										case CodeScopeKind.Method:
-											result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.method, scope.Container) });
-											flag = true;
-											break;
-										default:
-											break;
-									}
-
-								}
-								else
-								{
-									if (stack_classes.ContainsKey(ld_InstanceOrSocpeMemberRef.instance.index))
-									{
-										ASClass cls = stack_classes[ld_InstanceOrSocpeMemberRef.instance.index];
-										var member = cls._link_codescope.Members[(int)ld_InstanceOrSocpeMemberRef.scopemember_index];
-										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(member.TypeKind) });
-
-										flag = true;
-									}
-									else
-									{
-
-										if (result.Any(r => r.Key.GetDef().Contains(ld_InstanceOrSocpeMemberRef.instance)))
-										{
-											var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_InstanceOrSocpeMemberRef.instance)).Value;
-											if (v.Count == 1 && v[0].Obj != null) //count==1,防止出现多个def的情况 多def还有可能多个mv到同一个目标，SSA后可能出现
-											{
-												Debug.Assert(v[0].Obj is ASInstance);
-
-												var member = ((ASInstance)v[0].Obj)._link_codescope.Members[(int)ld_InstanceOrSocpeMemberRef.scopemember_index];
-												result.Add(instruction, new List<InstructionDef>() { FromTypeKind(member.TypeKind) });
-
-												flag = true;
-											}
-											else
-											{
-												result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
-												flag = true;
-											}
-										}
-										else
-										{
-											//等下一轮
-											//throw new NotImplementedException();
-										}
-									}
-								}
+								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+								flag = true;
 							}
 							break;
 						case INS_Code.ld_methodVariable:
@@ -369,6 +288,102 @@ namespace juicescript.compiler.IL.Optimize
 						case INS_Code.ld_MultiName_Val:
 							{
 								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+								flag = true;
+							}
+							break;
+						case INS_Code.ld_instacneMember_Val:
+							{
+								INS_Ld_InstanceMember_Val ld_instanceMeberVal = (INS_Ld_InstanceMember_Val)instruction;
+								//Optimizer_Block.cs 里，已经排除instance.index<0的情况
+
+								//if (ld_instanceMeberVal.instance.index < 0)
+								//{
+								//	int scopeid = -ld_instanceMeberVal.instance.index - 1;
+								//	var scope = method.Body._link_codescope;
+
+								//	while (scope.index != scopeid)
+								//	{
+								//		scope = scope.Parent;
+								//	}
+
+								//	switch (scope.Kind)
+								//	{
+								//		case CodeScopeKind.Script:
+								//			result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.global, scope.Container) });
+								//			flag = true;
+								//			break;
+								//		case CodeScopeKind.Instance:
+								//			{
+								//				var asinstance = (ASInstance)scope.Container;
+								//				if (asinstance.Flags.HasFlag(ClassFlags.Struct))
+								//				{
+								//					result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.Struct, asinstance) });
+								//					flag = true;
+								//				}
+								//				else if (asinstance.Flags.HasFlag(ClassFlags.Vector))
+								//				{
+								//					throw new InvalidOperationException();
+								//				}
+								//				else
+								//				{
+								//					result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.obj_maybeCacheable, scope.Container) });
+								//					flag = true;
+								//				}
+								//			}
+								//			break;
+								//		case CodeScopeKind.Class:
+								//			result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.asclass, scope.Container) });
+								//			flag = true;
+								//			break;
+								//		case CodeScopeKind.Method:
+								//			result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.method, scope.Container) });
+								//			flag = true;
+								//			break;
+								//		default:
+								//			break;
+								//	}
+
+								//}
+								//else
+								{
+									if (stack_classes.ContainsKey(ld_instanceMeberVal.instance.index))
+									{
+										ASClass cls = stack_classes[ld_instanceMeberVal.instance.index];
+										var member = cls._link_codescope.Members[(int)ld_instanceMeberVal.scopemember_index];
+										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(member.TypeKind) });
+
+										flag = true;
+									}
+									else
+									{
+
+										if (result.Any(r => r.Key.GetDef().Contains(ld_instanceMeberVal.instance)))
+										{
+											var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_instanceMeberVal.instance)).Value;
+											if (v.Count == 1 && v[0].Obj != null) //count==1,防止出现多个def的情况 多def还有可能多个mv到同一个目标，SSA后可能出现
+											{
+												Debug.Assert(v[0].Obj is ASInstance);
+
+												var member = ((ASInstance)v[0].Obj)._link_codescope.Members[(int)ld_instanceMeberVal.scopemember_index];
+												result.Add(instruction, new List<InstructionDef>() { FromTypeKind(member.TypeKind) });
+
+												flag = true;
+											}
+											else
+											{
+												result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+												flag = true;
+											}
+										}
+										else
+										{
+											//等下一轮
+											//throw new NotImplementedException();
+										}
+									}
+								}
+
+
 								flag = true;
 							}
 							break;
@@ -488,7 +503,7 @@ namespace juicescript.compiler.IL.Optimize
 													result.Add(instruction, new List<InstructionDef>()
 												{
 													new InstructionDef(InstructionDefType.method,
-													((ASContainer)d.Obj)._vtable.Items[ (int)ld_Method.const_index ] )
+													((ASContainer)d.Obj)._vtable.Items[ (int)ld_Method.const_index ].Trait.Method )
 												});
 													flag = true;
 												}
@@ -501,7 +516,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Number)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Number)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -515,7 +530,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Boolean)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Boolean)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -523,7 +538,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Int)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Int)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -531,7 +546,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Uint)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Uint)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -539,7 +554,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.SByte)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.SByte)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -547,7 +562,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Byte)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Byte)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -555,7 +570,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Short)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Short)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -563,7 +578,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.UShort)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.UShort)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -571,7 +586,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Float)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Float)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -584,7 +599,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.String)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.String)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															//throw new InvalidOperationException();
@@ -593,7 +608,7 @@ namespace juicescript.compiler.IL.Optimize
 															result.Add(instruction, new List<InstructionDef>()
 														{
 															new InstructionDef(InstructionDefType.method,
-															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.String)).Instance._vtable.Items[(int) ld_Method.const_index] )
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.String)).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 														});
 															flag = true;
 															break;
@@ -616,7 +631,7 @@ namespace juicescript.compiler.IL.Optimize
 											result.Add(instruction, new List<InstructionDef>()
 										{
 											new InstructionDef(InstructionDefType.method,
-											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index] )
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 										});
 											flag = true;
 											break;
@@ -627,7 +642,7 @@ namespace juicescript.compiler.IL.Optimize
 											result.Add(instruction, new List<InstructionDef>()
 										{
 											new InstructionDef(InstructionDefType.method,
-											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index] )
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 										});
 											flag = true;
 											break;
@@ -635,7 +650,7 @@ namespace juicescript.compiler.IL.Optimize
 											result.Add(instruction, new List<InstructionDef>()
 										{
 											new InstructionDef(InstructionDefType.method,
-											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index] )
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 										});
 											flag = true;
 											break;
@@ -643,7 +658,7 @@ namespace juicescript.compiler.IL.Optimize
 											result.Add(instruction, new List<InstructionDef>()
 										{
 											new InstructionDef(InstructionDefType.method,
-											allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Function).Instance._vtable.Items[(int) ld_Method.const_index] )
+											allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Function).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 										});
 											flag = true;
 											break;
@@ -652,7 +667,7 @@ namespace juicescript.compiler.IL.Optimize
 											result.Add(instruction, new List<InstructionDef>()
 										{
 											new InstructionDef(InstructionDefType.method,
-											allClasses.First(c=>c.Type_identifier == (ulong)TypeKind.Array).Instance._vtable.Items[ (int)ld_Method.const_index ] )
+											allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Array).Instance._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 										});
 											flag = true;
 											break;
@@ -661,7 +676,7 @@ namespace juicescript.compiler.IL.Optimize
 											result.Add(instruction, new List<InstructionDef>()
 										{
 											new InstructionDef(InstructionDefType.method,
-											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index] )
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_Method.const_index].Trait.Method )
 										});
 											flag = true;
 											break;
@@ -688,7 +703,7 @@ namespace juicescript.compiler.IL.Optimize
 								RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[fbox.HeapPtr & 0xffffff];
 								Debug.Assert(heapInstance.Kind == RtHeapTypeKind.MethodScope);
 
-								var m = ((ASClass)heapInstance.Type).Instance._vtable.Items[((RtMethodScope)heapInstance).ParentPtr];
+								var m = ((ASClass)heapInstance.Type).Instance._vtable.Items[((RtMethodScope)heapInstance).ParentPtr].Trait.Method;
 								result.Add(instruction, new List<InstructionDef>()
 							{
 								new InstructionDef(InstructionDefType.method,m )
@@ -709,7 +724,7 @@ namespace juicescript.compiler.IL.Optimize
 
 								result.Add(instruction, new List<InstructionDef>()
 							{
-								new InstructionDef(InstructionDefType.method, @class.Instance._vtable.Items[(int) ld_Method_Interface.const_index ]  )
+								new InstructionDef(InstructionDefType.method, @class.Instance._vtable.Items[(int) ld_Method_Interface.const_index ].Trait.Method  )
 							});
 
 								flag = true;
@@ -1321,7 +1336,7 @@ namespace juicescript.compiler.IL.Optimize
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
 									{
 
-										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((VTableItem)typeDef.Obj).Trait.Method.ReturnTypeKind) });
+										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((ASMethod)typeDef.Obj).ReturnTypeKind) });
 										flag = true;
 									}
 									else
@@ -1351,7 +1366,7 @@ namespace juicescript.compiler.IL.Optimize
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
 									{
-										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((VTableItem)typeDef.Obj).Trait.Method.ReturnTypeKind) });
+										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((ASMethod)typeDef.Obj).ReturnTypeKind) });
 										flag = true;
 									}
 									else
@@ -1381,7 +1396,7 @@ namespace juicescript.compiler.IL.Optimize
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
 									{
-										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((VTableItem)typeDef.Obj).Trait.Method.ReturnTypeKind) });
+										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((ASMethod)typeDef.Obj).ReturnTypeKind) });
 										flag = true;
 									}
 									else
@@ -1679,6 +1694,16 @@ namespace juicescript.compiler.IL.Optimize
 								//无定值
 							}
 							break;
+						case INS_Code.store_MultiName:
+							{ 
+								//无定值
+							}
+							break;
+						case INS_Code.store_instanceMember:
+							{
+								//无定值
+							}
+							break;
 						case INS_Code.array_vector_initelement:
 							{
 								//无定值
@@ -1704,6 +1729,239 @@ namespace juicescript.compiler.IL.Optimize
 
 							}
 							break;
+						case INS_Code.O_ld_method:
+							{
+								//逻辑同 ld_method.
+								INS_O_Ld_Method ld_O_Method = (INS_O_Ld_Method)instruction;
+
+								if (result.Any(r => r.Key.GetDef().Contains(ld_O_Method.instance)))
+								{
+									var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_O_Method.instance));
+									var index = v.Key.GetDef().IndexOf(ld_O_Method.instance);
+									var d = v.Value[index];
+
+									switch (d.DefType)
+									{
+										case InstructionDefType.unkown:
+											result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+											flag = true;
+											break;
+										case InstructionDefType.primitive:
+											//throw new NotImplementedException();
+											{
+												if (d.Obj is ASInstance)
+												{
+													result.Add(instruction, new List<InstructionDef>()
+												{
+													new InstructionDef(InstructionDefType.method,
+													((ASContainer)d.Obj)._vtable.Items[ (int)ld_O_Method.const_index ].Trait.Method )
+												});
+													flag = true;
+												}
+												else if (d.Obj is NaNBoxing)
+												{
+													NaNBoxing val = (NaNBoxing)d.Obj;
+													switch (val.ValueType)
+													{
+														case NaNBoxing.BoxType.Number:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Number)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Undefined:
+															throw new InvalidOperationException();
+															break;
+														case NaNBoxing.BoxType.Null:
+															throw new InvalidOperationException();
+															break;
+														case NaNBoxing.BoxType.Boolean:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Boolean)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Int:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Int)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Uint:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Uint)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Sbyte:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.SByte)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Byte:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Byte)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Short:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Short)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.UShort:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.UShort)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Float:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Float)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.HeapPtr:
+
+															ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(val.HeapPtr >> 24);
+															Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.String));
+
+
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.String)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															//throw new InvalidOperationException();
+															break;
+														case NaNBoxing.BoxType.LocalString:
+															result.Add(instruction, new List<InstructionDef>()
+														{
+															new InstructionDef(InstructionDefType.method,
+															(allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.String)).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+														});
+															flag = true;
+															break;
+														case NaNBoxing.BoxType.Fault:
+															throw new InvalidOperationException();
+															break;
+														default:
+															break;
+													}
+
+												}
+												else
+												{
+													//无法确认
+												}
+											}
+											break;
+										case InstructionDefType.obj_maybeCacheable:
+										case InstructionDefType.obj:
+											result.Add(instruction, new List<InstructionDef>()
+										{
+											new InstructionDef(InstructionDefType.method,
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+										});
+											flag = true;
+											break;
+										case InstructionDefType.global:
+											throw new InvalidOperationException();
+											break;
+										case InstructionDefType.Struct:
+											result.Add(instruction, new List<InstructionDef>()
+										{
+											new InstructionDef(InstructionDefType.method,
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+										});
+											flag = true;
+											break;
+										case InstructionDefType.asclass:
+											result.Add(instruction, new List<InstructionDef>()
+										{
+											new InstructionDef(InstructionDefType.method,
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+										});
+											flag = true;
+											break;
+										case InstructionDefType.method:
+											result.Add(instruction, new List<InstructionDef>()
+										{
+											new InstructionDef(InstructionDefType.method,
+											allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Function).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+										});
+											flag = true;
+											break;
+										case InstructionDefType.array:
+
+											result.Add(instruction, new List<InstructionDef>()
+										{
+											new InstructionDef(InstructionDefType.method,
+											allClasses.First(c => c.Type_identifier ==(ulong) TypeKind.Array).Instance._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+										});
+											flag = true;
+											break;
+										case InstructionDefType.vector:
+
+											result.Add(instruction, new List<InstructionDef>()
+										{
+											new InstructionDef(InstructionDefType.method,
+											((ASContainer) d.Obj)._vtable.Items[(int) ld_O_Method.const_index].Trait.Method )
+										});
+											flag = true;
+											break;
+										default:
+											break;
+									}
+
+
+								}
+								else
+								{
+									//等下一轮 
+								}
+							}
+							break;
+						case INS_Code.O_ld_interface_method:
+							{
+								INS_O_Ld_Method_Interface ld_O_Method_Interface = (INS_O_Ld_Method_Interface)instruction;
+								var box = constants[ld_O_Method_Interface.class_id];
+
+								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
+								Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+								ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
+								ASClass @class = allClasses.First(c => c.Type_identifier == classid);
+
+								result.Add(instruction, new List<InstructionDef>()
+							{
+								new InstructionDef(InstructionDefType.method, @class.Instance._vtable.Items[(int) ld_O_Method_Interface.const_index ].Trait.Method  )
+							});
+
+								flag = true;
+							}
+							break;
 						case INS_Code.O_Call:
 							{
 								INS_O_Call o_Call = (INS_O_Call)instruction;
@@ -1715,7 +1973,7 @@ namespace juicescript.compiler.IL.Optimize
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
 									{
-										result.Add(instruction, new List<InstructionDef>() { FromTypeKind( ((ASMethod)typeDef.Obj).ReturnTypeKind ) });
+										result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((ASMethod)typeDef.Obj).ReturnTypeKind) });
 										flag = true;
 									}
 									else
