@@ -134,10 +134,9 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
-		private static void OptimizeAndEncodeInstruction(BasicBlock basicBlock, ControlFlowGraph cfg, NaNBoxing[] constants)
+		private static void OptimizeLDREF(BasicBlock basicBlock, ControlFlowGraph cfg, NaNBoxing[] constants)
 		{
-			EncodeMessageIntoStoreVar(basicBlock, cfg);
-
+			
 
 			//查找ld_MultiNameL_Ref,再查找后续是否是把值保存到引用里。如果是，并且中间没有使用这个引用，则把指令移动到保存指令前面,然后合并为直接存值指令
 			{
@@ -336,7 +335,9 @@ namespace juicescript.compiler.IL.Optimize
 							{
 								continue;
 							}
-							if (basicBlock.Instructions.Skip(k + 1).Any(ins => (ins.GetUse().Contains(instruction.dst) || ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier))
+							if (basicBlock.Instructions.Skip(k + 1).Any(
+								ins => (ins.GetUse().Contains(instruction.dst)
+								|| ins.GetDef().Contains(instruction.dst)) && ins.INS_Code != INS_Code.expression_barrier))
 							{
 								continue;
 							}
@@ -499,6 +500,12 @@ namespace juicescript.compiler.IL.Optimize
 			}
 
 		}
+
+
+		
+
+
+
 
 		/// <summary>
 		/// 查找公共的支配节点
@@ -1120,7 +1127,7 @@ namespace juicescript.compiler.IL.Optimize
 					o_Ld_Function_BindGLobal.const_index = group.Key;
 					o_Ld_Function_BindGLobal.dst.index = newslot; 
 
-					if (lineat != null)
+					if (lineat != null && dom.TryStmtId == 0)
 					{
 						int insert_at = dom.Instructions.IndexOf(lineat);
 						dom.Instructions.Insert(insert_at, o_Ld_Function_BindGLobal);
@@ -1197,7 +1204,7 @@ namespace juicescript.compiler.IL.Optimize
 				.Where((i) =>
 				{
 					var defat = FindStackSlotDefAt(i.instance, cfg);
-
+					// defat 必须等于1，否则就是SSA的多路合并,不可提取
 					//若instance小于0，则在上下文读取，那么绝不可能被改变。
 
 					return i.instance.index<0 || (defat.Count == 1 && (defat.All(d => d.Item1.INS_Code == INS_Code.ld_methodVariable
@@ -1306,7 +1313,7 @@ namespace juicescript.compiler.IL.Optimize
 						}
 						var lineat = dom.Instructions.FirstOrDefault(i => method.Contains(i));
 
-						if (lineat != null)
+						if (lineat != null) 
 						{
 							int insert_at = dom.Instructions.IndexOf(lineat);
 							dom.Instructions.Insert(insert_at, o_Ld_Method);
@@ -1539,6 +1546,161 @@ namespace juicescript.compiler.IL.Optimize
 			return slotCount;
 		}
 
+/// <summary>
+/// 触发可能性过低，不管了
+/// </summary>
+/// <param name="ins"></param>
+/// <param name="loop"></param>
+/// <returns></returns>
+////		private static int OptimizeCommLdRef(ControlFlowGraph cfg, int slotcount, CompileContext context)
+////		{
+////			/* 目前看来，只有这种代码可能触发
+////			 (
+////function()
+////{var perm;// = Array(3);
+////var k;
+
+
+//// while (0) {
+	 
+////	k= ((k = perm[0]) == 0);
+	 
+////	perm[0] = 0;
+////	trace(k);
+//// }
+ 
+ 
+////})();
+////			 */
+
+
+////			if (cfg.Blocks.Count == 0)
+////				return slotcount;
+////			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+////				return slotcount;
+
+
+////			foreach (var l in cfg.toplevelloops)
+////			{
+////				Queue<ControlFlowGraph.looptreenode> loops = new Queue<ControlFlowGraph.looptreenode>();
+////				loops.Enqueue(l);
+
+////				Stack<NaturalLoop> stack=new Stack<NaturalLoop>();
+////				while (loops.Count>0)
+////				{
+////					var n = loops.Dequeue();
+////					foreach (var c in n.children)
+////					{
+////						loops.Enqueue(c);
+////					}
+////					stack.Push(n.loop);
+////				}
+
+////				while (stack.Count > 0)
+////				{
+////					var loop = stack.Pop();
+
+////					var check = loop.nodes.SelectMany(b => b.Instructions).Where( i=>i.INS_Code == INS_Code.ld_MultiNameL_Ref ).Select(i=>(INS_Ld_MultiNameL_Ref)i).ToList();
+
+////					foreach (var ins in check)
+////					{
+////						bool canmoveup = true;
+
+////						var changes = loop.nodes.SelectMany(b => b.Instructions).Where(i =>
+////						{
+////							var def = i.GetDef();
+////							return def.Contains(ins.name) || def.Contains(ins.instance);
+////						}).ToArray();
+
+						
+////						foreach (var test in changes )
+////						{
+////							if (AllReachable(test, loop).Contains(ins))
+////							{ 
+////								canmoveup=false;
+////								break;
+////							}
+////						}
+
+////						if (canmoveup)
+////						{
+////							var startblock = loop.nodes.First(b => b.Instructions.Contains(ins));
+////							startblock.Instructions.Remove(ins);
+
+////							Debug.Assert(loop.firstNode.Predecessors.Contains(loop.firstNode.Idom));
+////							var toinsert = loop.firstNode.Idom;
+
+////							Debug.Assert(toinsert.Instructions[toinsert.Instructions.Count - 1].INS_Code != INS_Code.goto_flag);
+
+////							toinsert.Instructions.Add(ins);
+////						}
+////					}				
+////				}
+
+////			}
+
+
+////			return slotcount;
+////		}
+
+		private static IEnumerable<Instruction> AllReachable(Instruction ins, NaturalLoop loop)
+		{
+			var startblock = loop.nodes.First(b => b.Instructions.Contains(ins));
+
+			int at = startblock.Instructions.IndexOf(ins);
+
+			Stack<BasicBlock> path = new Stack<BasicBlock>();
+
+			for (int i = at + 1; i < startblock.Instructions.Count; i++)
+			{
+				yield return startblock.Instructions[i];
+			}
+
+			foreach (var item in startblock.Successors)
+			{
+				if(item != startblock && loop.nodes.Contains(item))
+					path.Push(item);
+				else if (item == startblock)
+				{
+					for (int i = 0; i < at; i++)
+					{
+						yield return startblock.Instructions[i];
+					}
+				}
+			}
+
+			HashSet<BasicBlock> visited=new HashSet<BasicBlock>();
+
+			while (path.Count>0)
+			{
+				var b = path.Pop();
+
+				visited.Add(b);
+
+				for (int i = 0; i < b.Instructions.Count; i++)
+				{
+					yield return b.Instructions[i];
+				}
+
+				foreach (var item in b.Successors)
+				{
+					if (item != startblock && loop.nodes.Contains(item) && !visited.Contains(item))
+						path.Push(item);
+					else if (item == startblock)
+					{
+						for (int i = 0; i < at; i++)
+						{
+							yield return startblock.Instructions[i];
+						}
+					}
+				}
+			}
+
+
+
+
+
+		}
 
 
 

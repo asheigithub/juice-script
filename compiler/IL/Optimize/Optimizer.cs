@@ -475,16 +475,21 @@ namespace juicescript.compiler.IL.Optimize
 
 			ControlFlowGraphBuilder.BuildDomTree(cfg);
 
+			
+
 			for (int i = 0; i < cfg.Blocks.Count; i++)
 			{
-				OptimizeAndEncodeInstruction(cfg.Blocks[i], cfg, constants);
+				EncodeMessageIntoStoreVar(cfg.Blocks[i], cfg);
+
+				OptimizeLDREF(cfg.Blocks[i], cfg, constants);
+
 			}
 
 			slotCount = OptimizeBlockLdConst(cfg,slotCount);
 
 			slotCount = OptimizeLdStaticMember(cfg,slotCount,context); //外提静态成员。
 
-			slotCount = OptimizeLdFunctionBindGlobal(cfg,slotCount);//提取ld_function_bindglobal的公共部分.
+			slotCount = OptimizeLdFunctionBindGlobal(cfg,slotCount);//提取ld_function_bindglobal的公共部分.[注意try catch的情况，必须提取到try块的头]
 
 			slotCount = OptimizeBlockSSAVariable(cfg,slotCount,context);
 
@@ -492,7 +497,7 @@ namespace juicescript.compiler.IL.Optimize
 			slotCount = OptimizeLdMethod(cfg, slotCount, context);
 			slotCount = OptimizeLdInterfaceMethod(cfg, slotCount, context);
 
-
+			
 			slotCount = RemoveBlockMove(cfg,slotCount); //干涉图移除move
 
 			RemoveBarrier(cfg,context); 

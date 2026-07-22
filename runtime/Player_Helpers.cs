@@ -10685,12 +10685,12 @@ namespace juicescript.runtime
 			LoadStackLocater(&source, PC);
 
 
-			Debug.Assert(stackslots[target.index].ValueType == NaNBoxing.BoxType.HeapPtr);
-			
+			var refobj = stackslots[target.index];
 
+			
 			RtHeapBase cache = Context.GC.Heap[stackslots[target.index].HeapPtr];
 
-			if (stackslots[target.index].HeapKind == (byte)RtHeapTypeKind.CLOSURE)
+			if (refobj.HeapKind == (byte)RtHeapTypeKind.CLOSURE)
 			{
 				RaiseReferenceError_WriteToMethod(ref error, (ASMethodBody)cache.Type, ((RtClosure)cache)._ref_as_type.QName);
 

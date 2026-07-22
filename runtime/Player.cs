@@ -13301,8 +13301,10 @@ namespace juicescript.runtime
 								//LoadStackLocater(&target, &PC);
 								target.index = dst_index;
 
-								var v = stackslots[sourc.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[sourc.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[sourc.index].HeapPtr],
-									 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index);
+								var refobj = stackslots[sourc.index];
+
+								var v = refobj.HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? refobj : LoadValue((RtStackCache)Context.GC.Heap[refobj.HeapPtr],
+										 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index);
 								if (error.raised)
 								{
 									goto flag_handle_error;
