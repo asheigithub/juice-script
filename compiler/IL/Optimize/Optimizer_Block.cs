@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
@@ -1546,102 +1547,352 @@ namespace juicescript.compiler.IL.Optimize
 			return slotCount;
 		}
 
-/// <summary>
-/// 触发可能性过低，不管了
-/// </summary>
-/// <param name="ins"></param>
-/// <param name="loop"></param>
-/// <returns></returns>
-////		private static int OptimizeCommLdRef(ControlFlowGraph cfg, int slotcount, CompileContext context)
-////		{
-////			/* 目前看来，只有这种代码可能触发
-////			 (
-////function()
-////{var perm;// = Array(3);
-////var k;
+		/// <summary>
+		/// 触发可能性过低，不管了
+		/// </summary>
+		/// <param name="ins"></param>
+		/// <param name="loop"></param>
+		/// <returns></returns>
+		////		private static int OptimizeCommLdRef(ControlFlowGraph cfg, int slotcount, CompileContext context)
+		////		{
+		////			/* 目前看来，只有这种代码可能触发
+		////			 (
+		////function()
+		////{var perm;// = Array(3);
+		////var k;
 
 
-//// while (0) {
-	 
-////	k= ((k = perm[0]) == 0);
-	 
-////	perm[0] = 0;
-////	trace(k);
-//// }
- 
- 
-////})();
-////			 */
+		//// while (0) {
+
+		////	k= ((k = perm[0]) == 0);
+
+		////	perm[0] = 0;
+		////	trace(k);
+		//// }
 
 
-////			if (cfg.Blocks.Count == 0)
-////				return slotcount;
-////			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
-////				return slotcount;
+		////})();
+		////			 */
 
 
-////			foreach (var l in cfg.toplevelloops)
-////			{
-////				Queue<ControlFlowGraph.looptreenode> loops = new Queue<ControlFlowGraph.looptreenode>();
-////				loops.Enqueue(l);
-
-////				Stack<NaturalLoop> stack=new Stack<NaturalLoop>();
-////				while (loops.Count>0)
-////				{
-////					var n = loops.Dequeue();
-////					foreach (var c in n.children)
-////					{
-////						loops.Enqueue(c);
-////					}
-////					stack.Push(n.loop);
-////				}
-
-////				while (stack.Count > 0)
-////				{
-////					var loop = stack.Pop();
-
-////					var check = loop.nodes.SelectMany(b => b.Instructions).Where( i=>i.INS_Code == INS_Code.ld_MultiNameL_Ref ).Select(i=>(INS_Ld_MultiNameL_Ref)i).ToList();
-
-////					foreach (var ins in check)
-////					{
-////						bool canmoveup = true;
-
-////						var changes = loop.nodes.SelectMany(b => b.Instructions).Where(i =>
-////						{
-////							var def = i.GetDef();
-////							return def.Contains(ins.name) || def.Contains(ins.instance);
-////						}).ToArray();
-
-						
-////						foreach (var test in changes )
-////						{
-////							if (AllReachable(test, loop).Contains(ins))
-////							{ 
-////								canmoveup=false;
-////								break;
-////							}
-////						}
-
-////						if (canmoveup)
-////						{
-////							var startblock = loop.nodes.First(b => b.Instructions.Contains(ins));
-////							startblock.Instructions.Remove(ins);
-
-////							Debug.Assert(loop.firstNode.Predecessors.Contains(loop.firstNode.Idom));
-////							var toinsert = loop.firstNode.Idom;
-
-////							Debug.Assert(toinsert.Instructions[toinsert.Instructions.Count - 1].INS_Code != INS_Code.goto_flag);
-
-////							toinsert.Instructions.Add(ins);
-////						}
-////					}				
-////				}
-
-////			}
+		////			if (cfg.Blocks.Count == 0)
+		////				return slotcount;
+		////			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+		////				return slotcount;
 
 
-////			return slotcount;
-////		}
+		////			foreach (var l in cfg.toplevelloops)
+		////			{
+		////				Queue<ControlFlowGraph.looptreenode> loops = new Queue<ControlFlowGraph.looptreenode>();
+		////				loops.Enqueue(l);
+
+		////				Stack<NaturalLoop> stack=new Stack<NaturalLoop>();
+		////				while (loops.Count>0)
+		////				{
+		////					var n = loops.Dequeue();
+		////					foreach (var c in n.children)
+		////					{
+		////						loops.Enqueue(c);
+		////					}
+		////					stack.Push(n.loop);
+		////				}
+
+		////				while (stack.Count > 0)
+		////				{
+		////					var loop = stack.Pop();
+
+		////					var check = loop.nodes.SelectMany(b => b.Instructions).Where( i=>i.INS_Code == INS_Code.ld_MultiNameL_Ref ).Select(i=>(INS_Ld_MultiNameL_Ref)i).ToList();
+
+		////					foreach (var ins in check)
+		////					{
+		////						bool canmoveup = true;
+
+		////						var changes = loop.nodes.SelectMany(b => b.Instructions).Where(i =>
+		////						{
+		////							var def = i.GetDef();
+		////							return def.Contains(ins.name) || def.Contains(ins.instance);
+		////						}).ToArray();
+
+
+		////						foreach (var test in changes )
+		////						{
+		////							if (AllReachable(test, loop).Contains(ins))
+		////							{ 
+		////								canmoveup=false;
+		////								break;
+		////							}
+		////						}
+
+		////						if (canmoveup)
+		////						{
+		////							var startblock = loop.nodes.First(b => b.Instructions.Contains(ins));
+		////							startblock.Instructions.Remove(ins);
+
+		////							Debug.Assert(loop.firstNode.Predecessors.Contains(loop.firstNode.Idom));
+		////							var toinsert = loop.firstNode.Idom;
+
+		////							Debug.Assert(toinsert.Instructions[toinsert.Instructions.Count - 1].INS_Code != INS_Code.goto_flag);
+
+		////							toinsert.Instructions.Add(ins);
+		////						}
+		////					}				
+		////				}
+
+		////			}
+
+
+		////			return slotcount;
+		////		}
+
+
+
+		struct groupkey : IEquatable<groupkey> 
+		{
+			public StackLocater v1;
+			public StackLocater v2;
+
+			public bool Equals(groupkey other)
+			{
+				return v1.Equals(other.v1) && v2.Equals(other.v2);
+			}
+
+			public override int GetHashCode()
+			{
+				return v1.GetHashCode()^ v2.GetHashCode();
+			}
+
+		}
+
+		private static int OptimizeCommExpr(ControlFlowGraph cfg, int slotcount, CompileContext context)
+		{
+			if (cfg.Blocks.Count == 0)
+				return slotcount;
+			if (cfg.Method.Flags.HasFlag(MethodFlags.ASYNC) || cfg.Method.Flags.HasFlag(MethodFlags.Generator)) //async里有问题，yield里有问题，需要在变量里保持值
+				return slotcount;
+
+			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
+
+			Dictionary<INS_Code, Tuple< Func<Instruction, groupkey>, Func<int,StackLocater,StackLocater,Instruction,Instruction> >> operators 
+				= new Dictionary<INS_Code, Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater,Instruction, Instruction>>>();
+			operators.Add(INS_Code.add,
+
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater,Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_Add)i).v1, v2 = ((INS_Add)i).v2}; }
+				,
+				(index, v1, v2,template) => { return new INS_Add(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
+				)
+					
+				);
+			operators.Add(INS_Code.sub,
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_Sub)i).v1, v2 = ((INS_Sub)i).v2 }; }
+				,
+				(index, v1, v2, template) => { return new INS_Sub(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
+				)
+
+				);
+			operators.Add(INS_Code.multiply,
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_Multiply)i).v1, v2 = ((INS_Multiply)i).v2 }; }
+				,
+				(index, v1, v2, template) => { return new INS_Multiply(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
+				)
+
+				);
+
+			operators.Add(INS_Code.div,
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_Div)i).v1, v2 = ((INS_Div)i).v2 }; }
+				,
+				(index, v1, v2, template) => { return new INS_Div(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
+				)
+
+				);
+
+			operators.Add(INS_Code.modulus,
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_Modulus)i).v1, v2 = ((INS_Modulus)i).v2 }; }
+				,
+				(index, v1, v2, template) => { return new INS_Modulus(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
+				)
+
+				);
+
+			foreach ( var op in operators )
+			{
+
+			lbl_retry:
+
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == op.Key)								
+					;
+
+				foreach (var group in all.GroupBy( i=> op.Value.Item1(i)   ))
+				{
+					if (group.Count() > 1)
+					{
+						var v1 = group.Key.v1;
+						var v2 = group.Key.v2;
+
+						var def1 = FindStackSlotDefAt(v1, cfg);
+						var def2 = FindStackSlotDefAt(v2, cfg);
+
+						if (def1.Count == 1 && def2.Count == 1 && instructionType.ContainsKey(def1[0].Item1) && instructionType.ContainsKey(def2[0].Item1))
+						{
+							if (instructionType[def1[0].Item1][def1[0].Item2].DefType == InstructionDefType.primitive &&
+								instructionType[def2[0].Item1][def2[0].Item2].DefType == InstructionDefType.primitive
+								)
+							{
+								var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => group.Contains(i))).ToList();
+								var dom = FindCommDom(atblocks);
+
+								int defat1 = dom.Instructions.IndexOf(def1[0].Item1);
+								int defat2 = dom.Instructions.IndexOf(def2[0].Item1);
+
+								int at = Math.Max(defat1, defat2);
+
+								int newslot = slotcount++;
+								//INS_Add add = new INS_Add(group.First().token);
+								//add.dst.index = newslot;
+								//add.v1 = v1;
+								//add.v2 = v2;
+
+								var newins = op.Value.Item2(newslot, v1, v2, group.First());
+
+								instructionType.Add(newins, new List<InstructionDef> { new InstructionDef(InstructionDefType.primitive, TypeKind.Any  ) });
+
+
+								if (at > -1)
+								{
+									dom.Instructions.Insert(at + 1, newins);
+								}
+								else
+								{
+									if (dom.TryStmtId == 0 && dom.Instructions.Any(i => group.Contains(i)))
+									{
+										at = dom.Instructions.FindIndex(i => group.Contains(i));
+										dom.Instructions.Insert(at, newins);
+
+									}
+									else
+									{
+										if (dom.Instructions.Count > 0 &&
+												(dom.Instructions[0].INS_Code == INS_Code.flag
+												||
+												dom.Instructions[0].INS_Code == INS_Code.try_enter
+												||
+												dom.Instructions[0].INS_Code == INS_Code.catch_enter
+												||
+												dom.Instructions[0].INS_Code == INS_Code.finally_enter
+												)
+												)
+										{
+											dom.Instructions.Insert(1, newins);
+										}
+										else
+										{
+											dom.Instructions.Insert(0, newins);
+										}
+									}
+								}
+
+								foreach (var toremove in group)
+								{
+									Dictionary<int, int> replace = new Dictionary<int, int> { { toremove.dst.index, newslot } };
+
+									foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+									{
+										ins.RemappingSlots(replace);
+									}
+
+
+									var atblock = cfg.Blocks.First(b => b.Instructions.Contains(toremove));
+
+									atblock.Instructions.Remove(toremove);
+
+								}
+
+								goto lbl_retry;
+							}
+						}
+
+					}
+					else
+					{
+						var v1 = group.Key.v1;
+						var v2 = group.Key.v2;
+
+						var def1 = FindStackSlotDefAt(v1, cfg);
+						var def2 = FindStackSlotDefAt(v2, cfg);
+
+						if (def1.Count == 1 && def2.Count == 1 && instructionType.ContainsKey(def1[0].Item1) && instructionType.ContainsKey(def2[0].Item1))
+						{
+							if (instructionType[def1[0].Item1][def1[0].Item2].DefType == InstructionDefType.primitive &&
+								instructionType[def2[0].Item1][def2[0].Item2].DefType == InstructionDefType.primitive
+								)
+							{
+								//检测是否可以循环不变量外提
+								var ins = group.First();
+
+								var tloop = cfg.toplevelloops.FirstOrDefault( l=>l.loop.nodes.Any(b=>b.Instructions.Contains(ins)) );
+
+								if (tloop != null)
+								{
+									var atblock = cfg.Blocks.First(b => b.Instructions.Contains(ins));
+									var loop = tloop.FindLoop(atblock);
+
+									if (!loop.loop.nodes.Any(b => b.Instructions.Contains(def1[0].Item1) || b.Instructions.Contains(def2[0].Item1)))
+									{
+										//定义不在循环内
+										Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+										var dom = loop.loop.firstNode.Idom;
+
+										//移除
+										atblock.Instructions.Remove(ins);
+
+
+										int defat1 = dom.Instructions.IndexOf(def1[0].Item1);
+										int defat2 = dom.Instructions.IndexOf(def2[0].Item1);
+
+										int at = Math.Max(defat1, defat2);
+
+										if (at > -1)
+										{
+											dom.Instructions.Insert(at + 1, ins);
+										}
+										else
+										{
+											Debug.Assert(dom.Instructions[dom.Instructions.Count - 1].INS_Code != INS_Code.goto_flag);
+
+											dom.Instructions.Add(ins);
+
+										}
+
+
+									}
+
+								}
+
+							}
+						}
+					}				
+				}
+			}
+
+
+
+
+
+
+
+			return slotcount;
+		}
+
 
 		private static IEnumerable<Instruction> AllReachable(Instruction ins, NaturalLoop loop)
 		{

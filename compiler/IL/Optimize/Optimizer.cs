@@ -497,6 +497,7 @@ namespace juicescript.compiler.IL.Optimize
 			slotCount = OptimizeLdMethod(cfg, slotCount, context);
 			slotCount = OptimizeLdInterfaceMethod(cfg, slotCount, context);
 
+			slotCount = OptimizeCommExpr(cfg, slotCount, context); //公共表达式
 			
 			slotCount = RemoveBlockMove(cfg,slotCount); //干涉图移除move
 
