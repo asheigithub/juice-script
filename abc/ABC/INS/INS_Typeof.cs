@@ -46,14 +46,16 @@ namespace juicescript.ABC.INS
 			return $"typeof  [{dst}] <- [{src}]";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+			//return new List<StackLocater> { dst };
+			yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { src };
+			//return new List<StackLocater> { src };
+			yield return src;
         }
 
         public override bool MaybeRaiseError()

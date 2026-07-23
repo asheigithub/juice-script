@@ -49,14 +49,18 @@ namespace juicescript.ABC.INS
             return $"Ld_RTQNameL_Ref [{dst}] <- [{instance}.{ns}::{name}]";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+            //return new List<StackLocater> { dst };
+            yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { instance, ns, name };
+            //return new List<StackLocater> { instance, ns, name };
+            yield return instance;
+            yield return ns;
+            yield return name;
         }
 
         public override bool MaybeRaiseError()

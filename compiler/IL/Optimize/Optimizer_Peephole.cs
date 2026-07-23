@@ -70,7 +70,7 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
-			var useless = list.Where(i => i.GetDef().Count > 0 && !list.Any(ii => ii != i && ii.GetUse().Intersect(i.GetDef()).Any()))
+			var useless = list.Where(i => i.GetDef().Count() > 0 && !list.Any(ii => ii != i && ii.GetUse().Intersect(i.GetDef()).Any()))
 				.Where(i => i.INS_Code == INS_Code.ld_const ||
 						i.INS_Code == INS_Code.ld_false ||
 						i.INS_Code == INS_Code.ld_true ||
@@ -100,7 +100,7 @@ namespace juicescript.compiler.IL.Optimize
 			foreach (var ins in instructions)
 			{
 				
-				var idef = ins.GetUse();
+				var idef = ins.GetUse().ToList();
 
 				for (int i = 0; i < idef.Count; i++)
 				{
@@ -134,7 +134,7 @@ namespace juicescript.compiler.IL.Optimize
 			var barriers = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code == INS_Code.expression_barrier);
 			foreach (var barrier in barriers)
 			{
-				var use = barrier.GetUse();//.RemoveAll( u => instructions.Any( i ) );
+				var use = barrier.GetUse().ToList();//.RemoveAll( u => instructions.Any( i ) );
 
 				var notuse = use.Where( u=> !instructions.Any( i=>i.GetUse().Contains(u) || i.GetDef().Contains(u) ) ).ToArray();
 

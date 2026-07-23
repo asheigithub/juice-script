@@ -41,13 +41,13 @@ namespace juicescript.ABC.INS
         /// 返回本指令对StackSlot槽的赋值目标(如果有)
         /// </summary>
         /// <returns></returns>
-        public abstract List<StackLocater> GetDef();
+        public abstract IEnumerable<StackLocater> GetDef();
 
         /// <summary>
         /// 返回本指令使用了栈上的哪些槽。
         /// </summary>
         /// <returns></returns>
-        public abstract List<StackLocater> GetUse();
+        public abstract IEnumerable<StackLocater> GetUse();
 
         /// <summary>
         /// 返回本指令是否有引发异常的可能。

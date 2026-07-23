@@ -19,14 +19,16 @@ namespace juicescript.ABC.INS
 
 		public StackLocater instacnce;
 
-		public override List<StackLocater> GetDef()
+		public override IEnumerable<StackLocater> GetDef()
 		{
-			return new List<StackLocater>() { dst};
+			//return new List<StackLocater>() { dst};
+			yield return dst;
 		}
 
-		public override List<StackLocater> GetUse()
+		public override IEnumerable<StackLocater> GetUse()
 		{
-			return new List<StackLocater>() { instacnce };
+			//return new List<StackLocater>() { instacnce };
+			yield return instacnce;
 		}
 
 		public override bool MaybeRaiseError()

@@ -486,7 +486,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any(r => r.Key.GetDef().Contains(ld_Method.instance)))
 								{
 									var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_Method.instance));
-									var index = v.Key.GetDef().IndexOf(ld_Method.instance);
+									var index = v.Key.GetDef().TakeWhile(k => !k.Equals(ld_Method.instance)).Count(); //.IndexOf(ld_Method.instance);
 									var d = v.Value[index];
 
 									switch (d.DefType)
@@ -746,7 +746,7 @@ namespace juicescript.compiler.IL.Optimize
 									if (result.Any(r => r.Key.GetDef().Contains(store_MethodVariable.dst)))
 									{
 										var kv = result.First(r => r.Key.GetDef().Contains(store_MethodVariable.dst));
-												int index = kv.Key.GetDef().IndexOf(store_MethodVariable.dst);
+												int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(store_MethodVariable.dst)).Count();
 
 												var d = kv.Value[index];
 
@@ -810,7 +810,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any(r => r.Key.GetDef().Contains(move.source)))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(move.source));
-									int index = kv.Key.GetDef().IndexOf(move.source);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(move.source)).Count();
 
 									var d = kv.Value[index];
 
@@ -849,7 +849,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any(r => r.Key.GetDef().Contains(positive.src)))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(positive.src));
-									int index = kv.Key.GetDef().IndexOf(positive.src);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(positive.src)).Count();
 
 									var d = kv.Value[index];
 
@@ -884,7 +884,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any(r => r.Key.GetDef().Contains(neg.src)))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(neg.src));
-									int index = kv.Key.GetDef().IndexOf(neg.src);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(neg.src)).Count();
 
 									var d = kv.Value[index];
 
@@ -920,8 +920,8 @@ namespace juicescript.compiler.IL.Optimize
 									var kv1 = result.First(r => r.Key.GetDef().Contains(multiply.v1));
 									var kv2 = result.First(r => r.Key.GetDef().Contains(multiply.v2));
 
-									int index1 = kv1.Key.GetDef().IndexOf(multiply.v1);
-									int index2 = kv2.Key.GetDef().IndexOf(multiply.v2);
+									int index1 = kv1.Key.GetDef().TakeWhile(k => !k.Equals(multiply.v1)).Count();
+									int index2 = kv2.Key.GetDef().TakeWhile(k => !k.Equals(multiply.v2)).Count();
 
 									var d1 = kv1.Value[index1];
 									var d2 = kv2.Value[index2];
@@ -956,8 +956,8 @@ namespace juicescript.compiler.IL.Optimize
 									var kv1 = result.First(r => r.Key.GetDef().Contains(div.v1));
 									var kv2 = result.First(r => r.Key.GetDef().Contains(div.v2));
 
-									int index1 = kv1.Key.GetDef().IndexOf(div.v1);
-									int index2 = kv2.Key.GetDef().IndexOf(div.v2);
+									int index1 = kv1.Key.GetDef().TakeWhile(k => !k.Equals(div.v1)).Count();
+									int index2 = kv2.Key.GetDef().TakeWhile(k => !k.Equals(div.v2)).Count();
 
 									var d1 = kv1.Value[index1];
 									var d2 = kv2.Value[index2];
@@ -992,8 +992,8 @@ namespace juicescript.compiler.IL.Optimize
 									var kv1 = result.First(r => r.Key.GetDef().Contains(add.v1));
 									var kv2 = result.First(r => r.Key.GetDef().Contains(add.v2));
 
-									int index1 = kv1.Key.GetDef().IndexOf(add.v1);
-									int index2 = kv2.Key.GetDef().IndexOf(add.v2);
+									int index1 = kv1.Key.GetDef().TakeWhile(k => !k.Equals(add.v1)).Count();
+									int index2 = kv2.Key.GetDef().TakeWhile(k => !k.Equals(add.v2)).Count();
 
 									var d1 = kv1.Value[index1];
 									var d2 = kv2.Value[index2];
@@ -1028,8 +1028,8 @@ namespace juicescript.compiler.IL.Optimize
 									var kv1 = result.First(r => r.Key.GetDef().Contains(sub.v1));
 									var kv2 = result.First(r => r.Key.GetDef().Contains(sub.v2));
 
-									int index1 = kv1.Key.GetDef().IndexOf(sub.v1);
-									int index2 = kv2.Key.GetDef().IndexOf(sub.v2);
+									int index1 = kv1.Key.GetDef().TakeWhile(k => !k.Equals(sub.v1)).Count();
+									int index2 = kv2.Key.GetDef().TakeWhile(k => !k.Equals(sub.v2)).Count();
 
 									var d1 = kv1.Value[index1];
 									var d2 = kv2.Value[index2];
@@ -1064,8 +1064,8 @@ namespace juicescript.compiler.IL.Optimize
 									var kv1 = result.First(r => r.Key.GetDef().Contains(modulus.v1));
 									var kv2 = result.First(r => r.Key.GetDef().Contains(modulus.v2));
 
-									int index1 = kv1.Key.GetDef().IndexOf(modulus.v1);
-									int index2 = kv2.Key.GetDef().IndexOf(modulus.v2);
+									int index1 = kv1.Key.GetDef().TakeWhile(k => !k.Equals(modulus.v1)).Count();
+									int index2 = kv2.Key.GetDef().TakeWhile(k => !k.Equals(modulus.v2)).Count();
 
 									var d1 = kv1.Value[index1];
 									var d2 = kv2.Value[index2];
@@ -1159,7 +1159,7 @@ namespace juicescript.compiler.IL.Optimize
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(iNS_As.v2));
 
-									int index = kv.Key.GetDef().IndexOf(iNS_As.v2);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(iNS_As.v2)).Count();
 									var d = kv.Value[index];
 
 									if (d.DefType == InstructionDefType.asclass)
@@ -1196,14 +1196,14 @@ namespace juicescript.compiler.IL.Optimize
 									var out_def = new List<InstructionDef>();
 
 
-									if (incr_def.Count == 1)
+									if (incr_def.Count() == 1)
 									{
 										out_def.Add(new InstructionDef(InstructionDefType.primitive, TypeKind.Number));
 									}
 									else
 									{
 										var kv = result.First(r => r.Key.GetDef().Contains(incr_Decr.source));
-										int index = kv.Key.GetDef().IndexOf(incr_Decr.source);
+										int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(incr_Decr.source)).Count();
 										var dsrc = kv.Value[index];
 
 										out_def.Add(new InstructionDef(dsrc.DefType, dsrc.Obj));
@@ -1228,7 +1228,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any((r => r.Key.GetDef().Contains(new_Instance.typeLocator))))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(new_Instance.typeLocator));
-									int index = kv.Key.GetDef().IndexOf(new_Instance.typeLocator);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(new_Instance.typeLocator)).Count();
 									var typeDef = kv.Value[index];
 
 									if (typeDef.DefType == InstructionDefType.asclass)
@@ -1357,7 +1357,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any((r => r.Key.GetDef().Contains(bindThis_Call.function))))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(bindThis_Call.function));
-									int index = kv.Key.GetDef().IndexOf(bindThis_Call.function);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(bindThis_Call.function)).Count();
 									var typeDef = kv.Value[index];
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
@@ -1388,7 +1388,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any((r => r.Key.GetDef().Contains(bindGlobal_Call.function))))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(bindGlobal_Call.function));
-									int index = kv.Key.GetDef().IndexOf(bindGlobal_Call.function);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(bindGlobal_Call.function)).Count();
 									var typeDef = kv.Value[index];
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
@@ -1418,7 +1418,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any((r => r.Key.GetDef().Contains(method_Call.function))))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(method_Call.function));
-									int index = kv.Key.GetDef().IndexOf(method_Call.function);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(method_Call.function)).Count();
 									var typeDef = kv.Value[index];
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
@@ -1449,7 +1449,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any(r => r.Key.GetDef().Contains(readPoperty.instance)))
 								{
 									var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(readPoperty.instance));
-									var index = v.Key.GetDef().IndexOf(readPoperty.instance);
+									var index = v.Key.GetDef().TakeWhile(k => !k.Equals(readPoperty.instance)).Count();
 									var d = v.Value[index];
 
 									switch (d.DefType)
@@ -1764,7 +1764,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any(r => r.Key.GetDef().Contains(ld_O_Method.instance)))
 								{
 									var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_O_Method.instance));
-									var index = v.Key.GetDef().IndexOf(ld_O_Method.instance);
+									var index = v.Key.GetDef().TakeWhile(k => !k.Equals(ld_O_Method.instance)).Count();
 									var d = v.Value[index];
 
 									switch (d.DefType)
@@ -1995,7 +1995,7 @@ namespace juicescript.compiler.IL.Optimize
 								if (result.Any((r => r.Key.GetDef().Contains(o_Call.function))))
 								{
 									var kv = result.First(r => r.Key.GetDef().Contains(o_Call.function));
-									int index = kv.Key.GetDef().IndexOf(o_Call.function);
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(o_Call.function)).Count();
 									var typeDef = kv.Value[index];
 
 									if (typeDef.DefType == InstructionDefType.method && typeDef.Obj != null)
@@ -2150,7 +2150,7 @@ namespace juicescript.compiler.IL.Optimize
 				searched.Add(test.index);
 
 				var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index)).ToList();
-				defsourcelist.AddRange(deflist.Where(i => i.INS_Code != INS_Code.move).Select(i => new Tuple<Instruction, int>(i, i.GetDef().IndexOf(test))));
+				defsourcelist.AddRange(deflist.Where(i => i.INS_Code != INS_Code.move).Select(i => new Tuple<Instruction, int>(i, i.GetDef().TakeWhile(k => !k.Equals(test)).Count())));
 
 				foreach (var def in deflist.Where(i => i.INS_Code == INS_Code.move))
 				{

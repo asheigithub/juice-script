@@ -62,16 +62,27 @@ namespace juicescript.ABC.INS
             return $"INS_BindThis_Call [{dst}] <-  call function:[{function}](this:{_this_},{string.Join(",", args)})";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+            //return new List<StackLocater> { dst };
+            yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            var use = new List<StackLocater> { function, _this_ };
-            use.AddRange(args);
-            return use;
+            //var use = new List<StackLocater> { function, _this_ };
+            //use.AddRange(args);
+            //return use;
+
+            yield return function;
+            yield return _this_;
+
+            foreach (var item in args)
+            {
+                yield return item;
+            }
+
+
         }
 
         public override bool MaybeRaiseError()

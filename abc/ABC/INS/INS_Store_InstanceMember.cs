@@ -50,14 +50,17 @@ namespace juicescript.ABC.INS
 			return $"Store_InstanceMember   [{instance} . scopemember: {scopemember_index}]<- [{dst}]";
 		}
 
-		public override List<StackLocater> GetDef()
+		public override IEnumerable<StackLocater> GetDef()
 		{
-			return new List<StackLocater> {  };
+			//return new List<StackLocater> {  };
+			yield break;
 		}
 
-		public override List<StackLocater> GetUse()
+		public override IEnumerable<StackLocater> GetUse()
 		{
-			return new List<StackLocater> {dst, instance };
+			//return new List<StackLocater> {dst, instance };
+			yield return dst;
+			yield return instance;
 		}
 
 		public override bool MaybeRaiseError()

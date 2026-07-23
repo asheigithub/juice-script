@@ -54,14 +54,16 @@ namespace juicescript.ABC.INS
             return $"Store_MethodVar   [offset:{heap.MemberIndex}] <-( ctype({dst} ->{convertedloc} ) , [{convertedloc}])";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { convertedloc  };
+            //return new List<StackLocater> { convertedloc  };
+            yield return convertedloc;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { dst };
+            //return new List<StackLocater> { dst };
+            yield return dst;
         }
 
         public override bool MaybeRaiseError()

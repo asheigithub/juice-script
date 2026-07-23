@@ -1,4 +1,5 @@
 ﻿using juicescript.ABC.Locaters;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,18 +103,27 @@ namespace juicescript.ABC.INS
 			}
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+			//return new List<StackLocater> { dst };
+			yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            if (wiseMode == BItWiseMode.bitwise_not)
-            {
-                return new List<StackLocater> { v1 };
-            }
-            return new List<StackLocater> { v1, v2 };
+			if (wiseMode == BItWiseMode.bitwise_not)
+			{
+				yield return v1;
+
+				//return new List<StackLocater> { v1 };
+			}
+			else
+			{
+				yield return v1;
+				yield return v2;
+
+				//return new List<StackLocater> { v1, v2 };
+			}
         }
 
         public override bool MaybeRaiseError()

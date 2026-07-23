@@ -40,22 +40,26 @@ namespace juicescript.ABC.INS
 			return $"Incr return [{ ( dst.index !=  result.index ? $"{source}->{result}" : $"{dst}" ) }], [{dst}] = [{source}] + ({addvalue})";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
 			if (dst.index != result.index)
 			{
-				return new List<StackLocater>() { result,dst };
+				yield return result;
+				yield return dst;
+
+				//return new List<StackLocater>() { result,dst };
 			}
 			else
 			{
-				return new List<StackLocater>() { dst };
+				//return new List<StackLocater>() { dst };
+				yield return dst;
 			}
 
 			//return new List<StackLocater>() { };
 
 		}
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
 			if (dst.index != result.index)
 			{

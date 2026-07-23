@@ -47,14 +47,16 @@ namespace juicescript.ABC.INS
 			return $"FINALLY_EXIT hold{HoldError}";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater>();
+			//return new List<StackLocater>();
+			yield break;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { HoldError };
+			//return new List<StackLocater> { HoldError };
+			yield return HoldError;
         }
 
         public override bool MaybeRaiseError()

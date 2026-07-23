@@ -73,18 +73,23 @@ namespace juicescript.ABC.INS
 			return $"If_LogicOp_Goto	( if( [stack:{v1}] {GetCompModeString()} [stack:{v2}] == { jump_mode } ) goto  FLAG_{flag_id})";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater>();
+			//return new List<StackLocater>();
+			yield break;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> 
-            { 
-                new StackLocater { index = v1 }, 
-                new StackLocater { index = v2 } 
-            };
+			//return new List<StackLocater> 
+			//{ 
+			//    new StackLocater { index = v1 }, 
+			//    new StackLocater { index = v2 } 
+			//};
+
+			yield return new StackLocater { index = v1 };
+			yield return new StackLocater { index = v2 };
+
         }
 
         public override bool MaybeRaiseError()

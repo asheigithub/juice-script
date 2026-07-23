@@ -67,15 +67,17 @@ namespace juicescript.ABC.INS
 			return $"TRY_ENTER hold{dst}";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
 			//用于保存try结构内抛出的异常。当进入finally内，需要暂存在这里。
-            return new List<StackLocater> { dst };
+			//return new List<StackLocater> { dst };
+			yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater>();
+			//return new List<StackLocater>();
+			yield break;
         }
 
         public override bool MaybeRaiseError()

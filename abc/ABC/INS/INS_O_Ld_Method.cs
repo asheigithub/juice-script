@@ -49,15 +49,17 @@ namespace juicescript.ABC.INS
 			return $"O_ld_Method   [{dst}] <- [instance:{instance}].vtable[{const_index}]";
 		}
 
-		public override List<StackLocater> GetDef()
+		public override IEnumerable<StackLocater> GetDef()
 		{
-			return new List<StackLocater> { dst };
+			//return new List<StackLocater> { dst };
+			yield return dst;
 		}
 
-		public override List<StackLocater> GetUse()
+		public override IEnumerable<StackLocater> GetUse()
 		{
 			// 读取instance栈位置
-			return new List<StackLocater> { instance };
+			//return new List<StackLocater> { instance };
+			yield return instance;
 		}
 
 		public override bool MaybeRaiseError()

@@ -47,14 +47,16 @@ namespace juicescript.ABC.INS
 			return $"Read_Property_Interface   [{dst}] <- (interface:{class_id})[instance:{instance}].vtable_getter[{const_index}].read()";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+			//return new List<StackLocater> { dst };
+			yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { instance };
+			//return new List<StackLocater> { instance };
+			yield return instance;
         }
 
         public override bool MaybeRaiseError()

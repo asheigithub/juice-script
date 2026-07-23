@@ -49,14 +49,18 @@ namespace juicescript.ABC.INS
             return $"Ld_MultiNameL_Val [{dst}] <- [({instance}).{name}]";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst};
+            //return new List<StackLocater> { dst};
+            yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { instance, name, refholder };
+            //return new List<StackLocater> { instance, name, refholder };
+            yield return instance;
+            yield return name;
+            yield return refholder; 
         }
 
         public override bool MaybeRaiseError()

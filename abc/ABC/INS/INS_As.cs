@@ -41,14 +41,17 @@ namespace juicescript.ABC.INS
 			return $"As   [{dst}]<- [{v1}] as [{v2}]";
 		}
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+			//return new List<StackLocater> { dst };
+			yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { v1, v2 };
+            //return new List<StackLocater> { v1, v2 };
+			yield return v1;
+			yield return v2;
         }
 
         public override bool MaybeRaiseError()

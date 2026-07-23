@@ -56,16 +56,22 @@ namespace juicescript.ABC.INS
             return $"INS_bindGlobal_Call [{dst}] <-  call function:[{function}](this:global,{string.Join(",", args)})";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+            //return new List<StackLocater> { dst };
+            yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            var use = new List<StackLocater> { function };
-            use.AddRange(args);
-            return use;
+            // var use = new List<StackLocater> { function };
+            // use.AddRange(args);
+            // return use;
+
+            yield return function;
+
+            foreach (StackLocater l in args)
+                yield return l;
         }
 
         public override bool MaybeRaiseError()

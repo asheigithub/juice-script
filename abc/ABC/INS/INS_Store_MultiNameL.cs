@@ -58,14 +58,19 @@ namespace juicescript.ABC.INS
 			return $"Store_MultiNameL [(({super_type_index}){instance}).{name}] <- {dst}";
 		}
 
-		public override List<StackLocater> GetDef()
+		public override IEnumerable<StackLocater> GetDef()
 		{
-			return new List<StackLocater> {};
+			//return new List<StackLocater> {};
+			yield break;
 		}
 
-		public override List<StackLocater> GetUse()
+		public override IEnumerable<StackLocater> GetUse()
 		{
-			return new List<StackLocater> { instance, name ,dst,tmp_holder };
+			//return new List<StackLocater> { instance, name ,dst,tmp_holder };
+			yield return instance;
+			yield return name;
+			yield return dst;
+			yield return tmp_holder;
 		}
 
 		public override bool MaybeRaiseError()

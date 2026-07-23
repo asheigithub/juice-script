@@ -44,14 +44,17 @@ namespace juicescript.ABC.INS
             return $"Store_HeapValueRef [{dst}] <- [{source}]";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater>();
+            //return new List<StackLocater>();
+            yield break;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { source, dst };
+            //return new List<StackLocater> { source, dst };
+            yield return source;
+            yield return dst;
         }
 
         public override bool MaybeRaiseError()

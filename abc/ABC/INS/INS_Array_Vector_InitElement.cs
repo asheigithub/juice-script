@@ -24,14 +24,16 @@ namespace juicescript.ABC.INS
 
 		public int index;
 
-		public override List<StackLocater> GetDef()
+		public override IEnumerable<StackLocater> GetDef()
 		{
-			return new List<StackLocater>();
+			yield break;
 		}
 
-		public override List<StackLocater> GetUse()
+		public override IEnumerable<StackLocater> GetUse()
 		{
-			return new List<StackLocater>() { dst , instance };
+			//return new List<StackLocater>() { dst , instance };
+			yield return dst;
+			yield return instance;
 		}
 
 		public override bool MaybeRaiseError()

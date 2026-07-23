@@ -39,16 +39,18 @@ namespace juicescript.ABC.INS
             return $"Ld_True   [{dst}] <- true";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
             // 加载true常量到目标栈位置
-            return new List<StackLocater> { dst };
+            //return new List<StackLocater> { dst };
+            yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
             // 不读取任何栈位置
-            return new List<StackLocater>();
+            //return new List<StackLocater>();
+            yield break ;
         }
 
         public override bool MaybeRaiseError()

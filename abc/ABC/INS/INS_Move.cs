@@ -44,14 +44,16 @@ namespace juicescript.ABC.INS
             return $"Move   [{dst}]<-[{source}]";
         }
 
-        public override List<StackLocater> GetDef()
+        public override IEnumerable<StackLocater> GetDef()
         {
-            return new List<StackLocater> { dst };
+            // return new List<StackLocater> { dst };
+            yield return dst;
         }
 
-        public override List<StackLocater> GetUse()
+        public override IEnumerable<StackLocater> GetUse()
         {
-            return new List<StackLocater> { source };
+            //return new List<StackLocater> { source };
+            yield return source;
         }
 
         public override bool MaybeRaiseError()
