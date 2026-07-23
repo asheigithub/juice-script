@@ -10,6 +10,7 @@ using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
@@ -503,11 +504,8 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
+
 		
-
-
-
-
 		/// <summary>
 		/// 查找公共的支配节点
 		/// </summary>
@@ -1651,14 +1649,16 @@ namespace juicescript.compiler.IL.Optimize
 			public StackLocater v1;
 			public StackLocater v2;
 
+			public byte otherkey;
+
 			public bool Equals(groupkey other)
 			{
-				return v1.Equals(other.v1) && v2.Equals(other.v2);
+				return v1.Equals(other.v1) && v2.Equals(other.v2) && otherkey == other.otherkey;
 			}
 
 			public override int GetHashCode()
 			{
-				return v1.GetHashCode()^ v2.GetHashCode();
+				return v1.GetHashCode()^ v2.GetHashCode() ^ otherkey.GetHashCode();
 			}
 
 		}
@@ -1679,7 +1679,7 @@ namespace juicescript.compiler.IL.Optimize
 
 				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater,Instruction, Instruction>>(
 
-				(i) => { return new groupkey() { v1 = ((INS_Add)i).v1, v2 = ((INS_Add)i).v2}; }
+				(i) => { return new groupkey() { v1 = ((INS_Add)i).v1, v2 = ((INS_Add)i).v2 , otherkey=0 }; }
 				,
 				(index, v1, v2,template) => { return new INS_Add(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
 				)
@@ -1688,7 +1688,7 @@ namespace juicescript.compiler.IL.Optimize
 			operators.Add(INS_Code.sub,
 				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
 
-				(i) => { return new groupkey() { v1 = ((INS_Sub)i).v1, v2 = ((INS_Sub)i).v2 }; }
+				(i) => { return new groupkey() { v1 = ((INS_Sub)i).v1, v2 = ((INS_Sub)i).v2, otherkey = 0 }; }
 				,
 				(index, v1, v2, template) => { return new INS_Sub(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
 				)
@@ -1697,7 +1697,7 @@ namespace juicescript.compiler.IL.Optimize
 			operators.Add(INS_Code.multiply,
 				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
 
-				(i) => { return new groupkey() { v1 = ((INS_Multiply)i).v1, v2 = ((INS_Multiply)i).v2 }; }
+				(i) => { return new groupkey() { v1 = ((INS_Multiply)i).v1, v2 = ((INS_Multiply)i).v2, otherkey = 0 }; }
 				,
 				(index, v1, v2, template) => { return new INS_Multiply(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
 				)
@@ -1707,7 +1707,7 @@ namespace juicescript.compiler.IL.Optimize
 			operators.Add(INS_Code.div,
 				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
 
-				(i) => { return new groupkey() { v1 = ((INS_Div)i).v1, v2 = ((INS_Div)i).v2 }; }
+				(i) => { return new groupkey() { v1 = ((INS_Div)i).v1, v2 = ((INS_Div)i).v2, otherkey = 0 }; }
 				,
 				(index, v1, v2, template) => { return new INS_Div(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
 				)
@@ -1717,9 +1717,29 @@ namespace juicescript.compiler.IL.Optimize
 			operators.Add(INS_Code.modulus,
 				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
 
-				(i) => { return new groupkey() { v1 = ((INS_Modulus)i).v1, v2 = ((INS_Modulus)i).v2 }; }
+				(i) => { return new groupkey() { v1 = ((INS_Modulus)i).v1, v2 = ((INS_Modulus)i).v2, otherkey = 0 }; }
 				,
 				(index, v1, v2, template) => { return new INS_Modulus(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2 }; }
+				)
+
+				);
+
+			operators.Add(INS_Code.bitwise,
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_BitWise)i).v1, v2 = ((INS_BitWise)i).v2 , otherkey = (byte)((INS_BitWise)i).wiseMode }; }
+				,
+				(index, v1, v2, template) => { return new INS_BitWise(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2, wiseMode = ((INS_BitWise)template).wiseMode }; }
+				)
+
+				);
+
+			operators.Add(INS_Code.logic_comparison,
+				new Tuple<Func<Instruction, groupkey>, Func<int, StackLocater, StackLocater, Instruction, Instruction>>(
+
+				(i) => { return new groupkey() { v1 = ((INS_Comparison)i).v1, v2 = ((INS_Comparison)i).v2, otherkey = (byte)((INS_Comparison)i).opMode }; }
+				,
+				(index, v1, v2, template) => { return new INS_Comparison(template.token) { dst = new StackLocater() { index = index }, v1 = v1, v2 = v2, opMode = ((INS_Comparison)template).opMode }; }
 				)
 
 				);
@@ -1736,6 +1756,58 @@ namespace juicescript.compiler.IL.Optimize
 				{
 					if (group.Count() > 1)
 					{
+						//先按块传播
+						var groupbyblock = group.GroupBy( i=> cfg.Blocks.First( b=>b.Instructions.Contains(i) ) );
+						foreach (var gb in groupbyblock)
+						{
+							bool flag = false;
+
+							var first = gb.Key.Instructions.First(i => group.Contains(i));
+
+
+							Stack<BasicBlock> blocks= new Stack<BasicBlock>();
+							blocks.Push(gb.Key);
+
+							HashSet<BasicBlock> visited = new HashSet<BasicBlock>();
+							
+							while (blocks.Count>0)
+							{
+								var block = blocks.Pop();
+								visited.Add	(block);
+
+
+								foreach (var toremove in block.Instructions.Where(i=>group.Contains(i)).ToArray())
+								{
+									if (toremove == first)
+										continue;
+
+									Dictionary<int, int> replace = new Dictionary<int, int> { { toremove.dst.index, first.dst.index } };
+									foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+									{
+										ins.RemappingSlots(replace);
+									}
+
+									block.Instructions.Remove(toremove);
+									flag = true;
+								}
+
+								//传播直接支配节点
+								foreach (var item in block.Successors)
+								{
+									if (!visited.Contains(item) && item.Idom == block)
+									{
+										blocks.Push(item);
+									}
+								}
+							}
+
+							if (flag)
+							{
+								goto lbl_retry;
+							}
+						}
+						
+
 						var v1 = group.Key.v1;
 						var v2 = group.Key.v2;
 
@@ -1824,6 +1896,12 @@ namespace juicescript.compiler.IL.Optimize
 					}
 					else
 					{
+						var ins = group.First();
+						var tloop = cfg.toplevelloops.FirstOrDefault(l => l.loop.nodes.Any(b => b.Instructions.Contains(ins)));
+						if (tloop == null)
+							continue;
+
+
 						var v1 = group.Key.v1;
 						var v2 = group.Key.v2;
 
@@ -1837,11 +1915,9 @@ namespace juicescript.compiler.IL.Optimize
 								)
 							{
 								//检测是否可以循环不变量外提
-								var ins = group.First();
 
-								var tloop = cfg.toplevelloops.FirstOrDefault( l=>l.loop.nodes.Any(b=>b.Instructions.Contains(ins)) );
 
-								if (tloop != null)
+								Debug.Assert(tloop != null);
 								{
 									var atblock = cfg.Blocks.First(b => b.Instructions.Contains(ins));
 									var loop = tloop.FindLoop(atblock);

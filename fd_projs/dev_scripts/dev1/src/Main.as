@@ -200,29 +200,3 @@ if (ret != expected)
 //
 //trace( getTimer() - st );
 
-//function j()
-//{
-	//try
-	//{
-		//var b = 1;
-		//
-		//for (var i:int = 0; i < 5; i++) 
-		//{
-			//trace(b + b);
-		//}
-		//
-		////var a = b + b + b;
-		//
-		//
-		//
-		//
-		//trace(b);
-	//}
-	//
-	//finally
-	//{
-		//trace(b + b + b);
-	//}
-//}
-//
-//j();

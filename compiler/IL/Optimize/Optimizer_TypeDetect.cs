@@ -739,12 +739,39 @@ namespace juicescript.compiler.IL.Optimize
 							{
 								INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)instruction;
 								//method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex];
+								//
 
-								result.Add(instruction, new List<InstructionDef>() {
-								FromTypeKind( method.Body._link_codescope.Members[ store_MethodVariable.heap.MemberIndex ].TypeKind )
-							});
+								if (method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex].TypeKind == TypeKind.Any)
+								{
+									if (result.Any(r => r.Key.GetDef().Contains(store_MethodVariable.dst)))
+									{
+										var kv = result.First(r => r.Key.GetDef().Contains(store_MethodVariable.dst));
+												int index = kv.Key.GetDef().IndexOf(store_MethodVariable.dst);
 
-								flag = true;
+												var d = kv.Value[index];
+
+												result.Add(instruction, new List<InstructionDef>() {
+											 new InstructionDef( d.DefType,d.Obj)
+											});
+
+										flag = true;
+
+									}
+									else
+									{
+										//等下一轮
+										//throw new NotImplementedException();
+									}
+								}
+								else
+								{
+									result.Add(instruction, new List<InstructionDef>() {
+											FromTypeKind( method.Body._link_codescope.Members[ store_MethodVariable.heap.MemberIndex ].TypeKind )
+
+										});
+									flag = true;
+								}
+								
 
 							}
 							break;
@@ -2122,7 +2149,7 @@ namespace juicescript.compiler.IL.Optimize
 
 				searched.Add(test.index);
 
-				var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index));
+				var deflist = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetDef().Any(d => d.index == test.index)).ToList();
 				defsourcelist.AddRange(deflist.Where(i => i.INS_Code != INS_Code.move).Select(i => new Tuple<Instruction, int>(i, i.GetDef().IndexOf(test))));
 
 				foreach (var def in deflist.Where(i => i.INS_Code == INS_Code.move))
