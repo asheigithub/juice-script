@@ -61,30 +61,30 @@ import adobe.utils.CustomActions;
 
 
 
-
-
-import flash.utils.getTimer;
-
-
-function  fib(i:int):int 
-	{
-		if (i === 1 || i === 2)
-		{
-			return 1;
-		}
-		else 
-		{
-			
-			return fib(i - 2) + fib(i-1);
-			
-		}	
-	}
-	
-	import flash.utils.getTimer;
-	
-	
-	var st = getTimer();
-trace(fib(35),getTimer() - st );
+//
+//
+//import flash.utils.getTimer;
+//
+//
+//function  fib(i:int):int 
+	//{
+		//if (i === 1 || i === 2)
+		//{
+			//return 1;
+		//}
+		//else 
+		//{
+			//
+			//return fib(i - 2) + fib(i-1);
+			//
+		//}	
+	//}
+	//
+	//import flash.utils.getTimer;
+	//
+	//
+	//var st = getTimer();
+//trace(fib(35),getTimer() - st );
 
 
 

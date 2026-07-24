@@ -485,6 +485,8 @@ namespace juicescript.compiler.IL.Optimize
 
 			}
 
+			RemoveMoveFirst(cfg);
+
 			slotCount = OptimizeBlockLdConst(cfg,slotCount);
 
 			slotCount = OptimizeLdStaticMember(cfg,slotCount,context); //外提静态成员。
@@ -499,7 +501,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			slotCount = OptimizeCommExpr(cfg, slotCount, context); //公共表达式
 			
-			slotCount = RemoveBlockMove(cfg,slotCount); //干涉图移除move
+			slotCount = RemoveBlockMove(cfg,slotCount,context); //干涉图移除move
 
 			RemoveBarrier(cfg,context); 
 

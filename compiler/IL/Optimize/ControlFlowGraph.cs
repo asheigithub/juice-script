@@ -598,7 +598,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			tempCFG.ComputeLivenessForAllBlocks();
 
-			foreach (var block in tempCFG.Blocks.Where(b => b.IsReachable))
+			foreach (var block in tempCFG.Blocks.Where(b => b.IsReachable && b.Instructions.Count>0))
 			{
 				var ins = block.Instructions[0];
 				var defs = ins.GetDef();

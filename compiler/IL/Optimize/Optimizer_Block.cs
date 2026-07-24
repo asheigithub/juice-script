@@ -3346,102 +3346,212 @@ namespace juicescript.compiler.IL.Optimize
 			}
 		}
 
-
-
-		private static int RemoveBlockMove(ControlFlowGraph cfg,int slotCount)
+		private static void RemoveMoveFirst(ControlFlowGraph cfg)
 		{
-			//算法：用干涉图计算 mv 的src和dst之间是不是没有干涉。如果没有，则直接使用同一个槽然后把mv删掉。
+			//每遇到一个move,就将source向后传播，直到遇到新的定值
 
-
-			var tmp = cfg.BuildTemporaryCFGForInstructionLevel();
-			//tmp中移除所有的move。然后计算干涉图
-			foreach (var block in tmp.Blocks)
+			foreach (var block in cfg.Blocks)
 			{
-				block.Instructions.RemoveAll(i => i.INS_Code == INS_Code.move);
-			}
-			var interference =  tmp.ComputeInterferenceGraph();
-
-			var all = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(i => i.INS_Code == INS_Code.move).Select(i=>(INS_Move)i).ToList();
-			var toremove = new List<INS_Move>();
-
-			foreach (var mv in all)
-			{
-				if (!interference.ContainsKey(mv.source.index))
+				foreach (var ins in block.Instructions)
 				{
-					toremove.Add(mv);
+					if (ins.INS_Code == INS_Code.move)
+					{ 
+						Queue<BasicBlock> blocks = new Queue<BasicBlock>();
+						blocks.Enqueue(block);
+						
+						HashSet<BasicBlock> visited=new HashSet<BasicBlock>();
+						visited.Add(block);
+
+						int at = block.Instructions.IndexOf(ins) + 1;
+
+						Dictionary<int, int> mapping = new Dictionary<int, int> { { ins.dst.index, ((INS_Move)ins).source.index  } };
+
+						while (blocks.Count>0)
+						{
+							var b = blocks.Dequeue();
+
+
+							for (; at < b.Instructions.Count; at++)
+							{
+								var check = b.Instructions[at];
+								if (check.GetDef().Contains(ins.dst))
+								{
+									break;
+								}
+								
+								check.RemappingSlots(mapping);
+							}
+
+							if (at == b.Instructions.Count)
+							{
+								//没有中断，可继续
+								foreach (var ss in b.Successors)
+								{
+									if (visited.Add(ss) && ss.Idom == b) // 必须是直接支配的节点才能传播下去！
+									{ 
+										blocks.Enqueue(ss);
+									}
+								}
+							}
+
+							at = 0;
+
+						}
+
+
+					}
 				}
-				else
+			}
+
+
+
+
+		}
+
+
+
+		private static int RemoveBlockMove(ControlFlowGraph cfg,int slotCount,CompileContext context)
+		{
+
+			{
+				//算法：如果move的目标没有被任何指令引用，则删除它 如果move的目标只被barrier引用，并且它是一个普通类型，则删除
+
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i=>i.INS_Code == INS_Code.move).Select(i=>(INS_Move)i);
+
+				var instructionType = DetectType(cfg.Method, cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(b => b.Instructions).ToList(), context);
+
+
+				foreach (var mv in all)
 				{
-					if (!interference[mv.source.index].Contains(mv.dst.index))
+					var use = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetUse().Contains(mv.dst)).ToArray();
+					if (use.Length == 0)
+					{
+						//后面会处理的
+					}
+					else if (use.All(u => u.INS_Code == INS_Code.expression_barrier))
+					{
+						var defs = FindStackSlotDefAt(mv.source, cfg);
+
+						if (defs.All(d => instructionType.ContainsKey(d.Item1) && instructionType[d.Item1][d.Item2].DefType == InstructionDefType.primitive))
+						{
+							//可移除
+
+							foreach (var u in use)
+							{
+
+								var ul = u.GetUse().ToList();
+								ul.RemoveAll(s=>s.Equals( mv.dst ));
+								((INS_Barrier)u).uselist = ul.ToArray();
+
+							}
+							
+
+
+						}
+
+
+					}
+				}
+
+				
+
+
+
+			}
+
+
+			{
+
+				//算法：用干涉图计算 mv 的src和dst之间是不是没有干涉。如果没有，则直接使用同一个槽然后把mv删掉。
+				var tmp = cfg.BuildTemporaryCFGForInstructionLevel();
+				//tmp中移除所有的move。然后计算干涉图
+				foreach (var block in tmp.Blocks)
+				{
+					block.Instructions.RemoveAll(i => i.INS_Code == INS_Code.move);
+				}
+				var interference = tmp.ComputeInterferenceGraph();
+
+				var all = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(i => i.INS_Code == INS_Code.move).Select(i => (INS_Move)i).ToList();
+				var toremove = new List<INS_Move>();
+
+				foreach (var mv in all)
+				{
+					if (!interference.ContainsKey(mv.source.index))
 					{
 						toremove.Add(mv);
 					}
-				}
-			}
-
-			foreach (var mv in toremove)
-			{
-				if (mv.source.index != mv.dst.index)
-				{
-					int newslot = slotCount++;
-
-					Dictionary<int, int> toreplace = new Dictionary<int, int>();
-					toreplace.Add(mv.source.index, newslot);
-					toreplace.Add(mv.dst.index, newslot);
-
-					foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
+					else
 					{
-						b.RemappingSlots(toreplace);
+						if (!interference[mv.source.index].Contains(mv.dst.index))
+						{
+							toremove.Add(mv);
+						}
 					}
 				}
+
+				foreach (var mv in toremove)
+				{
+					if (mv.source.index != mv.dst.index)
+					{
+						int newslot = slotCount++;
+
+						Dictionary<int, int> toreplace = new Dictionary<int, int>();
+						toreplace.Add(mv.source.index, newslot);
+						toreplace.Add(mv.dst.index, newslot);
+
+						foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
+						{
+							b.RemappingSlots(toreplace);
+						}
+					}
+				}
+
+				foreach (var b in cfg.Blocks)
+				{
+					b.Instructions.RemoveAll(i => toremove.Contains(i));
+				}
+
+
+
+				//foreach (var mv in toremove.Select(r=>new Tuple<int,int>( r.source.index,r.dst.index )).ToArray() )
+				//{
+				//	if (mv.Item1 != mv.Item2)
+				//	{
+				//		var insmv = toremove.Where( r=>r.source.index == mv.Item1 && r.dst.index == mv.Item2 ).ToArray();
+
+				//		int newslot = slotCount++;
+
+				//		Dictionary<int, int> toreplace = new Dictionary<int, int>();
+				//		toreplace.Add(mv.Item1, newslot);
+				//		toreplace.Add(mv.Item2, newslot);
+
+				//		foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
+				//		{
+
+				//			b.RemappingSlots(toreplace);
+
+				//		}
+
+				//		foreach (var b in cfg.Blocks)
+				//		{
+				//			b.Instructions.Remove(insmv[0]);
+				//		}
+
+
+
+				//	}
+				//}
+
+
+				//foreach (var b in cfg.Blocks)
+				//{
+				//	b.Instructions.RemoveAll(i => toremove.Contains(i) );
+				//}
+
+
+				return slotCount;
+
 			}
-
-			foreach (var b in cfg.Blocks)
-			{
-				b.Instructions.RemoveAll(i => toremove.Contains(i));
-			}
-
-
-
-			//foreach (var mv in toremove.Select(r=>new Tuple<int,int>( r.source.index,r.dst.index )).ToArray() )
-			//{
-			//	if (mv.Item1 != mv.Item2)
-			//	{
-			//		var insmv = toremove.Where( r=>r.source.index == mv.Item1 && r.dst.index == mv.Item2 ).ToArray();
-
-			//		int newslot = slotCount++;
-
-			//		Dictionary<int, int> toreplace = new Dictionary<int, int>();
-			//		toreplace.Add(mv.Item1, newslot);
-			//		toreplace.Add(mv.Item2, newslot);
-
-			//		foreach (var b in cfg.Blocks.SelectMany(bb => bb.Instructions))
-			//		{
-
-			//			b.RemappingSlots(toreplace);
-
-			//		}
-
-			//		foreach (var b in cfg.Blocks)
-			//		{
-			//			b.Instructions.Remove(insmv[0]);
-			//		}
-
-
-
-			//	}
-			//}
-
-
-			//foreach (var b in cfg.Blocks)
-			//{
-			//	b.Instructions.RemoveAll(i => toremove.Contains(i) );
-			//}
-
-
-			return slotCount;
-
-
 		}
 
 
