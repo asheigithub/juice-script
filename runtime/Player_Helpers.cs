@@ -2423,6 +2423,98 @@ namespace juicescript.runtime
 			NaNBoxing n1 = stackslots[v1.index];
 			NaNBoxing n2 = stackslots[v2.index];
 
+			DoCompress(opMode, dst, n1, n2, scope_ptr, stackslots, stackStPos, thisPtr, ref error);
+
+//			if (((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
+//				&&
+//				((n2.ValueType == BoxType.Int || n2.ValueType > BoxType.Uint) && n2.ValueType < BoxType.Float)
+//				)
+//			{
+//				int c_r = n1.IntValue - n2.IntValue;
+//				switch (opMode)
+//				{
+//					case 0:
+//						stackslots[dst.index].SetBoolean(c_r < 0);
+//						break;
+//					case 1:
+//						stackslots[dst.index].SetBoolean(c_r > 0);
+//						break;
+//					case 2:
+//						stackslots[dst.index].SetBoolean((c_r <= 0));
+//						break;
+//					case 3:
+//						stackslots[dst.index].SetBoolean((c_r >= 0));
+//						break;
+//					default:
+//#if DEBUG
+//					throw new InvalidOperationException();
+//#else
+//						Environment.FailFast("出错了，这里跑不到");
+//						break;
+//#endif
+
+//				}
+//			}
+//			else if ((n1.ValueType == BoxType.Number || n1.ValueType >= BoxType.Int && n1.ValueType <= BoxType.Float)
+//				&&
+//				(n2.ValueType == BoxType.Number || n2.ValueType >= BoxType.Int && n2.ValueType <= BoxType.Float)
+//				)
+//			{
+//				//数值快速比较
+//				double d1 = Extensions.GetDoubleValue(n1);
+//				double d2 = Extensions.GetDoubleValue(n2);
+
+
+//				if (double.IsNaN(d1) || double.IsNaN(d2))
+//				{
+//					stackslots[dst.index].SetBoolean(false);
+//					return;
+//				}
+
+//				int c_r;
+
+//				if (d1 < d2)
+//					c_r = -1;
+//				else if (d1 == d2)
+//					c_r = 0;
+//				else
+//					c_r = 1;
+
+//				switch (opMode)
+//				{
+//					case 0:
+//						stackslots[dst.index].SetBoolean(c_r < 0);
+//						break;
+//					case 1:
+//						stackslots[dst.index].SetBoolean(c_r > 0);
+//						break;
+//					case 2:
+//						stackslots[dst.index].SetBoolean((c_r <= 0));
+//						break;
+//					case 3:
+//						stackslots[dst.index].SetBoolean((c_r >= 0));
+//						break;
+//					default:
+//#if DEBUG
+//					throw new InvalidOperationException();
+//#else
+//						Environment.FailFast("出错了，这里跑不到");
+//						break;
+//#endif
+
+//				}
+
+//			}
+//			else
+//			{
+//				Comparse_Slow(opMode, dst, n1, n2, stackslots, stackStPos, scope_ptr, thisPtr, ref error);
+//			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe bool DoCompress(byte opMode,StackLocater dst,NaNBoxing n1,NaNBoxing n2, int scope_ptr, 
+			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr, ref ReceiveError error)
+		{	
 			if (((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
 				&&
 				((n2.ValueType == BoxType.Int || n2.ValueType > BoxType.Uint) && n2.ValueType < BoxType.Float)
@@ -2433,22 +2525,22 @@ namespace juicescript.runtime
 				{
 					case 0:
 						stackslots[dst.index].SetBoolean(c_r < 0);
-						break;
+						return c_r < 0;
 					case 1:
 						stackslots[dst.index].SetBoolean(c_r > 0);
-						break;
+						return c_r > 0;
 					case 2:
 						stackslots[dst.index].SetBoolean((c_r <= 0));
-						break;
+						return c_r <= 0;
 					case 3:
 						stackslots[dst.index].SetBoolean((c_r >= 0));
-						break;
+						return c_r >= 0;
 					default:
 #if DEBUG
-					throw new InvalidOperationException();
+						throw new InvalidOperationException();
 #else
 						Environment.FailFast("出错了，这里跑不到");
-						break;
+						return false;
 #endif
 
 				}
@@ -2466,7 +2558,7 @@ namespace juicescript.runtime
 				if (double.IsNaN(d1) || double.IsNaN(d2))
 				{
 					stackslots[dst.index].SetBoolean(false);
-					return;
+					return false;
 				}
 
 				int c_r;
@@ -2482,22 +2574,22 @@ namespace juicescript.runtime
 				{
 					case 0:
 						stackslots[dst.index].SetBoolean(c_r < 0);
-						break;
+						return c_r < 0;
 					case 1:
 						stackslots[dst.index].SetBoolean(c_r > 0);
-						break;
+						return c_r > 0;
 					case 2:
 						stackslots[dst.index].SetBoolean((c_r <= 0));
-						break;
+						return c_r <= 0;
 					case 3:
 						stackslots[dst.index].SetBoolean((c_r >= 0));
-						break;
+						return c_r >= 0;
 					default:
 #if DEBUG
-					throw new InvalidOperationException();
+						throw new InvalidOperationException();
 #else
 						Environment.FailFast("出错了，这里跑不到");
-						break;
+						return false;
 #endif
 
 				}
@@ -2506,6 +2598,7 @@ namespace juicescript.runtime
 			else
 			{
 				Comparse_Slow(opMode, dst, n1, n2, stackslots, stackStPos, scope_ptr, thisPtr, ref error);
+				return stackslots[dst.index].Boolean;
 			}
 		}
 

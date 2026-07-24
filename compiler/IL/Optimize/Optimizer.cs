@@ -500,8 +500,11 @@ namespace juicescript.compiler.IL.Optimize
 			slotCount = OptimizeLdInterfaceMethod(cfg, slotCount, context);
 
 			slotCount = OptimizeCommExpr(cfg, slotCount, context); //公共表达式
-			
+						
 			slotCount = RemoveBlockMove(cfg,slotCount,context); //干涉图移除move
+
+			slotCount = OptimizeSuperInstruction(cfg, slotCount, context);//超级指令
+
 
 			RemoveBarrier(cfg,context); 
 
@@ -533,6 +536,9 @@ namespace juicescript.compiler.IL.Optimize
 
 
 			var optimizedInstructions = cfg.FlattenInstructions();
+
+			optimizedInstructions = JmpJmp(optimizedInstructions);
+
 
 			method.Body.ByteCode = Assembler.Assemble(maxslots, constants, optimizedInstructions);
 

@@ -11,7 +11,16 @@ namespace juicescript.ABC.INS
 	{
 		public enum CompMode : byte
 		{
-			strict_equal,		
+			strict_equal,
+			strict_neq,
+			equal,
+			notequal,
+
+			less,
+			greater,
+
+			less_equal,
+			greater_equal,
 		}
 
 
@@ -22,7 +31,7 @@ namespace juicescript.ABC.INS
 
 		public override INS_Code INS_Code => INS_Code.if_logicOp_goto;
 
-		public override int Size =>  4 + 4 + 4 ;
+		public override int Size => 4 + 4 + 4 + 4;
 
 		public int flag_id
 		{
@@ -38,12 +47,28 @@ namespace juicescript.ABC.INS
 		public byte v1;
 		public byte v2;
 
+		public StackLocater compResult;
+
 		private string GetCompModeString()
 		{
 			switch (compMode)
 			{
 				case CompMode.strict_equal:
 					return "===";
+				case CompMode.strict_neq:
+					return "!==";
+				case CompMode.equal:
+					return "==";
+				case CompMode.notequal:
+					return "!=";
+				case CompMode.less:
+					return "<";
+				case CompMode.greater:
+					return ">";
+				case CompMode.less_equal:
+					return "<=";
+				case CompMode.greater_equal:
+					return ">=";
 				default:
 					return "!!Known";
 			}
@@ -52,6 +77,7 @@ namespace juicescript.ABC.INS
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
+			compResult.ReadFromBinary(br);
 			offset = br.ReadInt32();
 			uint store = br.ReadUInt32();
 
@@ -63,6 +89,7 @@ namespace juicescript.ABC.INS
 
 		protected override void WriteByte(BinaryWriter bw)
 		{
+			compResult.Write(bw);
 			bw.Write(offset);
 			uint store = (uint)compMode | ((uint)(jump_mode ? 1 : 0) << 8) | ((uint)v1 << 16) | ((uint)v2 << 24);
 			bw.Write(store);
@@ -70,17 +97,17 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"If_LogicOp_Goto	( if( [stack:{v1}] {GetCompModeString()} [stack:{v2}] == { jump_mode } ) goto  FLAG_{flag_id})";
+			return $"If_LogicOp_Goto	( if( [stack:{v1}] {GetCompModeString()} [stack:{v2}] == {jump_mode}, save->[{compResult}] ) goto  FLAG_{flag_id})";
 		}
 
-        public override IEnumerable<StackLocater> GetDef()
-        {
+		public override IEnumerable<StackLocater> GetDef()
+		{
 			//return new List<StackLocater>();
-			yield break;
-        }
+			yield return dst;
+		}
 
-        public override IEnumerable<StackLocater> GetUse()
-        {
+		public override IEnumerable<StackLocater> GetUse()
+		{
 			//return new List<StackLocater> 
 			//{ 
 			//    new StackLocater { index = v1 }, 
@@ -90,20 +117,26 @@ namespace juicescript.ABC.INS
 			yield return new StackLocater { index = v1 };
 			yield return new StackLocater { index = v2 };
 
-        }
+		}
 
-        public override bool MaybeRaiseError()
-        {
-            return false;
-        }
+		public override bool MaybeRaiseError()
+		{
+			return  compMode!= CompMode.strict_equal && compMode != CompMode.strict_neq ;
+		}
 
-        public override void RemappingSlots(Dictionary<int, int> mapping)
-        {
-            if (mapping.TryGetValue(v1, out int newIndex))
-                v1 = (byte)newIndex;
-            if (mapping.TryGetValue(v2, out int newIndex1))
-                v2 = (byte)newIndex1;
-        }
+		public override void RemappingSlots(Dictionary<int, int> mapping)
+		{
+
+
+			if (mapping.TryGetValue(v1, out int newIndex))
+				v1 = (byte)newIndex;
+			if (mapping.TryGetValue(v2, out int newIndex1))
+				v2 = (byte)newIndex1;
+
+			if (mapping.TryGetValue(compResult.index, out int newdst))
+				compResult.index = newdst;
+
+		}
 
 	}
 }

@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
+
 //using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
 using static System.Formats.Asn1.AsnWriter;
@@ -14059,6 +14061,64 @@ namespace juicescript.runtime
 								break;
 							}
 
+						case INS_Code.if_logicOp_goto:
+							{
+
+								StackLocater compResult;LoadStackLocater(&compResult, &PC);							
+								int offset;  LoadInt32(&offset,&PC); //br.ReadInt32();
+								uint store;  LoadUInt(&store, &PC);
+
+								var compMode = (CompMode)(store & 0xff);
+								bool jump_mode = (store >> 8 & 0xff) > 0;
+								byte v1 = (byte)(store >> 16 & 0xff);
+								byte v2 = (byte)(store >> 24 & 0xff);
+
+								if (compMode <= CompMode.strict_neq)
+								{
+									bool c = IsStrictlyEqual(stackslots[v1], stackslots[v2]);
+									c = compMode == CompMode.strict_equal ? c : !c;
+									stackslots[compResult.index].SetBoolean(c);
+									if (c == jump_mode)
+									{
+										PC = PC_START + offset;
+									}
+								}								
+								else if (compMode <= CompMode.notequal)
+								{
+									bool c = IsEqual(stackslots[v1], stackslots[v2], compResult, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+									c = compMode == CompMode.equal ? c : !c;
+
+									stackslots[compResult.index].SetBoolean(c);
+									if (c == jump_mode)
+									{
+										PC = PC_START + offset;
+									}
+								}								
+								else
+								{
+									bool c = DoCompress((byte)(compMode - 4), compResult, stackslots[v1], stackslots[v2], scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr, ref error);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+									if (c == jump_mode)
+									{
+										PC = PC_START + offset;
+									}
+
+								}
+
+
+								break;
+							}
+
+
 						case INS_Code.return_void:
 
 
@@ -14102,9 +14162,7 @@ namespace juicescript.runtime
 
 								Debug.Assert(returnSlotIndex >= 0);
 								
-
-								Context.GC.CheckGC(ref error);
-
+								//Context.GC.CheckGC(ref error);
 								StackLocater value;
 								value.index = dst_index;
 

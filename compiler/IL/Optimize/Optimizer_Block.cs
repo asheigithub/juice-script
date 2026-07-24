@@ -1970,6 +1970,17 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
+		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
+		{
+			
+
+
+
+			return slotcount;
+		}
+
+
+
 		private static IEnumerable<Instruction> AllReachable(Instruction ins, NaturalLoop loop)
 		{
 			var startblock = loop.nodes.First(b => b.Instructions.Contains(ins));
