@@ -204,3 +204,16 @@ import geom.Vector2;
 
 var a:Vector2 = new Vector2(3, 4);
 trace(a);
+
+trace(a + a);
+trace(a - a);
+
+trace(a.dot(a));
+trace(a.cross(a));
+
+trace(a * 5.0);
+trace(a / 2.0f);
+trace(a / 2.0);
+
+trace(2 * a);
+trace( -a);

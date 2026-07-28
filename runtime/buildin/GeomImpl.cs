@@ -193,24 +193,54 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
+
 
 			var vector2_b = context.GC.Heap[v2.HeapPtr];
 			var payload_b = (RtInstance)vector2_b;
 
-			NaNBoxing x2 = payload_b.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y2 = payload_b.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			float x2;
+			float y2;
+
+			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x2 = *(float*)p;
+					y2 = *((float*)p + 1);
+				}
+			}
+
+
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(x1.FloatValue - x2.FloatValue);
-			NaNBoxing y = default; y.SetFloat(y1.FloatValue - y2.FloatValue);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x1 - x2;
+					*((float*)p + 1) = y1 - y2;
+				}
+			}
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
 
 		}
 
@@ -226,19 +256,47 @@ namespace juicescript.runtime.buildin
 			var vector2_this = context.GC.Heap[thisPtr.HeapPtr];
 			var payload_this = (RtInstance)vector2_this;
 
-			NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
-			NaNBoxing y1 = payload_this.ReadSlot(1, vector2_this.Type._link_codescope, context.player);
+			//NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
+			//NaNBoxing y1 = payload_this.ReadSlot(1, vector2_this.Type._link_codescope, context.player);
 
-			NaNBoxing v_arg = context.StackSlots[stackStPos];
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_this).GetStoreData(context.player, (ASInstance)payload_this.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
+
+			NaNBoxing v_arg = scope.ReadSlot(0, context.player);
 			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
 			var payload_arg = (RtInstance)vector2_arg;
 
-			NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
-			NaNBoxing y2 = payload_arg.ReadSlot(1, vector2_arg.Type._link_codescope, context.player);
+			//NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
+			//NaNBoxing y2 = payload_arg.ReadSlot(1, vector2_arg.Type._link_codescope, context.player);
 
-			float result = x1.FloatValue * x2.FloatValue + y1.FloatValue * y2.FloatValue;
+			float x2;
+			float y2;
+
+			var store2 = ((RtInstance)payload_arg).GetStoreData(context.player, (ASInstance)payload_arg.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x2 = *(float*)p;
+					y2 = *((float*)p + 1);
+				}
+			}
+
+
+			float result = x1 * x2 + y1 * y2;
 
 			NaNBoxing nan_result = default;
 			nan_result.SetFloat(result);
@@ -257,19 +315,48 @@ namespace juicescript.runtime.buildin
 			var vector2_this = context.GC.Heap[thisPtr.HeapPtr];
 			var payload_this = (RtInstance)vector2_this;
 
-			NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
-			NaNBoxing y1 = payload_this.ReadSlot(1, vector2_this.Type._link_codescope, context.player);
+			//NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
+			//NaNBoxing y1 = payload_this.ReadSlot(1, vector2_this.Type._link_codescope, context.player);
 
-			NaNBoxing v_arg = context.StackSlots[stackStPos];
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_this).GetStoreData(context.player, (ASInstance)payload_this.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
+
+
+			NaNBoxing v_arg = scope.ReadSlot(0, context.player);//.StackSlots[stackStPos];
 			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
 			var payload_arg = (RtInstance)vector2_arg;
 
-			NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
-			NaNBoxing y2 = payload_arg.ReadSlot(1, vector2_arg.Type._link_codescope, context.player);
+			//NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
+			//NaNBoxing y2 = payload_arg.ReadSlot(1, vector2_arg.Type._link_codescope, context.player);
+			float x2;
+			float y2;
 
-			float result = x1.FloatValue * y2.FloatValue - y1.FloatValue * x2.FloatValue;
+			var store2 = ((RtInstance)payload_arg).GetStoreData(context.player, (ASInstance)payload_arg.Type);
+			unsafe
+			{
+				fixed (byte* p = store2)
+				{
+					x2 = *(float*)p;
+					y2 = *((float*)p + 1);
+				}
+			}
+
+
+			float result = x1 * y2 - y1 * x2;
 
 			NaNBoxing nan_result = default;
 			nan_result.SetFloat(result);
@@ -296,8 +383,22 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
 
 			float scalar = s.FloatValue;
 
@@ -305,11 +406,23 @@ namespace juicescript.runtime.buildin
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
-			NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
+			//NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
+			//NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x1 * scalar;
+					*((float*)p + 1) = y1 * scalar;
+				}
+			}
+
+
 		}
 
 		[NativeFunction("$geom.Vector2$private::Vec2mulNumber")]
@@ -331,8 +444,23 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
+
 
 			float scalar = (float)s.Number;
 
@@ -340,11 +468,22 @@ namespace juicescript.runtime.buildin
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
-			NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
+			//NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
+			//NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x1 * scalar;
+					*((float*)p + 1) = y1 * scalar;
+				}
+			}
+
 		}
 
 		[NativeFunction("$geom.Vector2$private::Vec2divFloat")]
@@ -367,8 +506,21 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
 
 			float scalar = s.FloatValue;
 
@@ -376,11 +528,22 @@ namespace juicescript.runtime.buildin
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
-			NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
+			//NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
+			//NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x1 / scalar;
+					*((float*)p + 1) = y1 / scalar;
+				}
+			}
+
 		}
 
 		[NativeFunction("$geom.Vector2$private::Vec2divNumber")]
@@ -402,8 +565,21 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
 
 			float scalar = (float)s.Number;
 
@@ -411,11 +587,22 @@ namespace juicescript.runtime.buildin
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
-			NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
+			//NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
+			//NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x1 / scalar;
+					*((float*)p + 1) = y1 / scalar;
+				}
+			}
+
 		}
 
 		[NativeFunction("$geom.Vector2$private::FloatmulVec2")]
@@ -440,18 +627,42 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
-			NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
+			//NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
+			//NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = scalar * x1;
+					*((float*)p + 1) = scalar * y1 ;
+				}
+			}
+
 		}
 
 		[NativeFunction("$geom.Vector2$private::NumbermulVec2")]
@@ -475,18 +686,42 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
-			NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
+			//NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
+			//NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = scalar * x1;
+					*((float*)p + 1) = scalar * y1;
+				}
+			}
+
 		}
 
 
@@ -509,18 +744,42 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			x1.SetFloat(-x1.FloatValue);
-			y1.SetFloat(-y1.FloatValue);
+			//x1.SetFloat(-x1.FloatValue);
+			//y1.SetFloat(-y1.FloatValue);
 
-			payload_result.SetSlot(x1, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y1, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x1, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y1, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = -x1;
+					*((float*)p + 1) = -y1;
+				}
+			}
+
 		}
 
 
@@ -543,18 +802,43 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			x1.SetFloat(+x1.FloatValue);
-			y1.SetFloat(+y1.FloatValue);
+			//x1.SetFloat(+x1.FloatValue);
+			//y1.SetFloat(+y1.FloatValue);
 
-			payload_result.SetSlot(x1, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y1, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x1, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y1, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = +x1;
+					*((float*)p + 1) = +y1;
+				}
+			}
+
 		}
 
 
