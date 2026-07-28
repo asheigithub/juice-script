@@ -63,11 +63,13 @@ namespace juicescript.ABC.INS
         {
 			if (dst.index != result.index)
 			{
-				return new List<StackLocater>() { source };
+				yield return source;
+				//return new List<StackLocater>() { source };
 			}
 			else
 			{
-				return new List<StackLocater>() { source };
+				yield return source;
+				//return new List<StackLocater>() { source };
 			}
 
 			//return new List<StackLocater> { source ,result , dst};

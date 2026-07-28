@@ -14060,7 +14060,16 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+						case INS_Code.O_IncrDecr_StoreVar:
+							{
+								IncrDecrStoreVar(dst_index, &PC, methodscope, stackslots, scope_ptr, stackStPos, method_scopes ,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
 
+								break;
+							}
 						case INS_Code.if_logicOp_goto:
 							{
 

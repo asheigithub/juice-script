@@ -1972,9 +1972,35 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
-			
+			foreach (var block in cfg.Blocks)
+			{
+				for (int i = 0; i < block.Instructions.Count-1; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.increment_decrement)
+					{
+						var next = block.Instructions.Skip(i + 1).SkipWhile(k => k.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
+						if (next.INS_Code == INS_Code.storeMethodVariable)
+						{
+							if (ins.GetDef().Contains(((INS_Store_MethodVariable)next).dst))
+							{
+								INS_O_IncrDecr_StoreVar incrDecr_StoreVar = new INS_O_IncrDecr_StoreVar(next.token);
+								incrDecr_StoreVar.dst = ins.dst;
+								incrDecr_StoreVar.result = ((INS_Incr_Decr)ins).result;
+								incrDecr_StoreVar.source = ((INS_Incr_Decr)ins).source;
+								incrDecr_StoreVar.addvalue = ((INS_Incr_Decr)ins).addvalue;
+								incrDecr_StoreVar.heap = ((INS_Store_MethodVariable)next).heap;
+								incrDecr_StoreVar.convertedloc = ((INS_Store_MethodVariable)next).convertedloc;
 
+								block.Instructions[i] = incrDecr_StoreVar;
+								block.Instructions.Remove(next);
+							}
+						}
 
+					}
+				}
+
+			}
 
 			return slotcount;
 		}

@@ -309,8 +309,11 @@ namespace juicescript.compiler.IL.Optimize
 						jumpflag = ((INS_If_False_Goto)instruction).flag_id;
 					}
 
+
+
 					if (condition.HasValue)
 					{
+						
 						var ins = instructions[i - 1];
 						if (ins.INS_Code == INS_Code.strict_eq && ((INS_Strict_Eq)ins).dst.index == condition?.index
 

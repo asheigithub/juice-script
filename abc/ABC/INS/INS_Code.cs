@@ -310,7 +310,7 @@ namespace juicescript.ABC.INS
         O_ld_interface_method =124,     //加载接口方法，instance相同的公共method
         O_Call =125,                    //直接调缓存优化的闭包                   
 
-
+        O_IncrDecr_StoreVar =127,       // ++,--后保存到变量中
 
 		//**specialized opcode  quickening
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -33,11 +34,20 @@ namespace juicescript.runtime.buildin
 			}
 
 #endif
-			
-			
-			((RtInstance)vector2).SetSlot(x, 0, ((ASInstance)vector2.Type)._link_codescope  , context.player);
-			((RtInstance)vector2).SetSlot(y, 1, ((ASInstance)vector2.Type)._link_codescope  , context.player);
 
+
+			//((RtInstance)vector2).SetSlot(x, 0, ((ASInstance)vector2.Type)._link_codescope  , context.player);
+			//((RtInstance)vector2).SetSlot(y, 1, ((ASInstance)vector2.Type)._link_codescope  , context.player);
+
+			var store = ((RtInstance)vector2).GetStoreData(context.player, (ASInstance)vector2.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x.FloatValue;
+					*((float*)p + 1) = y.FloatValue;
+				}
+			}
 		}
 
 		//geom.Vector2$public::toString
@@ -54,19 +64,26 @@ namespace juicescript.runtime.buildin
 			var payload = (RtInstance)vector2;
 
 
-			NaNBoxing x = payload.ReadSlot(0, vector2.Type._link_codescope, context.player);
-			NaNBoxing y = payload.ReadSlot(1, vector2.Type._link_codescope, context.player);
+			//NaNBoxing x = payload.ReadSlot(0, vector2.Type._link_codescope, context.player);
+			//NaNBoxing y = payload.ReadSlot(1, vector2.Type._link_codescope, context.player);
+
+			float x;
+			float y;
+
+			var store = ((RtInstance)vector2).GetStoreData(context.player, (ASInstance)vector2.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					x = *(float*)p ;
+					y = *((float*)p + 1) ;
+				}
+			}
+			
+			
 
 
-
-			//int str = context.GC.AllocString($"({x.FloatValue.ToString("F2")},{y.FloatValue.ToString("F2")})");
-			//if (str == 0)
-			//{
-			//	context.player.RaiseOutOfMemory(ref error);
-			//	return;
-			//}
-
-			if (context.player.TryCreateStringValue($"({x.FloatValue.ToString("F2")},{y.FloatValue.ToString("F2")})", out NaNBoxing result, ref error))
+			if (context.player.TryCreateStringValue($"({x.ToString("F2")},{y.ToString("F2")})", out NaNBoxing result, ref error))
 			{
 				context.StackSlots[returnSlotIndex] = result;
 				//context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
@@ -93,24 +110,66 @@ namespace juicescript.runtime.buildin
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
-			NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x1;
+			float y1;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x1 = *(float*)p;
+					y1 = *((float*)p + 1);
+				}
+			}
+
+
 
 			var vector2_b = context.GC.Heap[v2.HeapPtr];
 			var payload_b = (RtInstance)vector2_b;
 
-			NaNBoxing x2 = payload_b.ReadSlot(0, vec2.Instance._link_codescope, context.player);
-			NaNBoxing y2 = payload_b.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing x2 = payload_b.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y2 = payload_b.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float x2;
+			float y2;
+
+			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					x2 = *(float*)p;
+					y2 = *((float*)p + 1);
+				}
+			}
+
+
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
 			var vector2_result = context.GC.Heap[resultptr];
 			var payload_result = (RtInstance)vector2_result;
 
-			NaNBoxing x = default;x.SetFloat( x1.FloatValue + x2.FloatValue );
-			NaNBoxing y = default;y.SetFloat( y1.FloatValue + y2.FloatValue );
+			//NaNBoxing x = default;x.SetFloat( x1.FloatValue + x2.FloatValue );
+			//NaNBoxing y = default;y.SetFloat( y1.FloatValue + y2.FloatValue );
 
-			payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
-			payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(x, 0, vec2.Instance._link_codescope, context.player);
+			//payload_result.SetSlot(y, 1, vec2.Instance._link_codescope, context.player);
+
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = x1 + x2;
+					*((float*)p + 1) = y1 + y2;
+				}
+			}
+
+
 
 		}
 

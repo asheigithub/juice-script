@@ -2694,6 +2694,122 @@ namespace juicescript.runtime
 
 
 
+
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void IncrDecrStoreVar(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos, 
+			int* method_scopes,
+			ref ReceiveError error)
+		{
+			StackLocater dst;
+			StackLocater src;
+			StackLocater result;
+
+			dst.index = dst_index;
+			LoadStackLocater(&src, PC);
+			LoadStackLocater(&result, PC);
+
+			int addvalue = *(int*)*PC; *PC += 4;
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+			}
+
+			StackLocater convertedloc; LoadStackLocater(&convertedloc, PC);
+
+			NaNBoxing n1 = stackslots[src.index];
+
+
+			RtMethodScope heap = (RtMethodScope)methodscope;
+			ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+
+			if ((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
+			{
+				stackslots[dst.index].SetInt(n1.IntValue + addvalue);
+
+				if (dst.index != result.index)
+				{
+					stackslots[result.index] = n1;
+				}
+
+
+				if (
+					
+					heapV.ValueType == BoxType.Int
+				)
+				{
+					heapV.SetInt(n1.IntValue + addvalue);
+					stackslots[convertedloc.index] = heapV;
+#if FORCOMPILER
+					((RtMethodScope)heap).SetSlot(heapV, heapLocater.MemberIndex);
+#endif
+
+					return;
+				}
+
+
+			}
+			else if (n1.ValueType == BoxType.Uint || n1.ValueType == BoxType.Number)
+			{
+				stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + addvalue);
+				if (dst.index != result.index)
+				{
+					stackslots[result.index] = n1;
+				}
+			}
+			else if (n1.ValueType == BoxType.Float)
+			{
+				stackslots[dst.index].SetFloat(n1.FloatValue + addvalue);
+				if (dst.index != result.index)
+				{
+					stackslots[result.index] = n1;
+				}
+			}
+			else
+			{
+				Incr_Decr_Slow(methodscope, addvalue, dst, result, n1, stackslots, scope_ptr, stackStPos, ref error);
+			}
+
+			if (error.raised)
+				return;
+
+			NaNBoxing incr_decr_v = stackslots[dst.index];
+
+			Debug.Assert(incr_decr_v.ValueType != BoxType.HeapPtr);
+
+			if (
+				(heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any
+				||
+				(incr_decr_v.ValueType == heapV.ValueType)
+
+				)
+			{
+				if (heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+				{
+					heapV = incr_decr_v;
+					stackslots[convertedloc.index] = incr_decr_v;
+#if FORCOMPILER
+					((RtMethodScope)heap).SetSlot(incr_decr_v, heapLocater.MemberIndex);
+#endif
+
+					return;
+				}
+			}
+
+			StoreMethodVariable_Slow(methodscope, heapLocater, incr_decr_v, ref heapV, scope_ptr, method_scopes, ref error);
+			stackslots[convertedloc.index] = heapV;
+
+
+		}
+
+
+
+
+
+
 		private unsafe void GET_TYPEOF(int dst_index,byte** PC ,Span<NaNBoxing> stackslots)
 		{
 			StackLocater dst;
