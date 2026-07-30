@@ -29,3 +29,4 @@ packages/
 /script_workspace
 /nul
 /test_output.txt
+.playwright/
