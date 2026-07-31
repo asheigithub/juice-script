@@ -25,7 +25,7 @@
     },
     "asc_box2dlite": {
       "commandName": "Project",
-      "commandLineArgs": "-r F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\dev_scripts\\box2d-lite\\src \r\n-w F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\dev_scripts\\box2d-lite\\obj \r\n-l F:\\GitHub\\juice-script-2\\juice-script-2\\player\\bin\\Debug\\net6.0\\juice_global.swc -f"
+      "commandLineArgs": "-r F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\dev_scripts\\box2d-lite\\src \r\n-w F:\\GitHub\\juice-script-2\\juice-script-2\\fd_projs\\dev_scripts\\box2d-lite\\obj \r\n-l F:\\GitHub\\juice-script-2\\juice-script-2\\player\\bin\\Debug\\net6.0\\juice_global.swc"
     }
   }
 }

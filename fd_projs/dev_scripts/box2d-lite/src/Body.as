@@ -2,7 +2,7 @@ package
 {
 	import geom.Vector2;
 	
-	[struct]
+	
 	public final class Body 
 	{
 		public var position:Vector2;
@@ -22,10 +22,15 @@ package
 		public var I:float;
 		public var invI:float;
 		
+		public var id:int;
+		
 		public static const FLT_MAX:float = 3.402823466e+38F;
+		
+		private static var idseed:int = 0;
 		
 		public function Body()
 		{
+			id = idseed++;
 			
 			//position.Set(0.0f, 0.0f);
 			rotation = 0.0f;

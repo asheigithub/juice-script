@@ -48,6 +48,16 @@ function Demo1():void
 }
 
 
+
 Demo1();
+for (var k:int = 0;  k< 200 ; k++) 
+{
+	
+	world.Step(1.0f / 60);
+	
+	
+}
+
+//trace( world.bodies[1].position.y.toFixed(8) , world.bodies[1].velocity.y.toFixed(8) );
 
 
