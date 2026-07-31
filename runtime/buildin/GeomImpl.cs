@@ -140,7 +140,7 @@ namespace juicescript.runtime.buildin
 			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
 			unsafe
 			{
-				fixed (byte* p = store1)
+				fixed (byte* p = store2)
 				{
 					x2 = *(float*)p;
 					y2 = *((float*)p + 1);
@@ -217,7 +217,7 @@ namespace juicescript.runtime.buildin
 			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
 			unsafe
 			{
-				fixed (byte* p = store1)
+				fixed (byte* p = store2)
 				{
 					x2 = *(float*)p;
 					y2 = *((float*)p + 1);
@@ -288,7 +288,7 @@ namespace juicescript.runtime.buildin
 			var store2 = ((RtInstance)payload_arg).GetStoreData(context.player, (ASInstance)payload_arg.Type);
 			unsafe
 			{
-				fixed (byte* p = store1)
+				fixed (byte* p = store2)
 				{
 					x2 = *(float*)p;
 					y2 = *((float*)p + 1);

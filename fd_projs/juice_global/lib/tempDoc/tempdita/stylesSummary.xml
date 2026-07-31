@@ -16,6 +16,20 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
+      <apiClassifier id="__AS3__:utils">
+         <apiName>utils</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
       <apiClassifier id="__AS3__:MethodClosure">
          <apiName>MethodClosure</apiName>
          <apiClassifierDetail>
@@ -135,6 +149,20 @@
             <apiClassifierDef>
                <apiAccess value="public"/>
                <apiDynamic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Mathf">
+         <apiName>Mathf</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
                <apiFinal/>
                <apiBaseClassifier>Object</apiBaseClassifier>
             </apiClassifierDef>

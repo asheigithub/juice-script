@@ -119,7 +119,7 @@ trace("Hello World");
 
 	 ]]></see>
 </field>
-<field name='undefined' fullname='undefined' type='' isStatic='false' isConst='true' defaultValue='unknown' >
+<field name='undefined' fullname='undefined' type='' isStatic='false' isConst='true' defaultValue='0' >
 <description><![CDATA[
 
 	 一个适用于尚未初始化的无类型变量或未初始化的动态对象属性的特殊值。
@@ -228,7 +228,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='indexOf' fullname='String/AS3:indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='undefined;0' result_type='int'>
+<method name='indexOf' fullname='String/AS3:indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='unknown;0' result_type='int'>
 <description><![CDATA[
 
 		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
@@ -244,7 +244,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='lastIndexOf' fullname='String/AS3:lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='undefined;0x7FFFFFFF' result_type='int'>
+<method name='lastIndexOf' fullname='String/AS3:lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='unknown;0x7FFFFFFF' result_type='int'>
 <description><![CDATA[
 
 		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
@@ -262,7 +262,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='replace' fullname='String/AS3:replace' isStatic='false' isFinal='false' isOverride='false'  param_names='pattern;repl' param_types='String;String' param_defaults='undefined;undefined' result_type='String'>
+<method name='replace' fullname='String/AS3:replace' isStatic='false' isFinal='false' isOverride='false'  param_names='pattern;repl' param_types='String;*' param_defaults='undefined;undefined' result_type='String'>
 <description><![CDATA[
 
 		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
@@ -276,6 +276,15 @@ trace("Hello World");
 		 ]]></param>
 <return><![CDATA[
 		 ]]></return>
+</method>
+<method name='search' fullname='String/AS3:search' isStatic='false' isFinal='false' isOverride='false'  param_names='pattern' param_types='*' param_defaults='null' result_type='int'>
+<description><![CDATA[
+
+		搜索指定的 pattern 并返回第一个匹配子字符串的索引。如果没有匹配的子字符串，该方法返回 -1。
+
+			pattern:— 要匹配的模式，可以为任何类型的对象，但通常是字符串。如果 pattern 不是字符串，则该方法在执行前会将其转换为字符串。 当前实现中未实现正则表达式，所以只支持字符串搜索。
+
+		]]></description>
 </method>
 <method name='slice' fullname='String/AS3:slice' isStatic='false' isFinal='false' isOverride='false'  param_names='startIndex;endIndex' param_types='Number;Number' param_defaults='0;0x7fffffff' result_type='String'>
 <description><![CDATA[
@@ -293,13 +302,13 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='split' fullname='String/AS3:split' isStatic='false' isFinal='false' isOverride='false'  param_names='delimiter;limit' param_types='String;Number' param_defaults='undefined;0x7fffffff' result_type='Array'>
+<method name='split' fullname='String/AS3:split' isStatic='false' isFinal='false' isOverride='false'  param_names='delimiter;limit' param_types='*;*' param_defaults='null;0x7fffffff' result_type='Array'>
 <description><![CDATA[
 
 		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
 
 		 ]]></description>
-<param><![CDATA[delimiter 指定拆分此字符串的位置的模式。此模式可以是任何类型的对象，但通常为字符串。如果 delimiter 不是正则表达式或字符串，则该方法在执行前会将其转换为字符串。
+<param><![CDATA[delimiter 指定拆分此字符串的位置的模式。正则表达式未实现
 
 		 ]]></param>
 <param><![CDATA[limit 要放入数组中的最大项数。默认为允许的最大值。
@@ -339,6 +348,22 @@ trace("Hello World");
 		 ]]></param>
 <return><![CDATA[基于指定参数的子字符串。
 
+		 ]]></return>
+</method>
+<method name='toLocaleLowerCase' fullname='String/AS3:toLocaleLowerCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toLowerCase() 方法生成的结果相同。
+
+		]]></description>
+</method>
+<method name='toLocaleUpperCase' fullname='String/AS3:toLocaleUpperCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+<description><![CDATA[
+
+		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toUpperCase() 方法生成的结果相同。
+
+		 ]]></description>
+<return><![CDATA[
 		 ]]></return>
 </method>
 <method name='toLowerCase' fullname='String/AS3:toLowerCase' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
@@ -456,7 +481,84 @@ trace("Hello World");
 
 	 ]]></author>
 </classRec>
-<method name='valueOf' fullname='sbyte/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='sbyte'>
+<method name='sbyte' fullname='sbyte/sbyte' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
+<description><![CDATA[
+
+		 创建新的 sbyte 对象。可以创建一个 sbyte 类型的变量并赋予其文本值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	要创建的 sbyte 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+
+		 ]]></param>
+</method>
+<method name='toExponential' fullname='sbyte/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toFixed' fullname='sbyte/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toPrecision' fullname='sbyte/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toString' fullname='sbyte/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
+<description><![CDATA[
+
+		 返回 sbyte 对象的字符串表示形式。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+
+		 ]]></param>
+<return><![CDATA[sbyte 对象的字符串表达式。
+
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='sbyte/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='sbyte'>
 <description><![CDATA[
 
 		 返回指定 sbyte 对象的原始 sbyte 类型值。
@@ -465,7 +567,7 @@ trace("Hello World");
 <langversion><![CDATA[3.0
 
 		 ]]></langversion>
-<return><![CDATA[此 byte 对象的原始 byte 类型值。
+<return><![CDATA[此 sbyte 对象的原始 sbyte 类型值。
 
 		 ]]></return>
 </method>
@@ -488,6 +590,12 @@ trace("Hello World");
 <langversion><![CDATA[3.0
 
 		 ]]></langversion>
+</field>
+<field name='length' fullname='sbyte/length' type='int' isStatic='true' isConst='true' defaultValue='1' >
+<description><![CDATA[
+
+		 ]]></description>
+<private><![CDATA[]]></private>
 </field>
 <classRec name='uint' fullname='uint' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\uint.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 <description><![CDATA[
@@ -732,7 +840,78 @@ trace("Hello World");
 
 	 ]]></author>
 </classRec>
-<method name='valueOf' fullname='float/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='float'>
+<method name='float' fullname='float/float' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
+<description><![CDATA[
+
+		 创建新的 float 对象。可以创建一个 float 类型的变量并赋予其文本值。
+
+		 ]]></description>
+<param><![CDATA[value	要创建的 float 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+
+		 ]]></param>
+</method>
+<method name='toExponential' fullname='float/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toFixed' fullname='float/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toPrecision' fullname='float/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toString' fullname='float/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
+<description><![CDATA[
+
+		 返回 float 对象的字符串表示形式。
+
+		 ]]></description>
+<param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+
+		 ]]></param>
+<return><![CDATA[float 对象的字符串表达式。
+
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='float/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='float'>
 <description><![CDATA[
 
 		 返回指定 float 对象的原始 float 类型值。
@@ -743,6 +922,17 @@ trace("Hello World");
 		 ]]></return>
 </method>
 <field name='Epsilon' fullname='float/Epsilon' type='float' isStatic='true' isConst='true' defaultValue='1.4e-45' >
+<description><![CDATA[
+
+		 可表示的最小正 float 值为 1.4e-45。
+
+		 ]]></description>
+</field>
+<field name='length' fullname='float/length' type='int' isStatic='true' isConst='true' defaultValue='1' >
+<description><![CDATA[
+
+		 ]]></description>
+<private><![CDATA[]]></private>
 </field>
 <classRec name='Array' fullname='Array' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Array.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
 <description><![CDATA[
@@ -776,6 +966,19 @@ trace("Hello World");
 		 <p><b>注意:</b> 如果传递给 Array 构造函数的只有一个单数值参数，则认为该参数指定数组的 length 属性。</p>
 
 		 ]]></param>
+</method>
+<method name='concat' fullname='Array/AS3:concat' isStatic='false' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='Array'>
+<description><![CDATA[
+
+		 将参数中指定的元素与数组中的元素连接，并创建新的数组。如果这些参数指定了一个数组，将连接该数组中的元素。如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
+
+		 ]]></description>
+<param><![CDATA[args	要连接到新数组中的任意数据类型的值（如数字、元素或字符串）。
+
+		 ]]></param>
+<return><![CDATA[一个数组，其中包含此数组中的元素，后跟参数中的元素。
+
+		 ]]></return>
 </method>
 <method name='every' fullname='Array/AS3:every' isStatic='false' isFinal='false' isOverride='false'  param_names='callback;thisObject' param_types='Function;*' param_defaults='undefined;null' result_type='Boolean'>
 <description><![CDATA[
@@ -1024,6 +1227,19 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
+<method name='push' fullname='Array/AS3:push' isStatic='false' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='uint'>
+<description><![CDATA[
+
+		 将一个或多个元素添加到数组的结尾，并返回该数组的新长度。
+
+		 ]]></description>
+<param><![CDATA[args	要追加到数组中的一个或多个值。
+
+		 ]]></param>
+<return><![CDATA[一个表示新数组长度的整数。
+
+		 ]]></return>
+</method>
 <method name='removeAt' fullname='Array/AS3:removeAt' isStatic='false' isFinal='false' isOverride='false'  param_names='index' param_types='int' param_defaults='undefined' result_type='*'>
 <description><![CDATA[
 
@@ -1094,6 +1310,8 @@ trace("Hello World");
 <return><![CDATA[如果数组中的所有项对于指定的函数都返回 true，则为布尔值 true，否则为 false。
 
 		 ]]></return>
+</method>
+<method name='sortOn' fullname='Array/AS3:sortOn' isStatic='false' isFinal='false' isOverride='false'  param_names='fieldName;options' param_types='Object;Object' param_defaults='undefined;null' result_type='Array'>
 </method>
 <method name='sort' fullname='Array/AS3:sort' isStatic='false' isFinal='false' isOverride='false'  param_names='args' param_types='restParam' param_defaults='undefined' result_type='Array'>
 <description><![CDATA[
@@ -1496,6 +1714,430 @@ sortOptions - 一个或多个数字或定义的常数，相互之间由 |（按�
 </method>
 <method name='next' fullname='IIterator/IIterator:next' isStatic='false' isFinal='false' isOverride='false'  param_names='obj;r' param_types='*;IteratorResult' param_defaults='undefined;undefined' result_type='void'>
 </method>
+<classRec name='Mathf' fullname='Mathf' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Mathf.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+</classRec>
+<method name='abs' fullname='Mathf/abs' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the absolute value of f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The absolute value of f.
+		 ]]></return>
+</method>
+<method name='acos' fullname='Mathf/acos' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the arc-cosine of f (the angle in radians whose cosine is f).
+		 ]]></description>
+<param><![CDATA[f	Value between -1 and 1.
+		 ]]></param>
+<return><![CDATA[Arc-cosine of f, between 0 and PI.
+		 ]]></return>
+</method>
+<method name='approximately' fullname='Mathf/approximately' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b' param_types='float;float' param_defaults='undefined;undefined' result_type='Boolean'>
+<description><![CDATA[
+		 Compares two floating point values and returns true if they are similar.
+		 ]]></description>
+<param><![CDATA[a	First value.
+		 ]]></param>
+<param><![CDATA[b	Second value.
+		 ]]></param>
+<return><![CDATA[True if a and b are approximately equal.
+		 ]]></return>
+</method>
+<method name='asin' fullname='Mathf/asin' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the arc-sine of f (the angle in radians whose sine is f).
+		 ]]></description>
+<param><![CDATA[f	Value between -1 and 1.
+		 ]]></param>
+<return><![CDATA[Arc-sine of f, between -PI/2 and PI/2.
+		 ]]></return>
+</method>
+<method name='atan2' fullname='Mathf/atan2' isStatic='true' isFinal='false' isOverride='false'  param_names='y;x' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the angle in radians whose Tan is y/x.
+		 ]]></description>
+<param><![CDATA[y	Y coordinate.
+		 ]]></param>
+<param><![CDATA[x	X coordinate.
+		 ]]></param>
+<return><![CDATA[Angle in radians.
+		 ]]></return>
+</method>
+<method name='atan' fullname='Mathf/atan' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the arc-tangent of f (the angle in radians whose tangent is f).
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[Arc-tangent of f, between -PI/2 and PI/2.
+		 ]]></return>
+</method>
+<method name='ceilToInt' fullname='Mathf/ceilToInt' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='int'>
+<description><![CDATA[
+		 Returns the smallest integer greater than or equal to f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The smallest integer >= f, as int.
+		 ]]></return>
+</method>
+<method name='ceil' fullname='Mathf/ceil' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the smallest integer greater than or equal to f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The smallest integer >= f.
+		 ]]></return>
+</method>
+<method name='clamp01' fullname='Mathf/clamp01' isStatic='true' isFinal='false' isOverride='false'  param_names='value' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Clamps a value between 0 and 1 and returns the value.
+		 ]]></description>
+<param><![CDATA[value	Input value.
+		 ]]></param>
+<return><![CDATA[Clamped value between 0 and 1.
+		 ]]></return>
+</method>
+<method name='clamp' fullname='Mathf/clamp' isStatic='true' isFinal='false' isOverride='false'  param_names='value;min;max' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Clamps a value between a minimum float and maximum float value.
+		 ]]></description>
+<param><![CDATA[value	Input value.
+		 ]]></param>
+<param><![CDATA[min		Minimum value.
+		 ]]></param>
+<param><![CDATA[max		Maximum value.
+		 ]]></param>
+<return><![CDATA[Clamped value.
+		 ]]></return>
+</method>
+<method name='cos' fullname='Mathf/cos' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the cosine of angle f in radians.
+		 ]]></description>
+<param><![CDATA[f	Angle in radians.
+		 ]]></param>
+<return><![CDATA[The cosine of angle f, between -1 and 1.
+		 ]]></return>
+</method>
+<method name='deltaAngle' fullname='Mathf/deltaAngle' isStatic='true' isFinal='false' isOverride='false'  param_names='current;target' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Calculates the shortest difference between two given angles in degrees.
+		 ]]></description>
+<param><![CDATA[current	Current angle in degrees.
+		 ]]></param>
+<param><![CDATA[target	Target angle in degrees.
+		 ]]></param>
+<return><![CDATA[Shortest difference in degrees.
+		 ]]></return>
+</method>
+<method name='exp' fullname='Mathf/exp' isStatic='true' isFinal='false' isOverride='false'  param_names='power' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns e raised to the specified power.
+		 ]]></description>
+<param><![CDATA[power	Exponent.
+		 ]]></param>
+<return><![CDATA[e ^ power.
+		 ]]></return>
+</method>
+<method name='floorToInt' fullname='Mathf/floorToInt' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='int'>
+<description><![CDATA[
+		 Returns the largest integer smaller than or equal to f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The largest integer <= f, as int.
+		 ]]></return>
+</method>
+<method name='floor' fullname='Mathf/floor' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the largest integer smaller than or equal to f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The largest integer <= f.
+		 ]]></return>
+</method>
+<method name='inverseLerp' fullname='Mathf/inverseLerp' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b;value' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Returns 0 if value is between min and max.
+		 ]]></description>
+<param><![CDATA[a	Start of the range.
+		 ]]></param>
+<param><![CDATA[b	End of the range.
+		 ]]></param>
+<param><![CDATA[value	Input value.
+		 ]]></param>
+<return><![CDATA[Inverse linear interpolation (0 to 1).
+		 ]]></return>
+</method>
+<method name='isPowerOfTwo' fullname='Mathf/isPowerOfTwo' isStatic='true' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='Boolean'>
+<description><![CDATA[
+		 Returns true if the value is a power of two.
+		 ]]></description>
+<param><![CDATA[value	Input value.
+		 ]]></param>
+<return><![CDATA[True if value is a power of two.
+		 ]]></return>
+</method>
+<method name='lerpAngle' fullname='Mathf/lerpAngle' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b;t' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Same as Lerp but makes sure the values interpolate correctly when they wrap around 360 degrees.
+		 ]]></description>
+<param><![CDATA[a	Start angle in degrees.
+		 ]]></param>
+<param><![CDATA[b	End angle in degrees.
+		 ]]></param>
+<param><![CDATA[t	Interpolation factor (clamped between 0 and 1).
+		 ]]></param>
+<return><![CDATA[Interpolated angle.
+		 ]]></return>
+</method>
+<method name='lerpUnclamped' fullname='Mathf/lerpUnclamped' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b;t' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Linearly interpolates between a and b by t without clamping t.
+		 ]]></description>
+<param><![CDATA[a	Start value.
+		 ]]></param>
+<param><![CDATA[b	End value.
+		 ]]></param>
+<param><![CDATA[t	Interpolation factor (not clamped).
+		 ]]></param>
+<return><![CDATA[Interpolated value.
+		 ]]></return>
+</method>
+<method name='lerp' fullname='Mathf/lerp' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b;t' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Linearly interpolates between a and b by t.
+		 ]]></description>
+<param><![CDATA[a	Start value.
+		 ]]></param>
+<param><![CDATA[b	End value.
+		 ]]></param>
+<param><![CDATA[t	Interpolation factor (clamped between 0 and 1).
+		 ]]></param>
+<return><![CDATA[Interpolated value.
+		 ]]></return>
+</method>
+<method name='log10' fullname='Mathf/log10' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the base 10 logarithm of f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[Base 10 logarithm of f.
+		 ]]></return>
+</method>
+<method name='logBase' fullname='Mathf/logBase' isStatic='true' isFinal='false' isOverride='false'  param_names='f;p' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the logarithm of f in base p.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<param><![CDATA[p	Base of the logarithm.
+		 ]]></param>
+<return><![CDATA[Logarithm of f in base p.
+		 ]]></return>
+</method>
+<method name='log' fullname='Mathf/log' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the natural (base e) logarithm of f.
+		 ]]></description>
+<param><![CDATA[f	Input value (must be > 0).
+		 ]]></param>
+<return><![CDATA[Natural logarithm of f.
+		 ]]></return>
+</method>
+<method name='max' fullname='Mathf/max' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the largest of two values.
+		 ]]></description>
+<param><![CDATA[a	First value.
+		 ]]></param>
+<param><![CDATA[b	Second value.
+		 ]]></param>
+<return><![CDATA[The larger value.
+		 ]]></return>
+</method>
+<method name='min' fullname='Mathf/min' isStatic='true' isFinal='false' isOverride='false'  param_names='a;b' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the smallest of two values.
+		 ]]></description>
+<param><![CDATA[a	First value.
+		 ]]></param>
+<param><![CDATA[b	Second value.
+		 ]]></param>
+<return><![CDATA[The smaller value.
+		 ]]></return>
+</method>
+<method name='moveTowardsAngle' fullname='Mathf/moveTowardsAngle' isStatic='true' isFinal='false' isOverride='false'  param_names='current;target;maxDelta' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Same as MoveTowards but makes sure the values interpolate correctly when they wrap around 360 degrees.
+		 ]]></description>
+<param><![CDATA[current	Current angle in degrees.
+		 ]]></param>
+<param><![CDATA[target	Target angle in degrees.
+		 ]]></param>
+<param><![CDATA[maxDelta	Maximum change per call.
+		 ]]></param>
+<return><![CDATA[Angle that moves towards target.
+		 ]]></return>
+</method>
+<method name='moveTowards' fullname='Mathf/moveTowards' isStatic='true' isFinal='false' isOverride='false'  param_names='current;target;maxDelta' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Moves a value current towards target.
+		 ]]></description>
+<param><![CDATA[current	Current value.
+		 ]]></param>
+<param><![CDATA[target	Target value.
+		 ]]></param>
+<param><![CDATA[maxDelta	Maximum change per call.
+		 ]]></param>
+<return><![CDATA[Value that moves towards target.
+		 ]]></return>
+</method>
+<method name='nextPowerOfTwo' fullname='Mathf/nextPowerOfTwo' isStatic='true' isFinal='false' isOverride='false'  param_names='value' param_types='int' param_defaults='undefined' result_type='int'>
+<description><![CDATA[
+		 Returns the next power of two that is >= value.
+		 ]]></description>
+<param><![CDATA[value	Input value.
+		 ]]></param>
+<return><![CDATA[Next power of two >= value.
+		 ]]></return>
+</method>
+<method name='pingPong' fullname='Mathf/pingPong' isStatic='true' isFinal='false' isOverride='false'  param_names='t;length' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 PingPongs the value t, so that it is never larger than length and never smaller than 0.
+		 ]]></description>
+<param><![CDATA[t	Input value.
+		 ]]></param>
+<param><![CDATA[length	Length of the ping-pong.
+		 ]]></param>
+<return><![CDATA[Ping-ponged value between 0 and length.
+		 ]]></return>
+</method>
+<method name='pow' fullname='Mathf/pow' isStatic='true' isFinal='false' isOverride='false'  param_names='f;p' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Returns f raised to power p.
+		 ]]></description>
+<param><![CDATA[f	Base value.
+		 ]]></param>
+<param><![CDATA[p	Exponent.
+		 ]]></param>
+<return><![CDATA[f raised to power p.
+		 ]]></return>
+</method>
+<method name='repeat' fullname='Mathf/repeat' isStatic='true' isFinal='false' isOverride='false'  param_names='t;length' param_types='float;float' param_defaults='undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Loops the value t, so that it is never larger than length and never smaller than 0.
+		 ]]></description>
+<param><![CDATA[t	Input value.
+		 ]]></param>
+<param><![CDATA[length	Length of the loop.
+		 ]]></param>
+<return><![CDATA[Looped value.
+		 ]]></return>
+</method>
+<method name='roundToInt' fullname='Mathf/roundToInt' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='int'>
+<description><![CDATA[
+		 Returns f rounded to the nearest integer.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The nearest integer to f, as int.
+		 ]]></return>
+</method>
+<method name='round' fullname='Mathf/round' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns f rounded to the nearest integer.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[The nearest integer to f.
+		 ]]></return>
+</method>
+<method name='sign' fullname='Mathf/sign' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the sign of f.
+		 ]]></description>
+<param><![CDATA[f	Input value.
+		 ]]></param>
+<return><![CDATA[1.0 if f is positive, -1.0 if negative, 1.0 if zero.
+		 ]]></return>
+</method>
+<method name='sin' fullname='Mathf/sin' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the sine of angle f in radians.
+		 ]]></description>
+<param><![CDATA[f	Angle in radians.
+		 ]]></param>
+<return><![CDATA[The sine of angle f, between -1 and 1.
+		 ]]></return>
+</method>
+<method name='smoothStep' fullname='Mathf/smoothStep' isStatic='true' isFinal='false' isOverride='false'  param_names='from;to;t' param_types='float;float;float' param_defaults='undefined;undefined;undefined' result_type='float'>
+<description><![CDATA[
+		 Interpolates between min and max with smoothing at the limits.
+		 ]]></description>
+<param><![CDATA[from	Start value.
+		 ]]></param>
+<param><![CDATA[to		End value.
+		 ]]></param>
+<param><![CDATA[t		Interpolation factor (clamped between 0 and 1).
+		 ]]></param>
+<return><![CDATA[Smoothly interpolated value.
+		 ]]></return>
+</method>
+<method name='sqrt' fullname='Mathf/sqrt' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the square root of f.
+		 ]]></description>
+<param><![CDATA[f	Input value (must be >= 0).
+		 ]]></param>
+<return><![CDATA[Square root of f.
+		 ]]></return>
+</method>
+<method name='tan' fullname='Mathf/tan' isStatic='true' isFinal='false' isOverride='false'  param_names='f' param_types='float' param_defaults='undefined' result_type='float'>
+<description><![CDATA[
+		 Returns the tangent of angle f in radians.
+		 ]]></description>
+<param><![CDATA[f	Angle in radians.
+		 ]]></param>
+<return><![CDATA[The tangent of angle f.
+		 ]]></return>
+</method>
+<field name='Deg2Rad' fullname='Mathf/Deg2Rad' type='float' isStatic='true' isConst='true' defaultValue='0.0174532924' >
+<description><![CDATA[
+		 Degrees-to-radians conversion constant (Read Only).
+		 ]]></description>
+</field>
+<field name='Epsilon' fullname='Mathf/Epsilon' type='float' isStatic='true' isConst='true' defaultValue='1.401298E-45' >
+<description><![CDATA[
+		 A tiny floating point value (Read Only).
+		 ]]></description>
+</field>
+<field name='Infinity' fullname='Mathf/Infinity' type='float' isStatic='true' isConst='true' defaultValue='Infinity' >
+<description><![CDATA[
+		 Positive infinity (Read Only).
+		 ]]></description>
+</field>
+<field name='NegativeInfinity' fullname='Mathf/NegativeInfinity' type='float' isStatic='true' isConst='true' defaultValue='-Infinity' >
+<description><![CDATA[
+		 Negative infinity (Read Only).
+		 ]]></description>
+</field>
+<field name='PI' fullname='Mathf/PI' type='float' isStatic='true' isConst='true' defaultValue='3.14159274' >
+<description><![CDATA[
+		 The well-known 3.14159265358979... value (Read Only).
+		 ]]></description>
+</field>
+<field name='Rad2Deg' fullname='Mathf/Rad2Deg' type='float' isStatic='true' isConst='true' defaultValue='57.29578' >
+<description><![CDATA[
+		 Radians-to-degrees conversion constant (Read Only).
+		 ]]></description>
+</field>
 <classRec name='Class' fullname='Class' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\Class.as' namespace='' access='public' baseclass='Object' isFinal='false' isDynamic='true' >
 <description><![CDATA[
 
@@ -2251,7 +2893,7 @@ trace(classInstance);    // [object ClassB]
 
 		 ]]></param>
 </method>
-<method name='valueOf' fullname='ushort/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='ushort'>
+<method name='valueOf' fullname='ushort/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='ushort'>
 <description><![CDATA[
 
 		 返回指定 ushort 对象的原始 ushort 类型值。
@@ -2355,7 +2997,84 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 
 	 ]]></author>
 </classRec>
-<method name='valueOf' fullname='byte/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='byte'>
+<method name='byte' fullname='byte/byte' isStatic='false' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='0' result_type='*'>
+<description><![CDATA[
+
+		 创建新的 byte 对象。可以创建一个 byte 类型的变量并赋予其文本值。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[value	要创建的 sbyte 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+
+		 ]]></param>
+</method>
+<method name='toExponential' fullname='byte/toExponential' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toFixed' fullname='byte/toFixed' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[fractionDigits	介于 0 和 20（含）之间的整数，表示所需的小数位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toPrecision' fullname='byte/toPrecision' isStatic='false' isFinal='false' isOverride='false'  param_names='p' param_types='int' param_defaults='0' result_type='String'>
+<description><![CDATA[
+
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[precision	介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+
+		 ]]></param>
+<throws><![CDATA[RangeError 如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+
+		 ]]></throws>
+</method>
+<method name='toString' fullname='byte/toString' isStatic='false' isFinal='false' isOverride='false'  param_names='radix' param_types='int' param_defaults='10' result_type='String'>
+<description><![CDATA[
+
+		 返回 byte 对象的字符串表示形式。
+
+		 ]]></description>
+<langversion><![CDATA[3.0
+
+		 ]]></langversion>
+<param><![CDATA[radix	指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+
+		 ]]></param>
+<return><![CDATA[byte 对象的字符串表达式。
+
+		 ]]></return>
+</method>
+<method name='valueOf' fullname='byte/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='byte'>
 <description><![CDATA[
 
 		 返回指定 byte 对象的原始 byte 类型值。
@@ -2387,6 +3106,12 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 <langversion><![CDATA[3.0
 
 		 ]]></langversion>
+</field>
+<field name='length' fullname='byte/length' type='int' isStatic='true' isConst='true' defaultValue='1' >
+<description><![CDATA[
+
+		 ]]></description>
+<private><![CDATA[]]></private>
 </field>
 <classRec name='IteratorResult' fullname='IteratorResult' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\IteratorResult.as' namespace='' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 </classRec>
@@ -3030,7 +3755,7 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 
 		 ]]></return>
 </method>
-<method name='valueOf' fullname='short/AS3:valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='short'>
+<method name='valueOf' fullname='short/valueOf' isStatic='false' isFinal='false' isOverride='false'  result_type='short'>
 <description><![CDATA[
 
 		 ����ָ�� short �����ԭʼ short ����ֵ��
@@ -4798,17 +5523,73 @@ catch(e:EOFError) {
 </method>
 <classRec name='MethodClosure' fullname='__AS3__:MethodClosure' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\MethodClosure.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 </classRec>
+<classRec name='utils' fullname='__AS3__:utils' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\utils.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+</classRec>
+<method name='getDefinitionByName' fullname='__AS3__:utils/getDefinitionByName' isStatic='true' isFinal='false' isOverride='false'  param_names='name' param_types='String' param_defaults='undefined' result_type='Object'>
+<description><![CDATA[
+
+		 返回 name 参数指定的类的类对象引用。
+
+		 ]]></description>
+<param><![CDATA[name	类的名称。
+
+		 ]]></param>
+<return><![CDATA[返回 name 参数指定的类的类对象引用。
+
+		 ]]></return>
+<throws><![CDATA[ReferenceError 不存在具有指定名称的公共定义。
+
+		 ]]></throws>
+</method>
+<method name='getQualifiedClassName' fullname='__AS3__:utils/getQualifiedClassName' isStatic='true' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='undefined' result_type='String'>
+<description><![CDATA[
+
+		 返回对象的完全限定类名。
+
+		 ]]></description>
+<param><![CDATA[value	需要完全限定类名称的对象。可以将任何 ActionScript 值传递给此方法，包括所有可用的 ActionScript 类型、对象实例、原始类型（如 uint）和类对象。
+
+		 ]]></param>
+<return><![CDATA[包含完全限定类名称的字符串。
+
+		 ]]></return>
+</method>
+<method name='getQualifiedSuperclassName' fullname='__AS3__:utils/getQualifiedSuperclassName' isStatic='true' isFinal='false' isOverride='false'  param_names='value' param_types='*' param_defaults='undefined' result_type='String'>
+<description><![CDATA[
+
+			 返回 value 参数指定的对象的基类的完全限定类名。此函数检索基类名称的速度比 describeType() 快，但提供的信息不如 describeType() 全面。
+
+			 使用此函数检索了类的名称后，可以用 getDefinitionByName() 函数将类名称转换为类引用。注意：此函数将本身局限于实例层次结构，而 describeType() 函数则使用类对象层次结构（如果 value 参数是数据类型）。如果在数据类型上调用 describeType()，将会基于类对象层次结构（其中所有类对象均继承自 Class）返回超类。但是，getQualifiedSuperclassName() 函数会忽略类对象层次结构，并基于较普通的实例层次结构返回超类。例如，调用 getQualifiedSuperclassName(String) 将会返回 Object，尽管从技术角度来说 String 类对象继承自 Class。换言之，不管使用的是类型的实例还是类型本身，结果都是相同的。
+
+			 ]]></description>
+<param><![CDATA[value	任何值。
+
+			 ]]></param>
+<return><![CDATA[完全限定的基类名称，或 null（如果不存在基类名称）。
+
+			 ]]></return>
+</method>
 <classRec name='toplevel' fullname='__AS3__:toplevel' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\toplevel.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 </classRec>
+<method name='clearInterval' fullname='__AS3__:toplevel/clearInterval' isStatic='true' isFinal='false' isOverride='false'  param_names='id' param_types='uint' param_defaults='undefined' result_type='void'>
+</method>
+<method name='clearTimeout' fullname='__AS3__:toplevel/clearTimeout' isStatic='true' isFinal='false' isOverride='false'  param_names='id' param_types='uint' param_defaults='undefined' result_type='void'>
+</method>
 <method name='fetch' fullname='__AS3__:toplevel/fetch' isStatic='true' isFinal='false' isOverride='false'  param_names='url' param_types='String' param_defaults='undefined' result_type='Promise'>
 </method>
-<method name='isFinite' fullname='__AS3__:toplevel/isFinite' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='*' param_defaults='unknown' result_type='Boolean'>
+<method name='getTimer' fullname='__AS3__:toplevel/getTimer' isStatic='true' isFinal='false' isOverride='false'  result_type='int'>
 </method>
-<method name='isNaN' fullname='__AS3__:toplevel/isNaN' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='*' param_defaults='unknown' result_type='Boolean'>
+<method name='isFinite' fullname='__AS3__:toplevel/isFinite' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='undefined' result_type='Boolean'>
+</method>
+<method name='isNaN' fullname='__AS3__:toplevel/isNaN' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='undefined' result_type='Boolean'>
 </method>
 <method name='parseFloat' fullname='__AS3__:toplevel/parseFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='str' param_types='String' param_defaults='NaN' result_type='Number'>
 </method>
 <method name='parseInt' fullname='__AS3__:toplevel/parseInt' isStatic='true' isFinal='false' isOverride='false'  param_names='s;radix' param_types='String;int' param_defaults='NaN;0' result_type='Number'>
+</method>
+<method name='setInterval' fullname='__AS3__:toplevel/setInterval' isStatic='true' isFinal='false' isOverride='false'  param_names='closure;delay;arguments' param_types='Function;Number;restParam' param_defaults='undefined;undefined;undefined' result_type='uint'>
+</method>
+<method name='setTimeout' fullname='__AS3__:toplevel/setTimeout' isStatic='true' isFinal='false' isOverride='false'  param_names='closure;delay;arguments' param_types='Function;Number;restParam' param_defaults='undefined;undefined;undefined' result_type='uint'>
 </method>
 <method name='trace' fullname='__AS3__:toplevel/trace' isStatic='true' isFinal='false' isOverride='false'  param_names='rest' param_types='restParam' param_defaults='undefined' result_type='void'>
 <description><![CDATA[

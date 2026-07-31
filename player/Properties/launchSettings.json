@@ -3,6 +3,10 @@
     "player": {
       "commandName": "Project",
       "commandLineArgs": "-s F:\\\\GitHub\\\\juice-script-2\\\\juice-script-2\\\\fd_projs\\\\dev_scripts\\\\dev1\\\\obj\\\\o.swc -g F:\\\\GitHub\\\\juice-script-2\\\\juice-script-2\\\\player\\\\bin\\\\Debug\\\\net6.0\\\\juice_global.swc"
+    },
+    "player_box2dlite": {
+      "commandName": "Project",
+      "commandLineArgs": "-s F:\\\\GitHub\\\\juice-script-2\\\\juice-script-2\\\\fd_projs\\\\dev_scripts\\\\box2d-lite\\\\obj\\\\o.swc -g F:\\\\GitHub\\\\juice-script-2\\\\juice-script-2\\\\player\\\\bin\\\\Debug\\\\net6.0\\\\juice_global.swc"
     }
   }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="__AS3__:MethodClosure"><apiName>MethodClosure</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="__Global__"><apiName>__Global__</apiName><apiClassifier id="globalClassifier:ReferenceError"><apiName>ReferenceError</apiName><shortdesc>
+<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="__AS3__:utils"><apiName>utils</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="__AS3__:MethodClosure"><apiName>MethodClosure</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="__Global__"><apiName>__Global__</apiName><apiClassifier id="globalClassifier:ReferenceError"><apiName>ReferenceError</apiName><shortdesc>
 	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
 	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef><apiDesc>
 	 如果试图对密封（非动态）对象引用未定义的属性，则会引发 ReferenceError 异常。引用未定义变量将导致 ReferenceError 异常，通知您潜在的错误并帮助您排除应用程序代码故障。
@@ -34,7 +34,11 @@
 	 </shortdesc><prolog><author>
 	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
 	 juice的扩展类型，32位浮点数
-	 </apiDesc></apiClassifierDetail><apiValue id="float:Epsilon"><apiName>Epsilon</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.4e-45</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiValue id="Math:E"><apiName>E</apiName><shortdesc>
+	 </apiDesc></apiClassifierDetail><apiValue id="float:Epsilon"><apiName>Epsilon</apiName><shortdesc>
+		 可表示的最小正 float 值为 1.4e-45。
+		 </shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.4e-45</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 可表示的最小正 float 值为 1.4e-45。
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiValue id="Math:E"><apiName>E</apiName><shortdesc>
 		 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.7182818284590451。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>2.7182818284590451</apiData><apiValueClassifier>Number</apiValueClassifier></apiValueDef><apiDesc>
 		 代表自然对数的底的数学常数，表示为 e。e 的近似值为 2.7182818284590451。
@@ -89,7 +93,25 @@
 	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
 	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
 	 <p>类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。</p>
-	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><shortdesc>
+	 </apiDesc></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:Mathf"><apiName>Mathf</apiName><shortdesc/><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiValue id="Mathf:Deg2Rad"><apiName>Deg2Rad</apiName><shortdesc>
+		 Degrees-to-radians conversion constant (Read Only).</shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>0.0174532924</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 Degrees-to-radians conversion constant (Read Only).
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Mathf:Epsilon"><apiName>Epsilon</apiName><shortdesc>
+		 A tiny floating point value (Read Only).</shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>1.401298E-45</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 A tiny floating point value (Read Only).
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Mathf:Infinity"><apiName>Infinity</apiName><shortdesc>
+		 Positive infinity (Read Only).</shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>Infinity</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 Positive infinity (Read Only).
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Mathf:NegativeInfinity"><apiName>NegativeInfinity</apiName><shortdesc>
+		 Negative infinity (Read Only).</shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>-Infinity</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 Negative infinity (Read Only).
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Mathf:PI"><apiName>PI</apiName><shortdesc>
+		 The well-known 3.14159265358979...</shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>3.14159274</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 The well-known 3.14159265358979... value (Read Only).
+		 </apiDesc></apiValueDetail></apiValue><apiValue id="Mathf:Rad2Deg"><apiName>Rad2Deg</apiName><shortdesc>
+		 Radians-to-degrees conversion constant (Read Only).</shortdesc><prolog/><apiValueDetail><apiValueDef><apiAccess value="public"/><apiStatic/><apiData>57.29578</apiData><apiValueClassifier>float</apiValueClassifier></apiValueDef><apiDesc>
+		 Radians-to-degrees conversion constant (Read Only).
+		 </apiDesc></apiValueDetail></apiValue></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><shortdesc>
 	 表示 IEEE-754 双精度浮点数的数据类型。使用与 Number 类关联的方法和属性可以操作基元数值。此类与 JavaScript 的 Number 类完全相同。
 	 但 Number 类的属性是静态属性，这意味着无需对象就可以使用这些属性，因此您不需要使用构造函数。Number 数据类型符合双精度 IEEE-754 标准。 需要使用浮点值时，Number 数据类型很有用。Flash 运行时处理 int 和 uint 数据类型的效率高于处理 Number 数据类型的效率，但当所需值的范围超过 int 和 uint 数据类型的有效范围时，Number 数据类型很有用。Number 类可用于表示超出 int 和 uint 数据类型有效范围的整数值。Number 数据类型可使用多达 53 位来表示整数值，而 int 和 uint 则只能使用 32 位。Number 类型的变量的默认值为 NaN（非数字）。
 	 

@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+
+  <configSections>
+    <section name="skipcreatortypes" type="LinkCodeGenCLI.StringListSection,LinkCodeGenCLI"/>
+    <section name="notcreatenamespace" type="LinkCodeGenCLI.StringListSection,LinkCodeGenCLI"/>
+    <section name="notcreatetypes" type="LinkCodeGenCLI.StringListSection,LinkCodeGenCLI"/>
+    <section name="notcreatemembers" type="LinkCodeGenCLI.StringListSection,LinkCodeGenCLI"/>
+    
+    <section name="includelibcode" type="LinkCodeGenCLI.StringListSection,LinkCodeGenCLI"/>
+    <section name="buildassemblys" type="LinkCodeGenCLI.AssemblyListSection,LinkCodeGenCLI" />
+    <section name="resolvepath" type="LinkCodeGenCLI.StringListSection,LinkCodeGenCLI" />
+  </configSections>
+  
+  <startup>
+    <supportedRuntime version="v2.0.50727" sku="Client"/>
+  </startup>
+  
+  <appSettings>
+    <!--Generated single CSharp code file-->
+    <add key="combiedcodefile" value="{TEMPPATH}/codeoutput.cs"/>
+    <!--The directory where the ACTIONSCRIPT3 API code is created-->
+    <add key="as3apipath" value="as3_unity"/>
+    <!--The directory where the C # code is created-->
+    <add key="csharpcodepath" value="{UNITYPROJPATH}/Assets/Standard Assets/ASRuntime/ScriptSupport/Generated"/>
+    <!--namespaces for generated C # code-->
+    <add key="csharpcodenamespace" value="ASCAutoGen.regNativeFunctions"/>
+    <!--生成的csharp注册代码的命名空间-->
+    <add key="regfunctioncodenamespace" value="ASRuntime"/>
+    <!--生成的csharp注册代码文件-->
+    <add key="regfunctioncodefile" value="{UNITYPROJPATH}/Assets/ASRuntimePlayer/RegCode/regNativeCode.cs"/>
+
+    <!--是否将.net的mscorlib模块库导出代码  这里是false-->
+    <add key="makemscorlib" value="false"/>
+
+    <!--AS3RuntimeSDK地址-->
+    <add key="sdkpath" value="auto"/>
+    <!--编译出的as3二进制字节码-->
+    <add key="as3libfile" value="lib/as3unitylib.cswc"/>
+    
+    
+    
+  </appSettings>
+
+  <!--一同编译的类库代码-->
+  <includelibcode>
+    <item value="$(sdkpath)\as3corelib"></item>
+  </includelibcode>
+
+<!--Configure DLLs to export-->
+  <buildassemblys>
+   
+	<!--<assembly value="{SYSTEMDLL}"></assembly>-->
+    {UNITYDLLS}
+	
+  </buildassemblys>
+  <!--Which paths to find dependent assemblies for DLLs.
+	For example, when loading Scriptassemblies/assembly-csharp.dll, 
+	you may need to find its dependent assemblies in the UnityAssemblies path, and so on.-->
+  <resolvepath>
+	<item value="{UNITYINSTALLPATH}\Editor\Data\Managed"></item>
+	<item value="{UNITYINSTALLPATH}\Editor\Data\Managed\UnityEngine"></item>
+	<item value="{UNITYINSTALLPATH}\Editor\Data\UnityExtensions\Unity\GUISystem"></item>
+	<item value="{UNITYPROJPATH}\Library\UnityAssemblies"></item>
+	{RESOLVEPATH}
+  </resolvepath>
+  
+  
+  <!--Types that have been created manually-->
+  <skipcreatortypes>  
+    <item value="ASBinCode.RunTimeValueBase"></item>
+    <item value="System.ICloneable"></item>
+    <item value="System.Collections.IEnumerator"></item>
+    <item value="System.Collections.IEnumerable"></item>
+    <item value="System.Collections.ICollection"></item>
+    <item value="System.Collections.ArrayList"></item>
+    <item value="System.Collections.Hashtable"></item>
+    <item value="System.Collections.DictionaryEntry"></item>
+    <item value="System.Collections.IDictionary"></item>
+    <item value="System.Collections.IDictionaryEnumerator"></item>
+    <item value="System.Collections.IList"></item>
+    <item value="System.Collections.Queue"></item>
+    <item value="System.Collections.Stack"></item>
+    <item value="System.TypedReference"></item>
+    <item value="System.Array"></item>
+    <item value="System.Object"></item>
+    <item value="System.String"></item>
+    <item value="System.Delegate"></item>
+    <item value="System.MulticastDelegate"></item>
+  </skipcreatortypes>
+
+  
+  <!--Types in the following namespaces will be skipped-->
+  <notcreatenamespace>
+    <item value="System.Reflection"></item>
+    <item value="System.Runtime"></item>
+    <item value="System.Threading"></item>
+    <item value="System.Timers"></item>
+    <item value="System.Deployment"></item>
+    <item value="System.Diagnostics"></item>
+    <item value="System.CodeDom"></item>
+    <item value="System.Configuration"></item>
+    <item value="System.Media"></item>
+    <item value="System.Resources"></item>
+    <item value="System.Web"></item>
+    <item value="System.Linq"></item>
+    <item value="System.Data.Odbc"></item>
+    <item value="System.Data.OleDb"></item>
+    <item value="System.Data.SqlClient"></item>
+    <item value="System.Net"></item>
+    <item value="System.ComponentModel"></item>    
+    <item value="Windows"></item>
+    <item value="System.Security.AccessControl"></item>
+    <item value="System.Security.Permissions"></item>
+    <item value="System.Security.Policy"></item>
+    <item value="System.Security.Principal"></item>
+    <item value="Microsoft"></item>
+    <item value="JetBrains"></item>
+    <item value="UnityEngineInternal"></item>
+    <item value="UnityEngine.VR"></item>
+    <item value="UnityEngine.WSA"></item>
+    <item value="UnityEngine.iOS"></item>
+    <item value="UnityEngine.Apple"></item>
+    <item value="UnityEngine.Windows"></item>
+    <item value="UnityEngine.Tizen"></item>
+    <item value="UnityEngine.Collections"></item>
+    <item value="UnityEngine.Analytics"></item>
+    <item value="UnityEngine.Assertions"></item>
+    <item value="UnityEngine.CrashReportHandler"></item>
+    <item value="UnityEngine.Diagnostics"></item>
+    <item value="UnityEngine.Experimental"></item>
+    <item value="UnityEngine.Networking"></item>
+    <item value="UnityEngine.Profiling"></item>
+    <item value="UnityEngine.SocialPlatforms"></item>
+    <item value="UnityEngine.tvOS"></item>
+    <item value="Mono"></item>
+	<item value="System.Collections.Specialized"></item>
+	<item value="System.Text.RegularExpressions"></item>
+	<item value="System.IO.Ports"></item>
+  </notcreatenamespace>
+  
+  <!--The following types will be skipped-->
+  <notcreatetypes>
+    <item value="System.Exception"></item>
+    <item value="System.AppDomain"></item>
+    <item value="System.TupleExtensions"></item>
+    <item value="System.Globalization.GlobalizationExtensions"></item>
+    <item value="System.AppContext"></item>
+    <item value="System.Enum"></item>
+    <item value="System.ActivationContext"></item>
+    <item value="System.Activator"></item>
+    <item value="System.AppDomainManager"></item>
+    <item value="System.AppDomainSetup"></item>
+    <item value="System.Console"></item>
+	
+    <item value="System.ArgIterator"></item>
+    <item value="System.RuntimeArgumentHandle"></item>
+    <item value="System.Attribute"></item>
+    <item value="System.Environment"></item>
+    <item value="System.Security.Cryptography.RNGCryptoServiceProvider"></item>
+    <item value="System.Security.PermissionSet"></item>
+    <item value="System.GC"></item>
+    <item value="System.Globalization.CultureInfo"></item>
+    <item value="UnityEngine.iPhoneUtils"></item>
+	<item value="System.GopherStyleUriParser"></item>
+	<item value="System.LdapStyleUriParser"></item>
+
+    <item value="UnityEngine.AndroidInput"></item>
+    <item value="UnityEngine.AndroidJavaClass"></item>
+    <item value="UnityEngine.AndroidJavaException"></item>
+    <item value="UnityEngine.AndroidJavaObject"></item>
+    <item value="UnityEngine.AndroidJavaProxy"></item>
+    <item value="UnityEngine.AndroidJavaRunnable"></item>
+    <item value="UnityEngine.AndroidJNI"></item>
+    <item value="UnityEngine.AndroidJNIHelper"></item>
+
+
+    <item value="UnityEngine.AndroidActivityIndicatorStyle"></item>
+    <item value="UnityEngine.Caching"></item>
+    <item value="UnityEngine.CanvasRenderer"></item>
+    <item value="UnityEngine.EventProvider"></item>
+    <item value="UnityEngine.FullScreenMovieControlMode"></item>
+    <item value="UnityEngine.FullScreenMovieScalingMode"></item>
+    <item value="UnityEngine.GUIStyleState"></item>
+    <item value="UnityEngine.Handheld"></item>
+    <item value="UnityEngine.SamsungTV"></item>
+    <item value="UnityEngine.TextureCompressionQuality"></item>
+    <item value="UnityEngine.TizenActivityIndicatorStyle"></item>
+    <item value="UnityEngine.TouchScreenKeyboard"></item>
+    <item value="UnityEngine.Collections.NativeLeakDetectionMode"></item>
+    <item value="UnityEngine.iPhoneSettings"></item>
+    <item value="UnityEngine.Graphics"></item>
+    <item value="UnityEngine.UI.GraphicRebuildTracker"></item>
+    <item value="UnityEngine.LightmapBakeType"></item>
+
+    <item value="UnityEngine.WWWAudioExtensions"></item>
+    <item value="UnityEngine.MovieTexture"></item>
+    <item value="UnityEngine.ClusterNetwork"></item>
+    <item value="UnityEngine.ClusterInput"></item>
+    <item value="UnityEngine.ClusterInputType"></item>
+    <item value="UnityEngine.DrivenRectTransformTracker"></item>
+    <item value="UnityEngine.LightProbeGroup"></item>
+    <item value="UnityEngine.Light"></item>
+    <item value="UnityEngine.QualitySettings"></item>
+	
+	<item value="UnityEngine.Playables.PlayableGraph"></item>
+	<item value="Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle"></item>
+	<item value="Unity.Collections.LowLevel.Unsafe.DisposeSentinel"></item>
+	<item value="Unity.Collections.LowLevel.Unsafe.EnforceJobResult"></item>
+
+  </notcreatetypes>
+
+  
+  
+  <!--The following members will be skipped-->
+  <notcreatemembers>
+    <item value="UnityEngine.AnimatorControllerParameter::Void set_name(System.String)"></item>
+    <item value="UnityEngine.Input::Boolean IsJoystickPreconfigured(System.String)"></item>
+
+    <item value="UnityEngine.Light::UnityEngine.Vector2 get_areaSize()"></item>
+    <item value="UnityEngine.Light::Void set_areaSize(UnityEngine.Vector2)"></item>
+	  
+	<item value="UnityEngine.Light::Single get_shadowRadius()"></item>
+	<item value="UnityEngine.Light::Void set_shadowRadius(Single)"></item>
+	<item value="UnityEngine.Light::Single get_shadowAngle()"></item> 
+	<item value="UnityEngine.Light::Void set_shadowAngle(Single)"></item>
+	  
+	<item value="UnityEngine.Texture::UnityEngine.Hash128 get_imageContentsHash()"></item> 
+	<item value="UnityEngine.Texture::Void set_imageContentsHash(UnityEngine.Hash128)"></item> 
+	   
+	  
+
+    <item value="UnityEngine.MonoBehaviour::Boolean get_runInEditMode()"></item>
+    <item value="UnityEngine.MonoBehaviour::Void set_runInEditMode(Boolean)"></item>
+
+	<item value="UnityEngine.MonoBehaviour::UnityEngine.Coroutine StartCoroutine(System.String)"></item>
+	<item value="UnityEngine.MonoBehaviour::UnityEngine.Coroutine StartCoroutine(System.String, System.Object)"></item>
+	  
+    <item value="UnityEngine.UI.Graphic::Void OnRebuildRequested()"></item>
+
+    <item value="UnityEngine.Terrain::Boolean get_bakeLightProbesForTrees()"></item>
+    <item value="UnityEngine.Terrain::Void set_bakeLightProbesForTrees(Boolean)"></item>
+    
+    <item value="UnityEngine.Texture2D::Boolean get_alphaIsTransparency()"></item>
+    <item value="UnityEngine.Texture2D::Void set_alphaIsTransparency(Boolean)"></item>
+	<item value="UnityEngine.GameObject::UnityEngine.Component AddComponent(System.String)"></item>
+
+	 
+	<item value="UnityEngine.GameObject::Void SendMessage(System.String, System.Object)"></item>
+	<item value="UnityEngine.GameObject::Void SendMessage(System.String)"></item>
+    <item value="UnityEngine.GameObject::Void SendMessage(System.String, UnityEngine.SendMessageOptions)"></item>
+	
+	<item value="UnityEngine.GameObject::Void BroadcastMessage(System.String, System.Object)"></item>
+	<item value="UnityEngine.GameObject::Void BroadcastMessage(System.String)"></item>
+    <item value="UnityEngine.GameObject::Void BroadcastMessage(System.String, UnityEngine.SendMessageOptions)"></item>
+	 
+    <item value="UnityEngine.GameObject::Void SendMessageUpwards(System.String, System.Object)"></item>
+	<item value="UnityEngine.GameObject::Void SendMessageUpwards(System.String)"></item>
+    <item value="UnityEngine.GameObject::Void SendMessageUpwards(System.String, UnityEngine.SendMessageOptions)"></item>
+	
+	<item value="UnityEngine.Component::Void SendMessage(System.String, System.Object)"></item>
+	<item value="UnityEngine.Component::Void SendMessage(System.String)"></item>
+    <item value="UnityEngine.Component::Void SendMessage(System.String, UnityEngine.SendMessageOptions)"></item>
+	
+	<item value="UnityEngine.Component::Void BroadcastMessage(System.String, System.Object)"></item>
+	<item value="UnityEngine.Component::Void BroadcastMessage(System.String)"></item>
+    <item value="UnityEngine.Component::Void BroadcastMessage(System.String, UnityEngine.SendMessageOptions)"></item>
+	 
+    <item value="UnityEngine.Component::Void SendMessageUpwards(System.String, System.Object)"></item>
+	<item value="UnityEngine.Component::Void SendMessageUpwards(System.String)"></item>
+    <item value="UnityEngine.Component::Void SendMessageUpwards(System.String, UnityEngine.SendMessageOptions)"></item>
+	  
+  </notcreatemembers>
+  
+  
+</configuration>

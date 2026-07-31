@@ -14,6 +14,18 @@
             </apiClassifierDef>
          </apiClassifierDetail>
       </apiClassifier>
+      <apiClassifier id="__AS3__:utils">
+         <apiName>utils</apiName>
+         <shortdesc/>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+      </apiClassifier>
       <apiClassifier id="__AS3__:MethodClosure">
          <apiName>MethodClosure</apiName>
          <shortdesc/>
@@ -167,6 +179,18 @@
 	 函数是可在 ActionScript 中调用的基本代码单位。ActionScript 中用户定义的函数和内置函数都由 Function 对象来表示，该对象是 Function 类的实例。
 	 <p>类的方法与 Function 对象略有不同。与普通函数对象不同，方法和与其关联的类对象紧密关联。因此，方法或属性具有在同一类的所有实例中共享的定义。可以从实例提取方法并将其处理为“绑定”方法（保留与原始实例的链接）。对于绑定方法，this 关键字指向实现该方法的原始对象。对于函数，this 在调用函数时指向关联对象。</p>
 	        </apiDesc>
+      </apiClassifier>
+      <apiClassifier id="globalClassifier:Mathf">
+         <apiName>Mathf</apiName>
+         <shortdesc/>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
       </apiClassifier>
       <apiClassifier id="globalClassifier:Number">
          <apiName>Number</apiName>

@@ -1,9 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="__AS3__:toplevel:fetch"><apiName>fetch</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>url</apiItemName><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isFinite"><apiName>isFinite</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiType value="any"/><apiData>unknown</apiData></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isNaN"><apiName>isNaN</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiType value="any"/><apiData>unknown</apiData></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:parseFloat"><apiName>parseFloat</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>str</apiItemName><apiData>NaN</apiData><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:parseInt"><apiName>parseInt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>s</apiItemName><apiData>NaN</apiData><apiOperationClassifier>String</apiOperationClassifier></apiParam><apiParam><apiItemName>radix</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:trace"><apiName>trace</apiName><shortdesc>
+<?xml version="1.0" encoding="UTF-8"?><allClasses><apiPackage id="__AS3__"><apiName>__AS3__</apiName><apiClassifier id="__AS3__:toplevel"><apiName>toplevel</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="__AS3__:toplevel:clearInterval"><apiName>clearInterval</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>id</apiItemName><apiOperationClassifier>uint</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:clearTimeout"><apiName>clearTimeout</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>id</apiItemName><apiOperationClassifier>uint</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:fetch"><apiName>fetch</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>url</apiItemName><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:getTimer"><apiName>getTimer</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>int</apiOperationClassifier></apiReturn></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isFinite"><apiName>isFinite</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:isNaN"><apiName>isNaN</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier></apiReturn><apiParam><apiItemName>n</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:parseFloat"><apiName>parseFloat</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>str</apiItemName><apiData>NaN</apiData><apiOperationClassifier>String</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:parseInt"><apiName>parseInt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>s</apiItemName><apiData>NaN</apiData><apiOperationClassifier>String</apiOperationClassifier></apiParam><apiParam><apiItemName>radix</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:setInterval"><apiName>setInterval</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier></apiReturn><apiParam><apiItemName>closure</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam><apiParam><apiItemName>delay</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>arguments</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:setTimeout"><apiName>setTimeout</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier></apiReturn><apiParam><apiItemName>closure</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam><apiParam><apiItemName>delay</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>arguments</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="__AS3__:toplevel:trace"><apiName>trace</apiName><shortdesc>
 		 调试时显示表达式或写入日志文件。单个跟踪语句可支持多个参数。如果跟踪语句中的任何参数包含 String 之外的数据类型，则跟踪函数将调用与该数据类型关联的 toString() 方法。例如，如果该参数是一个布尔值，则跟踪函数将调用 Boolean.toString() 并显示返回值。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiType value="void"/></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>要计算的一个或多个（逗号分隔）表达式。对于多个表达式，输出中每个表达式之间都将插入一个空格。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 调试时显示表达式或写入日志文件。单个跟踪语句可支持多个参数。如果跟踪语句中的任何参数包含 String 之外的数据类型，则跟踪函数将调用与该数据类型关联的 toString() 方法。例如，如果该参数是一个布尔值，则跟踪函数将调用 Boolean.toString() 并显示返回值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="__AS3__:MethodClosure"><apiName>MethodClosure</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="__Global__"><apiName>__Global__</apiName><apiClassifier id="globalClassifier:ReferenceError"><apiName>ReferenceError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="ReferenceError:ReferenceError"><apiName>ReferenceError</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="__AS3__:utils"><apiName>utils</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="__AS3__:utils:getDefinitionByName"><apiName>getDefinitionByName</apiName><shortdesc>
+		 返回 name 参数指定的类的类对象引用。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiException><apiDesc>不存在具有指定名称的公共定义。
+		 </apiDesc><apiItemName>ReferenceError</apiItemName><apiOperationClassifier>ReferenceError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>Object</apiOperationClassifier><apiDesc>返回 name 参数指定的类的类对象引用。
+		 </apiDesc></apiReturn><apiParam><apiItemName>name</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>类的名称。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回 name 参数指定的类的类对象引用。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="__AS3__:utils:getQualifiedClassName"><apiName>getQualifiedClassName</apiName><shortdesc>
+		 返回对象的完全限定类名。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>包含完全限定类名称的字符串。
+		 </apiDesc></apiReturn><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiDesc>需要完全限定类名称的对象。可以将任何 ActionScript 值传递给此方法，包括所有可用的 ActionScript 类型、对象实例、原始类型（如 uint）和类对象。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回对象的完全限定类名。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="__AS3__:utils:getQualifiedSuperclassName"><apiName>getQualifiedSuperclassName</apiName><shortdesc>
+			 返回 value 参数指定的对象的基类的完全限定类名。此函数检索基类名称的速度比 describeType() 快，但提供的信息不如 describeType() 全面。
+			 使用此函数检索了类的名称后，可以用 getDefinitionByName() 函数将类名称转换为类引用。注意：此函数将本身局限于实例层次结构，而 describeType() 函数则使用类对象层次结构（如果 value 参数是数据类型）。如果在数据类型上调用 describeType()，将会基于类对象层次结构（其中所有类对象均继承自 Class）返回超类。但是，getQualifiedSuperclassName() 函数会忽略类对象层次结构，并基于较普通的实例层次结构返回超类。例如，调用 getQualifiedSuperclassName(String) 将会返回 Object，尽管从技术角度来说 String 类对象继承自 Class。换言之，不管使用的是类型的实例还是类型本身，结果都是相同的。
+			 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>完全限定的基类名称，或 null（如果不存在基类名称）。
+			 </apiDesc></apiReturn><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiDesc>任何值。
+			 </apiDesc></apiParam></apiOperationDef><apiDesc>
+			 返回 value 参数指定的对象的基类的完全限定类名。此函数检索基类名称的速度比 describeType() 快，但提供的信息不如 describeType() 全面。
+			 使用此函数检索了类的名称后，可以用 getDefinitionByName() 函数将类名称转换为类引用。注意：此函数将本身局限于实例层次结构，而 describeType() 函数则使用类对象层次结构（如果 value 参数是数据类型）。如果在数据类型上调用 describeType()，将会基于类对象层次结构（其中所有类对象均继承自 Class）返回超类。但是，getQualifiedSuperclassName() 函数会忽略类对象层次结构，并基于较普通的实例层次结构返回超类。例如，调用 getQualifiedSuperclassName(String) 将会返回 Object，尽管从技术角度来说 String 类对象继承自 Class。换言之，不管使用的是类型的实例还是类型本身，结果都是相同的。
+			 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="__AS3__:MethodClosure"><apiName>MethodClosure</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier></apiPackage><apiPackage id="__Global__"><apiName>__Global__</apiName><apiClassifier id="globalClassifier:ReferenceError"><apiName>ReferenceError</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Error</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiConstructor id="ReferenceError:ReferenceError"><apiName>ReferenceError</apiName><shortdesc>
 		 创建一个新的 ReferenceError 对象。
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>message</apiItemName><apiData/><apiOperationClassifier>String</apiOperationClassifier><apiDesc>包含与 ReferenceError 对象关联的消息。
 		 </apiDesc></apiParam><apiParam><apiItemName>id</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier></apiParam></apiConstructorDef><apiDesc>
@@ -35,7 +56,7 @@
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:indexOf"><apiName>indexOf</apiName><shortdesc>
 		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定子字符串的第一个匹配项的索引，或 -1。
-		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要搜索的子字符串。
+		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiData>unknown</apiData><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要搜索的子字符串。
 		 </apiDesc></apiParam><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个可选整数，指定搜索的起始索引。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
@@ -43,16 +64,22 @@
 		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定子字符串的最后一个匹配项的位置，或 -1（如果未找到）。
 
-		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要搜索的字符串。
+		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiData>unknown</apiData><apiOperationClassifier>String</apiOperationClassifier><apiDesc>要搜索的字符串。
 		 </apiDesc></apiParam><apiParam><apiItemName>startIndex</apiItemName><apiData>0x7FFFFFFF</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个可选整数，指定开始搜索 val 的起始索引。默认为允许的最大索引值。如果未指定 startIndex，则从字符串中的最后一项开始搜索。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:replace"><apiName>replace</apiName><shortdesc>
 		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
-		 </apiDesc></apiReturn><apiParam><apiItemName>pattern</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>	 </apiDesc></apiParam><apiParam><apiItemName>repl</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>	 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 </apiDesc></apiReturn><apiParam><apiItemName>pattern</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>	 </apiDesc></apiParam><apiParam><apiItemName>repl</apiItemName><apiType value="any"/><apiDesc>	 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 相对于字符串匹配指定的 pattern 并返回一个新字符串，其中的第一个 pattern 匹配项被替换为 repl 所指定的内容。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:slice"><apiName>slice</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:search"><apiName>search</apiName><shortdesc>
+		搜索指定的 pattern 并返回第一个匹配子字符串的索引。如果没有匹配的子字符串，该方法返回 -1。
+			pattern:— 要匹配的模式，可以为任何类型的对象，但通常是字符串。如果 pattern 不是字符串，则该方法在执行前会将其转换为字符串。 当前实现中未实现正则表达式，所以只支持字符串搜索。
+		</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>int</apiOperationClassifier></apiReturn><apiParam><apiItemName>pattern</apiItemName><apiType value="any"/><apiData>null</apiData></apiParam></apiOperationDef><apiDesc>
+		搜索指定的 pattern 并返回第一个匹配子字符串的索引。如果没有匹配的子字符串，该方法返回 -1。
+			pattern:— 要匹配的模式，可以为任何类型的对象，但通常是字符串。如果 pattern 不是字符串，则该方法在执行前会将其转换为字符串。 当前实现中未实现正则表达式，所以只支持字符串搜索。
+		</apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:slice"><apiName>slice</apiName><shortdesc>
 		 返回一个字符串，该字符串包括从 startIndex 字符一直到 endIndex 字符（但不包括该字符）之间的所有字符。不修改原始 String 对象。如果未指定 endIndex 参数，此子字符串的结尾就是该字符串的结尾。如果按 startIndex 索引到的字符与按 endIndex 索引到的字符相同或位于后者的右侧，则该方法返回一个空字符串。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>基于指定索引的子字符串。
 		 </apiDesc></apiReturn><apiParam><apiItemName>startIndex</apiItemName><apiData>0</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>片段起始点的从 0 开始的索引。如果 startIndex 是一个负数，则从右到左创建片段，其中 -1 是最后一个字符。
@@ -62,8 +89,8 @@
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:split"><apiName>split</apiName><shortdesc>
 		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个子字符串的数组。
-		 </apiDesc></apiReturn><apiParam><apiItemName>delimiter</apiItemName><apiOperationClassifier>String</apiOperationClassifier><apiDesc>指定拆分此字符串的位置的模式。此模式可以是任何类型的对象，但通常为字符串。如果 delimiter 不是正则表达式或字符串，则该方法在执行前会将其转换为字符串。
-		 </apiDesc></apiParam><apiParam><apiItemName>limit</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>要放入数组中的最大项数。默认为允许的最大值。
+		 </apiDesc></apiReturn><apiParam><apiItemName>delimiter</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>指定拆分此字符串的位置的模式。正则表达式未实现
+		 </apiDesc></apiParam><apiParam><apiItemName>limit</apiItemName><apiType value="any"/><apiData>0x7fffffff</apiData><apiDesc>要放入数组中的最大项数。默认为允许的最大值。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 将 String 对象拆分为一个子字符串数组，方法是在所有出现指定 delimiter 参数的位置进行拆分。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:substr"><apiName>substr</apiName><shortdesc>
@@ -80,6 +107,15 @@
 		 </apiDesc></apiParam><apiParam><apiItemName>endIndex</apiItemName><apiData>0x7fffffff</apiData><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>一个整数，它比所提取的子字符串中的最后一个字符的索引大 1。endIndex 的有效值范围为从 0 到 String.length。endIndex 处的字符不包括在子字符串中。默认为允许的最大索引值。如果省略此参数，则使用 String.length。如果此参数是一个负值，则使用 0。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回一个字符串，其中包含由 startIndex 指定的字符和一直到 endIndex - 1 的所有字符。如果未指定 endIndex，则使用 String.length。如果 startIndex 的值等于 endIndex 的值，则该方法返回一个空字符串。如果 startIndex 的值大于 endIndex 的值，则在执行函数之前会自动交换参数。原始字符串保持不变。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:toLocaleLowerCase"><apiName>toLocaleLowerCase</apiName><shortdesc>
+		返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toLowerCase() 方法生成的结果相同。
+		</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn></apiOperationDef><apiDesc>
+		返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toLowerCase() 方法生成的结果相同。
+		</apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:toLocaleUpperCase"><apiName>toLocaleUpperCase</apiName><shortdesc>
+		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toUpperCase() 方法生成的结果相同。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
+		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
+		 返回此字符串的一个副本，其中所有小写的字符均转换为大写字符。原始字符串保持不变。虽然此方法旨在以特定于区域设置的方式处理转换，但 juicescript 实现生成的结果与 toUpperCase() 方法生成的结果相同。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="String:AS3:toLowerCase"><apiName>toLowerCase</apiName><shortdesc>
 		 返回此字符串的一个副本，其中所有大写的字符均转换为小写字符。原始字符串保持不变。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>
@@ -126,9 +162,9 @@
 		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 返回 ushort 对象的字符串表示形式。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="ushort:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="ushort:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回指定 ushort 对象的原始 ushort 类型值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>ushort</apiOperationClassifier><apiDesc>此 ushort 对象的原始 ushort 类型值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>ushort</apiOperationClassifier><apiDesc>此 ushort 对象的原始 ushort 类型值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回指定 ushort 对象的原始 ushort 类型值。
 		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="ushort:ushort"><apiName>ushort</apiName><shortdesc>
@@ -136,12 +172,41 @@
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 ushort 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 创建新的 ushort 对象。可以创建一个 ushort 类型的变量并赋予其文本值。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:float"><apiName>float</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="float:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:float"><apiName>float</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="float:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="float:toFixed"><apiName>toFixed</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="float:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="float:toString"><apiName>toString</apiName><shortdesc>
+		 返回 float 对象的字符串表示形式。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>float 对象的字符串表达式。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回 float 对象的字符串表示形式。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="float:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回指定 float 对象的原始 float 类型值。
-		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>此 float 对象的原始 float 类型值。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>此 float 对象的原始 float 类型值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回指定 float 对象的原始 float 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Math:abs"><apiName>abs</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="float:float"><apiName>float</apiName><shortdesc>
+		 创建新的 float 对象。可以创建一个 float 类型的变量并赋予其文本值。
+		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 float 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 float 对象。可以创建一个 float 类型的变量并赋予其文本值。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Math"><apiName>Math</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Math:abs"><apiName>abs</apiName><shortdesc>
 		 计算并返回由参数 val 指定的数字的绝对值。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>指定参数的绝对值。
 		 </apiDesc></apiReturn><apiParam><apiItemName>val</apiItemName><apiOperationClassifier>Number</apiOperationClassifier><apiDesc>已返回绝对值的数字。
@@ -272,7 +337,220 @@
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 调用 Function 对象表示的函数。ActionScript 中的每个函数都由一个 Function 对象来表示，所以所有的函数都支持此方法。
 		 <p>几乎在所有的情形下，都可以使用函数调用运算符 (()) 来代替此方法。如果需要明确控制函数调用中的 thisObject 参数，则此方法很有用。</p>
-		 </apiDesc></apiOperationDetail><related-links><link href="#Function/apply()"><linktext>apply()</linktext></link></related-links></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Number:abs"><apiName>abs</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:acos"><apiName>acos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:asin"><apiName>asin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan2"><apiName>atan2</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan"><apiName>atan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:ceil"><apiName>ceil</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:cos"><apiName>cos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:exp"><apiName>exp</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:floor"><apiName>floor</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:log"><apiName>log</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:max"><apiName>max</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:min"><apiName>min</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:pow"><apiName>pow</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:random"><apiName>random</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:round"><apiName>round</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sin"><apiName>sin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sqrt"><apiName>sqrt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:tan"><apiName>tan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail><related-links><link href="#Function/apply()"><linktext>apply()</linktext></link></related-links></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Mathf"><apiName>Mathf</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Mathf:abs"><apiName>abs</apiName><shortdesc>
+		 Returns the absolute value of f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The absolute value of f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the absolute value of f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:acos"><apiName>acos</apiName><shortdesc>
+		 Returns the arc-cosine of f (the angle in radians whose cosine is f).</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Arc-cosine of f, between 0 and PI.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Value between -1 and 1.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the arc-cosine of f (the angle in radians whose cosine is f).
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:approximately"><apiName>approximately</apiName><shortdesc>
+		 Compares two floating point values and returns true if they are similar.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>True if a and b are approximately equal.
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>First value.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Second value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Compares two floating point values and returns true if they are similar.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:asin"><apiName>asin</apiName><shortdesc>
+		 Returns the arc-sine of f (the angle in radians whose sine is f).</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Arc-sine of f, between -PI/2 and PI/2.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Value between -1 and 1.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the arc-sine of f (the angle in radians whose sine is f).
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:atan2"><apiName>atan2</apiName><shortdesc>
+		 Returns the angle in radians whose Tan is y/x.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Angle in radians.
+		 </apiDesc></apiReturn><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Y coordinate.
+		 </apiDesc></apiParam><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>X coordinate.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the angle in radians whose Tan is y/x.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:atan"><apiName>atan</apiName><shortdesc>
+		 Returns the arc-tangent of f (the angle in radians whose tangent is f).</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Arc-tangent of f, between -PI/2 and PI/2.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the arc-tangent of f (the angle in radians whose tangent is f).
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:ceilToInt"><apiName>ceilToInt</apiName><shortdesc>
+		 Returns the smallest integer greater than or equal to f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>The smallest integer &gt;= f, as int.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the smallest integer greater than or equal to f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:ceil"><apiName>ceil</apiName><shortdesc>
+		 Returns the smallest integer greater than or equal to f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The smallest integer &gt;= f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the smallest integer greater than or equal to f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:clamp01"><apiName>clamp01</apiName><shortdesc>
+		 Clamps a value between 0 and 1 and returns the value.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Clamped value between 0 and 1.
+		 </apiDesc></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Clamps a value between 0 and 1 and returns the value.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:clamp"><apiName>clamp</apiName><shortdesc>
+		 Clamps a value between a minimum float and maximum float value.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Clamped value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam><apiParam><apiItemName>min</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>	Minimum value.
+		 </apiDesc></apiParam><apiParam><apiItemName>max</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>	Maximum value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Clamps a value between a minimum float and maximum float value.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:cos"><apiName>cos</apiName><shortdesc>
+		 Returns the cosine of angle f in radians.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The cosine of angle f, between -1 and 1.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Angle in radians.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the cosine of angle f in radians.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:deltaAngle"><apiName>deltaAngle</apiName><shortdesc>
+		 Calculates the shortest difference between two given angles in degrees.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Shortest difference in degrees.
+		 </apiDesc></apiReturn><apiParam><apiItemName>current</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Current angle in degrees.
+		 </apiDesc></apiParam><apiParam><apiItemName>target</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Target angle in degrees.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Calculates the shortest difference between two given angles in degrees.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:exp"><apiName>exp</apiName><shortdesc>
+		 Returns e raised to the specified power.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>e ^ power.
+		 </apiDesc></apiReturn><apiParam><apiItemName>power</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Exponent.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns e raised to the specified power.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:floorToInt"><apiName>floorToInt</apiName><shortdesc>
+		 Returns the largest integer smaller than or equal to f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc/></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the largest integer smaller than or equal to f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:floor"><apiName>floor</apiName><shortdesc>
+		 Returns the largest integer smaller than or equal to f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc/></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the largest integer smaller than or equal to f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:inverseLerp"><apiName>inverseLerp</apiName><shortdesc>
+		 Returns 0 if value is between min and max.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Inverse linear interpolation (0 to 1).
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Start of the range.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>End of the range.
+		 </apiDesc></apiParam><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns 0 if value is between min and max.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:isPowerOfTwo"><apiName>isPowerOfTwo</apiName><shortdesc>
+		 Returns true if the value is a power of two.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>True if value is a power of two.
+		 </apiDesc></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns true if the value is a power of two.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:lerpAngle"><apiName>lerpAngle</apiName><shortdesc>
+		 Same as Lerp but makes sure the values interpolate correctly when they wrap around 360 degrees.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Interpolated angle.
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Start angle in degrees.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>End angle in degrees.
+		 </apiDesc></apiParam><apiParam><apiItemName>t</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Interpolation factor (clamped between 0 and 1).
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Same as Lerp but makes sure the values interpolate correctly when they wrap around 360 degrees.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:lerpUnclamped"><apiName>lerpUnclamped</apiName><shortdesc>
+		 Linearly interpolates between a and b by t without clamping t.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Interpolated value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Start value.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>End value.
+		 </apiDesc></apiParam><apiParam><apiItemName>t</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Interpolation factor (not clamped).
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Linearly interpolates between a and b by t without clamping t.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:lerp"><apiName>lerp</apiName><shortdesc>
+		 Linearly interpolates between a and b by t.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Interpolated value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Start value.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>End value.
+		 </apiDesc></apiParam><apiParam><apiItemName>t</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Interpolation factor (clamped between 0 and 1).
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Linearly interpolates between a and b by t.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:log10"><apiName>log10</apiName><shortdesc>
+		 Returns the base 10 logarithm of f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Base 10 logarithm of f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the base 10 logarithm of f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:logBase"><apiName>logBase</apiName><shortdesc>
+		 Returns the logarithm of f in base p.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Logarithm of f in base p.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam><apiParam><apiItemName>p</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Base of the logarithm.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the logarithm of f in base p.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:log"><apiName>log</apiName><shortdesc>
+		 Returns the natural (base e) logarithm of f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Natural logarithm of f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value (must be &gt; 0).
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the natural (base e) logarithm of f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:max"><apiName>max</apiName><shortdesc>
+		 Returns the largest of two values.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The larger value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>First value.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Second value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the largest of two values.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:min"><apiName>min</apiName><shortdesc>
+		 Returns the smallest of two values.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The smaller value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>a</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>First value.
+		 </apiDesc></apiParam><apiParam><apiItemName>b</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Second value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the smallest of two values.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:moveTowardsAngle"><apiName>moveTowardsAngle</apiName><shortdesc>
+		 Same as MoveTowards but makes sure the values interpolate correctly when they wrap around 360 degrees.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Angle that moves towards target.
+		 </apiDesc></apiReturn><apiParam><apiItemName>current</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Current angle in degrees.
+		 </apiDesc></apiParam><apiParam><apiItemName>target</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Target angle in degrees.
+		 </apiDesc></apiParam><apiParam><apiItemName>maxDelta</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Maximum change per call.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Same as MoveTowards but makes sure the values interpolate correctly when they wrap around 360 degrees.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:moveTowards"><apiName>moveTowards</apiName><shortdesc>
+		 Moves a value current towards target.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Value that moves towards target.
+		 </apiDesc></apiReturn><apiParam><apiItemName>current</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Current value.
+		 </apiDesc></apiParam><apiParam><apiItemName>target</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Target value.
+		 </apiDesc></apiParam><apiParam><apiItemName>maxDelta</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Maximum change per call.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Moves a value current towards target.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:nextPowerOfTwo"><apiName>nextPowerOfTwo</apiName><shortdesc>
+		 Returns the next power of two that is &gt;= value.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>Next power of two &gt;= value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>value</apiItemName><apiOperationClassifier>int</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the next power of two that is &gt;= value.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:pingPong"><apiName>pingPong</apiName><shortdesc>
+		 PingPongs the value t, so that it is never larger than length and never smaller than 0.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Ping-ponged value between 0 and length.
+		 </apiDesc></apiReturn><apiParam><apiItemName>t</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam><apiParam><apiItemName>length</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Length of the ping-pong.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 PingPongs the value t, so that it is never larger than length and never smaller than 0.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:pow"><apiName>pow</apiName><shortdesc>
+		 Returns f raised to power p.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>f raised to power p.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Base value.
+		 </apiDesc></apiParam><apiParam><apiItemName>p</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Exponent.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns f raised to power p.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:repeat"><apiName>repeat</apiName><shortdesc>
+		 Loops the value t, so that it is never larger than length and never smaller than 0.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Looped value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>t</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam><apiParam><apiItemName>length</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Length of the loop.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Loops the value t, so that it is never larger than length and never smaller than 0.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:roundToInt"><apiName>roundToInt</apiName><shortdesc>
+		 Returns f rounded to the nearest integer.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>int</apiOperationClassifier><apiDesc>The nearest integer to f, as int.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns f rounded to the nearest integer.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:round"><apiName>round</apiName><shortdesc>
+		 Returns f rounded to the nearest integer.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The nearest integer to f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns f rounded to the nearest integer.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:sign"><apiName>sign</apiName><shortdesc>
+		 Returns the sign of f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>1.0 if f is positive, -1.0 if negative, 1.0 if zero.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the sign of f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:sin"><apiName>sin</apiName><shortdesc>
+		 Returns the sine of angle f in radians.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The sine of angle f, between -1 and 1.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Angle in radians.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the sine of angle f in radians.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:smoothStep"><apiName>smoothStep</apiName><shortdesc>
+		 Interpolates between min and max with smoothing at the limits.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Smoothly interpolated value.
+		 </apiDesc></apiReturn><apiParam><apiItemName>from</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Start value.
+		 </apiDesc></apiParam><apiParam><apiItemName>to</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>	End value.
+		 </apiDesc></apiParam><apiParam><apiItemName>t</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>	Interpolation factor (clamped between 0 and 1).
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Interpolates between min and max with smoothing at the limits.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:sqrt"><apiName>sqrt</apiName><shortdesc>
+		 Returns the square root of f.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Square root of f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Input value (must be &gt;= 0).
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the square root of f.
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Mathf:tan"><apiName>tan</apiName><shortdesc>
+		 Returns the tangent of angle f in radians.</shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>float</apiOperationClassifier><apiDesc>The tangent of angle f.
+		 </apiDesc></apiReturn><apiParam><apiItemName>f</apiItemName><apiOperationClassifier>float</apiOperationClassifier><apiDesc>Angle in radians.
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 Returns the tangent of angle f in radians.
+		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Number"><apiName>Number</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Number:abs"><apiName>abs</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:acos"><apiName>acos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:asin"><apiName>asin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan2"><apiName>atan2</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:atan"><apiName>atan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:ceil"><apiName>ceil</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:cos"><apiName>cos</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:exp"><apiName>exp</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:floor"><apiName>floor</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:log"><apiName>log</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:max"><apiName>max</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:min"><apiName>min</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiData>unknown</apiData><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:pow"><apiName>pow</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam><apiParam><apiItemName>y</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:random"><apiName>random</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:round"><apiName>round</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sin"><apiName>sin</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:sqrt"><apiName>sqrt</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:tan"><apiName>tan</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Number</apiOperationClassifier></apiReturn><apiParam><apiItemName>x</apiItemName><apiOperationClassifier>Number</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Number:toExponential"><apiName>toExponential</apiName><shortdesc>
 		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
 		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/><apiPlatform description="" name="Flash" version="9"/><apiPlatform description="" name="AIR" version="1.0"/><apiPlatform description="" name="Lite" version="4"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
 		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
@@ -321,12 +599,41 @@
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>false</apiData><apiDesc>任何表达式。
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 创建一个具有指定值的 Boolean 对象。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:byte"><apiName>byte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="byte:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:byte"><apiName>byte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="byte:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="byte:toFixed"><apiName>toFixed</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="byte:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="byte:toString"><apiName>toString</apiName><shortdesc>
+		 返回 byte 对象的字符串表示形式。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>byte 对象的字符串表达式。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回 byte 对象的字符串表示形式。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="byte:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回指定 byte 对象的原始 byte 类型值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>byte</apiOperationClassifier><apiDesc>此 byte 对象的原始 byte 类型值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>byte</apiOperationClassifier><apiDesc>此 byte 对象的原始 byte 类型值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回指定 byte 对象的原始 byte 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:Error"><apiName>Error</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Error:getStackTrace"><apiName>getStackTrace</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="byte:byte"><apiName>byte</apiName><shortdesc>
+		 创建新的 byte 对象。可以创建一个 byte 类型的变量并赋予其文本值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 sbyte 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 byte 对象。可以创建一个 byte 类型的变量并赋予其文本值。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Error"><apiName>Error</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Error:getStackTrace"><apiName>getStackTrace</apiName><shortdesc>
 		 在构建错误时，以字符串形式返回该错误的调用堆栈。如以下示例所示，返回值的第一行是异常对象的字符串表示形式，后跟堆栈跟踪元素：
 		 
 TypeError: Error #1009: Cannot access a property or method of a null object reference
@@ -436,7 +743,13 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 </shortdesc><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 int 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
 		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
 		 构造函数；创建新的 int 对象。使用 int.toString() 和 int.valueOf() 时，必须使用 int 构造函数。使用 int 对象的属性时，不要使用构造函数。new int 构造函数主要用作占位符。int 对象与 int() 函数不同，后者将参数转换为原始值。
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Array"><apiName>Array</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Array:AS3:every"><apiName>every</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Array"><apiName>Array</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiDynamic/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Array:AS3:concat"><apiName>concat</apiName><shortdesc>
+		 将参数中指定的元素与数组中的元素连接，并创建新的数组。如果这些参数指定了一个数组，将连接该数组中的元素。如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier><apiDesc>一个数组，其中包含此数组中的元素，后跟参数中的元素。
+		 </apiDesc></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>要连接到新数组中的任意数据类型的值（如数字、元素或字符串）。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 将参数中指定的元素与数组中的元素连接，并创建新的数组。如果这些参数指定了一个数组，将连接该数组中的元素。如果不传递任何参数，则新数组是原始数组的副本（浅表克隆）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:every"><apiName>every</apiName><shortdesc>
 		 对数组中的每一项执行测试函数，直到获得对指定的函数返回 false 的项。使用此方法可确定数组中的所有项是否满足某一条件，如具有的值小于某一特定数值。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Boolean</apiOperationClassifier><apiDesc>如果数组中的所有项对指定的函数都返回 true，则为布尔值 true；否则为 false。
 		 </apiDesc></apiReturn><apiParam><apiItemName>callback</apiItemName><apiOperationClassifier>Function</apiOperationClassifier><apiDesc>要对数组中的每一项运行的函数。该函数可以包含简单的比较操作（例如，item &lt; 20）或者更复杂的操作，并用三个参数来调用，即项值、项索引和 Array 对象： 
@@ -551,6 +864,12 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>指定的数组中最后一个元素（可以为任意数据类型）的值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 删除数组中最后一个元素，并返回该元素的值。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:push"><apiName>push</apiName><shortdesc>
+		 将一个或多个元素添加到数组的结尾，并返回该数组的新长度。
+		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>uint</apiOperationClassifier><apiDesc>一个表示新数组长度的整数。
+		 </apiDesc></apiReturn><apiParam><apiItemName>rest</apiItemName><apiType value="restParam"/><apiDesc>要追加到数组中的一个或多个值。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 将一个或多个元素添加到数组的结尾，并返回该数组的新长度。
 		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:removeAt"><apiName>removeAt</apiName><shortdesc>
 		 从数组中删除一个单独的元素。此方法会修改数组但不制作副本。
 		 </shortdesc><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiType value="any"/><apiDesc>从原数组中删除的元素。
@@ -586,7 +905,7 @@ TypeError: Error #1009: Cannot access a property or method of a null object refe
 		 </apiDesc></apiParam><apiParam><apiItemName>thisObject</apiItemName><apiType value="any"/><apiData>null</apiData><apiDesc>用作函数的 this 的对象。
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 对数组中的每一项执行测试函数，直到获得返回 true 的项。使用此方法确定数组中的所有项是否满足条件，如具有小于某一特定数值的值。
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:sort"><apiName>sort</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:sortOn"><apiName>sortOn</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>Array</apiOperationClassifier></apiReturn><apiParam><apiItemName>fieldName</apiItemName><apiOperationClassifier>Object</apiOperationClassifier></apiParam><apiParam><apiItemName>options</apiItemName><apiData>null</apiData><apiOperationClassifier>Object</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Array:AS3:sort"><apiName>sort</apiName><shortdesc>
 		 对数组中的元素进行排序。此方法按 Unicode 值排序。
 		 默认情况下，Array.sort() 按以下方式进行排序：
 		 
@@ -782,12 +1101,41 @@ trace(numbers); // 3,5,10,34,100
 		 
 		 <p>如果不传递任何参数，则认为创建长度为0的数组。</p>
 		 
-		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Promise"><apiName>Promise</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Promise:_catch"><apiName>_catch</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>onRejected</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:reject"><apiName>reject</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>reason</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:resolve"><apiName>resolve</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>value</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:then"><apiName>then</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>onFulfilled</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam><apiParam><apiItemName>onRejected</apiItemName><apiData>null</apiData><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiConstructor id="Promise:Promise"><apiName>Promise</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>executor</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:IteratorResult"><apiName>IteratorResult</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:sbyte"><apiName>sbyte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="sbyte:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:Promise"><apiName>Promise</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="Promise:_catch"><apiName>_catch</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>onRejected</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:reject"><apiName>reject</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>reason</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:resolve"><apiName>resolve</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiStatic/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>value</apiItemName><apiType value="any"/></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiOperation id="Promise:then"><apiName>then</apiName><shortdesc/><prolog/><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>Promise</apiOperationClassifier></apiReturn><apiParam><apiItemName>onFulfilled</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam><apiParam><apiItemName>onRejected</apiItemName><apiData>null</apiData><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiOperationDef></apiOperationDetail></apiOperation><apiConstructor id="Promise:Promise"><apiName>Promise</apiName><shortdesc/><prolog/><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>executor</apiItemName><apiOperationClassifier>Function</apiOperationClassifier></apiParam></apiConstructorDef></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:IteratorResult"><apiName>IteratorResult</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail></apiClassifier><apiClassifier id="globalClassifier:sbyte"><apiName>sbyte</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="sbyte:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法）。字符串在小数点前面包含一位，在小数点后面最多包含 20 位（在 fractionDigits 参数中指定）。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="sbyte:toFixed"><apiName>toFixed</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 fractionDigits 参数不在 0 到 20 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 0 和 20（含）之间的整数，表示所需的小数位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用定点表示法）。定点表示法是指字符串的小数点后面包含特定的位数（在 fractionDigits 参数中指定）。fractionDigits 参数的有效范围为 0 到 20。如果指定的值在此范围外，则会引发异常。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="sbyte:toPrecision"><apiName>toPrecision</apiName><shortdesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>如果 precision 参数不在 1 到 21 的范围内，则会引发异常。
+		 </apiDesc><apiItemName>RangeError</apiItemName><apiOperationClassifier>RangeError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>介于 1 和 21（含）之间的整数，表示结果字符串中所需的位数。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回数字的字符串表示形式（采用指数表示法或定点表示法）。字符串将包含 precision 参数中指定的位数。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="sbyte:toString"><apiName>toString</apiName><shortdesc>
+		 返回 sbyte 对象的字符串表示形式。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>String</apiOperationClassifier><apiDesc>sbyte 对象的字符串表达式。
+		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>指定要用于数字到字符串的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 </apiDesc></apiParam></apiOperationDef><apiDesc>
+		 返回 sbyte 对象的字符串表示形式。
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="sbyte:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 返回指定 sbyte 对象的原始 sbyte 类型值。
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>sbyte</apiOperationClassifier><apiDesc>此 byte 对象的原始 byte 类型值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>sbyte</apiOperationClassifier><apiDesc>此 sbyte 对象的原始 sbyte 类型值。
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 返回指定 sbyte 对象的原始 sbyte 类型值。
-		 </apiDesc></apiOperationDetail></apiOperation></apiClassifier><apiClassifier id="globalClassifier:short"><apiName>short</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="short:toExponential"><apiName>toExponential</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="sbyte:sbyte"><apiName>sbyte</apiName><shortdesc>
+		 创建新的 sbyte 对象。可以创建一个 sbyte 类型的变量并赋予其文本值。
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiConstructorDetail><apiConstructorDef><apiAccess value="public"/><apiParam><apiItemName>value</apiItemName><apiType value="any"/><apiData>0</apiData><apiDesc>要创建的 sbyte 对象的数值，或者要转换为数字的值。如果未提供 value，则默认值为 0。
+		 </apiDesc></apiParam></apiConstructorDef><apiDesc>
+		 创建新的 sbyte 对象。可以创建一个 sbyte 类型的变量并赋予其文本值。
+		 </apiDesc></apiConstructorDetail></apiConstructor></apiClassifier><apiClassifier id="globalClassifier:short"><apiName>short</apiName><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef></apiClassifierDetail><apiOperation id="short:toExponential"><apiName>toExponential</apiName><shortdesc>
 			�������ֵ��ַ�����ʾ��ʽ������ָ����ʾ�������ַ�����С����ǰ�����һλ����С������������� 20 λ���� fractionDigits ������ָ������
 			</shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiException><apiDesc>��� fractionDigits �������� 0 �� 20 �ķ�Χ�ڣ���������쳣��
 			</apiDesc><apiItemName>ArgumentError</apiItemName><apiOperationClassifier>ArgumentError</apiOperationClassifier></apiException><apiReturn><apiOperationClassifier>String</apiOperationClassifier></apiReturn><apiParam><apiItemName>p</apiItemName><apiData>0</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>���� 0 �� 20������֮�����������ʾ�����С��λ����
@@ -811,9 +1159,9 @@ trace(numbers); // 3,5,10,34,100
 		 </apiDesc></apiReturn><apiParam><apiItemName>radix</apiItemName><apiData>10</apiData><apiOperationClassifier>int</apiOperationClassifier><apiDesc>ָ��Ҫ�������ֵ��ַ�����ת���Ļ������� 2 �� 36�������δָ�� radix ��������Ĭ��ֵΪ 10��
 		 </apiDesc></apiParam></apiOperationDef><apiDesc>
 		 ���� short ������ַ�����ʾ��ʽ��
-		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="short:AS3:valueOf"><apiName>valueOf</apiName><shortdesc>
+		 </apiDesc></apiOperationDetail></apiOperation><apiOperation id="short:valueOf"><apiName>valueOf</apiName><shortdesc>
 		 ����ָ�� short �����ԭʼ short ����ֵ��
-		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="AS3"/><apiReturn><apiOperationClassifier>short</apiOperationClassifier><apiDesc>�� short �����ԭʼ short ����ֵ��
+		 </shortdesc><prolog><asMetadata><apiVersion><apiLanguage version="3.0"/></apiVersion></asMetadata></prolog><apiOperationDetail><apiOperationDef><apiAccess value="public"/><apiReturn><apiOperationClassifier>short</apiOperationClassifier><apiDesc>�� short �����ԭʼ short ����ֵ��
 		 </apiDesc></apiReturn></apiOperationDef><apiDesc>
 		 ����ָ�� short �����ԭʼ short ����ֵ��
 		 </apiDesc></apiOperationDetail></apiOperation><apiConstructor id="short:short"><apiName>short</apiName><shortdesc>

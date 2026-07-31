@@ -611,7 +611,7 @@ namespace juicescript.compiler.parse
 
 					if (char.ToLower(csymobl) != 'f')
 					{
-						if (!(char.IsWhiteSpace(csymobl) || csymobl == ';' || csymobl == '(' || csymobl == ')'))
+						if (!(char.IsWhiteSpace(csymobl) || csymobl == ';' || csymobl == ',' || csymobl == '(' || csymobl == ')'))
 						{
 							throw new LexException("Expecting either a 'semicolon' or a 'new line' here.", cline, linepos);
 						}
