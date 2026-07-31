@@ -22,7 +22,7 @@ package
 		public var I:float;
 		public var invI:float;
 		
-		static const FLT_MAX:float = 3.402823466e+38F;
+		public static const FLT_MAX:float = 3.402823466e+38F;
 		
 		public function Body()
 		{

@@ -44,6 +44,24 @@ namespace juicescript.runtime
                     Span<int> ints = new Span<int>( (int*)p + 3 ,info.instructions * 2 );
                     int pc_ptr = points[index];
 
+                    //               for (int i = 0; i < ints.Length - 1; i += 2)
+                    //               {
+                    //                   if (pc_ptr >= ints[i] && pc_ptr < ints[i+2])
+                    //                   {
+                    //                       if (ints[i + 1] < 0)
+                    //                       {
+                    //                           return -1;
+                    //                       }
+                    //                       else
+                    //                       {
+                    //                           return ints[i + 1]
+                    //                               + 1 //修正行数从1开始计数
+                    //                               ;
+                    //                       }
+                    //                   }
+
+                    //}
+
                     int lo = 2;
                     int hi = ints.Length - 1;
 
@@ -51,7 +69,7 @@ namespace juicescript.runtime
                     {
                         int middle = (lo + ((hi - lo) / 2)) & (~1);
 
-                        if (pc_ptr >= ints[middle - 2] && pc_ptr <= ints[middle])
+                        if (pc_ptr >= ints[middle - 2] && pc_ptr < ints[middle])
                         {
                             if (ints[middle - 1] < 0)
                             {
@@ -65,7 +83,7 @@ namespace juicescript.runtime
                             }
                         }
                         else if (pc_ptr < ints[middle])
-                        { 
+                        {
                             hi = middle;
                         }
                         else
@@ -75,7 +93,7 @@ namespace juicescript.runtime
                     }
 
 #if DEBUG
-//未找到？不可能的说
+                    //未找到？不可能的说
                     throw new InvalidOperationException();
 #else
 					Environment.FailFast("出错了，这里跑不到");
