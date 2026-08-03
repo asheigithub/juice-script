@@ -5,6 +5,7 @@ package
 	 * ...
 	 * @author 
 	 */
+	//[struct]
 	public final class Concat 
 	{
 		var position:Vector2;

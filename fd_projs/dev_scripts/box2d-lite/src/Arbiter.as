@@ -22,10 +22,10 @@ package
 		var friction:float;
 		
 		
-		
 				
 		public function Arbiter(b1:Body,b2:Body) 
 		{
+			
 			
 			if (b1.id < b2.id)
 			{
@@ -271,21 +271,23 @@ package
 					var cOld:Concat = contacts[k];
 					//*c = *cNew;
 					
-					mergedContacts[i] = cNew;
-					var c:Concat = cNew;
+					
+					
 					
 					if (World.warmStarting)
 					{
-						c.Pn = cOld.Pn;
-						c.Pt = cOld.Pt;
-						c.Pnb = cOld.Pnb;
+						cNew.Pn = cOld.Pn;
+						cNew.Pt = cOld.Pt;
+						cNew.Pnb = cOld.Pnb;
 					}
 					else
 					{
-						c.Pn = 0.0f;
-						c.Pt = 0.0f;
-						c.Pnb = 0.0f;
+						cNew.Pn = 0.0f;
+						cNew.Pt = 0.0f;
+						cNew.Pnb = 0.0f;
 					}
+					
+					mergedContacts[i] = cNew;
 				}
 				else
 				{
@@ -328,7 +330,9 @@ package
 				c.massTangent = 1.0f /  kTangent;
 				
 				c.bias = -k_biasFactor * inv_dt * Mathf.min(0.0f, c.separation + k_allowedPenetration);
-
+				
+				//contacts[i] = c;
+				
 				if (World.accumulateImpulses)
 				{
 					// Apply normal + friction impulse

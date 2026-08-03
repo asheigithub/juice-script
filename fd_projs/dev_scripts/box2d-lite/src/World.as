@@ -25,6 +25,9 @@ package
 		{
 			this.gravity = gravity;
 			this.iterations = iterations;
+			
+			
+			
 		}
 		
 		public function AddBody(body:Body):void
@@ -49,6 +52,22 @@ package
 		{
 			var inv_dt:float = dt > 0.0f ? 1.0f / dt : 0.0f;
 
+			arbiters.sort( function(aa:Arbiter, bb:Arbiter){
+				if (aa.body1.id < bb.body1.id)
+				{
+					return -1;
+				}
+				else if ( aa.body1.id == bb.body1.id && aa.body2.id < bb.body2.id )
+				{
+					return -1;
+				}
+				else
+				{
+					return 1;
+				}
+				
+			} );
+			
 			// Determine overlapping bodies and update contact points.
 			BroadPhase();
 			
@@ -66,6 +85,7 @@ package
 				
 			}
 			
+						
 			// Perform pre-steps.
 			for each (var arb:Arbiter in arbiters)
 			{
@@ -75,7 +95,7 @@ package
 			
 			for (var i:int = 0; i < joints.length; ++i)
 			{
-				//joints[i]->PreStep(inv_dt);	
+				joints[i].PreStep(inv_dt);	
 			}
 			
 			// Perform iterations
@@ -89,7 +109,7 @@ package
 
 				for (var j:int = 0; j < joints.length; ++j)
 				{
-					//joints[j]->ApplyImpulse();
+					joints[j].ApplyImpulse();
 				}
 			}
 			
@@ -128,6 +148,8 @@ package
 					
 					if (newArb.numContacts > 0)
 					{
+						
+						
 						//ArbIter iter = arbiters.find(key);
 						//if (iter == arbiters.end())
 						//{
@@ -140,9 +162,10 @@ package
 						var key:Arbiter = null;
 						for (var k:int = 0; k < arbiters.length	; k++) 
 						{
-							key = arbiters[k];
-							if(key.body1.id == newArb.body1.id && key.body2.id == newArb.body2.id)
+							var temp = arbiters[k];
+							if(temp.body1.id == newArb.body1.id && temp.body2.id == newArb.body2.id)
 							{
+								key = temp;
 								break;
 							}
 						}
@@ -150,6 +173,7 @@ package
 						if (key == null)
 						{
 							arbiters.push(newArb);
+							
 						}
 						else
 						{
@@ -164,7 +188,9 @@ package
 							var key:Arbiter = arbiters[k];
 							if(key.body1.id == newArb.body1.id && key.body2.id == newArb.body2.id)
 							{
+								
 								arbiters.removeAt(k);
+								
 								break;
 							}
 						}

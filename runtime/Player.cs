@@ -68,8 +68,12 @@ namespace juicescript.runtime
 			}
 		}
 
-
-		public void CheckRequires()
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		void CheckRequires()
 		{
 			if (waitforlink.Count != 0)
 			{
@@ -189,8 +193,12 @@ namespace juicescript.runtime
 			}
 		}
 
-
-		public static void ComputeTypeSize_Align(ASTrait t, out int align, out int size)
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		 static void ComputeTypeSize_Align(ASTrait t, out int align, out int size)
 		{
 			align = 0;
 
@@ -417,7 +425,13 @@ namespace juicescript.runtime
 		/// <param name="script"></param>
 		/// <param name="namespaceSets"></param>
 		/// <exception cref="InvalidOperationException"></exception>
-		public static void ComputeCodeScope(ASScript script, ASNamespaceSet[] namespaceSets)
+		/// 
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		static void ComputeCodeScope(ASScript script, ASNamespaceSet[] namespaceSets)
 		{
 			if (script.codeScopes != null)
 				throw new InvalidOperationException();
@@ -642,7 +656,12 @@ namespace juicescript.runtime
 		/// 计算虚函数表
 		/// </summary>
 		/// <param name="script"></param>		
-		public void ComputeVTable(ASScript script)
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		void ComputeVTable(ASScript script)
 		{
 
 			for (int i = 0; i < script.allContainers.Count; i++)
@@ -948,7 +967,12 @@ namespace juicescript.runtime
 		/// 计算接口和函数表的对应关系
 		/// </summary>
 		/// <param name="script"></param>
-		public void ComputeInterface(ASScript script)
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		void ComputeInterface(ASScript script)
 		{
 			for (int i = 0; i < script.allContainers.Count; i++)
 			{
@@ -1634,7 +1658,12 @@ namespace juicescript.runtime
 
 		}
 
-		public void MakeVectorType(ASVector vector
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		 void MakeVectorType(ASVector vector
 #if FORCOMPILER
 			, IEnumerable<ASClass> compilingClasses = null
 #endif
@@ -12077,8 +12106,12 @@ namespace juicescript.runtime
 
 		}
 
-
-		public int InitCacheInstance(ASClass @class, int slotindex, bool initmember)
+#if FORCOMPILER
+		public 
+#else
+		internal
+#endif
+		int InitCacheInstance(ASClass @class, int slotindex, bool initmember)
 		{
 
 			int cache_ptr = Context.CacheInstancePtr + slotindex;

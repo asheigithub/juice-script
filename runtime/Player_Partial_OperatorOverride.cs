@@ -51,7 +51,12 @@ namespace juicescript.runtime
 		/// 计算操作符重载表
 		/// </summary>
 		/// <param name="script"></param>
-		public void ComputeOperatorTable(ASScript script , Dictionary<ulong,ASClass> typeDict)
+#if FORCOMPILER
+		public 
+#else
+		private
+#endif
+		void ComputeOperatorTable(ASScript script , Dictionary<ulong,ASClass> typeDict)
 		{
 			operator_override_type_code.Add(null); //null的占位
 			unsafe

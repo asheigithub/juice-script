@@ -19,7 +19,7 @@ namespace juicescript.runtime
     /// <summary>
     /// 运行时Vector对象的负载
     /// </summary>
-    internal class RtVector : RtHeapBase
+    public class RtVector : RtHeapBase
     {
 
         /// <summary>

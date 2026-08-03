@@ -87,7 +87,7 @@ namespace juicescript.runtime
 			}
 #endif
 
-#if DEBUG
+#if DEBUG && !DEBUG_PLAYER
 			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
 			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
 			Context.GC.ForceGC(ref error);
