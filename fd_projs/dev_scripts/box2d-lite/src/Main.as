@@ -377,6 +377,62 @@ package
 			
 		}
 		
+		public static function Demo9():void
+		{
+			world.Clear();
+			bomb = null;
+			
+			var b:Body = new Body();
+			b.Set(new Vector2(100.0f, 20.0f), Body.FLT_MAX);
+			b.friction = 0.2f;
+			b.position = new Vector2(0.0f, -0.5f * b.width.y);
+			b.rotation = 0.0f;
+			world.AddBody(b);
+
+			var b1:Body = b;
+			
+			var mass:float = 10.0f;
+
+			// Tuning
+			var frequencyHz:float = 4.0f;
+			var dampingRatio:float = 0.7f;
+
+			// frequency in radians
+			var omega:float = 2.0f * Mathf.PI * frequencyHz;
+
+			// damping coefficient
+			var d:float = 2.0f * mass * dampingRatio * omega;
+
+			// spring stiffness
+			var k:float = mass * omega * omega;
+
+			// magic formulas
+			var softness:float = 1.0f / (d + timeStep * k);
+			var biasFactor:float = timeStep * k / (d + timeStep * k);
+
+			const y:float = 12.0f;
+
+			for (var i:int = 0; i < 15; ++i)
+			{
+				var x:Vector2 = new Vector2(0.5f + i, y);
+				b = new Body();
+				b.Set(new Vector2(0.75f, 0.25f), mass);
+				b.friction = 0.2f;
+				b.position = x;
+				b.rotation = 0.0f;
+				world.AddBody(b);
+
+				var j:Joint = new Joint();
+				j.Set(b1, b, new Vector2(float(i), y));
+				j.softness = softness;
+				j.biasFactor = biasFactor;
+				world.AddJoint(j);
+
+				b1 = b;
+				
+			}
+		}
+		
 		
 		
 		public static function Step():void
@@ -400,15 +456,15 @@ var demoIndex:int = 0;
 
 var world:World = new World(gravity, iterations);
 
-//Demo1();
-//for (var k:int = 0;  k< 200 ; k++) 
+//Main.Demo5();
+//for (var k:int = 0;  k< 20 ; k++) 
 //{
 	//
 	//world.Step(1.0f / 60);
 	//
 	//
 //}
-//
+
 //trace( world.bodies[1].position.y.toFixed(8) , world.bodies[1].velocity.y.toFixed(8) );
 
 

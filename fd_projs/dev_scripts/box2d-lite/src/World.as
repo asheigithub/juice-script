@@ -142,7 +142,9 @@ package
 					if (bi.invMass == 0.0f && bj.invMass == 0.0f)
 						continue;
 					
-					var newArb:Arbiter = new Arbiter(bi, bj);
+						
+					var concats:Vector.<Concat> = new <Concat>[ new Concat(), new Concat() ];
+					var newArb:Arbiter = new Arbiter(bi, bj,concats);
 					
 					
 					
@@ -172,12 +174,13 @@ package
 						
 						if (key == null)
 						{
+							newArb.contacts = concats;
 							arbiters.push(newArb);
 							
 						}
 						else
 						{
-							key.Update(newArb.contacts, newArb.numContacts);								
+							key.Update(concats, newArb.numContacts);								
 						}
 						
 					}

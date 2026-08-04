@@ -23,7 +23,7 @@ package
 		
 		
 				
-		public function Arbiter(b1:Body,b2:Body) 
+		public function Arbiter(b1:Body,b2:Body, temp_contacts:Vector.<Concat>) 
 		{
 			
 			
@@ -38,12 +38,12 @@ package
 				body2 = b1;
 			}
 
-			numContacts = Collide( body1, body2);
+			numContacts = Collide( body1, body2,temp_contacts);
 			
 			friction = Mathf.sqrt(body1.friction * body2.friction);
 		}
 		
-		private function Collide(bodyA:Body,  bodyB:Body):int
+		private function Collide(bodyA:Body,  bodyB:Body,temp_contacts:Vector.<Concat>):int
 		{
 			// Setup
 			var hA:Vector2 = 0.5f * bodyA.width;
@@ -201,16 +201,16 @@ package
 				
 				if (separation <= 0)
 				{
-					if (contacts == null)
-					{
-						contacts = new <Concat>[new Concat(),new Concat()];
-					}
+					//if (contacts == null)
+					//{
+						//contacts = new <Concat>[new Concat(),new Concat()];
+					//}
 									
-					contacts[numContacts].separation = separation;
-					contacts[numContacts].normal = normal;
+					temp_contacts[numContacts].separation = separation;
+					temp_contacts[numContacts].normal = normal;
 					// slide contact point onto reference face (easy to cull)
-					contacts[numContacts].position = clipPoints2[i].v - separation * frontNormal;
-					contacts[numContacts].feature = clipPoints2[i].fp;
+					temp_contacts[numContacts].position = clipPoints2[i].v - separation * frontNormal;
+					temp_contacts[numContacts].feature = clipPoints2[i].fp;
 					if (axis == Axis.FACE_B_X || axis == Axis.FACE_B_Y)
 					{
 						//Flip(contacts[numContacts].feature);
@@ -220,7 +220,7 @@ package
 							//Swap(fp.e.outEdge1, fp.e.outEdge2);
 						//}
 						
-						var f:FeaturePair = contacts[numContacts].feature;
+						var f:FeaturePair = temp_contacts[numContacts].feature;
 						var tmp:byte = f.e.inEdge1;
 						f.e.inEdge1 = f.e.inEdge2;
 						f.e.inEdge2 = tmp;
@@ -229,7 +229,7 @@ package
 						f.e.outEdge1 = f.e.outEdge2;
 						f.e.outEdge2 = tmp;
 						
-						contacts[numContacts].feature = f;
+						temp_contacts[numContacts].feature = f;
 						
 					}
 					++numContacts;
@@ -331,7 +331,7 @@ package
 				
 				c.bias = -k_biasFactor * inv_dt * Mathf.min(0.0f, c.separation + k_allowedPenetration);
 				
-				//contacts[i] = c;
+				contacts[i] = c;
 				
 				if (World.accumulateImpulses)
 				{
@@ -363,7 +363,9 @@ package
 				var c:Concat = contacts[i];
 				c.r1 = c.position - b1.position;
 				c.r2 = c.position - b2.position;
-
+				
+				
+				
 				// Relative velocity at contact
 				var dv:Vector2 = b2.velocity + MathUtil.Cross(b2.angularVelocity, c.r2) - b1.velocity - MathUtil.Cross(b1.angularVelocity, c.r1);
 
@@ -424,6 +426,9 @@ package
 
 				b2.velocity += b2.invMass * Pt;
 				b2.angularVelocity += b2.invI * c.r2.cross( Pt);
+				
+				contacts[i] = c;
+				
 			}
 		}
 		

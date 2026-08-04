@@ -51,6 +51,11 @@ namespace box2dlite
 			Gl.DeleteBuffer(Ebo);
 			Gl.DeleteVertexArray(Vao);
 			Gl.DeleteProgram(Shader);
+
+#if PROFILEPLAYER
+                    InstructionProfiler.OutPutProfile();
+#endif
+
 		}
 
 		private static uint Vbo;
@@ -526,7 +531,7 @@ namespace box2dlite
 					var contact_v = Player.GetVectorElement(contacts, j);
 					RtInstance contact = (RtInstance)Player.Context.GC.Heap[contact_v.HeapPtr];
 
-					var pos_v = contact.ReadSlot(0, contact.Type._link_codescope, Player);
+					var pos_v = contact.ReadSlot(0, contact.Type._link_codescope, Player, Context.STACK_LENGTH-1,contact_v.HeapPtr );
 					RtInstance pos = (RtInstance)Player.Context.GC.Heap[pos_v.HeapPtr];
 
 					float pos_x = pos.ReadSlot(0, pos.Type._link_codescope, Player).FloatValue;
@@ -669,6 +674,16 @@ namespace box2dlite
 				Player.InvokeStaticMethod(demo);
 
 				window.Title = "Dominos";
+				hasbomb = false;
+			}
+			else if (arg2 == Key.Number9)
+			{
+				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+				var demo = main.Traits.First(t => t.QName.Name == "Demo9").Method;
+
+				Player.InvokeStaticMethod(demo);
+
+				window.Title = "Multi-pendulum";
 				hasbomb = false;
 			}
 		}
