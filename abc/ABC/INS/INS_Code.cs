@@ -312,6 +312,11 @@ namespace juicescript.ABC.INS
 
         O_IncrDecr_StoreVar =127,       // ++,--后保存到变量中
 
+        O_NewInstance_MethodVar =129,   //直接构造到变量中,且编译时已确认类型匹配
+
+
+
+
 		//**specialized opcode  quickening
 
 		//ld_ValueRef_ARR = 130, //从读取中引用值，如果发现失败，则回退。

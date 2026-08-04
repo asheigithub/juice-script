@@ -2019,8 +2019,41 @@ namespace juicescript.compiler.IL.Optimize
 
 							}
 							break;
+						case INS_Code.O_NewInstance_MethodVar:
+							{
+								{
+									INS_O_NewInstance_StoreVar new_Instance_storevar = (INS_O_NewInstance_StoreVar)instruction;
+									if (result.Any((r => r.Key.GetDef().Contains(new_Instance_storevar.typeLocator))))
+									{
+										var kv = result.First(r => r.Key.GetDef().Contains(new_Instance_storevar.typeLocator));
+										int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(new_Instance_storevar.typeLocator)).Count();
+										var typeDef = kv.Value[index];
 
+										Debug.Assert( typeDef.DefType == InstructionDefType.asclass && typeDef.Obj is ASClass );
+										//if (typeDef.DefType == InstructionDefType.asclass)
+										{
+											//if (typeDef.Obj != null)
+											{
+												var dd = FromTypeKind((TypeKind)((ASClass)typeDef.Obj).Type_identifier);
 
+												result.Add(instruction, new List<InstructionDef>() {
+													dd
+												});
+												flag = true;
+											}
+											
+											
+										}
+										
+									}
+									else
+									{
+
+									}
+
+								}
+							}
+							break;
 						case INS_Code.iter_initctx:
 
 						case INS_Code.iter_get:

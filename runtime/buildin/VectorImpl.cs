@@ -499,7 +499,7 @@ namespace juicescript.runtime.buildin
 				}
 				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
 				{
-					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
+					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true,out RtInstance _instance);
 					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}
 				else
@@ -677,7 +677,7 @@ namespace juicescript.runtime.buildin
 				}
 				else if (((ASInstance)vecinstance.Type)._element_class.Instance.Flags.HasFlag(ClassFlags.Struct))
 				{
-					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true);
+					int cache_ptr = context.player.InitCacheInstance(((ASInstance)vecinstance.Type)._element_class, returnSlotIndex, true, out RtInstance _instance);
 					context.StackSlots[returnSlotIndex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}
 				else
@@ -5793,8 +5793,9 @@ namespace juicescript.runtime.buildin
 										return;
 									}
 
-									int p = context.player.InitCacheInstance(element, context.StackPosition, false);
-									slice.CopyTo(((RtInstance)context.GC.Heap[p]).GetStoreData(context.player, (ASInstance)element.Instance));
+									int p = context.player.InitCacheInstance(element, context.StackPosition, false, out RtInstance _instance);
+									//slice.CopyTo(((RtInstance)context.GC.Heap[p]).GetStoreData(context.player, (ASInstance)element.Instance));
+									slice.CopyTo(_instance.GetStoreData(context.player, (ASInstance)element.Instance));
 
 									context.StackPosition++;
 									TopLevel.TraceElement(context.StackSlots[context.StackPosition - 1], context, stackStPos, ref error, scope_ptr, default, printer);

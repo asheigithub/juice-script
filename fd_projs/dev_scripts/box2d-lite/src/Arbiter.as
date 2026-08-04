@@ -8,7 +8,7 @@ package
 	public final class Arbiter 
 	{
 		const MAX_POINTS:int = 2;
-		
+		 
 		//Contact contacts[MAX_POINTS];
 		
 		var contacts:Vector.<Concat>; //new <Concat>[ new Concat(),new Concat() ];

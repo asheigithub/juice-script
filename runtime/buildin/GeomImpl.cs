@@ -149,9 +149,9 @@ namespace juicescript.runtime.buildin
 
 
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default;x.SetFloat( x1.FloatValue + x2.FloatValue );
 			//NaNBoxing y = default;y.SetFloat( y1.FloatValue + y2.FloatValue );
@@ -226,9 +226,9 @@ namespace juicescript.runtime.buildin
 
 
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
 			unsafe
@@ -402,9 +402,9 @@ namespace juicescript.runtime.buildin
 
 			float scalar = s.FloatValue;
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
 			//NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
@@ -464,9 +464,9 @@ namespace juicescript.runtime.buildin
 
 			float scalar = (float)s.Number;
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
 			//NaNBoxing y = default; y.SetFloat(y1.FloatValue * scalar);
@@ -524,9 +524,9 @@ namespace juicescript.runtime.buildin
 
 			float scalar = s.FloatValue;
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
 			//NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
@@ -583,9 +583,9 @@ namespace juicescript.runtime.buildin
 
 			float scalar = (float)s.Number;
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
 			//NaNBoxing y = default; y.SetFloat(y1.FloatValue / scalar);
@@ -643,9 +643,9 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
 			//NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
@@ -702,9 +702,9 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
 			//NaNBoxing y = default; y.SetFloat(scalar * y1.FloatValue);
@@ -760,9 +760,9 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//x1.SetFloat(-x1.FloatValue);
 			//y1.SetFloat(-y1.FloatValue);
@@ -819,9 +819,9 @@ namespace juicescript.runtime.buildin
 			}
 
 
-			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false);
-			var vector2_result = context.GC.Heap[resultptr];
-			var payload_result = (RtInstance)vector2_result;
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
+			//var vector2_result = context.GC.Heap[resultptr];
+			//var payload_result = (RtInstance)vector2_result;
 
 			//x1.SetFloat(+x1.FloatValue);
 			//y1.SetFloat(+y1.FloatValue);

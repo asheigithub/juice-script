@@ -10445,7 +10445,11 @@ namespace juicescript.runtime
 		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
 		{
 
-			if (totype == TypeKind.Any || ((byte)invalue.ValueType - 3 == (byte)totype && totype< TypeKind.Float) || (invalue.ValueType == BoxType.LocalString && totype == TypeKind.String))
+			if (totype == TypeKind.Any 
+				|| ((byte)invalue.ValueType - 3 == (byte)totype && totype<= TypeKind.Float) 
+				|| (invalue.ValueType == BoxType.LocalString && totype == TypeKind.String)
+				|| (invalue.ValueType == BoxType.Number && totype == TypeKind.Number)
+				)
 			{
 				outvalue = invalue;
 				return;
@@ -10527,7 +10531,7 @@ namespace juicescript.runtime
 
 				if (totype_class.Instance.Flags.HasFlag(ClassFlags.CacheAble))
 				{
-					errPtr = InitCacheInstance(totype_class, returnSlotindex, true);
+					errPtr = InitCacheInstance(totype_class, returnSlotindex, true,out RtInstance _temp);
 				}
 				else
 				{
@@ -12111,7 +12115,7 @@ namespace juicescript.runtime
 #else
 		internal
 #endif
-		int InitCacheInstance(ASClass @class, int slotindex, bool initmember)
+		int InitCacheInstance(ASClass @class, int slotindex, bool initmember,out RtInstance instance)
 		{
 
 			int cache_ptr = Context.CacheInstancePtr + slotindex;
@@ -12129,6 +12133,8 @@ namespace juicescript.runtime
 			{
 				((RtInstance)cache).Init(cscope, Context.player, initmember);
 			}
+
+			instance = (RtInstance)cache;
 
 			Context.StackSlots[slotindex].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(@class.Instance.Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
 			return cache_ptr;
@@ -14101,6 +14107,15 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
+								break;
+							}
+						case INS_Code.O_NewInstance_MethodVar:
+							{
+								O_NewInstance_Var(dst_index, &PC, stackStPos, scope_ptr, stackslots, scopeType, methodscope, method_scopes ,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
 								break;
 							}
 						case INS_Code.if_logicOp_goto:

@@ -11,6 +11,7 @@ using System.Net;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -3023,7 +3024,7 @@ namespace juicescript.runtime
 					{
 
 						var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
-						InitCacheInstance(obj_iter, iter_slot, false);
+						InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
 						PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
 						if (error.raised)
@@ -3095,7 +3096,7 @@ namespace juicescript.runtime
 					)
 				{
 					var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
-					InitCacheInstance(obj_iter, iter_slot, false);
+					InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
 					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], m_scope, method_scopes, ref error);
 					if (error.raised)
@@ -3214,8 +3215,8 @@ namespace juicescript.runtime
 			//int cache_slot_index = Context.StackPosition - 1;
 
 			var resulttype = Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__;
-			int result_ptr = InitCacheInstance(resulttype, stackStPos + resultLoc.index, true);
-			RtHeapBase result = Context.GC.Heap[stackslots[resultLoc.index].HeapPtr];
+			int result_ptr = InitCacheInstance(resulttype, stackStPos + resultLoc.index, true,out RtInstance result);
+			//RtHeapBase result = Context.GC.Heap[stackslots[resultLoc.index].HeapPtr];
 
 
 			int m_idx =
@@ -4394,9 +4395,9 @@ namespace juicescript.runtime
 					{
 						int ptrIndex = stackStPos + target.index;
 						//instancePtr = Context.CacheInstancePtr + ptrIndex;
-						instancePtr.SetHeapPtr(InitCacheInstance(@class, ptrIndex, true), (byte)RtHeapTypeKind.INSTANCE, (byte)(@class.Instance.Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
-
-						instance = Context.GC.Heap[instancePtr.HeapPtr];
+						instancePtr.SetHeapPtr(InitCacheInstance(@class, ptrIndex, true, out RtInstance _instance), (byte)RtHeapTypeKind.INSTANCE, (byte)(@class.Instance.Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
+						instance = _instance;
+						//instance = Context.GC.Heap[instancePtr.HeapPtr];
 
 						//instance = Context.GC.Heap[instancePtr];
 						//instance.Type = @class.Instance;
@@ -4691,9 +4692,9 @@ namespace juicescript.runtime
 						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtArray t);
 						stackslots[target.index].SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 					}
-					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && !instancePtr.IsStruct())
-					{ 
-						int obj_ptr = RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr,this,out RtInstance t);
+					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((RtInstance)instance).HEAPINSTANCE_PTR !=0  && !instancePtr.IsStruct())
+					{
+						int obj_ptr = ((RtInstance)instance).FindAndUpdateHeapInstancePtr(this, out RtInstance t); //RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr,this,out RtInstance t);
 						stackslots[target.index].SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 					}
 
@@ -4895,6 +4896,140 @@ namespace juicescript.runtime
 
 		}
 
+
+
+
+		private unsafe void O_NewInstance_Var(int dst_index, byte** PC, int stackStPos, int scope_ptr,
+			Span<NaNBoxing> stackslots, ASContainer scopeType,
+			RtHeapBase methodscope,int * method_scopes,
+			ref ReceiveError error)
+		{
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+			}
+			StackLocater target;
+			StackLocater typeLocater;
+			target.index = dst_index;
+			LoadStackLocater(&typeLocater, PC);
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//StackLocater* argements = (StackLocater*)PC;
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
+			NaNBoxing type_box = stackslots[typeLocater.index];
+
+			Debug.Assert(type_box.HeapKind == (byte)RtHeapTypeKind.CLASS);
+			RtHeapBase type = Context.GC.Heap[type_box.HeapPtr];
+			ASClass @class = (ASClass)((RtScriptClass)type).Meta;
+			//构造实例
+			RtHeapBase instance;
+			NaNBoxing instancePtr = default;
+
+
+
+
+			RtMethodScope heap = (RtMethodScope)methodscope;
+			NaNBoxing heapV = heap.ReadSlotRef(heapLocater.MemberIndex);
+
+			
+			if (heap.IsStackSlot && heapV.ValueType == BoxType.HeapPtr)
+			{
+				//先准备更新原对象
+				int* m_scope = method_scopes;
+				*m_scope++ = scope_ptr;
+				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, m_scope, method_scopes);
+			}
+
+			if (
+			    heap.IsStackSlot &&  
+				(
+						(
+#if FORCOMPILER
+						!IsComputeConstExpr &&
+#endif
+						@class.Instance.Flags.HasFlag(ClassFlags.CacheAble)
+						)
+						||
+						@class.Instance.Flags.HasFlag(ClassFlags.Struct)
+						)
+					)
+			{
+				//只有heap可缓存情况下才会进入,直接构造到heap缓存堆上。
+
+				int ptrIndex
+				 = heapLocater.MemberIndex + heap.StackPos;
+
+				instancePtr.SetHeapPtr(InitCacheInstance(@class, ptrIndex, true, out RtInstance _instance), (byte)RtHeapTypeKind.INSTANCE, (byte)(@class.Instance.Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
+				instance = _instance; //Context.GC.Heap[instancePtr.HeapPtr];
+
+				stackslots[target.index] = instancePtr;
+
+				//执行构造函数
+				RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+				if (!instancePtr.IsStruct() && ((RtInstance)instance).HEAPINSTANCE_PTR != 0) //构造函数将自己提升到了堆中的情况
+				{
+					int obj_ptr = ((RtInstance)instance).FindAndUpdateHeapInstancePtr(this, out RtInstance t); //RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtInstance t);
+					stackslots[target.index].SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+
+					instancePtr.SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+
+				}
+				else
+				{
+					_instance.methodscopeslot_ref_state = 1;
+				}
+
+				
+				
+				
+			}
+			else
+			{
+
+				Context.GC.CheckGC(ref error);
+				instancePtr.SetHeapPtr(Context.GC.AllocInstance(@class.Instance, out instance), (byte)RtHeapTypeKind.INSTANCE, (byte)(@class.Instance.Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
+				
+				if (instancePtr.HeapPtr == 0)
+				{
+					//throw new NotImplementedException("out of memory");
+					RaiseOutOfMemory(ref error);
+					goto flag_handle_error;
+				}
+				stackslots[target.index] = instancePtr; //.SetHeapPtr(instancePtr);
+
+				//执行构造函数
+				RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+			}
+
+			//已确认类型无需转换，直接赋值即可
+			
+			//由于构造函数可能导致methodscope提升到堆，所以这里重新保存
+			((RtMethodScope) methodscope).SetSlot(instancePtr, heapLocater.MemberIndex);
+
+
+
+
+
+
+		flag_handle_error:
+			;
+
+		}
 
 
 

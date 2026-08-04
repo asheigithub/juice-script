@@ -76,7 +76,13 @@ namespace juicescript.runtime
 
 			return ptr;
 		}
-		
+
+		internal int FindAndUpdateHeapInstancePtr(Player player, out RtInstance target)
+		{
+			Debug.Assert(HEAPINSTANCE_PTR != 0);
+			return DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, (ASInstance)Type, out target);
+			
+		}
 
         internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player,out RtInstance target)
         {

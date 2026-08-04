@@ -1970,6 +1970,92 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
+		private static int OptimizeConstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
+		{
+			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
+
+			foreach (var block in cfg.Blocks)
+			{
+				for (int i = 0; i < block.Instructions.Count - 1; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.new_instance)
+					{
+						INS_New_Instance newinstance = (INS_New_Instance)ins;
+						var typedef = FindStackSlotDefAt(newinstance.typeLocator,cfg);
+						if (typedef.Count == 1 && instructionType.ContainsKey(typedef[0].Item1))
+						{
+							var type = instructionType[typedef[0].Item1][typedef[0].Item2];
+							if (type.DefType == InstructionDefType.asclass && type.Obj is ASClass)
+							{ 
+								var @class = type.Obj as ASClass;
+
+								if (@class.Instance.Flags.HasFlag(ClassFlags.NoConstructor))
+									continue;
+
+								if (@class.Instance.Flags.HasFlag(ClassFlags.Vector))
+									continue;
+
+								if (@class.Type_identifier < 7)
+									continue;
+								if (
+									@class.Type_identifier == (ulong)TypeKind.String ||
+									@class.Type_identifier == (ulong)TypeKind.Boolean ||
+									@class.Type_identifier == (ulong)TypeKind.Number ||
+									@class.Type_identifier == (ulong)TypeKind.Function ||
+									@class.Type_identifier == (ulong)TypeKind.Array
+									)
+								{
+									continue;
+								}
+
+								var use = cfg.Blocks.SelectMany(b => b.Instructions).Where(
+									i => i.INS_Code != INS_Code.expression_barrier && i.GetUse().Contains(newinstance.dst));
+
+								if (use.Count() == 1 && use.First().INS_Code == INS_Code.storeMethodVariable)
+								{
+									INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)use.First();
+
+									var variable = cfg.Method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex];
+
+									if (TypeUtils.TestImplicitConvert((TypeKind)@class.Type_identifier, variable.TypeKind, context))
+									{
+										INS_O_NewInstance_StoreVar newInstance_StoreVar = new INS_O_NewInstance_StoreVar(ins.token);
+										newInstance_StoreVar.typeLocator = newinstance.typeLocator;
+										newInstance_StoreVar.args = newinstance.args;
+										newInstance_StoreVar.dst = store_MethodVariable.convertedloc;
+										newInstance_StoreVar.heap = store_MethodVariable.heap;
+
+										block.Instructions[i] = newInstance_StoreVar;
+
+										var at = cfg.Blocks.First(b => b.Instructions.Contains(store_MethodVariable));
+										at.Instructions.Remove(store_MethodVariable);
+
+									}
+								}
+								else if (use.Count() == 1)
+								{ 
+									
+								}
+							}
+
+						}
+
+					}
+				}
+
+
+			}
+
+
+
+			return slotcount;
+		}
+
+
+
+
 		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
 			foreach (var block in cfg.Blocks)

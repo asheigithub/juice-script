@@ -199,8 +199,8 @@ namespace juicescript.runtime
 									if (box.IsStruct())//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 									{
 										var v = Context.GC.Heap[box.HeapPtr];
-										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
-										var struct_ins = Context.GC.Heap[struct_ptr];
+										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false,out RtInstance struct_ins);
+										//var struct_ins = Context.GC.Heap[struct_ptr];
 
 										((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 										box.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
@@ -256,8 +256,8 @@ namespace juicescript.runtime
 							if (box.IsStruct())
 							{
 								var v = Context.GC.Heap[box.HeapPtr];
-								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false);
-								var struct_ins = Context.GC.Heap[struct_ptr];
+								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false, out RtInstance struct_ins);
+								//var struct_ins = Context.GC.Heap[struct_ptr];
 
 								((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 								box.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
@@ -532,9 +532,9 @@ namespace juicescript.runtime
 											var v = Context.GC.Heap[box.HeapPtr];
 											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,
 												Context.StackPosition - para_argcount + i //实例到arguments数组
-												,false
+												,false,out RtInstance struct_ins
 												);
-											var struct_ins = Context.GC.Heap[struct_ptr];
+											//var struct_ins = Context.GC.Heap[struct_ptr];
 
 											((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 											box.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);

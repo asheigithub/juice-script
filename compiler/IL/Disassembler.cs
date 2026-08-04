@@ -324,6 +324,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_IncrDecr_StoreVar:
 					instruction = new INS_O_IncrDecr_StoreVar(token);
 					break;
+				case INS_Code.O_NewInstance_MethodVar:
+					instruction = new INS_O_NewInstance_StoreVar(token);
+					break;
 				case INS_Code.iter_initctx:
 					instruction = new INS_Iter_GetCtx(token);
 					break;

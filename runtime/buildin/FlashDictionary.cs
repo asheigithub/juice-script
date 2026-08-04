@@ -413,7 +413,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			context.player.InitCacheInstance(iter_class, returnSlotIndex,true);
+			context.player.InitCacheInstance(iter_class, returnSlotIndex,true,out RtInstance instance);
 
 		}
 
