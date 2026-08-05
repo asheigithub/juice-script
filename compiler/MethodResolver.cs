@@ -27,6 +27,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static juicescript.compiler.IL.Optimize.Optimizer;
+using static juicescript.NaNBoxing;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace juicescript.compiler
@@ -1349,7 +1351,151 @@ namespace juicescript.compiler
 
 			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,expiredScripts);
 
+			//检查构造函数。
+			foreach (var script in context.scriptDefs)
+			{
+				for (int i = 1; i < script.scriptMethods.Count; i++)
+				{
+					bool CheckIsAutoInitCtor(ASInstance instance,bool nested)
+					{
+						Debug.Assert(instance.Flags.HasFlag(ClassFlags.Struct));
+						var method = instance.Constructor;
 
+						if (nested)
+						{
+							if (method.Flags.HasFlag(MethodFlags.AUTO_INIT_CTOR))
+							{
+								for (int i = 0; i < method.Parameters.Count; i++)
+								{
+									//如果param 的默认值 和字段类型默认值 **不同**则返回false
+									var p = method.Parameters[i];
+									if (!p.IsOptional)
+									{
+										return false;
+									}
+
+									var t = instance._link_codescope.Members[i];
+
+									unsafe
+									{
+										fixed (byte* bp =  method.Body.param_defaultvalues)
+										{
+											Span<NaNBoxing> dc = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
+											var dv = dc[p.ValueExprIndex];
+
+											if (t.TypeKind > TypeKind.Object)
+											{
+												if (dv.ValueType != NaNBoxing.BoxType.Null)
+												{
+													return false;
+												}
+											}
+											else if (t.TypeKind == TypeKind.Boolean)
+											{
+												if (!(dv.ValueType == NaNBoxing.BoxType.Boolean && dv.Boolean == false))
+												{
+													return false;
+												}
+											}
+											else if (t.TypeKind == TypeKind.Number)
+											{
+												if (!(dv.ValueType == NaNBoxing.BoxType.Number && double.IsNaN(juicescript.runtime.Extensions.GetDoubleValue(dv))))
+												{
+													return false;
+												}
+											}
+											else
+											{
+												if (!(juicescript.runtime.Extensions.GetDoubleValue(dv)==0))
+												{
+													return false;
+												}
+											}
+										}
+									}
+
+									
+								}
+
+								return true;
+							}
+						}
+						if (method.Flags.HasFlag(MethodFlags.Native))
+							return false;
+						
+
+						Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
+
+						var sctor = instructions.First(s => s.INS_Code == INS_Code.super_ctor);
+						var codepart = instructions.SkipWhile(s => s != sctor).Skip(1).ToList();
+						if (codepart.All(c => c.INS_Code == INS_Code.END))
+						{
+							//在检查构造部分								
+							var initpart = instructions.TakeWhile(s => s != sctor).ToList();
+							if (initpart.Count == 0)
+							{
+								return true;
+							}
+							else
+							{
+								for (int i = 0; i < initpart.Count; i+=3)
+								{
+									if (i+2 < initpart.Count 
+										&& initpart[i].INS_Code == INS_Code.ld_class
+										&& initpart[i+1].INS_Code == INS_Code.new_instance
+										&& initpart[i+2].INS_Code == INS_Code.storeScopeH
+										)
+									{
+										if (((INS_New_Instance)initpart[i + 1]).args.Length > 0)
+										{
+											return false;
+										}
+
+										var allClasses = context.scriptDefs.SelectMany(
+											s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+										INS_Ld_Class ld_Class = (INS_Ld_Class)initpart[i];
+										var boxing = constants[ld_Class.classid_index];
+
+										ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+										Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+										ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
+										ASClass @class = allClasses.First(c => c.Type_identifier == classid);
+
+										if (!CheckIsAutoInitCtor(@class.Instance,true))
+										{
+											return false;
+										}
+
+									}
+								}
+								return true;
+							}
+						}
+						else
+						{
+							return false;
+						}
+
+					}
+
+
+
+					ASMethod method = script.scriptMethods[i];
+					if (!method.Flags.HasFlag(MethodFlags.Native) && method.IsConstructor && method.Container is ASInstance)
+					{
+						var instance = (ASInstance)method.Container;
+						if (instance.Flags.HasFlag(ClassFlags.Struct))
+						{
+							if (CheckIsAutoInitCtor(instance,false))
+							{
+								method.Flags |= MethodFlags.AUTO_INIT_CTOR;
+							}
+						}
+					}
+				}
+			}
 
 			//优化Pass
 			foreach (var script in context.scriptDefs)
@@ -3098,6 +3244,8 @@ namespace juicescript.compiler
 							throw new InvalidOperationException();
 						}
 
+						
+
 						var function = as_srcfile._functions[method.ast_function_index];
 
 						CompileEnv compileEnv = new CompileEnv(instance._link_codescope, imports,
@@ -3106,6 +3254,44 @@ namespace juicescript.compiler
 						ILBuilder.Build(compileEnv);
 
 						var instance_initmember = compileEnv;
+
+
+						if (method.Trait != null && method.Trait.ASMetadata.Any(m => m.Name == "auto"))
+						{
+							//标记此构造函数
+							if (compileEnv.instructions.Count > 0 || function.FunctionScope.Codes.Count>0 || !instance.Flags.HasFlag( ClassFlags.Struct))
+							{
+								throw new ResolverException(
+											method.Token
+											, $"[auto] 只能标记[struct]空构造函数.");
+
+							}
+
+							if (method.Parameters.Count != instance._link_codescope.Members.Count)
+							{
+								throw new ResolverException(
+											method.Token
+											, $"[auto] 构造函数,参数和字段一一对应，运行时自动将参数赋值给每个字段");
+
+							}
+
+							for (int j = 0; j < method.Parameters.Count; j++)
+							{
+								var param = method.Parameters[j];
+								var filed = instance._link_codescope.Members[j];
+
+								if (param.TypeKind != filed.TypeKind)
+								{
+									throw new ResolverException(
+											method.Token
+											, $"[auto] 构造函数,参数和字段一一对应，运行时自动将参数赋值给每个字段");
+								}
+							}
+
+							method.Flags |= MethodFlags.AUTO_INIT_CTOR;
+						}
+
+
 
 
 						//如果构造函数一行代码也没有，则自动合成一行super()
@@ -3471,6 +3657,8 @@ namespace juicescript.compiler
 										FF1Type = AST.Expr.FF1DataValueType.super_pointer
 									}
 								}
+								,
+								OpCode = "autogen ctor"
 							});
 
 							compileEnv = new CompileEnv(method.Body._link_codescope, imports, new List<IAS3SyntaxNode>() { expression }, context, compileEnv);

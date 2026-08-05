@@ -470,6 +470,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							var pmembers = method.Body._link_codescope.Members;
 							if (i < args)
 							{
 								StackLocater argLocater;
@@ -480,7 +481,7 @@ namespace juicescript.runtime
 								
 								Context.StackPosition += method.Parameters.Count;
 								Context.BackTraceIndex++;
-								ConvertValueType(ref error, box, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
+								ConvertValueType(ref error, box, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
 								Context.BackTraceIndex--;
 								Context.StackPosition -= method.Parameters.Count;
 
@@ -576,7 +577,7 @@ namespace juicescript.runtime
 								NaNBoxing value = constants[p.ValueExprIndex];
 
 								
-								ConvertValueType(ref error, value, p.TypeKind, method.Body._link_codescope.Members[i].__rt_type_class__, ref param_slots[i]);
+								ConvertValueType(ref error, value, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i]);
 
 								if (error.raised)
 								{

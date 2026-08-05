@@ -631,7 +631,9 @@ namespace juicescript.runtime
 									Type = m.Type,
 									TypeKind = m.TypeKind,
 									ValueKind = m.ValueKind,
-									__rt_type_class__ = m.__rt_type_class__
+									__rt_type_class__ = m.__rt_type_class__,
+									_rt_type_flag = m._rt_type_flag
+
 								});
 
 								parent.Members.RemoveAt(j);
@@ -1645,6 +1647,7 @@ namespace juicescript.runtime
 						if (smember.TypeKind > TypeKind.Object)
 						{
 							smember.__rt_type_class__ = Context.dictTypes[(ulong)smember.TypeKind];
+							smember._rt_type_flag = smember.__rt_type_class__.Instance.Flags;
 						}
 
 					}
@@ -3164,7 +3167,8 @@ namespace juicescript.runtime
 					PName = "name",
 					Type = m.Parameters[0].Type,
 					TypeKind = TypeKind.String,
-					__rt_type_class__ = Context.STRING
+					__rt_type_class__ = Context.STRING,
+					_rt_type_flag = Context.STRING.Instance.Flags
 				});
 				m.__is_hasOwnProperty = true;
 				m.__is_buildin_proto = true;
@@ -3210,7 +3214,8 @@ namespace juicescript.runtime
 					PName = "theClass",
 					Type = m.Parameters[0].Type,
 					TypeKind = TypeKind.Object,
-					__rt_type_class__ = Context.OBJECT
+					__rt_type_class__ = Context.OBJECT,
+					_rt_type_flag = Context.OBJECT.Instance.Flags
 				});
 				m.__is_hasOwnProperty = true;
 				m.__is_buildin_proto = true;
@@ -3296,7 +3301,8 @@ namespace juicescript.runtime
 					PName = "args",
 					Type = null,
 					TypeKind = TypeKind.Any,
-					__rt_type_class__ = null
+					__rt_type_class__ = null,
+					_rt_type_flag = ClassFlags.None
 				});
 
 
@@ -4076,7 +4082,8 @@ namespace juicescript.runtime
 					PName = "rest",
 					Type = m.Parameters[0].Type,
 					TypeKind = m.Parameters[0].TypeKind,
-					__rt_type_class__ = Context.ARRAY
+					__rt_type_class__ = Context.ARRAY,
+					_rt_type_flag = Context.ARRAY.Instance.Flags
 				});
 
 				m.__is_buildin_proto = true;
@@ -4122,7 +4129,8 @@ namespace juicescript.runtime
 					PName = "rest",
 					Type = m.Parameters[0].Type,
 					TypeKind = m.Parameters[0].TypeKind,
-					__rt_type_class__ = Context.ARRAY
+					__rt_type_class__ = Context.ARRAY,
+					_rt_type_flag = Context.ARRAY.Instance.Flags
 				});
 
 				m.__is_buildin_proto = true;
@@ -6966,7 +6974,7 @@ namespace juicescript.runtime
 									Context.StackPosition--;
 									goto flag_handle_error;
 								}
-								if (payload.IsUpdateStructOrEqual(Context, cacheObj.scopemember_index, conv, (ASInstance)instance.Type))
+								if (payload.IsUpdateStructOrEqual(Context, cacheObj.scopemember_index, conv))
 								{
 									Context.StackPosition--;
 								}
@@ -10445,8 +10453,8 @@ namespace juicescript.runtime
 		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
 		{
 
-			if (totype == TypeKind.Any 
-				|| ((byte)invalue.ValueType - 3 == (byte)totype && totype<= TypeKind.Float) 
+			if (totype == TypeKind.Any
+				|| ((byte)invalue.ValueType - 3 == (byte)totype && totype <= TypeKind.Float)
 				|| (invalue.ValueType == BoxType.LocalString && totype == TypeKind.String)
 				|| (invalue.ValueType == BoxType.Number && totype == TypeKind.Number)
 				)
@@ -10454,14 +10462,23 @@ namespace juicescript.runtime
 				outvalue = invalue;
 				return;
 			}
-			else if (totype == TypeKind.Int && (byte)(invalue.ValueType-1) < (byte)BoxType.UShort)
+			else if (totype == TypeKind.Int && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
 			{
 				outvalue.SetInt(invalue.IntValue);
 				return;
 			}
-			else if (totype == TypeKind.Uint && (byte)(invalue.ValueType-1) < (byte)BoxType.UShort)
+			else if (totype == TypeKind.Uint && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
 			{
 				outvalue.SetUInt(invalue.UIntValue);
+				return;
+			}
+			else if (
+				totype_class !=null && (totype >= TypeKind.Object) &&
+				(
+				invalue.ValueType == BoxType.Null ||
+				(invalue.ValueType == BoxType.HeapPtr && ( totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance  ))) )
+			{
+				outvalue = invalue;
 				return;
 			}
 			else

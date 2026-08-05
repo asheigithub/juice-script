@@ -386,6 +386,26 @@ namespace juicescript.compiler.IL.Optimize
 				
 			}
 
+			public looptreenode FindLoop(BasicBlock block1,BasicBlock block2)
+			{
+				if (loop.nodes.Contains(block1) && loop.nodes.Contains(block2))
+				{
+					return this;
+				}
+				else
+				{
+					foreach (var child in children)
+					{
+						var n = child.FindLoop(block1,block2);
+						if (n != null)
+							return n;
+					}
+
+					return null;
+				}
+
+			}
+
 
 			public string getMermaidStr(ControlFlowGraph cfg)
 			{

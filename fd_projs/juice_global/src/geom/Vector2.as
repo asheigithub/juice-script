@@ -10,7 +10,8 @@ package geom
 		public var x:float;
 		public var y:float;
 		
-		public native function Vector2(x:float = 0,y:float = 0);
+		[auto]
+		public function Vector2(x:float = 0,y:float = 0);
 		
 		public native function dot(v:Vector2):float;
 		

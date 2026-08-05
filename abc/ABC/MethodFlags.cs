@@ -62,5 +62,11 @@ namespace juicescript.ABC
         Generator = 2048,
 
         ASYNC =4096,
+
+        /// <summary>
+        /// 标记是是一个构造函数，它内容为空，并且用 或者没有参数， 或者参数给字段赋值，参数数和字段数对应
+        /// </summary>
+        AUTO_INIT_CTOR = ASYNC << 1,
+
     }
 }

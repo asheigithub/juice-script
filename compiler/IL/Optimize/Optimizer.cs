@@ -477,6 +477,9 @@ namespace juicescript.compiler.IL.Optimize
 
 			if (cfg.Method.IsConstructor && cfg.Method.Body._link_codescope.Parent.Kind == CodeScopeKind.Instance)
 			{
+				
+
+
 				if (((ASInstance)cfg.Method.Body._link_codescope.Parent.Container).Flags.HasFlag(ClassFlags.Struct))
 				{
 					//结构体删除superCtor

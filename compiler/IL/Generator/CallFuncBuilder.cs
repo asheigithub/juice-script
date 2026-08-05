@@ -100,7 +100,12 @@ namespace juicescript.compiler.IL.Generator
                 {
                     throw new ResolverException(step.token, $"A super statement can be used only inside class instance constructors.");
                 }
-                
+
+                if (((ASInstance)method.Body._link_codescope.Parent.Container).Flags.HasFlag(ClassFlags.Struct) && step.OpCode != "autogen ctor")
+                {
+					throw new ResolverException(step.token, $"A super statement can be used only inside class instance constructors.");
+				}
+
 
                 ASMethod super_ctor = instance._super_class_.Instance.Constructor;
 

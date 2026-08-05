@@ -154,10 +154,17 @@ namespace juicescript.runtime
 
         private Memory<byte> store;
 
-        internal Span<byte> GetStoreData(Player player,ASInstance type)
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		internal Span<byte> GetStoreData(Player player,ASInstance type)
         {
-			bool is_ref_vector;bool is_ref_struct;RtInstance target;
-			return GetStoreData(player, type, out is_ref_vector,out is_ref_struct,out target);
+			if (HEAPINSTANCE_PTR == 0)
+			{
+				return store.Span;
+			}
+			else
+			{
+				return GetStoreData(player, type, out bool is_ref_vector, out bool is_ref_struct, out RtInstance target);
+			}
         }
 
 		private Span<byte> GetStoreData(Player player,ASInstance type , out bool is_ref_vector,out bool is_ref_struct,out RtInstance target)
@@ -503,7 +510,8 @@ namespace juicescript.runtime
 #endif
 					if (((ASInstance)member.DefineAt).Flags.HasFlag(ClassFlags.Struct)
 						&&
-						member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+						//member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+						member._rt_type_flag.HasFlag(ClassFlags.Struct)
 						)
 					{
 #if DEBUG
@@ -622,8 +630,11 @@ namespace juicescript.runtime
 							}
 #endif
 
-							if (((ASInstance)member.DefineAt).Flags.HasFlag(ClassFlags.Struct) &&
-									member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+							Debug.Assert(member.DefineAt == Type);
+
+							if (((ASInstance)Type).Flags.HasFlag(ClassFlags.Struct) &&
+									//member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+									member._rt_type_flag.HasFlag(ClassFlags.Struct)
 								)
 							{
 								int cache_ptr = Context.CacheInstancePtr + returnSlotIndex;
@@ -794,10 +805,10 @@ namespace juicescript.runtime
 
 		}
 
-		internal bool IsUpdateStructOrEqual(Context contxt, ushort memberIndex, NaNBoxing newValue, ASInstance type)
+		internal bool IsUpdateStructOrEqual(Context contxt, ushort memberIndex, NaNBoxing newValue)
         {
-            
-
+			var type = (ASInstance)Type;
+			
 #if FORCOMPILER
 			if (isCompiling)
 			{
@@ -809,7 +820,8 @@ namespace juicescript.runtime
 			{
 				if (type.Flags.HasFlag(ClassFlags.Struct)
 					&&
-					type._link_codescope.Members[memberIndex].__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+					//type._link_codescope.Members[memberIndex].__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+					type._link_codescope.Members[memberIndex]._rt_type_flag.HasFlag(ClassFlags.Struct)
 					)
 				{
 

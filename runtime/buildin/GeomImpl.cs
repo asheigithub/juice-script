@@ -13,42 +13,42 @@ namespace juicescript.runtime.buildin
 {
 	internal class GeomImpl
 	{
-		[NativeFunction("geom.Vector2$public::Vector2")]
-		public static void Vector2(Context context,
-			ASMethod method,
-			int scope_ptr,
-			NaNBoxing thisPtr,
-			int stackStPos, ref ReceiveError error, int returnSlotIndex)
-		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+//		[NativeFunction("geom.Vector2$public::Vector2")]
+//		public static void Vector2(Context context,
+//			ASMethod method,
+//			int scope_ptr,
+//			NaNBoxing thisPtr,
+//			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+//		{
+//			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var vector2 = context.GC.Heap[thisPtr.HeapPtr];
+//			var vector2 = context.GC.Heap[thisPtr.HeapPtr];
 
-			NaNBoxing x = scope.ReadSlot(0, context.player);
-			NaNBoxing y = scope.ReadSlot(1, context.player);
+//			NaNBoxing x = scope.ReadSlot(0, context.player);
+//			NaNBoxing y = scope.ReadSlot(1, context.player);
 
-#if DEBUG
-			if (x.ValueType != NaNBoxing.BoxType.Float || y.ValueType != NaNBoxing.BoxType.Float)
-			{
-				throw new InvalidOperationException();
-			}
+//#if DEBUG
+//			if (x.ValueType != NaNBoxing.BoxType.Float || y.ValueType != NaNBoxing.BoxType.Float)
+//			{
+//				throw new InvalidOperationException();
+//			}
 
-#endif
+//#endif
 
 
-			//((RtInstance)vector2).SetSlot(x, 0, ((ASInstance)vector2.Type)._link_codescope  , context.player);
-			//((RtInstance)vector2).SetSlot(y, 1, ((ASInstance)vector2.Type)._link_codescope  , context.player);
+//			//((RtInstance)vector2).SetSlot(x, 0, ((ASInstance)vector2.Type)._link_codescope  , context.player);
+//			//((RtInstance)vector2).SetSlot(y, 1, ((ASInstance)vector2.Type)._link_codescope  , context.player);
 
-			var store = ((RtInstance)vector2).GetStoreData(context.player, (ASInstance)vector2.Type);
-			unsafe
-			{
-				fixed (byte* p = store)
-				{
-					*(float*)p = x.FloatValue;
-					*((float*)p + 1) = y.FloatValue;
-				}
-			}
-		}
+//			var store = ((RtInstance)vector2).GetStoreData(context.player, (ASInstance)vector2.Type);
+//			unsafe
+//			{
+//				fixed (byte* p = store)
+//				{
+//					*(float*)p = x.FloatValue;
+//					*((float*)p + 1) = y.FloatValue;
+//				}
+//			}
+//		}
 
 		//geom.Vector2$public::toString
 		[NativeFunction("geom.Vector2$public::toString")]

@@ -144,8 +144,8 @@ package
 					
 						
 					var concats:Vector.<Concat> = new <Concat>[ new Concat(), new Concat() ];
-					var newArb:Arbiter = new Arbiter(bi, bj,concats);
-					
+					var newArb:Arbiter = new Arbiter(bi, bj);
+					newArb.init(concats);
 					
 					
 					if (newArb.numContacts > 0)

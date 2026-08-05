@@ -7,11 +7,12 @@ package
 		public var col1:Vector2;
 		public var col2:Vector2;
 		
-		public function Mat22(col1:Vector2 = null,col2:Vector2 = null)
-		{
-			this.col1 = col1;
-			this.col2 = col2;
-		}
+		[auto]
+		public function Mat22(col1:Vector2 = null, col2:Vector2 = null);
+		//{
+			//this.col1 = col1;
+			//this.col2 = col2;
+		//}
 		
 		public static function FromAngle(angle:float):Mat22
 		{

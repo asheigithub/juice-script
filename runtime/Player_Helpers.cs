@@ -4674,11 +4674,52 @@ namespace juicescript.runtime
 					}
 
 
-					//执行构造函数
-					RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
-					if (error.raised)
+					var ctor = ((ASInstance)instance.Type).Constructor;
+					if (ctor.Flags.HasFlag(MethodFlags.AUTO_INIT_CTOR))
 					{
-						goto flag_handle_error;
+						fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
+						{
+							var pmembers = ctor.Body._link_codescope.Members;
+							for (int i = 0; i < ctor.Parameters.Count; i++)
+							{
+								NaNBoxing v;
+								if (i < argsCount)
+								{
+									StackLocater s = *(StackLocater*)argementsPtr;
+
+									v = stackslots[s.index];
+								}
+								else
+								{
+									Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
+									v = constants[ctor.Parameters[i].ValueExprIndex];						
+								}
+
+								ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
+								Debug.Assert(!error.raised);
+
+								if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+								{
+									bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+									Debug.Assert(successd);
+								}
+								else
+								{
+									((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+								}
+
+								argementsPtr += 4;
+							}
+						}
+					}
+					else
+					{
+						//执行构造函数
+						RunMethod(ctor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
+						if (error.raised)
+						{
+							goto flag_handle_error;
+						}
 					}
 
 					if (instancePtr.HeapKind == (byte)RtHeapTypeKind.VECTOR)
@@ -4969,11 +5010,53 @@ namespace juicescript.runtime
 
 				stackslots[target.index] = instancePtr;
 
-				//执行构造函数
-				RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
-				if (error.raised)
+
+				var ctor = ((ASInstance)instance.Type).Constructor;
+				if (ctor.Flags.HasFlag(MethodFlags.AUTO_INIT_CTOR))
 				{
-					goto flag_handle_error;
+					fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
+					{
+						var pmembers = ctor.Body._link_codescope.Members;
+						for (int i = 0; i < ctor.Parameters.Count; i++)
+						{
+							NaNBoxing v;
+							if (i < argsCount)
+							{
+								StackLocater s = *(StackLocater*)argementsPtr;
+
+								v = stackslots[s.index];
+							}
+							else
+							{
+								Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
+								v = constants[ctor.Parameters[i].ValueExprIndex];
+							}
+
+							ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
+							Debug.Assert(!error.raised);
+
+							if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+							{
+								bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+								Debug.Assert(successd);
+							}
+							else
+							{
+								((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+							}
+
+							argementsPtr += 4;
+						}
+					}
+				}
+				else
+				{
+					//执行构造函数
+					RunMethod(ctor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
 				}
 
 				if (!instancePtr.IsStruct() && ((RtInstance)instance).HEAPINSTANCE_PTR != 0) //构造函数将自己提升到了堆中的情况
@@ -5007,13 +5090,53 @@ namespace juicescript.runtime
 				}
 				stackslots[target.index] = instancePtr; //.SetHeapPtr(instancePtr);
 
-				//执行构造函数
-				RunMethod(((ASInstance)instance.Type).Constructor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
-				if (error.raised)
+				var ctor = ((ASInstance)instance.Type).Constructor;
+				if (ctor.Flags.HasFlag(MethodFlags.AUTO_INIT_CTOR))
 				{
-					goto flag_handle_error;
-				}
+					fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
+					{
+						var pmembers = ctor.Body._link_codescope.Members;
+						for (int i = 0; i < ctor.Parameters.Count; i++)
+						{
+							NaNBoxing v;
+							if (i < argsCount)
+							{
+								StackLocater s = *(StackLocater*)argementsPtr;
 
+								v = stackslots[s.index];
+							}
+							else
+							{
+								Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
+								v = constants[ctor.Parameters[i].ValueExprIndex];
+							}
+
+							ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
+							Debug.Assert(!error.raised);
+
+							if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+							{
+								bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+								Debug.Assert(successd);
+							}
+							else
+							{
+								((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+							}
+
+							argementsPtr += 4;
+						}
+					}
+				}
+				else
+				{
+					//执行构造函数
+					RunMethod(ctor, stackslots[target.index], instancePtr.HeapPtr, @class.Instance, (ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
+				}
 			}
 
 			//已确认类型无需转换，直接赋值即可
@@ -7943,7 +8066,7 @@ namespace juicescript.runtime
 								Context.StackPosition--;
 								goto flag_handle_error;
 							}
-							if (heap.IsUpdateStructOrEqual(Context, heapLocater.MemberIndex, conv, (ASInstance)s.Type))
+							if (heap.IsUpdateStructOrEqual(Context, heapLocater.MemberIndex, conv))
 							{
 								Context.StackPosition--;
 							}
@@ -8250,13 +8373,13 @@ namespace juicescript.runtime
 
 
 			NaNBoxing instance_box;
-			RtHeapTypeKind kind;
+			//RtHeapTypeKind kind;
 			//ASContainer as_type;
 
 			Debug.Assert(src.index >= 0);
 			
 			instance_box = stackslots[src.index];
-			kind = (RtHeapTypeKind)(instance_box.ValueType == BoxType.HeapPtr ? instance_box.HeapKind : 255);
+			//kind = (RtHeapTypeKind)(instance_box.ValueType == BoxType.HeapPtr ? instance_box.HeapKind : 255);
 
 
 			switch (instance_box.ValueType)
@@ -8540,7 +8663,7 @@ namespace juicescript.runtime
 						Context.StackPosition--;
 						goto flag_handle_error;
 					}
-					if (payload.IsUpdateStructOrEqual(Context, (ushort)scopemember_index, conv, (ASInstance)instance.Type))
+					if (payload.IsUpdateStructOrEqual(Context, (ushort)scopemember_index, conv))
 					{
 						Context.StackPosition--;
 					}

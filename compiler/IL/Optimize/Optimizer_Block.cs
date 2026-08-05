@@ -2010,7 +2010,7 @@ namespace juicescript.compiler.IL.Optimize
 									continue;
 								}
 
-								var use = cfg.Blocks.SelectMany(b => b.Instructions).Where(
+								var use = block.Instructions.Where(
 									i => i.INS_Code != INS_Code.expression_barrier && i.GetUse().Contains(newinstance.dst));
 
 								if (use.Count() == 1 && use.First().INS_Code == INS_Code.storeMethodVariable)
@@ -2029,9 +2029,13 @@ namespace juicescript.compiler.IL.Optimize
 
 										block.Instructions[i] = newInstance_StoreVar;
 
-										var at = cfg.Blocks.First(b => b.Instructions.Contains(store_MethodVariable));
-										at.Instructions.Remove(store_MethodVariable);
+										
+										block.Instructions.Remove(store_MethodVariable);
 
+									}
+									else
+									{ 
+										
 									}
 								}
 								else if (use.Count() == 1)
@@ -3030,7 +3034,21 @@ namespace juicescript.compiler.IL.Optimize
 					split.pred.Successors.Add(split.inserted);
 					split.succ.Predecessors.Add(split.inserted);
 
-					
+					//将拆边加入循环
+					var loop = cfg.toplevelloops.FirstOrDefault( l=>l.FindLoop(split.pred,split.succ) != null );
+					if (loop != null)
+					{
+						var l = loop.FindLoop(split.pred, split.succ);
+
+						do
+						{
+							l.loop.nodes.Insert(l.loop.nodes.IndexOf(split.succ)+1, split.inserted);
+							l.loop.nodes.Insert(l.loop.nodes.IndexOf(split.succ)+1, split.beforeinserted);
+							l = l.parent;
+
+						}
+						while (l != null);
+					}
 
 					foreach (var pre in split.succ.Predecessors)
 					{
@@ -3099,7 +3117,21 @@ namespace juicescript.compiler.IL.Optimize
 					{
 						var SSA = item.Value;
 						var scopemember = cfg.Method.Body._link_codescope.Members[item.Key];
-						if (!scopemember.TypeKind.IsHeapType() || scopemember.TypeKind == TypeKind.String)
+
+						bool IsStructTypeKind(TypeKind typekind)
+						{ 
+							var alltype = context.scriptDefs.SelectMany(
+						s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+							var t = alltype.FirstOrDefault(c=>c.Type_identifier == (ulong)typekind);
+							if (t == null)
+								return false;
+
+							return t.Instance.Flags.HasFlag(ClassFlags.Struct);
+
+						}
+
+						if (!scopemember.TypeKind.IsHeapType() || scopemember.TypeKind == TypeKind.String || IsStructTypeKind( scopemember.TypeKind ) )
 						{							
 							//类型安全。
 							foreach (var ins in SSA.Keys)

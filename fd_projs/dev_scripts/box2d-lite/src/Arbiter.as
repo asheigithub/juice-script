@@ -23,7 +23,7 @@ package
 		
 		
 				
-		public function Arbiter(b1:Body,b2:Body, temp_contacts:Vector.<Concat>) 
+		public function Arbiter(b1:Body,b2:Body ) 
 		{
 			
 			
@@ -38,6 +38,11 @@ package
 				body2 = b1;
 			}
 
+			
+		}
+		
+		public function init(temp_contacts:Vector.<Concat>)
+		{
 			numContacts = Collide( body1, body2,temp_contacts);
 			
 			friction = Mathf.sqrt(body1.friction * body2.friction);

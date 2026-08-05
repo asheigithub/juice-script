@@ -68,6 +68,8 @@ namespace juicescript
         /// </summary>
         public ASClass __rt_type_class__;
 
+        public ClassFlags _rt_type_flag;
+
 
         public byte[] compiler_initvalue;
         public int compiler_initvalue_stpos;

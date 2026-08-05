@@ -128,8 +128,14 @@ namespace juicescript.compiler.IL.Generator
 
                         StackLocater dst = compileEnv.GetStackLocater(step.Arg1.Reg, type.Mir == TypeKind.Unknown ? TypeKind.Any : type.Mir);
 
+
+                        
+
                         if (isVectorInitData == true)
                         {
+
+
+
                             VectorDef vd = compileEnv.CompileContext.vectorDefs.First(v => v.Identifier == type.Mir);
                             for (int i = 0; i < arguments.Count; i++)
                             {
@@ -138,8 +144,20 @@ namespace juicescript.compiler.IL.Generator
 
                             }
 
-                            arguments.Insert(0, dst); //构造特殊参数,头两个参数绕过原本的两个参数
-                            arguments.Insert(0, dst);
+							int dummid = compileEnv.AddConstUInt(0);
+							StackLocater dummy = compileEnv.MakeStackLocater(TypeKind.Uint);
+							INS_Ld_Const ld_Const = new INS_Ld_Const(step.token);
+							ld_Const.dst = dummy;
+							ld_Const.const_index = dummid;
+							compileEnv.instructions.Add(ld_Const);
+
+							StackLocater dummy2 = compileEnv.MakeStackLocater(TypeKind.Boolean);
+							INS_Ld_False ld_false = new INS_Ld_False(step.token);
+							ld_false.dst = dummy2;
+							compileEnv.instructions.Add(ld_false);
+
+							arguments.Insert(0, dummy2); //构造特殊参数,头两个参数绕过原本的两个参数
+                            arguments.Insert(0, dummy);
                         }
 
                         INS_New_Instance new_Instance = new INS_New_Instance(step.token);
