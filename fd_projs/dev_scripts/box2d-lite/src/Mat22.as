@@ -72,6 +72,7 @@ package
 		[operator("*")]
 		private static function Mat22mulMat22( A:Mat22, B:Mat22 ):Mat22
 		{
+			//return new Mat22( new Vector2( A.col1.x * B.col1.x + A.col2.x * B.col1.y,A.col1.y * B.col1.x + A.col2.y * B.col1.y ),new Vector2(A.col1.x * B.col2.x + A.col2.x * B.col2.y ,A.col1.y * B.col2.x + A.col2.y * B.col2.y  ) );
 			return new Mat22(A * B.col1, A * B.col2);
 		}
 		

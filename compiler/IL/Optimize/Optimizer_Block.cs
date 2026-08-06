@@ -427,7 +427,7 @@ namespace juicescript.compiler.IL.Optimize
 							basicBlock.Instructions.RemoveAt(i);
 							int j = basicBlock.Instructions.IndexOf(ld);
 
-							INS_Ld_InstanceMember_Val ld_InstanceMember_Val = new INS_Ld_InstanceMember_Val(instruction.token);
+							INS_Ld_InstanceOrScopeMember_Val ld_InstanceMember_Val = new INS_Ld_InstanceOrScopeMember_Val(instruction.token);
 							ld_InstanceMember_Val.dst = ld.dst;
 							ld_InstanceMember_Val.instance = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance;
 							ld_InstanceMember_Val.scopemember_index = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
@@ -486,7 +486,7 @@ namespace juicescript.compiler.IL.Optimize
 							basicBlock.Instructions.RemoveAt(i);
 							int j = basicBlock.Instructions.IndexOf(store);
 
-							INS_Store_InstanceMember store_InstanceMember = new INS_Store_InstanceMember(store.token);
+							INS_Store_InstanceOrScopeMember store_InstanceMember = new INS_Store_InstanceOrScopeMember(store.token);
 							store_InstanceMember.dst = ((INS_Store_HeapValueRef)store).source;
 							store_InstanceMember.instance = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance;
 							store_InstanceMember.scopemember_index = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
@@ -930,8 +930,8 @@ namespace juicescript.compiler.IL.Optimize
 			//静态常量
 			{
 				var all = cfg.Blocks.SelectMany(b => b.Instructions)
-					.Where(i => i.INS_Code == INS_Code.ld_instacneMember_Val)
-					.Select(i=> (INS_Ld_InstanceMember_Val)i)
+					.Where(i => i.INS_Code == INS_Code.ld_instacneOrScopeMember_Val)
+					.Select(i=> (INS_Ld_InstanceOrScopeMember_Val)i)
 					.Where((k) => {
 
 						var deflist = FindStackSlotDefAt(k.instance, cfg);
@@ -1182,6 +1182,210 @@ namespace juicescript.compiler.IL.Optimize
 			return slotcount;
 		}
 
+
+
+		private static int OptimizeInstance(ControlFlowGraph cfg, int slotCount, CompileContext context)
+		{
+			
+			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
+
+
+
+			foreach (var block in cfg.Blocks)
+			{
+				for (var i = 0; i < block.Instructions.Count; i++)
+				{ 
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.ld_instacneOrScopeMember_Val)
+					{
+						var def =FindStackSlotDefAt(((INS_Ld_InstanceOrScopeMember_Val)ins).instance, cfg);
+						if (def.Count == 1 && instructionType.ContainsKey(def[0].Item1))
+						{
+							var type = instructionType[def[0].Item1][def[0].Item2];
+
+							if ((type.DefType == InstructionDefType.obj
+								|| type.DefType == InstructionDefType.obj_maybeCacheable
+								|| type.DefType == InstructionDefType.Struct) && type.Obj is ASInstance)
+							{
+								var astype = type.Obj as ASInstance;
+
+								int memberindex = (int)((INS_Ld_InstanceOrScopeMember_Val)ins).scopemember_index;
+								int offset = astype._link_codescope.TypeLayout.Offset[memberindex];
+								int slotsize = astype._link_codescope.TypeLayout.SlotSize[memberindex];
+
+								if (offset < ushort.MaxValue && slotsize < ushort.MaxValue)
+								{
+
+									TypeKind typekind = astype._link_codescope.Members[memberindex].TypeKind;
+
+									NaNBoxing v = default;
+									v.setDefault(typekind);
+
+									uint mask = (uint)(v.Raw >> 32);
+									if (typekind == TypeKind.Number)
+									{
+										mask = 0;
+									}
+
+									INS_O_Ld_InstanceFiled ld_InstanceFiled = new INS_O_Ld_InstanceFiled(ins.token);
+									ld_InstanceFiled.scopemember_index = memberindex;
+									ld_InstanceFiled.dst = ins.dst;
+									ld_InstanceFiled.instance = ((INS_Ld_InstanceOrScopeMember_Val)ins).instance;
+									ld_InstanceFiled.offset = (ushort)offset;
+									ld_InstanceFiled.slotsize = (ushort)slotsize;
+									ld_InstanceFiled.mask = mask;
+
+
+									block.Instructions[i] = ld_InstanceFiled;
+
+									Debug.Assert(instructionType.ContainsKey(ins));
+									instructionType.Add(ld_InstanceFiled, instructionType[ins]);
+
+
+								}
+							}
+							else
+							{ 
+								
+							}
+						}
+
+					}
+				}
+			}
+
+
+
+
+			//pass2, 如果从嵌套结构体内取值，最终取到primitive,则跳过中间步骤
+			foreach (var block in cfg.Blocks)
+			{
+				for (int i = block.Instructions.Count - 1; i >= 0; i--)
+				{
+					if (block.Instructions[i].INS_Code == INS_Code.O_Ld_InstanceFiled)
+					{
+						INS_O_Ld_InstanceFiled ld = (INS_O_Ld_InstanceFiled)block.Instructions[i];
+						if (instructionType[ld][0].DefType == InstructionDefType.primitive)
+						{
+
+							int instance_id = ld.instance.index;
+							int ii = i;
+
+							while (ii - 1 >= 0 && block.Instructions[ii-1].INS_Code == INS_Code.O_Ld_InstanceFiled && 
+								((INS_O_Ld_InstanceFiled)block.Instructions[ii-1]).dst.index == instance_id )
+							{
+								instance_id = ((INS_O_Ld_InstanceFiled)block.Instructions[ii - 1]).instance.index;
+								ii--;
+							}
+
+							if (ii < i)
+							{
+								var test = ((INS_O_Ld_InstanceFiled)block.Instructions[ii]);
+								var def = FindStackSlotDefAt(test.instance, cfg);
+								Debug.Assert(def.Count == 1);
+
+								var t = instructionType[def[0].Item1][def[0].Item2];
+								if (((ASInstance)t.Obj).Flags.HasFlag(ClassFlags.Struct))
+								{
+									test.slotsize = ld.slotsize;
+									test.mask = ld.mask;
+									test.dst = ld.dst;
+									test.scopemember_index = -1; //标记这是一个连续取值
+
+									for (int j = ii+1; j <= i; j++)
+									{
+										test.offset += ((INS_O_Ld_InstanceFiled)block.Instructions[j]).offset;
+									}
+
+									while (i>ii)
+									{
+										block.Instructions.RemoveAt(i);
+
+										i--;
+									}
+
+								}
+
+							}
+
+						}
+					}
+
+				}
+			}
+
+
+
+
+			return slotCount;
+		}
+
+
+
+		private static int OptimizeInstanceFieldAfterSSA(ControlFlowGraph cfg, int slotCount, CompileContext context)
+		{
+			
+			foreach (var block in cfg.Blocks)
+			{
+				for (var i = 0; i < block.Instructions.Count - 1; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.ld_instacneOrScopeMember_Val)
+					{
+						var ins2 = block.Instructions[i + 1];
+						if (ins2.INS_Code == INS_Code.ld_instacneOrScopeMember_Val)
+						{
+							var ld1 = (INS_Ld_InstanceOrScopeMember_Val)ins;
+							var ld2 = (INS_Ld_InstanceOrScopeMember_Val)ins2;
+
+							if (ld1.instance.index == ld2.instance.index && ld1.scopemember_index == ld2.scopemember_index)
+							{
+								INS_Move move = new INS_Move(ld2.token);
+								move.dst = ld2.dst;
+								move.source = ld1.dst;
+
+								block.Instructions[i + 1] = move;
+
+							}
+
+						}
+					}
+				}
+			}
+
+			foreach (var block in cfg.Blocks)
+			{
+				for (var i = 0; i < block.Instructions.Count - 1; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.O_Ld_InstanceFiled)
+					{
+						var ins2 = block.Instructions[i + 1];
+						if (ins2.INS_Code == INS_Code.O_Ld_InstanceFiled)
+						{
+							var ld1 = (INS_O_Ld_InstanceFiled)ins;
+							var ld2 = (INS_O_Ld_InstanceFiled)ins2;
+
+							if (ld1.instance.index == ld2.instance.index && ld1.scopemember_index == ld2.scopemember_index)
+							{
+								INS_Move move = new INS_Move(ld2.token);
+								move.dst = ld2.dst;
+								move.source = ld1.dst;
+
+								block.Instructions[i + 1] = move;
+
+							}
+
+						}
+					}
+				}
+			}
+
+
+			return slotCount;
+
+		}
 
 
 
@@ -1969,6 +2173,9 @@ namespace juicescript.compiler.IL.Optimize
 			return slotcount;
 		}
 
+		
+
+
 
 		private static int OptimizeConstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
@@ -2029,19 +2236,35 @@ namespace juicescript.compiler.IL.Optimize
 
 										block.Instructions[i] = newInstance_StoreVar;
 
-										
+
 										block.Instructions.Remove(store_MethodVariable);
+
+
+										Debug.Assert(instructionType.ContainsKey(store_MethodVariable));
+										instructionType.Add(newInstance_StoreVar, instructionType[store_MethodVariable]);
 
 									}
 									else
-									{ 
-										
+									{
+
 									}
 								}
-								else if (use.Count() == 1)
-								{ 
-									
+								else if (@class.Instance.Flags.HasFlag( ClassFlags.Struct) && @class.Instance.Constructor.Flags.HasFlag( MethodFlags.AUTO_INIT_CTOR))
+								{
+									INS_O_NewStruct o_NewStruct = new INS_O_NewStruct(newinstance.token);
+									o_NewStruct.typeLocator = newinstance.typeLocator;
+									o_NewStruct.dst = newinstance.dst; 
+									o_NewStruct.args = newinstance.args;
+
+									block.Instructions[i]=o_NewStruct;
+
+									Debug.Assert(instructionType.ContainsKey(newinstance));
+									instructionType.Add(o_NewStruct, instructionType[newinstance]);
 								}
+								//else if (use.Count() == 1)
+								//{
+
+								//}
 							}
 
 						}
@@ -2056,6 +2279,64 @@ namespace juicescript.compiler.IL.Optimize
 
 			return slotcount;
 		}
+
+		private static int OptimizeStoreInstanceToVar(ControlFlowGraph cfg, int slotcount, CompileContext context)
+		{
+			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
+
+			foreach (var block in cfg.Blocks)
+			{
+				for (int i = 0; i < block.Instructions.Count - 1; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.storeMethodVariable)
+					{
+						INS_Store_MethodVariable store_MethodVariable = (INS_Store_MethodVariable)ins;
+
+						var def = FindStackSlotDefAt(store_MethodVariable.dst, cfg);
+						var member = cfg.Method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex];
+
+						if (def.All(d => instructionType.ContainsKey(d.Item1)
+						&& instructionType[d.Item1][d.Item2].Obj is ASInstance
+						&& (
+						instructionType[d.Item1][d.Item2].DefType == InstructionDefType.Struct ||
+						instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable ||
+						instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj
+						)
+						&&
+						TypeUtils.TestImplicitConvert(
+							(TypeKind)((ASInstance)instructionType[d.Item1][d.Item2].Obj)._link_codescope.TypeLayout.ASType.Type_identifier, member.TypeKind, context
+							)
+
+
+
+
+
+						))
+						{
+							INS_O_StoreMethodVar_Instance o_StoreMethodVar_Instance = new INS_O_StoreMethodVar_Instance(store_MethodVariable.token);
+							o_StoreMethodVar_Instance.convertedloc = store_MethodVariable.convertedloc;
+							o_StoreMethodVar_Instance.dst = store_MethodVariable.dst;
+							o_StoreMethodVar_Instance.heap = store_MethodVariable.heap;
+
+
+							block.Instructions[i] = o_StoreMethodVar_Instance;
+
+
+							instructionType.Add(o_StoreMethodVar_Instance, instructionType[store_MethodVariable]);
+						}
+						else
+						{ 
+							
+						}
+					}
+				}
+			}
+
+			return slotcount;
+		}
+		
 
 
 

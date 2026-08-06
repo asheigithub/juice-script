@@ -111,8 +111,8 @@ namespace juicescript.compiler.IL
 				case INS_Code.ld_MultiNameL_Val:
 					instruction = new INS_Ld_MultiNameL_Val(token);
 					break;
-				case INS_Code.ld_instacneMember_Val:
-					instruction = new INS_Ld_InstanceMember_Val(token);
+				case INS_Code.ld_instacneOrScopeMember_Val:
+					instruction = new INS_Ld_InstanceOrScopeMember_Val(token);
 					break;
 				case INS_Code.ld_This:
 					instruction = new INS_Ld_this(token);
@@ -284,7 +284,7 @@ namespace juicescript.compiler.IL
 					instruction = new INS_Store_MultiName(token);
 					break;
 				case INS_Code.store_instanceMember:
-					instruction = new INS_Store_InstanceMember(token);
+					instruction = new INS_Store_InstanceOrScopeMember(token);
 					break;
 
 				//case INS_Code.return_op:
@@ -324,8 +324,17 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_IncrDecr_StoreVar:
 					instruction = new INS_O_IncrDecr_StoreVar(token);
 					break;
+				case INS_Code.O_NewStruct:
+					instruction = new INS_O_NewStruct(token);
+					break;
 				case INS_Code.O_NewInstance_MethodVar:
 					instruction = new INS_O_NewInstance_StoreVar(token);
+					break;
+				case INS_Code.O_Ld_InstanceFiled:
+					instruction = new INS_O_Ld_InstanceFiled(token);
+					break;
+				case INS_Code.O_StoreMethodVar_Instance:
+					instruction = new INS_O_StoreMethodVar_Instance(token);
 					break;
 				case INS_Code.iter_initctx:
 					instruction = new INS_Iter_GetCtx(token);

@@ -457,18 +457,16 @@ var demoIndex:int = 0;
 var world:World = new World(gravity, iterations);
 
 
-
-var t = getTimer();
-Main.Demo5();
-for (var k:int = 0;  k< 30 ; k++) 
-{
-	
-	world.Step(1.0f / 60);
-	
-	
-}
-trace(getTimer() - t);
+//
+//var t = getTimer();
+//Main.Demo5();
+//for (var k:int = 0;  k< 60 ; k++) 
+//{
+	//
+	//world.Step(1.0f / 60);
+	//
+	//
+//}
+//trace(getTimer() - t);
 
 //trace( world.bodies[1].position.y.toFixed(8) , world.bodies[1].velocity.y.toFixed(8) );
-
-

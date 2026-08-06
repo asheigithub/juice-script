@@ -7,8 +7,10 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
 
 //using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
@@ -10462,7 +10464,7 @@ namespace juicescript.runtime
 				outvalue = invalue;
 				return;
 			}
-			else if (totype == TypeKind.Int && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			else if ((totype == TypeKind.Int) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
 			{
 				outvalue.SetInt(invalue.IntValue);
 				return;
@@ -10472,11 +10474,21 @@ namespace juicescript.runtime
 				outvalue.SetUInt(invalue.UIntValue);
 				return;
 			}
+			else if (totype == TypeKind.Float && ((byte)(invalue.ValueType) % 2 == 1) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			{
+				outvalue.SetFloat(invalue.IntValue);
+				return;
+			}
+			else if (totype == TypeKind.Float && ((byte)(invalue.ValueType) % 2 == 0) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			{
+				outvalue.SetFloat(invalue.UIntValue);
+				return;
+			}
 			else if (
-				totype_class !=null && (totype >= TypeKind.Object) &&
+				totype_class != null && (totype >= TypeKind.Object) &&
 				(
 				invalue.ValueType == BoxType.Null ||
-				(invalue.ValueType == BoxType.HeapPtr && ( totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance  ))) )
+				(invalue.ValueType == BoxType.HeapPtr && (totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance))))
 			{
 				outvalue = invalue;
 				return;
@@ -12127,6 +12139,7 @@ namespace juicescript.runtime
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 #if FORCOMPILER
 		public 
 #else
@@ -13316,9 +13329,9 @@ namespace juicescript.runtime
 								}
 							}
 							break;
-						case INS_Code.ld_instacneMember_Val:
+						case INS_Code.ld_instacneOrScopeMember_Val:
 							{
-								Ld_InstanceMemberVal(dst_index, &PC, stackslots, stackStPos, scope_ptr,ref error);
+								Ld_InstanceOrScopeMemberVal(dst_index, &PC, stackslots, stackStPos, scope_ptr,ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14126,9 +14139,33 @@ namespace juicescript.runtime
 
 								break;
 							}
+						case INS_Code.O_NewStruct:
+							{
+								O_NewStruct(dst_index, &PC, stackStPos, stackslots,ref error);
+								Debug.Assert(!error.raised);
+								break;
+							}
 						case INS_Code.O_NewInstance_MethodVar:
 							{
 								O_NewInstance_Var(dst_index, &PC, stackStPos, scope_ptr, stackslots, scopeType, methodscope, method_scopes ,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.O_Ld_InstanceFiled:
+							{
+								O_Ld_InstanceField(dst_index,&PC,stackslots,stackStPos,scope_ptr,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.O_StoreMethodVar_Instance:
+							{
+								O_StoreMethodVariable_Instance(dst_index, &PC, methodscope, stackslots, scope_ptr, method_scopes, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;

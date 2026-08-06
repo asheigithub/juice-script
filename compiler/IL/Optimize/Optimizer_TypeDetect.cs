@@ -291,9 +291,9 @@ namespace juicescript.compiler.IL.Optimize
 								flag = true;
 							}
 							break;
-						case INS_Code.ld_instacneMember_Val:
+						case INS_Code.ld_instacneOrScopeMember_Val:
 							{
-								INS_Ld_InstanceMember_Val ld_instanceMeberVal = (INS_Ld_InstanceMember_Val)instruction;
+								INS_Ld_InstanceOrScopeMember_Val ld_instanceMeberVal = (INS_Ld_InstanceOrScopeMember_Val)instruction;
 								//Optimizer_Block.cs 里，已经排除instance.index<0的情况
 
 								//if (ld_instanceMeberVal.instance.index < 0)
@@ -2019,6 +2019,49 @@ namespace juicescript.compiler.IL.Optimize
 
 							}
 							break;
+						case INS_Code.O_NewStruct:
+							{
+								INS_O_NewStruct new_struct = (INS_O_NewStruct)instruction;
+								if (result.Any((r => r.Key.GetDef().Contains(new_struct.typeLocator))))
+								{
+									var kv = result.First(r => r.Key.GetDef().Contains(new_struct.typeLocator));
+									int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(new_struct.typeLocator)).Count();
+									var typeDef = kv.Value[index];
+
+									if (typeDef.DefType == InstructionDefType.asclass)
+									{
+										if (typeDef.Obj != null)
+										{
+											var dd = FromTypeKind((TypeKind)((ASClass)typeDef.Obj).Type_identifier);
+
+											result.Add(instruction, new List<InstructionDef>() {
+											dd
+										});
+											flag = true;
+										}
+										else
+										{   //Class本身
+											result.Add(instruction, new List<InstructionDef>() {
+											new InstructionDef(InstructionDefType.unkown,null)
+										});
+											flag = true;
+										}
+									}
+									else
+									{
+										result.Add(instruction, new List<InstructionDef>() {
+										new InstructionDef(InstructionDefType.unkown,null)
+									});
+										flag = true;
+									}
+								}
+								else
+								{
+
+								}
+
+							}
+							break;
 						case INS_Code.O_NewInstance_MethodVar:
 							{
 								{
@@ -2052,6 +2095,153 @@ namespace juicescript.compiler.IL.Optimize
 									}
 
 								}
+							}
+							break;
+						case INS_Code.O_Ld_InstanceFiled:
+							{
+								INS_O_Ld_InstanceFiled ld_instancefield = (INS_O_Ld_InstanceFiled)instruction;
+								
+								{
+									//if (stack_classes.ContainsKey(ld_instancefield.instance.index))
+									//{
+									//	ASClass cls = stack_classes[ld_instancefield.instance.index];
+									//	var member = cls._link_codescope.Members[(int)ld_instancefield.scopemember_index];
+									//	result.Add(instruction, new List<InstructionDef>() { FromTypeKind(member.TypeKind) });
+
+									//	flag = true;
+									//}
+									//else
+									{
+
+										if (result.Any(r => r.Key.GetDef().Contains(ld_instancefield.instance)))
+										{
+											var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_instancefield.instance)).Value;
+											if (v.Count == 1 && v[0].Obj != null) //count==1,防止出现多个def的情况 多def还有可能多个mv到同一个目标，SSA后可能出现
+											{
+												Debug.Assert(v[0].Obj is ASInstance);
+
+												if (ld_instancefield.mask == NaNBoxing.NULL >> 32)
+												{
+													var member = ((ASInstance)v[0].Obj)._link_codescope.Members[(int)ld_instancefield.scopemember_index];
+													result.Add(instruction, new List<InstructionDef>() { FromTypeKind(member.TypeKind) });
+												}
+												else if (ld_instancefield.mask == NaNBoxing.FALSE >> 32)
+												{
+													var member = ((ASInstance)v[0].Obj)._link_codescope.Members[(int)ld_instancefield.scopemember_index];
+													result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Boolean) });
+												}
+												else if (ld_instancefield.mask == NaNBoxing.UNDEFINED >> 32)
+												{
+													var member = ((ASInstance)v[0].Obj)._link_codescope.Members[(int)ld_instancefield.scopemember_index];
+													result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Any) });
+												}
+												else if (ld_instancefield.mask == 0)
+												{
+													var member = ((ASInstance)v[0].Obj)._link_codescope.Members[(int)ld_instancefield.scopemember_index];
+													result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Number) });
+												}
+												else
+												{ 
+													NaNBoxing vv = new NaNBoxing( (ulong)ld_instancefield.mask <<32 );
+
+													switch (vv.ValueType)
+													{
+														
+														case NaNBoxing.BoxType.Int:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Int) });
+															break;
+														case NaNBoxing.BoxType.Uint:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Uint) });
+															break;
+														case NaNBoxing.BoxType.Sbyte:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.SByte) });
+															break;
+														case NaNBoxing.BoxType.Byte:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Byte) });
+															break;
+														case NaNBoxing.BoxType.Short:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Short) });
+															break;
+														case NaNBoxing.BoxType.UShort:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.UShort) });
+															break;
+														case NaNBoxing.BoxType.Float:
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind(TypeKind.Float) });
+															break;
+														case NaNBoxing.BoxType.Number:
+														case NaNBoxing.BoxType.Undefined:
+														case NaNBoxing.BoxType.Null:
+														case NaNBoxing.BoxType.Boolean:
+														case NaNBoxing.BoxType.HeapPtr:
+														case NaNBoxing.BoxType.LocalString:
+														case NaNBoxing.BoxType.Fault:
+														default:
+															throw new InvalidOperationException();
+															break;
+													}
+
+												}
+
+
+												flag = true;
+											}
+											else
+											{
+												result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+												flag = true;
+											}
+										}
+										else
+										{
+											//等下一轮
+											//throw new NotImplementedException();
+										}
+									}
+								}
+
+
+								flag = true;
+							}
+							break;
+						case INS_Code.O_StoreMethodVar_Instance:
+							{
+								INS_O_StoreMethodVar_Instance store_MethodVariable = (INS_O_StoreMethodVar_Instance)instruction;
+								//method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex];
+								//
+
+								if (method.Body._link_codescope.Members[store_MethodVariable.heap.MemberIndex].TypeKind == TypeKind.Any)
+								{
+									if (result.Any(r => r.Key.GetDef().Contains(store_MethodVariable.dst)))
+									{
+										var kv = result.First(r => r.Key.GetDef().Contains(store_MethodVariable.dst));
+										int index = kv.Key.GetDef().TakeWhile(k => !k.Equals(store_MethodVariable.dst)).Count();
+
+										var d = kv.Value[index];
+
+										result.Add(instruction, new List<InstructionDef>() {
+											 new InstructionDef( d.DefType,d.Obj)
+											});
+
+										flag = true;
+
+									}
+									else
+									{
+										//等下一轮
+										//throw new NotImplementedException();
+									}
+								}
+								else
+								{
+									
+									result.Add(instruction, new List<InstructionDef>() {
+											FromTypeKind( method.Body._link_codescope.Members[ store_MethodVariable.heap.MemberIndex ].TypeKind )
+
+										});
+									flag = true;
+								}
+
+
 							}
 							break;
 						case INS_Code.iter_initctx:

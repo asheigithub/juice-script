@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 
 namespace juicescript.ABC.INS
 {
-	public sealed class INS_Ld_InstanceMember_Val : Instruction
+	/// <summary>
+	/// 保存进instance的成员中
+	/// 用dst承载要保存的值
+	/// </summary>
+	public sealed class INS_Store_InstanceOrScopeMember : Instruction
 	{
-		public override INS_Code INS_Code => INS_Code.ld_instacneMember_Val;
+		public override INS_Code INS_Code => INS_Code.store_instanceMember;
 
 		public override int Size
 		{
@@ -23,7 +27,7 @@ namespace juicescript.ABC.INS
 
 		public uint scopemember_index;
 
-		public INS_Ld_InstanceMember_Val(Token token) : base(token)
+		public INS_Store_InstanceOrScopeMember(Token token) : base(token)
 		{
 		}
 
@@ -43,18 +47,19 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"Ld_InstanceMember_Val   [{dst}] <- [{instance} . scopemember: {scopemember_index}]";
+			return $"Store_InstanceOrScopeMember   [{instance} . scopemember: {scopemember_index}]<- [{dst}]";
 		}
 
 		public override IEnumerable<StackLocater> GetDef()
 		{
-			//return new List<StackLocater> { dst };
-			yield return dst;
+			//return new List<StackLocater> {  };
+			yield break;
 		}
 
 		public override IEnumerable<StackLocater> GetUse()
 		{
-			//return new List<StackLocater> { instance };
+			//return new List<StackLocater> {dst, instance };
+			yield return dst;
 			yield return instance;
 		}
 
@@ -71,6 +76,7 @@ namespace juicescript.ABC.INS
 				instance.index = newIndex1;
 		}
 
-	}
 
+
+	}
 }

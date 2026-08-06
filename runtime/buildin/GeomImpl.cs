@@ -104,6 +104,13 @@ namespace juicescript.runtime.buildin
 			NaNBoxing v1 = scope.ReadSlot(0, context.player);
 			NaNBoxing v2 = scope.ReadSlot(1, context.player);
 
+			if (v1.ValueType == NaNBoxing.BoxType.Null || v2.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref  error);	
+				return;
+			}
+
+
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(v2.ValueType == NaNBoxing.BoxType.HeapPtr);
 
@@ -186,6 +193,12 @@ namespace juicescript.runtime.buildin
 
 			NaNBoxing v1 = scope.ReadSlot(0, context.player);
 			NaNBoxing v2 = scope.ReadSlot(1, context.player);
+
+			if (v1.ValueType == NaNBoxing.BoxType.Null || v2.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
 
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(v2.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -274,6 +287,13 @@ namespace juicescript.runtime.buildin
 
 
 			NaNBoxing v_arg = scope.ReadSlot(0, context.player);
+
+			if (v_arg.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
@@ -335,6 +355,13 @@ namespace juicescript.runtime.buildin
 
 
 			NaNBoxing v_arg = scope.ReadSlot(0, context.player);//.StackSlots[stackStPos];
+
+			if (v_arg.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
@@ -376,6 +403,13 @@ namespace juicescript.runtime.buildin
 
 			NaNBoxing v1 = scope.ReadSlot(0, context.player);
 			NaNBoxing s = scope.ReadSlot(1, context.player);
+
+			if (v1.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
@@ -439,6 +473,12 @@ namespace juicescript.runtime.buildin
 			NaNBoxing v1 = scope.ReadSlot(0, context.player);
 			NaNBoxing s = scope.ReadSlot(1, context.player);
 
+			if (v1.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
@@ -500,6 +540,13 @@ namespace juicescript.runtime.buildin
 			NaNBoxing v1 = scope.ReadSlot(0, context.player);
 			NaNBoxing s = scope.ReadSlot(1, context.player);
 
+			if (v1.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
 
@@ -560,6 +607,12 @@ namespace juicescript.runtime.buildin
 			NaNBoxing v1 = scope.ReadSlot(0, context.player);
 			NaNBoxing s = scope.ReadSlot(1, context.player);
 
+			if (v1.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var vector2_a = context.GC.Heap[v1.HeapPtr];
@@ -618,6 +671,12 @@ namespace juicescript.runtime.buildin
 
 			NaNBoxing s = scope.ReadSlot(0, context.player);
 			NaNBoxing v1 = scope.ReadSlot(1, context.player);
+
+			if (v1.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
 
 			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -679,6 +738,12 @@ namespace juicescript.runtime.buildin
 			NaNBoxing s = scope.ReadSlot(0, context.player);
 			NaNBoxing v1 = scope.ReadSlot(1, context.player);
 
+			if (v1.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			float scalar = (float)s.Number;
@@ -737,7 +802,13 @@ namespace juicescript.runtime.buildin
 			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v = scope.ReadSlot(0, context.player);
-			
+
+			if (v.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			
@@ -795,7 +866,13 @@ namespace juicescript.runtime.buildin
 			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v = scope.ReadSlot(0, context.player);
-			
+
+			if (v.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(v.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			

@@ -71,9 +71,9 @@ namespace juicescript.ABC.INS
 
 
         /// <summary>
-        /// 从instance的slot或者const中取值
+        /// 从instance或class或script的slot或者const中取值
         /// </summary>
-        ld_instacneMember_Val = 14,
+        ld_instacneOrScopeMember_Val = 14,
 
 
         /// <summary>
@@ -312,9 +312,13 @@ namespace juicescript.ABC.INS
 
         O_IncrDecr_StoreVar =127,       // ++,--后保存到变量中
 
+        O_NewStruct = 128,              //构造结构体
+
         O_NewInstance_MethodVar =129,   //直接构造到变量中,且编译时已确认类型匹配
 
+        O_Ld_InstanceFiled =130,        //读Instance成员。
 
+        O_StoreMethodVar_Instance = 132, //保存对象到变量，变量类型已确认匹配
 
 
 		//**specialized opcode  quickening

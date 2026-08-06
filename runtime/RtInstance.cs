@@ -258,6 +258,14 @@ namespace juicescript.runtime
         }
 
         private int m_property_ptr;
+
+		internal int inner_struct_ptr
+		{
+			get { return m_property_ptr; }
+			set { m_property_ptr = value; }
+		}
+
+
         /// <summary>
         /// 动态属性
         /// </summary>

@@ -1,0 +1,99 @@
+﻿using juicescript.ABC.Locaters;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace juicescript.ABC.INS
+{
+    public sealed class INS_O_NewStruct : Instruction
+    {
+        public override INS_Code INS_Code => INS_Code.O_NewStruct;
+
+        protected override void WriteByte(BinaryWriter bw)
+        {
+            
+            typeLocator.Write(bw);
+            bw.Write(args.Length);
+            for (int i = 0; i < args.Length; i++)
+            {
+                args[i].Write(bw);
+            }
+
+        }
+
+		protected override void ReadFromBinary(BinaryReader br)
+		{
+			
+            typeLocator.ReadFromBinary(br);
+            args = new StackLocater[br.ReadInt32()];
+            for (int i = 0; i < args.Length; i++)
+            {
+                args[i].ReadFromBinary(br);
+            }
+		}
+
+
+		public override int Size
+        {
+            get
+            {
+                // opcode (1) + dest_locator (4) + class_locator (4) + args_count (2) + StackLocater(4) * count 
+                return 4 + 4 + 4 + 4 * args.Length;
+            }
+        }
+
+        public StackLocater typeLocator;
+
+        public StackLocater[] args;
+
+        public INS_O_NewStruct(Token token) : base(token)
+        {
+        }
+
+        public override string ToString()
+        {
+            return $"O_NewStruct [{dst}] <-  class:[{typeLocator}]({ string.Join(",", args)})";
+        }
+
+        public override IEnumerable<StackLocater> GetDef()
+        {
+            //return new List<StackLocater> { dst };
+            yield return dst;
+        }
+
+        public override IEnumerable<StackLocater> GetUse()
+        {
+            //var use = new List<StackLocater> { typeLocator };
+            //use.AddRange(args);
+            //return use;
+
+            yield return typeLocator;
+            foreach (var arg in args)
+            {
+                yield return arg;
+            }
+
+        }
+
+        public override bool MaybeRaiseError()
+        {
+            return false;
+        }
+
+        public override void RemappingSlots(Dictionary<int, int> mapping)
+        {
+            if (mapping.TryGetValue(dst.index, out int newIndex))
+                dst.index = newIndex;
+            if (mapping.TryGetValue(typeLocator.index, out int newIndex1))
+                typeLocator.index = newIndex1;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (mapping.TryGetValue(args[i].index, out int newIdx))
+                    args[i].index = newIdx;
+            }
+        }
+
+    }
+}

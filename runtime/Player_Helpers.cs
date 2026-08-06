@@ -5139,20 +5139,316 @@ namespace juicescript.runtime
 				}
 			}
 
-			//已确认类型无需转换，直接赋值即可
+			if (heap.IsStackSlot)
+			{
+
+
+
+				//已确认类型无需转换，直接赋值即可
+
+				//由于构造函数可能导致methodscope提升到堆，所以这里重新保存
+				((RtMethodScope)methodscope).SetSlot(instancePtr, heapLocater.MemberIndex);
+
+			}
+			else
+			{
+				//完全相同结构体可以不分配内存，就地覆盖
+				NaNBoxing old = heap.__get_slots_for_gc[heapLocater.MemberIndex];
+				if (CopyIfSameTypeStructAndReplaceSrc(old, ref instancePtr))
+				{
+
+				}
+				else
+				{
+					instancePtr = GetSaveValue(instancePtr, ref error);
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
+					((RtMethodScope)methodscope).SetSlot(instancePtr, heapLocater.MemberIndex);
+				}
+
+
+
+				//throw new NotImplementedException();
+			}
+
+
+
+
+			flag_handle_error:
+			;
+
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void O_StoreMethodVariable_Instance(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int* method_scopes, ref ReceiveError error)
+		{
 			
-			//由于构造函数可能导致methodscope提升到堆，所以这里重新保存
-			((RtMethodScope) methodscope).SetSlot(instancePtr, heapLocater.MemberIndex);
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)*PC; *PC += 2;
+				heapLocater.MemberIndex = *(ushort*)*PC; *PC += 2;
+			}
+
+			StackLocater convertedloc; LoadStackLocater(&convertedloc, PC);
+
+
+			NaNBoxing value = stackslots[dst_index];
+
+			RtMethodScope heap = (RtMethodScope)methodscope;
+			ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+
+			if (value.ValueType != BoxType.HeapPtr && heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+			{
+				Debug.Assert(value.ValueType == BoxType.Null);
+				heapV = value;
+				stackslots[convertedloc.index] = value;
+#if FORCOMPILER
+				((RtMethodScope)heap).SetSlot(value, heapLocater.MemberIndex);
+#endif
+
+				return;
+			}
+
+
+			if (heap.IsStackSlot)
+			{
+				if (heapV.ValueType == BoxType.HeapPtr)
+				{
+					//先准备更新原对象
+					int* m_scope = method_scopes;
+					*m_scope++ = scope_ptr;
+					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, m_scope, method_scopes);
+				}
+
+
+
+				prepare_savemethodscope_saveinstacne(heap, ref value, heapLocater, false);
+				heapV = value;
+			}
+			else
+			{
+				//完全相同结构体可以不分配内存，就地覆盖
+				NaNBoxing old = heap.__get_slots_for_gc[heapLocater.MemberIndex];
+				if (CopyIfSameTypeStructAndReplaceSrc(old, ref value))
+				{
+
+				}
+				else
+				{
+					value = GetSaveValue(value, ref error);
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
+					((RtMethodScope)methodscope).SetSlot(value, heapLocater.MemberIndex);
+				}
+
+			}
+
+			stackslots[convertedloc.index] = heapV;
+
+
+		flag_handle_error:
+						;
+
+		}
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void O_NewStruct(int dst_index, byte** PC, int stackStPos, 
+			Span<NaNBoxing> stackslots,
+			ref ReceiveError error
+			)
+		{
+			StackLocater target;
+			StackLocater typeLocater;
+			target.index = dst_index;
+			LoadStackLocater(&typeLocater, PC);
+			int argsCount;
+			LoadInt32(&argsCount, PC);
+
+			//StackLocater* argements = (StackLocater*)PC;
+			//!!需要考虑对齐问题
+			byte* argementsPtr = *PC;
+			*PC += argsCount * 4;
+
+
+			NaNBoxing type_box = stackslots[typeLocater.index];
+			Debug.Assert(type_box.ValueType == BoxType.HeapPtr);
+			Debug.Assert((type_box.HeapKind == (byte)RtHeapTypeKind.CLASS));
+
+			RtHeapBase type = Context.GC.Heap[type_box.HeapPtr];
+			ASClass @class = (ASClass)((RtScriptClass)type).Meta;
+
+			Debug.Assert(@class.Instance.Flags.HasFlag(ClassFlags.Struct));
+			Debug.Assert(@class.Instance.Constructor.Flags.HasFlag(MethodFlags.AUTO_INIT_CTOR));
+			//构造实例
+
+			RtHeapBase instance;
+			NaNBoxing instancePtr = default;
+
+			int ptrIndex = stackStPos + target.index;
+			
+			int cache_ptr = Context.CacheInstancePtr + ptrIndex;
+			{
+				var cache = Context.GC.Heap[cache_ptr];
+				cache.Type = @class.Instance;
+
+				((RtInstance)cache).HEAPINSTANCE_PTR = 0;
+				((RtInstance)cache).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
+				((RtInstance)cache).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
+				((RtInstance)cache).methodscopeslot_ref_state = 0;
+
+				CodeScope cscope = @class.Instance._link_codescope;
+
+				if (cscope.TypeLayout.Size > 0 && argsCount==0)
+				{
+					((RtInstance)cache).Init(cscope, Context.player, true);
+				}
+
+				instance = (RtInstance)cache;
+
+				stackslots[target.index].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)( HeapKindFlag.FLAG_STRUCT ));
+			}
+			instancePtr = stackslots[target.index];
+			//instancePtr.SetHeapPtr(InitCacheInstance(@class, ptrIndex, true, out RtInstance _instance), (byte)RtHeapTypeKind.INSTANCE, (byte)(@class.Instance.Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
+			//instance = _instance;
+
+			var ctor = ((ASInstance)instance.Type).Constructor;
+			fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
+			{
+				var pmembers = ctor.Body._link_codescope.Members;
+				for (int i = 0; i < ctor.Parameters.Count; i++)
+				{
+					NaNBoxing v;
+					if (i < argsCount)
+					{
+						StackLocater s = *(StackLocater*)argementsPtr;
+
+						v = stackslots[s.index];
+					}
+					else
+					{
+						Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
+						v = constants[ctor.Parameters[i].ValueExprIndex];
+					}
+
+					
+					ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
+					Debug.Assert(!error.raised);
+
+					if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+					{
+						bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+						Debug.Assert(successd);
+					}
+					else
+					{
+						((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+					}
+
+					argementsPtr += 4;
+				}
+			}
+
+
+		}
 
 
 
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void O_Ld_InstanceField(int dst_index, byte** PC, Span<NaNBoxing> stackslots,
+			int stackStPos, int scope_ptr, ref ReceiveError error)
+		{
 
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			//ushort trait_index;
+			int scopemember_index;
+
+			//LoadUShort(&trait_index, &PC);
+			LoadInt32(&scopemember_index, PC);
+
+			ushort offset = *(ushort*)*PC; *PC += 2;
+			ushort slotsize = *(ushort*)*PC; *PC += 2;
+
+			uint mask; LoadUInt(&mask, PC);
+			NaNBoxing instance_box = stackslots[src.index];
+			if (instance_box.ValueType == BoxType.Null)
+			{
+				Context.GC.CheckGC(ref error);
+				RaiseTypeError_AccessNull(ref error);
+				goto flag_handle_error;
+			}
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE);
+			RtInstance instance = (RtInstance)Context.GC.Heap[instance_box.HeapPtr];
+
+#if DEBUG
+			if (scopemember_index >= 0)
+			{
+				ASTrait trait = instance.Type._link_codescope.Members[(ushort)scopemember_index].trait;
+				Debug.Assert(instance.Type._link_codescope.TypeLayout.Offset[(int)scopemember_index] == offset);
+				Debug.Assert(instance.Type._link_codescope.TypeLayout.SlotSize[(int)scopemember_index] == slotsize);
+			}
+#endif
+
+
+
+			var store = (instance).GetStoreData(this, (ASInstance)instance.Type).Slice(offset, slotsize);
+			fixed (void* ptr = store)
+			{
+				if (mask == 0)
+				{
+					stackslots[dst_index].SetNumber(*(double*)ptr);
+				}
+				else if (NaNBoxing.FALSE >> 32 == mask)
+				{
+					stackslots[dst_index].SetBoolean(*(bool*)ptr);
+				}
+				else if (NaNBoxing.NULL >> 32 == mask && (((HeapKindFlag)instance_box.HeapFlag & HeapKindFlag.FLAG_STRUCT) == HeapKindFlag.FLAG_STRUCT))
+				{
+					Debug.Assert(scopemember_index >= 0);
+
+					int cache_ptr = Context.CacheInstancePtr + stackStPos + dst_index;
+					var cache = Context.GC.Heap[cache_ptr];
+
+					cache.Type = instance.Type._link_codescope.Members[(ushort)scopemember_index].__rt_type_class__.Instance;
+					RtInstance struct_payload = (RtInstance)cache;
+
+					struct_payload.methodscopeslot_ref_state = 0;
+					struct_payload.inner_struct_ptr = instance.inner_struct_ptr + offset; //标记index.
+					struct_payload.HEAPINSTANCE_PTR = instance.HEAPINSTANCE_PTR == 0 ? instance_box.HeapPtr : instance.HEAPINSTANCE_PTR; //指向当前对象.
+
+					stackslots[dst_index].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+
+					//throw new NotImplementedException();
+				}
+				else if (NaNBoxing.NULL >> 32 == mask || NaNBoxing.UNDEFINED >> 32 == mask)
+				{
+					stackslots[dst_index] = *(NaNBoxing*)ptr;
+				}
+				else
+				{
+					stackslots[dst_index] = new NaNBoxing((((ulong)mask) << 32) | *(uint*)ptr);
+				}
+			}
 
 		flag_handle_error:
 			;
 
 		}
+
+
+
+
 
 
 
@@ -8355,7 +8651,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Ld_InstanceMemberVal(int dst_index, byte** PC, Span<NaNBoxing> stackslots,
+		private unsafe void Ld_InstanceOrScopeMemberVal(int dst_index, byte** PC, Span<NaNBoxing> stackslots,
 			int stackStPos, int scope_ptr, ref ReceiveError error
 			)
 		{
@@ -8514,6 +8810,10 @@ namespace juicescript.runtime
 			;
 			
 		}
+
+
+
+		
 
 
 		private unsafe void Store_InstanceMember(int src_index, byte** PC, Span<NaNBoxing> stackslots,
@@ -11140,6 +11440,9 @@ namespace juicescript.runtime
 			StoreMethodVariable_Slow(methodscope, heapLocater,  value, ref heapV, scope_ptr, method_scopes, ref error);
 			stackslots[convertedloc.index] = heapV;
 		}
+
+		
+
 
 
 		private unsafe void StoreHeapValueRef(int dst_index,byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos , int scope_ptr, ref ReceiveError error)
