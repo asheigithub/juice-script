@@ -3469,7 +3469,7 @@ namespace juicescript.compiler
 											{
 
 												INS_SuperCtor superCtor = new INS_SuperCtor(method.Token);
-												superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
+												//superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
 												superCtor.args = new StackLocater[0];
 
 												compileEnv.instructions.Insert(0, superCtor);

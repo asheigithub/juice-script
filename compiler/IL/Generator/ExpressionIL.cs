@@ -1204,7 +1204,7 @@ namespace juicescript.compiler.IL.Generator
 								{
 									var slotmember = scope.Members.First(s => s.Kind == ScopeMemberKind.Slot && s.QName.Name == method.Name);
 
-									ScopeHeapLocater slotlocater = new ScopeHeapLocater()
+									ScopeHeapLocater heaplocater = new ScopeHeapLocater()
 									{
 										ScopeIndex = (ushort)scope.index,
 										MemberIndex = (ushort)scope.Members.IndexOf(slotmember)
@@ -1212,12 +1212,12 @@ namespace juicescript.compiler.IL.Generator
 
 									INS_Store_ScopeHeap store_slotVariable = new INS_Store_ScopeHeap(step.token);
 									store_slotVariable.dst = stackLocater;
-									store_slotVariable.heap = slotlocater;
+									store_slotVariable.heap = heaplocater;
 
 									compileEnv.instructions.Add(store_slotVariable);
 
 									INS_Ld_ScopeHeap ld_method = new INS_Ld_ScopeHeap(step.token);
-									ld_method.heap = slotlocater;
+									ld_method.heap = heaplocater;
 									ld_method.dst = compileEnv.MakeStackLocater(TypeKind.Function);
 									compileEnv.instructions.Add(ld_method);
 
@@ -3863,6 +3863,25 @@ namespace juicescript.compiler.IL.Generator
 							{
 								if (compileEnv.CompileContext.computeConstExprState.Count > 0) { throw new ResolverException(step.token, "Parameter initializer unknown or is not a compile-time constant."); }
 								string name = step.Arg3.Data.Value.ToString();
+
+								if (trait != null && importNS == null && trait.ValueKind == ConstantKind.Namespace)
+								{
+									var topscope = compileEnv.Scope;
+									while (topscope.Kind == CodeScopeKind.Method)
+									{
+										topscope = topscope.Parent;
+									}
+									if (topscope.Kind == CodeScopeKind.Class || topscope.Kind == CodeScopeKind.Instance)
+									{
+										throw new ResolverException(step.token, $"Access of possibly undefined property {name} through a reference with static type {topscope.Container.QName.Name}.");
+									}
+									else
+									{
+										throw new ResolverException(step.token, $"Access of possibly undefined property {name}.");
+									}
+								}
+
+
 								//RTQName
 								int constindex = compileEnv.AddConstString(name);
 
@@ -4331,7 +4350,7 @@ namespace juicescript.compiler.IL.Generator
 
 							accessInstance = instance;
 						}
-					}
+					}					
 					else
 					{
 						var stackLoc = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.RTQNameRTQNameL_N, heapType); //compileEnv.MakeStackLocater(heapType);
@@ -5750,7 +5769,7 @@ namespace juicescript.compiler.IL.Generator
 								ld_MethodVariable.heap = heapLocater;
 
 								compileEnv.instructions.Add(ld_MethodVariable);
-							}
+							}							
 							else
 							{
 								INS_Ld_ScopeHeap ld_ScopeHeap = new INS_Ld_ScopeHeap(token);

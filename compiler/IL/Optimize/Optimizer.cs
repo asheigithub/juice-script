@@ -455,6 +455,7 @@ namespace juicescript.compiler.IL.Optimize
 
 		internal static void Optimize(ASMethod method, List<string> displaycfg_files, string fullPath, string outfile_base, CompileContext context)
 		{
+
 			
 			string key = CompileContext.CleanInvalidPathChars(Player.GetMethodKey(method));
 			Disassembler.Disassemble(method.Body.ByteCode, out int slotCount, out NaNBoxing[] constants, out Instruction[] instructions);
@@ -477,17 +478,73 @@ namespace juicescript.compiler.IL.Optimize
 
 			if (cfg.Method.IsConstructor && cfg.Method.Body._link_codescope.Parent.Kind == CodeScopeKind.Instance)
 			{
-				
-
 
 				if (((ASInstance)cfg.Method.Body._link_codescope.Parent.Container).Flags.HasFlag(ClassFlags.Struct))
 				{
 					//结构体删除superCtor
 					foreach (var item in cfg.Blocks)
 					{
-						item.Instructions.RemoveAll( i=>i.INS_Code == INS_Code.super_ctor );
-					}				
+						item.Instructions.RemoveAll(i => i.INS_Code == INS_Code.super_ctor);
+					}
 				}
+				else
+				{
+					//检测父类构造函数是否为空
+
+					bool CheckIsBlankCtor(ASMethod ctor)
+					{
+						if (ctor.Flags.HasFlag(MethodFlags.Native))
+							return false;
+
+						Disassembler.Disassemble(ctor.Body.ByteCode, out int _s, out NaNBoxing[] _c, out Instruction[] inslist);
+
+						for (int i = 0; i < inslist.Length; i++)
+						{
+							Instruction ins = inslist[i];
+							if (ins.INS_Code == INS_Code.expression_barrier)
+							{
+								
+							}
+							else if (ins.INS_Code == INS_Code.super_ctor)
+							{
+								var super_class = ((ASInstance)(ctor.Container))._super_class_;
+								if (super_class != null)
+								{
+									if (!CheckIsBlankCtor(super_class.Instance.Constructor))
+									{
+										return false;
+									}
+								}
+
+							}
+							else if (ins.INS_Code == INS_Code.END)
+							{ 
+								
+							}
+							else
+							{
+								return false;
+							}
+						}
+
+						return true;
+					}
+
+					var super_class = ((ASInstance)(method.Container))._super_class_;
+					if (super_class != null)
+					{
+						if (CheckIsBlankCtor(super_class.Instance.Constructor))
+						{
+							//父类构造函数为空，删了
+							foreach (var item in cfg.Blocks)
+							{
+								item.Instructions.RemoveAll(i => i.INS_Code == INS_Code.super_ctor);
+							}
+						}
+					}
+
+				}
+
 			}
 
 

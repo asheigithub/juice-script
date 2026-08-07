@@ -240,6 +240,7 @@ namespace juicescript.compiler.IL.Optimize
 								flag = true;
 							}
 							break;
+						
 						case INS_Code.ld_InstanceOrScopeMemberValueRef:
 							{
 								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
@@ -281,8 +282,78 @@ namespace juicescript.compiler.IL.Optimize
 							break;
 						case INS_Code.ld_MultiNameL_Val:
 							{
-								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
-								flag = true;
+								INS_Ld_MultiNameL_Val ld_MultiNameL_Val = (INS_Ld_MultiNameL_Val)instruction;
+								if (stack_classes.ContainsKey(ld_MultiNameL_Val.instance.index))
+								{
+									ASClass cls = stack_classes[ld_MultiNameL_Val.instance.index];
+									result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+									flag = true;
+								}
+								else
+								{
+
+									if (result.Any(r => r.Key.GetDef().Contains(ld_MultiNameL_Val.instance)))
+									{
+										var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_MultiNameL_Val.instance)).Value;
+										if (v.Count == 1 && v[0].Obj != null && v[0].DefType == InstructionDefType.vector) //count==1,防止出现多个def的情况 多def还有可能多个mv到同一个目标，SSA后可能出现
+										{
+											Debug.Assert(v[0].Obj is ASInstance);
+
+											var t = (ASInstance)v[0].Obj; //检查Vector的强类型
+											if (t.Flags.HasFlag(ClassFlags.Vector) && t._element_class != null)
+											{
+												if (result.Any(r => r.Key.GetDef().Contains(ld_MultiNameL_Val.name)))
+												{
+													var name = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_MultiNameL_Val.name)).Value;
+													if (name.Count == 1 && name[0].DefType == InstructionDefType.primitive && name[0].Obj is ASInstance)
+													{
+														var typekind = (TypeKind)((ASInstance)name[0].Obj)._link_codescope.TypeLayout.ASType.Type_identifier;
+
+														if (typekind >= TypeKind.Int && typekind <= TypeKind.Number)
+														{
+															result.Add(instruction, new List<InstructionDef>() { FromTypeKind( (TypeKind)t._element_class.Type_identifier )  });
+															flag = true;
+														}
+														else
+														{
+															result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+															flag = true;
+														}
+													}
+													else
+													{
+														result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+														flag = true;
+													}
+												}
+												else
+												{
+													result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+													flag = true;
+												}
+											}
+											else
+											{
+												result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+												flag = true;
+											}
+										}
+										else
+										{
+											result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+											flag = true;
+										}
+									}
+									else
+									{
+										//等下一轮
+										//throw new NotImplementedException();
+									}
+								}
+
+								
+
+								
 							}
 							break;
 						case INS_Code.ld_MultiName_Val:
@@ -430,7 +501,7 @@ namespace juicescript.compiler.IL.Optimize
 
 								stack_classes.Add(ld_VectorType.dst.index, @class);
 
-								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.vector, @class) });
+								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.asclass, @class) });
 								flag = true;
 
 							}
@@ -1249,7 +1320,7 @@ namespace juicescript.compiler.IL.Optimize
 										});
 											flag = true;
 										}
-									}
+									}									
 									else
 									{
 										result.Add(instruction, new List<InstructionDef>() {

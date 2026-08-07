@@ -13346,6 +13346,7 @@ namespace juicescript.runtime
 								//stackslots[stackLocater.index] = v;
 							}
 							break;
+						
 						case INS_Code.ld_methodVariable:
 							{
 								//StackLocater stackLocater;
@@ -14147,7 +14148,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_NewInstance_MethodVar:
 							{
-								O_NewInstance_Var(dst_index, &PC, stackStPos, scope_ptr, stackslots, scopeType, methodscope, method_scopes ,ref error);
+								O_NewInstance_Var(dst_index, &PC, stackStPos, scope_ptr, stackslots, methodscope, method_scopes ,ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;

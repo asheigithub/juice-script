@@ -2287,7 +2287,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			foreach (var block in cfg.Blocks)
 			{
-				for (int i = 0; i < block.Instructions.Count - 1; i++)
+				for (int i = 0; i < block.Instructions.Count ; i++)
 				{
 					var ins = block.Instructions[i];
 					if (ins.INS_Code == INS_Code.storeMethodVariable)

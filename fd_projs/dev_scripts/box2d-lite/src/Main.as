@@ -457,7 +457,7 @@ var demoIndex:int = 0;
 var world:World = new World(gravity, iterations);
 
 
-//
+
 //var t = getTimer();
 //Main.Demo5();
 //for (var k:int = 0;  k< 60 ; k++) 
