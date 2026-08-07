@@ -101,6 +101,7 @@ namespace juicescript.ABC.INS
        /// </summary>
         ld_array_hole = 19,
 
+
         /// <summary>
         /// 加载function到栈
         /// </summary>

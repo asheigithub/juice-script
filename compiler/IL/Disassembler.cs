@@ -129,6 +129,7 @@ namespace juicescript.compiler.IL
 				case INS_Code.ld_array_hole:
 					instruction = new INS_Ld_ArrayHole(token);
 					break;
+				
 				case INS_Code.ld_function:
 					instruction = new INS_Ld_Function(token);
 					break;

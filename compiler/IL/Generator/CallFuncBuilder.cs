@@ -113,7 +113,7 @@ namespace juicescript.compiler.IL.Generator
 
 
                 INS_SuperCtor superCtor = new INS_SuperCtor(step.token);
-                superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
+                //superCtor.super_type = compileEnv.AddConstClassId(instance._super_class_); //instance._super_class_.Type_identifier;
                 superCtor.args = arguments.ToArray();
 
                 compileEnv.instructions.Add(superCtor);
