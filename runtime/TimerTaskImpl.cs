@@ -168,7 +168,7 @@ namespace juicescript.runtime
 
 						context.player.RunMethod(callmethod, ((RtClosure)closureinstance).This,
 							((RtClosure)closureinstance).ScopePtr,
-							((RtClosure)closureinstance).ScopeType,
+							//((RtClosure)closureinstance).ScopeType,
 							(ushort)len, (byte*)args,
 							slots,
 							ref error,

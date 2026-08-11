@@ -1817,7 +1817,7 @@ namespace juicescript.runtime.buildin
 							(args + 2)->index = 2;
 
 							context.player.RunMethod(((ASMethodBody)replinstance.Type).Method, closure.This, closure.ScopePtr,
-								closure.ScopeType, 3, (byte*)args, slots, ref error,
+								 3, (byte*)args, slots, ref error,
 								basePos
 								);
 

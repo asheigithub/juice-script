@@ -1044,7 +1044,8 @@ namespace juicescript.runtime.buildin
 									var m = ((ASMethodBody)funinstance.Type).Method;
 
 									NaNBoxing conv = context.player.RunMethod(m,
-										arg,  ((RtClosure)funinstance).ScopePtr, ((RtClosure)funinstance).ScopeType, 0, null, null, ref error, stPos + 1, fun.HeapPtr);
+										arg,  ((RtClosure)funinstance).ScopePtr, //((RtClosure)funinstance).ScopeType,
+										0, null, null, ref error, stPos + 1, fun.HeapPtr);
 									context.StackPosition -= 2;
 									if (error.raised)
 									{

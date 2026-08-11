@@ -122,7 +122,7 @@ namespace juicescript.runtime.buildin
 
 				context.player.RunMethod(callmethod, _this,
 					((RtClosure)closureinstance).ScopePtr,
-					((RtClosure)closureinstance).ScopeType,
+					//((RtClosure)closureinstance).ScopeType,
 					(ushort)rest_array.stack_store.Length , (byte*)args,
 					slots,
 					ref error,
@@ -226,7 +226,7 @@ namespace juicescript.runtime.buildin
 
 				context.player.RunMethod(callmethod, _this,
 					((RtClosure)closureinstance).ScopePtr,
-					((RtClosure)closureinstance).ScopeType,
+					//((RtClosure)closureinstance).ScopeType,
 					(ushort)len, (byte*)args,
 					slots,
 					ref error,

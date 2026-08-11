@@ -18,12 +18,12 @@ namespace juicescript.ABC.INS
         {
             get
             {
-                return 4 + 4;
+                return 4 + 4 + 4;
             }
         }
 
         public ScopeHeapLocater heap;
-
+        public CodeScopeKind kind;
         
 
         public INS_Store_ScopeHeap(Token token) : base(token)
@@ -33,19 +33,19 @@ namespace juicescript.ABC.INS
         protected override void WriteByte(BinaryWriter bw)
         {
             heap.Write(bw);
-            
+            bw.Write((int)kind);
         }
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
 			heap.ReadFromBinary(br);
-            
+            kind = ( CodeScopeKind)br.ReadInt32();
 		}
 
 
         public override string ToString()
         {
-            return $"Store_Heap   [{heap}] <- [{dst}]";
+            return $"Store_Heap   [{heap}({kind})] <- [{dst}]";
         }
 
         public override IEnumerable<StackLocater> GetDef()

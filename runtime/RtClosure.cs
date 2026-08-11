@@ -15,10 +15,10 @@ namespace juicescript.runtime
 
 		public int ScopePtr;
 
-		/// <summary>
-		/// 作为method时，需在加载时确定是否继承
-		/// </summary>
-		public ASContainer ScopeType;
+		///// <summary>
+		///// 作为method时，需在加载时确定是否继承
+		///// </summary>
+		//public ASContainer ScopeType;
 
         /// <summary>
         /// 被哪个类型查找到的
@@ -136,7 +136,7 @@ namespace juicescript.runtime
 		public void CopyDataFrom(RtClosure facility , Player player )
 		{
 			_ref_as_type = facility._ref_as_type;
-			ScopeType = facility.ScopeType;
+			//ScopeType = facility.ScopeType;
 			ScopePtr = facility.ScopePtr;
 			This = facility.This;
 

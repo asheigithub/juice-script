@@ -281,7 +281,8 @@ namespace juicescript.runtime
 						try
 						{
 							
-							RunMethod(method, nullP, ((ASClass)c._link_codescope.Container).__instance_index__, null, 0, null, Context.StackSlots, ref error, -1);
+							RunMethod(method, nullP, ((ASClass)c._link_codescope.Container).__instance_index__, //null, 
+								0, null, Context.StackSlots, ref error, -1);
 						}
 						finally
 						{
@@ -312,7 +313,8 @@ namespace juicescript.runtime
 						try
 						{
 							
-							RunMethod(method, thisP, ((ASScript)c._link_codescope.Container).__global_index__, null, 0, null, Context.StackSlots, ref error, -1);
+							RunMethod(method, thisP, ((ASScript)c._link_codescope.Container).__global_index__, //null, 
+								0, null, Context.StackSlots, ref error, -1);
 						}
 						finally
 						{
@@ -377,7 +379,8 @@ namespace juicescript.runtime
 							Context.StackPosition++;
 							NaNBoxing thisP = default;
 							thisP.SetHeapPtr(instancePtr,(byte)instance.Kind, (byte)(instance.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
-							RunMethod(method, thisP, instancePtr, @type.Instance, 0, null, Context.StackSlots, ref error, -1);
+							RunMethod(method, thisP, instancePtr, //@type.Instance, 
+								0, null, Context.StackSlots, ref error, -1);
 							if (error.raised)
 							{
 								throw new EvalConstException();
@@ -516,7 +519,8 @@ namespace juicescript.runtime
 
 								Context.StackPosition += slots.Length;
 
-								Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
+								Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
+									slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
 							}
 							finally
 							{
@@ -576,7 +580,8 @@ namespace juicescript.runtime
 								}
 								Context.StackPosition += slots.Length;
 								//((RtPayloadScriptClass)@class).computing_member = member;
-								Execute(ref info,scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+								Execute(ref info,scopeinstance, run_methodscope,// is_closure ? scopeinstance.Type : null, 
+									slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
@@ -683,8 +688,8 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								Context.StackPosition += slots.Length;
-								Execute(ref info,scopeinstance, run_methodscope, 
-									is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
+								Execute(ref info,scopeinstance, run_methodscope
+									//,is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
 									, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
@@ -880,7 +885,8 @@ namespace juicescript.runtime
 						int P_PC;
 
 						Context.StackPosition += slots.Length;
-						Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+						Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
+							slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						Context.StackPosition -= slots.Length;
 						if (error.raised)
 						{
@@ -914,7 +920,8 @@ namespace juicescript.runtime
 						int P_PC;
 
 						Context.StackPosition += slots.Length;
-						Execute(ref info, scopeinstance, run_methodscope, is_closure ? scopeinstance.Type : null, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+						Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null, 
+							slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						Context.StackPosition -= slots.Length;
 
 						if (error.raised)
@@ -1009,8 +1016,8 @@ namespace juicescript.runtime
 						int P_PC;
 
 						Context.StackPosition += slots.Length;
-						Execute(ref info, scopeinstance, run_methodscope, 
-							is_closure ? scopeinstance.Type : scope.Container
+						Execute(ref info, scopeinstance, run_methodscope
+							//,is_closure ? scopeinstance.Type : scope.Container
 							//scope.Container
 							, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
 						Context.StackPosition -= slots.Length;

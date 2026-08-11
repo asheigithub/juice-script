@@ -77,7 +77,9 @@ namespace juicescript.runtime
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr, ASContainer scopeType, ushort args, byte* argementPtr,
+		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr, 
+			//ASContainer scopeType, 
+			ushort args, byte* argementPtr,
 			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex , int callee_closure_ptr = 0 ,bool skipcheckargscount = false)
 		{
 #if FORCOMPILER
@@ -314,7 +316,8 @@ namespace juicescript.runtime
 						RtClosure payloadClosure = (RtClosure)Context.GC.Heap[calleePtr];
 						payloadClosure.This = thisPtr;
 						payloadClosure.ScopePtr = scope_ptr;
-						payloadClosure.ScopeType = null; payloadClosure._ref_as_type = null;
+						//payloadClosure.ScopeType = null;
+						payloadClosure._ref_as_type = null;
 
 						Context.StackSlots[Context.StackPosition + args + 1].SetHeapPtr(calleePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 					}
@@ -666,7 +669,7 @@ namespace juicescript.runtime
 					wapper.generator = g_scope.HeapPtr;
 					wapper.state = 0;
 					wapper.thisPtr = _this;
-					wapper.scopeType = scopeType;
+					//wapper.scopeType = scopeType;
 
 
 					((RtInstance)gen).wapperedObject = wapper;
@@ -785,7 +788,7 @@ namespace juicescript.runtime
 					wapper.async_body = g_scope.HeapPtr;
 					wapper.state = 0;
 					wapper.thisPtr = _this;
-					wapper.scopeType = scopeType;
+					//wapper.scopeType = scopeType;
 					((RtInstance)gen).wapperedObject = wapper;
 
 					//构造promise
@@ -808,7 +811,7 @@ namespace juicescript.runtime
 					Context.GC.Heap[template_ctor].Type = Context.MicroTaskQueue.async_template_ctor.Body;
 					ctorClosure.This.SetHeapPtr(promise_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 					ctorClosure.ScopePtr = generator_ptr;
-					ctorClosure.ScopeType = null;
+					//ctorClosure.ScopeType = null;
 					ctorClosure._ref_as_type = Context.PROMISE;
 					ctorClosure.methodscopeslot_ref_state = 0; ctorClosure.HEAPINSTANCE_PTR = 0;
 
@@ -818,7 +821,8 @@ namespace juicescript.runtime
 					
 					StackLocater stackLocater = default;stackLocater.index = 0;
 					RunMethod( Context.PROMISE.Instance.Constructor, Context.StackSlots[basePos + 2], promise_ptr, 
-						Context.PROMISE.Instance, 1, (byte*)&stackLocater, slots, ref error, -1, 0, true);
+						//Context.PROMISE.Instance,
+						1, (byte*)&stackLocater, slots, ref error, -1, 0, true);
 
 
 					Context.StackPosition = basePos;
@@ -856,7 +860,8 @@ namespace juicescript.runtime
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
 					slots.Clear(); //栈清空 -- 防止GC时错误访问
 					int P_PC;
-					Execute( ref info, mScope, mScopeId, scopeType, slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
+					Execute( ref info, mScope, mScopeId, //scopeType, 
+						slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
 
 					Context.BackTraceIndex--;
 					//Context.BackTrace[Context.BackTraceIndex].Method = null;

@@ -1214,7 +1214,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -1409,7 +1409,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -1606,7 +1606,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -1803,7 +1803,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -1998,7 +1998,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -2194,7 +2194,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -2388,7 +2388,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -2583,7 +2583,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -2792,7 +2792,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -3003,7 +3003,7 @@ namespace juicescript.runtime.buildin
 
 											context.StackPosition += 3;
 											ReceiveError e = default;
-											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref e, basePos);
+											context.player.RunMethod(compfunc, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref e, basePos);
 
 											if (e.raised)
 											{
@@ -3435,7 +3435,7 @@ namespace juicescript.runtime.buildin
 
 					context.StackPosition += 3;
 
-					context.player.RunMethod(method, closure.This, closure.ScopePtr, closure.ScopeType, 2, (byte*)args, slots, ref error, basePos);
+					context.player.RunMethod(method, closure.This, closure.ScopePtr, 2, (byte*)args, slots, ref error, basePos);
 
 					if (error.raised)
 					{
@@ -4351,7 +4351,7 @@ namespace juicescript.runtime.buildin
 					argSlots[3].SetInt(i);
 					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
-					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos+1);
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, 3, (byte*)args, argSlots, ref error, basePos+1);
 					if (error.raised)
 					{
 						context.StackPosition -= 5;
@@ -4473,7 +4473,7 @@ namespace juicescript.runtime.buildin
 					argSlots[3].SetInt(i);
 					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
-					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
 						context.StackPosition -= 5;
@@ -4611,7 +4611,7 @@ namespace juicescript.runtime.buildin
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
 					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
-					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
 						context.StackPosition -= 5;
@@ -4763,7 +4763,7 @@ namespace juicescript.runtime.buildin
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
 					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
-					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
 						context.StackPosition -= 6;
@@ -4919,7 +4919,7 @@ namespace juicescript.runtime.buildin
 					argSlots[2] = v;
 					argSlots[3].SetInt(i);
 					argSlots[4].SetHeapPtr(vecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
-					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, cbclosure.ScopeType, 3, (byte*)args, argSlots, ref error, basePos + 1);
+					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{
 						context.StackPosition -= 5;

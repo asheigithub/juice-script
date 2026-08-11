@@ -1213,10 +1213,12 @@ namespace juicescript.compiler.IL.Generator
 									INS_Store_ScopeHeap store_slotVariable = new INS_Store_ScopeHeap(step.token);
 									store_slotVariable.dst = stackLocater;
 									store_slotVariable.heap = heaplocater;
+									store_slotVariable.kind = scope.Kind;
 
 									compileEnv.instructions.Add(store_slotVariable);
 
 									INS_Ld_ScopeHeap ld_method = new INS_Ld_ScopeHeap(step.token);
+									ld_method.kind = scope.Kind;
 									ld_method.heap = heaplocater;
 									ld_method.dst = compileEnv.MakeStackLocater(TypeKind.Function);
 									compileEnv.instructions.Add(ld_method);
@@ -1249,7 +1251,7 @@ namespace juicescript.compiler.IL.Generator
 							INS_Store_ScopeHeap iNS = new INS_Store_ScopeHeap(step.token);
 							iNS.dst = stackLocater;
 							iNS.heap = heapLocater;
-
+							iNS.kind = scopeMember.DefineAt._link_codescope.Kind;
 
 							compileEnv.instructions.Add(iNS);
 						}
@@ -1386,7 +1388,7 @@ namespace juicescript.compiler.IL.Generator
 									store_MethodVariable.dst = valueLocater;
 									store_MethodVariable.heap = heapLocater;
 									store_MethodVariable.convertedloc = compileEnv.MakeStackLocater(scopeMember.TypeKind);
-
+									
 									compileEnv.instructions.Add(store_MethodVariable);
 
 								}
@@ -1395,7 +1397,7 @@ namespace juicescript.compiler.IL.Generator
 									INS_Store_ScopeHeap iNS = new INS_Store_ScopeHeap(step.token);
 									iNS.dst = valueLocater;
 									iNS.heap = heapLocater;
-
+									iNS.kind = scopeMember.DefineAt._link_codescope.Kind;
 
 									compileEnv.instructions.Add(iNS);
 								}
@@ -3783,7 +3785,7 @@ namespace juicescript.compiler.IL.Generator
 								INS_Ld_ScopeHeap ld_ScopeHeap = new INS_Ld_ScopeHeap(step.token);
 								ld_ScopeHeap.dst = ns_locater;
 								ld_ScopeHeap.heap = scopeHeapLocater;
-
+								ld_ScopeHeap.kind = nsMember.DefineAt._link_codescope.Kind;
 
 								compileEnv.instructions.Add(ld_ScopeHeap);
 							}
@@ -4360,6 +4362,7 @@ namespace juicescript.compiler.IL.Generator
 						INS_Ld_ScopeHeap ld_ScopeHeap = new INS_Ld_ScopeHeap(step.token);
 						ld_ScopeHeap.dst = stackLoc;
 						ld_ScopeHeap.heap = heapLocater;
+						ld_ScopeHeap.kind = nsMember.DefineAt._link_codescope.Kind;
 
 						compileEnv.instructions.Add(ld_ScopeHeap);
 
@@ -5767,7 +5770,7 @@ namespace juicescript.compiler.IL.Generator
 								INS_Ld_MethodVariable ld_MethodVariable = new INS_Ld_MethodVariable(token);
 								ld_MethodVariable.dst = stackLoc;
 								ld_MethodVariable.heap = heapLocater;
-
+								
 								compileEnv.instructions.Add(ld_MethodVariable);
 							}							
 							else
@@ -5775,6 +5778,7 @@ namespace juicescript.compiler.IL.Generator
 								INS_Ld_ScopeHeap ld_ScopeHeap = new INS_Ld_ScopeHeap(token);
 								ld_ScopeHeap.dst = stackLoc;
 								ld_ScopeHeap.heap = heapLocater;
+								ld_ScopeHeap.kind = scopeMember.DefineAt._link_codescope.Kind;
 
 								compileEnv.instructions.Add(ld_ScopeHeap);
 							}

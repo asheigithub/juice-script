@@ -59,6 +59,7 @@ namespace juicescript.compiler.IL
                     INS_Store_ScopeHeap store_ScopeHeap = new INS_Store_ScopeHeap(m.trait.Token);
                     store_ScopeHeap.dst = ld_Namespace.dst;
                     store_ScopeHeap.heap = heapLocater;
+					store_ScopeHeap.kind = nsScope.Kind;
                     compileEnv.instructions.Add(store_ScopeHeap);
                 }
             }

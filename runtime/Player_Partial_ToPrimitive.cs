@@ -162,7 +162,8 @@ namespace juicescript.runtime
 
 			unsafe
 			{
-				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr , ((RtClosure)funinstance).ScopeType , 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
+				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr , //((RtClosure)funinstance).ScopeType ,
+					0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
 				if (error.raised)
 				{
 					return default;
@@ -227,7 +228,7 @@ namespace juicescript.runtime
 
 			unsafe
 			{
-				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr, ((RtClosure)funinstance).ScopeType, 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
+				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr, 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
 				if (error.raised)
 				{
 					return default;

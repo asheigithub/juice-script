@@ -62,7 +62,7 @@ namespace juicescript.runtime.buildin
 				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
 				closure.This = thisPtr;
 				closure.ScopePtr = scope_ptr;
-				closure.ScopeType = _resolve.DefineAt;
+				//closure.ScopeType = _resolve.DefineAt;
 				closure._ref_as_type = _resolve.DefineAt;
 				closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 
@@ -78,7 +78,7 @@ namespace juicescript.runtime.buildin
 				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
 				closure.This = thisPtr;
 				closure.ScopePtr = scope_ptr;
-				closure.ScopeType = _reject.DefineAt;
+				//closure.ScopeType = _reject.DefineAt;
 				closure._ref_as_type = _reject.DefineAt;
 				closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 
@@ -102,7 +102,7 @@ namespace juicescript.runtime.buildin
 
 				context.player.RunMethod(executor_method, ((RtClosure)executor_closure).This,
 					((RtClosure)executor_closure).ScopePtr,
-					((RtClosure)executor_closure).ScopeType,
+					//((RtClosure)executor_closure).ScopeType,
 					2, (byte*)args,
 					slots,
 					ref error,
@@ -930,7 +930,7 @@ namespace juicescript.runtime.buildin
 								cbMethod,
 								cbClosure.This,
 								cbClosure.ScopePtr,
-								cbClosure.ScopeType,
+								//cbClosure.ScopeType,
 								1,
 								(byte*)args1,
 								slots,
@@ -1035,7 +1035,7 @@ namespace juicescript.runtime.buildin
 								cbMethod,
 								cbClosure.This,
 								cbClosure.ScopePtr,
-								cbClosure.ScopeType,
+								//cbClosure.ScopeType,
 								1,
 								(byte*)args1,
 								slots,
@@ -1325,7 +1325,7 @@ namespace juicescript.runtime.buildin
 											getterMethod,
 											thisPtr,
 											value.HeapPtr,
-											(ASContainer)heapInstance.Type,
+											//(ASContainer)heapInstance.Type,
 											0,        // No arguments
 											null,     // No argument pointer
 											stackslots,
@@ -1495,7 +1495,7 @@ namespace juicescript.runtime.buildin
 				context.GC.Heap[resolveCb].Type = thenableResolve.Body;
 				resolveClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 				resolveClosure.ScopePtr = statePtr;
-				resolveClosure.ScopeType = stateObj.Type;
+				//resolveClosure.ScopeType = stateObj.Type;
 				resolveClosure._ref_as_type = context.PROMISE;
 				resolveClosure.methodscopeslot_ref_state = 0; resolveClosure.HEAPINSTANCE_PTR = 0;
 
@@ -1509,7 +1509,7 @@ namespace juicescript.runtime.buildin
 				context.GC.Heap[rejectCb].Type = thenableReject.Body;
 				rejectClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 				rejectClosure.ScopePtr = statePtr;
-				rejectClosure.ScopeType = stateObj.Type;
+				//rejectClosure.ScopeType = stateObj.Type;
 				rejectClosure._ref_as_type = context.PROMISE;
 				rejectClosure.methodscopeslot_ref_state = 0; rejectClosure.HEAPINSTANCE_PTR = 0;
 
@@ -1538,7 +1538,7 @@ namespace juicescript.runtime.buildin
 						thenMethod,
 						thenableObject,  // this 指向 thenable 对象
 						thenPayload.ScopePtr,
-						thenPayload.ScopeType,
+						//thenPayload.ScopeType,
 						2,  // 两个参数
 						(byte*)args,
 						slots,
@@ -1841,7 +1841,7 @@ namespace juicescript.runtime.buildin
 			/// </summary>
 			public int state;
 			internal NaNBoxing thisPtr;
-			internal ASContainer scopeType;
+			//internal ASContainer scopeType;
 
 			internal Player.ExceptionContext[] exceptionContext;
 			internal int exception_ctx_at;
@@ -2018,7 +2018,8 @@ namespace juicescript.runtime.buildin
 			//if (!g_method.Flags.HasFlag(MethodFlags.Native))
 			//{
 				context.player.Execute(ref info, m, genwapper.async_body,
-					genwapper.scopeType, slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
+					//genwapper.scopeType,
+					slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
 			//}
 			//else
 			//{
@@ -2058,7 +2059,8 @@ namespace juicescript.runtime.buildin
 				unsafe
 				{
 					context.StackPosition++;
-					context.player.RunMethod(private_reject, promisePtr, 0, context.PROMISE.Instance, 1, (byte*)&arg, slots, ref reject_err, -1);
+					context.player.RunMethod(private_reject, promisePtr, 0,// context.PROMISE.Instance,
+						1, (byte*)&arg, slots, ref reject_err, -1);
 					context.StackPosition--;
 				}
 
@@ -2095,7 +2097,8 @@ namespace juicescript.runtime.buildin
 					unsafe
 					{
 						context.StackPosition++;
-						context.player.RunMethod(private_resolve, promisePtr, 0, context.PROMISE.Instance, 1, (byte*)&arg, slots, ref resolve_err, -1);
+						context.player.RunMethod(private_resolve, promisePtr, 0,// context.PROMISE.Instance,
+							1, (byte*)&arg, slots, ref resolve_err, -1);
 						context.StackPosition--;
 					}
 
@@ -2128,7 +2131,8 @@ namespace juicescript.runtime.buildin
 
 					unsafe
 					{
-						context.player.RunMethod(static_resolve, promisePtr, 0, context.PROMISE, 1, (byte*)&arg, slots, ref resolve_err, resolved_promise);
+						context.player.RunMethod(static_resolve, promisePtr, 0, //context.PROMISE,
+							1, (byte*)&arg, slots, ref resolve_err, resolved_promise);
 					}
 
 					if (resolve_err.raised)
@@ -2152,7 +2156,7 @@ namespace juicescript.runtime.buildin
 					context.GC.Heap[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
 					onfulfilledClosure.This = promisePtr;
 					onfulfilledClosure.ScopePtr = genwapper_ptr;
-					onfulfilledClosure.ScopeType = genwapper.scopeType;
+					//onfulfilledClosure.ScopeType = genwapper.scopeType;
 					onfulfilledClosure._ref_as_type = context.PROMISE;
 					onfulfilledClosure.methodscopeslot_ref_state = 0; onfulfilledClosure.HEAPINSTANCE_PTR = 0;
 
@@ -2166,7 +2170,7 @@ namespace juicescript.runtime.buildin
 					context.GC.Heap[onrejected].Type = context.MicroTaskQueue.async_then_onrejected.Body;
 					onrejectedClosure.This = promisePtr;
 					onrejectedClosure.ScopePtr = genwapper_ptr;
-					onrejectedClosure.ScopeType = genwapper.scopeType;
+					//onrejectedClosure.ScopeType = genwapper.scopeType;
 					onrejectedClosure._ref_as_type = context.PROMISE;
 					onrejectedClosure.methodscopeslot_ref_state = 0; onrejectedClosure.HEAPINSTANCE_PTR = 0;
 
@@ -2181,7 +2185,8 @@ namespace juicescript.runtime.buildin
 						passthrough->index = 0;
 						(passthrough + 1)->index = 1;
 
-						context.player.RunMethod(private_then, resolved, 0, context.PROMISE.Instance, 2, (byte*)passthrough, slots, ref then_err, then_result);
+						context.player.RunMethod(private_then, resolved, 0, //context.PROMISE.Instance, 
+							2, (byte*)passthrough, slots, ref then_err, then_result);
 					}
 
 					context.StackPosition = stPos;

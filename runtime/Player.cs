@@ -5063,7 +5063,7 @@ namespace juicescript.runtime
 
 			unsafe
 			{
-				RunMethod(script.Initializer, thisPtr, index, null, 0, null, null, ref error, -1);
+				RunMethod(script.Initializer, thisPtr, index, 0, null, null, ref error, -1);
 			}
 
 
@@ -5155,7 +5155,7 @@ namespace juicescript.runtime
 				unsafe
 				{
 					//执行Class的初始化函数
-					RunMethod(cls.Constructor, new NaNBoxing(NaNBoxing.NULL), index, null, 0, null, null, ref error, -1);
+					RunMethod(cls.Constructor, new NaNBoxing(NaNBoxing.NULL), index, 0, null, null, ref error, -1);
 				}
 
 			}
@@ -5311,10 +5311,10 @@ namespace juicescript.runtime
 					var vtableitem = ins.Type._vtable.Items[vtable_index];
 					var function = vtableitem.Trait.Method;
 
-					var define = (ASInstance)vtableitem.DefineAt;
+					//var define = (ASInstance)vtableitem.DefineAt;
 
 					NaNBoxing result = RunMethod(function,
-					thisValue, thisValue.HeapPtr, define, 0, null, stackslots, ref error, returnSlotIndex);
+					thisValue, thisValue.HeapPtr, 0, null, stackslots, ref error, returnSlotIndex);
 
 					return result;
 
@@ -5324,10 +5324,10 @@ namespace juicescript.runtime
 					var vtableitem = Context.NAMESPACE.Instance._vtable.Items[vtable_index];
 					var function = vtableitem.Trait.Method;
 
-					var define = (ASInstance)vtableitem.DefineAt;
+					//var define = (ASInstance)vtableitem.DefineAt;
 
 					NaNBoxing result = RunMethod(function,
-					thisValue, thisValue.HeapPtr, define, 0, null, stackslots, ref error, returnSlotIndex);
+					thisValue, thisValue.HeapPtr, 0, null, stackslots, ref error, returnSlotIndex);
 
 					return result;
 				}
@@ -5351,10 +5351,10 @@ namespace juicescript.runtime
 					var vtableitem = Context.STRING.Instance._vtable.Items[vtable_index];
 					var function = vtableitem.Trait.Method;
 
-					var define = (ASInstance)vtableitem.DefineAt;
+					//var define = (ASInstance)vtableitem.DefineAt;
 
 					NaNBoxing result = RunMethod(function,
-					thisValue, thisValue.HeapPtr, define, 0, null, stackslots, ref error, returnSlotIndex);
+					thisValue, thisValue.HeapPtr, 0, null, stackslots, ref error, returnSlotIndex);
 
 					return result;
 				}
@@ -5384,7 +5384,7 @@ namespace juicescript.runtime
 					{
 
 						NaNBoxing result = RunMethod(function,
-							thisValue, thisValue.HeapPtr, @class, 0, null, stackslots, ref error, returnSlotIndex);
+							thisValue, thisValue.HeapPtr, 0, null, stackslots, ref error, returnSlotIndex);
 
 						//if (error.raised)
 						//{
@@ -5494,10 +5494,10 @@ namespace juicescript.runtime
 					else
 					{
 
-						var define = (ASInstance)vtableitem.DefineAt;
+						//var define = (ASInstance)vtableitem.DefineAt;
 
 						NaNBoxing result = RunMethod(function,
-						thisValue, thisValue.HeapPtr, define, 0, null, stackslots, ref error, returnSlotIndex);
+						thisValue, thisValue.HeapPtr, 0, null, stackslots, ref error, returnSlotIndex);
 
 						return result;
 					}
@@ -5718,7 +5718,7 @@ namespace juicescript.runtime
 									Context.StackPosition++;
 
 									RunMethod(((ASInstance)refObj.Type).indexer_get, _this,
-										_obj.RefInstance.HeapPtr, refObj.Type, 1, (byte*)&argLoc, argSpan, ref error, Context.StackPosition - 1);
+										_obj.RefInstance.HeapPtr,  1, (byte*)&argLoc, argSpan, ref error, Context.StackPosition - 1);
 
 									result = Context.StackSlots[Context.StackPosition - 1];
 
@@ -6827,7 +6827,7 @@ namespace juicescript.runtime
 								_this = cacheObj.RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
 
 								RunMethod(((ASInstance)instance.Type).indexer_set, _this,
-									cacheObj.RefInstance.HeapPtr, instance.Type, 2, (byte*)tmpArgLoc, argSpan, ref error, -1);
+									cacheObj.RefInstance.HeapPtr, 2, (byte*)tmpArgLoc, argSpan, ref error, -1);
 
 								Context.StackPosition -= 2;
 								if (error.raised)
@@ -6883,7 +6883,7 @@ namespace juicescript.runtime
 								_this = cacheObj.RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
 
 								RunMethod(cacheObj.trait[1].Method, _this,
-									cacheObj.RefInstance.HeapPtr, instance.Type, 1, (byte*)&argLoc, Context.StackSlots.AsSpan(stackStPos, stackslots.Length + 1), ref error, -1);
+									cacheObj.RefInstance.HeapPtr, 1, (byte*)&argLoc, Context.StackSlots.AsSpan(stackStPos, stackslots.Length + 1), ref error, -1);
 
 								Context.StackPosition--;
 								if (error.raised)
@@ -10530,7 +10530,7 @@ namespace juicescript.runtime
 				unsafe
 				{
 					//构造
-					RunMethod(totype_class.Instance.Constructor, invalue, instancePtr, totype_class.Instance, argsCount, (byte*)arguments, slots, ref error,
+					RunMethod(totype_class.Instance.Constructor, invalue, instancePtr,  argsCount, (byte*)arguments, slots, ref error,
 						Context.StackPosition - 1);
 				}
 				Context.StackPosition -= 1;
@@ -10582,7 +10582,7 @@ namespace juicescript.runtime
 				{
 					//构造
 					//StackLocater send_arg = new StackLocater() { index = 1 };
-					RunMethod(totype_class.Instance.Constructor, invalue, errPtr, totype_class.Instance, argsCount, (byte*)arguments, slots, ref error, Context.StackPosition - 1);
+					RunMethod(totype_class.Instance.Constructor, invalue, errPtr, argsCount, (byte*)arguments, slots, ref error, Context.StackPosition - 1);
 				}
 				Context.StackPosition -= 1;
 				if (error.raised)
@@ -10630,7 +10630,7 @@ namespace juicescript.runtime
 						//构造
 						//StackLocater send_arg = new StackLocater() { index = 1 };
 						RunMethod(totype_class.Instance.Constructor, Context.StackSlots[returnSlotindex], instancePtr,
-							totype_class.Instance, 1, (byte*)&l, _tmpslot, ref error, returnSlotindex);
+							 1, (byte*)&l, _tmpslot, ref error, returnSlotindex);
 
 						if (error.raised)
 						{
@@ -10981,7 +10981,7 @@ namespace juicescript.runtime
 					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
 					closure.This.SetNull();
 					closure.ScopePtr = instance.HeapPtr;
-					closure.ScopeType = vitem.DefineAt;
+					//closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = as_type;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 					stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -11149,7 +11149,7 @@ namespace juicescript.runtime
 					//closure.ScopePtr = instancePtr;
 					closure.This = instance;
 					closure.ScopePtr = instance.ValueType == BoxType.HeapPtr ? instance.HeapPtr : 0;
-					closure.ScopeType = vitem.DefineAt;
+					//closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = as_type;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 					stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -11424,7 +11424,7 @@ namespace juicescript.runtime
 					//closure.This.SetHeapPtr(instance.HeapPtr);
 					closure.This = instance;
 					closure.ScopePtr = instance.HeapPtr;
-					closure.ScopeType = vitem.DefineAt;
+					//closure.ScopeType = vitem.DefineAt;
 					closure._ref_as_type = Context.FUNCTION.Instance;
 					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
 					stackslots[stack.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -12241,7 +12241,8 @@ namespace juicescript.runtime
 						var closure = Context.GC.Heap[closurePtr];
 						closure.Type = function.Body;
 						((RtClosure)closure).ScopePtr = scope_ptr;
-						((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+						//((RtClosure)closure).ScopeType = null;
+						((RtClosure)closure)._ref_as_type = null;
 						((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
 						((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
@@ -12308,7 +12309,8 @@ namespace juicescript.runtime
 						var closure = Context.GC.Heap[closurePtr];
 						closure.Type = function.Body;
 						((RtClosure)closure).ScopePtr = scope_ptr;
-						((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+						//((RtClosure)closure).ScopeType = null;
+						((RtClosure)closure)._ref_as_type = null;
 						((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
 						((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
@@ -12360,7 +12362,8 @@ namespace juicescript.runtime
 				var closure = Context.GC.Heap[closurePtr];
 				closure.Type = function.Body;
 				((RtClosure)closure).ScopePtr = scope_ptr;
-				((RtClosure)closure).ScopeType = null; ((RtClosure)closure)._ref_as_type = null;
+				//((RtClosure)closure).ScopeType = null;
+				((RtClosure)closure)._ref_as_type = null;
 				((RtClosure)closure).This.SetNull(); ((RtClosure)closure).methodscopeslot_ref_state = 0;
 				((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 
@@ -12969,7 +12972,7 @@ namespace juicescript.runtime
 		}
 
 		
-		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapBase methodscope, int scope_ptr, ASContainer scopeType,
+		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapBase methodscope, int scope_ptr, //ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
 			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
 		{
@@ -13340,7 +13343,8 @@ namespace juicescript.runtime
 							}
 						case INS_Code.ld_ScopeH:
 							{
-								Ld_ScopeH(dst_index, &PC, stackslots, methodscope, scopeType, stackStPos);
+								Ld_ScopeH(dst_index, &PC, stackslots, methodscope,// scopeType,
+									stackStPos);
 
 								//NaNBoxing v = Ld_ScopeH(methodscope, heapLocater, scopeType, stackStPos + stackLocater.index);
 								//stackslots[stackLocater.index] = v;
@@ -13464,7 +13468,9 @@ namespace juicescript.runtime
 						case INS_Code.ld_function_call: //此指令目标肯定是匿名函数，所以不需要考虑proto和动态属性问题。
 							{
 
-								Ld_function_call( &PC, dst_index, methodscope,constants, stackslots, scopeType, scope_ptr, stackStPos, ref error);
+								Ld_function_call( &PC, dst_index, methodscope,constants, stackslots, 
+									//scopeType, 
+									scope_ptr, stackStPos, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13638,7 +13644,9 @@ namespace juicescript.runtime
 						case INS_Code.storeScopeH:
 							{
 
-								StoreScopeH(dst_index,&PC, scope_ptr, methodscope, method_scopes, stackslots, scopeType, ref error);
+								StoreScopeH(dst_index,&PC, scope_ptr, methodscope, method_scopes, stackslots, 
+									//scopeType,
+									ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13710,7 +13718,8 @@ namespace juicescript.runtime
 						case INS_Code.ld_memberInitValue:
 							{
 								
-								Ld_memberInitValue( &PC, methodscope, method_scopes, scope_ptr, scopeType, ref error);
+								Ld_memberInitValue( &PC, methodscope, method_scopes, scope_ptr, //scopeType,
+																								ref error);
 								Debug.Assert(!error.raised);
 
 							}
@@ -13725,7 +13734,8 @@ namespace juicescript.runtime
 								}
 #endif
 
-								NEW_INSTANCE( dst_index,&PC , stackStPos, scope_ptr, stackslots, scopeType, methodscope, ref error);
+								NEW_INSTANCE( dst_index,&PC , stackStPos, scope_ptr, stackslots, //scopeType, 
+									methodscope, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
