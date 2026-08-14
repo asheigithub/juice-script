@@ -921,6 +921,427 @@ namespace juicescript.runtime.buildin
 
 
 
+		//$.Mat22$public::FromAngle
+		[NativeFunction("$geom.Matrix2x2$public::FromAngle")]
+		public static void Mat22_FromAngle(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var mat2 = method.__return_type_class__;
+
+			float angle = scope.ReadSlot(0, context.player).FloatValue;
+			float c = MathF.Cos(angle);
+			float s = MathF.Sin(angle);
+
+			int resultptr = context.player.InitCacheInstance(mat2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = c;
+					*((float*)p + 1) = s;
+					*((float*)p + 2) = -s;
+					*((float*)p + 3) = c;
+				}
+			}
+
+
+		}
+
+
+
+
+
+		[NativeFunction("geom.Matrix2x2$public::Transpose")]
+		public static void Mat22_Transpose(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var mat2 = method.__return_type_class__;
+
+
+			var m2_a = context.GC.Heap[thisPtr.HeapPtr];
+			var payload_a = (RtInstance)m2_a;
+
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float a;
+			float b;
+
+			float c;
+			float d;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					a = *(float*)p;
+					c = *((float*)p + 1);
+
+					b = *((float*)p + 2);
+					d = *((float*)p + 3);
+				}
+			}
+
+
+
+			int resultptr = context.player.InitCacheInstance(mat2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+
+					*(float*)p = a;
+					*((float*)p + 1) = b;
+					*((float*)p + 2) = c;
+					*((float*)p + 3) = d;
+
+				}
+			}
+
+
+		}
+
+
+
+
+		//.Mat22$public::Invert
+		[NativeFunction("geom.Matrix2x2$public::Invert")]
+		public static void Mat22_Invert(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var mat2 = method.__return_type_class__;
+
+
+			var m2_a = context.GC.Heap[thisPtr.HeapPtr];
+			var payload_a = (RtInstance)m2_a;
+
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float a;
+			float b;
+
+			float c;
+			float d;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					a = *(float*)p;
+					c = *((float*)p + 1);
+
+					b = *((float*)p + 2);
+					d = *((float*)p + 3);
+				}
+			}
+
+			//var a:float = col1.x;
+			//var b:float = col2.x;
+			//var c:float = col1.y;
+			//var d:float = col2.y;
+			//
+			//var B:Mat22 = new Mat22();
+			//var det:float = a * d - b * c;
+			//
+			//if (det == 0.0f)
+			//throw new Error("det != 0.0f");
+			//
+			//det = 1.0f / det;
+			//
+			//B.col1.x =  det * d;	B.col2.x = -det * b;
+			//B.col1.y = -det * c;	B.col2.y =  det * a;
+			//return B;
+			//
+			//
+
+			float det = a * d - b * c;
+			if (det == 0.0f)
+			{
+				context.player.RaiseError(ref error, "det != 0.0f");
+				return;
+			}
+			det = 1.0f / det;
+
+
+			int resultptr = context.player.InitCacheInstance(mat2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+
+					*(float*)p = det * d;
+					*((float*)p + 1) = -det * c;
+					*((float*)p + 2) = -det * b;
+					*((float*)p + 3) = det * a;
+
+				}
+			}
+
+
+		}
+
+
+		//$.Mat22$private::Mat22mulMat22
+		[NativeFunction("$geom.Matrix2x2$private::Mat22mulMat22")]
+		public static void Mat22mulMat22(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var mat2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+
+			NaNBoxing m1 = scope.ReadSlot(0, context.player);
+			NaNBoxing m2 = scope.ReadSlot(1, context.player);
+
+			if (m1.ValueType == NaNBoxing.BoxType.Null || m2.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+			var m2_a = context.GC.Heap[m1.HeapPtr];
+			var payload_a = (RtInstance)m2_a;
+
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float Acol1_x;
+			float Acol1_y;
+
+			float Acol2_x;
+			float Acol2_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					Acol1_x = *(float*)p;
+					Acol1_y = *((float*)p + 1);
+
+					Acol2_x = *((float*)p + 2);
+					Acol2_y = *((float*)p + 3);
+				}
+			}
+
+			var m2_b = context.GC.Heap[m2.HeapPtr];
+			var payload_b = (RtInstance)m2_b;
+			float Bcol1_x;
+			float Bcol1_y;
+
+			float Bcol2_x;
+			float Bcol2_y;
+			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
+			unsafe
+			{
+				fixed (byte* p = store2)
+				{
+					Bcol1_x = *(float*)p;
+					Bcol1_y = *((float*)p + 1);
+
+					Bcol2_x = *((float*)p + 2);
+					Bcol2_y = *((float*)p + 3);
+				}
+			}
+
+			int resultptr = context.player.InitCacheInstance(mat2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					//return new Mat22( new Vector2( A.col1.x * B.col1.x + A.col2.x * B.col1.y,A.col1.y * B.col1.x + A.col2.y * B.col1.y ),
+					//new Vector2(A.col1.x * B.col2.x + A.col2.x * B.col2.y ,A.col1.y * B.col2.x + A.col2.y * B.col2.y  ) );
+
+					*(float*)p = Acol1_x * Bcol1_x + Acol2_x * Bcol1_y;
+					*((float*)p + 1) = Acol1_y * Bcol1_x + Acol2_y * Bcol1_y;
+					*((float*)p + 2) = Acol1_x * Bcol2_x + Acol2_x * Bcol2_y;
+					*((float*)p + 3) = Acol1_y * Bcol2_x + Acol2_y * Bcol2_y;
+
+				}
+			}
+
+
+		}
+
+		//$.Mat22$private::Mat22addMat22
+		[NativeFunction("$geom.Matrix2x2$private::Mat22addMat22")]
+		public static void Mat22addMat22(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var mat2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+
+			NaNBoxing m1 = scope.ReadSlot(0, context.player);
+			NaNBoxing m2 = scope.ReadSlot(1, context.player);
+
+			if (m1.ValueType == NaNBoxing.BoxType.Null || m2.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+			var m2_a = context.GC.Heap[m1.HeapPtr];
+			var payload_a = (RtInstance)m2_a;
+
+			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
+			//NaNBoxing y1 = payload_a.ReadSlot(1, vec2.Instance._link_codescope, context.player);
+
+			float Acol1_x;
+			float Acol1_y;
+
+			float Acol2_x;
+			float Acol2_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					Acol1_x = *(float*)p;
+					Acol1_y = *((float*)p + 1);
+
+					Acol2_x = *((float*)p + 2);
+					Acol2_y = *((float*)p + 3);
+				}
+			}
+
+			var m2_b = context.GC.Heap[m2.HeapPtr];
+			var payload_b = (RtInstance)m2_b;
+			float Bcol1_x;
+			float Bcol1_y;
+
+			float Bcol2_x;
+			float Bcol2_y;
+			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
+			unsafe
+			{
+				fixed (byte* p = store2)
+				{
+					Bcol1_x = *(float*)p;
+					Bcol1_y = *((float*)p + 1);
+
+					Bcol2_x = *((float*)p + 2);
+					Bcol2_y = *((float*)p + 3);
+				}
+			}
+
+			int resultptr = context.player.InitCacheInstance(mat2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+
+					*(float*)p = Acol1_x + Bcol1_x;
+					*((float*)p + 1) = Acol1_y + Bcol1_y;
+					*((float*)p + 2) = Acol2_x + Bcol2_x;
+					*((float*)p + 3) = Acol2_y + Bcol2_y;
+
+				}
+			}
+
+
+		}
+
+		//$.Mat22$private::Mat22mulVec2
+		[NativeFunction("$geom.Matrix2x2$private::Mat22mulVec2")]
+		public static void Mat22mulVec2(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var vec2 = method.__return_type_class__;
+
+			NaNBoxing mat = scope.ReadSlot(0, context.player);
+			NaNBoxing vec = scope.ReadSlot(1, context.player);
+
+			if (mat.ValueType == NaNBoxing.BoxType.Null || vec.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+			var m2_a = context.GC.Heap[mat.HeapPtr];
+			var payload_a = (RtInstance)m2_a;
+
+			float col1_x;
+			float col1_y;
+
+			float col2_x;
+			float col2_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					col1_x = *(float*)p;
+					col1_y = *((float*)p + 1);
+
+					col2_x = *((float*)p + 2);
+					col2_y = *((float*)p + 3);
+				}
+			}
+
+			var vec_b = context.GC.Heap[vec.HeapPtr];
+			var payload_b = (RtInstance)vec_b;
+
+			float x;
+			float y;
+			var store2 = ((RtInstance)payload_b).GetStoreData(context.player, (ASInstance)payload_b.Type);
+			unsafe
+			{
+				fixed (byte* p = store2)
+				{
+					x = *(float*)p;
+					y = *((float*)p + 1);
+				}
+			}
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					//A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y
+					*(float*)p = col1_x * x + col2_x * y;
+					*((float*)p + 1) = col1_y * x + col2_y * y;
+				}
+			}
+
+
+		}
+
+
+
+
 
 	}
 }

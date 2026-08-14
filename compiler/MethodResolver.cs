@@ -1549,7 +1549,23 @@ namespace juicescript.compiler
 									ASMethod method = script.scriptMethods[i];
 									if (!method.Flags.HasFlag(MethodFlags.Native))
 									{
+										
+										Disassembler.Disassemble(cache[Player.GetMethodKey(method)], out int s1, out NaNBoxing[] c1, out Instruction[] ins1);
+										Disassembler.Disassemble(method.Body.ByteCode, out int s2, out NaNBoxing[] c2, out Instruction[] ins2);
+
+										if (c1.Length != c2.Length) //检查常量池是否变化，变了也要重新搞，注意
+										{
+											goto lbl_failed;
+										}
+										for (int k = 0; k < c1.Length; k++)
+										{
+											if (c1[k].Raw != c2[k].Raw)
+											{
+												goto lbl_failed;
+											}
+										}
 										method.Body.ByteCode = cache[Player.GetMethodKey(method)];
+
 									}
 								}
 

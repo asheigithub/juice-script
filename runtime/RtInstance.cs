@@ -155,7 +155,7 @@ namespace juicescript.runtime
         private Memory<byte> store;
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal Span<byte> GetStoreData(Player player,ASInstance type)
+		public Span<byte> GetStoreData(Player player,ASInstance type)
         {
 			if (HEAPINSTANCE_PTR == 0)
 			{

@@ -1,6 +1,7 @@
 package 
 {
 	import geom.Vector2;
+	import geom.Matrix2x2;
 	/**
 	 * ...
 	 * @author 
@@ -57,18 +58,18 @@ package
 			var posA:Vector2 = bodyA.position;
 			var posB:Vector2 = bodyB.position;
 
-			var RotA:Mat22 = Mat22.FromAngle(bodyA.rotation); var RotB:Mat22 = Mat22.FromAngle(bodyB.rotation);
+			var RotA:Matrix2x2 = Matrix2x2.FromAngle(bodyA.rotation); var RotB:Matrix2x2 = Matrix2x2.FromAngle(bodyB.rotation);
 
-			var RotAT:Mat22 = RotA.Transpose();
-			var RotBT:Mat22 = RotB.Transpose();
+			var RotAT:Matrix2x2 = RotA.Transpose();
+			var RotBT:Matrix2x2 = RotB.Transpose();
 
 			var dp:Vector2 = posB - posA;
 			var dA:Vector2 = RotAT * dp;
 			var dB:Vector2 = RotBT * dp;
 
-			var C:Mat22 = RotAT * RotB;
-			var absC:Mat22 =  MathUtil.AbsM22(C);
-			var absCT:Mat22 = absC.Transpose();
+			var C:Matrix2x2 = RotAT * RotB;
+			var absC:Matrix2x2 =  MathUtil.AbsM22(C);
+			var absCT:Matrix2x2 = absC.Transpose();
 			
 			// Box A faces
 			var faceA:Vector2 = MathUtil.AbsVec2(dA) - hA - absC * hB;
@@ -443,7 +444,7 @@ package
 
 }
 import geom.Vector2;
-
+import geom.Matrix2x2;
 
 final class Axis
 {
@@ -472,9 +473,9 @@ final class ClipVertex
 
 
 function ComputeIncidentEdge( c:Vector.<ClipVertex>, h:Vector2, pos:Vector2,
-								Rot:Mat22, normal:Vector2):void
+								Rot:Matrix2x2, normal:Vector2):void
 {
-	var RotT:Mat22 = Rot.Transpose();
+	var RotT:Matrix2x2 = Rot.Transpose();
 	var n:Vector2 = -(RotT * normal);
 	var nAbs:Vector2 = MathUtil.AbsVec2(n);
 

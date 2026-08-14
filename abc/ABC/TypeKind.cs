@@ -70,7 +70,12 @@ namespace juicescript.ABC
         
 
 
+        //开始 geom下的类型
+        Vector2 = 20000,
+        Vector3 = 30000,
+        Vector4 = 40000,
 
+        Matrix2x2 = 25000,
         
 
     }

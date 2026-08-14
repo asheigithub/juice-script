@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC.INS;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -336,6 +337,31 @@ namespace juicescript.compiler.IL
 					break;
 				case INS_Code.O_StoreMethodVar_Instance:
 					instruction = new INS_O_StoreMethodVar_Instance(token);
+					break;
+
+				case INS_Code.add_Vec2_Vec2:
+					instruction = new INS_Add_Vec2_Vec2(token);
+					break;
+				case INS_Code.sub_Vec2_Vec2:
+					instruction = new INS_Sub_Vec2_Vec2(token);
+					break;
+				case INS_Code.scale_Vec2:
+					instruction = new INS_Scale_Vec2(token);
+					break;
+				case INS_Code.scale_Vec2_reciprocal:
+					instruction = new INS_Scale_Vec2_Reciprocal(token);
+					break;
+				case INS_Code.neg_pos_Vec2:
+					instruction = new INS_Neg_Pos_Vec2 (token);
+					break;
+				case INS_Code.mul_Mat22_Vec2:
+					instruction = new INS_Mul_Mat22_Vec2(token);
+					break;
+				case INS_Code.mul_Mat22_Mat22:
+					instruction = new INS_Mul_Mat22_Mat22(token);
+					break;
+				case INS_Code.add_Mat22_Mat22:
+					instruction = new INS_Add_Mat22_Mat22 (token);
 					break;
 				case INS_Code.iter_initctx:
 					instruction = new INS_Iter_GetCtx(token);

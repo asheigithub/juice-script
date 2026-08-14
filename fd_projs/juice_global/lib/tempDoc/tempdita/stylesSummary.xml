@@ -535,5 +535,19 @@
             <asMetadata/>
          </prolog>
       </apiClassifier>
+      <apiClassifier id="geom:Matrix2x2">
+         <apiName>Matrix2x2</apiName>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+      </apiClassifier>
    </apiPackage>
 </allClasses>

@@ -1069,6 +1069,7 @@
                   <class id="flash.utils:Dictionary"/>
                   <class id="flash.utils:ByteArray"/>
                   <class id="geom:Vector2"/>
+                  <class id="geom:Matrix2x2"/>
                </Subclasses>
                <Implementors/>
                <Excludes/>
@@ -1659,11 +1660,10 @@ catch(e:EOFError) {
 	 二维向量
 	 </shortdesc>
          <prolog>
-            <author>
-	 </author>
             <asMetadata/>
          </prolog>
-            <meta name="keywords" content="Vector2,geom.Vector2,x,y,cross,dot,toString"/>
+            <meta name="keywords"
+               content="Vector2,geom.Vector2,col1,col2,x,y,FromAngle,Invert,Transpose,cross,dot,toString,toString"/>
          <apiClassifierDetail>
             <apiClassifierDef>
                <apiAccess value="public"/>
@@ -1673,6 +1673,38 @@ catch(e:EOFError) {
             </apiClassifierDef>
             <apiDesc>
 	 二维向量
+	 </apiDesc>
+            <Inheritancelist>
+               <BaseInterface/>
+               <Inheritance>
+                  <Inherit id="Object"/>
+               </Inheritance>
+               <Implements/>
+               <Subclasses/>
+               <Implementors/>
+               <Excludes/>
+            </Inheritancelist>
+         </apiClassifierDetail>
+      </apiClassifier>
+      <apiClassifier id="geom:Matrix2x2">
+         <apiName>Matrix2x2</apiName>
+         <shortdesc>
+	 2x2矩阵
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+            <meta name="keywords"
+               content="Matrix2x2,geom.Matrix2x2,col1,col2,x,y,FromAngle,Invert,Transpose,cross,dot,toString,toString"/>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 2x2矩阵
 	 </apiDesc>
             <Inheritancelist>
                <BaseInterface/>

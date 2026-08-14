@@ -27,7 +27,7 @@ namespace juicescript.runtime
 #endif
 		public const int MAX_TRY_NESTED = 16;
 
-        internal readonly Player player;
+        public readonly Player player;
 
         /// <summary>
         /// 已加载并已链接的库
@@ -83,6 +83,10 @@ namespace juicescript.runtime
         public ASClass GENERATOR;
 
         public ASClass PROMISE;
+
+        public ASClass VEC2;
+        public ASClass MAT22;
+
 
         public SWCFile global_swc;
 

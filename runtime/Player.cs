@@ -7,6 +7,7 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Diagnostics.Metrics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -1370,6 +1371,14 @@ namespace juicescript.runtime
 					else if (cls != null && cls.QName.Name == "Promise")
 					{
 						Context.PROMISE = cls;
+					}
+					else if (cls != null && cls.QName.Name == "Vector2" && cls.QName.Namespace.Name == "geom")
+					{
+						Context.VEC2 = cls;
+					}
+					else if (cls != null && cls.QName.Name == "Matrix2x2" && cls.QName.Namespace.Name == "geom")
+					{
+						Context.MAT22 = cls;
 					}
 				}
 			}
@@ -2882,7 +2891,7 @@ namespace juicescript.runtime
 
 
 		int cache_CANNOT_ACCESS_NULL;
-		internal void RaiseTypeError_AccessNull(ref ReceiveError error)
+		public void RaiseTypeError_AccessNull(ref ReceiveError error)
 		{
 
 			error.raised = true;
@@ -4789,6 +4798,9 @@ namespace juicescript.runtime
 			InitScript((ASScript)Context.BOOLEAN._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("BOOLEAN init failed"); }
 
 			InitScript((ASScript)Context.NAMESPACE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("NAMESPACE init failed"); }
+			
+			InitScript((ASScript)Context.VEC2._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("Vector2 init failed"); }
+			InitScript((ASScript)Context.MAT22._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("Matrix2x2 init failed"); }
 
 
 			InitScript((ASScript)Context.ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("ERROR instance init failed"); }
@@ -4799,6 +4811,10 @@ namespace juicescript.runtime
 			InitScript((ASScript)Context.PROMISE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
 			InitScript((ASScript)Context.ILLEGALOPERATION_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
 			InitScript((ASScript)Context.RANGE_ERROR._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException("PROMISE instance init failed"); }
+
+
+
+
 
 			//InitScript((ASScript)Context.SBYTE._link_codescope.Parent.Container, ref error); if (error.raised) { throw new LoaderException(" instance init failed"); }
 			EMPTY_STR = Context.GC.AllocString(""); if (EMPTY_STR == 0) { throw new LoaderException("EMPTY_STR alloc failed"); }
@@ -12143,7 +12159,7 @@ namespace juicescript.runtime
 #if FORCOMPILER
 		public 
 #else
-		internal
+		public
 #endif
 		int InitCacheInstance(ASClass @class, int slotindex, bool initmember,out RtInstance instance)
 		{
@@ -14177,6 +14193,79 @@ namespace juicescript.runtime
 						case INS_Code.O_StoreMethodVar_Instance:
 							{
 								O_StoreMethodVariable_Instance(dst_index, &PC, methodscope, stackslots, scope_ptr, method_scopes, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+
+						case INS_Code.add_Vec2_Vec2:
+							{
+								Exec_Add_Vec2_Vec2(dst_index, &PC, ref error, stackslots,stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.sub_Vec2_Vec2:
+							{
+								Exec_Sub_Vec2_Vec2(dst_index, &PC, ref error, stackslots, stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.scale_Vec2:
+							{
+								Exec_Scale_Vec2(dst_index, &PC, ref error, stackslots, stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.scale_Vec2_reciprocal:
+							{
+								Exec_Scale_Vec2_Reciprocal(dst_index, &PC, ref error, stackslots, stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.neg_pos_Vec2:
+							{
+								Exec_Neg_Pos_Vec2(dst_index, &PC, ref error, stackslots, stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.mul_Mat22_Vec2:
+							{
+								Exec_Mul_Mat22_Vec2(dst_index, &PC, ref error, stackslots, stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.mul_Mat22_Mat22:
+							{
+								Exec_Mul_Mat22_Mat22(dst_index, &PC, ref error, stackslots, stackStPos);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.add_Mat22_Mat22:
+							{
+								Exec_Add_Mat22_Mat22(dst_index, &PC, ref error, stackslots, stackStPos);
 								if (error.raised)
 								{
 									goto flag_handle_error;

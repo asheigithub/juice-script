@@ -14,6 +14,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace juicescript.compiler.IL.Generator
 {
@@ -3046,6 +3047,129 @@ namespace juicescript.compiler.IL.Generator
 			if (t1.Maj != TypeKind.Any && t2.Maj != TypeKind.Any
 						)
 			{
+				//直接特化geom.Vector2 等操作
+				if (t1.Maj == TypeKind.Vector2 && t2.Maj == TypeKind.Vector2 && op == Player.OverrideOperator.add)
+				{
+					INS_Add_Vec2_Vec2 add_Vec2_Vec2 = new INS_Add_Vec2_Vec2(step.token);
+					add_Vec2_Vec2.v1 = v1;
+					add_Vec2_Vec2.v2 = v2;
+					add_Vec2_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(add_Vec2_Vec2);
+
+					return true;
+				}
+				else if (t1.Maj == TypeKind.Vector2 && t2.Maj == TypeKind.Vector2 && op == Player.OverrideOperator.sub)
+				{
+					INS_Sub_Vec2_Vec2 sub_Vec2_Vec2 = new INS_Sub_Vec2_Vec2(step.token);
+					sub_Vec2_Vec2.v1 = v1;
+					sub_Vec2_Vec2.v2 = v2;
+					sub_Vec2_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(sub_Vec2_Vec2);
+
+					return true;
+				}
+				else if (t1.Maj == TypeKind.Vector2 && t2.Maj >= TypeKind.Int && t2.Maj <= TypeKind.Number && op == Player.OverrideOperator.mul)
+				{
+					INS_Scale_Vec2 scale_Vec2 = new INS_Scale_Vec2(step.token);
+					scale_Vec2.vec = v1;
+					scale_Vec2.factor = v2;
+					scale_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(scale_Vec2);
+
+					return true;
+				}
+				else if (t2.Maj == TypeKind.Vector2 && t1.Maj >= TypeKind.Int && t1.Maj <= TypeKind.Number && op == Player.OverrideOperator.mul)
+				{
+					INS_Scale_Vec2 scale_Vec2 = new INS_Scale_Vec2(step.token);
+					scale_Vec2.vec = v2;
+					scale_Vec2.factor = v1;
+					scale_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(scale_Vec2);
+
+					return true;
+				}
+				else if (t1.Maj == TypeKind.Vector2 && t2.Maj >= TypeKind.Int && t2.Maj <= TypeKind.Number && op == Player.OverrideOperator.div)
+				{
+					INS_Scale_Vec2_Reciprocal scale_Vec2_reciprocal = new INS_Scale_Vec2_Reciprocal(step.token);
+					scale_Vec2_reciprocal.vec = v1;
+					scale_Vec2_reciprocal.factor = v2;
+					scale_Vec2_reciprocal.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(scale_Vec2_reciprocal);
+
+					return true;
+				}
+				else if (op == Player.OverrideOperator.neg && t1.Maj == TypeKind.Vector2)
+				{
+					INS_Neg_Pos_Vec2 neg_Pos_Vec2 = new INS_Neg_Pos_Vec2(step.token);
+					neg_Pos_Vec2.is_positive = false;
+					neg_Pos_Vec2.src = v1;
+					neg_Pos_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(neg_Pos_Vec2);
+
+					return true;
+
+				}
+				else if (op == Player.OverrideOperator.positive && t1.Maj == TypeKind.Vector2)
+				{
+					INS_Neg_Pos_Vec2 neg_Pos_Vec2 = new INS_Neg_Pos_Vec2(step.token);
+					neg_Pos_Vec2.is_positive = true;
+					neg_Pos_Vec2.src = v1;
+					neg_Pos_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(neg_Pos_Vec2);
+
+					return true;
+				}
+				else if (op == Player.OverrideOperator.mul && t1.Maj == TypeKind.Matrix2x2 && t2.Maj == TypeKind.Vector2)
+				{
+					INS_Mul_Mat22_Vec2 mul_Mat22_Vec2 = new INS_Mul_Mat22_Vec2(step.token);
+					mul_Mat22_Vec2.v1 = v1;
+					mul_Mat22_Vec2.v2 = v2;
+					mul_Mat22_Vec2.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Vector2);
+
+					compileEnv.instructions.Add(mul_Mat22_Vec2);
+
+					return true;
+
+				}
+				else if (op == Player.OverrideOperator.mul && t1.Maj == TypeKind.Matrix2x2 && t2.Maj == TypeKind.Matrix2x2)
+				{
+					INS_Mul_Mat22_Mat22 mul_Mat22_Mat22 = new INS_Mul_Mat22_Mat22(step.token);
+					mul_Mat22_Mat22.v1 = v1;
+					mul_Mat22_Mat22.v2 = v2;
+					mul_Mat22_Mat22.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Matrix2x2);
+
+					compileEnv.instructions.Add(mul_Mat22_Mat22);
+
+					return true;
+
+				}
+				else if (op == Player.OverrideOperator.add && t1.Maj == TypeKind.Matrix2x2 && t2.Maj == TypeKind.Matrix2x2)
+				{
+					INS_Add_Mat22_Mat22 add_Mat22_Mat22 = new INS_Add_Mat22_Mat22(step.token);
+					add_Mat22_Mat22.v1 = v1;
+					add_Mat22_Mat22.v2 = v2;
+					add_Mat22_Mat22.dst = compileEnv.GetStackLocater(step.Arg1.Reg, TypeKind.Matrix2x2);
+
+					compileEnv.instructions.Add(add_Mat22_Mat22);
+
+					return true;
+
+				}
+
+
+
+
+
+
+
+
 				var c1 = TypeUtils.FindOverrideTypeId(t1.Maj, compileEnv.CompileContext);
 				var c2 = TypeUtils.FindOverrideTypeId(t2.Maj, compileEnv.CompileContext);
 

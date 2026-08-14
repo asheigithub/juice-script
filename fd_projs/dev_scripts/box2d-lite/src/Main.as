@@ -173,11 +173,11 @@ package
 			var x:Vector2 = new Vector2(-6.0f, 0.75f);
 			var y:Vector2 = new Vector2();
 
-			for (var i:int = 0; i < 12; ++i)
+			for (var i:int = 0; i < 10; ++i)
 			{
 				y = x;
 
-				for (var j:int = i; j < 12; ++j)
+				for (var j:int = i; j < 10; ++j)
 				{
 					b = new Body();
 					
@@ -460,10 +460,10 @@ var world:World = new World(gravity, iterations);
 
 //var t = getTimer();
 //Main.Demo5();
-//for (var k:int = 0;  k< 60 ; k++) 
+//for (var k:int = 0;  k< 120 ; k++) 
 //{
 	//
-	//world.Step(1.0f / 60);
+	//world.Step(1.0f / 120);
 	//
 	//
 //}

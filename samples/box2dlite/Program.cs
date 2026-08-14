@@ -1,12 +1,15 @@
 ﻿using juicescript;
 using juicescript.ABC;
 using juicescript.runtime;
+using Silk.NET.Core.Attributes;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using System;
 using System.Drawing;
 using System.Reflection;
+using static juicescript.runtime.Player;
 
 namespace box2dlite
 {
@@ -135,6 +138,9 @@ namespace box2dlite
 			//加载脚本播放器
 
 			Player = new Player();
+
+			NativeFunctionRegistry.RegisterAllFromAssembly(typeof(Program).Assembly);
+
 			//加载全局swc
 			{
 				var path = Assembly.GetExecutingAssembly().Location;
@@ -520,6 +526,9 @@ namespace box2dlite
 			for (int i = 0; i < alen; i++)
 			{
 				var arbiter_v = Player.GetVectorElement(arbiters_v, i);
+				if (arbiter_v.ValueType == NaNBoxing.BoxType.Null)
+					continue;
+
 				RtInstance arbiter = (RtInstance)Player.Context.GC.Heap[arbiter_v.HeapPtr];
 
 				int num = arbiter.ReadSlot((ushort)arbiter_numContacts, arbiter.Type._link_codescope, Player).IntValue;
@@ -690,4 +699,220 @@ namespace box2dlite
 
 
 	}
+
+
+
+
+
+
+
+	class natives
+	{
+		
+
+		//$.MathUtil$public::Cross
+		[NativeFunction("$.MathUtil$public::Cross")]
+		public static void MathUtil_Cross(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var vec2 = method.__return_type_class__;
+
+			var s = scope.ReadSlot(0, context.player).FloatValue;
+			NaNBoxing vec = scope.ReadSlot(1, context.player);
+			if (vec.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+			var _a = context.GC.Heap[vec.HeapPtr];
+			var payload_a = (RtInstance)_a;
+
+			float a_x;
+			float a_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					a_x = *(float*)p;
+					a_y = *((float*)p + 1);
+				}
+			}
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					
+					*(float*)p = -s * a_y;
+					*((float*)p + 1) = s * a_x;
+				}
+			}
+
+		}
+
+
+
+		//$.MathUtil$public::Cross_Vec2_F
+		[NativeFunction("$.MathUtil$public::Cross_Vec2_F")]
+		public static void MathUtil_Cross_Vec2_F(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var vec2 = method.__return_type_class__;
+
+			
+			NaNBoxing vec = scope.ReadSlot(0, context.player);
+			if (vec.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+			var _a = context.GC.Heap[vec.HeapPtr];
+			var payload_a = (RtInstance)_a;
+
+			float a_x;
+			float a_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					a_x = *(float*)p;
+					a_y = *((float*)p + 1);
+				}
+			}
+
+			var s = scope.ReadSlot(1, context.player).FloatValue;
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+
+					*(float*)p = s * a_y;
+					*((float*)p + 1) = -s * a_x;
+				}
+			}
+
+		}
+
+		//$.MathUtil$public::AbsVec2
+		[NativeFunction("$.MathUtil$public::AbsVec2")]
+		public static void MathUtil_AbsVec2(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var vec2 = method.__return_type_class__;
+
+
+			NaNBoxing vec = scope.ReadSlot(0, context.player);
+			if (vec.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+			var _a = context.GC.Heap[vec.HeapPtr];
+			var payload_a = (RtInstance)_a;
+
+			float a_x;
+			float a_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					a_x = *(float*)p;
+					a_y = *((float*)p + 1);
+				}
+			}
+
+			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+
+					*(float*)p = MathF.Abs(a_x);
+					*((float*)p + 1) = MathF.Abs(a_y);
+				}
+			}
+
+		}
+
+		//$.MathUtil$public::AbsM22
+		[NativeFunction("$.MathUtil$public::AbsM22")]
+		public static void MathUtil_AbsM22(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var mat2 = method.__return_type_class__;
+
+
+			NaNBoxing mat = scope.ReadSlot(0, context.player);
+			if (mat.ValueType == NaNBoxing.BoxType.Null)
+			{
+				context.player.RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+			var _a = context.GC.Heap[mat.HeapPtr];
+			var payload_a = (RtInstance)_a;
+
+			float a_x;
+			float a_y;
+			float b_x;
+			float b_y;
+
+			var store1 = ((RtInstance)payload_a).GetStoreData(context.player, (ASInstance)payload_a.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					a_x = *(float*)p;
+					a_y = *((float*)p + 1);
+					b_x = *((float*)p + 2);
+					b_y = *((float*)p + 3);
+				}
+			}
+
+			int resultptr = context.player.InitCacheInstance(mat2, returnSlotIndex, false, out RtInstance payload_result);
+			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
+			unsafe
+			{
+				fixed (byte* p = store)
+				{
+					*(float*)p = MathF.Abs(a_x);
+					*((float*)p + 1) = MathF.Abs(a_y);
+					*((float*)p + 2) = MathF.Abs(b_x);
+					*((float*)p + 3) = MathF.Abs(b_y);
+				}
+			}
+
+		}
+
+	}
+
+
+
 }

@@ -938,5 +938,22 @@
 	 二维向量
 	 </apiDesc>
       </apiClassifier>
+      <apiClassifier id="geom:Matrix2x2">
+         <apiName>Matrix2x2</apiName>
+         <shortdesc>
+	 2x2矩阵
+	 </shortdesc>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+         </apiClassifierDetail>
+         <apiDesc>
+	 2x2矩阵
+	 </apiDesc>
+      </apiClassifier>
    </apiPackage>
 </allClasses>

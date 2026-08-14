@@ -47,7 +47,7 @@ package
 		 * @param	startIndex 一个可选整数，指定搜索的起始索引。
 		 * @return 指定子字符串的第一个匹配项的索引，或 -1。
 		 */
-		AS3 native function indexOf(val:String =undefined, startIndex:Number = 0):int;
+		AS3 native function indexOf(val:String =null, startIndex:Number = 0):int;
 
 		/**
 		 * 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
@@ -56,7 +56,7 @@ package
 		 * @return  指定子字符串的最后一个匹配项的位置，或 -1（如果未找到）。
 
 		 */
-		AS3 native function lastIndexOf(val:String =undefined, startIndex:Number = 0x7FFFFFFF):int;
+		AS3 native function lastIndexOf(val:String =null, startIndex:Number = 0x7FFFFFFF):int;
 
 		/**
 		 * 返回一个字符串，该字符串包括从 startIndex 字符一直到 endIndex 字符（但不包括该字符）之间的所有字符。不修改原始 String 对象。如果未指定 endIndex 参数，此子字符串的结尾就是该字符串的结尾。如果按 startIndex 索引到的字符与按 endIndex 索引到的字符相同或位于后者的右侧，则该方法返回一个空字符串。

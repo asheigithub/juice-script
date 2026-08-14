@@ -1,4 +1,5 @@
-﻿using juicescript.ABC.INS;
+﻿using juicescript.ABC;
+using juicescript.ABC.INS;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -75,8 +76,84 @@ namespace juicescript.runtime
 			{
 				Console.WriteLine($"{kv.code}: Count={kv.Count}, AvgTicks={kv.AvgTicks:F2}, TotalTicks={kv.TotalTicks}");
 			}
+
+			Console.WriteLine("==methods==");
+
+			foreach (var kv in MethodStats.OrderByDescending(kv=>kv.Value.TotalTicks))
+			{
+				Console.WriteLine($"{ Player.GetMethodKey( kv.Key)}: Count={kv.Value.Count}, AvgTicks={kv.Value.AvgTicks:F2}, TotalTicks={kv.Value.TotalTicks}");
+			}
+
+
 		}
 
-		
+
+
+		public static Dictionary<ASMethod, MethodExecStats> MethodStats = new Dictionary<ASMethod, MethodExecStats>();
+
+		private static Stack<MethodExecStats> exec_queue=new Stack<MethodExecStats>();
+
+		public class MethodExecStats
+		{
+			public long Count;
+			public long TotalTicks;
+
+			public int counter;
+
+			public void Record(long ticks)
+			{
+				Count++;
+				TotalTicks += ticks;
+			}
+
+			public double AvgTicks => Count == 0 ? 0 : (double)TotalTicks / Count;
+
+			public Stopwatch stopwatch;
+
+		}
+
+
+		public static void Profile_MethodStart(ASMethod method)
+		{
+			
+
+			if (!MethodStats.TryGetValue(method, out var stat))
+			{
+				stat = new MethodExecStats();
+				MethodStats[method] = stat;
+				stat.stopwatch = new Stopwatch();
+			}
+
+
+			if (stat.counter == 0)
+			{
+				stat.stopwatch.Restart();
+			}
+
+			stat.counter++;
+
+			exec_queue.Push(stat);
+
+		}
+		public static void Profile_MethodEnd()
+		{
+			var stat = exec_queue.Pop();
+			stat.counter--;
+
+			if (stat.counter == 0)
+			{
+				stat.stopwatch.Stop();				
+			}
+			stat.Record(stat.stopwatch.ElapsedTicks);
+
+			if (exec_queue.Count > 0)
+			{
+				exec_queue.Peek().TotalTicks -= stat.stopwatch.ElapsedTicks; // 减去调用函数的执行时间
+			}
+
+		}
+
+
+
 	}
 }

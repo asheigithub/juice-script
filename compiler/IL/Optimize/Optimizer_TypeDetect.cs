@@ -1055,6 +1055,24 @@ namespace juicescript.compiler.IL.Optimize
 								}
 							}
 							break;
+						case INS_Code.add_Vec2_Vec2:
+						case INS_Code.sub_Vec2_Vec2:
+						case INS_Code.scale_Vec2:
+						case INS_Code.scale_Vec2_reciprocal:
+						case INS_Code.neg_pos_Vec2:
+						case INS_Code.mul_Mat22_Vec2:
+							{
+								result.Add(instruction, new List<InstructionDef>() {
+									 FromTypeKind(TypeKind.Vector2) });
+							}
+							break;
+						case INS_Code.mul_Mat22_Mat22:
+						case INS_Code.add_Mat22_Mat22:
+							{
+								result.Add(instruction, new List<InstructionDef>() {
+									 FromTypeKind(TypeKind.Matrix2x2) });
+							}
+							break;
 						case INS_Code.add:
 							{
 								INS_Add add = (INS_Add)instruction;
@@ -1091,6 +1109,7 @@ namespace juicescript.compiler.IL.Optimize
 								}
 							}
 							break;
+						
 						case INS_Code.sub:
 							{
 								INS_Sub sub = (INS_Sub)instruction;

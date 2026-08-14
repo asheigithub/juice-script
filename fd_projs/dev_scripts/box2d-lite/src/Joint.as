@@ -1,6 +1,7 @@
 package 
 {
 	import geom.Vector2;
+	import geom.Matrix2x2;
 	/**
 	 * ...
 	 * @author 
@@ -17,7 +18,7 @@ package
 		//float biasFactor;
 		//float softness;
 		
-		public var M:Mat22 = new Mat22();
+		public var M:Matrix2x2 = new Matrix2x2();
 		public var localAnchor1:Vector2 = new Vector2();
 		public var localAnchor2:Vector2 = new Vector2();
 		public var r1:Vector2 = new Vector2();
@@ -42,11 +43,11 @@ package
 			body1 = b1;
 			body2 = b2;
 			
-			var Rot1:Mat22 = Mat22.FromAngle(body1.rotation);
-			var Rot2:Mat22 = Mat22.FromAngle(body2.rotation);
+			var Rot1:Matrix2x2 = Matrix2x2.FromAngle(body1.rotation);
+			var Rot2:Matrix2x2 = Matrix2x2.FromAngle(body2.rotation);
 	
-			var Rot1T:Mat22 = Rot1.Transpose();
-			var Rot2T:Mat22 = Rot2.Transpose();
+			var Rot1T:Matrix2x2 = Rot1.Transpose();
+			var Rot2T:Matrix2x2 = Rot2.Transpose();
 
 			localAnchor1 = Rot1T * (anchor - body1.position);
 			localAnchor2 = Rot2T * (anchor - body2.position);
@@ -61,8 +62,8 @@ package
 		public function PreStep(inv_dt:float):void
 		{
 			// Pre-compute anchors, mass matrix, and bias.
-			var Rot1:Mat22 = Mat22.FromAngle(body1.rotation);
-			var Rot2:Mat22 = Mat22.FromAngle(body2.rotation);
+			var Rot1:Matrix2x2 = Matrix2x2.FromAngle(body1.rotation);
+			var Rot2:Matrix2x2 = Matrix2x2.FromAngle(body2.rotation);
 
 			r1 = Rot1 * localAnchor1;
 			r2 = Rot2 * localAnchor2;
@@ -71,21 +72,21 @@ package
 			// invM = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
 			//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
 			//        [    0     1/m1+1/m2]           [-r1.x*r1.y r1.x*r1.x]           [-r1.x*r1.y r1.x*r1.x]
-			var K1:Mat22 = new Mat22();
+			var K1:Matrix2x2 = new Matrix2x2();
 			K1.col1.x = body1.invMass + body2.invMass;	
 			K1.col2.x = 0.0f;
 			K1.col1.y = 0.0f;	
 			K1.col2.y = body1.invMass + body2.invMass;
 
-			var K2:Mat22 = new Mat22();
+			var K2:Matrix2x2 = new Matrix2x2();
 			K2.col1.x =  body1.invI * r1.y * r1.y;		K2.col2.x = -body1.invI * r1.x * r1.y;
 			K2.col1.y = -body1.invI * r1.x * r1.y;		K2.col2.y =  body1.invI * r1.x * r1.x;
 
-			var K3:Mat22 = new Mat22() ;
+			var K3:Matrix2x2 = new Matrix2x2() ;
 			K3.col1.x =  body2.invI * r2.y * r2.y;		K3.col2.x = -body2.invI * r2.x * r2.y;
 			K3.col1.y = -body2.invI * r2.x * r2.y;		K3.col2.y =  body2.invI * r2.x * r2.x;
 
-			var K:Mat22 = K1 + K2 + K3;
+			var K:Matrix2x2 = K1 + K2 + K3;
 			K.col1.x += softness;
 			K.col2.y += softness;
 

@@ -760,7 +760,10 @@ catch(e:EOFError) {
 		 将文件指针的当前位置（以字节为单位）移动或返回到 ByteArray 对象中。下一次调用读取方法时将在此位置开始读取，或者下一次调用写入方法时将在此位置开始写入。
 		 </apiDesc></apiValueDetail></apiValue></apiClassifier></apiPackage><apiPackage id="geom"><apiName>geom</apiName><apiClassifier id="geom:Vector2"><apiName>Vector2</apiName><shortdesc>
 	 二维向量
-	 </shortdesc><prolog><author>
-	 </author><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
 	 二维向量
-	 </apiDesc></apiClassifierDetail><apiValue id="geom:Vector2:x"><apiName>x</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>float</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="geom:Vector2:y"><apiName>y</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>float</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier></apiPackage></allClasses>
+	 </apiDesc></apiClassifierDetail><apiValue id="geom:Vector2:x"><apiName>x</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>float</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="geom:Vector2:y"><apiName>y</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>float</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier><apiClassifier id="geom:Matrix2x2"><apiName>Matrix2x2</apiName><shortdesc>
+	 2x2矩阵
+	 </shortdesc><prolog><asMetadata/></prolog><apiClassifierDetail><apiClassifierDef><apiAccess value="public"/><apiStatic/><apiFinal/><apiBaseClassifier>Object</apiBaseClassifier></apiClassifierDef><apiDesc>
+	 2x2矩阵
+	 </apiDesc></apiClassifierDetail><apiValue id="geom:Matrix2x2:col1"><apiName>col1</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>geom:Vector2</apiValueClassifier></apiValueDef></apiValueDetail></apiValue><apiValue id="geom:Matrix2x2:col2"><apiName>col2</apiName><shortdesc/><prolog/><apiValueDetail><apiValueDef><apiProperty/><apiAccess value="public"/><apiDynamic/><apiValueClassifier>geom:Vector2</apiValueClassifier></apiValueDef></apiValueDetail></apiValue></apiClassifier></apiPackage></allClasses>

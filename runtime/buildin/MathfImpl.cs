@@ -191,7 +191,17 @@ namespace juicescript.runtime.buildin
         {
             var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0, context.player));
-            context.StackSlots[returnSlotIndex].SetFloat(MathF.Sign(f));
+
+            try
+            {
+				context.StackSlots[returnSlotIndex].SetFloat(MathF.Sign(f));
+			}
+            catch (ArithmeticException)
+            {
+				context.StackSlots[returnSlotIndex].SetFloat(float.NaN);
+			}
+
+            
         }
 
         [NativeFunction("$.Mathf$public::max")]

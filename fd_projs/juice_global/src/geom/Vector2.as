@@ -2,7 +2,6 @@ package geom
 {
 	/**
 	 * 二维向量
-	 * @author 
 	 */
 	[struct]
 	public final class Vector2 

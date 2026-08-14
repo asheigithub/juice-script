@@ -69,28 +69,28 @@ import adobe.utils.CustomActions;
 
 
 
-import flash.utils.getTimer;
-
-
-function  fib(i:int):int 
-	{
-		if (i === 1 || i === 2)
-		{
-			return 1;
-		}
-		else 
-		{
-			
-			return fib(i - 2) + fib(i-1);
-			
-		}	
-	}
-	
-	import flash.utils.getTimer;
-	
-	
-	var st = getTimer();
-trace(fib(35),getTimer() - st );
+//import flash.utils.getTimer;
+//
+//
+//function  fib(i:int):int 
+	//{
+		//if (i === 1 || i === 2)
+		//{
+			//return 1;
+		//}
+		//else 
+		//{
+			//
+			//return fib(i - 2) + fib(i-1);
+			//
+		//}	
+	//}
+	//
+	//import flash.utils.getTimer;
+	//
+	//
+	//var st = getTimer();
+//trace(fib(35),getTimer() - st );
 
 
 
@@ -168,40 +168,3 @@ trace(fib(35),getTimer() - st );
 //var expected = 30;
 //if (ret != expected)
     //throw "ERROR: bad result: expected " + expected + " but got " + ret + " " + ( getTimer() - st);
-
-
-import flash.utils.getTimer;	
-	//
-//class TT
-//{
-	//public function Test()
-	//{
-		//
-	//}
-//}
-//
-//var st = getTimer();
-//
-//(	
-//function ():void 
-//{
-	//
-	//var t:TT = new TT();
-	//
-	//for (var i:int = 0; i <0xffffff ;i ++) 
-	//{
-		//var b:TT = t;
-		//
-		//b.Test();
-		//
-		//b.Test();
-		//
-	//}
-	//
-	//t.Test();
-	//
-//}
-//)();	
-//
-//
-//trace( getTimer() - st );

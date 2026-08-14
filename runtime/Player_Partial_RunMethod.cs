@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
@@ -601,10 +602,15 @@ namespace juicescript.runtime
 #endif
 
 
+#if PROFILEPLAYER
+				InstructionProfiler.Profile_MethodStart(method);
+#endif
+
 				if (returnSlotIndex > -1)
 				{
 					Context.StackSlots[returnSlotIndex].setDefault(method.ReturnTypeKind);
 				}
+
 
 				if (method.Flags.HasFlag(MethodFlags.Generator))
 				{
@@ -685,6 +691,11 @@ namespace juicescript.runtime
 					{
 						Context.StackSlots[returnSlotIndex] = result;
 					}
+
+
+#if PROFILEPLAYER
+					InstructionProfiler.Profile_MethodEnd();
+#endif
 
 					return result;
 
@@ -842,6 +853,9 @@ namespace juicescript.runtime
 						Context.StackSlots[returnSlotIndex] = result;
 					}
 
+#if PROFILEPLAYER
+					InstructionProfiler.Profile_MethodEnd();
+#endif
 					return result;
 
 					//throw new NotImplementedException();
@@ -888,6 +902,10 @@ namespace juicescript.runtime
 						}
 						else
 						{
+#if PROFILEPLAYER
+							InstructionProfiler.Profile_MethodEnd();
+#endif
+
 							if (returnSlotIndex >= 0)
 							{
 								return Context.StackSlots[returnSlotIndex];
@@ -900,6 +918,10 @@ namespace juicescript.runtime
 					}
 					else
 					{
+#if PROFILEPLAYER
+						InstructionProfiler.Profile_MethodEnd();
+#endif
+
 						//记录当前报错堆栈，看上级调用是否处理这个错误
 						Context.errorStack.AddTrace(method, P_PC);
 
@@ -913,6 +935,10 @@ namespace juicescript.runtime
 				}
 				else
 				{
+#if PROFILEPLAYER
+					InstructionProfiler.Profile_MethodEnd();
+#endif
+
 					//Context.StackPosition--;
 					Context.StackPosition -= para_argcount;
 					return new NaNBoxing();
@@ -933,8 +959,12 @@ namespace juicescript.runtime
 				((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
 				Context.StackPosition -= scopeHoleSlots;
 				Context.BackTraceIndex--;
-			//Context.BackTrace[Context.BackTraceIndex].Method = null;
+				//Context.BackTrace[Context.BackTraceIndex].Method = null;
 
+
+#if PROFILEPLAYER
+				InstructionProfiler.Profile_MethodEnd();
+#endif
 
 			lbl_native_called:
 				m_scopePayload.ParentPtr = 0;

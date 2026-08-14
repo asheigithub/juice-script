@@ -1,5 +1,6 @@
 package 
 {
+	import flash.utils.Dictionary;
 	import geom.Vector2;
 	/**
 	 * ...
@@ -20,7 +21,8 @@ package
 		public var joints:Vector.<Joint> = new Vector.<Joint>();
 		public var arbiters:Vector.<Arbiter> = new Vector.<Arbiter>();
 		
-		
+		private var arbiterIndex:Dictionary = new Dictionary();
+				
 		public function World(gravity:Vector2,iterations:int) 
 		{
 			this.gravity = gravity;
@@ -53,7 +55,19 @@ package
 			var inv_dt:float = dt > 0.0f ? 1.0f / dt : 0.0f;
 
 			arbiters.sort( function(aa:Arbiter, bb:Arbiter){
-				if (aa.body1.id < bb.body1.id)
+				if (aa == null && bb == null)
+				{
+					return 0;
+				}
+				else if(aa == null)
+				{
+					return 1;
+				}
+				else if (bb == null)
+				{
+					return -1;					
+				}
+				else if (aa.body1.id < bb.body1.id)
 				{
 					return -1;
 				}
@@ -67,6 +81,26 @@ package
 				}
 				
 			} );
+			
+			var n = arbiters.indexOf(null);
+			if (n >= 0)
+			{
+				
+				arbiters.length = n;
+			}	
+			
+			for (var key in arbiterIndex)
+			{
+				delete arbiterIndex[key];
+				//trace(key,arbiterIndex[key]);
+			}
+			
+			for (var k:int = 0; k < arbiters.length; k++) 
+			{
+				var a:Arbiter = arbiters[k];
+				arbiterIndex[  Number( a.body1.id) * 0xffffff + a.body2.id   ] = k;
+			}
+			
 			
 			// Determine overlapping bodies and update contact points.
 			BroadPhase();
@@ -89,7 +123,8 @@ package
 			// Perform pre-steps.
 			for each (var arb:Arbiter in arbiters)
 			{
-				
+				if (arb == null)
+					continue;
 				arb.PreStep(inv_dt);
 			}
 			
@@ -103,6 +138,8 @@ package
 			{
 				for each(var arb:Arbiter in arbiters)
 				{
+					if (arb == null)
+						continue;
 					arb.ApplyImpulse();
 					//arb->second.ApplyImpulse();
 				}
@@ -129,13 +166,17 @@ package
 			
 		}
 		
+		
+		
 		private function BroadPhase():void
 		{
-			for (var i:int = 0; i < bodies.length; i++) 
+			var bodiescount:int = bodies.length;
+			
+			for (var i:int = 0; i < bodiescount; i++) 
 			{
 				var bi:Body = bodies[i];
 				
-				for (var j:int = i + 1; j <  bodies.length; ++j)
+				for (var j:int = i + 1; j <  bodiescount; ++j)
 				{
 					var bj:Body = bodies[j];
 
@@ -147,6 +188,7 @@ package
 					var newArb:Arbiter = new Arbiter(bi, bj);
 					newArb.init(concats);
 					
+					var searchkey :Number =  Number( newArb.body1.id) * 0xffffff + newArb.body2.id  ;
 					
 					if (newArb.numContacts > 0)
 					{
@@ -162,41 +204,73 @@ package
 							//iter->second.Update(newArb.contacts, newArb.numContacts);
 						//}
 						var key:Arbiter = null;
-						for (var k:int = 0; k < arbiters.length	; k++) 
-						{
-							var temp = arbiters[k];
-							if(temp.body1.id == newArb.body1.id && temp.body2.id == newArb.body2.id)
-							{
-								key = temp;
-								break;
-							}
-						}
+						//for (var k:int = 0; k < arbiters.length	; k++) 
+						//{
+							//var temp = arbiters[k];
+							//if(temp.body1.id == newArb.body1.id && temp.body2.id == newArb.body2.id)
+							//{
+								//key = temp;
+								//break;
+							//}
+						//}
 						
-						if (key == null)
+						var index = arbiterIndex[searchkey]; 
+						  
+						
+						if ( index === undefined )
 						{
 							newArb.contacts = concats;
 							arbiters.push(newArb);
 							
+							arbiterIndex[searchkey] = arbiters.length - 1;
+							
 						}
 						else
 						{
+							
+							key = arbiters[index];
+							
 							key.Update(concats, newArb.numContacts);								
 						}
 						
 					}
 					else
 					{
-						for (var k:int = 0; k < arbiters.length	; k++) 
+						var index = arbiterIndex[searchkey]; 
+						if(index !== undefined)
 						{
-							var key:Arbiter = arbiters[k];
-							if(key.body1.id == newArb.body1.id && key.body2.id == newArb.body2.id)
-							{
-								
-								arbiters.removeAt(k);
-								
-								break;
-							}
+							//arbiters.removeAt(index);
+							
+							arbiters[index] = null;
+							
+							delete arbiterIndex[searchkey];
+							
+							//trace("remove ", index);
+							
+							//for(var k in arbiterIndex)
+							//{
+								////trace(arbiterIndex[k],index);
+								//if (arbiterIndex[k] >= index )
+								//{
+									//
+									//arbiterIndex[k] -= 1;
+									////trace("sub", arbiterIndex[k] );
+								//}
+							//}
+							
 						}
+						
+						//for (var k:int = 0; k < arbiters.length	; k++) 
+						//{
+							//var key:Arbiter = arbiters[k];
+							//if(key.body1.id == newArb.body1.id && key.body2.id == newArb.body2.id)
+							//{
+								//
+								//arbiters.removeAt(k);
+								//
+								//break;
+							//}
+						//}
 					}
 						
 				}

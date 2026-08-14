@@ -191,6 +191,14 @@ namespace juicescript.compiler
 						{
 							class_id = (ulong)TypeKind.Float;
 						}
+						else if (instance.QName.Name == "Vector2" && instance.QName.Namespace.Name == "geom")
+						{
+							class_id = (ulong)TypeKind.Vector2;
+						}
+						else if (instance.QName.Name == "Matrix2x2" && instance.QName.Namespace.Name == "geom")
+						{
+							class_id = (ulong)TypeKind.Matrix2x2;
+						}
 						else
 						{
 							class_id = GetClassId(instance.QName.ToString()); //CityHash.CityHash.CityHash64(instance.QName.ToString());  //new MyMD5.MyMD5().Hash(instance.QName.ToString()).ToIdentifier();

@@ -1318,8 +1318,6 @@ catch(e:EOFError) {
 	 二维向量
 	 </shortdesc>
          <prolog>
-            <author>
-	 </author>
             <asMetadata/>
          </prolog>
          <apiClassifierDetail>
@@ -1334,7 +1332,32 @@ catch(e:EOFError) {
 	 </apiDesc>
          </apiClassifierDetail>
          <Keywords>
-            <meta name="keywords" content="Vector2,geom.Vector2,x,y,cross,dot,toString"/>
+            <meta name="keywords"
+                  content="Vector2,geom.Vector2,col1,col2,x,y,FromAngle,Invert,Transpose,cross,dot,toString,toString"/>
+         </Keywords>
+      </apiClassifier>
+      <apiClassifier id="geom:Matrix2x2">
+         <apiName>Matrix2x2</apiName>
+         <shortdesc>
+	 2x2矩阵
+	 </shortdesc>
+         <prolog>
+            <asMetadata/>
+         </prolog>
+         <apiClassifierDetail>
+            <apiClassifierDef>
+               <apiAccess value="public"/>
+               <apiStatic/>
+               <apiFinal/>
+               <apiBaseClassifier>Object</apiBaseClassifier>
+            </apiClassifierDef>
+            <apiDesc>
+	 2x2矩阵
+	 </apiDesc>
+         </apiClassifierDetail>
+         <Keywords>
+            <meta name="keywords"
+                  content="Matrix2x2,geom.Matrix2x2,col1,col2,x,y,FromAngle,Invert,Transpose,cross,dot,toString,toString"/>
          </Keywords>
       </apiClassifier>
    </apiPackage>

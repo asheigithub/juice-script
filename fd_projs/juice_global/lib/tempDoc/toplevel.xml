@@ -228,7 +228,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='indexOf' fullname='String/AS3:indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='unknown;0' result_type='int'>
+<method name='indexOf' fullname='String/AS3:indexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='null;0' result_type='int'>
 <description><![CDATA[
 
 		 搜索字符串，并返回在调用字符串内 startIndex 位置上或之后找到的 val 的第一个匹配项的位置。此索引从 0 开始，这意味着字符串的第一个字符位于索引 0，而不是索引 1。如果未找到 val，则该方法返回 -1。
@@ -244,7 +244,7 @@ trace("Hello World");
 
 		 ]]></return>
 </method>
-<method name='lastIndexOf' fullname='String/AS3:lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='unknown;0x7FFFFFFF' result_type='int'>
+<method name='lastIndexOf' fullname='String/AS3:lastIndexOf' isStatic='false' isFinal='false' isOverride='false'  param_names='val;startIndex' param_types='String;Number' param_defaults='null;0x7FFFFFFF' result_type='int'>
 <description><![CDATA[
 
 		 从右向左搜索字符串，并返回在 startIndex 之前找到的最后一个 val 匹配项的索引。此索引从零开始，这意味着第一个字符位于索引 0 处，最后一个字符位于 string.length - 1 处。如果未找到 val，则该方法返回 -1。
@@ -5521,6 +5521,72 @@ catch(e:EOFError) {
 		 ]]></description>
 <private><![CDATA[]]></private>
 </method>
+<classRec name='Matrix2x2' fullname='geom:Matrix2x2' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\geom\Matrix2x2.as' namespace='geom' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 2x2矩阵
+
+	 ]]></description>
+</classRec>
+<method name='FromAngle' fullname='geom:Matrix2x2/FromAngle' isStatic='true' isFinal='false' isOverride='false'  param_names='angle' param_types='float' param_defaults='undefined' result_type='geom:Matrix2x2'>
+</method>
+<method name='Invert' fullname='geom:Matrix2x2/Invert' isStatic='false' isFinal='false' isOverride='false'  result_type='geom:Matrix2x2'>
+</method>
+<method name='Mat22addMat22' fullname='geom:Matrix2x2/private:Mat22addMat22' isStatic='true' isFinal='false' isOverride='false'  param_names='A;B' param_types='geom:Matrix2x2;geom:Matrix2x2' param_defaults='undefined;undefined' result_type='geom:Matrix2x2'>
+</method>
+<method name='Mat22mulMat22' fullname='geom:Matrix2x2/private:Mat22mulMat22' isStatic='true' isFinal='false' isOverride='false'  param_names='A;B' param_types='geom:Matrix2x2;geom:Matrix2x2' param_defaults='undefined;undefined' result_type='geom:Matrix2x2'>
+</method>
+<method name='Mat22mulVec2' fullname='geom:Matrix2x2/private:Mat22mulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='A;v' param_types='geom:Matrix2x2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Matrix2x2' fullname='geom:Matrix2x2/Matrix2x2' isStatic='false' isFinal='false' isOverride='false'  param_names='col1;col2' param_types='geom:Vector2;geom:Vector2' param_defaults='null;null' result_type='*'>
+</method>
+<method name='Transpose' fullname='geom:Matrix2x2/Transpose' isStatic='false' isFinal='false' isOverride='false'  result_type='geom:Matrix2x2'>
+</method>
+<method name='toString' fullname='geom:Matrix2x2/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+</method>
+<field name='col1' fullname='geom:Matrix2x2/col1' type='geom:Vector2' isStatic='false' isConst='false' >
+</field>
+<field name='col2' fullname='geom:Matrix2x2/col2' type='geom:Vector2' isStatic='false' isConst='false' >
+</field>
+<classRec name='Vector2' fullname='geom:Vector2' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\geom\Vector2.as' namespace='geom' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
+<description><![CDATA[
+
+	 二维向量
+
+	 ]]></description>
+</classRec>
+<method name='FloatmulVec2' fullname='geom:Vector2/private:FloatmulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='float;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='NumbermulVec2' fullname='geom:Vector2/private:NumbermulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='Number;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2Neg' fullname='geom:Vector2/private:Vec2Neg' isStatic='true' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2Positive' fullname='geom:Vector2/private:Vec2Positive' isStatic='true' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2addVec2' fullname='geom:Vector2/private:Vec2addVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2divFloat' fullname='geom:Vector2/private:Vec2divFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;float' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2divNumber' fullname='geom:Vector2/private:Vec2divNumber' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;Number' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2mulFloat' fullname='geom:Vector2/private:Vec2mulFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;float' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2mulNumber' fullname='geom:Vector2/private:Vec2mulNumber' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;Number' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vec2subVec2' fullname='geom:Vector2/private:Vec2subVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
+</method>
+<method name='Vector2' fullname='geom:Vector2/Vector2' isStatic='false' isFinal='false' isOverride='false'  param_names='x;y' param_types='float;float' param_defaults='0;0' result_type='*'>
+</method>
+<method name='cross' fullname='geom:Vector2/cross' isStatic='false' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='float'>
+</method>
+<method name='dot' fullname='geom:Vector2/dot' isStatic='false' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='float'>
+</method>
+<method name='toString' fullname='geom:Vector2/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
+</method>
+<field name='x' fullname='geom:Vector2/x' type='float' isStatic='false' isConst='false' >
+</field>
+<field name='y' fullname='geom:Vector2/y' type='float' isStatic='false' isConst='false' >
+</field>
 <classRec name='MethodClosure' fullname='__AS3__:MethodClosure' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\MethodClosure.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
 </classRec>
 <classRec name='utils' fullname='__AS3__:utils' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\__AS3__\utils.as' namespace='__AS3__' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
@@ -5579,9 +5645,9 @@ catch(e:EOFError) {
 </method>
 <method name='getTimer' fullname='__AS3__:toplevel/getTimer' isStatic='true' isFinal='false' isOverride='false'  result_type='int'>
 </method>
-<method name='isFinite' fullname='__AS3__:toplevel/isFinite' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='undefined' result_type='Boolean'>
+<method name='isFinite' fullname='__AS3__:toplevel/isFinite' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='unknown' result_type='Boolean'>
 </method>
-<method name='isNaN' fullname='__AS3__:toplevel/isNaN' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='undefined' result_type='Boolean'>
+<method name='isNaN' fullname='__AS3__:toplevel/isNaN' isStatic='true' isFinal='false' isOverride='false'  param_names='n' param_types='Number' param_defaults='unknown' result_type='Boolean'>
 </method>
 <method name='parseFloat' fullname='__AS3__:toplevel/parseFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='str' param_types='String' param_defaults='NaN' result_type='Number'>
 </method>
@@ -5601,48 +5667,6 @@ catch(e:EOFError) {
 
 		 ]]></param>
 </method>
-<classRec name='Vector2' fullname='geom:Vector2' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\geom\Vector2.as' namespace='geom' access='public' baseclass='Object' isFinal='true' isDynamic='false' >
-<description><![CDATA[
-
-	 二维向量
-
-	 ]]></description>
-<author><![CDATA[
-
-	 ]]></author>
-</classRec>
-<method name='FloatmulVec2' fullname='geom:Vector2/private:FloatmulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='float;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='NumbermulVec2' fullname='geom:Vector2/private:NumbermulVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='Number;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2Neg' fullname='geom:Vector2/private:Vec2Neg' isStatic='true' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2Positive' fullname='geom:Vector2/private:Vec2Positive' isStatic='true' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2addVec2' fullname='geom:Vector2/private:Vec2addVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2divFloat' fullname='geom:Vector2/private:Vec2divFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;float' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2divNumber' fullname='geom:Vector2/private:Vec2divNumber' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;Number' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2mulFloat' fullname='geom:Vector2/private:Vec2mulFloat' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;float' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2mulNumber' fullname='geom:Vector2/private:Vec2mulNumber' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;Number' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vec2subVec2' fullname='geom:Vector2/private:Vec2subVec2' isStatic='true' isFinal='false' isOverride='false'  param_names='lhs;rhs' param_types='geom:Vector2;geom:Vector2' param_defaults='undefined;undefined' result_type='geom:Vector2'>
-</method>
-<method name='Vector2' fullname='geom:Vector2/Vector2' isStatic='false' isFinal='false' isOverride='false'  param_names='x;y' param_types='float;float' param_defaults='0;0' result_type='*'>
-</method>
-<method name='cross' fullname='geom:Vector2/cross' isStatic='false' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='float'>
-</method>
-<method name='dot' fullname='geom:Vector2/dot' isStatic='false' isFinal='false' isOverride='false'  param_names='v' param_types='geom:Vector2' param_defaults='undefined' result_type='float'>
-</method>
-<method name='toString' fullname='geom:Vector2/toString' isStatic='false' isFinal='false' isOverride='false'  result_type='String'>
-</method>
-<field name='x' fullname='geom:Vector2/x' type='float' isStatic='false' isConst='false' >
-</field>
-<field name='y' fullname='geom:Vector2/y' type='float' isStatic='false' isConst='false' >
-</field>
 <classRec name='EOFError' fullname='flash.errors:EOFError' sourcefile='D:\drivers\F\GitHub\juice-script-2\juice-script-2\fd_projs\juice_global\src\flash\errors\EOFError.as' namespace='flash.errors' access='public' baseclass='Error' isFinal='true' isDynamic='false' >
 <description><![CDATA[
 
