@@ -69,6 +69,62 @@ fd_projs/dev_scripts/src
   用于构建运行时（runtime）与播放器（player）。  
   这两个配置不会生成编译器，只生成可执行的运行时环境。因为编译器其实也依赖于runtime,这两个配置删除了用于编译器部分的代码，所以生成的player是最优化的。
 
+## Samples: Box2DLite
+
+`samples/box2dlite` 是一个完整的示例，展示如何用 C# (OpenGL) 加载 JuiceScript 脚本并运行 Box2D-Lite 物理引擎模拟。
+
+- .net10的运行性能比.net6快至少20%
+- 为了最大化性能我展示了如何注入C#函数，同时启用了内置的Vector2,Matrix2x2。但是即使完全用脚本进行向量矩阵运算，同样可以支持金字塔堆叠35个以上刚体。
+
+### 架构概览
+
+- **AS3 脚本** (`fd_projs/dev_scripts/box2d-lite/src/`)：Box2D-Lite 物理引擎的核心逻辑（Body、Joint、World、碰撞检测等），用 JuiceScript 的 ActionScript 3 语法编写
+- **C# 宿主** (`samples/box2dlite/Program.cs`)：通过 Silk.NET 创建 OpenGL 窗口，加载编译好的 SWC 脚本，驱动物理模拟并渲染结果
+- **Native 函数桥接**：C# 端通过 `[NativeFunction]` 标记将性能关键的数学运算（向量叉乘、绝对值等）直接暴露给脚本层调用
+
+### 编译步骤
+
+#### Step 1: 构建所有项目
+
+```bash
+dotnet build juice-script-2.sln --configuration Debug
+```
+
+#### Step 2: 编译全局库 juice_global.swc
+
+如果尚未编译过，需要先生成运行时基础库：
+
+```bash
+./asc/bin/Debug/net6.0/asc.exe -r fd_projs/juice_global/src -w player/bin/Debug/net6.0 -o player/bin/Debug/net6.0/juice_global.swc -f
+```
+
+#### Step 3: 编译 box2d-lite 脚本
+
+```bash
+./asc/bin/Debug/net6.0/asc.exe -r fd_projs/dev_scripts/box2d-lite/src -w fd_projs/dev_scripts/box2d-lite/obj -l player/bin/Debug/net6.0/juice_global.swc -o fd_projs/dev_scripts/box2d-lite/obj/o.swc -f
+```
+
+编译产物为 `fd_projs/dev_scripts/box2d-lite/obj/o.swc`，C# 宿主程序会从该路径加载。
+
+#### Step 4: 构建并运行 box2dlite 示例
+
+```bash
+dotnet build samples/box2dlite/box2dlite.csproj --configuration Debug
+dotnet run --project samples/box2dlite/box2dlite.csproj --configuration Debug
+```
+
+### 运行操作
+
+| 按键 | 功能 |
+|------|------|
+| `1` - `9` | 切换不同 Demo 场景（单盒、单摆、摩擦系数、堆叠、金字塔、跷跷板、悬挂桥、多米诺、多摆） |
+| `Space` | 发射随机物体（bomb） |
+| `Esc` | 退出 |
+
+### 依赖
+
+- **Silk.NET 2.23.0**：窗口创建和 OpenGL 绑定（NuGet 自动恢复）
+
 
 
 
