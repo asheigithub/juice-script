@@ -17,6 +17,10 @@ juice-script 是我之前项目 **apple-juice-actionscript** 的 2.0 版延续�
 
 总体来说，希望它能成为一个好用的嵌入式脚本。
 
+### Demo
+
+<video src="samples/box2dlite/box2dlite.mp4" controls width="640"></video>
+
 ## 为什么要做 2.0
 
 动机其实很简单：在 apple-juice-actionscript 里有非常多的不足。
