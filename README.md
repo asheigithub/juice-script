@@ -3,8 +3,8 @@
 juice-script 是我之前项目 **apple-juice-actionscript** 的 2.0 版延续与重构。
 
 与之前项目相比，主要关注于解释器的效率
-### 解释运行box2dlite并保持可接受的性能
-https://github.com/user-attachments/assets/cd0e844c-4623-4597-bc1c-60cbca2365bd
+### 解释运行box2dlite，性能稳定
+<img width="640" height="360" alt="box2dlite 2026-08-17 16-17-45" src="https://github.com/user-attachments/assets/49cb0d46-e513-4618-9554-2d09517bb2dc" />
 
 
 - 运行时增加了一个轻量级的逃逸分析,很多小对象可以随意new,不会触发GC；
