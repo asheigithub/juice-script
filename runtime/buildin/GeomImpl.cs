@@ -1267,6 +1267,52 @@ namespace juicescript.runtime.buildin
 
 		}
 
+		//
+		[NativeFunction("geom.Matrix2x2$public::toString")]
+		public static void Mat22_toString(Context context,
+			ASMethod method,
+			int scope_ptr,
+			NaNBoxing thisPtr,
+			int stackStPos, ref ReceiveError error, int returnSlotIndex)
+		{
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+
+			var mat22 = context.GC.Heap[thisPtr.HeapPtr];
+			var payload = (RtInstance)mat22;
+
+
+			//NaNBoxing x = payload.ReadSlot(0, vector2.Type._link_codescope, context.player);
+			//NaNBoxing y = payload.ReadSlot(1, vector2.Type._link_codescope, context.player);
+
+			float col1_x;
+			float col1_y;
+
+			float col2_x;
+			float col2_y;
+
+			var store1 = ((RtInstance)payload).GetStoreData(context.player, (ASInstance)payload.Type);
+			unsafe
+			{
+				fixed (byte* p = store1)
+				{
+					col1_x = *(float*)p;
+					col1_y = *((float*)p + 1);
+
+					col2_x = *((float*)p + 2);
+					col2_y = *((float*)p + 3);
+				}
+			}
+
+
+
+
+			if (context.player.TryCreateStringValue($"({col1_x.ToString("F2")},{col1_y.ToString("F2")}),({col2_x.ToString("F2")},{col2_y.ToString("F2")})", out NaNBoxing result, ref error))
+			{
+				context.StackSlots[returnSlotIndex] = result;
+				//context.StackSlots[returnSlotIndex].SetHeapPtr(str, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+			}
+		}
+
 		//$.Mat22$private::Mat22mulVec2
 		[NativeFunction("$geom.Matrix2x2$private::Mat22mulVec2")]
 		public static void Mat22mulVec2(Context context,

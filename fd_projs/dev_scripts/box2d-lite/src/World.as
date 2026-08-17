@@ -169,7 +169,7 @@ package
 		
 		
 		private function BroadPhase():void
-		{
+		{ 
 			var bodiescount:int = bodies.length;
 			
 			for (var i:int = 0; i < bodiescount; i++) 

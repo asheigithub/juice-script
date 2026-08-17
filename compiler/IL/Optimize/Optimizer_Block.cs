@@ -673,6 +673,44 @@ namespace juicescript.compiler.IL.Optimize
 					}
 				}
 			}
+			//ld_vectorType
+			{
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_VectorType).Select(i => (INS_Ld_VectorType)i).ToList();
+				var vectype_list = all.GroupBy(i => i.vectortype_index).ToList();
+				foreach (var i in vectype_list)
+				{
+					var ld_list = i.ToList();
+					if (ld_list.Count > 1)
+					{
+						var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => ld_list.Contains(i))).ToList();
+						var dom = FindCommDom(atblocks);
+
+						var loop = cfg.toplevelloops.Where(l => l.FindLoop(dom) != null).FirstOrDefault();
+						if (loop != null)
+						{
+							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+							dom = loop.loop.firstNode.Idom;
+						}
+
+						MoveInstructions(dom, ld_list.Select(i => (Instruction)i).ToList());
+					}
+					else if (ld_list.Count == 1)
+					{
+						var at = cfg.Blocks.First(b => b.Instructions.Any(i => ld_list.Contains(i)));
+
+						var loop = cfg.toplevelloops.Where(l => l.FindLoop(at) != null).FirstOrDefault();
+						if (loop != null)
+						{
+							Debug.Assert(loop.loop.firstNode.Predecessors.Contains(loop.loop.firstNode.Idom));
+
+							MoveInstructions(loop.loop.firstNode.Idom, ld_list.Select(i => (Instruction)i).ToList());
+
+						}
+					}
+				}
+
+
+			}
 			//ld_true
 			{
 				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.ld_true).Select(i => (INS_Ld_True)i).ToList();

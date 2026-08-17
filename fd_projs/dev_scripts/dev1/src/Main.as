@@ -19,14 +19,19 @@ package
        
     }
 }
-import adobe.utils.CustomActions;
+import geom.Matrix2x2
+var m:Matrix2x2 = new Matrix2x2();
+trace(m);
 
+
+import adobe.utils.CustomActions;
+//
 //import com.adobe.serialization.json.JSON;
 //
 //var obj = JSON.decode('{"a":1,"b":2}');
 //obj.c = obj.a + obj.b;
 //trace(JSON.encode(obj));
-
+//
 
 
 //import flash.utils.Dictionary;

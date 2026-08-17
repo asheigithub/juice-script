@@ -91,14 +91,14 @@ namespace juicescript.runtime
 
 		public static Dictionary<ASMethod, MethodExecStats> MethodStats = new Dictionary<ASMethod, MethodExecStats>();
 
-		private static Stack<MethodExecStats> exec_queue=new Stack<MethodExecStats>();
+		private static Stack<MethodExecStats> exec_stack=new Stack<MethodExecStats>();
 
 		public class MethodExecStats
 		{
 			public long Count;
 			public long TotalTicks;
 
-			public int counter;
+			//public int counter;
 
 			public void Record(long ticks)
 			{
@@ -108,11 +108,12 @@ namespace juicescript.runtime
 
 			public double AvgTicks => Count == 0 ? 0 : (double)TotalTicks / Count;
 
-			public Stopwatch stopwatch;
+			//public Stopwatch stopwatch;
 
 		}
 
-
+		private static Stopwatch m_watch=new Stopwatch();
+		private static Stack<long> m_tick=new Stack<long>();
 		public static void Profile_MethodStart(ASMethod method)
 		{
 			
@@ -121,34 +122,49 @@ namespace juicescript.runtime
 			{
 				stat = new MethodExecStats();
 				MethodStats[method] = stat;
-				stat.stopwatch = new Stopwatch();
+				//stat.stopwatch = new Stopwatch();
 			}
 
-
-			if (stat.counter == 0)
+			if (m_tick.Count == 0)
 			{
-				stat.stopwatch.Restart();
+				m_watch.Restart();
 			}
 
-			stat.counter++;
 
-			exec_queue.Push(stat);
+			//if (stat.counter == 0)
+			//{
+			//	m_watch.Restart();
+			//	//stat.stopwatch.Restart();
+			//}
+
+			//stat.counter++;
+
+			exec_stack.Push(stat);
+			m_tick.Push(m_watch.ElapsedTicks);
 
 		}
 		public static void Profile_MethodEnd()
 		{
-			var stat = exec_queue.Pop();
-			stat.counter--;
+			var stat = exec_stack.Pop();
+			//stat.counter--;
 
-			if (stat.counter == 0)
+			//if (stat.counter == 0)
+			//{
+			//	m_watch.Stop();
+			//	//stat.stopwatch.Stop();				
+			//}
+			//stat.Record(stat.stopwatch.ElapsedTicks);
+			
+			long ticks = m_watch.ElapsedTicks - m_tick.Pop() ;
+			stat.Record(ticks);
+
+			if (exec_stack.Count > 0)
 			{
-				stat.stopwatch.Stop();				
+				exec_stack.Peek().TotalTicks -= ticks;  //stat.stopwatch.ElapsedTicks; // 减去调用函数的执行时间
 			}
-			stat.Record(stat.stopwatch.ElapsedTicks);
-
-			if (exec_queue.Count > 0)
+			else
 			{
-				exec_queue.Peek().TotalTicks -= stat.stopwatch.ElapsedTicks; // 减去调用函数的执行时间
+				m_watch.Stop();
 			}
 
 		}

@@ -1553,18 +1553,13 @@ namespace juicescript.compiler
 										Disassembler.Disassemble(cache[Player.GetMethodKey(method)], out int s1, out NaNBoxing[] c1, out Instruction[] ins1);
 										Disassembler.Disassemble(method.Body.ByteCode, out int s2, out NaNBoxing[] c2, out Instruction[] ins2);
 
-										if (c1.Length != c2.Length) //检查常量池是否变化，变了也要重新搞，注意
-										{
-											goto lbl_failed;
-										}
-										for (int k = 0; k < c1.Length; k++)
-										{
-											if (c1[k].Raw != c2[k].Raw)
-											{
-												goto lbl_failed;
-											}
-										}
-										method.Body.ByteCode = cache[Player.GetMethodKey(method)];
+										//method.Body.ByteCode = cache[Player.GetMethodKey(method)];
+
+										//由于常量池中的LD_CLASS指令的堆指针可能变化，需要更新常量池
+
+										Debug.Assert(c1.Length == c2.Length);
+										method.Body.ByteCode = Assembler.Assemble(s1, c2, ins1);
+
 
 									}
 								}

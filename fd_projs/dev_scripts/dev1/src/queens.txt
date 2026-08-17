@@ -1,0 +1,59 @@
+package {
+    import flash.display.Sprite;
+
+    [Doc]
+    public class Main extends Sprite {
+        public function Main() {
+            var solutions:Array = solve8Queens();
+            trace("Total solutions: " + solutions.length);
+            for (var i:int = 0; i < solutions.length; i++) {
+                trace("Solution " + (i + 1) + ":");
+                trace(solutions[i]);
+            }
+        }
+
+        private function solve8Queens():Array {
+            var solutions:Array = [];
+            var board:Array = [0, 0, 0, 0, 0, 0, 0, 0];
+            solve(board, 0, solutions);
+            return solutions;
+        }
+
+        private function solve(board:Array, row:int, solutions:Array):void {
+            if (row == 8) {
+                solutions.push(formatBoard(board));
+                return;
+            }
+            for (var col:int = 0; col < 8; col++) {
+                if (isValid(board, row, col)) {
+                    board[row] = col;
+                    solve(board, row + 1, solutions);
+                    board[row] = 0;
+                }
+            }
+        }
+
+        private function isValid(board:Array, row:int, col:int):Boolean {
+            for (var i:int = 0; i < row; i++) {
+                var queenCol:int = board[i];
+                if (queenCol == col) return false;
+                if (queenCol - i == col - row) return false;
+                if (queenCol + i == col + row) return false;
+            }
+            return true;
+        }
+
+        private function formatBoard(board:Array):String {
+            var result:String = "";
+            for (var i:int = 0; i < 8; i++) {
+                for (var j:int = 0; j < 8; j++) {
+                    result += (board[i] == j ? "Q " : ". ");
+                }
+                if (i < 7) result += "\n";
+            }
+            return result;
+        }
+    }
+}
+
+var main:Main = new Main();

@@ -1,0 +1,228 @@
+package {
+    import flash.display.Sprite;
+    import flash.utils.setInterval;
+    import flash.utils.clearInterval;
+
+    [Doc]
+    public class Main extends Sprite {
+        private var _timer:uint;
+        private var _board:Array;
+        private var _boardW:int = 10;
+        private var _boardH:int = 20;
+        private var _currentX:int;
+        private var _currentY:int;
+        private var _currentPiece:Array;
+        private var _pieceIndex:int = 0;
+        private var _dropTimer:int = 0;
+        private var _gameOver:Boolean = false;
+        private var _stepCount:int = 0;
+        private var _currentColor:String;
+        private var _colors:Array;
+        
+        private var _pieces:Array = [
+            [[1,1,1,1]],
+            [[1,1],[1,1]],
+            [[0,1,0],[1,1,1]],
+            [[0,1,1],[1,1,0]],
+            [[1,1,0],[0,1,1]],
+            [[1,0,0],[1,1,1]],
+            [[0,0,1],[1,1,1]]
+        ];
+
+        public function Main() {
+            _colors = [
+                ESC("[31m"), // I - 红
+                ESC("[32m"), // O - 绿
+                ESC("[33m"), // T - 黄
+                ESC("[34m"), // S - 蓝
+                ESC("[35m"), // Z - 品红
+                ESC("[36m"), // J - 青
+                ESC("[37m")  // L - 白
+            ];
+            initBoard();
+            spawnPiece();
+            _timer = setInterval(update, 80);
+        }
+
+        private function ESC(code:String):String {
+            return String.fromCharCode(27) + code;
+        }
+
+        private function initBoard():void {
+            _board = [];
+            for (var y:int = 0; y < _boardH; y++) {
+                _board[y] = [];
+                for (var x:int = 0; x < _boardW; x++) {
+                    _board[y][x] = 0;
+                }
+            }
+        }
+
+        private function spawnPiece():void {
+            _currentPiece = _pieces[_pieceIndex];
+            _currentColor = _colors[_pieceIndex];
+            _pieceIndex = (_pieceIndex + 1) % _pieces.length;
+            _currentX = Math.floor((_boardW - _currentPiece[0].length) / 2);
+            _currentY = 0;
+        }
+
+        private function rotatePiece(piece:Array):Array {
+            var rows:int = piece.length;
+            var cols:int = piece[0].length;
+            var rotated:Array = [];
+            for (var x:int = 0; x < cols; x++) {
+                rotated[x] = [];
+                for (var y:int = rows - 1; y >= 0; y--) {
+                    rotated[x][rows - 1 - y] = piece[y][x];
+                }
+            }
+            return rotated;
+        }
+
+        private function update():void {
+            if (_gameOver) return;
+            
+            _stepCount++;
+            
+            if (_stepCount % 10 == 0) {
+                var rotated:Array = rotatePiece(_currentPiece);
+                if (!collides(_currentX, _currentY, rotated)) {
+                    _currentPiece = rotated;
+                }
+            }
+            
+            if (_stepCount % 3 == 0) {
+                var moveDir:int = (_stepCount % 2 == 0) ? 1 : -1;
+                if (!collides(_currentX + moveDir, _currentY, _currentPiece)) {
+                    _currentX += moveDir;
+                }
+            }
+            
+            _dropTimer++;
+            if (_dropTimer >= 2) {
+                _dropTimer = 0;
+                if (!collides(_currentX, _currentY + 1, _currentPiece)) {
+                    _currentY++;
+                } else {
+                    lockPiece();
+                    clearLines();
+                    spawnPiece();
+                    if (collides(_currentX, _currentY, _currentPiece)) {
+                        _gameOver = true;
+                        clearInterval(_timer);
+                        showGameOver();
+                        return;
+                    }
+                }
+            }
+            render();
+        }
+
+        private function collides(px:int, py:int, piece:Array):Boolean {
+            for (var y:int = 0; y < piece.length; y++) {
+                for (var x:int = 0; x < piece[y].length; x++) {
+                    if (piece[y][x] == 0) continue;
+                    var nx:int = px + x;
+                    var ny:int = py + y;
+                    if (nx < 0 || nx >= _boardW || ny >= _boardH) return true;
+                    if (ny >= 0 && _board[ny][nx] == 1) return true;
+                }
+            }
+            return false;
+        }
+
+        private function lockPiece():void {
+            for (var y:int = 0; y < _currentPiece.length; y++) {
+                for (var x:int = 0; x < _currentPiece[y].length; x++) {
+                    if (_currentPiece[y][x] == 1) {
+                        var bx:int = _currentX + x;
+                        var by:int = _currentY + y;
+                        if (by >= 0) _board[by][bx] = 1;
+                    }
+                }
+            }
+        }
+
+        private function clearLines():void {
+            for (var y:int = _boardH - 1; y >= 0; y--) {
+                var full:Boolean = true;
+                for (var x:int = 0; x < _boardW; x++) {
+                    if (_board[y][x] == 0) { full = false; break; }
+                }
+                if (full) {
+                    for (var yy:int = y; yy > 0; yy--) {
+                        for (var xx:int = 0; xx < _boardW; xx++) {
+                            _board[yy][xx] = _board[yy-1][xx];
+                        }
+                    }
+                    for (xx = 0; xx < _boardW; xx++) _board[0][xx] = 0;
+                    y++;
+                }
+            }
+        }
+
+        private function render():void {
+            var ESC:String = String.fromCharCode(27);
+            var clear:String = ESC + "[2J" + ESC + "[H";
+            var reset:String = ESC + "[0m";
+            var fixedColor:String = ESC + "[90m"; // 灰色固定方块
+            
+            trace(clear);
+            trace("   === TETRIS DEMO ===");
+            trace("");
+            trace("   +" + repeatChar("-", _boardW * 2) + "+");
+            
+            for (var y:int = 0; y < _boardH; y++) {
+                var line:String = "   |";
+                for (var x:int = 0; x < _boardW; x++) {
+                    if (isPieceAt(x, y)) {
+                        line += _currentColor + "[]" + reset;
+                    } else if (_board[y][x] == 1) {
+                        line += fixedColor + "##" + reset;
+                    } else {
+                        line += "  ";
+                    }
+                }
+                line += "|";
+                trace(line);
+            }
+            trace("   +" + repeatChar("-", _boardW * 2) + "+");
+            trace("");
+            trace("   Next: " + getPieceName(_pieceIndex) + " " + _colors[_pieceIndex] + "■" + reset);
+        }
+
+        private function isPieceAt(x:int, y:int):Boolean {
+            for (var py:int = 0; py < _currentPiece.length; py++) {
+                for (var px:int = 0; px < _currentPiece[py].length; px++) {
+                    if (_currentPiece[py][px] == 1 && 
+                        _currentX + px == x && _currentY + py == y) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private function repeatChar(ch:String, count:int):String {
+            var s:String = "";
+            for (var i:int = 0; i < count; i++) s += ch;
+            return s;
+        }
+
+        private function getPieceName(idx:int):String {
+            var names:Array = ["I","O","T","S","Z","J","L"];
+            return names[idx];
+        }
+
+        private function showGameOver():void {
+            var ESC:String = String.fromCharCode(27);
+            trace(ESC + "[2J" + ESC + "[H");
+            trace("");
+            trace("");
+            trace("       === GAME OVER ===");
+            trace("");
+        }
+    }
+}
+
+var main:Main = new Main();

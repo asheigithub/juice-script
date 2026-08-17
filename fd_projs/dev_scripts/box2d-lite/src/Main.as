@@ -173,11 +173,11 @@ package
 			var x:Vector2 = new Vector2(-6.0f, 0.75f);
 			var y:Vector2 = new Vector2();
 
-			for (var i:int = 0; i < 10; ++i)
+			for (var i:int = 0; i < 12; ++i)
 			{
 				y = x;
 
-				for (var j:int = i; j < 10; ++j)
+				for (var j:int = i; j < 12; ++j)
 				{
 					b = new Body();
 					
