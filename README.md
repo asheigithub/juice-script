@@ -2,7 +2,9 @@
 
 juice-script 是我之前项目 **apple-juice-actionscript** 的 2.0 版延续与重构。
 
-相比上一代，这次的主要演进集中在运行时与语言层面：
+与之前项目相比，主要关注于解释器的效率
+### 解释运行box2dlite并保持可接受的性能
+https://github.com/user-attachments/assets/cae00138-69e9-443b-829b-38b08330085c
 
 - 运行时增加了一个轻量级的逃逸分析,很多小对象可以随意new,不会触发GC；
 - 追加了 `struct` 结构体类型，用于更贴近底层的值类型建模；
