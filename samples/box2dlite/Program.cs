@@ -382,7 +382,7 @@ namespace box2dlite
 
 			//绘制所有Body;
 			var bodies_index = world.Type._link_codescope.Members.FindIndex(m=>m.QName.Name == "bodies");
-			var bodies_v = world.ReadSlot((ushort)bodies_index, world.Type._link_codescope, Player);
+			var bodies_v = world.ReadSlot((ushort)bodies_index, Player);
 
 			Span<System.Numerics.Vector3> line_vbuffer = stackalloc System.Numerics.Vector3[2];
 
@@ -394,20 +394,20 @@ namespace box2dlite
 				RtInstance body = (RtInstance)Player.Context.GC.Heap[body_v.HeapPtr];
 
 				//float rotation
-				var rotation_v = body.ReadSlot((ushort)body_rotation, body.Type._link_codescope, Player);
+				var rotation_v = body.ReadSlot((ushort)body_rotation, Player);
 				float rotation = rotation_v.FloatValue;
 
-				var pos_v = body.ReadSlot((ushort)body_positoin, body.Type._link_codescope, Player);
+				var pos_v = body.ReadSlot((ushort)body_positoin, Player);
 				RtInstance pos = (RtInstance)Player.Context.GC.Heap[pos_v.HeapPtr];
 
-				var width_v = body.ReadSlot((ushort)body_width, body.Type._link_codescope, Player);
+				var width_v = body.ReadSlot((ushort)body_width, Player);
 				RtInstance width = (RtInstance)Player.Context.GC.Heap[width_v.HeapPtr];
 
-				float pos_x = pos.ReadSlot(0,pos.Type._link_codescope,Player).FloatValue;
-				float pos_y = pos.ReadSlot(1,pos.Type._link_codescope,Player).FloatValue;
+				float pos_x = pos.ReadSlot(0,Player).FloatValue;
+				float pos_y = pos.ReadSlot(1,Player).FloatValue;
 
-				float width_x = width.ReadSlot(0, width.Type._link_codescope, Player).FloatValue;
-				float width_y = width.ReadSlot(1, width.Type._link_codescope, Player).FloatValue;
+				float width_x = width.ReadSlot(0, Player).FloatValue;
+				float width_y = width.ReadSlot(1, Player).FloatValue;
 
 				if ( hasbomb && i == body_count - 1)
 				{
@@ -433,34 +433,34 @@ namespace box2dlite
 			Gl.BindVertexArray(VaoLine);
 			//joints
 			var joints_index = world.Type._link_codescope.Members.FindIndex(m => m.QName.Name == "joints");
-			var joints_v = world.ReadSlot((ushort)joints_index, world.Type._link_codescope, Player);
+			var joints_v = world.ReadSlot((ushort)joints_index, Player);
 			for (int i = 0; i < Player.GetVectorLen(joints_v); i++)
 			{
 				var joint_v = Player.GetVectorElement(joints_v, i);
 				RtInstance joint = (RtInstance)Player.Context.GC.Heap[joint_v.HeapPtr];
 
-				var body1_v = joint.ReadSlot((ushort)joint_body1, joint.Type._link_codescope, Player);
+				var body1_v = joint.ReadSlot((ushort)joint_body1, Player);
 				RtInstance body1 = (RtInstance)Player.Context.GC.Heap[body1_v.HeapPtr];
 
 				//float rotation
-				var rotation1_v = body1.ReadSlot((ushort)body_rotation, body1.Type._link_codescope, Player);
+				var rotation1_v = body1.ReadSlot((ushort)body_rotation, Player);
 				float rotation1 = rotation1_v.FloatValue;
-				var pos1_v = body1.ReadSlot((ushort)body_positoin, body1.Type._link_codescope, Player);
+				var pos1_v = body1.ReadSlot((ushort)body_positoin, Player);
 				RtInstance pos1 = (RtInstance)Player.Context.GC.Heap[pos1_v.HeapPtr];
 
-				var body2_v = joint.ReadSlot((ushort)joint_body2, joint.Type._link_codescope, Player);
+				var body2_v = joint.ReadSlot((ushort)joint_body2, Player);
 				RtInstance body2 = (RtInstance)Player.Context.GC.Heap[body2_v.HeapPtr];
 
 				//float rotation
-				var rotation2_v = body2.ReadSlot((ushort)body_rotation, body2.Type._link_codescope, Player);
+				var rotation2_v = body2.ReadSlot((ushort)body_rotation, Player);
 				float rotation2 = rotation2_v.FloatValue;
-				var pos2_v = body2.ReadSlot((ushort)body_positoin, body2.Type._link_codescope, Player);
+				var pos2_v = body2.ReadSlot((ushort)body_positoin, Player);
 				RtInstance pos2 = (RtInstance)Player.Context.GC.Heap[pos2_v.HeapPtr];
 
-				var localAnchor1_v = joint.ReadSlot((ushort) joint_localAnchor1, joint.Type._link_codescope, Player);
+				var localAnchor1_v = joint.ReadSlot((ushort) joint_localAnchor1, Player);
 				RtInstance localAnchor1 = (RtInstance)Player.Context.GC.Heap[localAnchor1_v.HeapPtr];
 
-				var localAnchor2_v = joint.ReadSlot((ushort)joint_localAnchor2, joint.Type._link_codescope, Player);
+				var localAnchor2_v = joint.ReadSlot((ushort)joint_localAnchor2, Player);
 				RtInstance localAnchor2 = (RtInstance)Player.Context.GC.Heap[localAnchor2_v.HeapPtr];
 
 				//Mat22 R1(b1->rotation);
@@ -473,23 +473,23 @@ namespace box2dlite
 				//Vec2 p2 = x2 + R2 * joint->localAnchor2;
 
 				System.Numerics.Vector2 x1 = 
-					new System.Numerics.Vector2(pos1.ReadSlot(0, pos1.Type._link_codescope, Player).FloatValue,
-					pos1.ReadSlot(1, pos1.Type._link_codescope, Player).FloatValue
+					new System.Numerics.Vector2(pos1.ReadSlot(0, Player).FloatValue,
+					pos1.ReadSlot(1, Player).FloatValue
 					);
 
 
-				float la1_x = localAnchor1.ReadSlot(0, localAnchor1.Type._link_codescope, Player).FloatValue;
-				float la1_y = localAnchor1.ReadSlot(1, localAnchor1.Type._link_codescope, Player).FloatValue;
+				float la1_x = localAnchor1.ReadSlot(0, Player).FloatValue;
+				float la1_y = localAnchor1.ReadSlot(1, Player).FloatValue;
 
 				var p1 = x1 + new System.Numerics.Vector2( la1_x * MathF.Cos(rotation1) - la1_y * MathF.Sin(rotation1),la1_x * MathF.Sin(rotation1) + la1_y * MathF.Cos(rotation1) );
 
 				System.Numerics.Vector2 x2 =
-					new System.Numerics.Vector2(pos2.ReadSlot(0, pos2.Type._link_codescope, Player).FloatValue,
-					pos2.ReadSlot(1, pos2.Type._link_codescope, Player).FloatValue
+					new System.Numerics.Vector2(pos2.ReadSlot(0, Player).FloatValue,
+					pos2.ReadSlot(1, Player).FloatValue
 					);
 				
-				float la2_x = localAnchor2.ReadSlot(0, localAnchor2.Type._link_codescope, Player).FloatValue;
-				float la2_y = localAnchor2.ReadSlot(1, localAnchor2.Type._link_codescope, Player).FloatValue;
+				float la2_x = localAnchor2.ReadSlot(0, Player).FloatValue;
+				float la2_y = localAnchor2.ReadSlot(1, Player).FloatValue;
 
 				var p2 = x2 + new System.Numerics.Vector2(la2_x * MathF.Cos(rotation2) - la2_y * MathF.Sin(rotation2), 
 					la2_x * MathF.Sin(rotation2) + la2_y * MathF.Cos(rotation2));
@@ -517,7 +517,7 @@ namespace box2dlite
 
 			//arbiters
 			var arbiters_index = world.Type._link_codescope.Members.FindIndex(m => m.QName.Name == "arbiters");
-			var arbiters_v = world.ReadSlot((ushort)arbiters_index, world.Type._link_codescope, Player);
+			var arbiters_v = world.ReadSlot((ushort)arbiters_index, Player);
 			Gl.BindVertexArray(Vao);
 			Gl.PointSize(4);
 
@@ -531,20 +531,20 @@ namespace box2dlite
 
 				RtInstance arbiter = (RtInstance)Player.Context.GC.Heap[arbiter_v.HeapPtr];
 
-				int num = arbiter.ReadSlot((ushort)arbiter_numContacts, arbiter.Type._link_codescope, Player).IntValue;
+				int num = arbiter.ReadSlot((ushort)arbiter_numContacts, Player).IntValue;
 
-				var contacts = arbiter.ReadSlot((ushort)arbiter_contacts, arbiter.Type._link_codescope, Player);
+				var contacts = arbiter.ReadSlot((ushort)arbiter_contacts, Player);
 
 				for (int j = 0; j < num; j++)
 				{
 					var contact_v = Player.GetVectorElement(contacts, j);
 					RtInstance contact = (RtInstance)Player.Context.GC.Heap[contact_v.HeapPtr];
 
-					var pos_v = contact.ReadSlot(0, contact.Type._link_codescope, Player, Context.STACK_LENGTH-1,contact_v.HeapPtr );
+					var pos_v = contact.ReadSlot(0,  Player, Context.STACK_LENGTH-1,contact_v.HeapPtr );
 					RtInstance pos = (RtInstance)Player.Context.GC.Heap[pos_v.HeapPtr];
 
-					float pos_x = pos.ReadSlot(0, pos.Type._link_codescope, Player).FloatValue;
-					float pos_y = pos.ReadSlot(1, pos.Type._link_codescope, Player).FloatValue;
+					float pos_x = pos.ReadSlot(0, Player).FloatValue;
+					float pos_y = pos.ReadSlot(1, Player).FloatValue;
 
 					SetColor(new System.Numerics.Vector4(1.0f, 0.0f, 0.0f, 1));
 

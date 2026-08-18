@@ -140,12 +140,12 @@ var o =new Main();
 
                 RtInstance payloadInstance = (RtInstance)instance;
 
-                NaNBoxing box = payloadInstance.ReadSlot(4, instance.Type._link_codescope, player);
+                NaNBoxing box = payloadInstance.ReadSlot(4, player);
                 Assert.AreEqual(NaNBoxing.BoxType.Int, box.ValueType);
                 Assert.AreEqual(666, box.IntValue);
 
 
-                box = payloadInstance.ReadSlot(5, instance.Type._link_codescope, player);
+                box = payloadInstance.ReadSlot(5, player);
                 Assert.AreEqual(NaNBoxing.BoxType.Short, box.ValueType);
                 Assert.AreEqual(777, box.ShortValue);
 

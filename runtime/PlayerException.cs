@@ -101,7 +101,7 @@ namespace juicescript.runtime
                                     if (((ASInstance)instance.Type).IsExtend(ex.player.Context.ERROR.Instance))
                                     {
                                         RtInstance rtPayload = (RtInstance)instance;
-                                        NaNBoxing msg = rtPayload.ReadSlot(0, instance.Type._link_codescope,player);
+                                        NaNBoxing msg = rtPayload.ReadSlot(0,player);
 
                                         stringBuilder.Append(instance.Type.QName.Name);
                                         stringBuilder.Append(": ");

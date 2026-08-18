@@ -1026,7 +1026,7 @@ namespace juicescript.runtime.buildin
 								{
 									printer.Write(instance.Type.QName.Name);
 									printer.Write(": ");
-									var msg = ((RtInstance)instance).ReadSlot(0, instance.Type._link_codescope, context.player);
+									var msg = ((RtInstance)instance).ReadSlot(0, context.player);
 									//TraceElement(msg, context, stackStPos, ref error, scope_ptr, callee_bindthis, printer);
 									arg = msg;
 									goto lbl_retry;

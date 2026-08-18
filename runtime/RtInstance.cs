@@ -409,7 +409,7 @@ namespace juicescript.runtime
 
 							if ((member.Kind == ScopeMemberKind.Constant || member.Kind == ScopeMemberKind.Slot) && member.trait.Value != null && member.trait.Value.initValue.HasValue)
 							{
-								SetSlot(member.trait.Value.initValue.Value, (ushort)i, link_codescope, player);
+								SetSlot(member.trait.Value.initValue.Value, (ushort)i, player);
 
 #if FORCOMPILER
 								if (isCompiling)
@@ -551,10 +551,13 @@ namespace juicescript.runtime
 
 #endif
 
-		public NaNBoxing ReadSlot(ushort memberIndex, CodeScope codescope, Player player , int returnSlotIndex ,int this_instance_Ptr)
+		public NaNBoxing ReadSlot(ushort memberIndex,  Player player , int returnSlotIndex ,int this_instance_Ptr)
 		{
-			var member = codescope.Members[memberIndex];
+			//Debug.Assert(Type._link_codescope == codescope);
 
+			var member = Type._link_codescope.Members[memberIndex];
+			var layout = Type._link_codescope.TypeLayout;
+			
 #if FORCOMPILER
 			if (isCompiling)
 			{
@@ -566,10 +569,10 @@ namespace juicescript.runtime
 #endif
 			unsafe
 			{
-				fixed (byte* p = GetStoreData(player, codescope.TypeLayout.ASType.Instance ))
+				fixed (byte* p = GetStoreData(player, layout.ASType.Instance ))
 				{
 					NaNBoxing result = new NaNBoxing();
-					byte* ptr = p + codescope.TypeLayout.Offset[memberIndex];
+					byte* ptr = p + layout.Offset[memberIndex];
 
 					switch (member.TypeKind)
 					{
@@ -652,7 +655,7 @@ namespace juicescript.runtime
 								RtInstance struct_payload = (RtInstance)cache;
 
 								struct_payload.methodscopeslot_ref_state = 0;
-								struct_payload.m_property_ptr = m_property_ptr + codescope.TypeLayout.Offset[memberIndex]; //标记index.
+								struct_payload.m_property_ptr = m_property_ptr + layout.Offset[memberIndex]; //标记index.
 								struct_payload.HEAPINSTANCE_PTR = HEAPINSTANCE_PTR == 0? this_instance_Ptr : HEAPINSTANCE_PTR ; //指向当前对象.
 
 								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
@@ -671,12 +674,12 @@ namespace juicescript.runtime
 			}
 		}
 
-		public NaNBoxing ReadSlot(ushort memberIndex, CodeScope codescope,Player player)
+		public NaNBoxing ReadSlot(ushort memberIndex, Player player)
         {
-			return ReadSlot(memberIndex, codescope, player, -1,0);
+			return ReadSlot(memberIndex, player, -1,0);
         }
 
-        internal void SetSlot(NaNBoxing value, ushort memberIndex, CodeScope codeScope,Player player)
+        internal void SetSlot(NaNBoxing value, ushort memberIndex, Player player)
         {
 #if FORCOMPILER
             if (isCompiling)
@@ -685,10 +688,14 @@ namespace juicescript.runtime
             }
 #endif
 
+			//Debug.Assert(Type._link_codescope == codeScope || (Extensions.IsExtend(  (ASInstance)Type , codeScope.TypeLayout.ASType.Instance) && memberIndex < Type._link_codescope.Members.Count ) );
+
+			var codeScope = Type._link_codescope;
+
             var member = codeScope.Members[memberIndex];
             unsafe
             {
-                fixed (byte* p = GetStoreData(player,codeScope.TypeLayout.ASType.Instance))
+                fixed (byte* p = GetStoreData(player, (ASInstance)Type ))//codeScope.TypeLayout.ASType.Instance))
                 { 
                     byte* ptr = p + codeScope.TypeLayout.Offset[memberIndex];
 					SetSlotDataByValue(member,ptr, value);
@@ -893,7 +900,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				var oldValue = ReadSlot(memberIndex, type._link_codescope, contxt.player);
+				var oldValue = ReadSlot(memberIndex, contxt.player);
 				return contxt.player.CopyIfSameTypeStructAndReplaceSrc(oldValue,ref newValue);
 			}
 

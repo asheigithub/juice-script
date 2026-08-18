@@ -93,7 +93,7 @@ new A().exec();
 
 			var errinstance = (RtInstance)err;
 
-			var message = errinstance.ReadSlot(0, err.Type._link_codescope, player);
+			var message = errinstance.ReadSlot(0, player);
 
 			Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, message.ValueType);
 

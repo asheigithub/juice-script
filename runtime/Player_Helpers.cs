@@ -3041,8 +3041,8 @@ namespace juicescript.runtime
 						NaNBoxing count = default; count.SetInt(0);
 
 
-						iter.SetSlot(index, 0, obj_iter.Instance._link_codescope, this);
-						iter.SetSlot(count, 1, obj_iter.Instance._link_codescope, this);
+						iter.SetSlot(index, 0, this);
+						iter.SetSlot(count, 1, this);
 
 						//throw new NotImplementedException();
 
@@ -3114,8 +3114,8 @@ namespace juicescript.runtime
 					NaNBoxing count = default; count.SetInt(0);
 
 
-					iter.SetSlot(index, 0, obj_iter.Instance._link_codescope, this);
-					iter.SetSlot(count, 1, obj_iter.Instance._link_codescope, this);
+					iter.SetSlot(index, 0, this);
+					iter.SetSlot(count, 1, this);
 
 				}
 				else
@@ -3257,7 +3257,7 @@ namespace juicescript.runtime
 			}
 
 			RtInstance result_payload = (RtInstance)result;
-			var done = result_payload.ReadSlot(0, result.Type._link_codescope, this);
+			var done = result_payload.ReadSlot(0, this);
 #if DEBUG
 			if (done.ValueType != BoxType.Boolean) throw new InvalidOperationException();
 #endif
@@ -3270,7 +3270,7 @@ namespace juicescript.runtime
 			{
 				if (mode == 0)
 				{
-					var key = result_payload.ReadSlot(1, result.Type._link_codescope, this);
+					var key = result_payload.ReadSlot(1, this);
 					//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
 					if (key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
@@ -3298,7 +3298,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					var value = result_payload.ReadSlot(2, result.Type._link_codescope, this);
+					var value = result_payload.ReadSlot(2, this);
 					//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
 					if (value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
@@ -4709,7 +4709,7 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+									((RtInstance)instance).SetSlot(v, (ushort)i, this);
 								}
 
 								argementsPtr += 4;
@@ -5048,7 +5048,7 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+								((RtInstance)instance).SetSlot(v, (ushort)i, this);
 							}
 
 							argementsPtr += 4;
@@ -5128,7 +5128,7 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+								((RtInstance)instance).SetSlot(v, (ushort)i, this);
 							}
 
 							argementsPtr += 4;
@@ -5356,7 +5356,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						((RtInstance)instance).SetSlot(v, (ushort)i, ((RtInstance)instance).Type._link_codescope, this);
+						((RtInstance)instance).SetSlot(v, (ushort)i, this);
 					}
 
 					argementsPtr += 4;
@@ -7121,7 +7121,7 @@ namespace juicescript.runtime
 						ASTrait t = scopeType._link_codescope.Members[heapLocater.MemberIndex].trait;
 
 
-						heap.SetSlot(t.Value.initValue.Value, heapLocater.MemberIndex, scopeType._link_codescope, this);
+						heap.SetSlot(t.Value.initValue.Value, heapLocater.MemberIndex, this);
 
 					}
 					break;
@@ -8407,7 +8407,7 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								heap.SetSlot(value, heapLocater.MemberIndex, s.Type._link_codescope, this);
+								heap.SetSlot(value, heapLocater.MemberIndex, this);
 							}
 						}
 					}
@@ -8798,7 +8798,7 @@ namespace juicescript.runtime
 #endif
 
 
-					stackslots[target.index] = ((RtInstance)instance).ReadSlot((ushort)scopemember_index, instance.Type._link_codescope, this, stackStPos + target.index, instance_box.HeapPtr);
+					stackslots[target.index] = ((RtInstance)instance).ReadSlot((ushort)scopemember_index, this, stackStPos + target.index, instance_box.HeapPtr);
 
 					//int ptrIndex = stackStPos + target.index;
 					//int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
@@ -9009,7 +9009,7 @@ namespace juicescript.runtime
 							goto flag_handle_error;
 						}
 
-						payload.SetSlot(box, (ushort)scopemember_index, instance.Type._link_codescope, this);
+						payload.SetSlot(box, (ushort)scopemember_index, this);
 					}
 				}
 #if DEBUG
@@ -11026,7 +11026,7 @@ namespace juicescript.runtime
 						{
 							//throw new InvalidOperationException();
 
-							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex, s.Type._link_codescope, this, stackStPos + stackLocater.index, _parent_ptr);
+							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex,  this, stackStPos + stackLocater.index, _parent_ptr);
 							stackslots[stackLocater.index] = value;
 							return;
 							//return value;

@@ -223,15 +223,15 @@ namespace juicescript.runtime.buildin
 
 					NaNBoxing key = context.StackSlots[returnSlotIndex];
 
-					result.SetSlot(key, 1, result_ins.Type._link_codescope, context.player);
-					result.SetSlot(key, 2, result_ins.Type._link_codescope, context.player);
+					result.SetSlot(key, 1, context.player);
+					result.SetSlot(key, 2, context.player);
 
 				}
 				else
 				{
 					done.SetBoolean(true);
 				}
-				result.SetSlot(done, 0, result_ins.Type._link_codescope, context.player);
+				result.SetSlot(done, 0, context.player);
 
 			}
 			else

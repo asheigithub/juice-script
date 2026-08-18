@@ -91,38 +91,38 @@ a.t = false;
 
             Assert.AreEqual("3",
                 
-                ((RtInstance)a_v).ReadSlot(0, OO.Instance._link_codescope,player).LocalStringValue
+                ((RtInstance)a_v).ReadSlot(0,player).LocalStringValue
                
                 );
 
             Assert.AreEqual("NaN",
                ((RtString)
-               player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(1, OO.Instance._link_codescope, player).HeapPtr]
+               player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(1, player).HeapPtr]
                ).Str
                );
 
             Assert.AreEqual("Infinity",
                 ((RtString)
-                player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(2, OO.Instance._link_codescope, player).HeapPtr]
+                player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(2, player).HeapPtr]
                 ).Str
                 );
 
             Assert.AreEqual("-Infinity",
                ((RtString)
-               player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(3, OO.Instance._link_codescope, player).HeapPtr]
+               player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(3, player).HeapPtr]
                ).Str
                );
 
 
             Assert.AreEqual("true",
               ((RtString)
-              player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(4, OO.Instance._link_codescope, player).HeapPtr]
+              player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(4, player).HeapPtr]
               ).Str
               );
 
             Assert.AreEqual("false",
               ((RtString)
-              player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(5, OO.Instance._link_codescope, player).HeapPtr]
+              player.Context.GC.Heap[((RtInstance)a_v).ReadSlot(5, player).HeapPtr]
               ).Str
               );
 

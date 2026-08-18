@@ -94,14 +94,14 @@ b = new a();
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, b.ValueType);
 
             RtInstance bins = (RtInstance)player.Context.GC.Heap[b.HeapPtr];
-            var b_I = bins.ReadSlot(0, @class.Instance._link_codescope, player);
+            var b_I = bins.ReadSlot(0, player);
             Assert.AreEqual(NaNBoxing.BoxType.Undefined, b_I.ValueType);
 
             NaNBoxing c = rtPayload.ReadSlot(1);
             Assert.AreEqual(NaNBoxing.BoxType.HeapPtr, b.ValueType);
 
             RtInstance cins = (RtInstance)player.Context.GC.Heap[c.HeapPtr];
-            var c_I = cins.ReadSlot(0, @class.Instance._link_codescope, player);
+            var c_I = cins.ReadSlot(0, player);
             Assert.AreEqual(NaNBoxing.BoxType.Sbyte, c_I.ValueType);
 
 

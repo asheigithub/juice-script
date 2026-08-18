@@ -79,7 +79,7 @@ a.o = 3;
 
             Assert.AreEqual(a_v.Type, OO.Instance);
 
-            var slot = ((RtInstance)a_v).ReadSlot(0, OO.Instance._link_codescope,player);
+            var slot = ((RtInstance)a_v).ReadSlot(0,player);
             Assert.AreEqual(NaNBoxing.BoxType.Int, slot.ValueType);
             Assert.AreEqual(3, slot.IntValue);
 

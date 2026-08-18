@@ -437,7 +437,7 @@ namespace juicescript.runtime.buildin
 			var result = context.GC.Heap[result_ptr.HeapPtr];
 			RtInstance result_obj = (RtInstance)result;
 
-			var index = ((RtInstance)iter_ins).ReadSlot(0, iter_ins.Type._link_codescope, context.player);
+			var index = ((RtInstance)iter_ins).ReadSlot(0, context.player);
 #if DEBUG
 			if (index.ValueType != NaNBoxing.BoxType.Int)
 			{
@@ -452,11 +452,11 @@ namespace juicescript.runtime.buildin
 				
 				//迭代器 递增
 				index.SetInt(i + 1);
-				((RtInstance)iter_ins).SetSlot(index, 0, iter_ins.Type._link_codescope, context.player);
+				((RtInstance)iter_ins).SetSlot(index, 0, context.player);
 
 
 				NaNBoxing f = default; f.SetBoolean(false);
-				result_obj.SetSlot(f, 0, result.Type._link_codescope, context.player);
+				result_obj.SetSlot(f, 0, context.player);
 
 				var kv = dict.dict.Skip(i).First();
 #if DEBUG
@@ -466,14 +466,14 @@ namespace juicescript.runtime.buildin
 
 				
 
-				result_obj.SetSlot(kv.Key.key, 1, result.Type._link_codescope, context.player);
-				result_obj.SetSlot(kv.Value, 2, result.Type._link_codescope, context.player);
+				result_obj.SetSlot(kv.Key.key, 1, context.player);
+				result_obj.SetSlot(kv.Value, 2, context.player);
 
 			}
 			else
 			{
 				NaNBoxing f = default;f.SetBoolean(true);
-				result_obj.SetSlot(f, 0, result.Type._link_codescope, context.player);
+				result_obj.SetSlot(f, 0, context.player);
 			}
 		}
 

@@ -186,7 +186,7 @@ var n = new Main();
 			var member = player.Context.GC.Heap[n.HeapPtr].Type._link_codescope.Members[0];
 
 			Assert.AreEqual("a", member.QName.Name);
-			var v = payloadInstance.ReadSlot(0, player.Context.GC.Heap[n.HeapPtr].Type._link_codescope, player);
+			var v = payloadInstance.ReadSlot(0,  player);
 			Assert.AreEqual(NaNBoxing.BoxType.Number, v.ValueType);
 			Assert.AreEqual(7, v.Number);
 

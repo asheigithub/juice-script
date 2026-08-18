@@ -28,11 +28,11 @@ namespace juicescript.runtime.buildin
 
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			err.SetSlot(scope.ReadSlot(0,context.player), 0, context.ERROR.Instance._link_codescope, context.player);
-			err.SetSlot(scope.ReadSlot(1,context.player), 2, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(scope.ReadSlot(0,context.player), 0, context.player);
+			err.SetSlot(scope.ReadSlot(1,context.player), 2, context.player);
 
 			NaNBoxing name = default; name.SetHeapPtr(context.player.cache_ERROR_NAME, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-			err.SetSlot(name, 1, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(name, 1, context.player);
 		}
 
 		[NativeFunction(".TypeError$public::TypeError")]
@@ -51,11 +51,11 @@ namespace juicescript.runtime.buildin
 
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			err.SetSlot(scope.ReadSlot(0,context.player), 0, context.TYPE_ERROR.Instance._link_codescope, context.player);
-			err.SetSlot(scope.ReadSlot(1,context.player), 2, context.TYPE_ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(scope.ReadSlot(0,context.player), 0, context.player);
+			err.SetSlot(scope.ReadSlot(1,context.player), 2, context.player);
 
 			NaNBoxing name=default;name.SetHeapPtr(context.player.cache_TYPE_ERROR_NAME, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE	);
-			err.SetSlot( name , 1, context.TYPE_ERROR.Instance._link_codescope, context.player);
+			err.SetSlot( name , 1, context.player);
 
 		}
 		//.EvalError$public::EvalError 
@@ -75,11 +75,11 @@ namespace juicescript.runtime.buildin
 
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
-			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.player);
+			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.player);
 	
 			NaNBoxing name = default; name.SetHeapPtr(context.player.cache_Eval_ERROR_NAME, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-			err.SetSlot(name, 1, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(name, 1, context.player);
 
 		}
 
@@ -99,11 +99,11 @@ namespace juicescript.runtime.buildin
 
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
-			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.player);
+			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.player);
 
 			NaNBoxing name = default; name.SetHeapPtr(context.player.cache_RANGE_ERROR_NAME, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-			err.SetSlot(name, 1, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(name, 1, context.player);
 
 		}
 
@@ -123,11 +123,11 @@ namespace juicescript.runtime.buildin
 
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
-			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.player);
+			err.SetSlot(scope.ReadSlot(1, context.player), 2, context.player);
 
 			NaNBoxing name = default; name.SetHeapPtr(context.player.cache_REFERENCE_ERROR_NAME, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-			err.SetSlot(name, 1, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(name, 1, context.player);
 
 		}
 
@@ -149,7 +149,7 @@ namespace juicescript.runtime.buildin
 
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(scope.ReadSlot(0, context.player), 0, context.player);
 
 			var scriptid = ((ASScript)context.GC.Heap[thisPtr.HeapPtr].Type._link_codescope.Parent.Container).__global_index__	;
 			NaNBoxing name = ((RtScriptClass)context.GC.Heap[scriptid]).ReadSlot(0);
@@ -157,7 +157,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(name.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(context.GC.Heap[name.HeapPtr].Kind == RtHeapTypeKind.STRING );
 
-			err.SetSlot(name, 1, context.ERROR.Instance._link_codescope, context.player);
+			err.SetSlot(name, 1, context.player);
 
 		}
 
@@ -186,7 +186,7 @@ namespace juicescript.runtime.buildin
 #endif
 			var err = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
 
-			NaNBoxing id = err.ReadSlot(2, context.ERROR.Instance._link_codescope, context.player);
+			NaNBoxing id = err.ReadSlot(2, context.player);
 
 			context.StackSlots[returnSlotIndex] = id;
 		}

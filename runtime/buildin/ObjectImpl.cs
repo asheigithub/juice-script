@@ -386,8 +386,8 @@ namespace juicescript.runtime.buildin
 			var iter = (RtInstance)iter_ins;
 
 			
-			var _index = iter.ReadSlot(0, iter_ins.Type._link_codescope, context.player);
-			var _count = iter.ReadSlot(1, iter_ins.Type._link_codescope, context.player);
+			var _index = iter.ReadSlot(0, context.player);
+			var _count = iter.ReadSlot(1, context.player);
 			
 			var _result = scope.ReadSlot(1, context.player);
 			var _obj = scope.ReadSlot(0,context.player);
@@ -426,16 +426,16 @@ namespace juicescript.runtime.buildin
 						
 						_count.SetInt((int)next_index);
 
-						iter.SetSlot(_index, 0, iter_ins.Type._link_codescope, context.player);
-						iter.SetSlot(_count, 1, iter_ins.Type._link_codescope, context.player);
+						iter.SetSlot(_index, 0, context.player);
+						iter.SetSlot(_count, 1, context.player);
 
 						NaNBoxing done = default; done.SetBoolean(false);
-						result.SetSlot(done, 0, result_ins.Type._link_codescope, context.player);
+						result.SetSlot(done, 0, context.player);
 
 						NaNBoxing key = default; key.SetUInt(k);
 						
-						result.SetSlot(key, 1, result_ins.Type._link_codescope, context.player);
-						result.SetSlot(v, 2, result_ins.Type._link_codescope, context.player);
+						result.SetSlot(key, 1, context.player);
+						result.SetSlot(v, 2, context.player);
 
 						return;
 
@@ -460,16 +460,16 @@ namespace juicescript.runtime.buildin
 					var _value = store.ReadSlot(vector.element_type,validid, context.player, _obj.HeapPtr,reseveSlot , vector.element_asclass);
 
 					_index.SetInt(validid + 1);
-					iter.SetSlot(_index, 0, iter_ins.Type._link_codescope, context.player);
+					iter.SetSlot(_index, 0, context.player);
 
 					
 					NaNBoxing done = default; done.SetBoolean(false);
-					result.SetSlot(done, 0, result_ins.Type._link_codescope, context.player);
+					result.SetSlot(done, 0, context.player);
 
 					NaNBoxing key = default; key.SetInt( validid);
 
-					result.SetSlot(key, 1, result_ins.Type._link_codescope, context.player);
-					result.SetSlot(_value, 2, result_ins.Type._link_codescope, context.player);
+					result.SetSlot(key, 1, context.player);
+					result.SetSlot(_value, 2, context.player);
 
 					return;
 				}
@@ -497,7 +497,7 @@ namespace juicescript.runtime.buildin
 				if (_index.IntValue == 0)
 				{
 					_count.SetInt(prop.Slots.Count);
-					iter.SetSlot(_count, 1, iter_ins.Type._link_codescope, context.player);
+					iter.SetSlot(_count, 1, context.player);
 				}
 
 				
@@ -532,16 +532,16 @@ namespace juicescript.runtime.buildin
 					}
 
 					_index.SetInt(current + 1);
-					iter.SetSlot(_index, 0, iter_ins.Type._link_codescope, context.player);
+					iter.SetSlot(_index, 0, context.player);
 
 					NaNBoxing done = default; done.SetBoolean(false);
-					result.SetSlot(done, 0, result_ins.Type._link_codescope, context.player);
+					result.SetSlot(done, 0, context.player);
 
 					NaNBoxing key = shapepayload.PTR_NAME;
 					NaNBoxing value = prop.Slots[prop.Slots.Count - current - 1];
 
-					result.SetSlot(key, 1, result_ins.Type._link_codescope, context.player);
-					result.SetSlot(value, 2, result_ins.Type._link_codescope, context.player);
+					result.SetSlot(key, 1, context.player);
+					result.SetSlot(value, 2, context.player);
 
 					return;
 				}
@@ -552,9 +552,9 @@ namespace juicescript.runtime.buildin
 			{
 				NaNBoxing done = default; done.SetBoolean(true);
 				NaNBoxing u = default; u.SetUndefined();
-				result.SetSlot(done, 0, result_ins.Type._link_codescope, context.player);
-				result.SetSlot(u, 1, result_ins.Type._link_codescope, context.player);
-				result.SetSlot(u, 2, result_ins.Type._link_codescope, context.player);
+				result.SetSlot(done, 0, context.player);
+				result.SetSlot(u, 1, context.player);
+				result.SetSlot(u, 2, context.player);
 			}
 		}
 
@@ -571,8 +571,8 @@ namespace juicescript.runtime.buildin
 			var iter = (RtInstance)iter_ins;
 
 			NaNBoxing zero = default; zero.SetInt(0);
-			iter.SetSlot(zero, 0, iter_ins.Type._link_codescope, context.player);
-			iter.SetSlot(zero, 1, iter_ins.Type._link_codescope, context.player);
+			iter.SetSlot(zero, 0, context.player);
+			iter.SetSlot(zero, 1, context.player);
 			
 
 		}

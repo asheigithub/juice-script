@@ -391,7 +391,7 @@ namespace juicescript.runtime
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
 
 							payload.isCompiling = false;
-							var v = payload.ReadSlot((ushort)idx, c._link_codescope, this);
+							var v = payload.ReadSlot((ushort)idx, this);
 							payload.isCompiling = true;
 
 							return v;
