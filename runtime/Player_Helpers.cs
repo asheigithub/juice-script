@@ -9233,7 +9233,10 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = index.ToString();
+										bool success = index.TryFormat(buffers, out int l);
+										Debug.Assert(success);
+										name = buffers.Slice(0, l);
+										//name = index.ToString();
 										goto array_prop;
 									}
 								}
@@ -9255,7 +9258,10 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = index.ToString();
+										bool success = index.TryFormat(buffers, out int l);
+										Debug.Assert(success);
+										name = buffers.Slice(0, l);
+										//name = index.ToString();
 										goto array_prop;
 									}
 								}
@@ -9283,7 +9289,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -9296,7 +9305,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -9309,7 +9321,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -9327,7 +9342,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -9913,7 +9931,12 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = index.ToString();
+										
+										bool success  =index.TryFormat(buffers, out int l);
+										Debug.Assert(success);
+										name = buffers.Slice(0, l);
+
+										//name = index.ToString();
 										goto array_prop;
 									}
 								}
@@ -9935,7 +9958,10 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = index.ToString();
+										bool success = index.TryFormat(buffers, out int l);
+										Debug.Assert(success);
+										name = buffers.Slice(0, l);
+										//name = index.ToString();
 										goto array_prop;
 									}
 								}
@@ -9963,7 +9989,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -9976,7 +10005,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -9989,7 +10021,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -10007,7 +10042,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -10538,7 +10576,10 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = index.ToString();
+										bool success = index.TryFormat(buffers, out int l);
+										Debug.Assert(success);
+										name = buffers.Slice(0, l);
+										//name = index.ToString();
 										goto array_prop;
 									}
 								}
@@ -10560,7 +10601,10 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										name = index.ToString();
+										bool success = index.TryFormat(buffers, out int l);
+										Debug.Assert(success);
+										name = buffers.Slice(0, l);
+										//name = index.ToString();
 										goto array_prop;
 									}
 								}
@@ -10588,7 +10632,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -10601,7 +10648,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -10614,7 +10664,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}
@@ -10632,7 +10685,10 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									name = index.ToString();
+									bool success = index.TryFormat(buffers, out int l);
+									Debug.Assert(success);
+									name = buffers.Slice(0, l);
+									//name = index.ToString();
 									goto array_prop;
 								}
 							}

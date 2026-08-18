@@ -9793,7 +9793,8 @@ namespace juicescript.runtime
 									Span<char> buffer1 = stackalloc char[128];
 
 									var str = buildin.Numeric.ToNumberString(invalue.Number, buffer1); //invalue.Number.ToString();
-																									   // 使用辅助函数优化字符串创建
+
+									// 使用辅助函数优化字符串创建
 									if (!TryCreateStringValue(str, out outvalue, ref error))
 									{
 										return; // 错误已经在TryCreateStringValue中处理
@@ -9826,7 +9827,11 @@ namespace juicescript.runtime
 							return;
 						case NaNBoxing.BoxType.Int:
 							{
-								string str = invalue.IntValue.ToString();
+								Span<char> _buffer = stackalloc char[128];
+								bool success = invalue.IntValue.TryFormat(_buffer, out int l);
+								ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+								//string str = invalue.IntValue.ToString();
 								// 使用辅助函数优化字符串创建
 								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
@@ -9836,7 +9841,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Uint:
 							{
-								string str = invalue.UIntValue.ToString();
+								Span<char> _buffer = stackalloc char[128];
+								bool success = invalue.UIntValue.TryFormat(_buffer, out int l);
+								ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+								//string str = invalue.UIntValue.ToString();
 								// 使用辅助函数优化字符串创建
 								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
@@ -9846,7 +9855,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Sbyte:
 							{
-								string str = invalue.SByteValue.ToString();
+								Span<char> _buffer = stackalloc char[128];
+								bool success = invalue.SByteValue.TryFormat(_buffer, out int l);
+								ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+								//string str = invalue.SByteValue.ToString();
 								// 使用辅助函数优化字符串创建
 								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
@@ -9856,7 +9869,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Byte:
 							{
-								string str = invalue.ByteValue.ToString();
+								Span<char> _buffer = stackalloc char[128];
+								bool success = invalue.ByteValue.TryFormat(_buffer, out int l);
+								ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+								//string str = invalue.ByteValue.ToString();
 								// 使用辅助函数优化字符串创建
 								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
@@ -9866,7 +9883,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.Short:
 							{
-								string str = invalue.ShortValue.ToString();
+								Span<char> _buffer = stackalloc char[128];
+								bool success = invalue.ShortValue.TryFormat(_buffer, out int l);
+								ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+								//string str = invalue.ShortValue.ToString();
 								// 使用辅助函数优化字符串创建
 								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
@@ -9876,7 +9897,11 @@ namespace juicescript.runtime
 							}
 						case NaNBoxing.BoxType.UShort:
 							{
-								string str = invalue.UShortValue.ToString();
+								Span<char> _buffer = stackalloc char[128];
+								bool success = invalue.UShortValue.TryFormat(_buffer, out int l);
+								ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+								//string str = invalue.UShortValue.ToString();
 								// 使用辅助函数优化字符串创建
 								if (!TryCreateStringValue(str, out outvalue, ref error))
 								{
@@ -9903,7 +9928,11 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									string str = invalue.FloatValue.ToString();
+									Span<char> _buffer = stackalloc char[128];
+									bool success = invalue.FloatValue.TryFormat(_buffer, out int l);
+									ReadOnlySpan<char> str = _buffer.Slice(0, l);
+
+									//string str = invalue.FloatValue.ToString();
 									// 使用辅助函数优化字符串创建
 									if (!TryCreateStringValue(str, out outvalue, ref error))
 									{
