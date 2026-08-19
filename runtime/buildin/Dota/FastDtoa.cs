@@ -30,6 +30,7 @@
 // Ported to Java from Mozilla's version of V8-dtoa by Hannes Wallnoefer.
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
+using System;
 using System.Diagnostics;
 
 namespace Jint.Native.Number.Dtoa;

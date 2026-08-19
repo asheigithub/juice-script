@@ -1,5 +1,6 @@
 #nullable disable
 
+using System;
 using System.Diagnostics;
 
 namespace Jint.Native.Number.Dtoa;

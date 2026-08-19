@@ -1132,7 +1132,7 @@ namespace juicescript.runtime.gc
                             {
                                 throw new InvalidOperationException();
                             }
-                            else if(((RtPayloadInstance)instance).wapperedObject != null)
+                            else if(((RtInstance)instance).wapperedObject != null)
                             {
                                 throw new InvalidOperationException();
                             }

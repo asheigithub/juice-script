@@ -10,28 +10,40 @@
     <Configurations>Debug;Release;Debug_Player;ReleasePlayer;ProfilePlayer</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);FORCOMPILER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);FORCOMPILER</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\abc\abc.csproj" />
-    <ProjectReference Include="..\runtime\runtime.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
+    <Compile Include="..\runtime\*.cs">
+      <Link>Rumtime\%(RecursivePath)%(Filename)%(Extension)</Link>
+    </Compile>
+	<Compile Include="..\runtime\gc\*.cs">
+      <Link>Rumtime\gc\%(RecursivePath)%(Filename)%(Extension)</Link>
+    </Compile>
+	<Compile Include="..\runtime\buildin\*.cs">
+      <Link>Rumtime\buildin\%(RecursivePath)%(Filename)%(Extension)</Link>
+    </Compile>
+	<Compile Include="..\runtime\buildin\Dota\*.cs">
+      <Link>Rumtime\buildin\Dota\%(RecursivePath)%(Filename)%(Extension)</Link>
+    </Compile>
+	<Compile Include="..\runtime\buildin\Pooling\*.cs">
+      <Link>Rumtime\buildin\Pooling\%(RecursivePath)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
 
+  
+  
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <ProjectReference Include="..\abc\abc.csproj" />
   </ItemGroup>
 
 </Project>

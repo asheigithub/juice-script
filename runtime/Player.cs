@@ -1,3 +1,4 @@
+using System.Linq;
 using juicescript.ABC;
 using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
@@ -17,6 +18,8 @@ using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
 //using static juicescript.ABC.INS.INS_Op_stack_Var_ldConst;
 using static juicescript.NaNBoxing;
 using static System.Formats.Asn1.AsnWriter;
+using System.Collections.Generic;
+using System.IO;
 
 
 namespace juicescript.runtime

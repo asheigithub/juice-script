@@ -1183,6 +1183,8 @@ namespace juicescript.runtime.buildin
 		}
 
 
+#if !FORCOMPILER
+
 		[NativeFunction("$__AS3__.toplevel$public::fetch")]
 		public static void HttpFetch(Context context,
 			ASMethod method,
@@ -1309,6 +1311,8 @@ namespace juicescript.runtime.buildin
 			context.StackSlots[returnSlotIndex].SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 
 		}
+
+#endif
 
 	}
 }
