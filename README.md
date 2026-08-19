@@ -63,11 +63,10 @@ fd_projs/dev_scripts/src
 解决方案中包含多套构建配置：
 
 - **Debug / Release**  
-  用于构建编译器（compiler）与工具链（juice.exe）。
+  用于构建编译器（compiler）运行时 (player) 工具链（juice.exe）。
 
-- **Debug_Player / Release_Player**  
-  用于构建运行时（runtime）与播放器（player）。  
-  这两个配置不会生成编译器，只生成可执行的运行时环境。因为编译器其实也依赖于runtime,这两个配置删除了用于编译器部分的代码，所以生成的player是最优化的。
+- **ProfilePlayer**  
+  构建带有性能计数的Player,可统计指令的耗时和函数的耗时。
 
 ## Samples: Box2DLite
 
