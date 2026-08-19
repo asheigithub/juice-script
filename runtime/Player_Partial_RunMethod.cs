@@ -124,7 +124,7 @@ namespace juicescript.runtime
 					//检查参数个数
 					if (args > method.Parameters.Count)
 					{
-						if ((method.Parameters.Count == 0 || !method.Flags.HasFlag( MethodFlags.NeedRest)) && !(method.Flags.HasFlag(MethodFlags.NeedArguments)))
+						if ((method.Parameters.Count == 0 || !((method.Flags & MethodFlags.NeedRest) != 0)) && !((method.Flags & MethodFlags.NeedArguments) != 0))
 						{
 							//throw new NotImplementedException("参数过多");
 
@@ -160,8 +160,8 @@ namespace juicescript.runtime
 
 
 				//先将 rest 部分元素序列放入
-				if (//method.Parameters.Count > 0 && method.Parameters[method.Parameters.Count - 1].IsRest
-					method.Flags.HasFlag(MethodFlags.NeedRest)
+				if (
+					((method.Flags & (MethodFlags.NeedRest)) != 0)
 					)
 				{
 					int restCount = args - (method.Parameters.Count - 1);
@@ -195,7 +195,7 @@ namespace juicescript.runtime
 							//	k(b);
 							//})();
 							NaNBoxing box = slot[argLocater.index];
-							if (!method.Flags.HasFlag(MethodFlags.Native))
+							if (!((method.Flags & (MethodFlags.Native)) != 0))
 							{
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
@@ -224,7 +224,7 @@ namespace juicescript.runtime
 						}
 					}
 				}
-				else if (method.Flags.HasFlag(MethodFlags.NeedArguments)) //构造argements数组
+				else if (((method.Flags & (MethodFlags.NeedArguments)) != 0)) //构造argements数组
 				{
 					para_argcount = args + 2;
 
@@ -417,11 +417,11 @@ namespace juicescript.runtime
 
 				//***传参***
 
-				fixed (byte* bp = method.Flags.HasFlag(MethodFlags.HasOptional) ? method.Body.param_defaultvalues : null)
+				fixed (byte* bp = ((method.Flags & (MethodFlags.HasOptional)) != 0) ? method.Body.param_defaultvalues : null)
 				{
 					Span<NaNBoxing> arguments_span = default;
 
-					if (method.Flags.HasFlag(MethodFlags.NeedArguments))
+					if ((method.Flags & (MethodFlags.NeedArguments)) != 0)
 					{
 						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 						RtHeapBase arg_arguments = Context.GC.Heap[argumentsPtr];
@@ -533,7 +533,7 @@ namespace juicescript.runtime
 									}
 								}
 
-								if (method.Flags.HasFlag(MethodFlags.NeedArguments))
+								if (((method.Flags & (MethodFlags.NeedArguments)) != 0))
 								{
 									//有arguments,只能实例到堆。避免其他意外
 									box = param_slots[i];
@@ -623,7 +623,7 @@ namespace juicescript.runtime
 				}
 
 
-				if (method.Flags.HasFlag(MethodFlags.Generator))
+				if (((method.Flags & (MethodFlags.Generator)) != 0))
 				{
 					if (Context.StackPosition + 2
 					//+ 1 
@@ -677,7 +677,7 @@ namespace juicescript.runtime
 
 
 					GeneratorImpl.GeneratorWapper wapper = new GeneratorImpl.GeneratorWapper();
-					if (!method.Flags.HasFlag(MethodFlags.NoTry))
+					if (!((method.Flags & (MethodFlags.NoTry)) != 0))
 					{
 						wapper.exceptionContext = new ExceptionContext[Context.MAX_TRY_NESTED + 2];
 					}
@@ -711,7 +711,7 @@ namespace juicescript.runtime
 					return result;
 
 				}
-				else if (method.Flags.HasFlag(MethodFlags.ASYNC) )
+				else if (((method.Flags & (MethodFlags.ASYNC)) != 0) )
 				{
 					Debug.Assert(!method.Flags.HasFlag(MethodFlags.Native));
 					//native方法只需要返回Promise即可，它里面没有await!
@@ -801,7 +801,7 @@ namespace juicescript.runtime
 					}
 
 					PromiseImpl.AsyncGenWapper wapper = new PromiseImpl.AsyncGenWapper();
-					if (!method.Flags.HasFlag(MethodFlags.NoTry))
+					if (!((method.Flags & (MethodFlags.NoTry)) != 0))
 					{
 						wapper.exceptionContext = new ExceptionContext[Context.MAX_TRY_NESTED + 2];
 					}
