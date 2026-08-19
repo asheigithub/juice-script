@@ -9,7 +9,7 @@ package
 		
 		var MM;
 		
-        public function Main() {
+        public  function Main() {
 			
 			
 			

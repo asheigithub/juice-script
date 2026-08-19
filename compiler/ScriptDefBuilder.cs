@@ -1806,7 +1806,10 @@ namespace juicescript.compiler
 				{
 					throw new SyntaxException(function.Token, "native function return Promise,not async");
 				}
-
+				if (function.IsConstructor)
+				{
+					throw new SyntaxException(function.Token, "constructor not async");
+				}
 
 				method.Flags |= MethodFlags.ASYNC;
 				method.Flags |= MethodFlags.NeedActivation; //ASYNC函数必然需要创建上下文

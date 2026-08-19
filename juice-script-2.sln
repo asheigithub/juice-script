@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{02EA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "box2dlite", "samples\box2dlite\box2dlite.csproj", "{5B53D3DB-75B5-4195-8B53-62B19E9F898B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6DCD3EC0-8364-4724-9BA4-53C2D5761B2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Player|Any CPU = Debug_Player|Any CPU
@@ -277,6 +279,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{610B3342-99F3-4DF8-9553-54C5A6049A94} = {6DCD3EC0-8364-4724-9BA4-53C2D5761B2F}
 		{5B53D3DB-75B5-4195-8B53-62B19E9F898B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
