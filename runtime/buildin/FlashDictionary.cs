@@ -103,7 +103,7 @@ namespace juicescript.runtime.buildin
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
 			Dict dict = (Dict)((RtInstance)this_ins).wapperedObject;
 
-			NaNBoxing key = scope.ReadSlot(0, context.player);
+			NaNBoxing key = scope.ReadSlot(0);
 
 			if (key.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
@@ -229,8 +229,8 @@ namespace juicescript.runtime.buildin
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
 			Dict dict = (Dict)((RtInstance)this_ins).wapperedObject;
 
-			NaNBoxing key = scope.ReadSlot(0, context.player);
-			NaNBoxing value = scope.ReadSlot(1, context.player);
+			NaNBoxing key = scope.ReadSlot(0);
+			NaNBoxing value = scope.ReadSlot(1);
 
 			if (key.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
@@ -316,7 +316,7 @@ namespace juicescript.runtime.buildin
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
 			Dict dict = (Dict)((RtInstance)this_ins).wapperedObject;
 
-			NaNBoxing key = scope.ReadSlot(0, context.player);
+			NaNBoxing key = scope.ReadSlot(0);
 
 			if (key.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
@@ -428,12 +428,12 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
 
-			var dict_ptr = scope.ReadSlot(0, context.player);
+			var dict_ptr = scope.ReadSlot(0);
 			var dict_ins = context.GC.Heap[dict_ptr.HeapPtr];
 
 			Dict dict = (Dict)((RtInstance)dict_ins).wapperedObject;
 
-			var result_ptr = scope.ReadSlot(1, context.player);
+			var result_ptr = scope.ReadSlot(1);
 			var result = context.GC.Heap[result_ptr.HeapPtr];
 			RtInstance result_obj = (RtInstance)result;
 

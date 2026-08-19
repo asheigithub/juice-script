@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
@@ -376,11 +377,7 @@ namespace juicescript.runtime
 
 				//save this
 				{
-					//bool flag = false;
-					//if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr && scope_ptr == thisPtr.HeapPtr)
-					//{
-					//	flag = true;
-					//}
+					
 					ScopeHeapLocater scopeHeapLocater;
 					scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
 					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount-1);
@@ -397,11 +394,7 @@ namespace juicescript.runtime
 
 					m_scopePayload.SetSlot(thisPtr, (ushort)(m_scopePayload.SlotCount - 1));
 
-					//if (flag)//this 结构体可能被拷贝，所以要同步更新scope.
-					//{
-					//	m_scopePayload.ParentPtr = thisPtr.HeapPtr;
 					
-					//}
 
 				}
 
@@ -436,7 +429,7 @@ namespace juicescript.runtime
 					}
 
 					Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, method.Parameters.Count);
-					param_slots.Clear(); //防止GC 错误意外访问
+					//param_slots.Clear(); //防止GC 错误意外访问
 					for (ushort i = 0; i < param_slots.Length; i++)
 					{
 						var p = method.Parameters[i];
@@ -482,21 +475,37 @@ namespace juicescript.runtime
 
 								NaNBoxing box = slot[argLocater.index];
 
-								
-								Context.StackPosition += method.Parameters.Count;
-								Context.BackTraceIndex++;
-								ConvertValueType(ref error, box, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
-								Context.BackTraceIndex--;
-								Context.StackPosition -= method.Parameters.Count;
 
-								if (error.raised)
+								if (p.TypeKind == TypeKind.Any
+									|| ((byte)box.ValueType - 3 == (byte)p.TypeKind && p.TypeKind <= TypeKind.Float)
+									|| (box.ValueType == BoxType.LocalString && p.TypeKind == TypeKind.String))
 								{
-									Context.StackPosition -= para_argcount;
-
-									goto lbl_handle_arg_err;
+									param_slots[i] = box;
 								}
-								
-								
+								else if (p.TypeKind == TypeKind.Int && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
+								{
+									param_slots[i].SetInt(box.IntValue);
+
+								}
+								else if (p.TypeKind == TypeKind.Uint && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
+								{
+									param_slots[i].SetUInt(box.UIntValue);
+								}
+								else
+								{
+									Context.StackPosition += i;// method.Parameters.Count;
+									Context.BackTraceIndex++;
+									ConvertValueType(ref error, box, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
+									Context.BackTraceIndex--;
+									Context.StackPosition -= i;// method.Parameters.Count;
+
+									if (error.raised)
+									{
+										Context.StackPosition -= para_argcount;
+										goto lbl_handle_arg_err;
+									}
+
+								}
 
 								if (true)
 								{
@@ -583,11 +592,13 @@ namespace juicescript.runtime
 								
 								ConvertValueType(ref error, value, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i]);
 
-								if (error.raised)
-								{
-									Context.StackPosition -= para_argcount;
-									goto lbl_handle_arg_err;
-								}
+								Debug.Assert(!error.raised);
+
+								//if (error.raised)
+								//{
+								//	Context.StackPosition -= para_argcount;
+								//	goto lbl_handle_arg_err;
+								//}
 								
 								//throw new NotImplementedException("有默认值的参数");
 								

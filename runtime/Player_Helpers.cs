@@ -3187,7 +3187,7 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 			}
 #endif
-			var obj_h = heap.ReadSlot(iterSrcObjSaveInVar.MemberIndex, this);
+			var obj_h = heap.ReadSlot(iterSrcObjSaveInVar.MemberIndex);
 #if DEBUG
 
 			if (obj_h.ValueType != BoxType.HeapPtr)
@@ -3199,7 +3199,7 @@ namespace juicescript.runtime
 			}
 
 #endif
-			NaNBoxing iter_v = heap.ReadSlot(iterVar.MemberIndex, this);
+			NaNBoxing iter_v = heap.ReadSlot(iterVar.MemberIndex);
 
 
 			var obj = Context.GC.Heap[obj_h.HeapPtr];
@@ -3372,11 +3372,11 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 
 #endif
-			var obj_h = heap.ReadSlot(holderLoc.MemberIndex, this);
+			var obj_h = heap.ReadSlot(holderLoc.MemberIndex);
 			// 从方法变量读取迭代器上下文
-			var iter_ctx_value = heap.ReadSlot(iterContextVar.MemberIndex, this);
+			var iter_ctx_value = heap.ReadSlot(iterContextVar.MemberIndex);
 			// 读iter对象
-			var iter_v = heap.ReadSlot(iterVar.MemberIndex, this);
+			var iter_v = heap.ReadSlot(iterVar.MemberIndex);
 
 #if DEBUG
 			if (obj_h.ValueType != BoxType.HeapPtr)
@@ -4354,7 +4354,9 @@ namespace juicescript.runtime
 					RtHeapBase instance;
 					NaNBoxing instancePtr = default;
 
-					if (@class.Instance.Flags.HasFlag(ClassFlags.NoConstructor))
+					var flag = @class.Instance.Flags;
+
+					if (flag.HasFlag(ClassFlags.NoConstructor))
 					{
 						stackslots[target.index].SetNull();
 						if (@class != Context.METHOD_CLOSURE)
@@ -4363,7 +4365,7 @@ namespace juicescript.runtime
 						}
 						return;
 					}
-					else if (@class.Instance.Flags.HasFlag(ClassFlags.Vector))
+					else if (flag.HasFlag(ClassFlags.Vector))
 					{
 						int ptrIndex = stackStPos + target.index;
 
@@ -4391,10 +4393,10 @@ namespace juicescript.runtime
 #if FORCOMPILER
 						!IsComputeConstExpr &&
 #endif
-						@class.Instance.Flags.HasFlag(ClassFlags.CacheAble)
+						flag.HasFlag(ClassFlags.CacheAble)
 						)
 						||
-						@class.Instance.Flags.HasFlag(ClassFlags.Struct)
+						flag.HasFlag(ClassFlags.Struct)
 						)
 					{
 						int ptrIndex = stackStPos + target.index;
@@ -11102,9 +11104,7 @@ namespace juicescript.runtime
 						{
 							RtMethodScope heap = (RtMethodScope)s;
 							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex
-								//#if FORCOMPILER
-								, this
-								//#endif
+								
 								);
 
 							stackslots[stackLocater.index] = value; return;

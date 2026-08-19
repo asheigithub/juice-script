@@ -105,193 +105,193 @@ namespace juicescript.ABC.INS
         /// <summary>
         /// 加载function到栈
         /// </summary>
-        ld_function = 25,
+        ld_function = 20,
 
         /// <summary>
         /// 加载arguments参数对象到栈
         /// </summary>
-        ld_arguments = 26,
+        ld_arguments = 21,
 
         /// <summary>
         /// 加载method对象到栈
         /// </summary>
-        ld_method = 27,
+        ld_method = 22,
 
         /// <summary>
         /// 加载编译时确定的基类版本对象到栈
         /// </summary>
-        ld_supermethod = 28,
+        ld_supermethod = 23,
 
         /// <summary>
         /// 查找接口实现表加载method对象到栈
         /// </summary>
-        ld_interface_method = 29,
+        ld_interface_method = 24,
 
         /// <summary>
         /// 保存栈上数据到上下文的堆内存中
         /// </summary>
-        storeScopeH = 30,      
+        storeScopeH = 25,      
 
         /// <summary>
         /// 编译期确定保存到方法的变量中
         /// </summary>
-        storeMethodVariable=31,
+        storeMethodVariable=26,
 
 
         /// <summary>
         /// 保存栈上数据到引用中
         /// </summary>
-        storeHeapValueRef =32, 
+        storeHeapValueRef =27, 
 
         /// <summary>
         /// 加载方法变量初始值
         /// </summary>
-        ld_MethodVariableInitValue =33,
+        ld_MethodVariableInitValue =28,
 
         /// <summary>
         /// 加载成员初始值 const成员在初始化时就赋值，但是var变量则需要通过指令来读默认值
         /// </summary>
-        ld_memberInitValue=34,
+        ld_memberInitValue=29,
 
         /// <summary>
         /// 从引用中读取值，用于如
         /// this["B"] 这样的代码。由于这可能是一个属性，所以要尝试执行一下getter方法。
         /// </summary>
-        ld_ValueRef =36,
+        ld_ValueRef =30,
 
         /// <summary>
         /// 直接复制StackLocator
         /// </summary>
-        move =37,
+        move =31,
 
         /// <summary>
         /// delete操作，返回成功与否
         /// </summary>
-        delete =38,
+        delete =32,
 
-        positive = 39,    //一元正值 +
-        neg =40,          //求负值 - 
-        multiply =41,     //做乘法 *
-        div =42,          //做除法 /
-        add =43,         //做加法 +
-        sub = 44,        //做减法 -
-        modulus = 45,    //求模
+        positive = 33,    //一元正值 +
+        neg =34,          //求负值 - 
+        multiply =35,     //做乘法 *
+        div =36,          //做除法 /
+        add =37,         //做加法 +
+        sub = 38,        //做减法 -
+        modulus = 39,    //求模
 
-        bitwise = 46,  // 位操作。& | ^ ~ << >> >>>
+        bitwise = 40,  // 位操作。& | ^ ~ << >> >>>
 
-        logic_not = 47,  //逻辑非
+        logic_not = 41,  //逻辑非
 
-		logic_comparison = 48,        // < , > <= , >= 比较运算 
+		logic_comparison = 42,        // < , > <= , >= 比较运算 
 
-		strict_eq = 50,  //严格相等
-        strict_neq = 51, //不严格相等
+		strict_eq = 43,  //严格相等
+        strict_neq = 44, //不严格相等
 
-        equal =52,       //相等
-        not_equal = 53,     //不相等
+        equal =45,       //相等
+        not_equal = 46,     //不相等
 
-        get_in = 54,       //in 操作符
+        get_in = 47,       //in 操作符
 
-        get_typeof = 55,  //typeof 操作
-        get_instanceof = 56, //instanceof 操作
+        get_typeof = 48,  //typeof 操作
+        get_instanceof = 49, //instanceof 操作
 
-        get_is = 57,       //is 操作 
-        cast_as = 58,      //as 操作
+        get_is = 50,       //is 操作 
+        cast_as = 51,      //as 操作
 
 
-        increment_decrement =59, // 加或减指定值
+        increment_decrement =52, // 加或减指定值
 
-	    new_instance = 60,
+	    new_instance = 53,
 
-        create_prop =62, //创建对象属性
+        create_prop =54, //创建对象属性
 
-        type_cast = 65, //强制类型转换
+        type_cast = 55, //强制类型转换
 
         /// <summary>
         /// 调父类构造函数
         /// </summary>
-        super_ctor =70,
+        super_ctor =56,
 
         /// <summary>
         /// 从Array或Vector或String中读length属性。
         /// </summary>
-        ld_length = 75,
+        ld_length = 57,
 
 		/// <summary>
 		/// 从常量池中加载function定义并调用
 		/// </summary>
-		ld_function_call = 80,
+		ld_function_call = 58,
 
         /// <summary>
         /// 加载function到成员，并且绑定global调用
         /// </summary>
-        ld_function_bindglobal_call = 81,
+        ld_function_bindglobal_call = 59,
 
         /// <summary>
         /// 用指定的this调用函数 
         /// </summary>
-        bindthis_call = 82,
+        bindthis_call = 60,
 
         /// <summary>
         /// 用当前代码所在global作为this调用函数
         /// </summary>
-        bindglobal_call = 84,
+        bindglobal_call = 61,
 
         /// <summary>
         /// 调用方法。
         /// </summary>
-        method_call = 86,
+        method_call = 62,
         
         /// <summary>
         /// 从property里读取值
         /// </summary>
-        read_property = 88,
+        read_property = 63,
 
         /// <summary>
         /// 从接口定义的property里读取值
         /// </summary>
-        read_property_interface = 89,
+        read_property_interface = 64,
 
         /// <summary>
         /// 往property里写值
         /// </summary>
-        write_property = 90,
+        write_property = 65,
 
         /// <summary>
         /// 往接口定义的property里写值
         /// </summary>
-        write_property_interface = 91,
+        write_property_interface = 66,
 
         /// <summary>
         /// 强制跳转
         /// </summary>
-        goto_flag = 100,
+        goto_flag = 67,
 
         /// <summary>
         /// 条件跳转
         /// </summary>
-        if_false_goto = 105,
-        if_true_goto = 106,
+        if_false_goto = 68,
+        if_true_goto = 69,
 
 
         
         //根据逻辑指令结果跳转
-        if_logicOp_goto =112,
+        if_logicOp_goto =70,
 
 		/// <summary>
 		/// 通过MultiNameL 查找成员,并将值保存进去。name也在运行时确定，namespace在打开的namespaceset里
 		/// </summary>
-		store_MultiNameL = 114,
+		store_MultiNameL = 71,
 
 
 		/// <summary>
 		/// 通过MultiName 查找成员,并将值保存进去。name确定，namespace在打开的namespaceset里
 		/// </summary>
-		store_MultiName = 115,
+		store_MultiName = 72,
 
         /// <summary>
         /// 将值保存到instance成员内
         /// </summary>
-        store_instanceMember = 116,
+        store_instanceMember = 73,
 
 
 		//******短路径版本**********
@@ -302,40 +302,7 @@ namespace juicescript.ABC.INS
 		//      short_add = 154,
 
 
-		array_vector_initelement = 120, //array push 初始值
-
-        //****优化******
-
-        O_ld_function_bindGlobal = 122, //加载function的闭包并绑定global.
-        O_ld_method =123,               //加载确认的instance相同，method相同的公共method
-        O_ld_interface_method =124,     //加载接口方法，instance相同的公共method
-        O_Call =125,                    //直接调缓存优化的闭包                   
-
-        O_IncrDecr_StoreVar =127,       // ++,--后保存到变量中
-
-        O_NewStruct = 128,              //构造结构体
-
-        O_NewInstance_MethodVar =129,   //直接构造到变量中,且编译时已确认类型匹配
-
-        O_Ld_InstanceFiled =130,        //读Instance成员。
-
-        O_StoreMethodVar_Instance = 132, //保存对象到变量，变量类型已确认匹配
-
-
-
-        //***矩阵，向量类***
-
-        add_Vec2_Vec2 = 140,            //二维向量相加
-        sub_Vec2_Vec2 = 141,            //二维向量相减
-        scale_Vec2 = 142,               //二维向量缩放
-		scale_Vec2_reciprocal = 143,    //二维向量缩放（1/factor） 
-        neg_pos_Vec2 = 144,             //二维向量取正或取反
-
-        mul_Mat22_Vec2 = 150,          //mat22 * vec2
-        mul_Mat22_Mat22 = 151,         //mat22 * mat22
-        add_Mat22_Mat22 = 152,         //mat22 + mat22
-
-
+		array_vector_initelement = 74, //array push 初始值
 
 
 		//**specialized opcode  quickening
@@ -359,50 +326,76 @@ namespace juicescript.ABC.INS
 
 
 
-		iter_initctx = 228,
-		iter_get = 230,
-        iter_close = 232,
-        iter_next =234,
+		iter_initctx = 75,
+		iter_get = 76,
+        iter_close = 77,
+        iter_next =78,
 
-        await_return =236,
-        await_resume =237,
+        await_return =79,
+        await_resume =80,
 
-		yield_return = 238,
-		yield_break = 239,
+		yield_return = 81,
+		yield_break = 82,
 
 		/// <summary>
 		/// 函数返回，将returnSlot赋值为 undefined
 		/// </summary>
-		return_void = 240,
+		return_void = 83,
         /// <summary>
         /// 函数返回，将returnSlot赋值
         /// </summary>
-        return_value = 242,
+        return_value = 84,
+
+		throw_error =85,
+        try_enter = 86,   // try catch finall 支持
+        try_exit = 87,
+        catch_enter = 88,
+        catch_exit = 89,
+        finally_enter = 90,
+        finally_exit = 91,
+
+
+        expression_barrier =92, //临时保持expression指令中的不安全的槽。最终优化时会被移除
+
+
+
+		//****优化******
+
+		O_ld_function_bindGlobal = 93, //加载function的闭包并绑定global.
+		O_ld_method = 94,               //加载确认的instance相同，method相同的公共method
+		O_ld_interface_method = 95,     //加载接口方法，instance相同的公共method
+		O_Call = 96,                    //直接调缓存优化的闭包                   
+
+		O_IncrDecr_StoreVar = 97,       // ++,--后保存到变量中
+
+		O_NewStruct = 98,              //构造结构体
+
+		O_NewInstance_MethodVar = 99,   //直接构造到变量中,且编译时已确认类型匹配
+
+		O_Ld_InstanceFiled = 100,        //读Instance成员。
+
+		O_StoreMethodVar_Instance = 101, //保存对象到变量，变量类型已确认匹配
+
+
+
+		//***矩阵，向量类***
+
+		add_Vec2_Vec2 = 102,            //二维向量相加
+		sub_Vec2_Vec2 = 103,            //二维向量相减
+		scale_Vec2 = 104,               //二维向量缩放
+		scale_Vec2_reciprocal = 105,    //二维向量缩放（1/factor） 
+		neg_pos_Vec2 = 106,             //二维向量取正或取反
+
+		mul_Mat22_Vec2 = 107,          //mat22 * vec2
+		mul_Mat22_Mat22 = 108,         //mat22 * mat22
+		add_Mat22_Mat22 = 109,         //mat22 + mat22
 
 
 
 
 
 
-		
 
-
-
-
-
-
-
-		throw_error =244,
-        try_enter =245,   // try catch finall 支持
-        try_exit = 246,
-        catch_enter =247,
-        catch_exit = 248,
-        finally_enter =249,
-        finally_exit = 250,
-
-
-        expression_barrier =254, //临时保持expression指令中的不安全的槽。最终优化时会被移除
-
-        END = 255       //结束
+		END = 255       //结束
     }
 }

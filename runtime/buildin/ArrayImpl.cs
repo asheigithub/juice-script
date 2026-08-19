@@ -35,7 +35,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			var arrayinstance = context.GC.Heap[thisPtr.HeapPtr];
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
@@ -216,7 +216,7 @@ namespace juicescript.runtime.buildin
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var arrayinstance = context.GC.Heap[thisPtr.HeapPtr];
-			var len = scope.ReadSlot(0, context.player);
+			var len = scope.ReadSlot(0);
 
 			((RtArray)arrayinstance).SetLength(len.UIntValue, context.player, ref error);
 		}
@@ -327,7 +327,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 			//var arrayinstance = context.GC.Heap[thisPtr.HeapPtr];
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
@@ -516,7 +516,7 @@ namespace juicescript.runtime.buildin
 			// 2. Get array instance and rest parameters
 			var arrayInstance = context.GC.Heap[thisPtr.HeapPtr];
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
 			var restSpan = restArray.stack_store.Span;
 
@@ -664,7 +664,7 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var sep = scope.ReadSlot(0, context.player);
+			var sep = scope.ReadSlot(0);
 
 
 			Span<char> buffer = stackalloc char[128];
@@ -850,7 +850,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
 			var restSpan = restArray.stack_store.Span;
 
@@ -968,14 +968,14 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var cb = scope.ReadSlot(0, context.player);
+			var cb = scope.ReadSlot(0);
 			if (cb.ValueType != BoxType.HeapPtr)
 			{
 				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
 				return;
 			}
 
-			var _this = scope.ReadSlot(1, context.player);
+			var _this = scope.ReadSlot(1);
 			//if (scope.__sendargcount < 2)
 			//{
 			//	_this.SetUndefined();
@@ -1121,14 +1121,14 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var cb = scope.ReadSlot(0, context.player);
+			var cb = scope.ReadSlot(0);
 			if (cb.ValueType != BoxType.HeapPtr)
 			{
 				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
 				return;
 			}
 
-			var _this = scope.ReadSlot(1, context.player);
+			var _this = scope.ReadSlot(1);
 			//if (scope.__sendargcount < 2)
 			//{
 			//	_this.SetUndefined();
@@ -1271,14 +1271,14 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var cb = scope.ReadSlot(0, context.player);
+			var cb = scope.ReadSlot(0);
 			if (cb.ValueType != BoxType.HeapPtr)
 			{
 				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
 				return;
 			}
 
-			var _this = scope.ReadSlot(1, context.player);
+			var _this = scope.ReadSlot(1);
 
 			var cbmethod = ((ASMethodBody)context.GC.Heap[cb.HeapPtr].Type).Method;
 			var cbclosure = (RtClosure)context.GC.Heap[cb.HeapPtr];
@@ -1406,14 +1406,14 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var cb = scope.ReadSlot(0, context.player);
+			var cb = scope.ReadSlot(0);
 			if (cb.ValueType != BoxType.HeapPtr)
 			{
 				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
 				return;
 			}
 
-			var _this = scope.ReadSlot(1, context.player);
+			var _this = scope.ReadSlot(1);
 			//if (scope.__sendargcount < 2)
 			//{
 			//	_this.SetUndefined();
@@ -1577,14 +1577,14 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var cb = scope.ReadSlot(0, context.player);
+			var cb = scope.ReadSlot(0);
 			if (cb.ValueType != BoxType.HeapPtr)
 			{
 				context.player.RaiseTypeError(ref error, cb, TypeKind.Function);
 				return;
 			}
 
-			var _this = scope.ReadSlot(1, context.player);
+			var _this = scope.ReadSlot(1);
 			//if (scope.__sendargcount < 2)
 			//{
 			//	_this.SetUndefined();
@@ -1724,8 +1724,8 @@ namespace juicescript.runtime.buildin
 
 			uint len = array.array_len;
 
-			NaNBoxing searchElement = scope.ReadSlot(0, context.player);
-			var fromIndexVal = scope.ReadSlot(1, context.player);
+			NaNBoxing searchElement = scope.ReadSlot(0);
+			var fromIndexVal = scope.ReadSlot(1);
 			Debug.Assert(fromIndexVal.ValueType == BoxType.Uint);
 
 			uint fromIndex = fromIndexVal.UIntValue;
@@ -1793,8 +1793,8 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			NaNBoxing searchElement = scope.ReadSlot(0, context.player);
-			var fromIndexVal = scope.ReadSlot(1, context.player);
+			NaNBoxing searchElement = scope.ReadSlot(0);
+			var fromIndexVal = scope.ReadSlot(1);
 
 			Debug.Assert(fromIndexVal.ValueType == BoxType.Int);
 
@@ -1864,8 +1864,8 @@ namespace juicescript.runtime.buildin
 			uint len = array.array_len;
 			// 2. Read parameters (defaults: A=0, B=16777215 are passed by RunMethod)
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var startVal = scope.ReadSlot(0, context.player);
-			var endVal = scope.ReadSlot(1, context.player);
+			var startVal = scope.ReadSlot(0);
+			var endVal = scope.ReadSlot(1);
 			// 3. Normalize start (handle negative: count from end)
 			int start = startVal.IntValue;
 			if (start < 0) start = (int)len + start;
@@ -1943,9 +1943,9 @@ namespace juicescript.runtime.buildin
 			uint len = array.array_len;
 			// 3. 读取参数（RunMethod 已传入默认值）
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var startVal = scope.ReadSlot(0, context.player);   // int: startIndex
-			var deleteCountVal = scope.ReadSlot(1, context.player); // uint: deleteCount
-			var values = scope.ReadSlot(2, context.player);  // Array: ...values
+			var startVal = scope.ReadSlot(0);   // int: startIndex
+			var deleteCountVal = scope.ReadSlot(1); // uint: deleteCount
+			var values = scope.ReadSlot(2);  // Array: ...values
 
 			// 4. 标准化 startIndex（负数从末尾计数）
 			int start = startVal.IntValue;
@@ -2050,9 +2050,9 @@ namespace juicescript.runtime.buildin
 			uint len = array.array_len;
 			// 3. 读取参数（RunMethod 已传入默认值）
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var startVal = scope.ReadSlot(0, context.player);   // int: startIndex
+			var startVal = scope.ReadSlot(0);   // int: startIndex
 
-			var element = scope.ReadSlot(1, context.player);
+			var element = scope.ReadSlot(1);
 
 			// 4. 标准化 startIndex（负数从末尾计数）
 			int start = startVal.IntValue;
@@ -2089,7 +2089,7 @@ namespace juicescript.runtime.buildin
 			uint len = array.array_len;
 			// 3. 读取参数（RunMethod 已传入默认值）
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var indexVal = scope.ReadSlot(0, context.player);   // int: startIndex
+			var indexVal = scope.ReadSlot(0);   // int: startIndex
 
 			// 4. 标准化 startIndex（负数从末尾计数）
 			int index = indexVal.IntValue;
@@ -2170,7 +2170,7 @@ namespace juicescript.runtime.buildin
 
 			// 3. 读取参数（RunMethod 已传入默认值）
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
 			var restSpan = restArray.stack_store.Span;
 
@@ -3229,8 +3229,8 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var fieldName = scope.ReadSlot(0, context.player);
-			var options = scope.ReadSlot(1, context.player);
+			var fieldName = scope.ReadSlot(0);
+			var options = scope.ReadSlot(1);
 
 			bool fieldnameisarray = false;
 			RtArray fields = null;

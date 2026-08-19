@@ -67,8 +67,8 @@ namespace juicescript.runtime.buildin
 			var closureinstance = context.GC.Heap[funslot.HeapPtr];
 
 
-			var _this = scope.ReadSlot(0,context.player);
-			var rest = scope.ReadSlot(1,context.player);
+			var _this = scope.ReadSlot(0);
+			var rest = scope.ReadSlot(1);
 
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
@@ -163,8 +163,8 @@ namespace juicescript.runtime.buildin
 			var closureinstance = context.GC.Heap[funslot.HeapPtr];
 
 
-			var _this = scope.ReadSlot(0, context.player);
-			var _arr = scope.ReadSlot(1, context.player);
+			var _this = scope.ReadSlot(0);
+			var _arr = scope.ReadSlot(1);
 
 
 			var callmethod = ((ASMethodBody)closureinstance.Type).Method;

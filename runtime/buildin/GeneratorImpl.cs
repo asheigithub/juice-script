@@ -170,8 +170,8 @@ namespace juicescript.runtime.buildin
 			var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
 			var iter = (RtInstance)iter_ins;
 
-			var _result = scope.ReadSlot(1, context.player);
-			var _obj = scope.ReadSlot(0, context.player);
+			var _result = scope.ReadSlot(1);
+			var _obj = scope.ReadSlot(0);
 
 
 			var result_ins = context.GC.Heap[_result.HeapPtr];

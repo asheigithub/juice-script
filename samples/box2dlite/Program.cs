@@ -721,8 +721,8 @@ namespace box2dlite
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var vec2 = method.__return_type_class__;
 
-			var s = scope.ReadSlot(0, context.player).FloatValue;
-			NaNBoxing vec = scope.ReadSlot(1, context.player);
+			var s = scope.ReadSlot(0).FloatValue;
+			NaNBoxing vec = scope.ReadSlot(1);
 			if (vec.ValueType == NaNBoxing.BoxType.Null)
 			{
 				context.player.RaiseTypeError_AccessNull(ref error);
@@ -772,7 +772,7 @@ namespace box2dlite
 			var vec2 = method.__return_type_class__;
 
 			
-			NaNBoxing vec = scope.ReadSlot(0, context.player);
+			NaNBoxing vec = scope.ReadSlot(0);
 			if (vec.ValueType == NaNBoxing.BoxType.Null)
 			{
 				context.player.RaiseTypeError_AccessNull(ref error);
@@ -794,7 +794,7 @@ namespace box2dlite
 				}
 			}
 
-			var s = scope.ReadSlot(1, context.player).FloatValue;
+			var s = scope.ReadSlot(1).FloatValue;
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
 			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
@@ -822,7 +822,7 @@ namespace box2dlite
 			var vec2 = method.__return_type_class__;
 
 
-			NaNBoxing vec = scope.ReadSlot(0, context.player);
+			NaNBoxing vec = scope.ReadSlot(0);
 			if (vec.ValueType == NaNBoxing.BoxType.Null)
 			{
 				context.player.RaiseTypeError_AccessNull(ref error);
@@ -870,7 +870,7 @@ namespace box2dlite
 			var mat2 = method.__return_type_class__;
 
 
-			NaNBoxing mat = scope.ReadSlot(0, context.player);
+			NaNBoxing mat = scope.ReadSlot(0);
 			if (mat.ValueType == NaNBoxing.BoxType.Null)
 			{
 				context.player.RaiseTypeError_AccessNull(ref error);

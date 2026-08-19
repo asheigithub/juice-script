@@ -1048,7 +1048,7 @@ namespace juicescript.runtime
 				{
 					if (!(scope == heap && i == heapLocater.MemberIndex))
 					{
-						var v = scope.ReadSlot((ushort)i, this);
+						var v = scope.ReadSlot((ushort)i);
 						if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
 							var inmember = Context.GC.Heap[v.HeapPtr];
@@ -1372,7 +1372,7 @@ namespace juicescript.runtime
 							{
 								if (!(scope == heap && i == heapLocater.MemberIndex))
 								{
-									var v = scope.ReadSlot((ushort)i, this);
+									var v = scope.ReadSlot((ushort)i);
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr && v.HeapPtr == ptr)
 									{
 										//复制一份新的Clousure
@@ -1579,7 +1579,7 @@ namespace juicescript.runtime
 							{
 								if (!(scope == heap && i == heapLocater.MemberIndex))
 								{
-									var v = scope.ReadSlot((ushort)i, this);
+									var v = scope.ReadSlot((ushort)i);
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										var inmember = Context.GC.Heap[v.HeapPtr];
@@ -1766,7 +1766,7 @@ namespace juicescript.runtime
 							{
 								if (!(scope == heap && i == heapLocater.MemberIndex))
 								{
-									var v = scope.ReadSlot((ushort)i, this);
+									var v = scope.ReadSlot((ushort)i);
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
 										var inmember = Context.GC.Heap[v.HeapPtr];
@@ -1998,9 +1998,7 @@ namespace juicescript.runtime
 			if (heap.IsStackSlot)
 			{
 				NaNBoxing old = heap.ReadSlot(heapLocater.MemberIndex
-//#if FORCOMPILER
-				, this
-//#endif
+
 					);
 
 				if (value.Raw == old.Raw)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,25 +46,32 @@ namespace juicescript.ABC
 
 		public byte[] param_defaultvalues;
 
+		[StructLayout(LayoutKind.Explicit)]
 		public struct MethodBodyInfo
         {
+            [FieldOffset(0)]
             public int useSlots;
+            [FieldOffset(4)]
             public int constants;
+            [FieldOffset(8)]
             public int instructions;
         }
 
-        public  unsafe void GetInfo(ref MethodBodyInfo info)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void GetInfo(ref MethodBodyInfo info)
         {
             GetInfo(ref info, ByteCode);
         }
-
-        public static unsafe void GetInfo(ref MethodBodyInfo info, byte[] ByteCode)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static unsafe void GetInfo(ref MethodBodyInfo info, byte[] ByteCode)
         {
 			fixed (void* p = ByteCode)
 			{
-				info.useSlots = *((int*)p);
-				info.constants = *((int*)p + 1);
-				info.instructions = *((int*)p + 2);
+                //info.useSlots = *((int*)p);
+                //info.constants = *((int*)p + 1);
+                //info.instructions = *((int*)p + 2);
+
+                info = *((MethodBodyInfo*)p);                
 			}
 		}
 

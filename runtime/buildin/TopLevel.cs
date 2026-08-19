@@ -25,7 +25,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
+			var arg0 = scope.ReadSlot(0);
 
 #if DEBUG
 			if (arg0.ValueType != NaNBoxing.BoxType.Number)
@@ -44,7 +44,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
+			var arg0 = scope.ReadSlot(0);
 
 #if DEBUG
 			if (arg0.ValueType != NaNBoxing.BoxType.Number)
@@ -79,7 +79,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
+			var arg0 = scope.ReadSlot(0);
 
 			switch (arg0.ValueType)
 			{
@@ -218,7 +218,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
+			var arg0 = scope.ReadSlot(0);
 
 			switch (arg0.ValueType)
 			{
@@ -334,7 +334,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
+			var arg0 = scope.ReadSlot(0);
 
 			if (arg0.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -406,7 +406,7 @@ namespace juicescript.runtime.buildin
 		int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
+			var arg0 = scope.ReadSlot(0);
 
 			if (arg0.ValueType == NaNBoxing.BoxType.Null || arg0.ValueType == NaNBoxing.BoxType.Undefined)
 			{
@@ -735,8 +735,8 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var arg0 = scope.ReadSlot(0, context.player);
-			var arg1 = scope.ReadSlot(1, context.player);
+			var arg0 = scope.ReadSlot(0);
+			var arg1 = scope.ReadSlot(1);
 
 			if (arg0.ValueType == NaNBoxing.BoxType.Null || arg0.ValueType == NaNBoxing.BoxType.Undefined)
 			{
@@ -1148,7 +1148,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			context.StackSlots[returnSlotIndex].SetUndefined();
 
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
@@ -1201,7 +1201,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			NaNBoxing url = scope.ReadSlot(0, context.player);
+			NaNBoxing url = scope.ReadSlot(0);
 			if (url.ValueType == NaNBoxing.BoxType.Null || url.ValueType == NaNBoxing.BoxType.Undefined)
 			{
 				context.player.RaiseError(ref error, "url is null");

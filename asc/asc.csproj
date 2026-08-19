@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Debug;Release;ProfilePlayer</Configurations>
   </PropertyGroup>
 
  

@@ -12257,7 +12257,7 @@ namespace juicescript.runtime
 					}
 					else if (s.Kind == RtHeapTypeKind.MethodScope)
 					{
-						c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex, this);
+						c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex);
 					}
 					else if (s.Kind == RtHeapTypeKind.INSTANCE)
 					{
@@ -12346,7 +12346,7 @@ namespace juicescript.runtime
 						throw new InvalidOperationException();
 					}
 #endif
-					var c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex, this);
+					var c = ((RtMethodScope)s).ReadSlot(heapLocater.MemberIndex);
 					if (c.ValueType == BoxType.Undefined)
 					{
 						//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
@@ -13409,7 +13409,7 @@ namespace juicescript.runtime
 
 								Debug.Assert(methodscope.Type._link_codescope.index == heapLocater->ScopeIndex);
 								
-								stackslots[dst_index] = ((RtMethodScope)methodscope).ReadSlot(heapLocater->MemberIndex, this);
+								stackslots[dst_index] = ((RtMethodScope)methodscope).ReadSlot(heapLocater->MemberIndex);
 
 
 							}
@@ -14425,7 +14425,7 @@ namespace juicescript.runtime
 								{
 								}
 								else if (method.ReturnTypeKind == TypeKind.Any 
-									|| ((byte)v.ValueType - 3 == (byte)method.ReturnTypeKind && method.ReturnTypeKind < TypeKind.Float) 
+									|| ((byte)v.ValueType - 3 == (byte)method.ReturnTypeKind && method.ReturnTypeKind <= TypeKind.Float) 
 									|| (v.ValueType == BoxType.LocalString && method.ReturnTypeKind == TypeKind.String))
 								{
 									

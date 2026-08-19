@@ -30,7 +30,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(_this.Kind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(_this.Type.QName.Name == "Promise");
 
-			var executor = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0, context.player);
+			var executor = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0);
 
 			RtHeapBase executor_closure;
 			// 2. 验证executor是否为函数
@@ -156,7 +156,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. 获取resolve的参数值
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var value = scope.ReadSlot(0, context.player);
+			var value = scope.ReadSlot(0);
 
 			// 2. 获取Promise实例和状态
 			Debug.Assert(thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -266,7 +266,7 @@ namespace juicescript.runtime.buildin
 		{
 			// 1. 获取reject的参数reason
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var reason = scope.ReadSlot(0, context.player);
+			var reason = scope.ReadSlot(0);
 
 			// 2. 获取Promise实例和状态
 			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
@@ -333,8 +333,8 @@ namespace juicescript.runtime.buildin
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			// 读取两个参数
-			var onFulfilled = scope.ReadSlot(0, context.player);
-			var onRejected = scope.ReadSlot(1, context.player);
+			var onFulfilled = scope.ReadSlot(0);
+			var onRejected = scope.ReadSlot(1);
 			// 验证回调函数（如果提供）
 			if (onFulfilled.ValueType != NaNBoxing.BoxType.Undefined &&
 				onFulfilled.ValueType != NaNBoxing.BoxType.Null)
@@ -441,7 +441,7 @@ namespace juicescript.runtime.buildin
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var onRejected = scope.ReadSlot(0, context.player);
+			var onRejected = scope.ReadSlot(0);
 
 			if (onRejected.ValueType != NaNBoxing.BoxType.Undefined &&
 				onRejected.ValueType != NaNBoxing.BoxType.Null)
@@ -530,7 +530,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var value = scope.ReadSlot(0, context.player);
+			var value = scope.ReadSlot(0);
 
 			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
@@ -587,7 +587,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var reason = scope.ReadSlot(0, context.player);
+			var reason = scope.ReadSlot(0);
 
 			// 提升 reason 到堆
 			reason = context.player.GetSaveValue(reason, ref error);
@@ -1782,7 +1782,7 @@ namespace juicescript.runtime.buildin
 
 			// 从 scope 读取参数
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var value = scope.ReadSlot(0, context.player);
+			var value = scope.ReadSlot(0);
 
 			// 递归调用 ResolvePromise
 			context.MicroTaskQueue.ResolvePromise(context, state.targetPromise, value, ref error);
@@ -1813,7 +1813,7 @@ namespace juicescript.runtime.buildin
 
 			// 从 scope 读取参数
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var reason = scope.ReadSlot(0, context.player);
+			var reason = scope.ReadSlot(0);
 
 			// reason 提升到堆
 			reason = context.player.GetSaveValue(reason, ref error);
@@ -1927,7 +1927,7 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var v = scope.ReadSlot(0, context.player);
+			var v = scope.ReadSlot(0);
 			int genwapper_ptr = scope.ParentPtr;
 
 			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.GC.Heap[genwapper_ptr]).wapperedObject;
@@ -1952,7 +1952,7 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var v = scope.ReadSlot(0, context.player);
+			var v = scope.ReadSlot(0);
 			int genwapper_ptr = scope.ParentPtr;
 
 			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.GC.Heap[genwapper_ptr]).wapperedObject;

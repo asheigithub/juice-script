@@ -219,9 +219,6 @@ namespace juicescript.runtime
 		}
 		[MethodImpl( MethodImplOptions.AggressiveOptimization)]
 		public NaNBoxing ReadSlot(ushort memberIndex
-//#if FORCOMPILER
-			, Player player
-//#endif
 			)
 		{
 #if FORCOMPILER

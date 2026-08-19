@@ -82,7 +82,7 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
@@ -208,7 +208,7 @@ namespace juicescript.runtime.buildin
 
 
 			NaNBoxing index_box = default;
-			context.player.ConvertValueType(ref error, scope.ReadSlot(0, context.player), TypeKind.Int, context.INT, ref index_box);
+			context.player.ConvertValueType(ref error, scope.ReadSlot(0), TypeKind.Int, context.INT, ref index_box);
 			Debug.Assert(!error.raised);
 
 
@@ -293,7 +293,7 @@ namespace juicescript.runtime.buildin
 
 
 			NaNBoxing index_box = default;
-			context.player.ConvertValueType(ref error, scope.ReadSlot(0, context.player), TypeKind.Int, context.INT, ref index_box);
+			context.player.ConvertValueType(ref error, scope.ReadSlot(0), TypeKind.Int, context.INT, ref index_box);
 			Debug.Assert(!error.raised);
 
 
@@ -347,7 +347,7 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			var rest = scope.ReadSlot(0, context.player);
+			var rest = scope.ReadSlot(0);
 			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
 
 #if DEBUG
@@ -421,7 +421,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
-			NaNBoxing val = scope.ReadSlot(0, context.player);
+			NaNBoxing val = scope.ReadSlot(0);
 			if (val.ValueType == NaNBoxing.BoxType.Null || val.ValueType == NaNBoxing.BoxType.Undefined)
 			{
 				context.StackSlots[returnSlotIndex].SetInt(-1);
@@ -429,7 +429,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			NaNBoxing index_box = default;
-			context.player.ConvertValueType(ref error, scope.ReadSlot(1, context.player), TypeKind.Int, context.INT, ref index_box);
+			context.player.ConvertValueType(ref error, scope.ReadSlot(1), TypeKind.Int, context.INT, ref index_box);
 			Debug.Assert(!error.raised);
 
 
@@ -607,14 +607,14 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
 
-			NaNBoxing val = scope.ReadSlot(0, context.player);
+			NaNBoxing val = scope.ReadSlot(0);
 			if (val.ValueType == NaNBoxing.BoxType.Null || val.ValueType == NaNBoxing.BoxType.Undefined)
 			{
 				context.StackSlots[returnSlotIndex].SetInt(-1);
 				return;
 			}
 
-			NaNBoxing index_arg = scope.ReadSlot(1, context.player);
+			NaNBoxing index_arg = scope.ReadSlot(1);
 			if (double.IsNaN(index_arg.Number))
 			{
 				index_arg.SetNumber(0x7FFFFFFF);
@@ -834,8 +834,8 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			NaNBoxing startArg = scope.ReadSlot(0, context.player);
-			NaNBoxing endArg = scope.ReadSlot(1, context.player);
+			NaNBoxing startArg = scope.ReadSlot(0);
+			NaNBoxing endArg = scope.ReadSlot(1);
 
 			if (double.IsPositiveInfinity(startArg.Number))
 			{
@@ -1011,8 +1011,8 @@ namespace juicescript.runtime.buildin
 
 			thisPtr = context.StackSlots[returnSlotIndex];
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			NaNBoxing delimiter = scope.ReadSlot(0, context.player);
-			NaNBoxing limit = scope.ReadSlot(1, context.player);
+			NaNBoxing delimiter = scope.ReadSlot(0);
+			NaNBoxing limit = scope.ReadSlot(1);
 
 
 			if (limit.ValueType == NaNBoxing.BoxType.Undefined)
@@ -1220,8 +1220,8 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			NaNBoxing startArg = scope.ReadSlot(0, context.player);
-			NaNBoxing endArg = scope.ReadSlot(1, context.player);
+			NaNBoxing startArg = scope.ReadSlot(0);
+			NaNBoxing endArg = scope.ReadSlot(1);
 
 			if (double.IsPositiveInfinity(startArg.Number))
 			{
@@ -1351,8 +1351,8 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			NaNBoxing startArg = scope.ReadSlot(0, context.player);
-			NaNBoxing lenArg = scope.ReadSlot(1, context.player);
+			NaNBoxing startArg = scope.ReadSlot(0);
+			NaNBoxing lenArg = scope.ReadSlot(1);
 
 			if (double.IsPositiveInfinity(startArg.Number))
 			{
@@ -1769,8 +1769,8 @@ namespace juicescript.runtime.buildin
 
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 
-			NaNBoxing pattern = scope.ReadSlot(0, context.player);
-			NaNBoxing repl = scope.ReadSlot(1, context.player);
+			NaNBoxing pattern = scope.ReadSlot(0);
+			NaNBoxing repl = scope.ReadSlot(1);
 
 
 			Span<char> buffer1 = stackalloc char[128];
@@ -1973,7 +1973,7 @@ namespace juicescript.runtime.buildin
 			
 			
 
-			NaNBoxing val = scope.ReadSlot(0, context.player);
+			NaNBoxing val = scope.ReadSlot(0);
 
 			if (scope.__sendargcount == 0) //如果完全没有传参，则默认是"";
 			{

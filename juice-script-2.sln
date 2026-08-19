@@ -42,7 +42,7 @@ Global
 		{944A2351-41FC-4FC5-B052-7788BAE0A576}.Debug|x64.Build.0 = Debug|Any CPU
 		{944A2351-41FC-4FC5-B052-7788BAE0A576}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{944A2351-41FC-4FC5-B052-7788BAE0A576}.Debug|x86.Build.0 = Debug|Any CPU
-		{944A2351-41FC-4FC5-B052-7788BAE0A576}.ProfilePlayer|Any CPU.ActiveCfg = ProfilePlayer|Any CPU
+		{944A2351-41FC-4FC5-B052-7788BAE0A576}.ProfilePlayer|Any CPU.ActiveCfg = Release|Any CPU
 		{944A2351-41FC-4FC5-B052-7788BAE0A576}.ProfilePlayer|x64.ActiveCfg = ProfilePlayer|Any CPU
 		{944A2351-41FC-4FC5-B052-7788BAE0A576}.ProfilePlayer|x64.Build.0 = ProfilePlayer|Any CPU
 		{944A2351-41FC-4FC5-B052-7788BAE0A576}.ProfilePlayer|x86.ActiveCfg = ProfilePlayer|Any CPU
@@ -93,8 +93,8 @@ Global
 		{D1E66905-A314-4291-B401-00C32EA89623}.Debug|x64.Build.0 = Debug|Any CPU
 		{D1E66905-A314-4291-B401-00C32EA89623}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{D1E66905-A314-4291-B401-00C32EA89623}.Debug|x86.Build.0 = Debug|Any CPU
-		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|Any CPU.ActiveCfg = ProfilePlayer|Any CPU
-		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|Any CPU.Build.0 = ProfilePlayer|Any CPU
+		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|Any CPU.ActiveCfg = Release|Any CPU
+		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|Any CPU.Build.0 = Release|Any CPU
 		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|x64.ActiveCfg = ProfilePlayer|Any CPU
 		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|x64.Build.0 = ProfilePlayer|Any CPU
 		{D1E66905-A314-4291-B401-00C32EA89623}.ProfilePlayer|x86.ActiveCfg = ProfilePlayer|Any CPU

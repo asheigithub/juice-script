@@ -115,10 +115,13 @@ namespace juicescript
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl( MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl( MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public bool FastTestComp(NaNBoxing other,out bool isequal)
         {
-            if ((ValueType == BoxType.Int || ValueType > BoxType.Uint) && ValueType < BoxType.Float && (other.ValueType > BoxType.Uint || other.ValueType == BoxType.Int) && other.ValueType < BoxType.Float)
+            var vt1 = ValueType;
+            var vt2 = other.ValueType;
+
+            if ((vt1 == BoxType.Int || vt1 > BoxType.Uint) && vt1 < BoxType.Float && (vt2 > BoxType.Uint || vt2 == BoxType.Int) && vt2 < BoxType.Float)
             {
                 isequal = IntValue == other.IntValue;
                 return true;
@@ -339,7 +342,11 @@ namespace juicescript
         {
             result = default;
 
-            if ((a.ValueType == BoxType.Int || a.ValueType > BoxType.Uint) && a.ValueType < BoxType.Float && (b.ValueType > BoxType.Uint || b.ValueType == BoxType.Int) && b.ValueType < BoxType.Float)
+            var vta = a.ValueType;
+            var vtb = b.ValueType;
+
+
+            if ((vta == BoxType.Int || vta > BoxType.Uint) && vta < BoxType.Float && (vtb > BoxType.Uint || vtb == BoxType.Int) && vtb < BoxType.Float)
             {
                 result.SetInt(a.IntValue + b.IntValue);
                 return true;
@@ -354,7 +361,7 @@ namespace juicescript
                 result.SetNumber(a.number + b.number);
                 return true;
             }
-            else if (a.ValueType == BoxType.Float && b.ValueType == BoxType.Float)
+            else if (vta == BoxType.Float && vtb == BoxType.Float)
             {
 				result.SetFloat(a.FloatValue + b.FloatValue);
 				return true;
@@ -665,8 +672,10 @@ namespace juicescript
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
-           
-            if ((a.ValueType == BoxType.Int || a.ValueType > BoxType.Uint) && a.ValueType < BoxType.Float && (b.ValueType > BoxType.Uint || b.ValueType == BoxType.Int) && b.ValueType < BoxType.Float)
+			var vta = a.ValueType;
+			var vtb = b.ValueType;
+
+			if ((vta == BoxType.Int || vta > BoxType.Uint) && vta < BoxType.Float && (vtb > BoxType.Uint || vtb == BoxType.Int) && vtb < BoxType.Float)
             {
                 result.SetInt(a.IntValue - b.IntValue);
                 return true;
@@ -681,7 +690,12 @@ namespace juicescript
                 result.SetNumber(a.number - b.number);
                 return true;
             }
-            else
+			else if (vta == BoxType.Float && vtb == BoxType.Float)
+			{
+				result.SetFloat(a.FloatValue - b.FloatValue);
+				return true;
+			}
+			else
             { 
                 return FastMinus_Step2(a,b, ref result);    
             }

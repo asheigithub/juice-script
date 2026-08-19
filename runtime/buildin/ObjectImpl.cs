@@ -142,7 +142,7 @@ namespace juicescript.runtime.buildin
 
 			if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
-				NaNBoxing sName = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0, context.player);
+				NaNBoxing sName = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0);
 				if (sName.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
 					RtHeapBase n = context.GC.Heap[sName.HeapPtr];
@@ -295,7 +295,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var theClass = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0, context.player);
+			var theClass = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0);
 
 
 /*---
@@ -389,8 +389,8 @@ namespace juicescript.runtime.buildin
 			var _index = iter.ReadSlot(0, context.player);
 			var _count = iter.ReadSlot(1, context.player);
 			
-			var _result = scope.ReadSlot(1, context.player);
-			var _obj = scope.ReadSlot(0,context.player);
+			var _result = scope.ReadSlot(1);
+			var _obj = scope.ReadSlot(0);
 
 
 #if DEBUG

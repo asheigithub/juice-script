@@ -252,7 +252,7 @@ namespace juicescript.runtime
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var id = scope.ReadSlot(0, context.player).UIntValue;
+			var id = scope.ReadSlot(0).UIntValue;
 
 			context.TimerTaskQueue.clearTimeOut(id);
 
@@ -267,7 +267,7 @@ namespace juicescript.runtime
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var id = scope.ReadSlot(0, context.player).UIntValue;
+			var id = scope.ReadSlot(0).UIntValue;
 
 			context.TimerTaskQueue.clearTimeOut(id);
 
@@ -293,9 +293,9 @@ namespace juicescript.runtime
 			int basePos = context.StackPosition;
 
 
-			var closure = scope.ReadSlot(0, context.player);
-			var delay = scope.ReadSlot(1, context.player);
-			var rest = scope.ReadSlot(2, context.player);
+			var closure = scope.ReadSlot(0);
+			var delay = scope.ReadSlot(1);
+			var rest = scope.ReadSlot(2);
 
 			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
 
@@ -359,9 +359,9 @@ namespace juicescript.runtime
 			int basePos = context.StackPosition;
 
 
-			var closure = scope.ReadSlot(0, context.player);
-			var delay = scope.ReadSlot(1, context.player);
-			var rest = scope.ReadSlot(2, context.player);
+			var closure = scope.ReadSlot(0);
+			var delay = scope.ReadSlot(1);
+			var rest = scope.ReadSlot(2);
 
 			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
 
