@@ -46,6 +46,15 @@ namespace juicescript.ABC
 
 		public byte[] param_defaultvalues;
 
+        /// <summary>
+        /// 当所在Script初始化后，赋值给内部method,这样就不用查找了!
+        /// </summary>
+        public int rt__globalindex;
+        ///// <summary>
+        ///// 当所在Class初始化后，赋值给内部method,这样就不用查找了
+        ///// </summary>
+        //public int rt__classindex;
+
 		[StructLayout(LayoutKind.Explicit)]
 		public struct MethodBodyInfo
         {

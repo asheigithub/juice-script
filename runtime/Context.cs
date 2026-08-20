@@ -15,7 +15,12 @@ namespace juicescript.runtime
     /// <summary>
     /// 运行时上下文
     /// </summary>
-    public class Context
+#if FORCOMPILER
+    internal
+#else
+    public
+#endif
+    class Context
     {
 
         public const int STACK_LENGTH = 512;

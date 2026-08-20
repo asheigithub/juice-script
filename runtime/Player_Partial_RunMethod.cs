@@ -18,7 +18,11 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 
 		public static string GetMethodKey(ASMethod method)
@@ -376,14 +380,15 @@ namespace juicescript.runtime
 				m_scopePayload.__sendargcount = args;
 
 				//save this
-				{
+				{					
 					
-					ScopeHeapLocater scopeHeapLocater;
-					scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
-					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount-1);
-
 					if (thisPtr.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
 					{
+						ScopeHeapLocater scopeHeapLocater;
+						scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
+						scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
+
+
 						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref thisPtr, null, null, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 						if (error.raised)
 						{
@@ -476,22 +481,22 @@ namespace juicescript.runtime
 								NaNBoxing box = slot[argLocater.index];
 
 
-								if (p.TypeKind == TypeKind.Any
-									|| ((byte)box.ValueType - 3 == (byte)p.TypeKind && p.TypeKind <= TypeKind.Float)
-									|| (box.ValueType == BoxType.LocalString && p.TypeKind == TypeKind.String))
-								{
-									param_slots[i] = box;
-								}
-								else if (p.TypeKind == TypeKind.Int && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
-								{
-									param_slots[i].SetInt(box.IntValue);
+								//if (p.TypeKind == TypeKind.Any
+								//	|| ((byte)box.ValueType - 3 == (byte)p.TypeKind && p.TypeKind <= TypeKind.Float)
+								//	|| (box.ValueType == BoxType.LocalString && p.TypeKind == TypeKind.String))
+								//{
+								//	param_slots[i] = box;
+								//}
+								//else if (p.TypeKind == TypeKind.Int && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
+								//{
+								//	param_slots[i].SetInt(box.IntValue);
 
-								}
-								else if (p.TypeKind == TypeKind.Uint && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
-								{
-									param_slots[i].SetUInt(box.UIntValue);
-								}
-								else
+								//}
+								//else if (p.TypeKind == TypeKind.Uint && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
+								//{
+								//	param_slots[i].SetUInt(box.UIntValue);
+								//}
+								//else
 								{
 									Context.StackPosition += i;// method.Parameters.Count;
 									Context.BackTraceIndex++;

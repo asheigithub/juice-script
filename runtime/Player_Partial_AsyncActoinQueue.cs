@@ -11,7 +11,11 @@ using static juicescript.runtime.buildin.PromiseImpl;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 		public class AsyncCallbackQueue
 		{

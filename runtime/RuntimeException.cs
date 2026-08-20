@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public abstract class RuntimeException : Exception
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		abstract class RuntimeException : Exception
     {      
         public RuntimeException(string message):base(message) {}
     }

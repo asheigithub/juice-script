@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public class LoaderException : RuntimeException
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		class LoaderException : RuntimeException
     {
         public LoaderException(string message) : base( message )
         {

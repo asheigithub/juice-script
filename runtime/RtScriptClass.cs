@@ -8,10 +8,15 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    /// <summary>
-    /// 运行时负载Global,Class的实例
-    /// </summary>
-    public sealed class RtScriptClass : RtHeapBase
+	/// <summary>
+	/// 运行时负载Global,Class的实例
+	/// </summary>
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		sealed class RtScriptClass : RtHeapBase
     {
 		private NaNBoxing[] Slots;
 

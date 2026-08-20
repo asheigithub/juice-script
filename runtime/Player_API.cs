@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
+#if !FORCOMPILER
+
 	public partial class  Player
 	{
 
@@ -49,4 +51,7 @@ namespace juicescript.runtime
 		}
 
 	}
+
+#endif
+
 }

@@ -8,7 +8,12 @@ namespace juicescript.runtime
 {
 
 
-    public sealed class RtDynamic : RtHeapBase
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		sealed class RtDynamic : RtHeapBase
     {
         public RtDynamic() : base(RtHeapTypeKind.DYNAMIC_PROPERTYS) { }
 

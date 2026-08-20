@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
+#if !FORCOMPILER
+
 	public class InstructionProfiler
 	{
 		public class InstructionStats
@@ -172,4 +174,7 @@ namespace juicescript.runtime
 
 
 	}
+
+#endif
+
 }

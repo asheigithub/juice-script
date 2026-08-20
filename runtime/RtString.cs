@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    /// <summary>
-    /// 运行时字符串负载
-    /// </summary>
-    public class RtString :RtHeapBase
+	/// <summary>
+	/// 运行时字符串负载
+	/// </summary>
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		class RtString :RtHeapBase
     {
         private string _str;
         public string Str

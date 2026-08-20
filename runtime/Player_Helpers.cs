@@ -19,10 +19,15 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 
 		private unsafe void Ld_class(int dst_index, byte** PC, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, ref ReceiveError error)
@@ -3723,7 +3728,7 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void M_Call(int dst_index, byte** PC, RtMethodScope methodscope,
 			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
-			ref NaNBoxing global_obj,
+			//ref NaNBoxing global_obj,
 			ref ReceiveError error)
 		{
 			StackLocater target;
@@ -3770,7 +3775,7 @@ namespace juicescript.runtime
 
 		private unsafe void Bindglobal_call(int dst_index, byte** PC, RtMethodScope methodscope,
 			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
-			ref NaNBoxing global_obj,
+			//ref NaNBoxing global_obj,
 			ref ReceiveError error)
 		{
 			StackLocater result;
@@ -3851,7 +3856,7 @@ namespace juicescript.runtime
 
 
 			NaNBoxing _this_ = new NaNBoxing();
-			ASContainer _scopeType;
+			//ASContainer _scopeType;
 			if (func.__ismethod)
 			{
 				_this_ = closure.This;
@@ -3869,26 +3874,31 @@ namespace juicescript.runtime
 				//var globalptr = ((ASScript)s.Container).__global_index__;
 
 				//_this_.SetHeapPtr(globalptr);
-				if (global_obj.ValueType != BoxType.HeapPtr)
-				{
-					//加载global。
-					var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
-					while (s.Kind != CodeScopeKind.Script)
-					{
-						s = s.Parent;
-					}
+				//if (global_obj.ValueType != BoxType.HeapPtr)
+				//{
+				//	//加载global。
+				//	var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				//	while (s.Kind != CodeScopeKind.Script)
+				//	{
+				//		s = s.Parent;
+				//	}
 
-					var globalptr = ((ASScript)s.Container).__global_index__;
-					global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
-					_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
-				}
-				else
-				{
-					_this_ = global_obj;
-				}
+				//	var globalptr = ((ASScript)s.Container).__global_index__;
+				//	global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+				//	_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+				//}
+				//else
+				//{
+				//	_this_ = global_obj;
+				//}
 
 
-				_scopeType = Context.GC.Heap[closure.ScopePtr].Type;
+				//_scopeType = Context.GC.Heap[closure.ScopePtr].Type;
+
+				Debug.Assert(((ASMethodBody)methodscope.Type).rt__globalindex != 0);
+				_this_.SetHeapPtr(((ASMethodBody)methodscope.Type).rt__globalindex, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+
+
 			}
 
 
@@ -4167,7 +4177,7 @@ namespace juicescript.runtime
 			int scope_ptr, int stackStPos,
 
 			int* method_scopes,
-			ref NaNBoxing global_obj,
+			//ref NaNBoxing global_obj,
 			ref ReceiveError error
 			)
 		{
@@ -4206,26 +4216,28 @@ namespace juicescript.runtime
 				goto flag_handle_error;
 			}
 
-
+			Debug.Assert(((ASMethodBody)methodscope.Type).rt__globalindex != 0);
 
 			NaNBoxing _this_ = default;
-			if (global_obj.ValueType != BoxType.HeapPtr)
-			{
-				//加载global。
-				var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
-				while (s.Kind != CodeScopeKind.Script)
-				{
-					s = s.Parent;
-				}
+			_this_.SetHeapPtr(((ASMethodBody)methodscope.Type).rt__globalindex, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
-				var globalptr = ((ASScript)s.Container).__global_index__;
-				global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
-				_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
-			}
-			else
-			{
-				_this_ = global_obj;
-			}
+			//if (global_obj.ValueType != BoxType.HeapPtr)
+			//{
+			//	//加载global。
+			//	var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+			//	while (s.Kind != CodeScopeKind.Script)
+			//	{
+			//		s = s.Parent;
+			//	}
+
+			//	var globalptr = ((ASScript)s.Container).__global_index__;
+			//	global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+			//	_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+			//}
+			//else
+			//{
+			//	_this_ = global_obj;
+			//}
 
 			var _scopeType = methodscope.Type; //Context.GC.Heap[((RtClosure)closure).ScopePtr].Type;
 
@@ -4253,7 +4265,7 @@ namespace juicescript.runtime
 			int scope_ptr, int stackStPos,
 
 			int* method_scopes,
-			ref NaNBoxing global_obj,
+			//ref NaNBoxing global_obj,
 			ref ReceiveError error)
 		{
 
@@ -4289,26 +4301,29 @@ namespace juicescript.runtime
 
 
 			NaNBoxing _this_ = default;
-			if (global_obj.ValueType != BoxType.HeapPtr)
-			{
-				//加载global。
-				var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
-				while (s.Kind != CodeScopeKind.Script)
-				{
-					s = s.Parent;
-				}
+			//if (global_obj.ValueType != BoxType.HeapPtr)
+			//{
+			//	//加载global。
+			//	var s = methodscope.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+			//	while (s.Kind != CodeScopeKind.Script)
+			//	{
+			//		s = s.Parent;
+			//	}
 
-				var globalptr = ((ASScript)s.Container).__global_index__;
-				global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
-				_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
-			}
-			else
-			{
-				_this_ = global_obj;
-			}
+			//	var globalptr = ((ASScript)s.Container).__global_index__;
+			//	global_obj.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+			//	_this_.SetHeapPtr(globalptr, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+			//}
+			//else
+			//{
+			//	_this_ = global_obj;
+			//}
+
+			Debug.Assert(((ASMethodBody)methodscope.Type).rt__globalindex != 0);
+			_this_.SetHeapPtr(((ASMethodBody)methodscope.Type).rt__globalindex, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 
-			((RtClosure)closure).This = global_obj;
+			((RtClosure)closure).This = _this_;
 			//((RtClosure)closure).ScopeType = methodscope.Type;
 
 			stackslots[dst_index].SetHeapPtr(closure_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -8251,9 +8266,97 @@ namespace juicescript.runtime
 			int* m_scope = method_scopes;
 			*m_scope++ = scope_ptr;
 
+#if !FORCOMPILER
+
+			switch (kind)
+			{
+				case CodeScopeKind.Class:
+				case CodeScopeKind.Script:
+					{
+						RtScriptClass heap;
+						if (kind == CodeScopeKind.Class)
+						{
+							Debug.Assert(methodscope.Type._link_codescope.Parent.Kind == CodeScopeKind.Class);
+							ASClass cls = (ASClass)methodscope.Type._link_codescope.Parent.Container;
+
+							Debug.Assert(cls.__instance_index__ != 0);
+							RtHeapBase sInstance = Context.GC.Heap[ cls.__instance_index__ ];
+							Debug.Assert(((RtScriptClass)sInstance).Meta._link_codescope.index == heapLocater.ScopeIndex);
+
+							heap = (RtScriptClass)sInstance;
+
+						}
+						else
+						{
+							Debug.Assert(((ASMethodBody)methodscope.Type).rt__globalindex != 0);
+
+							RtHeapBase sInstance = Context.GC.Heap[((ASMethodBody)methodscope.Type).rt__globalindex];
+							Debug.Assert(((RtScriptClass)sInstance).Meta._link_codescope.index == heapLocater.ScopeIndex);
+
+							heap = (RtScriptClass)sInstance;
+						}
+
+						
+						ASTrait t = heap.Meta._link_codescope.Members[heapLocater.MemberIndex].trait;
+
+						Context.GC.CheckGC(ref error);
+						if (Context.StackPosition >= Context.STACK_LENGTH)
+						{
+							RaiseStackOverflow(ref error);
+							goto flag_handle_error;
+						}
+
+						ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+						Context.StackPosition++;
+
+						ConvertValueType(ref error, value, t.TypeKind, t.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+						if (error.raised)
+						{
+							Context.StackPosition--;
+							goto flag_handle_error;
+						}
+
+						if (heap.IsUpdateStructOrEqual(Context, heapLocater.MemberIndex, conv))
+						{
+							Context.StackPosition--;
+						}
+						else
+						{
+							value = GetSaveValue(conv, ref error);
+							Context.StackPosition--;
+
+							if (error.raised)
+							{
+								goto flag_handle_error;
+							}
+
+							heap.SetSlot(value, heapLocater.MemberIndex);
+						}
+						return;
+					}
+
+				case CodeScopeKind.Instance:
+					break;				
+				case CodeScopeKind.Method:
+					break;
+				default:
+					break;
+			}
+
+
+#endif
+
+
+
+
+
+
 		label_method_parent:
 			switch (s.Kind)
 			{
+
+#if FORCOMPILER
+
 				case RtHeapTypeKind.CLASS:
 				case RtHeapTypeKind.GLOBAL:
 					{
@@ -8311,10 +8414,10 @@ namespace juicescript.runtime
 						}
 					}
 					break;
-
+#endif
 				case RtHeapTypeKind.INSTANCE:
 					{
-
+#if FORCOMPILER
 						//考虑可能继承的情况，scopeType保存上下文堆内存用的布局类型
 						//if (scopeType._link_codescope.index != heapLocater.ScopeIndex)
 						if (
@@ -8373,7 +8476,11 @@ namespace juicescript.runtime
 							}
 						}
 						else
+#endif
 						{
+
+							Debug.Assert(kind == CodeScopeKind.Instance);
+
 							RtInstance heap = (RtInstance)s;
 
 
@@ -10983,13 +11090,52 @@ namespace juicescript.runtime
 			int _kind; LoadInt32(&_kind, PC);
 			CodeScopeKind kind = (CodeScopeKind)_kind;
 
-
-
 			var s = scope; int _parent_ptr = 0;
+
+#if !FORCOMPILER
+
+			switch (kind)
+			{
+				case CodeScopeKind.Class:
+					//似乎不可能有走到这里的情况
+					break;
+				case CodeScopeKind.Script:
+					{
+						Debug.Assert(((ASMethodBody)scope.Type).rt__globalindex !=0);
+
+						RtHeapBase sInstance = Context.GC.Heap[((ASMethodBody)scope.Type).rt__globalindex];
+
+						Debug.Assert(((RtScriptClass)sInstance).Meta._link_codescope.index == heapLocater.ScopeIndex);
+
+						RtScriptClass heap = (RtScriptClass)sInstance;
+						NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+
+						stackslots[stackLocater.index] = value; return;
+					}
+					
+				case CodeScopeKind.Instance:
+					break;			
+				case CodeScopeKind.Method:
+					break;
+				default:
+					break;
+			}
+
+
+#endif
+
+
+
+
+
+
+
+
 		label_method_parent:
 
 			switch (s.Kind)
 			{
+#if FORCOMPILER
 				case RtHeapTypeKind.CLASS:
 					{
 						var codeScope = ((RtScriptClass)s).Meta._link_codescope;
@@ -11014,11 +11160,18 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							RtScriptClass heap = (RtScriptClass)s;
-							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+					Environment.FailFast("出错了，这里跑不到");  return;
+#endif
 
-							stackslots[stackLocater.index] = value; return;
-							//return value;
+
+							//RtScriptClass heap = (RtScriptClass)s;
+							//NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
+
+							//stackslots[stackLocater.index] = value; return;
+							
 						}
 
 					}
@@ -11037,9 +11190,10 @@ namespace juicescript.runtime
 						stackslots[stackLocater.index] = value; return;
 						//return value;
 					}
-
+#endif
 				case RtHeapTypeKind.INSTANCE:
 					{
+#if FORCOMPILER
 						//考虑可能继承的情况，scopeType保存上下文堆内存用的布局类型
 						if (
 							//scopeType._link_codescope.index != heapLocater.ScopeIndex
@@ -11081,7 +11235,11 @@ namespace juicescript.runtime
 							//return value;
 						}
 						else
+#endif
+						
 						{
+
+							Debug.Assert(kind == CodeScopeKind.Instance);
 							//throw new InvalidOperationException();
 
 							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex,  this, stackStPos + stackLocater.index, _parent_ptr);
@@ -11112,9 +11270,6 @@ namespace juicescript.runtime
 						}
 					}
 
-				case RtHeapTypeKind.STRING:
-				//case RtHeapTypeKind.CACHE_LD_CLASS:
-				case RtHeapTypeKind.STACK_CACHE_OBJ:
 				default:
 #if DEBUG
 					throw new InvalidOperationException();

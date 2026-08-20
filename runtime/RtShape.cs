@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    /// <summary>
-    /// 负载动态对象的Transition链节点
-    /// </summary>
-    public sealed class RtShape : RtHeapBase
+	/// <summary>
+	/// 负载动态对象的Transition链节点
+	/// </summary>
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		sealed class RtShape : RtHeapBase
     {
         public RtShape() : base( RtHeapTypeKind.SHAPE) { }
 

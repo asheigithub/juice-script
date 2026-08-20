@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-	public class EvalConstException : RuntimeException
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+	class EvalConstException : RuntimeException
 	{
 		public EvalConstException() : base("Parameter initializer unknown or is not a compile-time constant.")
 		{

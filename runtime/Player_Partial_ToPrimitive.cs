@@ -12,7 +12,11 @@ using System.Xml.Linq;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 		internal enum HINT
 		{

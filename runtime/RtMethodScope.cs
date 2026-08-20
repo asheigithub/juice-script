@@ -10,7 +10,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-	public sealed class RtMethodScope : RtHeapBase
+#if FORCOMPILER
+    internal
+#else
+	public
+#endif
+		sealed class RtMethodScope : RtHeapBase
 	{
 		public RtMethodScope() : base( RtHeapTypeKind.MethodScope) { }
 

@@ -1147,20 +1147,22 @@ namespace juicescript
         }
 
 #if DEBUG
-        public static Action<int,byte,byte> _setheapptr_validator;
+		public static Action<int,byte,byte> _setheapptr_validator;
 #endif
 
-		//未知的堆类型 实际上运行时只在GetSaveValue内部用到!
-		public const int UNKNOWN_HEAPKIND = 0xF;  
+        //未知的堆类型 实际上运行时只在GetSaveValue内部用到!
+        public const int UNKNOWN_HEAPKIND = 0xF;  
         public void SetHeapPtr(int indexofheap,byte heapkind , byte heapflag)
         {
+
 #if DEBUG
-            if (_setheapptr_validator != null)
+			if (_setheapptr_validator != null)
             { 
                 _setheapptr_validator(indexofheap, heapkind,heapflag);
             }
 #endif
-		    store = TAG_HEAP_POINTER | ((ulong)(heapkind | (heapflag << 4 ) ) << 32)  | (uint)indexofheap;
+
+            store = TAG_HEAP_POINTER | ((ulong)(heapkind | (heapflag << 4 ) ) << 32)  | (uint)indexofheap;
         }
 
         public int HeapPtr

@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public sealed class RtClosure : RtHeapBase
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		sealed class RtClosure : RtHeapBase
     {
 		public RtClosure() : base(RtHeapTypeKind.CLOSURE) { }
 

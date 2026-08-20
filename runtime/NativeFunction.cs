@@ -10,7 +10,13 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
-	public delegate void NativeFun(Context context, 
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+
+		delegate void NativeFun(Context context, 
 			ASMethod method, 
 			int scope_ptr, 
 			NaNBoxing thisPtr, 			
@@ -18,7 +24,12 @@ namespace juicescript.runtime
 
 
 	[AttributeUsage(AttributeTargets.Method)]
-	public class NativeFunctionAttribute : Attribute
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		class NativeFunctionAttribute : Attribute
 	{
 		public string key;
 
@@ -30,7 +41,12 @@ namespace juicescript.runtime
 	}
 
 
-	public static class NativeFunctionRegistry
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		static class NativeFunctionRegistry
 	{
 		private static readonly Dictionary<string, MethodInfo> _registry = new();
 

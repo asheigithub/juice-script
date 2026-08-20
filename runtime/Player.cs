@@ -24,9 +24,19 @@ using System.IO;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
+
 	{
-		public struct ReceiveError
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		struct ReceiveError
 		{
 			public NaNBoxing error;
 			public bool raised;
@@ -5066,6 +5076,16 @@ namespace juicescript.runtime
 			for (int i = 0; i < script.codeScopes.Count; i++)
 			{
 				var scope = script.codeScopes[i];
+				if (scope.Kind == CodeScopeKind.Method)
+				{
+					ASMethodBody methodBody = (ASMethodBody)scope.Container;
+					methodBody.rt__globalindex = index;
+				}
+			}
+
+			for (int i = 0; i < script.codeScopes.Count; i++)
+			{
+				var scope = script.codeScopes[i];
 				if (scope.Kind == CodeScopeKind.Class)
 				{
 					InitASClass((ASClass)scope.Container, ref error); if (error.raised) { return; }
@@ -5074,7 +5094,10 @@ namespace juicescript.runtime
 				{
 					CodeScope scriptScope = scope;
 				}
+				
 			}
+			
+
 
 			//执行script的初始化函数
 			NaNBoxing thisPtr = new NaNBoxing();
@@ -5106,6 +5129,28 @@ namespace juicescript.runtime
 			}
 
 			cls.__instance_index__ = index;
+
+			//var script = (ASScript)cls._link_codescope.Parent.Container;
+			//for (int i = 0; i < script.codeScopes.Count; i++)
+			//{
+			//	var scope = script.codeScopes[i];
+			//	if (scope.Kind == CodeScopeKind.Method)
+			//	{
+			//		ASMethodBody methodBody = (ASMethodBody)scope.Container;
+					
+			//		while (scope.Kind != CodeScopeKind.Script)
+			//		{
+			//			if (scope == cls._link_codescope)
+			//			{
+			//				methodBody.rt__classindex = index;
+			//				break;
+			//			}
+
+			//			scope = scope.Parent;
+			//		}
+			//	}
+			//}
+
 
 			//构造proto的constructor, 就是Class自己。
 			var proto = Context.GC.Heap[((RtScriptClass)Context.GC.Heap[index]).PROTO__PTR];
@@ -10499,44 +10544,48 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
 		{
-
+			BoxType intype = invalue.ValueType;
 			if (totype == TypeKind.Any
-				|| ((byte)invalue.ValueType - 3 == (byte)totype && totype <= TypeKind.Float)
-				|| (invalue.ValueType == BoxType.LocalString && totype == TypeKind.String)
-				|| (invalue.ValueType == BoxType.Number && totype == TypeKind.Number)
+				|| ((byte)intype - 3 == (byte)totype && totype <= TypeKind.Float)
+				|| (intype == BoxType.LocalString && totype == TypeKind.String)
+				|| (intype == BoxType.Number && totype == TypeKind.Number)
 				)
 			{
 				outvalue = invalue;
 				return;
 			}
-			else if ((totype == TypeKind.Int) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			else if (totype < TypeKind.Float && totype >= TypeKind.Int && intype >= BoxType.Int && intype < BoxType.Float )
 			{
-				outvalue.SetInt(invalue.IntValue);
+				ulong mask = (((ulong)totype + 3)<< 40) | NaNBoxing.QNAN;
+				ulong raw = mask | (invalue.Raw & 0xffffffff ) ;
+
+				outvalue = new NaNBoxing(raw);
 				return;
+
 			}
-			else if (totype == TypeKind.Uint && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			//else if ((totype == TypeKind.Int) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			//{
+			//	outvalue.SetInt(invalue.IntValue);
+			//	return;
+			//}
+			//else if (totype == TypeKind.Uint && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
+			//{
+			//	outvalue.SetUInt(invalue.UIntValue);
+			//	return;
+			//}
+			else if (totype == TypeKind.Float && (byte)(intype - 1) < (byte)BoxType.UShort)
 			{
-				outvalue.SetUInt(invalue.UIntValue);
+				outvalue.SetFloat(((byte)(intype) % 2 == 1) ?  invalue.IntValue : invalue.UIntValue);
 				return;
-			}
-			else if (totype == TypeKind.Float && ((byte)(invalue.ValueType) % 2 == 1) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
-			{
-				outvalue.SetFloat(invalue.IntValue);
-				return;
-			}
-			else if (totype == TypeKind.Float && ((byte)(invalue.ValueType) % 2 == 0) && (byte)(invalue.ValueType - 1) < (byte)BoxType.UShort)
-			{
-				outvalue.SetFloat(invalue.UIntValue);
-				return;
-			}
+			}			
 			else if (
 				totype_class != null && (totype >= TypeKind.Object) &&
 				(
-				invalue.ValueType == BoxType.Null ||
-				(invalue.ValueType == BoxType.HeapPtr && (totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance))))
+				intype == BoxType.Null ||
+				(intype == BoxType.HeapPtr && (totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance))))
 			{
 				outvalue = invalue;
 				return;
@@ -13088,7 +13137,7 @@ namespace juicescript.runtime
 					}
 				}
 
-				NaNBoxing global_obj = default;
+				//NaNBoxing global_obj = default;
 
 				while (true)
 				{
@@ -13537,7 +13586,8 @@ namespace juicescript.runtime
 #endif
 
 								Ld_function_bindglobal_call(&PC, methodscope, dst_index,constants, stackslots, scope_ptr, stackStPos, method_scopes,
-									ref global_obj, ref error
+									//ref global_obj, 
+									ref error
 									);
 								if (error.raised)
 								{
@@ -13554,7 +13604,9 @@ namespace juicescript.runtime
 								}
 
 #endif
-								Bindglobal_call(dst_index,&PC,(RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr,  ref global_obj, ref error);
+								Bindglobal_call(dst_index,&PC,(RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, 
+									//ref global_obj,
+									ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13626,7 +13678,7 @@ namespace juicescript.runtime
 
 								//stackslots[target.index] = result;
 
-								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, ref global_obj, ref error);
+								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr,ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14158,7 +14210,8 @@ namespace juicescript.runtime
 #endif
 
 								O_Ld_function_bindglobal(&PC, methodscope, dst_index, constants, stackslots, scope_ptr, stackStPos, method_scopes,
-									ref global_obj, ref error
+									//ref global_obj, 
+									ref error
 									);
 								if (error.raised)
 								{
@@ -14181,7 +14234,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_Call:
 							{
-								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, ref global_obj, ref error);
+								M_Call(dst_index, &PC, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;

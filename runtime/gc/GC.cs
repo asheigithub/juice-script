@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime.gc
 {
-    public class GC
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+	class GC
     {
         public GCHeap Heap;
 

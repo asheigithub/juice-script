@@ -9,7 +9,12 @@ using System.Threading.Tasks;
 namespace juicescript.runtime.gc
 {
 
-    public class GCHeap
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		class GCHeap
     {
         private List<RtHeapBase> Heap;
         private List<int> freeIndexes;
@@ -21,34 +26,31 @@ namespace juicescript.runtime.gc
                 return Heap[index];
             }
         }
-
+#if !FORCOMPILER
 #if DEBUG
-        private static WeakReference<GCHeap> reference;
+        private WeakReference<GCHeap> reference;
 
-        static GCHeap()
-        {
-			NaNBoxing._setheapptr_validator = (ptr, kind, flag) => {
+  //      static GCHeap()
+  //      {
+		//	NaNBoxing._setheapptr_validator = (ptr, kind, flag) => {
 
-				GCHeap heap;
-				if (reference !=null && reference.TryGetTarget(out heap))
-				{
-					if (ptr != 0 && kind != NaNBoxing.UNKNOWN_HEAPKIND)
-					{
-						Debug.Assert((byte)heap[ptr].Kind == kind);
-                        if (kind == (byte)RtHeapTypeKind.INSTANCE )
-                        {
-                            Debug.Assert(((ASInstance)heap[ptr].Type).Flags.HasFlag(ClassFlags.Struct) == ((flag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT));
-						}
-
-
-
-					}
-				}
-			};
-		}
+		//		GCHeap heap;
+		//		if (reference !=null && reference.TryGetTarget(out heap))
+		//		{
+		//			if (ptr != 0 && kind != NaNBoxing.UNKNOWN_HEAPKIND)
+		//			{
+		//				Debug.Assert((byte)heap[ptr].Kind == kind);
+  //                      if (kind == (byte)RtHeapTypeKind.INSTANCE )
+  //                      {
+  //                          Debug.Assert(((ASInstance)heap[ptr].Type).Flags.HasFlag(ClassFlags.Struct) == ((flag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT));
+		//				}
+		//			}
+		//		}
+		//	};
+		//}
 
 #endif
-
+#endif
 
 
 
@@ -64,14 +66,38 @@ namespace juicescript.runtime.gc
             
             freeIndexes = new List<int>(65536*2);
 
-            //ASClass_obj = new Dictionary<ulong, RtHeapInstance>();
-
+			//ASClass_obj = new Dictionary<ulong, RtHeapInstance>();
+#if !FORCOMPILER
 #if DEBUG
             reference = new WeakReference<GCHeap>(this);
+
+            NaNBoxing._setheapptr_validator = (ptr, kind, flag) => {
+				GCHeap heap;
+				if (reference !=null && reference.TryGetTarget(out heap))
+				{
+					if (ptr != 0 && kind != NaNBoxing.UNKNOWN_HEAPKIND)
+					{
+						Debug.Assert((byte)heap[ptr].Kind == kind);
+                        if (kind == (byte)RtHeapTypeKind.INSTANCE )
+                        {
+                            Debug.Assert(((ASInstance)heap[ptr].Type).Flags.HasFlag(ClassFlags.Struct) == ((flag & (byte)HeapKindFlag.FLAG_STRUCT) == (byte)HeapKindFlag.FLAG_STRUCT));
+						}
+					}
+				}
+			};
+
+#endif
+
+#else
+#if DEBUG
+			NaNBoxing._setheapptr_validator = null;
+
 #endif
 
 
-		}
+#endif
+
+        }
 
 		private int cacheCount;
 

@@ -172,3 +172,4 @@ trace(fib(35),getTimer() - st );
 //var expected = 30;
 //if (ret != expected)
     //throw "ERROR: bad result: expected " + expected + " but got " + ret + " " + ( getTimer() - st);
+

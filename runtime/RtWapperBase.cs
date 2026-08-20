@@ -9,7 +9,12 @@ namespace juicescript.runtime
 	/// <summary>
 	/// wapper 本地对象的基类
 	/// </summary>
-	public abstract class RtWapperBase
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		abstract class RtWapperBase
 	{
 		/// <summary>
 		/// GC标记阶段，标记内部引用的对象

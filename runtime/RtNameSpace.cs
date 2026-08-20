@@ -7,10 +7,15 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    /// <summary>
-    /// 负载Namespace实例
-    /// </summary>
-    public sealed class RtNameSpace : RtHeapBase
+	/// <summary>
+	/// 负载Namespace实例
+	/// </summary>
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		sealed class RtNameSpace : RtHeapBase
     {
         public RtNameSpace() : base( RtHeapTypeKind.NAMESPACE) { }
 

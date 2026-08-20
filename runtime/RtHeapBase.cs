@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public enum HeapKindFlag : byte
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		enum HeapKindFlag : byte
     { 
         NONE = 0,
 		FLAG_STRUCT = 1,
@@ -20,7 +25,12 @@ namespace juicescript.runtime
 	}
 
 
-    public enum RtHeapTypeKind : byte
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		enum RtHeapTypeKind : byte
     { 
         /// <summary>
         /// 表示ASClass实例
@@ -85,7 +95,12 @@ namespace juicescript.runtime
     }
 
 
-    public abstract class RtHeapBase
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		abstract class RtHeapBase
     {
         
       

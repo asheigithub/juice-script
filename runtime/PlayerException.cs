@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    public class PlayerException : RuntimeException
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		class PlayerException : RuntimeException
     {
         public Player player;
 

@@ -13,10 +13,15 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-    /// <summary>
-    /// 负载对象实例ASInstance
-    /// </summary>
-    public sealed class RtInstance : RtHeapBase
+	/// <summary>
+	/// 负载对象实例ASInstance
+	/// </summary>
+#if FORCOMPILER
+    internal
+#else
+	public
+#endif
+		sealed class RtInstance : RtHeapBase
     {
 		public RtInstance() : base(RtHeapTypeKind.INSTANCE) { }
 

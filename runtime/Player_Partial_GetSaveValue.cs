@@ -16,7 +16,11 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 
 		/// <summary>

@@ -8,7 +8,11 @@ using static juicescript.NaNBoxing;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 
 		int cache_ATERM_UNDEFINED;

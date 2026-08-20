@@ -15,7 +15,12 @@ using static juicescript.NaNBoxing;
 
 namespace juicescript.runtime
 {
-    public static class Extensions
+#if FORCOMPILER
+    internal
+#else
+    public
+#endif
+    static class Extensions
     {
 
 		public static bool CanConvertToFloatLossless (double value) 

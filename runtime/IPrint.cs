@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-	public interface IPrint
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		interface IPrint
 	{
 		//public void Write(string message);
 

@@ -12,7 +12,12 @@ namespace juicescript.runtime
     /// <summary>
     /// 记录运行时错误堆栈
     /// </summary>
-    public class ErrorStackTrace
+    #if FORCOMPILER
+	internal
+#else
+    public
+#endif
+    class ErrorStackTrace
     {
         public void Clear()
         {

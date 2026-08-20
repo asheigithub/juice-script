@@ -16,7 +16,12 @@ using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
-	public sealed class RtArray : RtHeapBase
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+		sealed class RtArray : RtHeapBase
 	{
 		public RtArray() : base(RtHeapTypeKind.ARRAY)
 		{

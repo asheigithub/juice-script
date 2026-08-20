@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
-	public class EvalConstOutOfStackException : RuntimeException
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+	class EvalConstOutOfStackException : RuntimeException
 	{
 		public EvalConstOutOfStackException(ASMethod method) : base( $" { Player.GetMethodKey( method)} use too much stackslots. Compute var default value failed." )
 		{

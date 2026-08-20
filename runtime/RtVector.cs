@@ -16,10 +16,15 @@ using System.Xml.Linq;
 
 namespace juicescript.runtime
 {
-    /// <summary>
-    /// 运行时Vector对象的负载
-    /// </summary>
-    public class RtVector : RtHeapBase
+	/// <summary>
+	/// 运行时Vector对象的负载
+	/// </summary>
+#if FORCOMPILER
+	internal
+#else
+    public
+#endif
+	class RtVector : RtHeapBase
     {
 
         /// <summary>

@@ -10,7 +10,11 @@ using System.Threading.Tasks;
 
 namespace juicescript.runtime
 {
+#if FORCOMPILER
+	internal partial class Player
+#else
 	public partial class Player
+#endif
 	{
 #if FORCOMPILER //编译期求值相关
 
