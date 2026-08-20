@@ -352,9 +352,9 @@ namespace juicescript.runtime
 
 				}
 
-				
+				var method_body_linkcodesocpe = method.Body._link_codescope;
 
-				int scopeHoleSlots = method.Body._link_codescope.Members.Count 
+				int scopeHoleSlots = method_body_linkcodesocpe.Members.Count 
 					+ 1 //holdthis
 					;
 
@@ -375,7 +375,7 @@ namespace juicescript.runtime
 				mScope.Type = method.Body;
 				RtMethodScope m_scopePayload = (RtMethodScope)mScope;
 				m_scopePayload.ParentPtr = scope_ptr;
-				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method.Body._link_codescope,true);
+				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method_body_linkcodesocpe, true);
 
 				m_scopePayload.__sendargcount = args;
 
@@ -385,7 +385,7 @@ namespace juicescript.runtime
 					if (thisPtr.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
 					{
 						ScopeHeapLocater scopeHeapLocater;
-						scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
+						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
 
 
@@ -433,6 +433,7 @@ namespace juicescript.runtime
 						arguments_span = ((RtArray)arg_arguments).stack_store.Span;
 					}
 
+					var pmembers = method_body_linkcodesocpe.Members;
 					Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, method.Parameters.Count);
 					//param_slots.Clear(); //防止GC 错误意外访问
 					for (ushort i = 0; i < param_slots.Length; i++)
@@ -472,7 +473,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							var pmembers = method.Body._link_codescope.Members;
+							
 							if (i < args)
 							{
 								StackLocater argLocater;
@@ -480,27 +481,27 @@ namespace juicescript.runtime
 
 								NaNBoxing box = slot[argLocater.index];
 
+								var ptypekind = p.TypeKind;
+								var boxtype = box.ValueType;
 
-								//if (p.TypeKind == TypeKind.Any
-								//	|| ((byte)box.ValueType - 3 == (byte)p.TypeKind && p.TypeKind <= TypeKind.Float)
-								//	|| (box.ValueType == BoxType.LocalString && p.TypeKind == TypeKind.String))
-								//{
-								//	param_slots[i] = box;
-								//}
-								//else if (p.TypeKind == TypeKind.Int && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
-								//{
-								//	param_slots[i].SetInt(box.IntValue);
+								if (ptypekind == TypeKind.Any
+									|| ((byte)boxtype - 3 == (byte)ptypekind && ptypekind <= TypeKind.Float)
+									|| (boxtype == BoxType.LocalString && ptypekind == TypeKind.String))
+								{
+									param_slots[i] = box;
+								}
+								else if (ptypekind < TypeKind.Float && ptypekind >= TypeKind.Int && boxtype >= BoxType.Int && boxtype < BoxType.Float)
+								{
+									ulong mask = (((ulong)ptypekind + 3) << 40) | NaNBoxing.QNAN;
+									ulong raw = mask | (box.Raw & 0xffffffff);
 
-								//}
-								//else if (p.TypeKind == TypeKind.Uint && (byte)(box.ValueType - 1) < (byte)BoxType.UShort)
-								//{
-								//	param_slots[i].SetUInt(box.UIntValue);
-								//}
-								//else
+									param_slots[i] = new NaNBoxing(raw);									
+								}
+								else
 								{
 									Context.StackPosition += i;// method.Parameters.Count;
 									Context.BackTraceIndex++;
-									ConvertValueType(ref error, box, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
+									ConvertValueType(ref error, box, ptypekind, pmembers[i].__rt_type_class__, ref param_slots[i], scope_ptr, thisPtr);
 									Context.BackTraceIndex--;
 									Context.StackPosition -= i;// method.Parameters.Count;
 
@@ -516,16 +517,18 @@ namespace juicescript.runtime
 								{
 									//这里是保存到参数中，也需要预准备保存到方法体。
 									box = param_slots[i];
-									if (box.ValueType == NaNBoxing.BoxType.HeapPtr) //仅在是堆对象时，才可能触发维护引用的操作
+									//if (box.ValueType == NaNBoxing.BoxType.HeapPtr) //仅在是堆对象时，才可能触发维护引用的操作
+									if (box.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //仅在是堆对象时，才可能触发维护引用的操作
 									{
 										param_slots[i].SetUndefined();
 
-										ScopeHeapLocater scopeHeapLocater;
-										scopeHeapLocater.ScopeIndex = (ushort)method.Body._link_codescope.index;
-										scopeHeapLocater.MemberIndex = i;
-
-										if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+										//if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+										//if(box.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 										{
+											ScopeHeapLocater scopeHeapLocater;
+											scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
+											scopeHeapLocater.MemberIndex = i;
+
 											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, null, ref error, false /*结构体拷贝传递*/);
 #if DEBUG
 											if (error.raised)
@@ -1019,6 +1022,248 @@ namespace juicescript.runtime
 			return new NaNBoxing();
 			;
 
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		internal unsafe void RunMethod_MatchArgs(ASMethod method, NaNBoxing _this_ , int scope_ptr,Span<NaNBoxing> stackslots,ushort argsCount,byte* argementsPtr,
+
+			int returnSlotIndex,
+			ref ReceiveError error
+			)
+		{
+			if (Context.BackTraceIndex >= Context.MAX_BACKTRACE)
+			{
+				RaiseStackOverflow(ref error);
+				goto flag_handle_error;
+			}
+			var method_body_linkcodesocpe = method.Body._link_codescope;
+
+			int scopeHoleSlots = method_body_linkcodesocpe.Members.Count
+				+ 1 //holdthis
+				;
+
+			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
+			method.Body.GetInfo(ref info);
+
+			if (Context.StackPosition + scopeHoleSlots + info.useSlots
+				//+ 1 
+				>= Context.STACK_LENGTH)
+			{
+				RaiseStackOverflow(ref error);
+				goto flag_handle_error;
+			}
+
+			Context.StackSlots[returnSlotIndex].SetUndefined();
+
+			int backTraceId = Context.BackTraceIndex;
+
+			int mScopeId = backTraceId + Context.M_MethodScopePtr;
+			RtHeapBase mScope = Context.GC.Heap[mScopeId];
+
+			mScope.Type = method.Body;
+			RtMethodScope m_scopePayload = (RtMethodScope)mScope;
+			m_scopePayload.ParentPtr = scope_ptr;
+			m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method_body_linkcodesocpe, true);
+
+			m_scopePayload.__sendargcount = argsCount;
+
+			//save this
+			{
+
+				if (_this_.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
+				{
+					ScopeHeapLocater scopeHeapLocater;
+					scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
+					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
+
+
+					PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref _this_, null, null, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
+				}
+
+				m_scopePayload.SetSlot(_this_, (ushort)(m_scopePayload.SlotCount - 1));
+			}
+
+			var pmembers = method_body_linkcodesocpe.Members;
+			Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, method.Parameters.Count);
+			//param_slots.Clear(); //防止GC 错误意外访问
+			for (ushort i = 0; i < param_slots.Length; i++)
+			{
+				var p = method.Parameters[i];
+
+				StackLocater argLocater = *(StackLocater*)argementsPtr; argementsPtr += 4;
+
+				NaNBoxing box = stackslots[argLocater.index];
+
+				var ptypekind = p.TypeKind;
+				var boxtype = box.ValueType;
+
+				if (ptypekind == TypeKind.Any
+					|| ((byte)boxtype - 3 == (byte)ptypekind && ptypekind <= TypeKind.Float)
+					|| (boxtype == BoxType.LocalString && ptypekind == TypeKind.String))
+				{
+					param_slots[i] = box;
+				}
+				else if (ptypekind < TypeKind.Float && ptypekind >= TypeKind.Int && boxtype >= BoxType.Int && boxtype < BoxType.Float)
+				{
+					ulong mask = (((ulong)ptypekind + 3) << 40) | NaNBoxing.QNAN;
+					ulong raw = mask | (box.Raw & 0xffffffff);
+
+					param_slots[i] = new NaNBoxing(raw);
+				}
+				else
+				{
+					Context.StackPosition += i;// method.Parameters.Count;
+					Context.BackTraceIndex++;
+					ConvertValueType(ref error, box, ptypekind, pmembers[i].__rt_type_class__, ref param_slots[i], scope_ptr, _this_);
+					Context.BackTraceIndex--;
+					Context.StackPosition -= i;// method.Parameters.Count;
+
+					if (error.raised)
+					{
+						goto flag_handle_error;
+					}
+
+				}
+
+
+				//这里是保存到参数中，也需要预准备保存到方法体。
+				box = param_slots[i];
+				//if (box.ValueType == NaNBoxing.BoxType.HeapPtr) //仅在是堆对象时，才可能触发维护引用的操作
+				if (box.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //仅在是堆对象时，才可能触发维护引用的操作
+				{
+					param_slots[i].SetUndefined();
+
+					//if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+					//if(box.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
+					{
+						ScopeHeapLocater scopeHeapLocater;
+						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
+						scopeHeapLocater.MemberIndex = i;
+
+						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, null, ref error, false /*结构体拷贝传递*/);
+						Debug.Assert(!error.raised);
+					}
+					param_slots[i] = box;
+				}
+
+			}
+
+#if PROFILEPLAYER
+				InstructionProfiler.Profile_MethodStart(method);
+#endif
+
+			if (info.instructions > 0)
+			{
+				int calleelastpos = Context.StackPosition;
+				Context.StackPosition += scopeHoleSlots;
+
+				int stPos = Context.StackPosition;
+				Context.StackPosition += info.useSlots;
+
+				//Context.BackTrace[Context.BackTraceIndex].Method = method;
+				Context.BackTraceIndex++; ;
+
+				Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
+				slots.Clear(); //栈清空 -- 防止GC时错误访问
+				int P_PC;
+				Execute(ref info, mScope, mScopeId, //scopeType, 
+					slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
+
+				Context.BackTraceIndex--;
+				//Context.BackTrace[Context.BackTraceIndex].Method = null;
+
+
+
+				Context.StackPosition -= info.useSlots;
+				Context.StackPosition -= scopeHoleSlots;
+
+				m_scopePayload.ParentPtr = 0;
+				mScope.Type = null;
+
+
+				if (!error.raised)
+				{
+					if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
+					{
+						Debug.Assert(method.IsConstructor); // 只有在有类成员初始化代码并且构造函数还是native的时候会触发
+						goto run_native;
+					}
+					else
+					{
+#if PROFILEPLAYER
+							InstructionProfiler.Profile_MethodEnd();
+#endif
+
+					}
+				}
+				else
+				{
+#if PROFILEPLAYER
+						InstructionProfiler.Profile_MethodEnd();
+#endif
+
+					//记录当前报错堆栈，看上级调用是否处理这个错误
+					Context.errorStack.AddTrace(method, P_PC);
+
+
+				}
+				return;
+			}
+			else if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
+			{
+				goto run_native;
+			}
+			else
+			{
+#if PROFILEPLAYER
+					InstructionProfiler.Profile_MethodEnd();
+#endif
+				return;
+			}
+
+		run_native:
+
+			SetNativeDelegate(method, ref error);
+			if (error.raised)
+			{
+				goto lbl_native_called;
+			}
+
+			//Context.BackTrace[Context.BackTraceIndex].Method = method;
+			Context.BackTraceIndex++; ;
+			Context.StackPosition += scopeHoleSlots;
+			((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, _this_, Context.StackPosition, ref error, returnSlotIndex);
+			Context.StackPosition -= scopeHoleSlots;
+			Context.BackTraceIndex--;
+		//Context.BackTrace[Context.BackTraceIndex].Method = null;
+
+
+#if PROFILEPLAYER
+				InstructionProfiler.Profile_MethodEnd();
+#endif
+
+		lbl_native_called:
+			m_scopePayload.ParentPtr = 0;
+			mScope.Type = null;
+
+			if (!error.raised)
+			{
+
+			}
+			else
+			{
+				//记录当前报错堆栈，看上级调用是否处理这个错误
+				Context.errorStack.AddTrace(method, 0);
+
+			}
+
+		flag_handle_error:
+
+			return;
 		}
 
 

@@ -109,8 +109,10 @@ namespace juicescript.ABC
 
         }
 
-		public static unsafe void CheckConstants(byte[] computeDefaultValue, List<NaNBoxing> compute_constants)
+		public static unsafe bool CheckConstants(byte[] computeDefaultValue, List<NaNBoxing> compute_constants)
 		{
+            bool flag = true;
+
 			fixed (void* p = computeDefaultValue)
 			{
 				int constantscount = *((int*)p + 1);
@@ -125,14 +127,18 @@ namespace juicescript.ABC
 				for (int i = 0; i < constantscount; i++)
 				{
                     if ((*(src_consts + i)).Raw != compute_constants[i].Raw)
-                        throw new InvalidOperationException();
+                    {
+                        (*(src_consts + i)) = compute_constants[i];
+                        flag = false;
+					}
+                    //throw new InvalidOperationException();
 
                     //(*src_consts+i) = compute_constants[i];
 
 				}
 
 
-
+                return flag;
 			}
 		}
 

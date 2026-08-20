@@ -1087,7 +1087,11 @@ namespace juicescript.compiler
 													para.computeDefaultValue = bytes;
 
 
-													ASMethodBody.CheckConstants(para.computeDefaultValue, compute_constants);
+													if (!ASMethodBody.CheckConstants(para.computeDefaultValue, compute_constants))
+													{
+														expiredScripts.Add(script);
+														//throw new IOException();
+													}
 
 												}
 											}

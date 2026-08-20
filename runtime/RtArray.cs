@@ -107,7 +107,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int HEAPINSTANCE_PTR;
 
-
+		
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
 			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
@@ -2049,7 +2049,7 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
 		{
 			if (HEAPINSTANCE_PTR == 0)

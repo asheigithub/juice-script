@@ -61,6 +61,7 @@ namespace juicescript.runtime
 		/// <param name="start"></param>
 		/// <param name="codescope"></param>
 		/// <param name="isStackSlot"></param>
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public void InitSlot(NaNBoxing[] array, int start, CodeScope codescope,bool isStackSlot)
 		{
 			IsStackSlot = isStackSlot;
@@ -91,6 +92,11 @@ namespace juicescript.runtime
 
 
 #endif
+			InitSlot_Set(codescope);
+		}
+
+		private void InitSlot_Set(CodeScope codescope)
+		{
 
 			Slots.Span[codescope.Members.Count].SetUndefined(); //此处槽保留this
 
@@ -169,15 +175,13 @@ namespace juicescript.runtime
 
 
 #if !FORCOMPILER
-		
-		codescope._rt_cache_init_data = new Memory<NaNBoxing>(new NaNBoxing[codescope.Members.Count+1]);
-		span.CopyTo(codescope._rt_cache_init_data.Span);
-		
+
+			codescope._rt_cache_init_data = new Memory<NaNBoxing>(new NaNBoxing[codescope.Members.Count + 1]);
+			span.CopyTo(codescope._rt_cache_init_data.Span);
+
 #endif
-
-
-
 		}
+
 
 #if FORCOMPILER
 		internal bool isCompiling;
@@ -209,7 +213,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int cloneout_ptr;
 
-
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		internal void SetSlot(NaNBoxing value, ushort memberIndex)
 		{
 			Slots.Span[memberIndex] = value;
@@ -222,7 +226,7 @@ namespace juicescript.runtime
 #endif
 
 		}
-		[MethodImpl( MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl( MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(ushort memberIndex
 			)
 		{

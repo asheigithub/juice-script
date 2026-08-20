@@ -120,13 +120,8 @@ namespace juicescript
         {
             var vt1 = ValueType;
             var vt2 = other.ValueType;
-
-            if ((vt1 == BoxType.Int || vt1 > BoxType.Uint) && vt1 < BoxType.Float && (vt2 > BoxType.Uint || vt2 == BoxType.Int) && vt2 < BoxType.Float)
-            {
-                isequal = IntValue == other.IntValue;
-                return true;
-            }
-			else if (store == QNAN || other.store == QNAN)
+            
+			if (store == QNAN || other.store == QNAN)
 			{
 				isequal = false;
 				return true;
@@ -135,8 +130,13 @@ namespace juicescript
 			{
 				isequal = true;
 				return true;
-			}           
-            else
+			}
+            else if ((vt1 == BoxType.Int || vt1 > BoxType.Uint) && vt1 < BoxType.Float && (vt2 > BoxType.Uint || vt2 == BoxType.Int) && vt2 < BoxType.Float)
+			{
+				isequal = IntValue == other.IntValue;
+				return true;
+			}
+			else
             {
                 return FastTestComp_Step2(other, out isequal);
             }            

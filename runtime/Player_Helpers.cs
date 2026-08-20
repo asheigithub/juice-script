@@ -3725,7 +3725,7 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization )]
 		private unsafe void M_Call(int dst_index, byte** PC, RtMethodScope methodscope,
 			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			//ref NaNBoxing global_obj,
@@ -3755,17 +3755,31 @@ namespace juicescript.runtime
 
 
 			RtHeapBase _method_ = Context.GC.Heap[stackslots[function.index].HeapPtr];
+			var method = ((ASMethodBody)_method_.Type).Method;
 			RtClosure _methodclosure_ = (RtClosure)_method_;
-			NaNBoxing result = RunMethod(((ASMethodBody)_method_.Type).Method,
-				_methodclosure_.This, _methodclosure_.ScopePtr, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
 
-			if (error.raised)
+			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
+				&&
+				method.Parameters.Count == argsCount
+
+				)
 			{
-				goto flag_handle_error;
+				RunMethod_MatchArgs(method, _methodclosure_.This, _methodclosure_.ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index, ref error);
+
 			}
+			else
+			{
+				
+				NaNBoxing result = RunMethod(method,
+					_methodclosure_.This, _methodclosure_.ScopePtr, (ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, stackslots[function.index].HeapPtr);
 
-			stackslots[target.index] = result;
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
 
+				stackslots[target.index] = result;
+			}
 		flag_handle_error:
 			;
 
@@ -4239,18 +4253,32 @@ namespace juicescript.runtime
 			//	_this_ = global_obj;
 			//}
 
-			var _scopeType = methodscope.Type; //Context.GC.Heap[((RtClosure)closure).ScopePtr].Type;
+			//var _scopeType = methodscope.Type; //Context.GC.Heap[((RtClosure)closure).ScopePtr].Type;
 
-			NaNBoxing ret = RunMethod(((ASMethodBody)closure.Type).Method, _this_,
-				((RtClosure)closure).ScopePtr,
-				(ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, closure_ptr);
-			if (error.raised)
+			var method = ((ASMethodBody)closure.Type).Method;
+			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0) 
+				&&
+				method.Parameters.Count == argsCount
+				
+				)
 			{
-				goto flag_handle_error;
+				RunMethod_MatchArgs(method, _this_, ((RtClosure)closure).ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index,ref error);
+
 			}
+			else
+			{
 
-			stackslots[target.index] = ret;
 
+				NaNBoxing ret = RunMethod(method, _this_,
+					((RtClosure)closure).ScopePtr,
+					(ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, closure_ptr);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+				stackslots[target.index] = ret;
+			}
 
 		flag_handle_error:
 			;
@@ -11006,14 +11034,17 @@ namespace juicescript.runtime
 
 			Debug.Assert(src.index >= 0);
 
+			uint name_box_index = name_box.UIntValue;
+			var name_box_type = name_box.ValueType;
+
 			if (//src.index >= 0 && 
 
 				instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
-				&& name_box.ValueType >= BoxType.Int && name_box.ValueType <= BoxType.UShort &&
-				(name_box.IntValue >= 0 || (name_box.ValueType == BoxType.Uint && name_box.UIntValue < uint.MaxValue)))
+				&& name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
+				( (int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
 			{
 
-				uint array_i = name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 
 				bool isoutofindex_or_ishole;
 				var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[instance_box.HeapPtr], out isoutofindex_or_ishole);
