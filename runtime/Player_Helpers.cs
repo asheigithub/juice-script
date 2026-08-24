@@ -30,7 +30,7 @@ namespace juicescript.runtime
 #endif
 	{
 
-		private unsafe void Ld_class(int dst_index, byte** PC, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, ref ReceiveError error)
+		private unsafe void Ld_class(int dst_index, byte** PC, ASMethodBody.MethodHeapConstants heap_consts ,Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, ref ReceiveError error)
 		{
 			StackLocater stackLocater;
 			stackLocater.index = dst_index;
@@ -41,11 +41,11 @@ namespace juicescript.runtime
 			var boxing = constants[classid_index];
 
 
-			Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
+			Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class  );
 
 
 			//InitASClass((ASClass)instance.Type, ref error);
-			var @class = Context.link_const_class[(int)boxing.UIntValue];
+			var @class = (ASClass)heap_consts.pool_values[boxing.IntValue]; //Context.link_const_class[(int)boxing.UIntValue];
 			InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
 			if (error.raised)
 			{
@@ -5513,13 +5513,11 @@ namespace juicescript.runtime
 
 
 			var boxing = constants[classid_index];
-#if DEBUG
-			if (boxing.ValueType != NaNBoxing.BoxType.Uint)
-			{
-				throw new InvalidOperationException();
-			}
-#endif
-			var @class = Context.link_const_class[(int)boxing.UIntValue];
+			ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)methodscope.Type).heapConstants;
+
+			Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+			var @class = (ASClass)heap_consts.pool_values[boxing.IntValue];  //Context.link_const_class[(int)boxing.UIntValue];
 			var v = stackslots[value.index].HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? stackslots[value.index] : LoadValue((RtStackCache)Context.GC.Heap[stackslots[value.index].HeapPtr], -1, ref error, stackslots, stackStPos + value.index);
 
 			ExplicitConvert(ref error, 1, &value, stackslots, (TypeKind)@class.Type_identifier, @class, ref stackslots[dst_index], stackStPos + dst_index, scope_ptr, ((RtMethodScope)methodscope).ThisPtr, false);
@@ -6818,7 +6816,10 @@ namespace juicescript.runtime
 				Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
 
 
-				var @class = Context.link_const_class[(int)boxing.UIntValue];
+				ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)methodscope.Type).heapConstants;
+				Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+			   var @class = (ASClass)heap_consts.pool_values[boxing.IntValue];
 
 				Debug.Assert(@class.Instance.IsInterface);
 
@@ -7000,7 +7001,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Write_property_interface(int dst_index, byte** PC,
+		private unsafe void Write_property_interface(int dst_index, byte** PC, ASMethodBody.MethodHeapConstants heap_consts,
 			 Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, ref ReceiveError error)
 		{
 			StackLocater valueLoc;
@@ -7059,13 +7060,10 @@ namespace juicescript.runtime
 				//if (ins.Kind == RtHeapTypeKind.INSTANCE)
 				{
 					var boxing = constants[class_id];
-#if DEBUG
-					if (boxing.ValueType != NaNBoxing.BoxType.Uint)
-					{
-						throw new InvalidOperationException();
-					}
-#endif
-					var @class = Context.link_const_class[(int)boxing.UIntValue];
+
+					Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+					var @class = (ASClass)heap_consts.pool_values[boxing.IntValue];
 #if DEBUG
 					if (!@class.Instance.IsInterface)
 					{
@@ -9218,12 +9216,10 @@ namespace juicescript.runtime
 
 				var vbox = constants[super_const_index];
 
-#if DEBUG
-				if (vbox.ValueType != NaNBoxing.BoxType.Uint)
-					throw new InvalidOperationException();
-#endif
+				ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)methodscope.Type).heapConstants;
+				Debug.Assert(heap_consts.pool_kinds[vbox.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-				var super_class = Context.link_const_class[(int)vbox.UIntValue];
+			   var super_class = (ASClass)heap_consts.pool_values[vbox.IntValue];
 
 #if DEBUG
 				var check = GetASTypeFromValue(instance_box);
@@ -9846,12 +9842,10 @@ namespace juicescript.runtime
 
 				var vbox = constants[super_const_index];
 
-#if DEBUG
-				if (vbox.ValueType != NaNBoxing.BoxType.Uint)
-					throw new InvalidOperationException();
-#endif
+				ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)methodscope.Type).heapConstants;
+				Debug.Assert(heap_consts.pool_kinds[vbox.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-				var super_class = Context.link_const_class[(int)vbox.UIntValue];
+				var super_class = (ASClass)heap_consts.pool_values[vbox.IntValue];
 
 #if DEBUG
 				var check = GetASTypeFromValue(instance_box);
@@ -11406,7 +11400,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Ld_interface_method(int dst_index, byte** PC, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos, ref ReceiveError error)
+		private unsafe void Ld_interface_method(int dst_index, byte** PC, ASMethodBody.MethodHeapConstants heap_consts, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos, ref ReceiveError error)
 		{
 			StackLocater target;
 			target.index = dst_index;
@@ -11445,10 +11439,9 @@ namespace juicescript.runtime
 
 			var boxing = constants[class_id];
 
-			Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
+			Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-
-			var @class = Context.link_const_class[(int)boxing.UIntValue];
+			var @class = (ASClass)heap_consts.pool_values[boxing.IntValue];
 
 			Debug.Assert(@class.Instance.IsInterface);
 
@@ -11478,7 +11471,7 @@ namespace juicescript.runtime
 
 		}
 
-		private unsafe void O_Ld_interface_method(int dst_index, byte** PC, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos)
+		private unsafe void O_Ld_interface_method(int dst_index, byte** PC, ASMethodBody.MethodHeapConstants heap_consts, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos)
 		{
 			StackLocater target;
 			target.index = dst_index;
@@ -11517,10 +11510,9 @@ namespace juicescript.runtime
 
 			var boxing = constants[class_id];
 
-			Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
+			Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-
-			var @class = Context.link_const_class[(int)boxing.UIntValue];
+			var @class = (ASClass)heap_consts.pool_values[boxing.IntValue]; //Context.link_const_class[(int)boxing.UIntValue];
 
 			Debug.Assert(@class.Instance.IsInterface);
 

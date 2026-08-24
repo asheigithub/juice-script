@@ -211,10 +211,14 @@ namespace juicescript.compiler.IL.Optimize
 								INS_Ld_Class ld_Class = (INS_Ld_Class)instruction;
 								var boxing = constants[ld_Class.classid_index];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-								Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								//Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-								ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
+								//ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
+
+								Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								ulong classid = (ulong)method.Body.heapConstants.pool_values[boxing.HeapPtr];
+
 								ASClass @class = allClasses.First(c => c.Type_identifier == classid);
 								stack_classes.Add(ld_Class.dst.index, @class);
 
@@ -787,10 +791,13 @@ namespace juicescript.compiler.IL.Optimize
 								INS_Ld_Method_Interface ld_Method_Interface = (INS_Ld_Method_Interface)instruction;
 								var box = constants[ld_Method_Interface.class_id];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
-								Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								Debug.Assert(method.Body.heapConstants.pool_kinds[box.HeapPtr] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								ulong classid = (ulong)method.Body.heapConstants.pool_values[box.HeapPtr];
 
-								ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
+								//Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+								//ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
 								ASClass @class = allClasses.First(c => c.Type_identifier == classid);
 
 								result.Add(instruction, new List<InstructionDef>()
@@ -1366,10 +1373,13 @@ namespace juicescript.compiler.IL.Optimize
 
 								var box = constants[typeCast.class_id];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
-								Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								Debug.Assert(method.Body.heapConstants.pool_kinds[box.HeapPtr] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								ulong classid = (ulong)method.Body.heapConstants.pool_values[box.HeapPtr];
 
-								ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
+								//Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+								//ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
 								ASClass @class = allClasses.First(c => c.Type_identifier == classid);
 
 								result.Add(instruction, new List<InstructionDef>()
@@ -1771,11 +1781,13 @@ namespace juicescript.compiler.IL.Optimize
 
 
 								var box = constants[readPoperty_Interface.class_id];
+								Debug.Assert(method.Body.heapConstants.pool_kinds[box.HeapPtr] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								ulong classid = (ulong)method.Body.heapConstants.pool_values[box.HeapPtr];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
-								Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
+								//Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-								ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
+								//ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
 								ASClass @class = allClasses.First(c => c.Type_identifier == classid);
 
 								result.Add(instruction, new List<InstructionDef>()
@@ -2065,10 +2077,14 @@ namespace juicescript.compiler.IL.Optimize
 								INS_O_Ld_Method_Interface ld_O_Method_Interface = (INS_O_Ld_Method_Interface)instruction;
 								var box = constants[ld_O_Method_Interface.class_id];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
-								Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								Debug.Assert(method.Body.heapConstants.pool_kinds[box.HeapPtr] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+								ulong classid = (ulong)method.Body.heapConstants.pool_values[box.HeapPtr];
 
-								ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
+
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(box.HeapPtr >> 24);
+								//Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+
+								//ulong classid = context.constpool_ldclass[box.HeapPtr & 0xFFFFFF];
 								ASClass @class = allClasses.First(c => c.Type_identifier == classid);
 
 								result.Add(instruction, new List<InstructionDef>()

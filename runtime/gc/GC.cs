@@ -571,6 +571,7 @@ namespace juicescript.runtime.gc
             return Heap.AddHeapInstance(heapInstance) ;
         }
 
+#if FORCOMPILER
         /// <summary>
         /// 编译时分配字符串常量
         /// </summary>
@@ -593,6 +594,8 @@ namespace juicescript.runtime.gc
 
             return Heap.AddHeapInstance(heapInstance);
         }
+
+#endif
 
         internal static int CalculMemusage(RtHeapBase instance)
         {

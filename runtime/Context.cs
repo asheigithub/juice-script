@@ -47,7 +47,7 @@ namespace juicescript.runtime
 
         internal List<ASVector> Vectors;
 
-        internal List<ASClass> link_const_class;
+        //internal List<ASClass> link_const_class;
 
         internal List<ASMethod> link_const_methods;
         internal List<VTableItem> link_const_vtableitems;
@@ -179,7 +179,7 @@ namespace juicescript.runtime
             this.player = player;
             starttime = DateTime.Now;
             
-            link_const_class = new List<ASClass>();
+            //link_const_class = new List<ASClass>();
             link_const_methods = new List<ASMethod>();
             link_const_vtableitems = new List<VTableItem>();
             Vectors = new List<ASVector> ();

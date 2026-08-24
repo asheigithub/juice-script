@@ -43,11 +43,11 @@ namespace juicescript.compiler
 
         internal Dictionary<AS3Function, ASMethod> dict_method_as3function = new Dictionary<AS3Function, ASMethod> ();
 
-		internal Dictionary<List<NaNBoxing>, List<Tuple<int, ASClass>>> dict_methodresolver_ldclass_map = new Dictionary<List<NaNBoxing>, List<Tuple<int, ASClass>>>();
+		//internal Dictionary<List<NaNBoxing>, List<Tuple<int, ASClass>>> dict_methodresolver_ldclass_map = new Dictionary<List<NaNBoxing>, List<Tuple<int, ASClass>>>();
 
 
 
-		internal List<ulong> constpool_ldclass = new List<ulong>();
+		//internal List<ulong> constpool_ldclass = new List<ulong>();
 
 		internal Player player_for_compiler = null;
 

@@ -1106,46 +1106,183 @@ namespace juicescript.runtime
 
 		}
 
-		private unsafe void linkConstantValue(NaNBoxing* b, SWCFile swc)
+		private unsafe void linkConstantValue(NaNBoxing* b, ASMethodBody.MethodHeapConstants hconstants)
 		{
 			if (b->ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
-				ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(b->HeapPtr >> 24);
+				Debug.Assert(b->HeapKind == NaNBoxing.UNKNOWN_HEAPKIND);
+				var kind = hconstants.pool_kinds[b->HeapPtr];
 				if (kind == ASMethodBody.PoolHeapPtrKind.String)
 				{
-					if (swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].ValueType == NaNBoxing.BoxType.HeapPtr)
-					{
-						b->SetHeapPtr(swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].HeapPtr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-					}
-					else
-					{
-						string str = swc.const_strings[b->HeapPtr & 0xffffff];
-						int index = Context.GC.AllocString(str); if (index == 0) { throw new LoaderException("alloc string failed,out of memory"); }
-						;
-						swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].SetHeapPtr(index, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+					//*b = (NaNBoxing)hconstants.pool_values[b->HeapPtr];
 
-						b->SetHeapPtr(index, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
-						Context.GC.Root.Add(Context.GC.Heap[index]);
-
-					}
-				}
-				else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-				{
-					ulong id = swc.ld_classid[b->HeapPtr & 0xffffff];
-					ASClass @class = Context.dictTypes[id];
-
-					if (!Context.link_const_class.Contains(@class))
-					{
-						Context.link_const_class.Add(@class);
-					}
-
-					int index = Context.link_const_class.IndexOf(@class);
-					b->SetUInt((uint)index);
+					NaNBoxing v = (NaNBoxing)hconstants.pool_values[b->HeapPtr];
+					b->SetHeapPtr(v.HeapPtr, v.HeapKind, v.HeapFlag);
 
 				}
 				else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
 				{
-					ASNamespace @namespace = swc.Namespaces[b->HeapPtr & 0xffffff];
+					NaNBoxing v = (NaNBoxing)hconstants.pool_values[b->HeapPtr];
+					b->SetHeapPtr(v.HeapPtr, v.HeapKind, v.HeapFlag);
+				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+				{
+					Debug.Assert(hconstants.pool_values[b->HeapPtr] is ASClass );
+
+					b->SetInt(b->HeapPtr);
+				}
+				else
+				{
+					throw new NotImplementedException();
+				}
+
+				//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(b->HeapPtr >> 24);
+				//if (kind == ASMethodBody.PoolHeapPtrKind.String)
+				//{
+				//	if (swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].ValueType == NaNBoxing.BoxType.HeapPtr)
+				//	{
+				//		b->SetHeapPtr(swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].HeapPtr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+				//	}
+				//	else
+				//	{
+				//		string str = swc.const_strings[b->HeapPtr & 0xffffff];
+				//		int index = Context.GC.AllocString(str); if (index == 0) { throw new LoaderException("alloc string failed,out of memory"); }
+				//		;
+				//		swc.runtime_alloced_strings[b->HeapPtr & 0xffffff].SetHeapPtr(index, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+
+				//		b->SetHeapPtr(index, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+				//		Context.GC.Root.Add(Context.GC.Heap[index]);
+
+				//	}
+				//}
+				//else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+				//{
+				//	ulong id = swc.ld_classid[b->HeapPtr & 0xffffff];
+				//	ASClass @class = Context.dictTypes[id];
+
+				//	if (!Context.link_const_class.Contains(@class))
+				//	{
+				//		Context.link_const_class.Add(@class);
+				//	}
+
+				//	int index = Context.link_const_class.IndexOf(@class);
+				//	b->SetUInt((uint)index);
+
+				//}
+				//else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+				//{
+				//	ASNamespace @namespace = swc.Namespaces[b->HeapPtr & 0xffffff];
+
+				//	if (@namespace.__instance_index__ == 0)
+				//	{
+				//		string uri = @namespace.def_uri;
+				//		if (string.IsNullOrEmpty(uri))
+				//		{
+				//			uri = @namespace.Name;
+				//		}
+
+				//		int uriPtr = Context.GC.AllocString(uri); if (uriPtr == 0) { throw new LoaderException("alloc uriPtr failed,out of memory"); }
+				//		;
+
+				//		int index = Context.GC.AllocNamespace(@namespace, 0, uriPtr); if (index == 0) { throw new LoaderException("alloc namespace failed,out of memory"); }
+				//		;
+				//		b->SetHeapPtr(index, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+
+				//		@namespace.__instance_index__ = index;
+
+				//		Context.GC.Root.Add(Context.GC.Heap[index]);
+
+				//	}
+				//	else
+				//	{
+				//		b->SetHeapPtr(@namespace.__instance_index__, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+				//	}
+				//}
+				//else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+				//{
+				//	int index = b->HeapPtr & 0xffffff;
+				//	var v = swc.Vectors[index];
+
+				//	MakeVectorType(v);
+
+				//	int newindex = Context.Vectors.IndexOf(v);
+				//	b->SetInt(newindex);
+
+				//}
+				//else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+				//{
+				//	int index = b->HeapPtr & 0xffffff;
+				//	var m = swc.Methods[index];
+
+				//	if (!Context.link_const_methods.Contains(m))
+				//	{
+				//		Context.link_const_methods.Add(m);
+				//	}
+
+				//	int m_index = Context.link_const_methods.IndexOf(m);
+				//	b->SetUInt((uint)m_index);
+
+				//}
+				//else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+				//{
+				//	int index = b->HeapPtr & 0xffffff;
+				//	var superconfig = swc.ld_supermethods[index];
+				//	ASClass @class = Context.dictTypes[superconfig.Item1];
+
+				//	var m = @class.Instance._vtable.Items[superconfig.Item2];
+
+				//	if (!Context.link_const_vtableitems.Contains(m))
+				//	{
+				//		Context.link_const_vtableitems.Add(m);
+				//	}
+
+				//	int m_index = Context.link_const_vtableitems.IndexOf(m);
+				//	b->SetUInt((uint)m_index);
+
+
+				//}
+				//else
+				//{
+				//	throw new InvalidOperationException();
+				//}
+			}
+
+		}
+
+
+		private void linkMethod(ASMethod method, SWCFile swc)
+		{
+			var heapconsts = method.Body.heapConstants;
+			
+			
+			for (int i = 0; i < heapconsts.pool_kinds.Length; i++)
+			{
+				var kind = heapconsts.pool_kinds[i];
+				if (kind == ASMethodBody.PoolHeapPtrKind.String)
+				{
+					if (swc.runtime_alloced_strings[(int)heapconsts.pool_values[i]].ValueType == NaNBoxing.BoxType.HeapPtr)
+					{
+						NaNBoxing v = default;
+						v.SetHeapPtr(swc.runtime_alloced_strings[(int)heapconsts.pool_values[i]].HeapPtr, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+						heapconsts.pool_values[i] = v;
+					}
+					else
+					{
+						string str = swc.const_strings[(int)heapconsts.pool_values[i]];
+						int index = Context.GC.AllocString(str); if (index == 0) { throw new LoaderException("alloc string failed,out of memory"); }
+						;
+						swc.runtime_alloced_strings[(int)heapconsts.pool_values[i]].SetHeapPtr(index, (byte)RtHeapTypeKind.STRING, (byte)HeapKindFlag.NONE);
+
+						heapconsts.pool_values[i] = swc.runtime_alloced_strings[(int)heapconsts.pool_values[i]];
+
+						Context.GC.Root.Add(Context.GC.Heap[index]);
+
+					}
+				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+				{
+					int vindex = (int)heapconsts.pool_values[i];
+					ASNamespace @namespace = swc.Namespaces[vindex];
 
 					if (@namespace.__instance_index__ == 0)
 					{
@@ -1160,7 +1297,10 @@ namespace juicescript.runtime
 
 						int index = Context.GC.AllocNamespace(@namespace, 0, uriPtr); if (index == 0) { throw new LoaderException("alloc namespace failed,out of memory"); }
 						;
-						b->SetHeapPtr(index, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+
+						NaNBoxing v = default;
+						v.SetHeapPtr(index, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+						heapconsts.pool_values[i] = v;
 
 						@namespace.__instance_index__ = index;
 
@@ -1169,61 +1309,32 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						b->SetHeapPtr(@namespace.__instance_index__, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+						NaNBoxing v = default;
+						v.SetHeapPtr(@namespace.__instance_index__, (byte)RtHeapTypeKind.NAMESPACE, (byte)HeapKindFlag.NONE);
+						heapconsts.pool_values[i] = v;
 					}
 				}
-				else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+				else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
 				{
-					int index = b->HeapPtr & 0xffffff;
-					var v = swc.Vectors[index];
-
-					MakeVectorType(v);
-
-					int newindex = Context.Vectors.IndexOf(v);
-					b->SetInt(newindex);
-
-				}
-				else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
-				{
-					int index = b->HeapPtr & 0xffffff;
-					var m = swc.Methods[index];
-
-					if (!Context.link_const_methods.Contains(m))
-					{
-						Context.link_const_methods.Add(m);
-					}
-
-					int m_index = Context.link_const_methods.IndexOf(m);
-					b->SetUInt((uint)m_index);
-
-				}
-				else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
-				{
-					int index = b->HeapPtr & 0xffffff;
-					var superconfig = swc.ld_supermethods[index];
-					ASClass @class = Context.dictTypes[superconfig.Item1];
-
-					var m = @class.Instance._vtable.Items[superconfig.Item2];
-
-					if (!Context.link_const_vtableitems.Contains(m))
-					{
-						Context.link_const_vtableitems.Add(m);
-					}
-
-					int m_index = Context.link_const_vtableitems.IndexOf(m);
-					b->SetUInt((uint)m_index);
-
-
+					ulong classid = (ulong)heapconsts.pool_values[i];
+					ASClass @class = Context.dictTypes[classid];
+					heapconsts.pool_values[i] = @class;
 				}
 				else
 				{
-					throw new InvalidOperationException();
+					throw new NotImplementedException();
 				}
 			}
 
+			linkMethod_Consts(method);
+
+			if (method.ReturnTypeKind != TypeKind.Fun_Void && method.ReturnTypeKind != TypeKind.Any)
+			{
+				method.__return_type_class__ = Context.dictTypes[(ulong)method.ReturnTypeKind];
+			}
 		}
 
-		private void linkMethod(ASMethod method, SWCFile swc)
+		private void linkMethod_Consts(ASMethod method)
 		{
 			var init_const = (byte[] buffer) =>
 			{
@@ -1242,7 +1353,7 @@ namespace juicescript.runtime
 
 						for (int j = 0; j < count; j++)
 						{
-							linkConstantValue(b, swc);
+							linkConstantValue(b, method.Body.heapConstants);
 							++b;
 						}
 
@@ -1258,10 +1369,6 @@ namespace juicescript.runtime
 				init_const(method.Body.param_defaultvalues);
 			}
 
-			if (method.ReturnTypeKind != TypeKind.Fun_Void && method.ReturnTypeKind != TypeKind.Any)
-			{
-				method.__return_type_class__ = Context.dictTypes[(ulong)method.ReturnTypeKind];
-			}
 		}
 
 		private void Link(SWCFile swc)
@@ -1641,10 +1748,32 @@ namespace juicescript.runtime
 
 								if (t.Value != null && t.Value.initValue.HasValue)
 								{
+									Debug.Assert(c._link_codescope.Kind == CodeScopeKind.Script 
+										|| c._link_codescope.Kind == CodeScopeKind.Class
+										|| c._link_codescope.Kind == CodeScopeKind.Instance
+										|| c._link_codescope.Kind == CodeScopeKind.Method
+										);
+									
 									unsafe
 									{
 										NaNBoxing v = t.Value.initValue.Value;
-										linkConstantValue(&v, swc);
+										if (c._link_codescope.Kind == CodeScopeKind.Script)
+										{
+											linkConstantValue(&v, ((ASScript)c).Initializer.Body.heapConstants);
+										}
+										else if (c._link_codescope.Kind == CodeScopeKind.Class)
+										{
+											linkConstantValue(&v, ((ASClass)c).Constructor.Body.heapConstants);
+										}
+										else if (c._link_codescope.Kind == CodeScopeKind.Instance)
+										{
+											linkConstantValue(&v, ((ASInstance)c).Constructor.Body.heapConstants);
+										}
+										else
+										{
+											linkConstantValue(&v, ((ASMethodBody)c).heapConstants);
+										}
+
 										t.Value.initValue = v;
 
 									}
@@ -13212,7 +13341,7 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.ld_class:
 							{
-								Ld_class(dst_index, &PC, constants, stackslots, ref error);
+								Ld_class(dst_index, &PC, method.Body.heapConstants  ,constants, stackslots, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13640,7 +13769,7 @@ namespace juicescript.runtime
 
 						case INS_Code.ld_interface_method:
 							{
-								Ld_interface_method(dst_index, &PC, stackslots, constants, stackStPos, ref error);
+								Ld_interface_method(dst_index, &PC, method.Body.heapConstants , stackslots, constants, stackStPos, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13733,7 +13862,7 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.write_property_interface:
 							{
-								Write_property_interface(dst_index, &PC, constants, stackslots, ref error);
+								Write_property_interface(dst_index, &PC, method.Body.heapConstants ,constants, stackslots, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14229,7 +14358,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_ld_interface_method:
 							{
-								O_Ld_interface_method(dst_index, &PC, stackslots, constants, stackStPos);
+								O_Ld_interface_method(dst_index, &PC, method.Body.heapConstants, stackslots, constants, stackStPos);
 								break;
 							}
 						case INS_Code.O_Call:

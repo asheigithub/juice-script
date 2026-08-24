@@ -50,12 +50,27 @@ namespace juicescript.ABC
         /// 当所在Script初始化后，赋值给内部method,这样就不用查找了!
         /// </summary>
         public int rt__globalindex;
-        ///// <summary>
-        ///// 当所在Class初始化后，赋值给内部method,这样就不用查找了
-        ///// </summary>
-        //public int rt__classindex;
 
-		[StructLayout(LayoutKind.Explicit)]
+
+
+        /// <summary>
+        /// 保存method级的堆常量（比如字符串等）
+        /// </summary>
+        public class MethodHeapConstants
+        {
+            public ASMethodBody.PoolHeapPtrKind[] pool_kinds = new PoolHeapPtrKind[0] ;
+
+            public object[] pool_values = new object[0] ;
+
+           
+            //public NaNBoxing[] constants = new NaNBoxing[0];
+
+        }
+
+        public MethodHeapConstants heapConstants;
+
+
+        [StructLayout(LayoutKind.Explicit)]
 		public struct MethodBodyInfo
         {
             [FieldOffset(0)]
@@ -146,6 +161,8 @@ namespace juicescript.ABC
         {
             Method = method;
             NamespaceSetIndex = 0;
+            heapConstants = new MethodHeapConstants();
+
         }
 
     }

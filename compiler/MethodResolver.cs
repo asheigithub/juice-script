@@ -30,6 +30,7 @@ using System.Xml.Linq;
 using static juicescript.compiler.IL.Optimize.Optimizer;
 using static juicescript.NaNBoxing;
 using static System.Formats.Asn1.AsnWriter;
+using static System.Reflection.Metadata.Ecma335.MethodBodyStreamEncoder;
 
 namespace juicescript.compiler
 {
@@ -853,6 +854,92 @@ namespace juicescript.compiler
 											method.Flags = (MethodFlags)flag;
 
 											#region 读常量池
+											int h_count = br.ReadInt32();
+											method.Body.heapConstants.pool_kinds = new ASMethodBody.PoolHeapPtrKind[h_count];
+											method.Body.heapConstants.pool_values = new object[h_count];
+											for (int j = 0; j < h_count; j++)
+											{
+												var kind = (ASMethodBody.PoolHeapPtrKind)br.ReadInt32();
+												method.Body.heapConstants.pool_kinds[j] = kind;
+												if (kind == ASMethodBody.PoolHeapPtrKind.String)
+												{
+													int chars = br.ReadInt32();
+													Memory<char> str = new Memory<char>(new char[chars]);
+													for (int ii = 0; ii < chars; ii++)
+													{
+														str.Span[ii] = (char)br.ReadUInt16();
+													}
+
+													//string str = br.ReadString();
+													int heap_ptr = context.player_for_compiler.Context.GC.Complie_AllocString(str.ToString());
+													if (heap_ptr == 0)
+														throw new InvalidOperationException();
+
+													method.Body.heapConstants.pool_values[j] = context.player_for_compiler.Context.GC.Heap[heap_ptr];
+
+
+												}
+												else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+												{
+													NamespaceKind nskind = (NamespaceKind)br.ReadInt32();
+													string in_package = null;
+													string name = null;
+													string def_uri = null;
+													if (br.ReadBoolean())
+													{
+														in_package = br.ReadString();
+													}
+													if (br.ReadBoolean())
+													{
+														name = br.ReadString();
+													}
+													if (br.ReadBoolean())
+													{
+														def_uri = br.ReadString();
+													}
+													var all_ns = context.scriptDefs.SelectMany(s => s.namespaces)
+														.Union
+														(
+															context.player_for_compiler.Context.libs.SelectMany(l => l.Namespaces)
+														);
+													var ns = all_ns.FirstOrDefault(n => n == new ASNamespace() { def_uri = def_uri, in_package = in_package, Kind = nskind, Name = name });
+													if (ns == null)
+													{
+														expiredScripts.Add(script);
+														throw new IOException();
+													}
+
+													method.Body.heapConstants.pool_values[j] = ns;
+
+
+												}
+												else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+												{
+													
+													ulong class_id = br.ReadUInt64();
+
+													var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+														.Union
+														(
+															context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+														).First(c => c != null && c.Type_identifier == class_id);
+
+
+
+													method.Body.heapConstants.pool_values[j] = @class.Type_identifier;
+
+
+												}
+												else
+												{
+													throw new NotImplementedException();
+												}
+											}
+
+
+
+
+
 
 											int count = br.ReadInt32();
 											List<NaNBoxing> constants = new List<NaNBoxing>();
@@ -864,142 +951,142 @@ namespace juicescript.compiler
 
 												if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 												{
-													RtHeapTypeKind type = (RtHeapTypeKind)br.ReadByte();
-													if (type == RtHeapTypeKind.STRING)
-													{
-														int chars = br.ReadInt32();
-														Memory<char> str = new Memory<char>(new char[chars]);
-														for (int i = 0; i < chars; i++)
-														{
-															str.Span[i] = (char)br.ReadUInt16();
-														}
+													//////RtHeapTypeKind type = (RtHeapTypeKind)br.ReadByte();
+													//////if (type == RtHeapTypeKind.STRING)
+													//////{
+													//////	int chars = br.ReadInt32();
+													//////	Memory<char> str = new Memory<char>(new char[chars]);
+													//////	for (int i = 0; i < chars; i++)
+													//////	{
+													//////		str.Span[i] = (char)br.ReadUInt16();
+													//////	}
 
-														//string str = br.ReadString();
-														int heap_ptr = context.player_for_compiler.Context.GC.Complie_AllocString(str.ToString());
-														if (heap_ptr == 0)
-															throw new InvalidOperationException();
+													//////	//string str = br.ReadString();
+													//////	int heap_ptr = context.player_for_compiler.Context.GC.Complie_AllocString(str.ToString());
+													//////	if (heap_ptr == 0)
+													//////		throw new InvalidOperationException();
 
-														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+													//////	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
 
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													//////	box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
-													}
-													else if (type == (RtHeapTypeKind)10)
-													{
-														ulong class_id = br.ReadUInt64();
-														var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
-															.Union
-															(
-																context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
-															).First(c => c != null && c.Type_identifier == class_id);
+													//////}
+													//////else if (type == (RtHeapTypeKind)10)
+													//////{
+													//////	ulong class_id = br.ReadUInt64();
+													//////	var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+													//////		.Union
+													//////		(
+													//////			context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+													//////		).First(c => c != null && c.Type_identifier == class_id);
 
-														int index = context.constpool_ldclass.IndexOf(class_id);
-														if (index < 0)
-														{
-															index = context.constpool_ldclass.Count;
-															context.constpool_ldclass.Add(class_id);
-														}
+													//////	int index = context.constpool_ldclass.IndexOf(class_id);
+													//////	if (index < 0)
+													//////	{
+													//////		index = context.constpool_ldclass.Count;
+													//////		context.constpool_ldclass.Add(class_id);
+													//////	}
 
-														int heap_ptr = (index & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													//////	int heap_ptr = (index & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
+													//////	box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
-														if (!context.dict_methodresolver_ldclass_map.ContainsKey(constants))
-														{
-															context.dict_methodresolver_ldclass_map.Add(constants,
-																new List<Tuple<int, ASClass>>() { new Tuple<int, ASClass>(index, @class) });
-														}
-														else
-														{
-															context.dict_methodresolver_ldclass_map[constants].Add(new Tuple<int, ASClass>(index, @class));
-														}
+													//////	if (!context.dict_methodresolver_ldclass_map.ContainsKey(constants))
+													//////	{
+													//////		context.dict_methodresolver_ldclass_map.Add(constants,
+													//////			new List<Tuple<int, ASClass>>() { new Tuple<int, ASClass>(index, @class) });
+													//////	}
+													//////	else
+													//////	{
+													//////		context.dict_methodresolver_ldclass_map[constants].Add(new Tuple<int, ASClass>(index, @class));
+													//////	}
 
-													}
-													//else if (type == RtHeapTypeKind.CACHE_LD_CLASS)
-													//{
-													//	ulong class_id = br.ReadUInt64();
+													//////}
+													////////else if (type == RtHeapTypeKind.CACHE_LD_CLASS)
+													////////{
+													////////	ulong class_id = br.ReadUInt64();
 
-													//	var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
-													//		.Union
-													//		(
-													//			context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
-													//		).First(c => c != null && c.Type_identifier == class_id);
+													////////	var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+													////////		.Union
+													////////		(
+													////////			context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+													////////		).First(c => c != null && c.Type_identifier == class_id);
 
-													//	int heap_ptr = context.player_for_compiler.Context.GC.AllocLD_Class(@class);
-													//	if (heap_ptr == 0)
-													//		throw new InvalidOperationException();
+													////////	int heap_ptr = context.player_for_compiler.Context.GC.AllocLD_Class(@class);
+													////////	if (heap_ptr == 0)
+													////////		throw new InvalidOperationException();
 
-													//	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
+													////////	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24);
 
-													//	box.SetHeapPtr(heap_ptr);
+													////////	box.SetHeapPtr(heap_ptr);
 
-													//}
-													else if (type == RtHeapTypeKind.NAMESPACE)
-													{
-														int index = br.ReadInt32();
-														var ns = script.namespaces[index];
+													////////}
+													//////else if (type == RtHeapTypeKind.NAMESPACE)
+													//////{
+													//////	int index = br.ReadInt32();
+													//////	var ns = script.namespaces[index];
 
-														int heap_ptr = context.player_for_compiler.Context.GC.AllocNamespace(ns, 0, 0);
-														if (heap_ptr == 0)
-															throw new InvalidOperationException();
-														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24);
+													//////	int heap_ptr = context.player_for_compiler.Context.GC.AllocNamespace(ns, 0, 0);
+													//////	if (heap_ptr == 0)
+													//////		throw new InvalidOperationException();
+													//////	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24);
 
-														box.SetHeapPtr(heap_ptr, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-													}
-													else if (type == RtHeapTypeKind.VECTOR)
-													{
-														int depth = br.ReadInt32();
-														ulong ElementType = br.ReadUInt64();
+													//////	box.SetHeapPtr(heap_ptr, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													//////}
+													//////else if (type == RtHeapTypeKind.VECTOR)
+													//////{
+													//////	int depth = br.ReadInt32();
+													//////	ulong ElementType = br.ReadUInt64();
 
-														VectorDef vd = VectorDef.CreateOrGet(context, (TypeKind)ElementType, depth);
+													//////	VectorDef vd = VectorDef.CreateOrGet(context, (TypeKind)ElementType, depth);
 
-														int ptr = context.vectorDefs.IndexOf(vd);
-														ptr = (ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.VectorDef << 24);
+													//////	int ptr = context.vectorDefs.IndexOf(vd);
+													//////	ptr = (ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.VectorDef << 24);
 
-														box.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													//////	box.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
-													}
-													else if (type == RtHeapTypeKind.MethodScope)
-													{
-														int index = br.ReadInt32();
-														ASMethod m = script.scriptMethods[index];
+													//////}
+													//////else if (type == RtHeapTypeKind.MethodScope)
+													//////{
+													//////	int index = br.ReadInt32();
+													//////	ASMethod m = script.scriptMethods[index];
 
-														int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
-														if (heap_ptr == 0)
-															throw new InvalidOperationException();
+													//////	int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
+													//////	if (heap_ptr == 0)
+													//////		throw new InvalidOperationException();
 
-														context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = m.Body;
+													//////	context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = m.Body;
 
-														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-													}
-													else if (type == (RtHeapTypeKind)200)
-													{
-														ulong class_id = br.ReadUInt64();
-														int vtable_index = br.ReadInt32();
+													//////	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
+													//////	box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													//////}
+													//////else if (type == (RtHeapTypeKind)200)
+													//////{
+													//////	ulong class_id = br.ReadUInt64();
+													//////	int vtable_index = br.ReadInt32();
 
-														var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
-															.Union
-															(
-																context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
-															).First(c => c != null && c.Type_identifier == class_id);
+													//////	var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+													//////		.Union
+													//////		(
+													//////			context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+													//////		).First(c => c != null && c.Type_identifier == class_id);
 
-														int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
-														if (heap_ptr == 0)
-															throw new InvalidOperationException();
+													//////	int heap_ptr = context.player_for_compiler.Context.GC.AllocMethodScope(null, 0, null);
+													//////	if (heap_ptr == 0)
+													//////		throw new InvalidOperationException();
 
-														context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = @class;
-														((RtMethodScope)context.player_for_compiler.Context.GC.Heap[heap_ptr]).ParentPtr = vtable_index;
+													//////	context.player_for_compiler.Context.GC.Heap[heap_ptr].Type = @class;
+													//////	((RtMethodScope)context.player_for_compiler.Context.GC.Heap[heap_ptr]).ParentPtr = vtable_index;
 
 
-														heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
+													//////	heap_ptr = (heap_ptr & 0xffffff) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
 
-														box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													//////	box.SetHeapPtr(heap_ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
-													}
-													else
-													{
-														throw new InvalidOperationException();
-													}
+													//////}
+													//////else
+													//////{
+													//////	throw new InvalidOperationException();
+													//////}
 												}
 												return box;
 											};
@@ -1461,10 +1548,14 @@ namespace juicescript.compiler
 										INS_Ld_Class ld_Class = (INS_Ld_Class)initpart[i];
 										var boxing = constants[ld_Class.classid_index];
 
-										ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-										Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
+										//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+										//Debug.Assert(kind == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-										ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
+										//ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
+
+										Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.LD_Class);
+										ulong classid = (ulong)method.Body.heapConstants.pool_values[boxing.HeapPtr];
+
 										ASClass @class = allClasses.First(c => c.Type_identifier == classid);
 
 										if (!CheckIsAutoInitCtor(@class.Instance,true))
@@ -1646,7 +1737,7 @@ namespace juicescript.compiler
 
 			//任何初始值计算时如果需要读取变量则计算失败。
 			//只需要不停的迭代计算，直到没有新的成功为止。此时所有初始化都计算成功
-			Dictionary<string, NaNBoxing> dict_newstring = new Dictionary<string, NaNBoxing>();
+			//Dictionary<string, NaNBoxing> dict_newstring = new Dictionary<string, NaNBoxing>();
 
 			HashSet<ScriptDef> load_init_from_mi = new HashSet<ScriptDef>();
 
@@ -1773,26 +1864,93 @@ namespace juicescript.compiler
 													{
 														string str = v.Substring(4);
 														NaNBoxing dv = default;
-														if (dict_newstring.ContainsKey(str))
+														//if (dict_newstring.ContainsKey(str))
+														//{
+														//	dv = dict_newstring[str];
+														//}
+														//else
+														//{
+														//	int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+														//	if (heapptr == 0)
+														//		throw new InvalidOperationException();
+														//	if (heapptr > 0xffffff)
+														//	{
+														//		throw new ParseException("heapptr > 0xffffff");
+														//	}
+
+														//	int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+
+														//	dv.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+														//	dict_newstring.Add(str, dv);
+														//}
+
+														//throw new NotImplementedException();
+
+														ASMethod update_method;
+														if (member.DefineAt is ASClass)
 														{
-															dv = dict_newstring[str];
+															var method = ((ASClass)member.DefineAt).Constructor;
+															update_method = method;
+														}
+														else if (member.DefineAt is ASScript)
+														{
+
+															var method = ((ASScript)member.DefineAt).Initializer;
+
+															update_method = method;
+														}
+														else if (member.DefineAt is ASInstance)
+														{
+
+															var method = ((ASInstance)member.DefineAt).Constructor;
+
+															update_method = method;
+														}
+														else if (member.DefineAt is ASMethodBody)
+														{
+															var method = ((ASMethodBody)member.DefineAt).Method;
+															update_method = method;
 														}
 														else
+														{
+															throw new InvalidOperationException();
+														}
+
+														bool found = false;
+														for (int i = 0; i < update_method.Body.heapConstants.pool_kinds.Length; i++)
+														{
+															if (update_method.Body.heapConstants.pool_kinds[i] == ASMethodBody.PoolHeapPtrKind.String
+																&&
+																string.CompareOrdinal(((RtString)update_method.Body.heapConstants.pool_values[i]).Str, str) == 0
+																)
+															{
+																dv.SetHeapPtr(i, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+																found = true;
+																break;
+															}
+
+														}
+
+														if (!found)
 														{
 															int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
 															if (heapptr == 0)
 																throw new InvalidOperationException();
-															if (heapptr > 0xffffff)
-															{
-																throw new ParseException("heapptr > 0xffffff");
-															}
 
-															int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+															List<ASMethodBody.PoolHeapPtrKind> kinds = new List<ASMethodBody.PoolHeapPtrKind>(update_method.Body.heapConstants.pool_kinds);
+															kinds.Add(ASMethodBody.PoolHeapPtrKind.String);
+															update_method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
+															List<object> hobjs = new List<object>(update_method.Body.heapConstants.pool_values);
+															hobjs.Add(context.player_for_compiler.Context.GC.Heap[heapptr]);
+															update_method.Body.heapConstants.pool_values = hobjs.ToArray();
 
-															dv.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-															dict_newstring.Add(str, dv);
+															dv.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
 														}
+
+
 														member.trait.Value.initValue = dv;
 														seted.Add(member.trait);
 													}
@@ -1837,6 +1995,9 @@ namespace juicescript.compiler
 
 							ASMethod _temp; ASMethod test_method;
 							ScopeMember t_member;
+
+							ASMethod update_method;
+
 							if (member.DefineAt is ASClass)
 							{
 								t_member = member;
@@ -1858,6 +2019,7 @@ namespace juicescript.compiler
 
 								_temp.IsConstructor = method.IsConstructor;
 
+								update_method = method;
 							}
 							else if (member.DefineAt is ASScript)
 							{
@@ -1880,6 +2042,8 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.NamespaceSet = member.DefineAt._link_codescope.NamespaceSet;
 
 								_temp.IsConstructor = method.IsConstructor;
+
+								update_method = method;
 							}
 							else if (member.DefineAt is ASInstance)
 							{
@@ -1901,6 +2065,8 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.NamespaceSet = member.DefineAt._link_codescope.NamespaceSet;
 
 								_temp.IsConstructor = method.IsConstructor;
+
+								update_method = method;
 							}
 							else if (member.DefineAt is ASMethodBody)
 							{
@@ -1927,6 +2093,8 @@ namespace juicescript.compiler
 
 								int mid = member.DefineAt._link_codescope.Members.IndexOf(member);
 								t_member = test_method.Body._link_codescope.Members[mid];
+
+								update_method = method;
 							}
 							else
 							{
@@ -1937,12 +2105,12 @@ namespace juicescript.compiler
 							try
 							{
 								ComputeJump(_temp, false);
-								List<Tuple<int, ASClass>> mapping = null;
+								//List<Tuple<int, ASClass>> mapping = null;
 
-								if (context.dict_methodresolver_ldclass_map.ContainsKey(method_const))
-								{
-									mapping = context.dict_methodresolver_ldclass_map[method_const];
-								}
+								//if (context.dict_methodresolver_ldclass_map.ContainsKey(method_const))
+								//{
+								//	mapping = context.dict_methodresolver_ldclass_map[method_const];
+								//}
 
 								byte[] bytecode;
 								if (!reuseslotbytecodes.TryGetValue(member, out bytecode))
@@ -1956,34 +2124,69 @@ namespace juicescript.compiler
 								
 								}
 								_temp.Body.ByteCode = (byte[])bytecode.Clone();
+								_temp.Body.heapConstants = test_method.Body.heapConstants;
+								
 
-								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone(), method_const, mapping, loadfromcache.Contains(script));
+
+								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone(), loadfromcache.Contains(script));
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 									var obj = computeplayer.Context.GC.Heap[v.HeapPtr];
 									if (obj.Kind == RtHeapTypeKind.STRING)                        //堆中的对象只有String可以被作为初始化值
 									{
 										string str = ((RtString)obj).Str;
-
-										if (dict_newstring.ContainsKey(str))
+										bool found = false;
+										for (int i = 0; i < update_method.Body.heapConstants.pool_kinds.Length ; i++)
 										{
-											v = dict_newstring[str];
+											if (update_method.Body.heapConstants.pool_kinds[i] == ASMethodBody.PoolHeapPtrKind.String
+												&&
+												string.CompareOrdinal( ((RtString)update_method.Body.heapConstants.pool_values[i]).Str,str )==0
+												)
+											{
+												v.SetHeapPtr(i, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE );
+												found = true;
+												break;
+											}
+
 										}
-										else
+
+										if (!found)
 										{
 											int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
 											if (heapptr == 0)
 												throw new InvalidOperationException();
-											if (heapptr > 0xffffff)
-											{
-												throw new ParseException("heapptr > 0xffffff");
-											}
 
-											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
-											v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+											List<ASMethodBody.PoolHeapPtrKind> kinds = new List<ASMethodBody.PoolHeapPtrKind>(update_method.Body.heapConstants.pool_kinds);
+											kinds.Add(ASMethodBody.PoolHeapPtrKind.String);
+											update_method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
-											dict_newstring.Add(str, v);
+											List<object> hobjs = new List<object>(update_method.Body.heapConstants.pool_values);
+											hobjs.Add(context.player_for_compiler.Context.GC.Heap[heapptr] );
+											update_method.Body.heapConstants.pool_values = hobjs.ToArray();
+
+											v.SetHeapPtr( kinds.Count -1 , NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
 										}
+
+										//if (dict_newstring.ContainsKey(str))
+										//{
+										//	v = dict_newstring[str];
+										//}
+										//else
+										//{
+										//	int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+										//	if (heapptr == 0)
+										//		throw new InvalidOperationException();
+										//	if (heapptr > 0xffffff)
+										//	{
+										//		throw new ParseException("heapptr > 0xffffff");
+										//	}
+
+										//	int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+										//	v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
+										//	dict_newstring.Add(str, v);
+										//}
 									}
 									else
 									{
@@ -1993,26 +2196,60 @@ namespace juicescript.compiler
 								else if (v.ValueType == NaNBoxing.BoxType.LocalString)
 								{
 									string str = v.LocalStringValue;
-
-									if (dict_newstring.ContainsKey(str))
+									bool found = false;
+									for (int i = 0; i < update_method.Body.heapConstants.pool_kinds.Length; i++)
 									{
-										v = dict_newstring[str];
+										if (update_method.Body.heapConstants.pool_kinds[i] == ASMethodBody.PoolHeapPtrKind.String
+											&&
+											string.CompareOrdinal(((RtString)update_method.Body.heapConstants.pool_values[i]).Str, str) == 0
+											)
+										{
+											v.SetHeapPtr(i, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+											found = true;
+											break;
+										}
+
 									}
-									else
+
+									if (!found)
 									{
 										int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
 										if (heapptr == 0)
 											throw new InvalidOperationException();
-										if (heapptr > 0xffffff)
-										{
-											throw new ParseException("heapptr > 0xffffff");
-										}
 
-										int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
-										v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+										List<ASMethodBody.PoolHeapPtrKind> kinds = new List<ASMethodBody.PoolHeapPtrKind>(update_method.Body.heapConstants.pool_kinds);
+										kinds.Add(ASMethodBody.PoolHeapPtrKind.String);
+										update_method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
-										dict_newstring.Add(str, v);
+										List<object> hobjs = new List<object>(update_method.Body.heapConstants.pool_values);
+										hobjs.Add(context.player_for_compiler.Context.GC.Heap[heapptr]);
+										update_method.Body.heapConstants.pool_values = hobjs.ToArray();
+
+										v.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
 									}
+
+
+									//throw new NotImplementedException();
+									//if (dict_newstring.ContainsKey(str))
+									//{
+									//	v = dict_newstring[str];
+									//}
+									//else
+									//{
+									//	int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+									//	if (heapptr == 0)
+									//		throw new InvalidOperationException();
+									//	if (heapptr > 0xffffff)
+									//	{
+									//		throw new ParseException("heapptr > 0xffffff");
+									//	}
+
+									//	int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+									//	v.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
+									//	dict_newstring.Add(str, v);
+									//}
 								}
 								else if (v.ValueType == NaNBoxing.BoxType.Fault)
 								{
@@ -2132,9 +2369,33 @@ namespace juicescript.compiler
 									string vStr;
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
-										int hptr = v.HeapPtr & 0xffffff;
-										string str = ((RtString)context.player_for_compiler.Context.GC.Heap[hptr]).Str;
-										vStr = "str:" + str;
+										Debug.Assert(v.HeapKind == NaNBoxing.UNKNOWN_HEAPKIND);
+
+										int index = v.HeapPtr;
+
+										if (container is ASScript)
+										{
+											vStr = "str:" + ((RtString)((ASScript)container).Initializer.Body.heapConstants.pool_values[index]).Str;
+										}
+										else if (container is ASClass)
+										{
+											vStr = "str:" + ((RtString)((ASClass)container).Constructor.Body.heapConstants.pool_values[index]).Str;
+										}
+										else if (container is ASInstance)
+										{
+											throw new NotImplementedException();
+										}
+										else
+										{
+											Debug.Assert(container is ASMethodBody);
+
+											vStr = "str:" + ((RtString)((ASMethodBody)container).heapConstants.pool_values[index]).Str;
+										}
+
+
+										//int hptr = v.HeapPtr & 0xffffff;
+										//string str = ((RtString)context.player_for_compiler.Context.GC.Heap[hptr]).Str;
+										//vStr = "str:" + str;
 									}
 									else
 									{
@@ -2425,114 +2686,138 @@ namespace juicescript.compiler
 						{
 							var hash = reader.ReadLine();
 							if (hash == origin)
-							{								
-								int const_count;
-								string l = reader.ReadLine();
+							{
+								for (int i = 1; i < script.scriptMethods.Count; i++)
+								{ 
+									var method = script.scriptMethods[i];
+									if (method.Parameters.Any(p => p.IsOptional))
+									{
+										int const_count;
+										string l = reader.ReadLine();
 
-								List<NaNBoxing> constants = new List<NaNBoxing>();
+										List<NaNBoxing> constants = new List<NaNBoxing>();
 
-								if (int.TryParse(l, out const_count))
-								{
-									#region 加载常量池
-									for (int i = 0; i < const_count; i++)
-									{ 
-										string nvstr = reader.ReadLine();
-										if (nvstr == null)
+										if (int.TryParse(l, out const_count))
 										{
-											goto lbl_failed;
-										}
-
-										if (nvstr.StartsWith("str:"))
-										{
-											string str = nvstr.Substring(4);
-											int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
-											if (heapptr == 0)
-												throw new InvalidOperationException();
-											if (heapptr > 0xffffff)
+											#region 加载常量池
+											for (int ii = 0; ii < const_count; ii++)
 											{
-												throw new ParseException("heapptr > 0xffffff");
-											}
-
-											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
-
-											NaNBoxing boxing = new NaNBoxing();
-											boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-
-											constants.Add(boxing);
-										}
-										else if (nvstr.StartsWith("raw:"))
-										{
-											string[] f = nvstr.Split('\t');
-											if (f.Length != 2)
-											{
-												goto lbl_failed;
-											}
-											else
-											{
-												string rawstr = f[0].Substring(4);
-												ulong raw;
-												if (ulong.TryParse(rawstr, out raw))
-												{
-													NaNBoxing c = new NaNBoxing(raw);
-													constants.Add(c);	
-												}
-												else
+												string nvstr = reader.ReadLine();
+												if (nvstr == null)
 												{
 													goto lbl_failed;
 												}
+
+												if (nvstr.StartsWith("str:"))
+												{
+													string str = nvstr.Substring(4);
+
+													NaNBoxing boxing = default;
+
+													bool found = false;
+													for (int k = 0; k < method.Body.heapConstants.pool_kinds.Length; k++)
+													{
+														if (method.Body.heapConstants.pool_kinds[k] == ASMethodBody.PoolHeapPtrKind.String
+															&&
+															string.CompareOrdinal(((RtString)method.Body.heapConstants.pool_values[k]).Str, str) == 0
+															)
+														{
+															boxing.SetHeapPtr(k, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+															found = true;
+															break;
+														}
+
+													}
+
+													if (!found)
+													{
+														int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+														if (heapptr == 0)
+															throw new InvalidOperationException();
+
+														List<ASMethodBody.PoolHeapPtrKind> kinds = new List<ASMethodBody.PoolHeapPtrKind>(method.Body.heapConstants.pool_kinds);
+														kinds.Add(ASMethodBody.PoolHeapPtrKind.String);
+														method.Body.heapConstants.pool_kinds = kinds.ToArray();
+
+														List<object> hobjs = new List<object>(method.Body.heapConstants.pool_values);
+														hobjs.Add(context.player_for_compiler.Context.GC.Heap[heapptr]);
+														method.Body.heapConstants.pool_values = hobjs.ToArray();
+
+														boxing.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
+													}
+
+													constants.Add(boxing);
+												}
+												else if (nvstr.StartsWith("raw:"))
+												{
+													string[] f = nvstr.Split('\t');
+													if (f.Length != 2)
+													{
+														goto lbl_failed;
+													}
+													else
+													{
+														string rawstr = f[0].Substring(4);
+														ulong raw;
+														if (ulong.TryParse(rawstr, out raw))
+														{
+															NaNBoxing c = new NaNBoxing(raw);
+															constants.Add(c);
+														}
+														else
+														{
+															goto lbl_failed;
+														}
+													}
+												}
+
 											}
-										}
+											#endregion
 
-									}
-									#endregion
+											List<Tuple<int, int, string, string, string, int>> records = new List<Tuple<int, int, string, string, string, int>>();
 
-									List<Tuple<int, int, string, string, string, int>> records = new List<Tuple<int, int, string, string, string, int>>();
+											while (true)
+											{
+												string line = reader.ReadLine();
+												if (line == null)
+												{
+													break;
+												}
 
-									while (true)
-									{
-										string line = reader.ReadLine();
-										if (line == null)
-										{
-											break;
-										}
+												string[] fields = line.Split("\t");
+												if (fields.Length != 5)
+												{
+													goto lbl_failed;
+												}
 
-										string[] fields = line.Split("\t");
-										if (fields.Length != 5)
-										{
-											goto lbl_failed;
-										}
+												int token_line; int token_ptr; string methodkey; string para_name; string para_index; int valueindex;
+												string[] xy = fields[0].Split(',');
+												if (xy.Length != 2)
+												{
+													goto lbl_failed;
+												}
 
-										int token_line;int token_ptr;string methodkey;string para_name;string para_index;int valueindex;
-										string[] xy = fields[0].Split(',');
-										if (xy.Length != 2)
-										{
-											goto lbl_failed;
-										}
+												if (!int.TryParse(xy[0], out token_line))
+												{
+													goto lbl_failed;
+												}
+												if (!int.TryParse(xy[1], out token_ptr))
+												{
+													goto lbl_failed;
+												}
+												methodkey = fields[1];
+												para_name = fields[2];
+												para_index = fields[3];
+												if (!int.TryParse(fields[4], out valueindex))
+												{
+													goto lbl_failed;
+												}
 
-										if (!int.TryParse(xy[0],out token_line))
-										{
-											goto lbl_failed;
-										}
-										if (!int.TryParse(xy[1], out token_ptr))
-										{
-											goto lbl_failed;
-										}
-										methodkey = fields[1];
-										para_name = fields[2];
-										para_index = fields[3];
-										if (!int.TryParse(fields[4], out valueindex))
-										{
-											goto lbl_failed;
-										}
+												records.Add(new Tuple<int, int, string, string, string, int>(token_line, token_ptr, methodkey, para_name, para_index, 
+													valueindex));
+											}
 
-										records.Add(new Tuple<int, int, string, string, string, int>(token_line, token_ptr, methodkey, para_name, para_index, valueindex));
-									}
-
-									for (int i = 1; i < script.scriptMethods.Count; i++)
-									{
-										ASMethod method = script.scriptMethods[i];
-										if (method.Parameters.Count > 0)
-										{
 											for (int a = 0; a < method.Parameters.Count; a++)
 											{
 												var para = method.Parameters[a];
@@ -2554,25 +2839,173 @@ namespace juicescript.compiler
 													para.ValueExprIndex = record.Item6;
 												}
 											}
+
+											if (constants.Count > 0)
+											{
+												CompileEnv compileEnv = new CompileEnv(null, null, null, context);
+												compileEnv.Constants = constants;
+												method.Body.param_defaultvalues = compileEnv.Encode();
+											}
+
+
+										}
+										else
+										{
+											goto lbl_failed;
 										}
 
-										foreach (var item in readedparas)
-										{
-											item.Key.computeDefaultValue = new byte[0];
-										}
-
-										if (constants.Count > 0)
-										{
-											CompileEnv compileEnv = new CompileEnv(null, null, null, context);
-											compileEnv.Constants = constants;
-											method.Body.param_defaultvalues = compileEnv.Encode();
-										}
 									}
 								}
-								else
-								{
-									goto lbl_failed;
-								}
+
+
+
+								//int const_count;
+								//string l = reader.ReadLine();
+
+								//List<NaNBoxing> constants = new List<NaNBoxing>();
+
+								//if (int.TryParse(l, out const_count))
+								//{
+								//	#region 加载常量池
+								//	for (int i = 0; i < const_count; i++)
+								//	{ 
+								//		string nvstr = reader.ReadLine();
+								//		if (nvstr == null)
+								//		{
+								//			goto lbl_failed;
+								//		}
+
+								//		if (nvstr.StartsWith("str:"))
+								//		{
+								//			string str = nvstr.Substring(4);
+								//			int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+								//			if (heapptr == 0)
+								//				throw new InvalidOperationException();
+								//			if (heapptr > 0xffffff)
+								//			{
+								//				throw new ParseException("heapptr > 0xffffff");
+								//			}
+
+								//			int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+								//			NaNBoxing boxing = new NaNBoxing();
+								//			boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
+								//			constants.Add(boxing);
+								//		}
+								//		else if (nvstr.StartsWith("raw:"))
+								//		{
+								//			string[] f = nvstr.Split('\t');
+								//			if (f.Length != 2)
+								//			{
+								//				goto lbl_failed;
+								//			}
+								//			else
+								//			{
+								//				string rawstr = f[0].Substring(4);
+								//				ulong raw;
+								//				if (ulong.TryParse(rawstr, out raw))
+								//				{
+								//					NaNBoxing c = new NaNBoxing(raw);
+								//					constants.Add(c);	
+								//				}
+								//				else
+								//				{
+								//					goto lbl_failed;
+								//				}
+								//			}
+								//		}
+
+								//	}
+								//	#endregion
+
+								//	List<Tuple<int, int, string, string, string, int>> records = new List<Tuple<int, int, string, string, string, int>>();
+
+								//	while (true)
+								//	{
+								//		string line = reader.ReadLine();
+								//		if (line == null)
+								//		{
+								//			break;
+								//		}
+
+								//		string[] fields = line.Split("\t");
+								//		if (fields.Length != 5)
+								//		{
+								//			goto lbl_failed;
+								//		}
+
+								//		int token_line;int token_ptr;string methodkey;string para_name;string para_index;int valueindex;
+								//		string[] xy = fields[0].Split(',');
+								//		if (xy.Length != 2)
+								//		{
+								//			goto lbl_failed;
+								//		}
+
+								//		if (!int.TryParse(xy[0],out token_line))
+								//		{
+								//			goto lbl_failed;
+								//		}
+								//		if (!int.TryParse(xy[1], out token_ptr))
+								//		{
+								//			goto lbl_failed;
+								//		}
+								//		methodkey = fields[1];
+								//		para_name = fields[2];
+								//		para_index = fields[3];
+								//		if (!int.TryParse(fields[4], out valueindex))
+								//		{
+								//			goto lbl_failed;
+								//		}
+
+								//		records.Add(new Tuple<int, int, string, string, string, int>(token_line, token_ptr, methodkey, para_name, para_index, valueindex));
+								//	}
+
+								//	for (int i = 1; i < script.scriptMethods.Count; i++)
+								//	{
+								//		ASMethod method = script.scriptMethods[i];
+								//		if (method.Parameters.Count > 0)
+								//		{
+								//			for (int a = 0; a < method.Parameters.Count; a++)
+								//			{
+								//				var para = method.Parameters[a];
+								//				if (para.IsOptional)
+								//				{
+								//					var record = records.FirstOrDefault(r => r.Item1 == method.Token.line &&
+								//						r.Item2 == method.Token.ptr &&
+								//						Player.GetMethodKey(method) == r.Item3 &&
+								//						para.Name == r.Item4 &&
+								//						"para_index:" + a == r.Item5
+								//					);
+
+								//					if (record == null)
+								//					{
+								//						goto lbl_failed;
+								//					}
+
+								//					readedparas.Add(para, para.ValueExprIndex);
+								//					para.ValueExprIndex = record.Item6;
+								//				}
+								//			}
+								//		}
+
+								//		foreach (var item in readedparas)
+								//		{
+								//			item.Key.computeDefaultValue = new byte[0];
+								//		}
+
+								//		if (constants.Count > 0)
+								//		{
+								//			CompileEnv compileEnv = new CompileEnv(null, null, null, context);
+								//			compileEnv.Constants = constants;
+								//			method.Body.param_defaultvalues = compileEnv.Encode();
+								//		}
+								//	}
+								//}
+								//else
+								//{
+								//	goto lbl_failed;
+								//}
 								continue;
 							}
 						}
@@ -2631,8 +3064,8 @@ namespace juicescript.compiler
 								_temp.Body._link_codescope.Container = testMethod.Body._link_codescope.Container;
 								_temp.Body._link_codescope.Parent = testMethod.Body._link_codescope.Parent;
 
-
-
+								_temp.Body.heapConstants = testMethod.Body.heapConstants;
+								
 								try
 								{
 									//默认值计算 禁止使用 x?a:b.
@@ -2654,39 +3087,49 @@ namespace juicescript.compiler
 										if (obj.Kind == RtHeapTypeKind.STRING)
 										{
 											string str = ((RtString)obj).Str;
-											int k = constants.FindIndex(
-												(n) => n.ValueType == NaNBoxing.BoxType.HeapPtr
-												&&
-												n.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String
-												&&
-												context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].Kind == RtHeapTypeKind.STRING
-												&&
-												string.CompareOrdinal(str, ((RtString)context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff]).Str) == 0
-												);
 
-											if (k >= 0)
+											NaNBoxing v = default;
+
+											bool found = false;
+											for (int j = 0; j < method.Body.heapConstants.pool_kinds.Length; j++)
 											{
-												para.ValueExprIndex = k;
+												if (method.Body.heapConstants.pool_kinds[j] == ASMethodBody.PoolHeapPtrKind.String
+													&&
+													string.CompareOrdinal(((RtString)method.Body.heapConstants.pool_values[j]).Str, str) == 0
+													)
+												{
+													v.SetHeapPtr(j, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+													found = true;
+													break;
+												}
+
 											}
-											else
+
+											if (!found)
 											{
 												int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
 												if (heapptr == 0)
 													throw new InvalidOperationException();
-												if (heapptr > 0xffffff)
-												{
-													throw new ParseException("heapptr > 0xffffff");
-												}
 
-												int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+												List<ASMethodBody.PoolHeapPtrKind> kinds = new List<ASMethodBody.PoolHeapPtrKind>(method.Body.heapConstants.pool_kinds);
+												kinds.Add(ASMethodBody.PoolHeapPtrKind.String);
+												method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
-												NaNBoxing boxing = new NaNBoxing();
-												boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+												List<object> hobjs = new List<object>(method.Body.heapConstants.pool_values);
+												hobjs.Add(context.player_for_compiler.Context.GC.Heap[heapptr]);
+												method.Body.heapConstants.pool_values = hobjs.ToArray();
 
-												constants.Add(boxing);
-												para.ValueExprIndex = constants.Count - 1;
+												v.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
 											}
 
+											int k = constants.IndexOf(v);
+											if (k < 0)
+											{
+												constants.Add(v);
+												k = constants.Count - 1;
+											}
+											para.ValueExprIndex = k;
 										}
 										else
 										{
@@ -2696,38 +3139,83 @@ namespace juicescript.compiler
 									else if (value.ValueType == NaNBoxing.BoxType.LocalString)
 									{
 										string str = value.LocalStringValue;
-										int k = constants.FindIndex(
-											(n) => n.ValueType == NaNBoxing.BoxType.HeapPtr
-											&&
-											n.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String
-											&&
-											context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].Kind == RtHeapTypeKind.STRING
-											&&
-											string.CompareOrdinal(str, ((RtString)context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff]).Str) == 0
-											);
 
-										if (k >= 0)
+										NaNBoxing v = default;
+
+										bool found = false;
+										for (int j = 0; j < method.Body.heapConstants.pool_kinds.Length; j++)
 										{
-											para.ValueExprIndex = k;
+											if (method.Body.heapConstants.pool_kinds[j] == ASMethodBody.PoolHeapPtrKind.String
+												&&
+												string.CompareOrdinal(((RtString)method.Body.heapConstants.pool_values[j]).Str, str) == 0
+												)
+											{
+												v.SetHeapPtr(j, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+												found = true;
+												break;
+											}
+
 										}
-										else
+
+										if (!found)
 										{
 											int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
 											if (heapptr == 0)
 												throw new InvalidOperationException();
-											if (heapptr > 0xffffff)
-											{
-												throw new ParseException("heapptr > 0xffffff");
-											}
 
-											int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+											List<ASMethodBody.PoolHeapPtrKind> kinds = new List<ASMethodBody.PoolHeapPtrKind>(method.Body.heapConstants.pool_kinds);
+											kinds.Add(ASMethodBody.PoolHeapPtrKind.String);
+											method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
-											NaNBoxing boxing = new NaNBoxing();
-											boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE	);
+											List<object> hobjs = new List<object>(method.Body.heapConstants.pool_values);
+											hobjs.Add(context.player_for_compiler.Context.GC.Heap[heapptr]);
+											method.Body.heapConstants.pool_values = hobjs.ToArray();
 
-											constants.Add(boxing);
-											para.ValueExprIndex = constants.Count - 1;
+											v.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+
 										}
+
+										int k = constants.IndexOf(v);
+										if (k < 0)
+										{
+											constants.Add(v);
+											k = constants.Count - 1;
+										}
+										para.ValueExprIndex = k;
+
+
+										//int k = constants.FindIndex(
+										//	(n) => n.ValueType == NaNBoxing.BoxType.HeapPtr
+										//	&&
+										//	n.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String
+										//	&&
+										//	context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff].Kind == RtHeapTypeKind.STRING
+										//	&&
+										//	string.CompareOrdinal(str, ((RtString)context.player_for_compiler.Context.GC.Heap[n.HeapPtr & 0xffffff]).Str) == 0
+										//	);
+
+										//if (k >= 0)
+										//{
+										//	para.ValueExprIndex = k;
+										//}
+										//else
+										//{
+										//	int heapptr = context.player_for_compiler.Context.GC.Complie_AllocString(str);
+										//	if (heapptr == 0)
+										//		throw new InvalidOperationException();
+										//	if (heapptr > 0xffffff)
+										//	{
+										//		throw new ParseException("heapptr > 0xffffff");
+										//	}
+
+										//	int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24);
+
+										//	NaNBoxing boxing = new NaNBoxing();
+										//	boxing.SetHeapPtr(ptr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE	);
+
+										//	constants.Add(boxing);
+										//	para.ValueExprIndex = constants.Count - 1;
+										//}
 									}
 									else if (value.ValueType == NaNBoxing.BoxType.Fault)
 									{
@@ -2787,7 +3275,7 @@ namespace juicescript.compiler
 
 						for (int i = 1; i < script.scriptMethods.Count; i++)
 						{
-							ASMethod method = script.scriptMethods[i];
+							ASMethod method = script.scriptMethods[i];							
 							if (method.Parameters.Any(p=>p.IsOptional))
 							{
 								int scount; NaNBoxing[] cs; Instruction[] inslist;
@@ -2800,8 +3288,13 @@ namespace juicescript.compiler
 									string vStr;
 									if (c.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
-										int hptr = c.HeapPtr & 0xffffff;
-										string str = ((RtString)context.player_for_compiler.Context.GC.Heap[hptr]).Str;
+										//int hptr = c.HeapPtr & 0xffffff;
+										//string str = ((RtString)context.player_for_compiler.Context.GC.Heap[hptr]).Str;
+
+										Debug.Assert(method.Body.heapConstants.pool_kinds[c.HeapPtr] == ASMethodBody.PoolHeapPtrKind.String);
+										string str = ((RtString)method.Body.heapConstants.pool_values[c.HeapPtr]).Str;
+
+
 										vStr = "str:" + str;
 									}
 									else
@@ -4071,102 +4564,182 @@ namespace juicescript.compiler
 
 						//写入.m文件
 						bw.Write((int)method.Flags);
+
+						bw.Write((int)method.Body.heapConstants.pool_kinds.Length);
+						for (int j = 0; j < method.Body.heapConstants.pool_kinds.Length; j++)
+						{
+							var kind = method.Body.heapConstants.pool_kinds[j];
+							bw.Write((int)kind);
+
+							if (kind == ASMethodBody.PoolHeapPtrKind.String)
+							{
+								var chars = ((RtString)(method.Body.heapConstants.pool_values[j])).Str.AsSpan();
+								bw.Write(chars.Length);
+								for (int k = 0; k < chars.Length; k++)
+								{
+									bw.Write((ushort)chars[k]);
+								}
+							}
+							else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+							{
+								ASNamespace ns = (ASNamespace)method.Body.heapConstants.pool_values[j];
+								bw.Write((int)ns.Kind);
+								if (ns.in_package == null)
+								{
+									bw.Write(false);
+								}
+								else
+								{
+									bw.Write(true);
+									bw.Write(ns.in_package);
+								}
+								if (ns.Name == null)
+								{
+									bw.Write(false);
+								}
+								else
+								{
+									bw.Write(true);
+									bw.Write(ns.Name);
+								}
+								if (ns.def_uri == null)
+								{
+									bw.Write(false);
+								}
+								else
+								{
+									bw.Write(true);
+									bw.Write(ns.def_uri);
+								}
+
+							}
+							else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+							{ 
+								ulong classid = (ulong)method.Body.heapConstants.pool_values[j];
+								bw.Write(classid);
+							}
+							else
+							{
+								throw new NotImplementedException();
+							}
+						}
+
+
 						var constansts = context.dict_method_constants[method];
 						bw.Write(constansts.Count);
 
 						var writer = (NaNBoxing box, BinaryWriter bw) =>
 						{
 							bw.Write(box.Raw);
-							if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+							if (box.ValueType == BoxType.HeapPtr)
 							{
-								var p = box.HeapPtr;
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(p >> 24);
-								int ptr = p & 0xFFFFFF;
+								Debug.Assert(box.HeapKind == NaNBoxing.UNKNOWN_HEAPKIND);
 
-								if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
-								{
-									var vecdef = context.vectorDefs[ptr];
+								//var kind = method.Body.heapConstants.pool_kinds[box.HeapPtr];
+								//if (kind == ASMethodBody.PoolHeapPtrKind.String)
+								//{
+								//	var chars = ((RtString)(method.Body.heapConstants.pool_values[box.HeapPtr])).Str.AsSpan();
+								//	bw.Write(chars.Length);
+								//	for (int i = 0; i < chars.Length; i++)
+								//	{
+								//		bw.Write((ushort)chars[i]);
+								//	}
 
-									bw.Write((byte)RtHeapTypeKind.VECTOR);
-									bw.Write(vecdef.depth);
-
-									while (vecdef.depth > 0)
-									{
-										vecdef = context.vectorDefs.First(v => v.Identifier == vecdef.ElementTypeId);
-									}
-									bw.Write((ulong)vecdef.ElementTypeId);
-								}
-								else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-								{
-									//bw.Write((byte)RtHeapTypeKind.CACHE_LD_CLASS);
-									bw.Write((byte)10);
-									bw.Write(context.constpool_ldclass[ptr]);
-
-									use_classes.Add(context.constpool_ldclass[ptr]);
-								}
-								else
-								{
-									RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[ptr];
-									if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
-									{
-										bw.Write((byte)RtHeapTypeKind.STRING);
-
-										var chars = ((RtString)heapInstance).Str.AsSpan();
-										bw.Write(chars.Length);
-										for (int i = 0; i < chars.Length; i++)
-										{
-											bw.Write((ushort)chars[i]);
-										}
-
-										//bw.Write(((RtPayloadString)heapInstance).Str);
-									}
-									//else if (heapInstance.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS && kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-									//{
-									//	bw.Write((byte)RtHeapTypeKind.CACHE_LD_CLASS);
-									//	bw.Write(((ASClass)heapInstance.Type).Type_identifier);
-									//}
-									else if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
-									{
-										bw.Write((byte)RtHeapTypeKind.NAMESPACE);
-										int index = script.namespaces.IndexOf(((RtNameSpace)heapInstance).ASNamespace);
-										if (index < 1)
-										{
-											throw new InvalidOperationException();
-										}
-
-										bw.Write(index);
-
-									}
-									else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
-									{
-										ASMethod m = ((ASMethodBody)heapInstance.Type).Method;
-
-										int index = script.scriptMethods.IndexOf(m);
-										if (index < 1)
-										{
-											throw new InvalidOperationException();
-										}
-
-										bw.Write((byte)RtHeapTypeKind.MethodScope);
-										bw.Write(index);
-									}
-									else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
-									{
-										ASClass _this_ = (ASClass)heapInstance.Type;
-										int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
-
-
-										bw.Write((byte)200);
-										bw.Write(_this_.Type_identifier);
-										bw.Write(vtable_index);
-
-									}
-									else
-									{
-										throw new InvalidOperationException();
-									}
-								}
+								//}
+								//else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+								//{
+									
+								//}
+								//else
+								//{
+								//	throw new NotImplementedException();
+								//}
 							}
+
+
+							//if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
+							//{
+							//	var p = box.HeapPtr;
+							//	ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(p >> 24);
+							//	int ptr = p & 0xFFFFFF;
+
+							//	if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+							//	{
+							//		var vecdef = context.vectorDefs[ptr];
+
+							//		bw.Write((byte)RtHeapTypeKind.VECTOR);
+							//		bw.Write(vecdef.depth);
+
+							//		while (vecdef.depth > 0)
+							//		{
+							//			vecdef = context.vectorDefs.First(v => v.Identifier == vecdef.ElementTypeId);
+							//		}
+							//		bw.Write((ulong)vecdef.ElementTypeId);
+							//	}
+							//	else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+							//	{
+							//		//bw.Write((byte)RtHeapTypeKind.CACHE_LD_CLASS);
+							//		bw.Write((byte)10);
+							//		bw.Write(context.constpool_ldclass[ptr]);
+
+							//		use_classes.Add(context.constpool_ldclass[ptr]);
+							//	}
+							//	else
+							//	{
+							//		RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[ptr];
+							//		if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
+							//		{
+							//			bw.Write((byte)RtHeapTypeKind.STRING);
+
+							//			var chars = ((RtString)heapInstance).Str.AsSpan();
+							//			bw.Write(chars.Length);
+							//			for (int i = 0; i < chars.Length; i++)
+							//			{
+							//				bw.Write((ushort)chars[i]);
+							//			}
+							//		}
+							//		else if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+							//		{
+							//			bw.Write((byte)RtHeapTypeKind.NAMESPACE);
+							//			int index = script.namespaces.IndexOf(((RtNameSpace)heapInstance).ASNamespace);
+							//			if (index < 1)
+							//			{
+							//				throw new InvalidOperationException();
+							//			}
+
+							//			bw.Write(index);
+
+							//		}
+							//		else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
+							//		{
+							//			ASMethod m = ((ASMethodBody)heapInstance.Type).Method;
+
+							//			int index = script.scriptMethods.IndexOf(m);
+							//			if (index < 1)
+							//			{
+							//				throw new InvalidOperationException();
+							//			}
+
+							//			bw.Write((byte)RtHeapTypeKind.MethodScope);
+							//			bw.Write(index);
+							//		}
+							//		else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+							//		{
+							//			ASClass _this_ = (ASClass)heapInstance.Type;
+							//			int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
+
+
+							//			bw.Write((byte)200);
+							//			bw.Write(_this_.Type_identifier);
+							//			bw.Write(vtable_index);
+
+							//		}
+							//		else
+							//		{
+							//			throw new InvalidOperationException();
+							//		}
+							//	}
+							//}
 						};
 
 						for (int j = 0; j < constansts.Count; j++)

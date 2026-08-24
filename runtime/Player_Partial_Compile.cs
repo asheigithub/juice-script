@@ -185,7 +185,7 @@ namespace juicescript.runtime
 		/// <exception cref="EvalConstException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
 		public NaNBoxing ComputeMemberInitValue(ScopeMember member, ASMethod method, SWCFile testswc, byte[] constpoolbytecode, 
-			List<NaNBoxing> method_const, List<Tuple<int, ASClass>> list,bool loadfromcache)
+			bool loadfromcache)
 		{
 
 
@@ -220,44 +220,42 @@ namespace juicescript.runtime
 							throw new InvalidOperationException();
 						}
 
-						for (int i = 0; i < src_count && loadfromcache; i++) //scriptDef从cache中读取时，需要重新对一下LD_Class
-						{
-							if (src_count != method_const.Count)
-							{
-								throw new InvalidOperationException();
-							}
+						//for (int i = 0; i < src_count && loadfromcache; i++)
+						//{
+						//	if (src_count != method_const.Count)
+						//	{
+						//		throw new InvalidOperationException();
+						//	}
 
-							NaNBoxing nb = method_const[i];
-							if (nb.ValueType == NaNBoxing.BoxType.HeapPtr)
-							{
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(nb.HeapPtr >> 24);
-								if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-								{
-									int index = nb.HeapPtr & 0xffffff;
-									var cls = list.First(t=>t.Item1 == index);
-									//ulong id =   Context.libs.ld_classid[nb.HeapPtr & 0xffffff];
-									//ASClass @class = Context.dictTypes[id];
+						//	NaNBoxing nb = method_const[i];
+						//	if (nb.ValueType == NaNBoxing.BoxType.HeapPtr)
+						//	{
+						//		ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(nb.HeapPtr >> 24);
+						//		if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+						//		{
+						//			int index = nb.HeapPtr & 0xffffff;
+						//			var cls = list.First(t=>t.Item1 == index);
 
-									if (!Context.link_const_class.Exists( c =>c.Type_identifier == cls.Item2.Type_identifier ))
-									{
-										Context.link_const_class.Add(cls.Item2);
-									}
+						//			if (!Context.link_const_class.Exists(c => c.Type_identifier == cls.Item2.Type_identifier))
+						//			{
+						//				Context.link_const_class.Add(cls.Item2);
+						//			}
 
-									int nindex = Context.link_const_class.FindIndex( c=>c.Type_identifier == cls.Item2.Type_identifier);
-									if ((src_consts + i)->ValueType != NaNBoxing.BoxType.HeapPtr)
-									{
-										(src_consts + i)->SetUInt((uint)nindex);
-									}
-									else
-									{ 
-										
-									}
-								}
+						//			int nindex = Context.link_const_class.FindIndex(c => c.Type_identifier == cls.Item2.Type_identifier);
+						//			if ((src_consts + i)->ValueType != NaNBoxing.BoxType.HeapPtr)
+						//			{
+						//				(src_consts + i)->SetUInt((uint)nindex);
+						//			}
+						//			else
+						//			{
 
-							}
+						//			}
+						//		}
+
+						//	}
 
 
-						}
+						//}
 
 						Buffer.BlockCopy(constpoolbytecode, (3 + 2 * src_ins_count) * 4, method.Body.ByteCode, (3+2 * dst_ins_count)*4 ,src_count * sizeof(NaNBoxing));
 					}
@@ -783,7 +781,9 @@ namespace juicescript.runtime
 			{
 				computermember_cachemethodscope = new Dictionary<ASContainer, int>();
 			}
-			linkMethod(method,testswc);
+
+			linkMethod_Consts(method);
+
 			unsafe
 			{
 				Context.StackPosition = 0;

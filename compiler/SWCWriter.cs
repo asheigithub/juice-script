@@ -4,6 +4,7 @@ using juicescript.runtime;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -151,6 +152,17 @@ namespace juicescript.compiler
                 {
                     _string_.Add(p.Name);
                 }
+
+
+                foreach (var c in item.Body.heapConstants.pool_values)
+                {
+                    if (c is RtString)
+                    {
+                        _string_.Add(((RtString)c).Str);
+                    }
+                }
+
+
             }
             foreach (var t in _traits)
             {
@@ -198,44 +210,45 @@ namespace juicescript.compiler
                     if (c.ValueType == NaNBoxing.BoxType.HeapPtr
                         )
                     {
-                        ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(c.HeapPtr >> 24);
-                        if (kind == ASMethodBody.PoolHeapPtrKind.String)
-                        {
-                            _string_.Add(((RtString)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF]).Str);
-                        }
-                        else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-                        {
-                            //ulong cid = ((ASClass)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF].Type).Type_identifier;
-                            ulong cid = context.constpool_ldclass[ c.HeapPtr & 0xFFFFFF ];
-                            _ld_classes.Add(cid);
-                        }
-                        else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
-                        {
-                            //do nothing
-                        }
-                        else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
-                        {
-                            //do nothing
-                        }
-                        else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
-                        {
-                            //do nothing
-                        }
-                        else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
-                        {
-                            var heapInstance = context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF];
-                            ulong type = ((ASClass)heapInstance.Type).Type_identifier;
-                            int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
+                        Debug.Assert(c.HeapKind == NaNBoxing.UNKNOWN_HEAPKIND);
+                        //ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(c.HeapPtr >> 24);
+                        //if (kind == ASMethodBody.PoolHeapPtrKind.String)
+                        //{
+                        //    _string_.Add(((RtString)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF]).Str);
+                        //}
+                        //else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+                        //{
+                        //    //ulong cid = ((ASClass)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF].Type).Type_identifier;
+                        //    ulong cid = context.constpool_ldclass[ c.HeapPtr & 0xFFFFFF ];
+                        //    _ld_classes.Add(cid);
+                        //}
+                        //else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+                        //{
+                        //    //do nothing
+                        //}
+                        //else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+                        //{
+                        //    //do nothing
+                        //}
+                        //else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+                        //{
+                        //    //do nothing
+                        //}
+                        //else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+                        //{
+                        //    var heapInstance = context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF];
+                        //    ulong type = ((ASClass)heapInstance.Type).Type_identifier;
+                        //    int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
 
-                            if (!_ld_supermethod.Exists((t) => t.Item1 == type && t.Item2 == vtable_index))
-                            {
-                                _ld_supermethod.Add(new Tuple<ulong, int>(type,vtable_index));
-                            }
-                        }
-                        else
-                        {
-                            throw new NotImplementedException();
-                        }
+                        //    if (!_ld_supermethod.Exists((t) => t.Item1 == type && t.Item2 == vtable_index))
+                        //    {
+                        //        _ld_supermethod.Add(new Tuple<ulong, int>(type,vtable_index));
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    throw new NotImplementedException();
+                        //}
                     }
                 }
             }
@@ -455,6 +468,41 @@ namespace juicescript.compiler
 
                         bw.Write(_containers.IndexOf(method.Body));
 
+                        bw.Write(method.Body.heapConstants.pool_kinds.Length);
+                        for (int j = 0; j < method.Body.heapConstants.pool_kinds.Length; j++)
+                        {
+                            var kind = method.Body.heapConstants.pool_kinds[j];
+                            bw.Write((int)kind);
+
+                            if (kind == ASMethodBody.PoolHeapPtrKind.String)
+                            {
+                                var index = _stringPool_.IndexOf(((RtString)method.Body.heapConstants.pool_values[j]).Str);
+                                Debug.Assert(index > -1);
+                                bw.Write(index);
+
+                            }
+                            else if (kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+                            {
+                                var index = _namespaces.IndexOf((ASNamespace)method.Body.heapConstants.pool_values[j]);
+                                Debug.Assert(index > -1);
+                                bw.Write(index);
+                            }
+                            else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+                            {
+                                ulong classid = (ulong)method.Body.heapConstants.pool_values[j];
+                                bw.Write(classid);
+                            }
+                            else
+                            {
+                                throw new NotImplementedException();
+                            }
+
+                        }
+
+
+
+
+
                         byte[] bytecode = new byte[method.Body.ByteCode.Length];
                         Array.Copy(method.Body.ByteCode,bytecode, method.Body.ByteCode.Length);
                         //**整理常量中的引用类型***
@@ -636,109 +684,111 @@ namespace juicescript.compiler
         {
 			if (boxing.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
-				ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+                Debug.Assert(boxing.HeapKind == NaNBoxing.UNKNOWN_HEAPKIND);
 
-                if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
-                {
-                    //int vector_index = boxings[j].HeapPtr & 0xFFFFFF;
-                }
-                else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-                {
+				//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+
+    //            if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+    //            {
+    //                //int vector_index = boxings[j].HeapPtr & 0xFFFFFF;
+    //            }
+    //            else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+    //            {
                     
-                    ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
+    //                ulong classid = context.constpool_ldclass[boxing.HeapPtr & 0xFFFFFF];
 
-                    int pool_index = ld_cls.IndexOf(classid);
-                    if (pool_index > 0xFFFFFF)
-                    {
-                        throw new ParseException("pool_index > 0xffffff");
-                    }
-                    if (pool_index < 0)
-                        throw new InvalidOperationException();
+    //                int pool_index = ld_cls.IndexOf(classid);
+    //                if (pool_index > 0xFFFFFF)
+    //                {
+    //                    throw new ParseException("pool_index > 0xffffff");
+    //                }
+    //                if (pool_index < 0)
+    //                    throw new InvalidOperationException();
 
-                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24),NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-                }
-				else
-                {
-                    RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
-                    if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
-                    {
-                        int pool_index = _stringPool_.IndexOf(((RtString)heapInstance).Str);
+    //                boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24),NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+    //            }
+				//else
+    //            {
+    //                RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
+    //                if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
+    //                {
+    //                    int pool_index = _stringPool_.IndexOf(((RtString)heapInstance).Str);
 
-                        if (pool_index > 0xFFFFFF)
-                        {
-                            throw new ParseException("pool_index > 0xffffff");
-                        }
-                        if (pool_index < 0)
-                            throw new InvalidOperationException();
+    //                    if (pool_index > 0xFFFFFF)
+    //                    {
+    //                        throw new ParseException("pool_index > 0xffffff");
+    //                    }
+    //                    if (pool_index < 0)
+    //                        throw new InvalidOperationException();
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-                    }
-                    //else if (heapInstance.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS && kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-                    //{
-                    //	int pool_index = ld_cls.IndexOf(((ASClass)heapInstance.Type).Type_identifier);
-                    //	if (pool_index > 0xFFFFFF)
-                    //	{
-                    //		throw new ParseException("pool_index > 0xffffff");
-                    //	}
-                    //	if (pool_index < 0)
-                    //		throw new InvalidOperationException();
+    //                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.String << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+    //                }
+    //                //else if (heapInstance.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS && kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
+    //                //{
+    //                //	int pool_index = ld_cls.IndexOf(((ASClass)heapInstance.Type).Type_identifier);
+    //                //	if (pool_index > 0xFFFFFF)
+    //                //	{
+    //                //		throw new ParseException("pool_index > 0xffffff");
+    //                //	}
+    //                //	if (pool_index < 0)
+    //                //		throw new InvalidOperationException();
 
-                    //	boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24));
+    //                //	boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.LD_Class << 24));
 
-                    //}
-                    else if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
-                    {
-                        int pool_index = _namespaces.IndexOf(((RtNameSpace)heapInstance).ASNamespace);
-                        if (pool_index > 0xFFFFFF)
-                        {
-                            throw new ParseException("pool_index > 0xffffff");
-                        }
-                        if (pool_index < 1)
-                        {
-                            throw new InvalidOperationException();
-                        }
+    //                //}
+    //                else if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE && kind == ASMethodBody.PoolHeapPtrKind.Namespace)
+    //                {
+    //                    int pool_index = _namespaces.IndexOf(((RtNameSpace)heapInstance).ASNamespace);
+    //                    if (pool_index > 0xFFFFFF)
+    //                    {
+    //                        throw new ParseException("pool_index > 0xffffff");
+    //                    }
+    //                    if (pool_index < 1)
+    //                    {
+    //                        throw new InvalidOperationException();
+    //                    }
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
-                    }
-                    else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
-                    {
-                        int pool_index = swc.Methods.IndexOf(((ASMethodBody)heapInstance.Type).Method);
+    //                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Namespace << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+    //                }
+    //                else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.Method)
+    //                {
+    //                    int pool_index = swc.Methods.IndexOf(((ASMethodBody)heapInstance.Type).Method);
 
-                        if (pool_index > 0xFFFFFF)
-                        {
-                            throw new ParseException("pool_index > 0xffffff");
-                        }
-                        if (pool_index < 1)
-                        {
-                            throw new InvalidOperationException();
-                        }
+    //                    if (pool_index > 0xFFFFFF)
+    //                    {
+    //                        throw new ParseException("pool_index > 0xffffff");
+    //                    }
+    //                    if (pool_index < 1)
+    //                    {
+    //                        throw new InvalidOperationException();
+    //                    }
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+    //                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
-                    }
-                    else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
-                    {
-                        ulong type = ((ASClass)heapInstance.Type).Type_identifier;
-                        int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
+    //                }
+    //                else if (heapInstance.Kind == RtHeapTypeKind.MethodScope && kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+    //                {
+    //                    ulong type = ((ASClass)heapInstance.Type).Type_identifier;
+    //                    int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
 
-                        int pool_index = _ld_supermethod.FindIndex((t) => { return t.Item1 == type && t.Item2 == vtable_index; });
-                        if (pool_index > 0xFFFFFF)
-                        {
-                            throw new ParseException("pool_index > 0xffffff");
-                        }
-                        if (pool_index < 0)
-                        {
-                            throw new InvalidOperationException();
-                        }
+    //                    int pool_index = _ld_supermethod.FindIndex((t) => { return t.Item1 == type && t.Item2 == vtable_index; });
+    //                    if (pool_index > 0xFFFFFF)
+    //                    {
+    //                        throw new ParseException("pool_index > 0xffffff");
+    //                    }
+    //                    if (pool_index < 0)
+    //                    {
+    //                        throw new InvalidOperationException();
+    //                    }
 
-                        boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
+    //                    boxing.SetHeapPtr((0xffffff & pool_index) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24), NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
 
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
-                    }
-                }
+    //                }
+    //                else
+    //                {
+    //                    throw new InvalidOperationException();
+    //                }
+    //            }
 			}
 		}
 

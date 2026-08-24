@@ -243,6 +243,32 @@ namespace juicescript
                         throw new InvalidOperationException();
                     }
 
+                    int pool_heapconsts = br.ReadInt32();
+                    List<ASMethodBody.PoolHeapPtrKind> pool_kinds = new List<ASMethodBody.PoolHeapPtrKind>();
+                    List<object> pool_objs = new List<object>();
+                    for (int j = 0; j < pool_heapconsts; j++)
+                    {
+                        ASMethodBody.PoolHeapPtrKind k = (ASMethodBody.PoolHeapPtrKind)br.ReadInt32();
+                        if (k == ASMethodBody.PoolHeapPtrKind.String || k == ASMethodBody.PoolHeapPtrKind.Namespace)
+                        {
+                            pool_kinds.Add(k);
+
+                            int index = br.ReadInt32();
+                            pool_objs.Add(index);
+                        }
+                        else if (k == ASMethodBody.PoolHeapPtrKind.LD_Class)
+                        {
+                            pool_kinds.Add(k);
+                            ulong classid = br.ReadUInt64();
+                            pool_objs.Add(classid);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                    }
+                   
+
                     int bytes = br.ReadInt32();
                     byte[] byteCode = br.ReadBytes(bytes);  
 
@@ -252,7 +278,13 @@ namespace juicescript
                     method.Body = (ASMethodBody)containers[bodyindex];
                     method.Body.ByteCode = byteCode;
                     method.Body.param_defaultvalues = param_dv;
-                }
+
+
+					method.Body.heapConstants.pool_kinds = pool_kinds.ToArray();
+                    method.Body.heapConstants.pool_values = pool_objs.ToArray();
+
+
+				}
 
                 int clsCount = br.ReadInt32();
                 scriptClasses = new ASClass[clsCount];
