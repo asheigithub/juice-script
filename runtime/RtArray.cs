@@ -1825,7 +1825,7 @@ namespace juicescript.runtime
 		}
 
 
-
+		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
 		{
 			if (HEAPINSTANCE_PTR == 0)
