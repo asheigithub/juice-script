@@ -2175,8 +2175,8 @@ namespace juicescript.compiler
 					{ "Infinity.as", "isFinite.as",
 					"isNaN.as", "parseFloat.as", "parseInt.as",
 					"NaN.as","trace.as","undefined.as",
-					"flash\\utils\\getDefinitionByName.as",
-					"flash\\utils\\getQualifiedClassName.as"
+					$"flash{ System.IO.Path.DirectorySeparatorChar }utils{ System.IO.Path.DirectorySeparatorChar }getDefinitionByName.as",
+					$"flash{ System.IO.Path.DirectorySeparatorChar }utils{ System.IO.Path.DirectorySeparatorChar }getQualifiedClassName.as"
 				};
 
 				if (exclude.Contains(src.Replace(proj, "")))
