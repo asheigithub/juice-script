@@ -173,15 +173,17 @@ namespace juicescript.runtime
 
 		internal uint array_len = 0;
 
-		public uint GetLength(Player player)
+		[MethodImpl( MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization )]
+		public uint GetLength(Player player,out RtArray target)
 		{
 			if (HEAPINSTANCE_PTR == 0)
 			{
+				target = this;
 				return array_len;
 			}
 			else
 			{
-				RtArray target;
+				//RtArray target;
 				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.array_len;
 			}
@@ -210,7 +212,7 @@ namespace juicescript.runtime
 					{
 						if (len > stack_store.Length)
 						{
-							ChangeStoreToHeap(len, player, ref error);
+							ChangeStoreToHeap(len, player, ref error,out RtArray arr);
 							//throw new NotImplementedException();
 						}
 						else
@@ -228,7 +230,7 @@ namespace juicescript.runtime
 					{
 						if (len > MAX_CACHE_ELEMENT)
 						{
-							ChangeStoreToHeap(len, player, ref error);
+							ChangeStoreToHeap(len, player, ref error, out RtArray arr);
 							//throw new NotImplementedException();
 						}
 						else
@@ -294,8 +296,8 @@ namespace juicescript.runtime
 			if (HEAPINSTANCE_PTR != 0)
 				throw new InvalidOperationException();
 #endif
-			uint len = GetLength(player);
-			return ChangeStoreToHeap(len, player, ref error);
+			uint len = GetLength(player,out RtArray t);
+			return ChangeStoreToHeap(len, player, ref error, out RtArray arr);
 
 		}
 
@@ -359,17 +361,18 @@ namespace juicescript.runtime
 		}
 
 
-		private int ChangeStoreToHeap(uint newlen, Player player, ref ReceiveError error)
+		private int ChangeStoreToHeap(uint newlen, Player player, ref ReceiveError error,out RtArray arr)
 		{
 			RtHeapBase arr_instance;
 			int arr_ptr = player.Context.GC.AllocArray(out arr_instance, ArrayStoreMode.normal);
 			if (arr_ptr == 0)
 			{
+				arr = null;
 				player.RaiseOutOfMemory(ref error);
 				return arr_ptr;
 			}
 
-			RtArray arr = (RtArray)arr_instance;
+			arr = (RtArray)arr_instance;
 
 			Span<NaNBoxing> store_span;
 
@@ -1828,16 +1831,18 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
 		{
-			if (HEAPINSTANCE_PTR == 0)
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+			//if (HEAPINSTANCE_PTR == 0)
 			{
 				return DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 			}
-			else
-			{
-				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
-			}
+			//else
+			//{
+			//	RtArray target;
+			//	HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	return target.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
+			//}
 
 		}
 
@@ -1852,19 +1857,22 @@ namespace juicescript.runtime
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private bool DoTrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
 				if (array_index >= stack_store.Length)
 				{
-					ChangeStoreToHeap(array_index, player, ref error);
+					ChangeStoreToHeap(array_index, player, ref error, out RtArray arr);
 					if (error.raised)
 					{
 						return false;
 					}
 
-					return TrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
+					//return TrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
+					Debug.Assert(arr.HEAPINSTANCE_PTR == 0);
+					return arr.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 
 					//throw new NotImplementedException();
 				}
@@ -1927,13 +1935,13 @@ namespace juicescript.runtime
 			{
 				if (array_index >= cache_store.Length)
 				{
-					ChangeStoreToHeap(array_index, player, ref error);
+					ChangeStoreToHeap(array_index, player, ref error, out RtArray arr);
 					if (error.raised)
 					{
 						return false;
 					}
-
-					return TrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
+					Debug.Assert(arr.HEAPINSTANCE_PTR == 0);
+					return arr.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player, ref error);
 					//throw new NotImplementedException();
 				}
 				else if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -2052,22 +2060,19 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				return DoReadSlot(array_index, player, out isoutofindex_or_ishole);
-			}
-			else
-			{
-				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.DoReadSlot(array_index, player, out isoutofindex_or_ishole);
-			}
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
 
-		}
+			//if (HEAPINSTANCE_PTR == 0)
+			{
+			//	return DoReadSlot(array_index, player, out isoutofindex_or_ishole);
+			}
+			//else
+			//{
+			//	RtArray target;
+			//	HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	return target.DoReadSlot(array_index, player, out isoutofindex_or_ishole);
+			//}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private NaNBoxing DoReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
-		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
 				if (array_index < array_len)
@@ -2160,7 +2165,15 @@ namespace juicescript.runtime
 					return v;
 				}
 			}
+
+
 		}
+
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+		//private NaNBoxing DoReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
+		//{
+			
+		//}
 
 
 

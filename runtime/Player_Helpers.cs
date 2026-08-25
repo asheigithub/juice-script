@@ -11567,7 +11567,7 @@ namespace juicescript.runtime
 			var obj = Context.GC.Heap[thisValue.HeapPtr];
 			if (obj.Kind == RtHeapTypeKind.ARRAY)
 			{
-				uint len = ((RtArray)obj).GetLength(this);
+				uint len = ((RtArray)obj).GetLength(this,out RtArray t);
 				stackslots[target.index].SetUInt(len);
 			}
 			else if (obj.Kind == RtHeapTypeKind.STRING)

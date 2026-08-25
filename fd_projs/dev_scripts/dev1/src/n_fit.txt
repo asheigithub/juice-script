@@ -1,0 +1,68 @@
+package {
+    import flash.display.Sprite;
+
+    [Doc]
+    public class Main extends Sprite {
+        public function Main() {
+            var x1:Vector.<Number> = Vector.<Number>([1, 5, 9, 13]);
+            var x2:Vector.<Number> = Vector.<Number>([70, 110, 150, 190]);
+            var y:Vector.<Number> = Vector.<Number>([3.883487942, -2.092651173, 0.109892412, 1.921784419]);
+
+            var n:int = x1.length;
+            var a:Number = 5;
+            var b:Number = 0.6;
+
+            for (var iter:int = 0; iter < 100; iter++) {
+                var jt0:Number = 0;
+                var jt1:Number = 0;
+                var j00:Number = 0;
+                var j01:Number = 0;
+                var j11:Number = 0;
+
+                for (var i:int = 0; i < n; i++) {
+                    var bx1:Number = b * x1[i];
+                    var sinBx1:Number = Math.sin(bx1);
+                    var cosBx1:Number = Math.cos(bx1);
+                    var denom:Number = a + b * x2[i];
+                    var frac:Number = 1 / denom;
+                    var pred:Number = a * sinBx1 + frac;
+                    var r:Number = y[i] - pred;
+
+                    var d_sin:Number = sinBx1 - frac * frac;
+                    var d_cos:Number = a * x1[i] * cosBx1 - x2[i] * frac * frac;
+
+                    jt0 += r * d_sin;
+                    jt1 += r * d_cos;
+                    j00 += d_sin * d_sin;
+                    j01 += d_sin * d_cos;
+                    j11 += d_cos * d_cos;
+                }
+
+                var j10:Number = j01;
+                var det:Number = j00 * j11 - j01 * j10;
+                if (Math.abs(det) < 1e-10) break;
+
+                var da:Number = (jt0 * j11 - jt1 * j01) / det;
+                var db:Number = (-jt0 * j10 + j00 * jt1) / det;
+
+                a += da;
+                b += db;
+
+                if (Math.abs(da) < 1e-9 && Math.abs(db) < 1e-9) break;
+            }
+
+            var totalError:Number = 0;
+            for (var j:int = 0; j < n; j++) {
+                var pred2:Number = a * Math.sin(b * x1[j]) + 1 / (a + b * x2[j]);
+                var diff:Number = y[j] - pred2;
+                totalError += diff * diff;
+            }
+
+            trace("a = " + a);
+            trace("b = " + b);
+            trace("RMSE = " + Math.sqrt(totalError / n));
+        }
+    }
+}
+
+var main:Main = new Main();

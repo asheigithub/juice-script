@@ -122,7 +122,7 @@ namespace juicescript.runtime
 
 						int len; RtArray argArray = (RtArray)context.GC.Heap[task.argumentsPtr];
 
-						len = (int)argArray.GetLength(context.player);
+						len = (int)argArray.GetLength(context.player,out argArray);
 
 						if (context.StackPosition + len + 1 >= Context.STACK_LENGTH)
 						{
@@ -300,7 +300,7 @@ namespace juicescript.runtime
 			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
-			if (restArray.GetLength(context.player) > 16)
+			if (restArray.GetLength(context.player,out restArray) > 16)
 			{
 				context.player.RaiseError(ref error, "setTimeout(closure:Function, delay:Number, ... arguments),arguments.length must less 16.");
 				return;
@@ -366,7 +366,7 @@ namespace juicescript.runtime
 			Debug.Assert(rest.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
-			if (restArray.GetLength(context.player) > 16)
+			if (restArray.GetLength(context.player,out restArray) > 16)
 			{
 				context.player.RaiseError(ref error, "setTimeout(closure:Function, delay:Number, ... arguments),arguments.length must less 16.");
 				return;

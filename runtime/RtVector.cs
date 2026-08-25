@@ -67,7 +67,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal VectorImpl.VectorStore GetStore()
         {
             Debug.Assert(HEAPINSTANCE_PTR == 0);

@@ -2,6 +2,7 @@
 using juicescript.runtime.buildin;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -952,7 +953,7 @@ namespace juicescript.runtime.gc
                             }
                             else
                             {
-                                if (rtPayload.GetLength(context.player) > 0)
+                                if (rtPayload.array_len>0)//(context.player, out RtArray t) > 0)
                                 {
                                     rtPayload.GCMarkAllElements( context );
                                     //throw new NotImplementedException();

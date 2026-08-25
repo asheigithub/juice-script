@@ -195,7 +195,7 @@ namespace juicescript.runtime.buildin
 			if (_arr.ValueType != NaNBoxing.BoxType.Null)
 			{
 				argArray = (RtArray)context.GC.Heap[_arr.HeapPtr];
-				len = (int)argArray.GetLength(context.player);
+				len = (int)argArray.GetLength(context.player,out argArray);
 			}
 			else
 			{

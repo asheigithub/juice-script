@@ -105,7 +105,9 @@ c(6,7);
             Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.Kind);
             Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance).StoreMode);
 
-            Assert.AreEqual(2u, ((RtArray)instance).GetLength(player));
+            Assert.AreEqual(2u, ((RtArray)instance).GetLength(player, out RtArray target));
+
+            instance = target;
             bool isoutofindex;
             Assert.AreEqual(NaNBoxing.BoxType.Sbyte, ((RtArray)instance).ReadSlot(0,player,out isoutofindex).ValueType);
             Assert.AreEqual(6, ((RtArray)instance).ReadSlot(0,player, out isoutofindex).SByteValue);

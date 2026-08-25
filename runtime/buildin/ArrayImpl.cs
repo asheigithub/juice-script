@@ -201,7 +201,7 @@ namespace juicescript.runtime.buildin
 		{
 			var arrayinstance = context.GC.Heap[thisPtr.HeapPtr];
 
-			context.StackSlots[returnSlotIndex].SetUInt(((RtArray)arrayinstance).GetLength(context.player));
+			context.StackSlots[returnSlotIndex].SetUInt(((RtArray)arrayinstance).GetLength(context.player,out RtArray t));
 
 		}
 
@@ -377,8 +377,8 @@ namespace juicescript.runtime.buildin
 					int src_p = RtArray.FindAndUpdateHeapInstancePtr(element.HeapPtr, context.player, out src);
 					RtHeapBase src_instance = context.GC.Heap[src_p];
 
-
-					uint src_len = src.GetLength(context.player);
+					Debug.Assert(src.HEAPINSTANCE_PTR == 0);
+					uint src_len = src.array_len;////;.GetLength(context.player, out src);
 
 					if ((ulong)index + src_len >= uint.MaxValue)
 					{
@@ -522,7 +522,7 @@ namespace juicescript.runtime.buildin
 
 			// 3. Get current length
 			var array = (RtArray)arrayInstance;
-			uint currentLength = array.GetLength(context.player);
+			uint currentLength = array.GetLength(context.player, out array);
 
 			// 4. Handle empty push case
 			if (restSpan.Length == 0)
@@ -543,7 +543,7 @@ namespace juicescript.runtime.buildin
 			for (int i = 0; i < restSpan.Length; i++)
 			{
 				uint targetIndex = currentLength + (uint)i;
-				context.player.SetArraySlot(restSpan[i], targetIndex, arrayInstance, ref error);
+				context.player.SetArraySlot(restSpan[i], targetIndex, array, ref error);
 				if (error.raised)
 				{
 					context.StackSlots[returnSlotIndex].SetUInt(currentLength);
@@ -858,7 +858,7 @@ namespace juicescript.runtime.buildin
 			int instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
 
 			// 3. Get current length
-			uint currentLength = array.GetLength(context.player);
+			uint currentLength = array.GetLength(context.player,out array);
 
 			// 4. Handle empty push case
 			if (restSpan.Length == 0)
@@ -956,7 +956,7 @@ namespace juicescript.runtime.buildin
 
 			RtArray array;
 			int arrPtr = RtArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
-
+			Debug.Assert(array.HEAPINSTANCE_PTR == 0);
 			uint len = array.array_len;
 
 
@@ -1109,7 +1109,7 @@ namespace juicescript.runtime.buildin
 
 			RtArray array;
 			int arrPtr = RtArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
-
+			Debug.Assert(array.HEAPINSTANCE_PTR == 0);
 			uint len = array.array_len;
 
 
@@ -1259,7 +1259,7 @@ namespace juicescript.runtime.buildin
 
 			RtArray array;
 			int arrPtr = RtArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
-
+			Debug.Assert(array.HEAPINSTANCE_PTR == 0);
 			uint len = array.array_len;
 
 
@@ -1394,7 +1394,7 @@ namespace juicescript.runtime.buildin
 
 			RtArray array;
 			int arrPtr = RtArray.FindAndUpdateHeapInstancePtr(scope.ThisPtr.HeapPtr, context.player, out array);
-
+			Debug.Assert(array.HEAPINSTANCE_PTR == 0);
 			uint len = array.array_len;
 
 
@@ -3635,6 +3635,7 @@ namespace juicescript.runtime.buildin
 						return c;
 					}
 
+					fieldarr.GetLength(context.player, out fieldarr);
 				}
 
 				return 0;

@@ -5746,16 +5746,26 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal NaNBoxing LoadSlotFromArray(uint uindex, RtHeapBase arrObj, out bool isoutofindex_or_ishole)
 		{
+			uint len = ((RtArray)arrObj).GetLength(this, out RtArray target);
 
-			NaNBoxing result = ((RtArray)arrObj).ReadSlot(uindex, this, out isoutofindex_or_ishole);
+			NaNBoxing result = default;
+
+			if (uindex < len)
+			{
+				result = ((RtArray)target).ReadSlot(uindex, this, out isoutofindex_or_ishole);
+			}
+			else
+			{
+				isoutofindex_or_ishole = true;
+			}
 
 			if (isoutofindex_or_ishole) //如果索引超出了length或者是一个洞则查找原型链。。。
 			{
-				NaNBoxing sname = default;sname.SetUInt(uindex);
+				NaNBoxing sname = default; sname.SetUInt(uindex);
 				ReadOnlySpan<char> searchName = Extensions.GetPrimitiveValueToString(this, sname, stackalloc char[120]);  //uindex.ToString();
 				NaNBoxing value; int shape_ptr; int index; RtDynamic prop;
 
-				if (FindDynamicValue(arrObj, searchName, out value, out shape_ptr, out index, out prop))
+				if (FindDynamicValue(target, searchName, out value, out shape_ptr, out index, out prop))
 				{
 					result = value;
 				}
@@ -5786,7 +5796,9 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal void SetArraySlot(NaNBoxing box, uint index, RtHeapBase instance, ref ReceiveError error)
 		{
-			if (((RtArray)instance).TrySetSlotIfReplaceStructOrNotHeap(box, index, this, ref error))
+			((RtArray)instance).GetLength(this, out RtArray target);
+
+			if (target.TrySetSlotIfReplaceStructOrNotHeap(box, index, this, ref error))
 			{
 
 			}
@@ -10887,7 +10899,8 @@ namespace juicescript.runtime
 
 					RtArray srcArr;
 					RtArray.FindAndUpdateHeapInstancePtr(invalue.HeapPtr, this, out srcArr);
-					uint len = srcArr.GetLength(this);
+					Debug.Assert(srcArr.HEAPINSTANCE_PTR == 0);
+					uint len = srcArr.array_len; //GetLength(this);
 
 					unsafe
 					{

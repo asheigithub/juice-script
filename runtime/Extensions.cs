@@ -47,7 +47,7 @@ namespace juicescript.runtime
 			return (double)f == value;
 		}
 
-        [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         public static double GetDoubleValue(NaNBoxing v)
         {
             switch (v.ValueType)
@@ -84,7 +84,7 @@ namespace juicescript.runtime
 #endif
             }
         }
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static float GetFloatValue(NaNBoxing v)
 		{
 			switch (v.ValueType)
@@ -126,6 +126,7 @@ namespace juicescript.runtime
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int GetIntValue(NaNBoxing v)
 		{
 			switch (v.ValueType)
@@ -168,7 +169,8 @@ namespace juicescript.runtime
 			}
 		}
 
-        public static bool IsHeapType(this TypeKind type)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsHeapType(this TypeKind type)
         {
             return !(type > TypeKind.Any && type < TypeKind.Fun_Void);
         }
@@ -344,7 +346,7 @@ namespace juicescript.runtime
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsStruct(this NaNBoxing value)
         { 
             return value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((HeapKindFlag)value.HeapFlag & HeapKindFlag.FLAG_STRUCT) == HeapKindFlag.FLAG_STRUCT;
