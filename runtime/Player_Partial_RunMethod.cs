@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,12 +46,12 @@ namespace juicescript.runtime
 			return $"{prefix}{ns}.{containerName}${bodyNs}::{methodSuffix}{method.Name}";
 		}
 
-		internal void SetNativeDelegate(ASMethod method,ref ReceiveError error)
+		internal void SetNativeDelegate(ASMethod method, ref ReceiveError error)
 		{
 			if (method.nativefunction_delegate == null)
 			{
 				string key = GetMethodKey(method);
-					
+
 				var m = NativeFunctionRegistry.GetFunction(key);
 				if (m != null)
 				{
@@ -59,7 +60,7 @@ namespace juicescript.runtime
 				else
 				{
 					RaiseIllegaloperationError(ref error, key);
-					
+
 				}
 
 			}
@@ -82,27 +83,15 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr, 
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe NaNBoxing RunMethod_FullCheck(ASMethod method, NaNBoxing thisPtr, int scope_ptr,
 			//ASContainer scopeType, 
 			ushort args, byte* argementPtr,
-			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex , int callee_closure_ptr = 0 ,bool skipcheckargscount = false)
+			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex, int callee_closure_ptr, bool skipcheckargscount)
 		{
-#if FORCOMPILER
-			if (IsComputeConstExpr)
-			{
-				ComputeConstExprOnRunMethod(method);
-			}
-#endif
 
-#if DEBUG && !DEBUG_PLAYER
-			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
-			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
-			Context.GC.ForceGC(ref error);
 
-#else
-			Context.GC.CheckGC(ref error);
-#endif
+
 
 
 
@@ -116,13 +105,13 @@ namespace juicescript.runtime
 					break;
 				}
 
-				
+
 				int para_argcount = 0;
 
-				if ( method.IsAnonymous  || skipcheckargscount )//method.Trait == null && method.Parameters.Count == 0)
+				if (method.IsAnonymous || skipcheckargscount)//method.Trait == null && method.Parameters.Count == 0)
 				{
 					//不检查参数个数
-				}				
+				}
 				else
 				{
 					//检查参数个数
@@ -203,11 +192,11 @@ namespace juicescript.runtime
 							{
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
-									
+
 									if (box.IsStruct())//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 									{
 										var v = Context.GC.Heap[box.HeapPtr];
-										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false,out RtInstance struct_ins);
+										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i, false, out RtInstance struct_ins);
 										//var struct_ins = Context.GC.Heap[struct_ptr];
 
 										((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
@@ -252,19 +241,19 @@ namespace juicescript.runtime
 
 						c(6,7);
 					*/
-					byte* P = argementPtr + method.Parameters.Count * sizeof(StackLocater) ;
-					for (int i = method.Parameters.Count ; i < args; i++)
+					byte* P = argementPtr + method.Parameters.Count * sizeof(StackLocater);
+					for (int i = method.Parameters.Count; i < args; i++)
 					{
 						StackLocater argLocater;
 						LoadStackLocater(&argLocater, &(P));
 
 						NaNBoxing box = slot[argLocater.index];
 						if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
-						{							
+						{
 							if (box.IsStruct())
 							{
 								var v = Context.GC.Heap[box.HeapPtr];
-								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i,false, out RtInstance struct_ins);
+								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i, false, out RtInstance struct_ins);
 								//var struct_ins = Context.GC.Heap[struct_ptr];
 
 								((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
@@ -303,7 +292,7 @@ namespace juicescript.runtime
 
 					if (callee_closure_ptr != 0)
 					{
-						
+
 						Context.StackSlots[Context.StackPosition + args + 1].SetHeapPtr(callee_closure_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 					}
 					else
@@ -317,7 +306,7 @@ namespace juicescript.runtime
 						}
 #endif
 
-						
+
 						Context.GC.Heap[calleePtr].Type = method.Body;
 						RtClosure payloadClosure = (RtClosure)Context.GC.Heap[calleePtr];
 						payloadClosure.This = thisPtr;
@@ -354,7 +343,7 @@ namespace juicescript.runtime
 
 				var method_body_linkcodesocpe = method.Body._link_codescope;
 
-				int scopeHoleSlots = method_body_linkcodesocpe.Members.Count 
+				int scopeHoleSlots = method_body_linkcodesocpe.Members.Count
 					+ 1 //holdthis
 					;
 
@@ -368,7 +357,7 @@ namespace juicescript.runtime
 				Context.StackPosition += para_argcount;
 
 				int backTraceId = Context.BackTraceIndex;
-				
+
 				int mScopeId = backTraceId + Context.M_MethodScopePtr;
 				RtHeapBase mScope = Context.GC.Heap[mScopeId];
 
@@ -380,8 +369,8 @@ namespace juicescript.runtime
 				m_scopePayload.__sendargcount = args;
 
 				//save this
-				{					
-					
+				{
+
 					if (thisPtr.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
 					{
 						ScopeHeapLocater scopeHeapLocater;
@@ -399,7 +388,7 @@ namespace juicescript.runtime
 
 					m_scopePayload.SetSlot(thisPtr, (ushort)(m_scopePayload.SlotCount - 1));
 
-					
+
 
 				}
 
@@ -418,7 +407,7 @@ namespace juicescript.runtime
 					goto lbl_arguments_pass;
 				}
 #endif
-				
+
 
 				//***传参***
 
@@ -459,7 +448,7 @@ namespace juicescript.runtime
 							arg_rest.Type = Context.ARRAY.Instance;
 							((RtArray)arg_rest).array_len = (uint)rest.Length;
 							((RtArray)arg_rest).stack_store = rest;
-							((RtArray)arg_rest).stack_store_startindex = Context.StackPosition- para_argcount;
+							((RtArray)arg_rest).stack_store_startindex = Context.StackPosition - para_argcount;
 							((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
 							((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
 							((RtArray)arg_rest).SetIsRest(true);
@@ -473,7 +462,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							
+
 							if (i < args)
 							{
 								StackLocater argLocater;
@@ -495,7 +484,7 @@ namespace juicescript.runtime
 									ulong mask = (((ulong)ptypekind + 3) << 40) | NaNBoxing.QNAN;
 									ulong raw = mask | (box.Raw & 0xffffffff);
 
-									param_slots[i] = new NaNBoxing(raw);									
+									param_slots[i] = new NaNBoxing(raw);
 								}
 								else
 								{
@@ -548,13 +537,13 @@ namespace juicescript.runtime
 
 									if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
-										
+
 										if (box.IsStruct())
 										{
 											var v = Context.GC.Heap[box.HeapPtr];
 											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,
 												Context.StackPosition - para_argcount + i //实例到arguments数组
-												,false,out RtInstance struct_ins
+												, false, out RtInstance struct_ins
 												);
 											//var struct_ins = Context.GC.Heap[struct_ptr];
 
@@ -575,7 +564,7 @@ namespace juicescript.runtime
 
 									arguments_span[i] = box;
 								}
-								
+
 							}
 							else
 							{
@@ -588,16 +577,16 @@ namespace juicescript.runtime
 									}
 #if DEBUG
 									else
-									{ 
+									{
 										throw new InvalidOperationException();
 									}
 #endif
 								}
-							
+
 								Span<NaNBoxing> constants = new Span<NaNBoxing>(bp + 3 * sizeof(int) + 2 * sizeof(int) * 0, *((int*)bp + 1));
 								NaNBoxing value = constants[p.ValueExprIndex];
 
-								
+
 								ConvertValueType(ref error, value, p.TypeKind, pmembers[i].__rt_type_class__, ref param_slots[i]);
 
 								Debug.Assert(!error.raised);
@@ -607,9 +596,9 @@ namespace juicescript.runtime
 								//	Context.StackPosition -= para_argcount;
 								//	goto lbl_handle_arg_err;
 								//}
-								
+
 								//throw new NotImplementedException("有默认值的参数");
-								
+
 							}
 						}
 					}
@@ -719,7 +708,7 @@ namespace juicescript.runtime
 					return result;
 
 				}
-				else if (((method.Flags & (MethodFlags.ASYNC)) != 0) )
+				else if (((method.Flags & (MethodFlags.ASYNC)) != 0))
 				{
 					Debug.Assert(!method.Flags.HasFlag(MethodFlags.Native));
 					//native方法只需要返回Promise即可，它里面没有await!
@@ -771,7 +760,7 @@ namespace juicescript.runtime
 					}
 
 					NaNBoxing g_scope = default;
-					g_scope.SetHeapPtr(mScopeId,  (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
+					g_scope.SetHeapPtr(mScopeId, (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
 					g_scope = GetSaveValue(g_scope, ref error);
 					if (error.raised)
 					{
@@ -824,7 +813,7 @@ namespace juicescript.runtime
 					//构造promise
 					RtHeapBase promise;
 					int promise_ptr = Context.GC.AllocInstance(Context.PROMISE.Instance, out promise);
-					if(promise_ptr == 0)
+					if (promise_ptr == 0)
 					{
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
@@ -848,9 +837,9 @@ namespace juicescript.runtime
 					Context.StackSlots[basePos + 3].SetHeapPtr(template_ctor, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(basePos + 3, 1);
-					
-					StackLocater stackLocater = default;stackLocater.index = 0;
-					RunMethod( Context.PROMISE.Instance.Constructor, Context.StackSlots[basePos + 2], promise_ptr, 
+
+					StackLocater stackLocater = default; stackLocater.index = 0;
+					RunMethod(Context.PROMISE.Instance.Constructor, Context.StackSlots[basePos + 2], promise_ptr,
 						//Context.PROMISE.Instance,
 						1, (byte*)&stackLocater, slots, ref error, -1, 0, true);
 
@@ -864,10 +853,10 @@ namespace juicescript.runtime
 					}
 
 
-	
+
 					NaNBoxing result = default;
 					if (returnSlotIndex > -1)
-					{ 
+					{
 						result.SetHeapPtr(promise_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 						Context.StackSlots[returnSlotIndex] = result;
 					}
@@ -893,7 +882,7 @@ namespace juicescript.runtime
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
 					slots.Clear(); //栈清空 -- 防止GC时错误访问
 					int P_PC;
-					Execute( ref info, mScope, mScopeId, //scopeType, 
+					Execute(ref info, mScope, mScopeId, //scopeType, 
 						slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
 
 					Context.BackTraceIndex--;
@@ -978,7 +967,7 @@ namespace juicescript.runtime
 				((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
 				Context.StackPosition -= scopeHoleSlots;
 				Context.BackTraceIndex--;
-				//Context.BackTrace[Context.BackTraceIndex].Method = null;
+			//Context.BackTrace[Context.BackTraceIndex].Method = null;
 
 
 #if PROFILEPLAYER
@@ -1025,7 +1014,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		internal unsafe void RunMethod_MatchArgs(ASMethod method, NaNBoxing _this_ , int scope_ptr,Span<NaNBoxing> stackslots,ushort argsCount,byte* argementsPtr,
+		private unsafe void RunMethod_MatchArgs(ASMethod method, NaNBoxing _this_, int scope_ptr, Span<NaNBoxing> stackslots, ushort argsCount, byte* argementsPtr,
 
 			int returnSlotIndex,
 			ref ReceiveError error
@@ -1053,7 +1042,7 @@ namespace juicescript.runtime
 				goto flag_handle_error;
 			}
 
-			Context.StackSlots[returnSlotIndex].SetUndefined();
+
 
 			int backTraceId = Context.BackTraceIndex;
 
@@ -1094,7 +1083,10 @@ namespace juicescript.runtime
 			{
 				var p = method.Parameters[i];
 
-				StackLocater argLocater = *(StackLocater*)argementsPtr; argementsPtr += 4;
+				StackLocater argLocater;
+				LoadStackLocater(&argLocater, &argementsPtr);
+
+				//StackLocater argLocater = *(StackLocater*)argementsPtr; argementsPtr += 4;
 
 				NaNBoxing box = stackslots[argLocater.index];
 
@@ -1156,6 +1148,8 @@ namespace juicescript.runtime
 				InstructionProfiler.Profile_MethodStart(method);
 #endif
 
+			Context.StackSlots[returnSlotIndex].setDefault(method.ReturnTypeKind);
+
 			if (info.instructions > 0)
 			{
 				int calleelastpos = Context.StackPosition;
@@ -1169,6 +1163,9 @@ namespace juicescript.runtime
 
 				Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
 				slots.Clear(); //栈清空 -- 防止GC时错误访问
+
+
+
 				int P_PC;
 				Execute(ref info, mScope, mScopeId, //scopeType, 
 					slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, null);
@@ -1267,6 +1264,46 @@ namespace juicescript.runtime
 		}
 
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr,
+			//ASContainer scopeType, 
+			ushort args, byte* argementPtr,
+			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex, int callee_closure_ptr = 0, bool skipcheckargscount = false)
+		{
+#if FORCOMPILER
+			if (IsComputeConstExpr)
+			{
+				ComputeConstExprOnRunMethod(method);
+			}
+#endif
 
+#if DEBUG && !DEBUG_PLAYER
+			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
+			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
+			Context.GC.ForceGC(ref error);
+
+#else
+			Context.GC.CheckGC(ref error);
+#endif
+
+
+			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
+				&&
+				method.Parameters.Count == args
+				&&
+				returnSlotIndex > -1
+				)
+			{
+				RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error);
+
+				return Context.StackSlots[returnSlotIndex];
+
+			}
+			else
+			{
+				return RunMethod_FullCheck(method, thisPtr, scope_ptr, args, argementPtr, slot, ref error, returnSlotIndex, callee_closure_ptr, skipcheckargscount);
+			}
+
+		}
 	}
 }

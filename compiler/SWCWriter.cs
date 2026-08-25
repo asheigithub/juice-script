@@ -179,9 +179,9 @@ namespace juicescript.compiler
                 }
             }
 
-            HashSet<ulong> _ld_classes = new HashSet<ulong>();
+           
 
-            List<Tuple<ulong, int>> _ld_supermethod = new List<Tuple<ulong, int>>();
+            //List<Tuple<ulong, int>> _ld_supermethod = new List<Tuple<ulong, int>>();
 
             var initValueConstants = context.scriptDefs.SelectMany(s => s.Script.allContainers)
                 .Where(c => c._link_codescope.Members.Any(m => m.Kind != ScopeMemberKind.Parameter && m.trait.Value != null && m.trait.Value.initValue.HasValue))
@@ -260,8 +260,7 @@ namespace juicescript.compiler
             _stringPool_.AddRange(context.vectorDefs.Select(v => v.ToString()));
 
 
-            var ld_cls = _ld_classes.ToList();
-
+           
 
             using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
             {
@@ -300,29 +299,9 @@ namespace juicescript.compiler
 
                     #endregion
 
-                    #region LD_CLASS_POOL
+                    
 
                    
-                    bw.Write(ld_cls.Count);
-
-                    for (int i = 0; i < ld_cls.Count; i++)
-                    {
-                        bw.Write(ld_cls[i]);
-                    }
-
-                    #endregion
-
-                    #region LD_SUPERMETHOD_POOL
-
-                    bw.Write(_ld_supermethod.Count);
-
-                    for (int i = 0; i < _ld_supermethod.Count; i++)
-                    {
-                        bw.Write(_ld_supermethod[i].Item1);
-                        bw.Write(_ld_supermethod[i].Item2);
-                    }
-
-                    #endregion
 
 
                     #region VectorDEFS
@@ -420,7 +399,7 @@ namespace juicescript.compiler
 							//byte[] buffer = new byte[method.Body.param_defaultvalues.Length];
 							//Array.Copy(method.Body.param_defaultvalues, buffer, method.Body.param_defaultvalues.Length);
 
-							UpdateMethodConstants(method.Body.param_defaultvalues, context, _stringPool_, ld_cls, _namespaces, swc, _ld_supermethod);
+							UpdateMethodConstants(method.Body.param_defaultvalues, context, _stringPool_, _namespaces, swc);
 
 							bw.Write(method.Body.param_defaultvalues.Length);
                             bw.Write(method.Body.param_defaultvalues);
@@ -448,7 +427,7 @@ namespace juicescript.compiler
                             {
                                 if (p.computeDefaultValue.Length > 0)
                                 {
-									UpdateMethodConstants(p.computeDefaultValue, context, _stringPool_, ld_cls, _namespaces, swc, _ld_supermethod);
+									UpdateMethodConstants(p.computeDefaultValue, context, _stringPool_, _namespaces, swc);
                                 }
                             }
 
@@ -492,9 +471,36 @@ namespace juicescript.compiler
                                 ulong classid = (ulong)method.Body.heapConstants.pool_values[j];
                                 bw.Write(classid);
                             }
+                            else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+                            {
+                                ASMethod m = (ASMethod)method.Body.heapConstants.pool_values[j];
+                                var index = swc.Methods.IndexOf(m);
+                                Debug.Assert(index > -1);
+                                bw.Write(index);
+
+                            }
+                            else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+                            {
+                                Tuple<ASClass, int> tuple = (Tuple<ASClass, int>)method.Body.heapConstants.pool_values[j];
+                                bw.Write(tuple.Item1.Type_identifier);
+                                bw.Write(tuple.Item2);
+
+                            }
+                            else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+                            {
+                                VectorDef vectorDef = (VectorDef)method.Body.heapConstants.pool_values[j];
+
+                                var index = context.vectorDefs.IndexOf(vectorDef);  
+                                
+                                Debug.Assert(index > -1);
+
+                                bw.Write(index);
+
+                                //throw new NotImplementedException();
+                            }
                             else
                             {
-                                throw new NotImplementedException();
+                                throw new InvalidOperationException();
                             }
 
                         }
@@ -506,7 +512,7 @@ namespace juicescript.compiler
                         byte[] bytecode = new byte[method.Body.ByteCode.Length];
                         Array.Copy(method.Body.ByteCode,bytecode, method.Body.ByteCode.Length);
                         //**整理常量中的引用类型***
-                        UpdateMethodConstants(bytecode, context, _stringPool_, ld_cls, _namespaces, swc, _ld_supermethod);
+                        UpdateMethodConstants(bytecode, context, _stringPool_, _namespaces, swc);
 
                         bw.Write(bytecode.Length);
                         bw.Write(bytecode, 0, bytecode.Length);
@@ -636,7 +642,7 @@ namespace juicescript.compiler
                             if (t.Value.initValue.HasValue)
                             {
                                 NaNBoxing v = (NaNBoxing)t.Value.initValue.Value;
-                                UpdateConstantSlot(ref v, context, _stringPool_, ld_cls, _namespaces, swc, _ld_supermethod);
+                                UpdateConstantSlot(ref v, context, _stringPool_, _namespaces, swc);
 
                                 bw.Write((byte)3);
                                 bw.Write(v.Raw);
@@ -678,8 +684,8 @@ namespace juicescript.compiler
         }
 
         internal static void UpdateConstantSlot(ref NaNBoxing boxing,
-			 CompileContext context, List<string> _stringPool_, List<ulong> ld_cls, List<ASNamespace> _namespaces,
-			    SWCFile swc, List<Tuple<ulong, int>> _ld_supermethod
+			 CompileContext context, List<string> _stringPool_,  List<ASNamespace> _namespaces,
+			    SWCFile swc
 			)
         {
 			if (boxing.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -793,8 +799,8 @@ namespace juicescript.compiler
 		}
 
         internal static void UpdateMethodConstants(byte[] bytecode,
-            CompileContext context,List<string> _stringPool_, List<ulong> ld_cls, List<ASNamespace> _namespaces,
-            SWCFile swc, List<Tuple<ulong, int>> _ld_supermethod
+            CompileContext context,List<string> _stringPool_, List<ASNamespace> _namespaces,
+            SWCFile swc
 			)
         {
 			unsafe
@@ -811,7 +817,7 @@ namespace juicescript.compiler
 
 					for (int j = 0; j < count; j++)
 					{
-                        UpdateConstantSlot(ref boxings[j], context, _stringPool_, ld_cls, _namespaces, swc, _ld_supermethod);
+                        UpdateConstantSlot(ref boxings[j], context, _stringPool_, _namespaces, swc);
 					}
 				}
 			}

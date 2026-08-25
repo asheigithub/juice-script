@@ -494,13 +494,11 @@ namespace juicescript.compiler.IL.Optimize
 							{
 								INS_Ld_VectorType ld_VectorType = (INS_Ld_VectorType)instruction;
 								var boxing = constants[ld_VectorType.vectortype_index];
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.VectorDef));
+								Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.VectorDef);
 
-
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-								Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.VectorDef));
-
-
-								var vectorDef = context.vectorDefs[boxing.HeapPtr & 0xFFFFFF];
+								var vectorDef = (VectorDef)method.Body.heapConstants.pool_values[boxing.HeapPtr];  //context.vectorDefs[boxing.HeapPtr & 0xFFFFFF];
 								var @class = allClasses.First(c => c.Type_identifier == (ulong)vectorDef.Identifier);
 
 								stack_classes.Add(ld_VectorType.dst.index, @class);
@@ -533,14 +531,15 @@ namespace juicescript.compiler.IL.Optimize
 								INS_Ld_Function ld_Function = (INS_Ld_Function)instruction;
 								var boxing = constants[ld_Function.const_index];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-								Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
+								Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.Method);
+								var m = (ASMethod)method.Body.heapConstants.pool_values[boxing.HeapPtr];
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
-								int ptr = boxing.HeapPtr & 0xFFFFFF;
-								var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
-								Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
-
-								var m = ((ASMethodBody)methodscope.Type).Method;
+								//int ptr = boxing.HeapPtr & 0xFFFFFF;
+								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
+								//var m = ((ASMethodBody)methodscope.Type).Method;
 
 								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.method, m) });
 								flag = true;
@@ -667,9 +666,9 @@ namespace juicescript.compiler.IL.Optimize
 															break;
 														case NaNBoxing.BoxType.HeapPtr:
 
-															ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(val.HeapPtr >> 24);
-															Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.String));
-
+															//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(val.HeapPtr >> 24);
+															//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.String));
+															Debug.Assert(method.Body.heapConstants.pool_kinds[val.HeapPtr] == ASMethodBody.PoolHeapPtrKind.String );
 
 															result.Add(instruction, new List<InstructionDef>()
 														{
@@ -771,14 +770,17 @@ namespace juicescript.compiler.IL.Optimize
 							{
 								INS_Ld_SuperMethod ld_SuperMethod = (INS_Ld_SuperMethod)instruction;
 								NaNBoxing fbox = constants[ld_SuperMethod.const_index];
+								Debug.Assert(method.Body.heapConstants.pool_kinds[fbox.HeapPtr] == ASMethodBody.PoolHeapPtrKind.SuperMethod);
+								Tuple<ASClass,int> tuple = (Tuple<ASClass, int>)method.Body.heapConstants.pool_values[fbox.HeapPtr];
+								ASMethod m = tuple.Item1.Instance._vtable.Items[tuple.Item2].Trait.Method;
 
-								Debug.Assert(fbox.ValueType == NaNBoxing.BoxType.HeapPtr);
-								Debug.Assert(fbox.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.SuperMethod);
+								//Debug.Assert(fbox.ValueType == NaNBoxing.BoxType.HeapPtr);
+								//Debug.Assert(fbox.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.SuperMethod);
 
-								RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[fbox.HeapPtr & 0xffffff];
-								Debug.Assert(heapInstance.Kind == RtHeapTypeKind.MethodScope);
+								//RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[fbox.HeapPtr & 0xffffff];
+								//Debug.Assert(heapInstance.Kind == RtHeapTypeKind.MethodScope);
 
-								var m = ((ASClass)heapInstance.Type).Instance._vtable.Items[((RtMethodScope)heapInstance).ParentPtr].Trait.Method;
+								//var m = ((ASClass)heapInstance.Type).Instance._vtable.Items[((RtMethodScope)heapInstance).ParentPtr].Trait.Method;
 								result.Add(instruction, new List<InstructionDef>()
 							{
 								new InstructionDef(InstructionDefType.method,m )
@@ -1415,15 +1417,16 @@ namespace juicescript.compiler.IL.Optimize
 								INS_Ld_Function_Call ld_Function_Call = (INS_Ld_Function_Call)instruction;
 
 								var boxing = constants[ld_Function_Call.const_index];
+								Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.Method);
+								var m = (ASMethod)method.Body.heapConstants.pool_values[boxing.HeapPtr];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-								Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
-								int ptr = boxing.HeapPtr & 0xFFFFFF;
-								var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
-								Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
-
-								var m = ((ASMethodBody)methodscope.Type).Method;
+								//int ptr = boxing.HeapPtr & 0xFFFFFF;
+								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
+								//var m = ((ASMethodBody)methodscope.Type).Method;
 
 								result.Add(instruction, new List<InstructionDef>() { FromTypeKind(m.ReturnTypeKind) });
 								flag = true;
@@ -1435,16 +1438,17 @@ namespace juicescript.compiler.IL.Optimize
 								INS_Ld_Function_BindGlobal_Call ld_Function_BindGlobal_Call = (INS_Ld_Function_BindGlobal_Call)instruction;
 
 								var boxing = constants[ld_Function_BindGlobal_Call.const_index];
+								Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.Method);
+								var m = (ASMethod)method.Body.heapConstants.pool_values[boxing.HeapPtr];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-								Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
-								int ptr = boxing.HeapPtr & 0xFFFFFF;
-								var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
-								Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
+								//int ptr = boxing.HeapPtr & 0xFFFFFF;
+								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
 
-								var m = ((ASMethodBody)methodscope.Type).Method;
-
+								//var m = ((ASMethodBody)methodscope.Type).Method;
 								result.Add(instruction, new List<InstructionDef>() { FromTypeKind(m.ReturnTypeKind) });
 								flag = true;
 
@@ -1843,16 +1847,17 @@ namespace juicescript.compiler.IL.Optimize
 							{
 								INS_O_Ld_Function_BindGLobal ld_Function = (INS_O_Ld_Function_BindGLobal)instruction;
 								var boxing = constants[ld_Function.const_index];
+								Debug.Assert(method.Body.heapConstants.pool_kinds[boxing.HeapPtr] == ASMethodBody.PoolHeapPtrKind.Method);
+								var m = (ASMethod)method.Body.heapConstants.pool_values[boxing.HeapPtr];
 
-								ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
-								Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
+								//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(boxing.HeapPtr >> 24);
+								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
-								int ptr = boxing.HeapPtr & 0xFFFFFF;
-								var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
-								Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
+								//int ptr = boxing.HeapPtr & 0xFFFFFF;
+								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
 
-								var m = ((ASMethodBody)methodscope.Type).Method;
-
+								//var m = ((ASMethodBody)methodscope.Type).Method;
 								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.method, m) });
 								flag = true;
 

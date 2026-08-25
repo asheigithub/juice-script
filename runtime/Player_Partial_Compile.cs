@@ -772,6 +772,43 @@ namespace juicescript.runtime
 
 		public NaNBoxing ComputeConstExpr(ASMethod method, SWCFile testswc, int compute_result_index)
 		{
+			if (CONSTRUCTOR_STR == 0)
+			{
+				CONSTRUCTOR_STR = Context.GC.AllocString("constructor"); if (CONSTRUCTOR_STR == 0) { throw new LoaderException("CONSTRUCTORPTR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[CONSTRUCTOR_STR]);
+			}
+			if (EMPTY_STR == 0)
+			{
+				EMPTY_STR = Context.GC.AllocString(""); if (EMPTY_STR == 0) { throw new LoaderException("EMPTY_STR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[EMPTY_STR]);
+			}
+			if (TRUE_STR == 0)
+			{
+				TRUE_STR = Context.GC.AllocString("true"); if (TRUE_STR == 0) { throw new LoaderException("TRUESTR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[TRUE_STR]);
+			}
+
+			if (FALSE_STR == 0)
+			{
+				FALSE_STR = Context.GC.AllocString("false"); if (FALSE_STR == 0) { throw new LoaderException("FALSESTR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[FALSE_STR]);
+			}
+			if (NAN_STR == 0)
+			{
+				NAN_STR = Context.GC.AllocString("NaN"); if (NAN_STR == 0) { throw new LoaderException("NANPTR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[NAN_STR]);
+			}
+			if (POSITIVEINF_STR == 0)
+			{
+				POSITIVEINF_STR = Context.GC.AllocString("Infinity"); if (POSITIVEINF_STR == 0) { throw new LoaderException("POSITIVEINFPTR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[POSITIVEINF_STR]);
+			}
+			if (NEGATIVEINF_STR == 0)
+			{
+				NEGATIVEINF_STR = Context.GC.AllocString("-Infinity"); if (NEGATIVEINF_STR == 0) { throw new LoaderException("NEGATIVEINFPTR alloc failed"); }
+				Context.GC.Root.Add(Context.GC.Heap[NEGATIVEINF_STR]);
+			}
+
 
 			if (computemember_cacheinstance == null)
 			{

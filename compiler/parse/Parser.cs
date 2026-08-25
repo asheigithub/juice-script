@@ -1704,6 +1704,14 @@ namespace juicescript.compiler.parse
                 X = stack.Peek();
             }
 
+            if (words.CurrentToken.Type != Token.TokenType.eof)
+            {
+                if (words.CurrentToken.StringValue == "package")
+                {
+                    throw new SyntaxException(words.CurrentToken, "Unable to generate code");
+                }
+			}
+
             return tree;
         }
 

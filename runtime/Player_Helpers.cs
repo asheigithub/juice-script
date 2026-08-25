@@ -3758,16 +3758,16 @@ namespace juicescript.runtime
 			var method = ((ASMethodBody)_method_.Type).Method;
 			RtClosure _methodclosure_ = (RtClosure)_method_;
 
-			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
-				&&
-				method.Parameters.Count == argsCount
+			//if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
+			//	&&
+			//	method.Parameters.Count == argsCount
 
-				)
-			{
-				RunMethod_MatchArgs(method, _methodclosure_.This, _methodclosure_.ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index, ref error);
+			//	)
+			//{
+			//	RunMethod_MatchArgs(method, _methodclosure_.This, _methodclosure_.ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index, ref error);
 
-			}
-			else
+			//}
+			//else
 			{
 				
 				NaNBoxing result = RunMethod(method,
@@ -4129,13 +4129,12 @@ namespace juicescript.runtime
 
 
 			NaNBoxing fbox = constants[function_id];
-#if DEBUG
-			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
-				throw new InvalidOperationException();
-#endif
 
-			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue]; //((ASMethodBody)obj.Type).Method;
+			Debug.Assert(((ASMethodBody)methodscope.Type).heapConstants.pool_kinds[fbox.IntValue] == ASMethodBody.PoolHeapPtrKind.Method);
 
+			ASMethod function = (ASMethod)((ASMethodBody)methodscope.Type).heapConstants.pool_values[fbox.IntValue];
+			
+			//Context.link_const_methods[(int)fbox.UIntValue]; //((ASMethodBody)obj.Type).Method;
 
 			////加载global。或者instance。
 			//var s = function.Body._link_codescope.Parent;
@@ -4213,12 +4212,11 @@ namespace juicescript.runtime
 			NaNBoxing fbox = constants[function_id];
 
 
-#if DEBUG
-			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
-				throw new InvalidOperationException();
-#endif
+			Debug.Assert(((ASMethodBody)methodscope.Type).heapConstants.pool_kinds[fbox.IntValue] == ASMethodBody.PoolHeapPtrKind.Method);
 
-			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
+			ASMethod function = (ASMethod)((ASMethodBody)methodscope.Type).heapConstants.pool_values[fbox.IntValue];
+
+			//ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
 
 			RtHeapBase closure;
 			int closure_ptr;
@@ -4256,16 +4254,16 @@ namespace juicescript.runtime
 			//var _scopeType = methodscope.Type; //Context.GC.Heap[((RtClosure)closure).ScopePtr].Type;
 
 			var method = ((ASMethodBody)closure.Type).Method;
-			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0) 
-				&&
-				method.Parameters.Count == argsCount
+			//if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0) 
+			//	&&
+			//	method.Parameters.Count == argsCount
 				
-				)
-			{
-				RunMethod_MatchArgs(method, _this_, ((RtClosure)closure).ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index,ref error);
+			//	)
+			//{
+			//	RunMethod_MatchArgs(method, _this_, ((RtClosure)closure).ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index,ref error);
 
-			}
-			else
+			//}
+			//else
 			{
 
 
@@ -4308,13 +4306,12 @@ namespace juicescript.runtime
 
 			NaNBoxing fbox = constants[function_id];
 
+			Debug.Assert(((ASMethodBody)methodscope.Type).heapConstants.pool_kinds[fbox.IntValue] == ASMethodBody.PoolHeapPtrKind.Method);
 
-#if DEBUG
-			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
-				throw new InvalidOperationException();
-#endif
+			ASMethod function = (ASMethod)((ASMethodBody)methodscope.Type).heapConstants.pool_values[fbox.IntValue];
 
-			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
+
+			//ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
 
 			RtHeapBase closure;
 			int closure_ptr;
@@ -6813,9 +6810,7 @@ namespace juicescript.runtime
 
 				var boxing = constants[class_id];
 
-				Debug.Assert(boxing.ValueType == NaNBoxing.BoxType.Uint);
-
-
+				
 				ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)methodscope.Type).heapConstants;
 				Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
@@ -11330,12 +11325,13 @@ namespace juicescript.runtime
 			LoadInt32(&function_id, PC);
 
 			NaNBoxing fbox = constants[function_id];
-#if DEBUG
-			if (fbox.ValueType != NaNBoxing.BoxType.Uint)
-				throw new InvalidOperationException();
-#endif
 
-			ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
+			Debug.Assert(((ASMethodBody)methodscope.Type).heapConstants.pool_kinds[fbox.IntValue] == ASMethodBody.PoolHeapPtrKind.Method);
+
+			ASMethod function = (ASMethod)((ASMethodBody)methodscope.Type).heapConstants.pool_values[fbox.IntValue];
+
+
+			//ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
 
 			RtHeapBase closure;
 			Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
@@ -11344,7 +11340,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Ld_supermethod(int dst_index, byte** PC, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos)
+		private unsafe void Ld_supermethod(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos)
 		{
 			StackLocater target;
 			target.index = dst_index;
@@ -11377,12 +11373,15 @@ namespace juicescript.runtime
 
 			NaNBoxing fbox = constants[method_id];
 
-			Debug.Assert(fbox.ValueType == NaNBoxing.BoxType.Uint);
+			Debug.Assert(((ASMethodBody)methodscope.Type).heapConstants.pool_kinds[fbox.HeapPtr] == ASMethodBody.PoolHeapPtrKind.SuperMethod);
 
+			//Debug.Assert(fbox.ValueType == NaNBoxing.BoxType.Uint);
 
-			var vtableitem = Context.link_const_vtableitems[(int)fbox.UIntValue];
-			var function = vtableitem.Trait.Method;
-			var define = (ASInstance)vtableitem.DefineAt;
+			var function = (ASMethod)((ASMethodBody)methodscope.Type).heapConstants.pool_values[fbox.HeapPtr];
+
+			//var vtableitem = Context.link_const_vtableitems[(int)fbox.UIntValue];
+			//var function = vtableitem.Trait.Method;
+			var define = function.Container; //(ASInstance)vtableitem.DefineAt;
 
 			int ptrIndex = stackStPos + target.index;
 			int closurePtr = Context.M_ClosurePtr + ptrIndex;

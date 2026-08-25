@@ -3,6 +3,7 @@ using juicescript.runtime.buildin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -614,7 +615,8 @@ namespace juicescript.runtime.gc
        
         private int thresholed;
 
-        internal void CheckGC(ref Player.ReceiveError receiveError)
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		internal void CheckGC(ref Player.ReceiveError receiveError)
         {
             //还需要额外扫描receiveError里引用的堆对象,不要忘记
 

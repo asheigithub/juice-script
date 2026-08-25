@@ -27,9 +27,9 @@ namespace juicescript
         public ASNamespace[] Namespaces { get; internal set; }
         
         public string[] const_strings { get; internal set; }
-        public ulong[] ld_classid { get; internal set; }
+        //public ulong[] ld_classid { get; internal set; }
 
-        public Tuple<ulong,int>[] ld_supermethods { get; internal set; }
+        //public Tuple<ulong,int>[] ld_supermethods { get; internal set; }
 
         public ASVector[] Vectors { get; internal set; }
 

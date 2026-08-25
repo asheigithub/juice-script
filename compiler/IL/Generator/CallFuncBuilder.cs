@@ -959,17 +959,27 @@ namespace juicescript.compiler.IL.Generator
                                                     {
                                                         var m = compileEnv.Constants[((INS_Ld_Function)ins).const_index];
 														int p = m.HeapPtr;
-                                                        Debug.Assert(p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method);
-														{
-															RtHeapBase heapInstance = compileEnv.CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
-                                                            Debug.Assert(heapInstance.Kind == RtHeapTypeKind.MethodScope);
 
-                                                            var cbmethod = ((ASMethodBody)heapInstance.Type).Method;
-															if (cbmethod.ReturnTypeKind != TypeKind.Boolean)
-															{
-																throw new ResolverException(step.token, "callback must return Boolean.");
-															}
-														}
+                                                        Debug.Assert(((ASMethodBody)compileEnv.Scope.Container).heapConstants.pool_kinds[p] == ASMethodBody.PoolHeapPtrKind.Method);
+                                                        {
+                                                            var cbmethod = (ASMethod)((ASMethodBody)compileEnv.Scope.Container).heapConstants.pool_values[p];
+                                                            if (cbmethod.ReturnTypeKind != TypeKind.Boolean)
+                                                            {
+                                                                throw new ResolverException(step.token, "callback must return Boolean.");
+                                                            }
+                                                        }
+
+														//                                          Debug.Assert(p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method);
+														//{
+														//	RtHeapBase heapInstance = compileEnv.CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+														//                                              Debug.Assert(heapInstance.Kind == RtHeapTypeKind.MethodScope);
+
+														//                                              var cbmethod = ((ASMethodBody)heapInstance.Type).Method;
+														//	if (cbmethod.ReturnTypeKind != TypeKind.Boolean)
+														//	{
+														//		throw new ResolverException(step.token, "callback must return Boolean.");
+														//	}
+														//}
 													}
 
                                                 }

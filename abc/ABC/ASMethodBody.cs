@@ -143,6 +143,7 @@ namespace juicescript.ABC
 				{
                     if ((*(src_consts + i)).Raw != compute_constants[i].Raw)
                     {
+                        
                         (*(src_consts + i)) = compute_constants[i];
                         flag = false;
 					}

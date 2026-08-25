@@ -33,11 +33,11 @@ namespace juicescript.compiler
         internal List<ASClass> classDependSort;
 
 
-        //internal Dictionary<TypeKind,VectorDef> dict_VectorDefs = new Dictionary<TypeKind,VectorDef>();
-
-        internal List<VectorDef> vectorDefs = new List<VectorDef> ();
-
-        internal Dictionary<ASMultiname, TypeLayout> dict_typelayout = new Dictionary<ASMultiname, TypeLayout>();
+		//internal Dictionary<TypeKind,VectorDef> dict_VectorDefs = new Dictionary<TypeKind,VectorDef>();
+#if FORCOMPILER
+		internal List<VectorDef> vectorDefs = new List<VectorDef> ();
+#endif
+		internal Dictionary<ASMultiname, TypeLayout> dict_typelayout = new Dictionary<ASMultiname, TypeLayout>();
 
         internal Dictionary<ASMethod, List<NaNBoxing>> dict_method_constants = new Dictionary<ASMethod, List<NaNBoxing>>();
 

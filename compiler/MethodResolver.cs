@@ -915,7 +915,7 @@ namespace juicescript.compiler
 												}
 												else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
 												{
-													
+
 													ulong class_id = br.ReadUInt64();
 
 													var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
@@ -930,9 +930,48 @@ namespace juicescript.compiler
 
 
 												}
+												else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+												{
+													int line = br.ReadInt32();
+													int ptr = br.ReadInt32();
+													int astindex = br.ReadInt32();
+
+													var m = script.scriptMethods.FirstOrDefault(m => m != null && m.Token != null && m.Token.line == line && m.Token.ptr == ptr && m.ast_function_index == astindex);
+													if (m == null)
+														throw new IOException();
+
+													method.Body.heapConstants.pool_values[j] = m;
+
+												}
+												else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+												{
+													ulong super_class_id = br.ReadUInt64();
+													int vindex = br.ReadInt32();
+
+													var @class = context.scriptDefs.SelectMany(s => s.scriptClasses)
+														.Union
+														(
+															context.player_for_compiler.Context.libs.SelectMany(l => l.Classes)
+														).First(c => c != null && c.Type_identifier == super_class_id);
+
+
+													var m = @class.Instance._vtable.Items[vindex].Trait.Method;
+
+													method.Body.heapConstants.pool_values[j] = new Tuple<ASClass, int>(@class, vindex);
+
+												}
+												else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+												{
+													int depth = br.ReadInt32();
+													ulong ElementType = br.ReadUInt64();
+
+													VectorDef vd = VectorDef.CreateOrGet(context, (TypeKind)ElementType, depth);
+
+													method.Body.heapConstants.pool_values[j] = vd;
+												}
 												else
 												{
-													throw new NotImplementedException();
+													throw new InvalidOperationException();
 												}
 											}
 
@@ -2383,7 +2422,8 @@ namespace juicescript.compiler
 										}
 										else if (container is ASInstance)
 										{
-											throw new NotImplementedException();
+											vStr = "str:" + ((RtString)((ASInstance)container).Constructor.Body.heapConstants.pool_values[index]).Str;
+											//throw new NotImplementedException();
 										}
 										else
 										{
@@ -4614,9 +4654,35 @@ namespace juicescript.compiler
 
 							}
 							else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
-							{ 
+							{
 								ulong classid = (ulong)method.Body.heapConstants.pool_values[j];
 								bw.Write(classid);
+							}
+							else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+							{
+								ASMethod m = (ASMethod)method.Body.heapConstants.pool_values[j];
+								bw.Write(m.Token.line);
+								bw.Write(m.Token.ptr);
+								bw.Write(m.ast_function_index);
+							}
+							else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+							{
+								Tuple<ASClass, int> tuple = (Tuple<ASClass, int>)method.Body.heapConstants.pool_values[j];
+								bw.Write(tuple.Item1.Type_identifier);
+								bw.Write(tuple.Item2);
+							}
+							else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+							{
+								var vecdef =  (VectorDef)method.Body.heapConstants.pool_values[j] ;
+
+								
+								bw.Write(vecdef.depth);
+
+								while (vecdef.depth > 0)
+								{
+									vecdef = context.vectorDefs.First(v => v.Identifier == vecdef.ElementTypeId);
+								}
+								bw.Write((ulong)vecdef.ElementTypeId);
 							}
 							else
 							{

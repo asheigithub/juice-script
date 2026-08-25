@@ -1127,13 +1127,31 @@ namespace juicescript.runtime
 				}
 				else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
 				{
-					Debug.Assert(hconstants.pool_values[b->HeapPtr] is ASClass );
+					Debug.Assert(hconstants.pool_values[b->HeapPtr] is ASClass);
 
 					b->SetInt(b->HeapPtr);
 				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+				{
+					Debug.Assert(hconstants.pool_values[b->HeapPtr] is ASMethod);
+					b->SetInt(b->HeapPtr);
+				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+				{
+					Debug.Assert(hconstants.pool_values[b->HeapPtr] is ASMethod);
+					b->SetInt(b->HeapPtr);
+				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+				{
+					Debug.Assert(hconstants.pool_values[b->HeapPtr] is ASVector);
+					var v = (ASVector)hconstants.pool_values[b->HeapPtr];
+					MakeVectorType(v);
+					int newindex = Context.Vectors.IndexOf(v);
+					b->SetInt(newindex);
+				}
 				else
 				{
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 				}
 
 				//ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(b->HeapPtr >> 24);
@@ -1320,9 +1338,28 @@ namespace juicescript.runtime
 					ASClass @class = Context.dictTypes[classid];
 					heapconsts.pool_values[i] = @class;
 				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.Method)
+				{
+					int index = (int)heapconsts.pool_values[i];
+					heapconsts.pool_values[i] = swc.Methods[index];
+				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+				{
+					Tuple<ulong, int> tuple = (Tuple<ulong, int>)heapconsts.pool_values[i];
+					ASClass supercls = Context.dictTypes[tuple.Item1];
+
+					heapconsts.pool_values[i] = supercls.Instance._vtable.Items[tuple.Item2].Trait.Method;
+
+				}
+				else if (kind == ASMethodBody.PoolHeapPtrKind.VectorDef)
+				{
+					ASVector v = (ASVector)heapconsts.pool_values[i];
+					Debug.Assert(v.vector_class != null);
+
+				}
 				else
 				{
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 				}
 			}
 
@@ -10686,10 +10723,10 @@ namespace juicescript.runtime
 				outvalue = invalue;
 				return;
 			}
-			else if (totype < TypeKind.Float && totype >= TypeKind.Int && intype >= BoxType.Int && intype < BoxType.Float )
+			else if (totype < TypeKind.Float && totype >= TypeKind.Int && intype >= BoxType.Int && intype < BoxType.Float)
 			{
-				ulong mask = (((ulong)totype + 3)<< 40) | NaNBoxing.QNAN;
-				ulong raw = mask | (invalue.Raw & 0xffffffff ) ;
+				ulong mask = (((ulong)totype + 3) << 40) | NaNBoxing.QNAN;
+				ulong raw = mask | (invalue.Raw & 0xffffffff);
 
 				outvalue = new NaNBoxing(raw);
 				return;
@@ -10705,11 +10742,16 @@ namespace juicescript.runtime
 			//	outvalue.SetUInt(invalue.UIntValue);
 			//	return;
 			//}
-			else if (totype == TypeKind.Float && (byte)(intype - 1) < (byte)BoxType.UShort)
+			else if (totype == TypeKind.Number && (byte)(intype - 2) < (byte)BoxType.UShort-1)
 			{
-				outvalue.SetFloat(((byte)(intype) % 2 == 1) ?  invalue.IntValue : invalue.UIntValue);
+				outvalue.SetNumber(((byte)(intype) % 2 == 1) ? invalue.IntValue : invalue.UIntValue);
 				return;
-			}			
+			}
+			else if (totype == TypeKind.Float && (byte)(intype - 2) < (byte)BoxType.UShort-1)
+			{
+				outvalue.SetFloat(((byte)(intype) % 2 == 1) ? invalue.IntValue : invalue.UIntValue);
+				return;
+			}
 			else if (
 				totype_class != null && (totype >= TypeKind.Object) &&
 				(
@@ -13754,7 +13796,7 @@ namespace juicescript.runtime
 
 						case INS_Code.ld_supermethod:
 							{
-								Ld_supermethod(dst_index, &PC, stackslots, constants, stackStPos);
+								Ld_supermethod(dst_index, &PC, methodscope, stackslots, constants, stackStPos);
 							}
 							break;
 						case INS_Code.ld_method:
@@ -14612,12 +14654,12 @@ namespace juicescript.runtime
 								{
 									
 								}
-								else if (method.ReturnTypeKind == TypeKind.Int && (byte)(v.ValueType - 1) < (byte)BoxType.UShort)
+								else if (method.ReturnTypeKind == TypeKind.Int && (byte)(v.ValueType - 2) < (byte)BoxType.UShort - 1)
 								{
 									v.SetInt(v.IntValue);
 									
 								}
-								else if (method.ReturnTypeKind == TypeKind.Uint && (byte)(v.ValueType - 1) < (byte)BoxType.UShort)
+								else if (method.ReturnTypeKind == TypeKind.Uint && (byte)(v.ValueType - 2) < (byte)BoxType.UShort - 1)
 								{
 									v.SetUInt(v.UIntValue);									
 								}

@@ -27,8 +27,8 @@ namespace juicescript
 
             ASVector[] aSVectors = null;
 
-            List<ulong> ld_cls = new List<ulong>();
-            List<Tuple<ulong, int>> ld_supermethods = new List<Tuple<ulong, int>>(); 
+            //List<ulong> ld_cls = new List<ulong>();
+            //List<Tuple<ulong, int>> ld_supermethods = new List<Tuple<ulong, int>>(); 
 
             Dictionary<ASScript,List<int>> _script_pkg_imps=new Dictionary<ASScript,List<int>>();
             Dictionary<ASScript,List<int>> _script_s_imps=new Dictionary<ASScript,List<int>>();
@@ -63,19 +63,19 @@ namespace juicescript
                     _stringPool_.Add(str.ToString());
                 }
 
-                int ld_cls_count = br.ReadInt32();
-                for (int i = 0; i < ld_cls_count; i++)
-                {
-                    ld_cls.Add(br.ReadUInt64());
-                }
+                //int ld_cls_count = br.ReadInt32();
+                //for (int i = 0; i < ld_cls_count; i++)
+                //{
+                //    ld_cls.Add(br.ReadUInt64());
+                //}
 
-                int ld_supermethod_count = br.ReadInt32();
-                for (int i = 0; i < ld_supermethod_count; i++)
-                {
-                    ulong type = br.ReadUInt64();
-                    int   vtable_idx = br.ReadInt32();
-                    ld_supermethods.Add( new Tuple<ulong, int>(type,vtable_idx) );
-                }
+                //int ld_supermethod_count = br.ReadInt32();
+                //for (int i = 0; i < ld_supermethod_count; i++)
+                //{
+                //    ulong type = br.ReadUInt64();
+                //    int   vtable_idx = br.ReadInt32();
+                //    ld_supermethods.Add( new Tuple<ulong, int>(type,vtable_idx) );
+                //}
 
 
                 int vectors_count = br.ReadInt32();
@@ -262,9 +262,31 @@ namespace juicescript
                             ulong classid = br.ReadUInt64();
                             pool_objs.Add(classid);
                         }
+                        else if (k == ASMethodBody.PoolHeapPtrKind.Method)
+                        {
+                            pool_kinds.Add(k);
+                            int index = (int)br.ReadInt32();
+                            pool_objs.Add(index);
+                        }
+                        else if (k == ASMethodBody.PoolHeapPtrKind.SuperMethod)
+                        {
+                            pool_kinds.Add(k);
+                            ulong superclassid = br.ReadUInt64();
+                            int index = (int)br.ReadInt32();
+
+                            pool_objs.Add(new Tuple<ulong, int>(superclassid, index));
+
+                        }
+                        else if (k == ASMethodBody.PoolHeapPtrKind.VectorDef)
+                        {
+                            pool_kinds.Add(k);
+                            int index = br.ReadInt32();
+
+                            pool_objs.Add(aSVectors[index]);
+                        }
                         else
                         {
-                            throw new NotImplementedException();
+                            throw new InvalidOperationException();
                         }
                     }
                    
@@ -531,8 +553,8 @@ namespace juicescript
             file.const_strings = _stringPool_.ToArray();
             file.runtime_alloced_strings = new NaNBoxing[file.const_strings.Length];
 
-            file.ld_classid = ld_cls.ToArray();
-            file.ld_supermethods = ld_supermethods.ToArray();
+            //file.ld_classid = ld_cls.ToArray();
+            //file.ld_supermethods = ld_supermethods.ToArray();
             file.Vectors = aSVectors;
             return file;
         }

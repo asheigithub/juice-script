@@ -49,8 +49,8 @@ namespace juicescript.runtime
 
         //internal List<ASClass> link_const_class;
 
-        internal List<ASMethod> link_const_methods;
-        internal List<VTableItem> link_const_vtableitems;
+        //internal List<ASMethod> link_const_methods;
+        //internal List<VTableItem> link_const_vtableitems;
 
 
         public ASClass OBJECT;
@@ -180,8 +180,8 @@ namespace juicescript.runtime
             starttime = DateTime.Now;
             
             //link_const_class = new List<ASClass>();
-            link_const_methods = new List<ASMethod>();
-            link_const_vtableitems = new List<VTableItem>();
+            //link_const_methods = new List<ASMethod>();
+            //link_const_vtableitems = new List<VTableItem>();
             Vectors = new List<ASVector> ();
 
 
