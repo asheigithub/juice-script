@@ -2396,7 +2396,18 @@ namespace juicescript.compiler.IL.Optimize
 						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.vector))
 						{
 
+							INS_O_Store_VectorElement o_Store_VectorElement = new INS_O_Store_VectorElement(store_MultiNameL.token);
+							o_Store_VectorElement.dst = store_MultiNameL.dst;
+							o_Store_VectorElement.instance = store_MultiNameL.instance;
+							o_Store_VectorElement.name = store_MultiNameL.name;
+							o_Store_VectorElement.tmp_holder = store_MultiNameL.tmp_holder;
+
+							block.Instructions[i] = o_Store_VectorElement;
+
+
+
 						}
+
 					}
 				}
 
@@ -2426,7 +2437,17 @@ namespace juicescript.compiler.IL.Optimize
 						}
 						else if (def.All(d => instructionType.ContainsKey(d.Item1)
 						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.vector))
-						{ 
+						{
+
+							INS_O_Ld_Vector_Element ld_Vector_Element = new INS_O_Ld_Vector_Element(ld_MultiNameL_Val.token);
+							ld_Vector_Element.dst = ld_MultiNameL_Val.dst;
+							ld_Vector_Element.refholder = ld_MultiNameL_Val.refholder;
+							ld_Vector_Element.instance = ld_MultiNameL_Val.instance;
+							ld_Vector_Element.name = ld_MultiNameL_Val.name;
+
+							block.Instructions[i] = ld_Vector_Element;
+
+							instructionType.Add(ld_Vector_Element, instructionType[ld_MultiNameL_Val]);
 							
 						}
 					}

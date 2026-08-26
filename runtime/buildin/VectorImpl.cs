@@ -5499,29 +5499,6 @@ namespace juicescript.runtime.buildin
 								return false;
 							}
 						}
-					case NaNBoxing.BoxType.Undefined:
-					case NaNBoxing.BoxType.Null:
-					case NaNBoxing.BoxType.Boolean:
-						valided_index = -1;
-						return false;
-					case NaNBoxing.BoxType.Int:
-						valided_index = index.IntValue;
-						return index.IntValue < length && index.IntValue >= 0;
-					case NaNBoxing.BoxType.Uint:
-						valided_index = (int)index.UIntValue;
-						return index.UIntValue < length;
-					case NaNBoxing.BoxType.Sbyte:
-						valided_index = index.SByteValue;
-						return index.SByteValue < length && index.SByteValue >= 0;
-					case NaNBoxing.BoxType.Byte:
-						valided_index = index.ByteValue;
-						return index.ByteValue < length;
-					case NaNBoxing.BoxType.Short:
-						valided_index = index.ShortValue;
-						return index.ShortValue < length && index.ShortValue >= 0;
-					case NaNBoxing.BoxType.UShort:
-						valided_index = index.UShortValue;
-						return index.UShortValue < length;
 					case NaNBoxing.BoxType.Float:
 						if (MathF.Truncate(index.FloatValue) == index.FloatValue)
 						{
@@ -5533,8 +5510,35 @@ namespace juicescript.runtime.buildin
 							valided_index = -1;
 							return false;
 						}
+					case NaNBoxing.BoxType.Undefined:
+					case NaNBoxing.BoxType.Null:
+					case NaNBoxing.BoxType.Boolean:
 					case NaNBoxing.BoxType.HeapPtr:
 					case NaNBoxing.BoxType.Fault:
+						valided_index = -1;
+						return false;
+					case NaNBoxing.BoxType.Int:
+						//valided_index = index.IntValue;
+						//return index.IntValue < length && index.IntValue >= 0;
+					case NaNBoxing.BoxType.Uint:
+						//valided_index = (int)index.UIntValue;
+						//return index.UIntValue < length;
+					case NaNBoxing.BoxType.Sbyte:
+						//valided_index = index.SByteValue;
+						//return index.SByteValue < length && index.SByteValue >= 0;
+					case NaNBoxing.BoxType.Byte:
+						//valided_index = index.ByteValue;
+						//return index.ByteValue < length;
+					case NaNBoxing.BoxType.Short:
+						//valided_index = index.ShortValue;
+						//return index.ShortValue < length && index.ShortValue >= 0;
+					case NaNBoxing.BoxType.UShort:
+						//valided_index = index.UShortValue;
+						//return index.UShortValue < length;
+
+						valided_index = index.IntValue;
+
+						return valided_index < length && valided_index >=0;
 					default:
 						valided_index = -1;
 						return false;
@@ -5554,7 +5558,7 @@ namespace juicescript.runtime.buildin
 				return CollectionsMarshal.AsSpan(buffer).Slice(offset, size);
 			}
 
-			[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			internal NaNBoxing ReadSlot( TypeKind element_type, int validid, Player player, int vector_ptr, int reseveSlot, ASClass element_asclass)
 			{
 				NaNBoxing result = default;

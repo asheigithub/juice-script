@@ -10570,7 +10570,102 @@ namespace juicescript.runtime
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Store_VectorElement(int dst_index, byte** PC,
+			Span<NaNBoxing> stackslots,
+			int stackStPos, int scope_ptr, RtHeapBase methodscope,
+			ref ReceiveError error)
+		{
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Store_Array_Element);
 
+			StackLocater source;
+			source.index = dst_index;
+
+			StackLocater instance_loc;
+			LoadStackLocater(&instance_loc, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			StackLocater tmp_holder;
+			LoadStackLocater(&tmp_holder, PC);
+
+
+			var instance_box = stackslots[instance_loc.index];
+			var name_box = stackslots[_name.index];
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR);
+
+			if (RtVector.IsValidIndexType(name_box)
+				)
+			{
+				//打补丁
+				//*opcodePtr = ((uint)INS_Code.store_Vector | (0xffffff00 & (*opcodePtr)));
+				Context.GC.CheckGC(ref error);
+				if (Context.StackPosition >= Context.STACK_LENGTH)
+				{
+					RaiseStackOverflow(ref error);
+					return;
+				}
+
+				//RtVector vector = ((RtVector)instance);
+				RtVector vector;
+				int vptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
+
+				ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+				Context.StackPosition++;
+
+				ConvertValueType(ref error, stackslots[source.index], vector.element_type, vector.element_asclass, ref conv);//, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+				if (error.raised)
+				{
+					Context.StackPosition--;
+					return;
+				}
+				//为性能考虑，阻止ConvertValueType调函数
+
+
+				int validid;
+				var store = ((RtVector)vector).GetStore();
+				if (!(store.IsValidIndexRange(name_box, out validid)))
+				{
+					int maxlen = store.length;
+					if (validid == maxlen && maxlen < int.MaxValue) //扩容
+					{
+						((RtVector)vector).Resize(validid + 1, ref error, this, (ASInstance)vector.Type, out VectorImpl.VectorStore resizedstore);
+
+						if (error.raised)
+						{
+							Context.StackPosition--;
+							return;
+						}
+
+						//throw new NotImplementedException();
+					}
+					else
+					{
+						Context.StackPosition--;
+						RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128]), maxlen);
+						return;
+					}
+				}
+
+				vector.SetSlot(validid, this, vptr, conv, ref error);
+
+				Context.StackPosition--;
+
+				if (error.raised)
+				{
+					return;
+				}
+
+			}
+			else
+			{
+				Store_MultiNameL_Slow(source, instance_loc, 0, tmp_holder, _name, default, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+			}
+
+
+		}
 
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
@@ -11231,6 +11326,63 @@ namespace juicescript.runtime
 			}
 
 		}
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Ld_VectorElement(int dst_index, byte** PC,
+
+			ASMethod method, RtHeapBase methodscope,
+
+			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, ref ReceiveError error)
+		{
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Ld_Array_Element);
+
+
+
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			StackLocater refholder_index;
+			LoadStackLocater(&refholder_index, PC);
+
+
+			var instance_box = stackslots[src.index];
+			var name_box = stackslots[_name.index];
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR);
+
+
+			if (
+				RtVector.IsValidIndexType(name_box)
+				)
+			{
+				RtVector vector;
+				int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
+				//int maxlen; int validid;
+				var store = vector.GetStore();
+				if (!(store.IsValidIndexRange(name_box, out int validid)))
+				{
+					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128]), store.length);
+					return;
+				}
+				else
+				{
+					stackslots[dst_index] = store.ReadSlot(vector.element_type, validid, this, v_ptr, stackStPos + dst_index, vector.element_asclass);
+				}
+
+			}
+			else
+			{
+				Ld_MultiNameL_Val_Slow(dst_index, src, refholder_index, _name, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+			}
+
+		}
+
+
 
 		private unsafe void Ld_ScopeH(int dst_index, byte** PC, Span<NaNBoxing> stackslots, RtHeapBase scope,
 			//ASContainer scopeType, 

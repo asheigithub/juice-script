@@ -344,6 +344,12 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_Store_Array_Element:
 					instruction = new INS_O_Store_ArrayElement(token);
 					break;
+				case INS_Code.O_Ld_Vector_Element:
+					instruction = new INS_O_Ld_Vector_Element(token);
+					break;
+				case INS_Code.O_Store_Vector_Element:
+					instruction = new INS_O_Store_VectorElement(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;

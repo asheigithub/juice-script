@@ -2363,7 +2363,67 @@ namespace juicescript.compiler.IL.Optimize
 											});
 							}
 							break;
+						case INS_Code.O_Ld_Vector_Element:
+							{
+								INS_O_Ld_Vector_Element o_Ld_Vector_Element = (INS_O_Ld_Vector_Element)instruction;
+
+								if (result.Any(r => r.Key.GetDef().Contains(o_Ld_Vector_Element.instance)))
+								{
+									var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(o_Ld_Vector_Element.instance)).Value;
+									Debug.Assert(v.Count == 1 && v[0].Obj != null && v[0].DefType == InstructionDefType.vector); //count==1,防止出现多个def的情况 多def还有可能多个mv到同一个目标，SSA后可能出现
+									
+									Debug.Assert(v[0].Obj is ASInstance);
+
+									var t = (ASInstance)v[0].Obj; //检查Vector的强类型
+									if (t.Flags.HasFlag(ClassFlags.Vector) && t._element_class != null)
+									{
+										if (result.Any(r => r.Key.GetDef().Contains(o_Ld_Vector_Element.name)))
+										{
+											var name = result.FirstOrDefault(r => r.Key.GetDef().Contains(o_Ld_Vector_Element.name)).Value;
+											if (name.Count == 1 && name[0].DefType == InstructionDefType.primitive && name[0].Obj is ASInstance)
+											{
+												var typekind = (TypeKind)((ASInstance)name[0].Obj)._link_codescope.TypeLayout.ASType.Type_identifier;
+
+												if (typekind >= TypeKind.Int && typekind <= TypeKind.Number)
+												{
+													result.Add(instruction, new List<InstructionDef>() { FromTypeKind((TypeKind)t._element_class.Type_identifier) });
+													flag = true;
+												}
+												else
+												{
+													result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+													flag = true;
+												}
+											}
+											else
+											{
+												result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+												flag = true;
+											}
+										}
+										else
+										{
+											result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+											flag = true;
+										}
+									}
+									else
+									{
+										result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.unkown, null) });
+										flag = true;
+									}
+									
+									
+								}
+								else
+								{
+									//等下一轮
+									//throw new NotImplementedException();
+								}
+							}
+							break;
 						case INS_Code.O_Store_Array_Element:
+						case INS_Code.O_Store_Vector_Element:
 							break;
 						case INS_Code.iter_initctx:
 

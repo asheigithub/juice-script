@@ -436,7 +436,7 @@ namespace juicescript.runtime
                 return 0;
             }
 
-            Debug.Assert(store == GetStore(player));
+            Debug.Assert(HEAPINSTANCE_PTR == 0);//store == GetStore(player));
 
 			if (player.Context.GC.MemUsage +  store.length * store.elementSize > player.Context.GC.USAGE_LIMIT)
 			{

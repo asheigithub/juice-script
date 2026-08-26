@@ -6729,7 +6729,7 @@ namespace juicescript.runtime
 		/// <param name="box"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal unsafe NaNBoxing LoadValue(RtStackCache _obj, int callee_slotindex, ref ReceiveError error, Span<NaNBoxing> stackslots, int returnSlotIndex)
 		{
 
@@ -10722,7 +10722,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+		[MethodImpl( MethodImplOptions.AggressiveInlining)]
 		public void ConvertValueType(ref ReceiveError error, NaNBoxing invalue, TypeKind totype, ASClass @totype_class, ref NaNBoxing outvalue, int scope_ptr = 0, NaNBoxing callee_bindthis = default, bool is_from_objtostring = false)
 		{
 			BoxType intype = invalue.ValueType;
@@ -14441,6 +14441,27 @@ namespace juicescript.runtime
 						case INS_Code.O_Store_Array_Element:
 							{
 								O_Store_ArrayElement(dst_index, &PC, stackslots, stackStPos, scope_ptr, methodscope, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.O_Ld_Vector_Element:
+							{
+								O_Ld_VectorElement(dst_index, &PC,
+									  method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+
+							}
+						case INS_Code.O_Store_Vector_Element:
+							{
+
+								O_Store_VectorElement(dst_index, &PC, stackslots, stackStPos, scope_ptr, methodscope, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;

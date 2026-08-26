@@ -380,6 +380,8 @@ namespace juicescript.ABC.INS
         O_Ld_Array_Element = 102,        //读数组元素 
         O_Store_Array_Element = 103,     //写数组元素
 
+        O_Ld_Vector_Element = 104,       //读Vector元素
+        O_Store_Vector_Element = 105,    //写Vector元素
 
 		//***矩阵，向量类***
 

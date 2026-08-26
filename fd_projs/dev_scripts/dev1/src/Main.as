@@ -96,8 +96,8 @@ import adobe.utils.CustomActions;
 
 
 
-//
-//
+
+
 //import flash.utils.getTimer;
 //
 //function fannkuch(n) {
@@ -169,26 +169,4 @@ import adobe.utils.CustomActions;
 //var expected = 30;
 //if (ret != expected)
     //throw "ERROR: bad result: expected " + expected + " but got " + ret + " " + ( getTimer() - st);
-//
-
-var ret=0;
-
-function fastaRepeat(n:int, seq:String) {
-  var seqi = 0, lenOut = 60;
-  while (n>0) {
-    if (n<lenOut) lenOut = n;
-    if (seqi + lenOut < seq.length) {
-      ret += seq.substring(seqi, seqi+lenOut).length;
-      seqi += lenOut;
-    } else {
-      var s = seq.substring(seqi);
-      seqi = lenOut - s.length;
-      ret += (s + seq.substring(0, seqi)).length;
-    }
-    n -= lenOut;
-  }
-}
-
-fastaRepeat(100, "UUUUUUU");
-trace(ret);
 
