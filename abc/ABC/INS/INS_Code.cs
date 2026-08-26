@@ -377,23 +377,27 @@ namespace juicescript.ABC.INS
 		O_StoreMethodVar_Instance = 101, //保存对象到变量，变量类型已确认匹配
 
 
+        O_Ld_Array_Element = 102,        //读数组元素 
+        O_Store_Array_Element = 103,     //写数组元素
+
 
 		//***矩阵，向量类***
 
-		add_Vec2_Vec2 = 102,            //二维向量相加
-		sub_Vec2_Vec2 = 103,            //二维向量相减
-		scale_Vec2 = 104,               //二维向量缩放
-		scale_Vec2_reciprocal = 105,    //二维向量缩放（1/factor） 
-		neg_pos_Vec2 = 106,             //二维向量取正或取反
+		add_Vec2_Vec2 = 112,            //二维向量相加
+		sub_Vec2_Vec2 = 113,            //二维向量相减
+		scale_Vec2 = 114,               //二维向量缩放
+		scale_Vec2_reciprocal = 115,    //二维向量缩放（1/factor） 
+		neg_pos_Vec2 = 116,             //二维向量取正或取反
 
-		mul_Mat22_Vec2 = 107,          //mat22 * vec2
-		mul_Mat22_Mat22 = 108,         //mat22 * mat22
-		add_Mat22_Mat22 = 109,         //mat22 + mat22
-
-
+		mul_Mat22_Vec2 = 117,          //mat22 * vec2
+		mul_Mat22_Mat22 = 118,         //mat22 * mat22
+		add_Mat22_Mat22 = 119,         //mat22 + mat22
 
 
 
+
+        //***动态优化***
+        //Q_LD_ARR =110,                 //如果失败则回退
 
 
 		END = 255       //结束

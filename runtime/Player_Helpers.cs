@@ -10484,11 +10484,58 @@ namespace juicescript.runtime
 		}
 
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Store_ArrayElement(int dst_index, byte** PC, 
+			Span<NaNBoxing> stackslots,
+			int stackStPos, int scope_ptr, RtHeapBase methodscope,
+			ref ReceiveError error)
+		{
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Store_Array_Element);
+
+			StackLocater source;
+			source.index = dst_index;
+
+			StackLocater instance_loc;
+			LoadStackLocater(&instance_loc, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			StackLocater tmp_holder;
+			LoadStackLocater(&tmp_holder, PC);
+
+			
+			var instance_box = stackslots[instance_loc.index];
+			var name_box = stackslots[_name.index];
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY);
+
+			uint name_box_index = name_box.UIntValue;
+			var name_box_type = name_box.ValueType;
+
+			if (
+				name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
+				((int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
+			{
+				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+				RtHeapBase instance = Context.GC.Heap[instance_box.HeapPtr];
+
+				SetArraySlot(stackslots[source.index], array_i, instance, ref error);
+				return;
+			}			
+			else
+			{
+				Store_MultiNameL_Slow(source, instance_loc, 0, tmp_holder, _name, default, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+			}
+
+
+		}
 
 
 
 
-		private unsafe void Ld_MultiNameL_Val_Slow(int dst_index, uint* opcodePtr, StackLocater src, StackLocater stack, StackLocater _name, Span<NaNBoxing> constants,
+		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
+		private unsafe void Ld_MultiNameL_Val_Slow(int dst_index,  StackLocater src, StackLocater stack, StackLocater _name,
 
 			ASMethod method, RtHeapBase methodscope,
 
@@ -10996,13 +11043,13 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Ld_MultiNameL_Val(int dst_index, byte** PC, Span<NaNBoxing> constants,
+		private unsafe void Ld_MultiNameL_Val(int dst_index, byte** PC, 
 
 			ASMethod method, RtHeapBase methodscope,
 
 			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, ref ReceiveError error)
 		{
-			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Val);
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Val);
 
 
 
@@ -11051,7 +11098,7 @@ namespace juicescript.runtime
 
 
 				//打补丁
-				//*opcodePtr = ((uint)INS_Code.ld_ARR_V | (0xffffff00 & (*opcodePtr)));
+				//*opcodePtr = ((uint)INS_Code.Q_LD_ARR | (0xffffff00 & (*opcodePtr)));
 
 				return;
 
@@ -11077,7 +11124,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Ld_MultiNameL_Val_Slow(dst_index, opcodePtr, src, refholder_index, _name, constants, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+				Ld_MultiNameL_Val_Slow(dst_index, src, refholder_index, _name, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
 			}
 
 
@@ -11086,6 +11133,65 @@ namespace juicescript.runtime
 		}
 
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Ld_ArrayElement (int dst_index, byte** PC, 
+
+			ASMethod method, RtHeapBase methodscope,
+
+			Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, ref ReceiveError error)
+		{
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Ld_Array_Element);
+
+
+
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			StackLocater refholder_index;
+			LoadStackLocater(&refholder_index, PC);
+
+
+			var instance_box = stackslots[src.index];
+			var name_box = stackslots[_name.index];
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY);
+
+			uint name_box_index = name_box.UIntValue;
+			var name_box_type = name_box.ValueType;
+
+			if (
+				name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
+				((int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
+			{
+
+				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+
+				bool isoutofindex_or_ishole;
+				var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[instance_box.HeapPtr], out isoutofindex_or_ishole);
+
+				if (a_element.ValueType == BoxType.Fault)
+				{
+					a_element.SetUndefined();
+				}
+				else if (a_element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+				{
+					a_element.SetHeapPtr(a_element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+				}
+
+				stackslots[dst_index] = a_element;
+
+				return;
+
+			}
+			else
+			{
+				Ld_MultiNameL_Val_Slow(dst_index, src, refholder_index, _name, method, methodscope, stackslots, stackStPos, scope_ptr, ref error);
+			}
+
+		}
 
 		private unsafe void Ld_ScopeH(int dst_index, byte** PC, Span<NaNBoxing> stackslots, RtHeapBase scope,
 			//ASContainer scopeType, 

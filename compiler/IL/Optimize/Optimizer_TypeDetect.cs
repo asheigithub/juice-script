@@ -2355,6 +2355,16 @@ namespace juicescript.compiler.IL.Optimize
 
 							}
 							break;
+
+						case INS_Code.O_Ld_Array_Element:
+							{
+								result.Add(instruction, new List<InstructionDef>() {
+											 FromTypeKind(TypeKind.Any)
+											});
+							}
+							break;
+						case INS_Code.O_Store_Array_Element:
+							break;
 						case INS_Code.iter_initctx:
 
 						case INS_Code.iter_get:

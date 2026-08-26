@@ -338,7 +338,12 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_StoreMethodVar_Instance:
 					instruction = new INS_O_StoreMethodVar_Instance(token);
 					break;
-
+				case INS_Code.O_Ld_Array_Element:
+					instruction = new INS_O_Ld_Array_Element(token);
+					break;
+				case INS_Code.O_Store_Array_Element:
+					instruction = new INS_O_Store_ArrayElement(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;

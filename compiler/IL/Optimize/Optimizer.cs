@@ -586,7 +586,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			slotCount = OptimizeConstruction(cfg,slotCount, context);//此步骤必须放在SSA 后，因为它也是一个变量赋值源   如果是new_instance,后面是构造到变量里，优化构造的目标直接到变量里
 			
-			slotCount = OptimizeStoreInstanceToVar(cfg,slotCount, context);//此步骤必须放在SSA后，因为它也是一个变量赋值源会破坏SSA。 检查肯定类型匹配的情况，加速保存
+			slotCount = OptimizeStoreInstanceToVar_DetectMultiNameLType(cfg,slotCount, context);//此步骤必须放在SSA后，因为它也是一个变量赋值源会破坏SSA。 检查肯定类型匹配的情况，加速保存
 
 			slotCount = OptimizeSuperInstruction(cfg, slotCount, context);//超级指令
 

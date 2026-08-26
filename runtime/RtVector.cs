@@ -142,7 +142,7 @@ namespace juicescript.runtime
 		//          return bytes;
 		//}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal Span<byte> ReadStoreOffset(int offset, Player player,int size)
         {
             Debug.Assert(HEAPINSTANCE_PTR == 0);
@@ -159,7 +159,7 @@ namespace juicescript.runtime
 		/// <param name="vector_ptr"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal NaNBoxing ReadSlot(int validid, Player player, int reseveSlot , int vector_ptr)
 		{
             Debug.Assert(HEAPINSTANCE_PTR == 0);
@@ -167,7 +167,7 @@ namespace juicescript.runtime
             return store.ReadSlot(element_type, validid, player, vector_ptr, reseveSlot, element_asclass);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetSlot(int validid,Player player,int vector_ptr,NaNBoxing value , ref Player.ReceiveError error)
         {
             Debug.Assert(HEAPINSTANCE_PTR == 0);
@@ -304,7 +304,7 @@ namespace juicescript.runtime
 
 
 
-        [MethodImpl( MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl( MethodImplOptions.AggressiveInlining)]
 		public static bool IsValidIndexType(NaNBoxing index)
         {
             switch (index.ValueType)

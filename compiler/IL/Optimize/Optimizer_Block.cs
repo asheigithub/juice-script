@@ -2318,14 +2318,14 @@ namespace juicescript.compiler.IL.Optimize
 			return slotcount;
 		}
 
-		private static int OptimizeStoreInstanceToVar(ControlFlowGraph cfg, int slotcount, CompileContext context)
+		private static int OptimizeStoreInstanceToVar_DetectMultiNameLType(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
 			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
 			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
 
 			foreach (var block in cfg.Blocks)
 			{
-				for (int i = 0; i < block.Instructions.Count ; i++)
+				for (int i = 0; i < block.Instructions.Count; i++)
 				{
 					var ins = block.Instructions[i];
 					if (ins.INS_Code == INS_Code.storeMethodVariable)
@@ -2365,19 +2365,81 @@ namespace juicescript.compiler.IL.Optimize
 							instructionType.Add(o_StoreMethodVar_Instance, instructionType[store_MethodVariable]);
 						}
 						else
+						{
+
+						}
+					}
+				}
+
+				for (int i = 0; i < block.Instructions.Count; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.store_MultiNameL)
+					{
+						INS_Store_MultiNameL store_MultiNameL = (INS_Store_MultiNameL)ins;
+						var def = FindStackSlotDefAt(store_MultiNameL.instance,cfg);
+
+						if (def.All(d => instructionType.ContainsKey(d.Item1)
+						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.array))
+						{
+							
+							
+							INS_O_Store_ArrayElement o_Store_ArrayElement = new INS_O_Store_ArrayElement(store_MultiNameL.token);
+							o_Store_ArrayElement.dst = store_MultiNameL.dst;
+							o_Store_ArrayElement.instance = store_MultiNameL.instance;
+							o_Store_ArrayElement.name = store_MultiNameL.name;
+							o_Store_ArrayElement.tmp_holder = store_MultiNameL.tmp_holder;
+
+							block.Instructions[i] = o_Store_ArrayElement;
+						}
+						else if (def.All(d => instructionType.ContainsKey(d.Item1)
+						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.vector))
+						{
+
+						}
+					}
+				}
+
+
+
+
+				for (int i = 0; i < block.Instructions.Count; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.ld_MultiNameL_Val)
+					{
+						INS_Ld_MultiNameL_Val ld_MultiNameL_Val = (INS_Ld_MultiNameL_Val)ins;
+
+						var def = FindStackSlotDefAt(ld_MultiNameL_Val.instance, cfg);
+						if (def.All(d => instructionType.ContainsKey(d.Item1)
+						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.array))
+						{
+							INS_O_Ld_Array_Element ld_Array_Element = new INS_O_Ld_Array_Element(ld_MultiNameL_Val.token);
+							ld_Array_Element.dst = ld_MultiNameL_Val.dst;
+							ld_Array_Element.refholder = ld_MultiNameL_Val.refholder;
+							ld_Array_Element.instance = ld_MultiNameL_Val.instance;
+							ld_Array_Element.name = ld_MultiNameL_Val.name;
+
+							block.Instructions[i] = ld_Array_Element;
+
+							instructionType.Add(ld_Array_Element, instructionType[ld_MultiNameL_Val]);
+						}
+						else if (def.All(d => instructionType.ContainsKey(d.Item1)
+						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.vector))
 						{ 
 							
 						}
 					}
+
+
 				}
 			}
-
 			return slotcount;
 		}
 		
 
 
-
+		
 
 		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
