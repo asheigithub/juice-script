@@ -1233,19 +1233,41 @@ namespace juicescript.runtime.buildin
 				endArg.SetNumber(0x7fffffff);
 			}
 
-			NaNBoxing startIndex = default;
-			NaNBoxing endIndex = default;
+			int startIndex;
+			if (double.IsNaN(startArg.Number) || double.IsInfinity(startArg.Number))
+			{
+				startIndex =0;
+			}
+			else
+			{
+				startIndex = ((int)(long)startArg.Number);
+			}
 
-			context.player.ConvertValueType(ref error, startArg, TypeKind.Int, context.INT, ref startIndex);
-			if (error.raised)
+			int endIndex;
+			if (double.IsNaN(endArg.Number) || double.IsInfinity(endArg.Number))
 			{
-				return;
+				endIndex = 0;
 			}
-			context.player.ConvertValueType(ref error, endArg, TypeKind.Int, context.INT, ref endIndex);
-			if (error.raised)
+			else
 			{
-				return;
+				endIndex = ((int)(long)endArg.Number);
 			}
+
+
+
+			//NaNBoxing startIndex = default;
+			//NaNBoxing endIndex = default;
+
+			//context.player.ConvertValueType(ref error, startArg, TypeKind.Int, context.INT, ref startIndex);
+			//if (error.raised)
+			//{
+			//	return;
+			//}
+			//context.player.ConvertValueType(ref error, endArg, TypeKind.Int, context.INT, ref endIndex);
+			//if (error.raised)
+			//{
+			//	return;
+			//}
 
 			int strLen;
 			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
@@ -1253,8 +1275,8 @@ namespace juicescript.runtime.buildin
 				Span<char> str_buffer = stackalloc char[16];
 				strLen = thisPtr.GetLocalStringChars(str_buffer);
 
-				int startIdx = startIndex.IntValue;
-				int endIdx = endIndex.IntValue;
+				int startIdx = startIndex;
+				int endIdx = endIndex;
 
 				if (startIdx < 0) startIdx = 0;
 				if (endIdx < 0) endIdx = 0;
@@ -1305,8 +1327,8 @@ namespace juicescript.runtime.buildin
 				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				strLen = str.Length;
 
-				int startIdx = startIndex.IntValue;
-				int endIdx = endIndex.IntValue;
+				int startIdx = startIndex;
+				int endIdx = endIndex;
 
 				if (startIdx < 0) startIdx = 0;
 				if (endIdx < 0) endIdx = 0;
@@ -1364,19 +1386,42 @@ namespace juicescript.runtime.buildin
 				lenArg.SetNumber(0x7fffffff);
 			}
 
-			NaNBoxing startIndex = default;
-			NaNBoxing length = default;
+			//NaNBoxing startIndex = default;
+			//NaNBoxing length = default;
 
-			context.player.ConvertValueType(ref error, startArg, TypeKind.Int, context.INT, ref startIndex);
-			if (error.raised)
+			//context.player.ConvertValueType(ref error, startArg, TypeKind.Int, context.INT, ref startIndex);
+			//if (error.raised)
+			//{
+			//	return;
+			//}
+			//context.player.ConvertValueType(ref error, lenArg, TypeKind.Int, context.INT, ref length);
+			//if (error.raised)
+			//{
+			//	return;
+			//}
+
+			int startIndex;
+			if (double.IsNaN(startArg.Number) || double.IsInfinity(startArg.Number))
 			{
-				return;
+				startIndex = 0;
 			}
-			context.player.ConvertValueType(ref error, lenArg, TypeKind.Int, context.INT, ref length);
-			if (error.raised)
+			else
 			{
-				return;
+				startIndex = ((int)(long)startArg.Number);
 			}
+
+			int length;
+			if (double.IsNaN(lenArg.Number) || double.IsInfinity(lenArg.Number))
+			{
+				length = 0;
+			}
+			else
+			{
+				length = ((int)(long)lenArg.Number);
+			}
+
+
+
 
 			int strLen;
 			if (thisPtr.ValueType == NaNBoxing.BoxType.LocalString)
@@ -1384,8 +1429,8 @@ namespace juicescript.runtime.buildin
 				Span<char> str_buffer = stackalloc char[16];
 				strLen = thisPtr.GetLocalStringChars(str_buffer);
 
-				int startIdx = startIndex.IntValue;
-				int len = length.IntValue;
+				int startIdx = startIndex;
+				int len = length;
 
 				if (startIdx < 0)
 				{
@@ -1440,8 +1485,8 @@ namespace juicescript.runtime.buildin
 				var str = ((RtString)context.GC.Heap[thisPtr.HeapPtr]).Str;
 				strLen = str.Length;
 
-				int startIdx = startIndex.IntValue;
-				int len = length.IntValue;
+				int startIdx = startIndex;
+				int len = length;
 
 				if (startIdx < 0)
 				{

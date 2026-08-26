@@ -10728,7 +10728,8 @@ namespace juicescript.runtime
 			BoxType intype = invalue.ValueType;
 			if (totype == TypeKind.Any
 				|| ((byte)intype - 3 == (byte)totype && totype <= TypeKind.Float)
-				|| (intype == BoxType.LocalString && totype == TypeKind.String)
+				|| ((intype == BoxType.LocalString || invalue.HeapKind == (byte)RtHeapTypeKind.STRING ) && totype == TypeKind.String)
+				|| (invalue.HeapKind == (byte)RtHeapTypeKind.ARRAY  && totype == TypeKind.Array)
 				|| (intype == BoxType.Number && totype == TypeKind.Number)
 				)
 			{
@@ -10767,8 +10768,10 @@ namespace juicescript.runtime
 			else if (
 				totype_class != null && (totype >= TypeKind.Object) &&
 				(
-				intype == BoxType.Null ||
-				(intype == BoxType.HeapPtr && (totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance))))
+				intype == BoxType.Null ||				
+				(intype == BoxType.HeapPtr && (totype == TypeKind.Object || Context.GC.Heap[invalue.HeapPtr].Type == totype_class.Instance))
+				
+				))
 			{
 				outvalue = invalue;
 				return;

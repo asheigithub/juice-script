@@ -369,13 +369,52 @@ namespace juicescript.runtime
 
 		}
 
-
+		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
 		private unsafe void Exec_AddSlow(StackLocater dst,
 
 		NaNBoxing n1, NaNBoxing n2, int scope_ptr, int stackStPos, Span<NaNBoxing> stackslots, NaNBoxing thisPtr,
 		ref ReceiveError error
 		)
 		{
+			if ((n1.HeapKind == (byte)RtHeapTypeKind.STRING || n1.ValueType == BoxType.LocalString)
+				&&
+				(n2.HeapKind == (byte)RtHeapTypeKind.STRING || n2.ValueType == BoxType.LocalString)
+				)
+			{
+				Span<char> buffer1 = stackalloc char[16];
+				Span<char> buffer2 = stackalloc char[16];
+				//int charCount1 = n1.GetLocalStringChars(chars1);
+				//var str1 = charCount1 > 0 ? chars1.Slice(0, charCount1) : ReadOnlySpan<char>.Empty;
+
+				ReadOnlySpan<char> chars1 = buffer1;
+				ReadOnlySpan<char> chars2 = buffer2;
+				if (n1.ValueType == BoxType.HeapPtr)
+				{
+					chars1 = ((RtString)Context.GC.Heap[n1.HeapPtr]).Str;
+				}
+				else
+				{					
+					int charCount = n1.GetLocalStringChars(buffer1);
+					chars1 = buffer1.Slice(0, charCount);
+				}
+				if (n2.ValueType == BoxType.HeapPtr)
+				{
+					chars2 = ((RtString)Context.GC.Heap[n2.HeapPtr]).Str;
+				}
+				else
+				{
+					int charCount = n2.GetLocalStringChars(buffer2);
+					chars2 = buffer2.Slice(0, charCount);
+				}
+				string concatenated = $"{chars1}{chars2}";
+				// 使用安全的字符串创建方法
+				TryCreateStringValue(concatenated, out stackslots[dst.index], ref error);
+								
+				return; // 错误已经在TryCreateStringValue中处理
+				
+			}
+
+
 			ASClass t1; ASClass t2;
 			//操作符重载
 			int op_override_id1 = GetOpOverrideTypeId(n1, out t1);

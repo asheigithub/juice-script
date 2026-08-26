@@ -3608,10 +3608,31 @@ namespace juicescript.compiler.IL.Optimize
 					var SSA = item.Value;
 					var scopemember = cfg.Method.Body._link_codescope.Members[item.Key];
 
+
+					int minver;
+
+					if (scopemember.Kind == ScopeMemberKind.Parameter && SSA.Count>0)
+					{
+						int k = SSA.Min(s => s.Value);
+						var test = SSA.Where(s => s.Value == k).Select(i => i.Key);
+						if (test.All(i => i.INS_Code == INS_Code.ld_methodVariable))
+						{
+							minver = k;
+						}
+						else
+						{
+							minver = 0;
+						}
+					}
+					else
+					{
+						minver = 0;
+					}
+
 					//version 0: 版本0，可以像ld_const那样优化					
 					{
-						var zero = SSA.Where(s => s.Value == 0).Select(i => i.Key).ToList();
-						if (zero.Count > 1 && 
+						var zero = SSA.Where(s => s.Value == minver).Select(i => i.Key).ToList();
+						if (zero.Count > 1 &&
 							!(scopemember.Kind == ScopeMemberKind.Slot && scopemember.QName.Name.StartsWith("%") && !scopemember.QName.Name.EndsWith("@--")) //排除 catch(e)
 							)
 						{
@@ -3673,7 +3694,7 @@ namespace juicescript.compiler.IL.Optimize
 						
 						int maxversion = SSA.Max(s => s.Value);
 
-						for (int v = 1; v < maxversion + 1; v++)
+						for (int v = minver+1; v < maxversion + 1; v++)
 						{
 							var version_ins = SSA.Where(s => s.Value == v).Select(i => i.Key).ToList();
 
