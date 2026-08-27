@@ -1,0 +1,54 @@
+import flash.utils.getTimer;
+
+class TreeNode
+{
+	public var left:TreeNode;
+	public var right:TreeNode;
+	
+	public static function create(depth:int):TreeNode
+        {
+            return ChildTreeNodes(depth);
+        }
+         
+		public    static function ChildTreeNodes(depth:int):TreeNode
+        {
+            var node:TreeNode = new TreeNode();
+            if (depth > 0)
+            {
+                node.left = ChildTreeNodes(depth - 1);
+                node.right = ChildTreeNodes(depth - 1);
+            }
+            return node;
+        }
+
+        public function  check():int {
+            return left == null ? 1 : left.check() + right.check() + 1;
+        }
+}  
+
+var st = getTimer();
+
+ var n:int = 10; //args.length > 0 ? Integer.parseInt(args[0]) : 0;
+        var minDepth:int = 4;
+        var maxDepth:int = Math.max(minDepth + 2, n);
+        var stretchDepth:int = maxDepth + 1;
+        var check:int = (TreeNode.create(stretchDepth)).check();
+        
+        trace("stretch tree of depth " + (maxDepth + 1) + "\t check: " + check);
+
+        var longLivedTree:TreeNode = TreeNode.create(maxDepth);
+        for (var depth:int = minDepth; depth <= maxDepth; depth += 2)
+        {
+           var iterations:int = 1 << (maxDepth - depth + minDepth);
+           check = 0;
+
+           for (var i:int = 1; i <= iterations; i++)
+           {
+                check += (TreeNode.create(depth)).check();
+           }
+           trace(iterations + "\t trees of depth " + depth + "\t check: " + check);
+        }
+
+       trace("long lived tree of depth " + maxDepth + "\t check: " + longLivedTree.check());
+	   
+	   trace( getTimer() - st);

@@ -9016,7 +9016,7 @@ namespace juicescript.runtime
 
 
 
-
+	
 		private unsafe void Store_InstanceMember(int src_index, byte** PC, Span<NaNBoxing> stackslots,
 			int stackStPos, int scope_ptr, RtHeapBase methodscope, ref ReceiveError error)
 		{
@@ -10548,6 +10548,13 @@ namespace juicescript.runtime
 			var instance_box = stackslots[instance_loc.index];
 			var name_box = stackslots[_name.index];
 
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY);
 
 			uint name_box_index = name_box.UIntValue;
@@ -10594,6 +10601,13 @@ namespace juicescript.runtime
 
 			var instance_box = stackslots[instance_loc.index];
 			var name_box = stackslots[_name.index];
+
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
 
 			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR);
 
@@ -10667,6 +10681,62 @@ namespace juicescript.runtime
 
 
 		}
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Store_Indexer(int dst_index, byte** PC,
+			Span<NaNBoxing> stackslots,
+			int stackStPos, 
+			ref ReceiveError error)
+		{
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Store_Array_Element);
+
+			StackLocater source;
+			source.index = dst_index;
+
+			StackLocater instance_loc;
+			LoadStackLocater(&instance_loc, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			StackLocater tmp_holder;
+			LoadStackLocater(&tmp_holder, PC);
+
+
+			var instance_box = stackslots[instance_loc.index];
+			var name_box = stackslots[_name.index];
+
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE);
+
+			StackLocater* tmpArgLoc = stackalloc StackLocater[2];
+
+			SaveIndexer(instance_box, name_box, stackslots[dst_index], tmpArgLoc, ref error);
+			
+
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]

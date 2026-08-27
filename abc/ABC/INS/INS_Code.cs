@@ -384,6 +384,8 @@ namespace juicescript.ABC.INS
         O_Store_Vector_Element = 105,    //写Vector元素
 
         O_Ld_Indexer = 106,              //从索引器对象中读
+        O_Store_Indexer = 107,           //往索引器对象中写
+
 
 
 		//***矩阵，向量类***

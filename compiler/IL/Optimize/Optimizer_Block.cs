@@ -2382,8 +2382,8 @@ namespace juicescript.compiler.IL.Optimize
 						if (def.All(d => instructionType.ContainsKey(d.Item1)
 						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.array))
 						{
-							
-							
+
+
 							INS_O_Store_ArrayElement o_Store_ArrayElement = new INS_O_Store_ArrayElement(store_MultiNameL.token);
 							o_Store_ArrayElement.dst = store_MultiNameL.dst;
 							o_Store_ArrayElement.instance = store_MultiNameL.instance;
@@ -2407,6 +2407,24 @@ namespace juicescript.compiler.IL.Optimize
 
 
 						}
+						else if (def.All(d => instructionType.ContainsKey(d.Item1)
+							&& (instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj || instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable)
+							&& (instructionType[d.Item1][d.Item2].Obj is ASInstance)
+							&& ((ASInstance)instructionType[d.Item1][d.Item2].Obj).Flags.HasFlag(ClassFlags.Indexer)
+							)
+							)
+						{
+							INS_O_Store_Indexer o_Store_Indexer = new INS_O_Store_Indexer(store_MultiNameL.token);
+							o_Store_Indexer.dst = store_MultiNameL.dst;
+							o_Store_Indexer.instance = store_MultiNameL.instance;
+							o_Store_Indexer.name = store_MultiNameL.name;
+							o_Store_Indexer.tmp_holder = store_MultiNameL.tmp_holder;
+
+							block.Instructions[i] = o_Store_Indexer;
+
+
+						}
+
 
 					}
 				}

@@ -19,8 +19,11 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			var this_ins = context.GC.Heap[thisPtr.HeapPtr];
-			((RtInstance)this_ins).wapperedObject = new Dict();
+			
 
+			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			bool isskipproto = scope.ReadSlot(0).Boolean;
+			((RtInstance)this_ins).wapperedObject = new Dict() { skip_proto=isskipproto  };
 		}
 
 
@@ -133,8 +136,12 @@ namespace juicescript.runtime.buildin
 				else
 				{
 					//context.StackSlots[returnSlotIndex].SetUndefined();
-
-					context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
+					if (dict.skip_proto)
+					{
+						context.StackSlots[returnSlotIndex].SetUndefined();
+					}
+					else
+						context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
 
 				}
 			}
@@ -158,7 +165,12 @@ namespace juicescript.runtime.buildin
 				else
 				{
 					//context.StackSlots[returnSlotIndex].SetUndefined();
-					context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
+					if (dict.skip_proto)
+					{
+						context.StackSlots[returnSlotIndex].SetUndefined();
+					}
+					else
+						context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
 				}
 			}
 			else if (key.ValueType == NaNBoxing.BoxType.Null || key.ValueType == NaNBoxing.BoxType.Undefined
@@ -193,7 +205,12 @@ namespace juicescript.runtime.buildin
 				else
 				{
 					//context.StackSlots[returnSlotIndex].SetUndefined();
-					context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
+					if (dict.skip_proto)
+					{
+						context.StackSlots[returnSlotIndex].SetUndefined();
+					}
+					else
+						context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
 				}
 
 				context.StackPosition--;
@@ -210,7 +227,12 @@ namespace juicescript.runtime.buildin
 				else
 				{
 					//context.StackSlots[returnSlotIndex].SetUndefined();
-					context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
+					if (dict.skip_proto)
+					{
+						context.StackSlots[returnSlotIndex].SetUndefined();
+					}
+					else
+						context.StackSlots[returnSlotIndex].setFault(); // 未找到！继续原型链查找。
 
 				}
 			}
@@ -248,6 +270,18 @@ namespace juicescript.runtime.buildin
 					{
 						key = lk;
 					}
+				}
+
+				var dictkey = new DictKey() { key=key,context = context };
+				if (!dict.dict.ContainsKey(dictkey))
+				{
+					key = context.player.GetSaveValue(key, ref error);
+					if (error.raised)
+						return;
+				}
+				else
+				{ 
+						
 				}
 
 				dict.dict[new DictKey() { key = key, context = context }] = value;
@@ -628,7 +662,7 @@ namespace juicescript.runtime.buildin
 
 		class Dict : RtWapperBase
 		{
-			
+			internal bool skip_proto;
 			public Dictionary<DictKey,NaNBoxing> dict = new Dictionary<DictKey, NaNBoxing>();
 
 			public override void OnDelete()

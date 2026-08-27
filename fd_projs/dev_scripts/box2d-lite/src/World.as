@@ -21,7 +21,7 @@ package
 		public var joints:Vector.<Joint> = new Vector.<Joint>();
 		public var arbiters:Vector.<Arbiter> = new Vector.<Arbiter>();
 		
-		private var arbiterIndex:Dictionary = new Dictionary();
+		private var arbiterIndex:Dictionary = new Dictionary(true);
 				
 		public function World(gravity:Vector2,iterations:int) 
 		{
@@ -98,7 +98,8 @@ package
 			for (var k:int = 0; k < arbiters.length; k++) 
 			{
 				var a:Arbiter = arbiters[k];
-				arbiterIndex[  Number( a.body1.id) * 0xffffff + a.body2.id   ] = k;
+				//arbiterIndex[  Number( a.body1.id) * 0xffffff + a.body2.id   ] = k;
+				arbiterIndex[ new ArbiterKey(a.body1.id,a.body2.id)  ] = k;
 			}
 			
 			
@@ -188,7 +189,7 @@ package
 					var newArb:Arbiter = new Arbiter(bi, bj);
 					newArb.init(concats);
 					
-					var searchkey :Number =  Number( newArb.body1.id) * 0xffffff + newArb.body2.id  ;
+					var searchkey :ArbiterKey =  new ArbiterKey(newArb.body1.id, newArb.body2.id); //Number( newArb.body1.id) * 0xffffff + newArb.body2.id  ;
 					
 					if (newArb.numContacts > 0)
 					{
@@ -283,3 +284,13 @@ package
 
 }
 
+[struct]
+final class ArbiterKey
+{
+	public var id1:int;
+	public var id2:int;
+	
+	[auto]
+	public function ArbiterKey(id1:int,id2:int);
+	
+}

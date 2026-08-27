@@ -5845,8 +5845,7 @@ namespace juicescript.runtime
 
 
 
-		private NaNBoxing indexer_find_prop_failed_key;
-		private NaNBoxing indexer_find_prop_failed_instance;
+		
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private NaNBoxing Load_Indexer(NaNBoxing indexer_key,NaNBoxing RefInstance ,ref ReceiveError error,int returnslot)
@@ -5894,12 +5893,7 @@ namespace juicescript.runtime
 			
 			if (result.ValueType == BoxType.Fault) //表示需要继续原型链查找
 			{
-				if (indexer_key.Raw == indexer_find_prop_failed_key.Raw && RefInstance.Raw == indexer_find_prop_failed_instance.Raw)
-				{
-					//简单缓存机制，肯定找不到
-					return new NaNBoxing(NaNBoxing.UNDEFINED);
-				}
-
+				
 
 				Span<char> buffers = stackalloc char[128];
 				ReadOnlySpan<char> searchName = buffers;
@@ -5951,9 +5945,7 @@ namespace juicescript.runtime
 
 					result.SetUndefined();
 
-					indexer_find_prop_failed_instance = RefInstance;
-					indexer_find_prop_failed_key = indexer_key;
-
+				
 				}
 
 				Context.StackPosition = basepos;
@@ -6807,8 +6799,60 @@ namespace juicescript.runtime
 
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void SaveIndexer(NaNBoxing RefInstance,NaNBoxing o_indexer_key, NaNBoxing value, StackLocater* tmpArgLoc, ref ReceiveError error)
+		{
+			RtHeapBase instance = Context.GC.Heap[RefInstance.HeapPtr];
+#if DEBUG
+			if (!(instance.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Indexer)))
+			{
+				throw new InvalidOperationException();
+			}
+#endif
+
+			if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
+			{
+				RaiseStackOverflow(ref error);
+				return;
+			}
+
+			var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 2);
+
+			Context.StackPosition += 2;
+			Context.GC.CheckGC(ref error);
 
 
+			//var indexer_key = GetSaveValue(o_indexer_key, ref error);
+			//if (error.raised)
+			//{
+			//	Context.StackPosition -= 2;
+			//	return;
+			//}
+
+			argSpan[0] = o_indexer_key;
+
+			NaNBoxing box = GetSaveValue(value, ref error);
+			if (error.raised)
+			{
+				Context.StackPosition -= 2;
+				return;
+			}
+
+			argSpan[1] = box;
+
+			tmpArgLoc[0].index = 0;
+			tmpArgLoc[1].index = 1; ;
+
+
+			NaNBoxing _this = new NaNBoxing();
+			_this = RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
+
+			RunMethod(((ASInstance)instance.Type).indexer_set, _this,
+				RefInstance.HeapPtr, 2, (byte*)tmpArgLoc, argSpan, ref error, -1);
+
+			Context.StackPosition -= 2;
+			
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal unsafe void SaveHeapRef(RtHeapBase cache, StackLocater source, Span<NaNBoxing> stackslots, Span<char> frame_holdchars,
@@ -7049,60 +7093,11 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								RtHeapBase instance = Context.GC.Heap[cacheObj.RefInstance.HeapPtr];
-#if DEBUG
-								if (!(instance.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Indexer)))
-								{
-									throw new InvalidOperationException();
-								}
-#endif
-
-								if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
-								{
-									RaiseStackOverflow(ref error);
-									goto flag_handle_error;
-								}
-
-								var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 2);
-
-								Context.StackPosition += 2;
-								Context.GC.CheckGC(ref error);
-
-
-								var indexer_key = GetSaveValue(cacheObj.indexer_key, ref error);
-								if (error.raised)
-								{
-									Context.StackPosition -= 2;
-									goto flag_handle_error;
-								}
-
-								argSpan[0] = indexer_key;
-
-								box = GetSaveValue(box, ref error);
-								if (error.raised)
-								{
-									Context.StackPosition -= 2;
-									goto flag_handle_error;
-								}
-
-								argSpan[1] = box;
-
-								tmpArgLoc[0].index = 0;
-								tmpArgLoc[1].index = 1; ;
-
-
-								NaNBoxing _this = new NaNBoxing();
-								_this = cacheObj.RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
-
-								RunMethod(((ASInstance)instance.Type).indexer_set, _this,
-									cacheObj.RefInstance.HeapPtr, 2, (byte*)tmpArgLoc, argSpan, ref error, -1);
-
-								Context.StackPosition -= 2;
+								SaveIndexer(cacheObj.RefInstance, cacheObj.indexer_key, box, tmpArgLoc, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
 								}
-
 							}
 							//else
 							//{
@@ -11877,8 +11872,7 @@ namespace juicescript.runtime
 		internal void CreateDynamic(ref ReceiveError error, RtHeapBase instance, NaNBoxing propname, NaNBoxing value, bool configurable, bool enumerable, bool writeable)
 		{
 			findd_lastshapeptr = 0;
-			indexer_find_prop_failed_key.setFault();
-
+			
 			int PROPERTY_PTR = GetPropertyPtr(instance);
 
 #if DEBUG
@@ -14505,6 +14499,16 @@ namespace juicescript.runtime
 								{
 									goto flag_handle_error;
 								}
+								break;
+							}
+						case INS_Code.O_Store_Indexer:
+							{
+								O_Store_Indexer(dst_index, &PC, stackslots, stackStPos, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+
 								break;
 							}
 						case INS_Code.add_Vec2_Vec2:

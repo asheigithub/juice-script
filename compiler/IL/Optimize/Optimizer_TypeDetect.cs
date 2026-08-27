@@ -2447,6 +2447,7 @@ namespace juicescript.compiler.IL.Optimize
 							break;
 						case INS_Code.O_Store_Array_Element:
 						case INS_Code.O_Store_Vector_Element:
+						case INS_Code.O_Store_Indexer:
 							break;
 						case INS_Code.iter_initctx:
 

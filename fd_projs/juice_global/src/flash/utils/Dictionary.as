@@ -25,9 +25,9 @@ package flash.utils
 	{
 		/**
 		 * 创建新的 Dictionary 对象。
-		 * @param	weakKeys 当前无用
+		 * @param	skip_proto 查找对象时，是否跳过原型
 		 */
-		public native function Dictionary (weakKeys:Boolean=false);
+		public native function Dictionary (skip_proto:Boolean=false);
 		
 		[indexer_set]
 		private native function indexer_set(key:*,value:*):void;
