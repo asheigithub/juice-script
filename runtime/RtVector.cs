@@ -445,6 +445,8 @@ namespace juicescript.runtime
 				return 0;
 			}
 
+            player.Context.GC.MemUsage += store.length * store.elementSize;
+
 			((RtVector)heap_vector).SetStore (newstore = new VectorImpl.VectorStore(store));
 
             //链接到堆对象, 堆对象此时被此对象链接
@@ -462,7 +464,7 @@ namespace juicescript.runtime
             {
                 store.buffer.RemoveRange(newlen * store.elementSize, (store.length - newlen) * store.elementSize);
 
-                if (store.IsCache)
+                if (!store.IsCache)
                 {
 					player.Context.GC.MemUsage += (newlen - store.length) * store.elementSize; //更新内存占用计数
 				}

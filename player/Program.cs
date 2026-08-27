@@ -35,6 +35,10 @@ namespace player
 	{
 		static int Main(string[] args)
 		{
+			Console.CancelKeyPress += Console_CancelKeyPress;
+
+
+
 			try
 			{
 				var app = new CommandLineApplication
@@ -108,6 +112,13 @@ namespace player
 				return 1;
 			}
 		}
+
+		private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+		{
+			Console.CancelKeyPress-= Console_CancelKeyPress;
+			Environment.Exit(2);
+		}
+
 		static void LoadSwcWithDeps(Player player, string? swcPath, string? libDir, HashSet<string> loadedAssemblies)
 		{
 			if (!File.Exists(swcPath))

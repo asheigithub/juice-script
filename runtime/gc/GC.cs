@@ -21,7 +21,17 @@ namespace juicescript.runtime.gc
 
         public List<RtHeapBase> Root;
 
+        //private int u;
         public int MemUsage;
+        //{
+        //    get { return u; }
+        //    set { 
+        //        u=value;
+        //        Debug.Assert(u > CacheUsage);
+        //    }
+        //}
+
+        private int CacheUsage;
 
         public readonly int USAGE_LIMIT;
 
@@ -43,6 +53,9 @@ namespace juicescript.runtime.gc
         {
             Heap.MarkCaches();
             root_cache_count = Root.Count;
+
+            CacheUsage = MemUsage;
+
         }
 
         
@@ -622,20 +635,27 @@ namespace juicescript.runtime.gc
             //还需要额外扫描receiveError里引用的堆对象,不要忘记
 
 
-#if !DEBUG
-            if (MemUsage > thresholed)
-#endif
+//#if !DEBUG
+            if (MemUsage - CacheUsage > thresholed)
+//#endif
             {
+                //int before = MemUsage;
+
                 Collect(ref receiveError);         
-                thresholed = MemUsage * 2;
+                thresholed = (MemUsage - CacheUsage) * 2;
+
+
+                //Console.WriteLine($"GC {before}->{MemUsage}");
+
             }
 
         }
 
         internal void ForceGC(ref Player.ReceiveError receiveError)
         {
-            Collect(ref receiveError);
-            thresholed = MemUsage * 2;
+            
+            //Collect(ref receiveError);
+            //thresholed = (MemUsage - CacheUsage) * 2;
         }
 
 

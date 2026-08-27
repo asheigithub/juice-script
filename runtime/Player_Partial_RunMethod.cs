@@ -1013,7 +1013,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining )]
 		private unsafe void RunMethod_MatchArgs(ASMethod method, NaNBoxing _this_, int scope_ptr, Span<NaNBoxing> stackslots, ushort argsCount, byte* argementsPtr,
 
 			int returnSlotIndex,
@@ -1264,7 +1264,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining )]
 		internal unsafe NaNBoxing RunMethod(ASMethod method, NaNBoxing thisPtr, int scope_ptr,
 			//ASContainer scopeType, 
 			ushort args, byte* argementPtr,
