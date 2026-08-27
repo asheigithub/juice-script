@@ -383,6 +383,9 @@ namespace juicescript.ABC.INS
         O_Ld_Vector_Element = 104,       //读Vector元素
         O_Store_Vector_Element = 105,    //写Vector元素
 
+        O_Ld_Indexer = 106,              //从索引器对象中读
+
+
 		//***矩阵，向量类***
 
 		add_Vec2_Vec2 = 112,            //二维向量相加

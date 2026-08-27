@@ -635,9 +635,9 @@ namespace juicescript.runtime.gc
             //还需要额外扫描receiveError里引用的堆对象,不要忘记
 
 
-//#if !DEBUG
+#if !DEBUG
             if (MemUsage - CacheUsage > thresholed)
-//#endif
+#endif
             {
                 //int before = MemUsage;
 
@@ -654,8 +654,8 @@ namespace juicescript.runtime.gc
         internal void ForceGC(ref Player.ReceiveError receiveError)
         {
             
-            //Collect(ref receiveError);
-            //thresholed = (MemUsage - CacheUsage) * 2;
+            Collect(ref receiveError);
+            thresholed = (MemUsage - CacheUsage) * 2;
         }
 
 

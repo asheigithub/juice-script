@@ -310,6 +310,7 @@ namespace juicescript.runtime
 
 		private int m__proto__;
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining)]
 		public int PROTOTYPE(Player player,ASInstance type)
 		{
 			if (HEAPINSTANCE_PTR == 0)

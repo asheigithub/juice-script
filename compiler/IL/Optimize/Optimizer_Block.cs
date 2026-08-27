@@ -2436,7 +2436,7 @@ namespace juicescript.compiler.IL.Optimize
 							instructionType.Add(ld_Array_Element, instructionType[ld_MultiNameL_Val]);
 						}
 						else if (def.All(d => instructionType.ContainsKey(d.Item1)
-						&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.vector))
+							&& instructionType[d.Item1][d.Item2].DefType == InstructionDefType.vector))
 						{
 
 							INS_O_Ld_Vector_Element ld_Vector_Element = new INS_O_Ld_Vector_Element(ld_MultiNameL_Val.token);
@@ -2448,7 +2448,27 @@ namespace juicescript.compiler.IL.Optimize
 							block.Instructions[i] = ld_Vector_Element;
 
 							instructionType.Add(ld_Vector_Element, instructionType[ld_MultiNameL_Val]);
-							
+
+						}
+						else if (def.All(d => instructionType.ContainsKey(d.Item1)
+							&& (instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj || instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable )
+							&& (instructionType[d.Item1][d.Item2].Obj is ASInstance )
+							&& ( (ASInstance)instructionType[d.Item1][d.Item2].Obj).Flags.HasFlag( ClassFlags.Indexer)
+							)
+							)
+						{
+							INS_O_Ld_Indexer ld_Indexer = new INS_O_Ld_Indexer(ld_MultiNameL_Val.token);
+							ld_Indexer.dst = ld_MultiNameL_Val.dst;
+							ld_Indexer.refholder = ld_MultiNameL_Val.refholder;
+							ld_Indexer.instance = ld_MultiNameL_Val.instance;
+							ld_Indexer.name = ld_MultiNameL_Val.name;
+
+							block.Instructions[i] = ld_Indexer;
+
+
+							instructionType.Add(ld_Indexer,
+								instructionType[ld_MultiNameL_Val]
+								);
 						}
 					}
 

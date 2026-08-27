@@ -2363,6 +2363,29 @@ namespace juicescript.compiler.IL.Optimize
 											});
 							}
 							break;
+						case INS_Code.O_Ld_Indexer:
+							{
+								INS_O_Ld_Indexer ld_Indexer = (INS_O_Ld_Indexer)instruction;
+								if (result.Any(r => r.Key.GetDef().Contains(ld_Indexer.instance)))
+								{
+									var v = result.FirstOrDefault(r => r.Key.GetDef().Contains(ld_Indexer.instance)).Value;
+									Debug.Assert(v.Count == 1 && v[0].Obj != null ); //count==1,防止出现多个def的情况 多def还有可能多个mv到同一个目标，SSA后可能出现
+
+									Debug.Assert(v[0].Obj is ASInstance);
+									Debug.Assert(((ASInstance)v[0].Obj).Flags.HasFlag( ClassFlags.Indexer));
+
+									result.Add(instruction, new List<InstructionDef>() { FromTypeKind(((ASInstance)v[0].Obj).indexer_get.ReturnTypeKind) });
+									flag = true;
+
+								}
+								else
+								{
+									//等下一轮
+									//throw new NotImplementedException();
+								}
+
+							}
+							break;
 						case INS_Code.O_Ld_Vector_Element:
 							{
 								INS_O_Ld_Vector_Element o_Ld_Vector_Element = (INS_O_Ld_Vector_Element)instruction;

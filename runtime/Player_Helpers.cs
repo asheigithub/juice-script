@@ -9977,16 +9977,7 @@ namespace juicescript.runtime
 
 				)
 			{
-				//索引器处理
-				int ptrIndex = stackStPos + tmp_holder.index;
-				int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-				RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
-#if DEBUG
-				if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
-				{
-					throw new InvalidOperationException();
-				}
-#endif
+				
 
 				if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR && RtVector.IsValidIndexType(prop_name))
 				{
@@ -10053,6 +10044,16 @@ namespace juicescript.runtime
 				}
 				else
 				{
+					//索引器处理
+					int ptrIndex = stackStPos + tmp_holder.index;
+					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
+#if DEBUG
+					if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
 					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance_box;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
@@ -10805,16 +10806,7 @@ namespace juicescript.runtime
 
 				)
 			{
-				//索引器处理
-				int ptrIndex = stackStPos + stack.index;
-				int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
-				RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
-#if DEBUG
-				if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
-				{
-					throw new InvalidOperationException();
-				}
-#endif
+				
 				if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 				{
 					RtVector vector;
@@ -10833,6 +10825,17 @@ namespace juicescript.runtime
 				}
 				else
 				{
+					//索引器处理
+					int ptrIndex = stackStPos + stack.index;
+					int cacheobjpointer = Context.CacheObjPtr + ptrIndex;  //Context.CacheObjectPointers[ptrIndex];
+					RtHeapBase cache = Context.GC.Heap[cacheobjpointer];
+#if DEBUG
+					if (cache.Kind != RtHeapTypeKind.STACK_CACHE_OBJ)
+					{
+						throw new InvalidOperationException();
+					}
+#endif
+
 					RtStackCache cachePayload = (RtStackCache)cache;
 					cachePayload.RefInstance = instance_box;
 					cachePayload.trait[0] = null; cachePayload.trait[1] = null;
@@ -11291,6 +11294,14 @@ namespace juicescript.runtime
 			var instance_box = stackslots[src.index];
 			var name_box = stackslots[_name.index];
 
+
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY);
 
 			uint name_box_index = name_box.UIntValue;
@@ -11353,6 +11364,13 @@ namespace juicescript.runtime
 			var instance_box = stackslots[src.index];
 			var name_box = stackslots[_name.index];
 
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
 			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR);
 
 
@@ -11381,6 +11399,62 @@ namespace juicescript.runtime
 			}
 
 		}
+
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Ld_Indexer(int dst_index, byte** PC,
+
+		
+			Span<NaNBoxing> stackslots, int stackStPos,ref ReceiveError error)
+		{
+			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Ld_Array_Element);
+
+
+
+			StackLocater src;
+			LoadStackLocater(&src, PC);
+
+			StackLocater _name;
+			LoadStackLocater(&_name, PC);
+
+			StackLocater refholder_index;
+			LoadStackLocater(&refholder_index, PC);
+
+
+			var instance_box = stackslots[src.index];
+			var name_box = stackslots[_name.index];
+
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE);
+
+
+			
+
+			//RtStackCache cachePayload = (RtStackCache)cache;
+			//cachePayload.RefInstance = instance_box;
+			//cachePayload.trait[0] = null; cachePayload.trait[1] = null;
+			//cachePayload.scopemember_index = 0;
+			//cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = Context.GC.Heap[instance_box.HeapPtr].Type;
+			//cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = name_box;
+
+			stackslots[dst_index] = Load_Indexer(name_box,instance_box ,
+				//stackStPos - method.Body._link_codescope.Members.Count - 2,
+				ref error, //stackslots, 
+				stackStPos + dst_index
+				);
+			
+
+		}
+
+
 
 
 
