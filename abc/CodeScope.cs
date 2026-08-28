@@ -70,6 +70,8 @@ namespace juicescript
 
         public ClassFlags _rt_type_flag;
 
+        public NaNBoxing? _initvalue;
+
 
         public byte[] compiler_initvalue;
         public int compiler_initvalue_stpos;

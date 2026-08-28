@@ -22,11 +22,12 @@ namespace juicescript.runtime
 #endif
     class Context
     {
-
-        public const int STACK_LENGTH = 512;
+        private const int REAL_STACK_LENGTH = 514;
+        public const int STACK_LENGTH = REAL_STACK_LENGTH - 2;
+        
 
 #if DEBUG
-		public const int MAX_BACKTRACE = 16;
+		public const int MAX_BACKTRACE = 25;
 #else
 		public const int MAX_BACKTRACE = 50;
 #endif
@@ -120,7 +121,7 @@ namespace juicescript.runtime
         /// 第一个缓存Instance的地址
         ///  由于是连续创建的，所以索引是连续的。
         /// </summary>
-        internal const int CacheInstancePtr = CacheObjPtr + STACK_LENGTH;
+        internal const int CacheInstancePtr = CacheObjPtr + REAL_STACK_LENGTH;
 
         
         //internal BackTraceInfo[] BackTrace;
@@ -133,29 +134,29 @@ namespace juicescript.runtime
         /// 由于连续创建，所以索引连续
         /// 因此当索引大于 BlankShapePtr 时，说明不是缓存的。
         /// </summary>
-        internal const int M_ClosurePtr = CacheInstancePtr + STACK_LENGTH;
+        internal const int M_ClosurePtr = CacheInstancePtr + REAL_STACK_LENGTH;
 
         
         /// <summary>
         /// 第一个缓存Rest参数的Array的地址,共MAX_BACKTRACE个
         /// </summary>
-        internal const int M_RestArrayPtr = M_ClosurePtr + STACK_LENGTH;
+        internal const int M_RestArrayPtr = M_ClosurePtr + REAL_STACK_LENGTH;
 
         /// <summary>
         /// 第一个缓存Array的地址
         /// </summary>
-        internal const int CacheArrayPtr = M_RestArrayPtr + MAX_BACKTRACE + STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT;
+        internal const int CacheArrayPtr = M_RestArrayPtr + MAX_BACKTRACE + REAL_STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT;
 
         /// <summary>
         /// 第一个缓存Vector的地址
         /// </summary>
-        internal const int CacheVectorPtr = CacheArrayPtr + STACK_LENGTH;
+        internal const int CacheVectorPtr = CacheArrayPtr + REAL_STACK_LENGTH;
 
 
 		/// <summary>
 		/// 根空Shape的指针
 		/// </summary>
-		internal const int BlankShapePtr = CacheVectorPtr + STACK_LENGTH;
+		internal const int BlankShapePtr = CacheVectorPtr + REAL_STACK_LENGTH;
 
 
 
@@ -171,7 +172,7 @@ namespace juicescript.runtime
         /// <summary>
         /// 第一个非缓存的指针，只要小于这个的就都是缓存对象
         /// </summary>
-        public const int MIN_HEAPPTR = 1+ MAX_BACKTRACE + STACK_LENGTH + STACK_LENGTH + STACK_LENGTH + MAX_BACKTRACE + STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT + STACK_LENGTH + STACK_LENGTH;
+        public const int MIN_HEAPPTR = 1+ MAX_BACKTRACE + REAL_STACK_LENGTH + REAL_STACK_LENGTH + REAL_STACK_LENGTH + MAX_BACKTRACE + REAL_STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT + REAL_STACK_LENGTH + REAL_STACK_LENGTH;
 
 
 		public Context(Player player, int gc_limit = int.MaxValue)
@@ -186,7 +187,7 @@ namespace juicescript.runtime
 
 
             GC = new gc.GC(this,gc_limit);
-            StackSlots = new NaNBoxing[STACK_LENGTH];
+            StackSlots = new NaNBoxing[REAL_STACK_LENGTH];
 
             int _MethodScopePtr = GC.AllocMethodScope(null,0,null);if (_MethodScopePtr == 0) { throw new LoaderException("alloc Method Scope failed,out of memory."); }
             Debug.Assert(_MethodScopePtr == M_MethodScopePtr);
@@ -199,7 +200,7 @@ namespace juicescript.runtime
 
             int _CacheObjPtr = GC.AllocStackCache();if (_CacheObjPtr == 0) { throw new LoaderException("alloc CacheObjPointer failed,out of memory."); }
             Debug.Assert(_CacheObjPtr == CacheObjPtr);
-            for (int i = 1; i < STACK_LENGTH; i++)
+            for (int i = 1; i < REAL_STACK_LENGTH; i++)
             {
                 if (GC.AllocStackCache() == 0)
                     throw new LoaderException("alloc CacheObjPointer failed,out of memory.");
@@ -207,7 +208,7 @@ namespace juicescript.runtime
 
             int _CacheInstancePtr = GC.AllocCacheInstance();if (_CacheInstancePtr == 0) { throw new LoaderException("alloc CacheInstancePtr failed,out of memory."); }
             Debug.Assert(_CacheInstancePtr == CacheInstancePtr);
-            for (int i = 1; i < STACK_LENGTH; i++)
+            for (int i = 1; i < REAL_STACK_LENGTH; i++)
             {
                 if(GC.AllocCacheInstance() == 0)
                     throw new LoaderException("alloc CacheInstancePtr failed,out of memory.");
@@ -217,7 +218,7 @@ namespace juicescript.runtime
             int _ClosurePtr = GC.AllocClosure(null);if (_ClosurePtr == 0) { throw new LoaderException("alloc Closure failed,out of memory."); }
             Debug.Assert(_ClosurePtr == M_ClosurePtr);
 
-            for (int i = 1; i < STACK_LENGTH; i++)
+            for (int i = 1; i < REAL_STACK_LENGTH; i++)
             {
                 if (GC.AllocClosure(null) == 0)
                     throw new LoaderException("alloc Closure failed,out of memory.");
@@ -235,7 +236,7 @@ namespace juicescript.runtime
 
             int cache_struct_p =0;
             //先分配Array的缓存struct
-            for (int i = 0; i < STACK_LENGTH; i++)
+            for (int i = 0; i < REAL_STACK_LENGTH; i++)
             {
                 for (int j = 0; j < RtArray.MAX_CACHE_ELEMENT; j++)
                 {
@@ -254,7 +255,7 @@ namespace juicescript.runtime
             int _CacheArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p); if (_CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
             Debug.Assert(_CacheArrayPtr == CacheArrayPtr);
             
-            for (int i = 1; i < STACK_LENGTH; i++)
+            for (int i = 1; i < REAL_STACK_LENGTH; i++)
             {
                 if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p + i* RtArray.MAX_CACHE_ELEMENT) == 0)
                     throw new LoaderException("alloc CacheArrayPtr failed,out of memory.");
@@ -263,7 +264,7 @@ namespace juicescript.runtime
             int _CacheVectorPtr = GC.AllocCacheVector();if (_CacheVectorPtr == 0) { throw new LoaderException("alloc CacheVector failed,out of memory"); }
             Debug.Assert(_CacheVectorPtr == CacheVectorPtr);
 
-            for (int i = 1; i < STACK_LENGTH; i++)
+            for (int i = 1; i < REAL_STACK_LENGTH; i++)
             {
                 if (GC.AllocCacheVector() == 0)
                 {

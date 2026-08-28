@@ -12,6 +12,8 @@ namespace juicescript.compiler.IL
 	{
 		public static byte[] Assemble(  int stackslotcount,  NaNBoxing[] constants,  Instruction[] instructions)
 		{
+			
+
 			using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
 			{
 				using (System.IO.BinaryWriter bw = new System.IO.BinaryWriter(ms))

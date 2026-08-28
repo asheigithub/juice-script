@@ -1840,6 +1840,13 @@ namespace juicescript.runtime
 							smember._rt_type_flag = smember.__rt_type_class__.Instance.Flags;
 						}
 
+						if (smember.trait != null && smember.trait.Value != null && smember.trait.Value.initValue.HasValue)
+						{
+							
+							smember._initvalue = smember.trait.Value.initValue;
+							
+						}
+
 					}
 				}
 			}
@@ -8632,7 +8639,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal bool IsEqual(NaNBoxing v1, NaNBoxing v2, StackLocater tempStore, ref ReceiveError error,
+		internal bool IsEqual(NaNBoxing v1, NaNBoxing v2, int tempStore, ref ReceiveError error,
 			int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing caller_bindthis_ptr
 			)
 		{
@@ -8643,7 +8650,7 @@ namespace juicescript.runtime
 			}
 			else
 			{ 
-				return IsEqual_Slow(v1,v2,tempStore,ref error,scope_ptr,stackslots,stackStPos,caller_bindthis_ptr);
+				return IsEqual_Slow(v1,v2, new StackLocater() { index = tempStore },ref error,scope_ptr,stackslots,stackStPos,caller_bindthis_ptr);
 			}
 
 		}
@@ -13308,8 +13315,11 @@ namespace juicescript.runtime
 
 
 
+
 				int* method_scopes = stackalloc int[64]; //64个，肯定不可能爆了。
 				
+
+
 				Span<NaNBoxing> constants = new Span<NaNBoxing>(p + 3 * sizeof(int) + 2 * sizeof(int) * info.instructions, info.constants); //(NaNBoxing*)((int*)p + 3);
 
 				byte* PC = p + sizeof(int) * 3 + 2 * sizeof(int) * info.instructions + sizeof(NaNBoxing) * info.constants;
@@ -13370,54 +13380,54 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.ld_const:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
 								int const_id = *(int*)PC; PC += 4;
 
-								stackslots[stackLocater.index] = constants[const_id];
+								stackslots[dst_index] = constants[const_id];
 
 							}
 							break;
 						
 						case INS_Code.ld_false:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
-								stackslots[stackLocater.index].SetBoolean(false);
+								stackslots[dst_index].SetBoolean(false);
 							}
 							break;
 						case INS_Code.ld_true:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
 
-								stackslots[stackLocater.index].SetBoolean(true);
+								stackslots[dst_index].SetBoolean(true);
 							}
 							break;
 						case INS_Code.ld_null:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
-								stackslots[stackLocater.index].SetNull();
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
+								stackslots[dst_index].SetNull();
 							}
 							break;
 						case INS_Code.ld_undefined:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
-								stackslots[stackLocater.index].SetUndefined();
+								stackslots[dst_index].SetUndefined();
 							}
 							break;
 						case INS_Code.ld_array_hole:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
-								stackslots[stackLocater.index].setFault();
+								stackslots[dst_index].setFault();
 							}
 							break;
 						case INS_Code.ld_class:
@@ -13431,8 +13441,8 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.ld_VectorType:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
 								int vector_index = 0;
 								LoadInt32(&vector_index, &PC);
@@ -13451,14 +13461,14 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								stackslots[stackLocater.index].SetHeapPtr(vector.vector_class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
+								stackslots[dst_index].SetHeapPtr(vector.vector_class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
 
 							}
 							break;
 						case INS_Code.ld_namespace:
 							{
-								StackLocater stackLocater;
-								stackLocater.index = dst_index;
+								//StackLocater stackLocater;
+								//stackLocater.index = dst_index;
 
 								int namespace_instance_index = 0;
 								LoadInt32(&namespace_instance_index, &PC);
@@ -13479,7 +13489,7 @@ namespace juicescript.runtime
 
 #endif
 
-								stackslots[stackLocater.index] = boxing; //.SetHeapPtr(boxing.HeapPtr);
+								stackslots[dst_index] = boxing; //.SetHeapPtr(boxing.HeapPtr);
 
 							}
 							break;
@@ -13567,7 +13577,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.store_instanceMember:
 							{
-								Store_InstanceMember(dst_index, &PC, stackslots, stackStPos, scope_ptr,methodscope , ref error);
+								Store_InstanceOrScopeMember(dst_index, &PC, stackslots, stackStPos, scope_ptr,methodscope , ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13634,34 +13644,34 @@ namespace juicescript.runtime
 							{
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_ValueRef);
 
-								StackLocater sourc;
-								StackLocater target;
-								LoadStackLocater(&sourc, &PC);
+								int sourc;
+								//int target;
+								LoadInt32(&sourc, &PC);
 								//LoadStackLocater(&target, &PC);
-								target.index = dst_index;
+								//target.index = dst_index;
 
-								var refobj = stackslots[sourc.index];
+								var refobj = stackslots[sourc];
 
 								var v = refobj.HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? refobj : LoadValue((RtStackCache)Context.GC.Heap[refobj.HeapPtr],
-										 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + target.index);
+										 stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + dst_index);
 								if (error.raised)
 								{
 									goto flag_handle_error;
 								}
 
-								stackslots[target.index] = v;
+								stackslots[dst_index] = v;
 							}
 							break;
 
 						case INS_Code.move:
 							{
-								StackLocater sourc;
-								StackLocater target;
-								LoadStackLocater(&sourc, &PC);
+								int sourc;
+								//StackLocater target;
+								LoadInt32(&sourc, &PC);
 								//LoadStackLocater(&target, &PC);
-								target.index = dst_index;
+								//target.index = dst_index;
 
-								stackslots[target.index] = stackslots[sourc.index];
+								stackslots[dst_index] = stackslots[sourc];
 
 							}
 							break;
@@ -13679,10 +13689,10 @@ namespace juicescript.runtime
 #endif
 
 
-								StackLocater target;
-								target.index = dst_index;
+								//StackLocater target;
+								//target.index = dst_index;
 
-								stackslots[target.index] = ((RtMethodScope)methodscope).ThisPtr;
+								stackslots[dst_index] = ((RtMethodScope)methodscope).ThisPtr;
 
 							}
 							break;
@@ -13695,8 +13705,8 @@ namespace juicescript.runtime
 								}
 
 #endif
-								StackLocater target;
-								target.index = dst_index;
+								//StackLocater target;
+								//target.index = dst_index;
 
 								int a_ptr = stackStPos - method.Body._link_codescope.Members.Count - 1
 									- 2; /*
@@ -13714,7 +13724,7 @@ namespace juicescript.runtime
 									throw new InvalidOperationException();
 
 #endif
-								stackslots[target.index] = arguments;
+								stackslots[dst_index] = arguments;
 
 							}
 							break;
@@ -14162,13 +14172,13 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.logic_not:
 							{
-								StackLocater dst;
-								StackLocater src;
+								//StackLocater dst;
+								int src;
 
-								dst.index = dst_index;
-								LoadStackLocater(&src, &PC);
+								//dst.index = dst_index;
+								LoadInt32(&src, &PC);
 
-								var v = stackslots[src.index];// LoadValue(stackslots[src.index], ref error, ref stackslots, stackStPos);
+								var v = stackslots[src];// LoadValue(stackslots[src.index], ref error, ref stackslots, stackStPos);
 															  //if (error.raised)
 															  //{
 															  //    goto flag_handle_error;
@@ -14180,22 +14190,22 @@ namespace juicescript.runtime
 								if (error.raised) throw new InvalidOperationException();//转Boolean，不可能失败
 #endif
 
-								stackslots[dst.index].SetBoolean(!v.Boolean);
+								stackslots[dst_index].SetBoolean(!v.Boolean);
 
 							}
 							break;
 						case INS_Code.strict_eq:
 							{
-								StackLocater dst;
-								StackLocater v1;
-								StackLocater v2;
+								//StackLocater dst;
+								int v1;
+								int v2;
 
-								dst.index = dst_index;
-								LoadStackLocater(&v1, &PC);
-								LoadStackLocater(&v2, &PC);
+								//dst.index = dst_index;
+								LoadInt32(&v1, &PC);
+								LoadInt32(&v2, &PC);
 
 
-								stackslots[dst.index].SetBoolean(IsStrictlyEqual(stackslots[v1.index], stackslots[v2.index]));
+								stackslots[dst_index].SetBoolean(IsStrictlyEqual(stackslots[v1], stackslots[v2]));
 
 							}
 							break;
@@ -14208,54 +14218,54 @@ namespace juicescript.runtime
 						//	break;
 						case INS_Code.strict_neq:
 							{
-								StackLocater dst;
-								StackLocater v1;
-								StackLocater v2;
+								//StackLocater dst;
+								int v1;
+								int v2;
 
-								dst.index = dst_index;
-								LoadStackLocater(&v1, &PC);
-								LoadStackLocater(&v2, &PC);
+								//dst.index = dst_index;
+								LoadInt32(&v1, &PC);
+								LoadInt32(&v2, &PC);
 
 
-								stackslots[dst.index].SetBoolean(!IsStrictlyEqual(stackslots[v1.index], stackslots[v2.index]));
+								stackslots[dst_index].SetBoolean(!IsStrictlyEqual(stackslots[v1], stackslots[v2]));
 
 							}
 							break;
 						case INS_Code.equal:
 							{
-								StackLocater dst;
-								StackLocater v1;
-								StackLocater v2;
+								//StackLocater dst;
+								int v1;
+								int v2;
 
-								dst.index = dst_index;
-								LoadStackLocater(&v1, &PC);
-								LoadStackLocater(&v2, &PC);
+								//dst.index = dst_index;
+								LoadInt32(&v1, &PC);
+								LoadInt32(&v2, &PC);
 
-								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+								bool isEqual = IsEqual(stackslots[v1], stackslots[v2], dst_index, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
 								}
-								stackslots[dst.index].SetBoolean(isEqual);
+								stackslots[dst_index].SetBoolean(isEqual);
 
 							}
 							break;
 						case INS_Code.not_equal:
 							{
-								StackLocater dst;
-								StackLocater v1;
-								StackLocater v2;
+								//StackLocater dst;
+								int v1;
+								int v2;
 
-								dst.index = dst_index;
-								LoadStackLocater(&v1, &PC);
-								LoadStackLocater(&v2, &PC);
+								//dst.index = dst_index;
+								LoadInt32(&v1, &PC);
+								LoadInt32(&v2, &PC);
 
-								bool isEqual = IsEqual(stackslots[v1.index], stackslots[v2.index], dst, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
+								bool isEqual = IsEqual(stackslots[v1], stackslots[v2], dst_index, ref error, scope_ptr, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 								if (error.raised)
 								{
 									goto flag_handle_error;
 								}
-								stackslots[dst.index].SetBoolean(!isEqual);
+								stackslots[dst_index].SetBoolean(!isEqual);
 							}
 							break;
 						case INS_Code.get_in:
@@ -14275,11 +14285,11 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.get_is:
 							{
-								StackLocater dst;
+								//StackLocater dst;
 								StackLocater v1;
 								StackLocater v2;
 
-								dst.index = dst_index;
+								//dst.index = dst_index;
 								LoadStackLocater(&v1, &PC);
 								LoadStackLocater(&v2, &PC);
 
@@ -14301,22 +14311,22 @@ namespace juicescript.runtime
 								var typeclass = (ASClass)((RtScriptClass)obj).Meta;
 								var v = stackslots[v1.index];
 
-								stackslots[dst.index].SetBoolean(Is(v, typeclass));
+								stackslots[dst_index].SetBoolean(Is(v, typeclass));
 
 							}
 							break;
 						case INS_Code.cast_as:
 							{
-								StackLocater dst;
-								StackLocater v1;
-								StackLocater v2;
+								//StackLocater dst;
+								int v1;
+								int v2;
 
-								dst.index = dst_index;
-								LoadStackLocater(&v1, &PC);
-								LoadStackLocater(&v2, &PC);
+								//dst.index = dst_index;
+								LoadInt32(&v1, &PC);
+								LoadInt32(&v2, &PC);
 
 
-								var type = stackslots[v2.index];
+								var type = stackslots[v2];
 								if (type.ValueType != BoxType.HeapPtr)
 								{
 									RaiseTypeError(ref error, type, TypeKind.Class);
@@ -14331,17 +14341,17 @@ namespace juicescript.runtime
 								}
 
 								var typeclass = (ASClass)((RtScriptClass)obj).Meta;
-								var v = stackslots[v1.index];
+								var v = stackslots[v1];
 
 								bool v1isv2 = Is(v, typeclass);
 
 								if (v1isv2)
 								{
-									stackslots[dst.index] = v;
+									stackslots[dst_index] = v;
 								}
 								else
 								{
-									stackslots[dst.index].SetNull();
+									stackslots[dst_index].SetNull();
 								}
 							}
 							break;
@@ -14511,6 +14521,15 @@ namespace juicescript.runtime
 
 								break;
 							}
+						case INS_Code.O_Store_InstanceField:
+							{
+								O_Store_InstanceField(dst_index,&PC,stackslots,stackStPos,scope_ptr,methodscope,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
 						case INS_Code.add_Vec2_Vec2:
 							{
 								Exec_Add_Vec2_Vec2(dst_index, &PC, ref error, stackslots,stackStPos);
@@ -14586,7 +14605,7 @@ namespace juicescript.runtime
 						case INS_Code.if_logicOp_goto:
 							{
 
-								StackLocater compResult;LoadStackLocater(&compResult, &PC);							
+								int compResult;LoadInt32(&compResult, &PC);							
 								int offset;  LoadInt32(&offset,&PC); //br.ReadInt32();
 								uint store;  LoadUInt(&store, &PC);
 
@@ -14599,7 +14618,7 @@ namespace juicescript.runtime
 								{
 									bool c = IsStrictlyEqual(stackslots[v1], stackslots[v2]);
 									c = compMode == CompMode.strict_equal ? c : !c;
-									stackslots[compResult.index].SetBoolean(c);
+									stackslots[compResult].SetBoolean(c);
 									if (c == jump_mode)
 									{
 										PC = PC_START + offset;
@@ -14615,7 +14634,7 @@ namespace juicescript.runtime
 
 									c = compMode == CompMode.equal ? c : !c;
 
-									stackslots[compResult.index].SetBoolean(c);
+									stackslots[compResult].SetBoolean(c);
 									if (c == jump_mode)
 									{
 										PC = PC_START + offset;
@@ -14681,71 +14700,12 @@ namespace juicescript.runtime
 						case INS_Code.return_value:
 
 							{
-
-								Debug.Assert(returnSlotIndex >= 0);
-								
-								//Context.GC.CheckGC(ref error);
-								StackLocater value;
-								value.index = dst_index;
-
-								var v = stackslots[value.index];
-
-								if (v.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
+								Return_Value(dst_index, returnSlotIndex, method, stackslots, stackStPos, calleelastPos, scope_ptr, ref error);
+								if (error.raised)
 								{
-									v = LoadValue((RtStackCache)Context.GC.Heap[v.HeapPtr],
-											stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + value.index);
-									if (error.raised)
-									{
-										goto flag_handle_error;
-									}
+									goto flag_handle_error;
 								}
 
-								if (method.Flags.HasFlag(MethodFlags.ASYNC))
-								{
-								}
-								else if (method.ReturnTypeKind == TypeKind.Any 
-									|| ((byte)v.ValueType - 3 == (byte)method.ReturnTypeKind && method.ReturnTypeKind <= TypeKind.Float) 
-									|| (v.ValueType == BoxType.LocalString && method.ReturnTypeKind == TypeKind.String))
-								{
-									
-								}
-								else if (method.ReturnTypeKind == TypeKind.Int && (byte)(v.ValueType - 2) < (byte)BoxType.UShort - 1)
-								{
-									v.SetInt(v.IntValue);
-									
-								}
-								else if (method.ReturnTypeKind == TypeKind.Uint && (byte)(v.ValueType - 2) < (byte)BoxType.UShort - 1)
-								{
-									v.SetUInt(v.UIntValue);									
-								}
-								else
-								{
-									ConvertValueType(ref error, v, method.ReturnTypeKind, method.__return_type_class__, ref v);
-									if (error.raised)
-									{
-										goto flag_handle_error;
-									}
-								}
-
-								if (									
-									v.ValueType == BoxType.HeapPtr &&
-									v.HeapKind >= (byte)RtHeapTypeKind.INSTANCE //||
-									//v.HeapKind == (byte)RtHeapTypeKind.ARRAY ||
-									//v.HeapKind == (byte)RtHeapTypeKind.VECTOR ||
-									//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
-									)
-								{
-									StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, v, ref error);
-									if (error.raised)
-									{
-										Context.StackSlots[returnSlotIndex].SetUndefined();
-										goto flag_handle_error;
-									}
-								}
-								else
-								{
-									Context.StackSlots[returnSlotIndex] = v;
-								}
 
 								if (exception_ctx != NO_TRY)
 								{

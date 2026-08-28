@@ -159,7 +159,7 @@ namespace juicescript.runtime
 
         private Memory<byte> store;
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Span<byte> GetStoreData(Player player,ASInstance type)
         {
 			if (HEAPINSTANCE_PTR == 0)
@@ -413,9 +413,11 @@ namespace juicescript.runtime
 							byte* ptr = p + link_codescope.TypeLayout.Offset[i];
 							var member = link_codescope.Members[i];
 
-							if ((member.Kind == ScopeMemberKind.Constant || member.Kind == ScopeMemberKind.Slot) && member.trait.Value != null && member.trait.Value.initValue.HasValue)
+							if ((member.Kind == ScopeMemberKind.Constant || member.Kind == ScopeMemberKind.Slot) && member._initvalue.HasValue )
 							{
-								SetSlot(member.trait.Value.initValue.Value, (ushort)i, player);
+								//SetSlot(member.trait.Value.initValue.Value, (ushort)i, player);
+
+								SetSlotDataByValue(member, ptr, member._initvalue.Value);
 
 #if FORCOMPILER
 								if (isCompiling)
@@ -435,7 +437,7 @@ namespace juicescript.runtime
 			}
         }
 
-		private unsafe static void InitAtBuffer(void* span,CodeScope link_codescope)
+		internal unsafe static void InitAtBuffer(void* span,CodeScope link_codescope)
 		{
 
 			byte* p = (byte*)span;
@@ -680,11 +682,13 @@ namespace juicescript.runtime
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(ushort memberIndex, Player player)
         {
 			return ReadSlot(memberIndex, player, -1,0);
         }
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetSlot(NaNBoxing value, ushort memberIndex, Player player)
         {
 #if FORCOMPILER
@@ -710,10 +714,10 @@ namespace juicescript.runtime
 
         }
 
-        internal unsafe static void SetSlotDataByValue( ScopeMember member,void* ptr, NaNBoxing value)
-        {
-
-			switch (member.TypeKind)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal unsafe static void SetSlotDataByValue(TypeKind kind, void* ptr, NaNBoxing value)
+		{
+			switch (kind)
 			{
 				case ABC.TypeKind.Any:
 					*(NaNBoxing*)ptr = value;
@@ -811,21 +815,36 @@ namespace juicescript.runtime
 						throw new InvalidOperationException();
 					}
 
-					if (((ASInstance)member.DefineAt).Flags.HasFlag(ClassFlags.Struct) &&
-						member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
-						) //断言，禁止对结构体的嵌套结构体走这里赋值
-					{
-						throw new InvalidOperationException();
-					}
+					
 #endif
 
 					*(NaNBoxing*)ptr = value;
 					break;
 
 			}
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal unsafe static void SetSlotDataByValue( ScopeMember member,void* ptr, NaNBoxing value)
+        {
+			SetSlotDataByValue(member.TypeKind, ptr, value);
+
+#if DEBUG
+			if (
+				member.TypeKind > TypeKind.Class &&
+				((ASInstance)member.DefineAt).Flags.HasFlag(ClassFlags.Struct) &&
+						member.__rt_type_class__ != null &&
+						member.__rt_type_class__.Instance.Flags.HasFlag(ClassFlags.Struct)
+						) //断言，禁止对结构体的嵌套结构体走这里赋值
+			{
+				throw new InvalidOperationException();
+			}
+#endif
 
 		}
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool IsUpdateStructOrEqual(Context contxt, ushort memberIndex, NaNBoxing newValue)
         {
 			var type = (ASInstance)Type;
@@ -885,9 +904,9 @@ namespace juicescript.runtime
 							throw new InvalidOperationException();
 						}
 #endif
-
+						Debug.Assert(type._link_codescope.TypeLayout.SlotSize[memberIndex] == src.Type._link_codescope.TypeLayout.Size);
 						var data = GetStoreData(contxt.player, type).Slice(type._link_codescope.TypeLayout.Offset[memberIndex], type._link_codescope.TypeLayout.SlotSize[memberIndex]);
-						var srcdata = srcPayload.GetStoreData(contxt.player, (ASInstance)src.Type).Slice(0, src.Type._link_codescope.TypeLayout.Size);
+						var srcdata = srcPayload.GetStoreData(contxt.player, (ASInstance)src.Type).Slice(0, data.Length);
 						srcdata.CopyTo(data);
 
 						return true;
@@ -907,7 +926,7 @@ namespace juicescript.runtime
 			else
 			{
 				var oldValue = ReadSlot(memberIndex, contxt.player);
-				return contxt.player.CopyIfSameTypeStructAndReplaceSrc(oldValue,ref newValue);
+				return oldValue.Raw == newValue.Raw; //contxt.player.CopyIfSameTypeStructAndReplaceSrc(oldValue,ref newValue);
 			}
 
 

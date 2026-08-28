@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net;
+using System.Numerics;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
@@ -370,7 +371,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-		private unsafe void Exec_AddSlow(StackLocater dst,
+		private unsafe void Exec_AddSlow(int dst,
 
 		NaNBoxing n1, NaNBoxing n2, int scope_ptr, int stackStPos, Span<NaNBoxing> stackslots, NaNBoxing thisPtr,
 		ref ReceiveError error
@@ -408,7 +409,7 @@ namespace juicescript.runtime
 				}
 				string concatenated = $"{chars1}{chars2}";
 				// 使用安全的字符串创建方法
-				TryCreateStringValue(concatenated, out stackslots[dst.index], ref error);
+				TryCreateStringValue(concatenated, out stackslots[dst], ref error);
 								
 				return; // 错误已经在TryCreateStringValue中处理
 				
@@ -469,7 +470,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						RunMethod(method, cls, scope_ptr, 2, (byte*)args, runmethd_slots, ref error, stackStPos + dst.index);
+						RunMethod(method, cls, scope_ptr, 2, (byte*)args, runmethd_slots, ref error, stackStPos + dst);
 					}
 					Context.StackPosition -= 2;
 
@@ -541,7 +542,7 @@ namespace juicescript.runtime
 							case BoxType.Short:
 							case BoxType.UShort:
 							case BoxType.Float:
-								stackslots[dst.index].SetNumber(n1.Number + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber(n1.Number + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -558,7 +559,7 @@ namespace juicescript.runtime
 										var concatenated = $"{Extensions.GetPrimitiveValueToString(this, n1, buffers)}{str2}";
 
 										// 使用安全的字符串创建方法
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
@@ -569,7 +570,7 @@ namespace juicescript.runtime
 										// Empty LocalString, just convert n1 to string
 										Span<char> buffers = stackalloc char[128];
 										var concatenated = Extensions.GetPrimitiveValueToString(this, n1, buffers);
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return;
@@ -600,7 +601,7 @@ namespace juicescript.runtime
 							case BoxType.Short:
 							case BoxType.UShort:
 							case BoxType.Float:
-								stackslots[dst.index].SetNumber(double.NaN + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber(double.NaN + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -616,7 +617,7 @@ namespace juicescript.runtime
 										string concatenated = $"{Extensions.GetPrimitiveValueToString(this, n1, buffers)}{str2}";
 
 										// 使用安全的字符串创建方法
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
@@ -627,7 +628,7 @@ namespace juicescript.runtime
 										Span<char> buffers = stackalloc char[128];
 										// Empty LocalString, just convert n1 to string
 										var concatenated = Extensions.GetPrimitiveValueToString(this, n1, buffers);
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return;
@@ -658,7 +659,7 @@ namespace juicescript.runtime
 							case BoxType.Short:
 							case BoxType.UShort:
 							case BoxType.Float:
-								stackslots[dst.index].SetNumber(0.0 + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber(0.0 + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -675,31 +676,31 @@ namespace juicescript.runtime
 						switch (n2.ValueType)
 						{
 							case BoxType.Number:
-								stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber((n1.Boolean ? 1 : 0) + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.Undefined:
-								stackslots[dst.index].SetNumber(double.NaN);
+								stackslots[dst].SetNumber(double.NaN);
 								break;
 							case BoxType.Null:
-								stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) + 0.0);
+								stackslots[dst].SetNumber((n1.Boolean ? 1 : 0) + 0.0);
 								break;
 							case BoxType.Boolean:
-								stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) + (n2.Boolean ? 1 : 0));
+								stackslots[dst].SetInt((n1.Boolean ? 1 : 0) + (n2.Boolean ? 1 : 0));
 								break;
 							case BoxType.Int:
-								stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) + n2.IntValue);
+								stackslots[dst].SetInt((n1.Boolean ? 1 : 0) + n2.IntValue);
 								break;
 							case BoxType.Uint:
-								stackslots[dst.index].SetNumber((n1.Boolean ? 1U : 0U) + n2.UIntValue);
+								stackslots[dst].SetNumber((n1.Boolean ? 1U : 0U) + n2.UIntValue);
 								break;
 							case BoxType.Sbyte:
 							case BoxType.Byte:
 							case BoxType.Short:
 							case BoxType.UShort:
-								stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) + Extensions.GetIntValue(n2));
+								stackslots[dst].SetInt((n1.Boolean ? 1 : 0) + Extensions.GetIntValue(n2));
 								break;
 							case BoxType.Float:
-								stackslots[dst.index].SetFloat((n1.Boolean ? 1 : 0) + n2.FloatValue);
+								stackslots[dst].SetFloat((n1.Boolean ? 1 : 0) + n2.FloatValue);
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -716,27 +717,27 @@ namespace juicescript.runtime
 						switch (n2.ValueType)
 						{
 							case BoxType.Undefined:
-								stackslots[dst.index].SetNumber(double.NaN);
+								stackslots[dst].SetNumber(double.NaN);
 								break;
 							case BoxType.Number:
 							case BoxType.Null:
-								stackslots[dst.index].SetNumber(n1.IntValue + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber(n1.IntValue + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.Boolean:
-								stackslots[dst.index].SetInt(n1.IntValue + (n2.Boolean ? 1 : 0));
+								stackslots[dst].SetInt(n1.IntValue + (n2.Boolean ? 1 : 0));
 								break;
 							case BoxType.Uint:
-								stackslots[dst.index].SetNumber((double)n1.IntValue + n2.UIntValue);
+								stackslots[dst].SetNumber((double)n1.IntValue + n2.UIntValue);
 								break;
 							case BoxType.Float:
-								stackslots[dst.index].SetFloat(n1.IntValue + n2.FloatValue);
+								stackslots[dst].SetFloat(n1.IntValue + n2.FloatValue);
 								break;
 							case BoxType.Int:
 							case BoxType.Sbyte:
 							case BoxType.Byte:
 							case BoxType.Short:
 							case BoxType.UShort:
-								stackslots[dst.index].SetInt(n1.IntValue + Extensions.GetIntValue(n2));
+								stackslots[dst].SetInt(n1.IntValue + Extensions.GetIntValue(n2));
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -753,35 +754,35 @@ namespace juicescript.runtime
 						switch (n2.ValueType)
 						{
 							case BoxType.Undefined:
-								stackslots[dst.index].SetNumber(double.NaN);
+								stackslots[dst].SetNumber(double.NaN);
 								break;
 							case BoxType.Number:
 							case BoxType.Null:
-								stackslots[dst.index].SetNumber(n1.UIntValue + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber(n1.UIntValue + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.Boolean:
-								stackslots[dst.index].SetNumber(n1.UIntValue + (n2.Boolean ? 1U : 0U));
+								stackslots[dst].SetNumber(n1.UIntValue + (n2.Boolean ? 1U : 0U));
 								break;
 							case BoxType.Int:
-								stackslots[dst.index].SetNumber((double)n1.UIntValue + n2.IntValue);
+								stackslots[dst].SetNumber((double)n1.UIntValue + n2.IntValue);
 								break;
 							case BoxType.Uint:
-								stackslots[dst.index].SetUInt(n1.UIntValue + n2.UIntValue);
+								stackslots[dst].SetUInt(n1.UIntValue + n2.UIntValue);
 								break;
 							case BoxType.Sbyte:
-								stackslots[dst.index].SetNumber((double)n1.UIntValue + n2.SByteValue);
+								stackslots[dst].SetNumber((double)n1.UIntValue + n2.SByteValue);
 								break;
 							case BoxType.Byte:
-								stackslots[dst.index].SetUInt(n1.UIntValue + n2.ByteValue);
+								stackslots[dst].SetUInt(n1.UIntValue + n2.ByteValue);
 								break;
 							case BoxType.Short:
-								stackslots[dst.index].SetNumber((double)n1.UIntValue + n2.ShortValue);
+								stackslots[dst].SetNumber((double)n1.UIntValue + n2.ShortValue);
 								break;
 							case BoxType.UShort:
-								stackslots[dst.index].SetUInt(n1.UIntValue + n2.UShortValue);
+								stackslots[dst].SetUInt(n1.UIntValue + n2.UShortValue);
 								break;
 							case BoxType.Float:
-								stackslots[dst.index].SetFloat((float)n1.UIntValue + n2.FloatValue);
+								stackslots[dst].SetFloat((float)n1.UIntValue + n2.FloatValue);
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -800,14 +801,14 @@ namespace juicescript.runtime
 					switch (n2.ValueType)
 					{
 						case BoxType.Undefined:
-							stackslots[dst.index].SetNumber(double.NaN);
+							stackslots[dst].SetNumber(double.NaN);
 							break;
 						case BoxType.Number:
 						case BoxType.Null:
-							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + Extensions.GetDoubleValue(n2));
+							stackslots[dst].SetNumber(Extensions.GetDoubleValue(n1) + Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Uint:
-							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + n2.UIntValue);
+							stackslots[dst].SetNumber(Extensions.GetDoubleValue(n1) + n2.UIntValue);
 							break;
 						case BoxType.Sbyte:
 						case BoxType.Byte:
@@ -815,10 +816,10 @@ namespace juicescript.runtime
 						case BoxType.UShort:
 						case BoxType.Boolean:
 						case BoxType.Int:
-							stackslots[dst.index].SetInt(Extensions.GetIntValue(n1) + Extensions.GetIntValue(n2));
+							stackslots[dst].SetInt(Extensions.GetIntValue(n1) + Extensions.GetIntValue(n2));
 							break;
 						case BoxType.Float:
-							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) + n2.FloatValue);
+							stackslots[dst].SetFloat(Extensions.GetFloatValue(n1) + n2.FloatValue);
 							break;
 						case BoxType.HeapPtr:
 							goto lbL_primtive_add_heap;
@@ -838,7 +839,7 @@ namespace juicescript.runtime
 							case BoxType.Undefined:
 							case BoxType.Null:
 
-								stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) + Extensions.GetDoubleValue(n2));
+								stackslots[dst].SetNumber(Extensions.GetDoubleValue(n1) + Extensions.GetDoubleValue(n2));
 								break;
 							case BoxType.Boolean:
 							case BoxType.Int:
@@ -848,7 +849,7 @@ namespace juicescript.runtime
 							case BoxType.UShort:
 							case BoxType.Float:
 							case BoxType.Uint:
-								stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) + Extensions.GetFloatValue(n2));
+								stackslots[dst].SetFloat(Extensions.GetFloatValue(n1) + Extensions.GetFloatValue(n2));
 								break;
 							case BoxType.HeapPtr:
 								goto lbL_primtive_add_heap;
@@ -886,7 +887,7 @@ namespace juicescript.runtime
 									string concatenated = $"{str1}{str2}";
 
 									// 使用安全的字符串创建方法
-									if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+									if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 									{
 										Context.StackPosition = basePos;
 										return; // 错误已经在TryCreateStringValue中处理
@@ -902,7 +903,7 @@ namespace juicescript.runtime
 										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
@@ -927,7 +928,7 @@ namespace juicescript.runtime
 										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
@@ -936,7 +937,7 @@ namespace juicescript.runtime
 									else
 									{
 										// n2 is empty LocalString, result is just str1
-										if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(str1, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return;
@@ -978,7 +979,7 @@ namespace juicescript.runtime
 										string concatenated = $"{str1}{str2}";
 
 										// 使用安全的字符串创建方法
-										if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+										if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 										{
 											Context.StackPosition = basePos;
 											return; // 错误已经在TryCreateStringValue中处理
@@ -996,7 +997,7 @@ namespace juicescript.runtime
 											string concatenated = str1 + str2;
 
 											// 使用安全的字符串创建方法
-											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+											if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 											{
 												Context.StackPosition = basePos;
 												return; // 错误已经在TryCreateStringValue中处理
@@ -1005,7 +1006,7 @@ namespace juicescript.runtime
 										else
 										{
 											// n2 is empty LocalString, result is just str1
-											if (!TryCreateStringValue(str1, out stackslots[dst.index], ref error))
+											if (!TryCreateStringValue(str1, out stackslots[dst], ref error))
 											{
 												Context.StackPosition = basePos;
 												return;
@@ -1022,7 +1023,7 @@ namespace juicescript.runtime
 											string concatenated = str1 + str2;
 
 											// 使用安全的字符串创建方法
-											if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+											if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 											{
 												Context.StackPosition = basePos;
 												return; // 错误已经在TryCreateStringValue中处理
@@ -1075,7 +1076,7 @@ namespace juicescript.runtime
 					string concatenated = $"{str}{str2}";
 
 					// 使用安全的字符串创建方法
-					if (!TryCreateStringValue(concatenated, out stackslots[dst.index], ref error))
+					if (!TryCreateStringValue(concatenated, out stackslots[dst], ref error))
 					{
 						Context.StackPosition = basePos;
 						return; // 错误已经在TryCreateStringValue中处理
@@ -1093,15 +1094,15 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void Exec_Add(int dst_index, byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
-			StackLocater dst;
+			
 			StackLocater v1;
 			StackLocater v2;
 
 
-			dst.index = dst_index;
+			
 			LoadStackLocater(&v1, PC);
 			LoadStackLocater(&v2, PC);
 
@@ -1114,21 +1115,21 @@ namespace juicescript.runtime
 			NaNBoxing sum;
 			if (NaNBoxing.FastAdd(n1, n2, out sum))
 			{
-				stackslots[dst.index] = sum;
+				stackslots[dst_index] = sum;
 				return;
 			}
 			else
 			{
-				Exec_AddSlow(dst, n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
+
+				Exec_AddSlow(dst_index, n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
 			}
 
 		}
 
 
 
-		private unsafe void Exec_SubSlow(StackLocater dst,
-		StackLocater v1,
-		StackLocater v2, NaNBoxing n1, NaNBoxing n2, int scope_ptr, int stackStPos, Span<NaNBoxing> stackslots, NaNBoxing thisPtr, ref ReceiveError error)
+		private unsafe void Exec_SubSlow(int dst,
+		 NaNBoxing n1, NaNBoxing n2, int scope_ptr, int stackStPos, Span<NaNBoxing> stackslots, NaNBoxing thisPtr, ref ReceiveError error)
 		{
 
 			//操作符重载
@@ -1184,7 +1185,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						RunMethod(method, cls, scope_ptr, 2, (byte*)args, slots, ref error, stackStPos + dst.index);
+						RunMethod(method, cls, scope_ptr, 2, (byte*)args, slots, ref error, stackStPos + dst);
 					}
 					Context.StackPosition -= 2;
 
@@ -1198,7 +1199,8 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n1))
 			{
-				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
+				StackLocater d= default;d.index = dst;
+				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, d, d, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1212,7 +1214,8 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
+				StackLocater d = default; d.index = dst;
+				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, d, d, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
 					return;
@@ -1227,43 +1230,43 @@ namespace juicescript.runtime
 			switch (n1.ValueType)
 			{
 				case BoxType.Number:
-					stackslots[dst.index].SetNumber(n1.Number - Extensions.GetDoubleValue(n2));
+					stackslots[dst].SetNumber(n1.Number - Extensions.GetDoubleValue(n2));
 					break;
 				case BoxType.Undefined:
-					stackslots[dst.index].SetNumber(double.NaN - Extensions.GetDoubleValue(n2));
+					stackslots[dst].SetNumber(double.NaN - Extensions.GetDoubleValue(n2));
 					break;
 				case BoxType.Null:
-					stackslots[dst.index].SetNumber(0.0 - Extensions.GetDoubleValue(n2));
+					stackslots[dst].SetNumber(0.0 - Extensions.GetDoubleValue(n2));
 					break;
 				case BoxType.Boolean:
 					switch (n2.ValueType)
 					{
 						case BoxType.Number:
-							stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) - Extensions.GetDoubleValue(n2));
+							stackslots[dst].SetNumber((n1.Boolean ? 1 : 0) - Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Undefined:
-							stackslots[dst.index].SetNumber(double.NaN);
+							stackslots[dst].SetNumber(double.NaN);
 							break;
 						case BoxType.Null:
-							stackslots[dst.index].SetNumber((n1.Boolean ? 1 : 0) - 0.0);
+							stackslots[dst].SetNumber((n1.Boolean ? 1 : 0) - 0.0);
 							break;
 						case BoxType.Boolean:
-							stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) - (n2.Boolean ? 1 : 0));
+							stackslots[dst].SetInt((n1.Boolean ? 1 : 0) - (n2.Boolean ? 1 : 0));
 							break;
 						case BoxType.Int:
-							stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) - n2.IntValue);
+							stackslots[dst].SetInt((n1.Boolean ? 1 : 0) - n2.IntValue);
 							break;
 						case BoxType.Uint:
-							stackslots[dst.index].SetNumber((n1.Boolean ? 1U : 0U) - n2.UIntValue);
+							stackslots[dst].SetNumber((n1.Boolean ? 1U : 0U) - n2.UIntValue);
 							break;
 						case BoxType.Sbyte:
 						case BoxType.Byte:
 						case BoxType.Short:
 						case BoxType.UShort:
-							stackslots[dst.index].SetInt((n1.Boolean ? 1 : 0) - Extensions.GetIntValue(n2));
+							stackslots[dst].SetInt((n1.Boolean ? 1 : 0) - Extensions.GetIntValue(n2));
 							break;
 						case BoxType.Float:
-							stackslots[dst.index].SetFloat((n1.Boolean ? 1 : 0) - n2.FloatValue);
+							stackslots[dst].SetFloat((n1.Boolean ? 1 : 0) - n2.FloatValue);
 							break;
 #if DEBUG
 						case BoxType.HeapPtr:
@@ -1277,27 +1280,27 @@ namespace juicescript.runtime
 					switch (n2.ValueType)
 					{
 						case BoxType.Undefined:
-							stackslots[dst.index].SetNumber(double.NaN);
+							stackslots[dst].SetNumber(double.NaN);
 							break;
 						case BoxType.Number:
 						case BoxType.Null:
-							stackslots[dst.index].SetNumber(n1.IntValue - Extensions.GetDoubleValue(n2));
+							stackslots[dst].SetNumber(n1.IntValue - Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Boolean:
-							stackslots[dst.index].SetInt(n1.IntValue - (n2.Boolean ? 1 : 0));
+							stackslots[dst].SetInt(n1.IntValue - (n2.Boolean ? 1 : 0));
 							break;
 						case BoxType.Uint:
-							stackslots[dst.index].SetNumber((double)n1.IntValue - n2.UIntValue);
+							stackslots[dst].SetNumber((double)n1.IntValue - n2.UIntValue);
 							break;
 						case BoxType.Float:
-							stackslots[dst.index].SetFloat(n1.IntValue - n2.FloatValue);
+							stackslots[dst].SetFloat(n1.IntValue - n2.FloatValue);
 							break;
 						case BoxType.Int:
 						case BoxType.Sbyte:
 						case BoxType.Byte:
 						case BoxType.Short:
 						case BoxType.UShort:
-							stackslots[dst.index].SetInt(n1.IntValue - Extensions.GetIntValue(n2));
+							stackslots[dst].SetInt(n1.IntValue - Extensions.GetIntValue(n2));
 							break;
 #if DEBUG
 						case BoxType.Fault:
@@ -1310,35 +1313,35 @@ namespace juicescript.runtime
 					switch (n2.ValueType)
 					{
 						case BoxType.Undefined:
-							stackslots[dst.index].SetNumber(double.NaN);
+							stackslots[dst].SetNumber(double.NaN);
 							break;
 						case BoxType.Number:
 						case BoxType.Null:
-							stackslots[dst.index].SetNumber(n1.UIntValue - Extensions.GetDoubleValue(n2));
+							stackslots[dst].SetNumber(n1.UIntValue - Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Boolean:
-							stackslots[dst.index].SetUInt(n1.UIntValue - (n2.Boolean ? 1U : 0U));
+							stackslots[dst].SetUInt(n1.UIntValue - (n2.Boolean ? 1U : 0U));
 							break;
 						case BoxType.Int:
-							stackslots[dst.index].SetNumber((double)n1.UIntValue - n2.IntValue);
+							stackslots[dst].SetNumber((double)n1.UIntValue - n2.IntValue);
 							break;
 						case BoxType.Uint:
-							stackslots[dst.index].SetUInt(n1.UIntValue - n2.UIntValue);
+							stackslots[dst].SetUInt(n1.UIntValue - n2.UIntValue);
 							break;
 						case BoxType.Sbyte:
-							stackslots[dst.index].SetNumber((double)n1.UIntValue - n2.SByteValue);
+							stackslots[dst].SetNumber((double)n1.UIntValue - n2.SByteValue);
 							break;
 						case BoxType.Byte:
-							stackslots[dst.index].SetUInt(n1.UIntValue - n2.ByteValue);
+							stackslots[dst].SetUInt(n1.UIntValue - n2.ByteValue);
 							break;
 						case BoxType.Short:
-							stackslots[dst.index].SetNumber((double)n1.UIntValue - n2.ShortValue);
+							stackslots[dst].SetNumber((double)n1.UIntValue - n2.ShortValue);
 							break;
 						case BoxType.UShort:
-							stackslots[dst.index].SetUInt(n1.UIntValue - n2.UShortValue);
+							stackslots[dst].SetUInt(n1.UIntValue - n2.UShortValue);
 							break;
 						case BoxType.Float:
-							stackslots[dst.index].SetFloat((float)n1.UIntValue - n2.FloatValue);
+							stackslots[dst].SetFloat((float)n1.UIntValue - n2.FloatValue);
 							break;
 #if DEBUG
 						case BoxType.Fault:
@@ -1354,14 +1357,14 @@ namespace juicescript.runtime
 					switch (n2.ValueType)
 					{
 						case BoxType.Undefined:
-							stackslots[dst.index].SetNumber(double.NaN);
+							stackslots[dst].SetNumber(double.NaN);
 							break;
 						case BoxType.Number:
 						case BoxType.Null:
-							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) - Extensions.GetDoubleValue(n2));
+							stackslots[dst].SetNumber(Extensions.GetDoubleValue(n1) - Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Uint:
-							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) - n2.UIntValue);
+							stackslots[dst].SetNumber(Extensions.GetDoubleValue(n1) - n2.UIntValue);
 							break;
 						case BoxType.Sbyte:
 						case BoxType.Byte:
@@ -1369,10 +1372,10 @@ namespace juicescript.runtime
 						case BoxType.UShort:
 						case BoxType.Boolean:
 						case BoxType.Int:
-							stackslots[dst.index].SetInt(Extensions.GetIntValue(n1) - Extensions.GetIntValue(n2));
+							stackslots[dst].SetInt(Extensions.GetIntValue(n1) - Extensions.GetIntValue(n2));
 							break;
 						case BoxType.Float:
-							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) - n2.FloatValue);
+							stackslots[dst].SetFloat(Extensions.GetFloatValue(n1) - n2.FloatValue);
 							break;
 #if DEBUG
 						case BoxType.HeapPtr:
@@ -1389,7 +1392,7 @@ namespace juicescript.runtime
 						case BoxType.Undefined:
 						case BoxType.Null:
 
-							stackslots[dst.index].SetNumber(Extensions.GetDoubleValue(n1) - Extensions.GetDoubleValue(n2));
+							stackslots[dst].SetNumber(Extensions.GetDoubleValue(n1) - Extensions.GetDoubleValue(n2));
 							break;
 						case BoxType.Boolean:
 						case BoxType.Int:
@@ -1399,7 +1402,7 @@ namespace juicescript.runtime
 						case BoxType.UShort:
 						case BoxType.Float:
 						case BoxType.Uint:
-							stackslots[dst.index].SetFloat(Extensions.GetFloatValue(n1) - Extensions.GetFloatValue(n2));
+							stackslots[dst].SetFloat(Extensions.GetFloatValue(n1) - Extensions.GetFloatValue(n2));
 							break;
 #if DEBUG
 						case BoxType.HeapPtr:
@@ -1418,31 +1421,36 @@ namespace juicescript.runtime
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void Exec_Sub(int dst_index, byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
-			StackLocater dst;
-			StackLocater v1;
-			StackLocater v2;
 
-			dst.index = dst_index;
-			LoadStackLocater(&v1, PC);
-			LoadStackLocater(&v2, PC);
+			//StackLocater v1;
+			//StackLocater v2;
 
-			NaNBoxing n1 = stackslots[v1.index];
-			NaNBoxing n2 = stackslots[v2.index];
+			//LoadStackLocater(&v1, PC);
+			//LoadStackLocater(&v2, PC);
+
+			int v1;
+			int v2;
+			LoadInt32(&v1, PC);
+			LoadInt32(&v2, PC);
+
+
+			NaNBoxing n1 = stackslots[v1];
+			NaNBoxing n2 = stackslots[v2];
 
 
 
 			//NaNBoxing sub;
-			if (NaNBoxing.FastMinus(n1, n2, ref stackslots[dst.index])) //out sub))
+			if (NaNBoxing.FastMinus(n1, n2, ref stackslots[dst_index])) //out sub))
 			{
 				//stackslots[dst.index] = sub;
 				return;
 			}
 			else
 			{
-				Exec_SubSlow(dst, v1, v2, n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
+				Exec_SubSlow(dst_index,  n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
 			}
 
 		}
@@ -2234,7 +2242,7 @@ namespace juicescript.runtime
 
 		private void Comparse_Slow(
 			byte opMode,
-			StackLocater dst,
+			int dst_index,
 		//StackLocater v1,
 		//StackLocater v2,
 		NaNBoxing n1, NaNBoxing n2, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, NaNBoxing thisPtr, ref ReceiveError error)
@@ -2337,7 +2345,7 @@ namespace juicescript.runtime
 					{
 						Context.StackPosition = basePos;
 
-						stackslots[dst.index].SetBoolean(false);
+						stackslots[dst_index].SetBoolean(false);
 						return;
 					}
 
@@ -2372,7 +2380,7 @@ namespace juicescript.runtime
 				{
 					Context.StackPosition = basePos;
 
-					stackslots[dst.index].SetBoolean(false);
+					stackslots[dst_index].SetBoolean(false);
 					return;
 				}
 
@@ -2411,7 +2419,7 @@ namespace juicescript.runtime
 				{
 					Context.StackPosition = basePos;
 
-					stackslots[dst.index].SetBoolean(false);
+					stackslots[dst_index].SetBoolean(false);
 					return;
 				}
 
@@ -2429,16 +2437,16 @@ namespace juicescript.runtime
 			switch (opMode)
 			{
 				case 0:
-					stackslots[dst.index].SetBoolean(c_r < 0);
+					stackslots[dst_index].SetBoolean(c_r < 0);
 					break;
 				case 1:
-					stackslots[dst.index].SetBoolean(c_r > 0);
+					stackslots[dst_index].SetBoolean(c_r > 0);
 					break;
 				case 2:
-					stackslots[dst.index].SetBoolean((c_r <= 0));
+					stackslots[dst_index].SetBoolean((c_r <= 0));
 					break;
 				case 3:
-					stackslots[dst.index].SetBoolean((c_r >= 0));
+					stackslots[dst_index].SetBoolean((c_r >= 0));
 					break;
 				default:
 #if DEBUG
@@ -2454,11 +2462,11 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void Exec_Comparse(int dst_index, byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
 		{
-			StackLocater dst;
+			//StackLocater dst;
 			StackLocater v1;
 			StackLocater v2;
 
-			dst.index = dst_index;
+			//dst.index = dst_index;
 
 			uint v = *(uint*)*PC; *PC += 4;
 			byte opMode = (byte)(v & 0xff);
@@ -2469,7 +2477,7 @@ namespace juicescript.runtime
 			NaNBoxing n1 = stackslots[v1.index];
 			NaNBoxing n2 = stackslots[v2.index];
 
-			DoCompress(opMode, dst, n1, n2, scope_ptr, stackslots, stackStPos, thisPtr, ref error);
+			DoCompress(opMode, dst_index, n1, n2, scope_ptr, stackslots, stackStPos, thisPtr, ref error);
 
 			//			if (((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
 			//				&&
@@ -2558,7 +2566,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe bool DoCompress(byte opMode, StackLocater dst, NaNBoxing n1, NaNBoxing n2, int scope_ptr,
+		private unsafe bool DoCompress(byte opMode, int dst_index, NaNBoxing n1, NaNBoxing n2, int scope_ptr,
 			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr, ref ReceiveError error)
 		{
 			if (((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
@@ -2570,16 +2578,16 @@ namespace juicescript.runtime
 				switch (opMode)
 				{
 					case 0:
-						stackslots[dst.index].SetBoolean(c_r < 0);
+						stackslots[dst_index].SetBoolean(c_r < 0);
 						return c_r < 0;
 					case 1:
-						stackslots[dst.index].SetBoolean(c_r > 0);
+						stackslots[dst_index].SetBoolean(c_r > 0);
 						return c_r > 0;
 					case 2:
-						stackslots[dst.index].SetBoolean((c_r <= 0));
+						stackslots[dst_index].SetBoolean((c_r <= 0));
 						return c_r <= 0;
 					case 3:
-						stackslots[dst.index].SetBoolean((c_r >= 0));
+						stackslots[dst_index].SetBoolean((c_r >= 0));
 						return c_r >= 0;
 					default:
 #if DEBUG
@@ -2603,7 +2611,7 @@ namespace juicescript.runtime
 
 				if (double.IsNaN(d1) || double.IsNaN(d2))
 				{
-					stackslots[dst.index].SetBoolean(false);
+					stackslots[dst_index].SetBoolean(false);
 					return false;
 				}
 
@@ -2619,16 +2627,16 @@ namespace juicescript.runtime
 				switch (opMode)
 				{
 					case 0:
-						stackslots[dst.index].SetBoolean(c_r < 0);
+						stackslots[dst_index].SetBoolean(c_r < 0);
 						return c_r < 0;
 					case 1:
-						stackslots[dst.index].SetBoolean(c_r > 0);
+						stackslots[dst_index].SetBoolean(c_r > 0);
 						return c_r > 0;
 					case 2:
-						stackslots[dst.index].SetBoolean((c_r <= 0));
+						stackslots[dst_index].SetBoolean((c_r <= 0));
 						return c_r <= 0;
 					case 3:
-						stackslots[dst.index].SetBoolean((c_r >= 0));
+						stackslots[dst_index].SetBoolean((c_r >= 0));
 						return c_r >= 0;
 					default:
 #if DEBUG
@@ -2643,8 +2651,8 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Comparse_Slow(opMode, dst, n1, n2, stackslots, stackStPos, scope_ptr, thisPtr, ref error);
-				return stackslots[dst.index].Boolean;
+				Comparse_Slow(opMode, dst_index, n1, n2, stackslots, stackStPos, scope_ptr, thisPtr, ref error);
+				return stackslots[dst_index].Boolean;
 			}
 		}
 
@@ -4398,7 +4406,51 @@ namespace juicescript.runtime
 		}
 
 
+		/// <summary>
+		/// 优化结构体构造填充
+		/// </summary>
+		/// <param name="store"></param>
+		/// <param name="memberIndex"></param>
+		/// <param name="typeLayout"></param>
+		/// <param name="newValue"></param>
+		/// <param name="nvmember"></param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		private void Fill_StructAutoCtor(Span<byte> store,ushort memberIndex, TypeLayout typeLayout, NaNBoxing newValue,ScopeMember nvmember)
+		{
+			var data = store.Slice(typeLayout.Offset[memberIndex], typeLayout.SlotSize[memberIndex]);
 
+			if (newValue.ValueType == NaNBoxing.BoxType.Null)
+			{
+
+				unsafe
+				{
+					fixed (byte* ptr = data)
+					{
+						RtInstance.InitAtBuffer(ptr, nvmember.__rt_type_class__.Instance._link_codescope);
+					}
+				}
+			}
+			else if (newValue.ValueType == BoxType.HeapPtr)
+			{
+				var src = Context.GC.Heap[newValue.HeapPtr];
+				RtInstance srcPayload = (RtInstance)src;
+
+				Debug.Assert(typeLayout.SlotSize[memberIndex] == src.Type._link_codescope.TypeLayout.Size);
+				var srcdata = srcPayload.GetStoreData(this, (ASInstance)src.Type).Slice(0, data.Length);
+				srcdata.CopyTo(data);
+
+			}
+			else
+			{
+				unsafe
+				{
+					fixed (byte* ptr = data)
+					{
+						RtInstance.SetSlotDataByValue(nvmember, ptr, newValue);
+					}
+				}
+			}
+		}
 
 		private unsafe void NEW_INSTANCE(int dst_index, byte** PC, int stackStPos, int scope_ptr,
 			Span<NaNBoxing> stackslots, 
@@ -4764,6 +4816,8 @@ namespace juicescript.runtime
 					{
 						fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
 						{
+							var struct_store = ((RtInstance)instance).GetStoreData(this, (ASInstance)instance.Type);
+
 							var pmembers = ctor.Body._link_codescope.Members;
 							for (int i = 0; i < ctor.Parameters.Count; i++)
 							{
@@ -4783,15 +4837,17 @@ namespace juicescript.runtime
 								ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
 								Debug.Assert(!error.raised);
 
-								if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
-								{
-									bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
-									Debug.Assert(successd);
-								}
-								else
-								{
-									((RtInstance)instance).SetSlot(v, (ushort)i, this);
-								}
+								Fill_StructAutoCtor(struct_store, (ushort)i, instance.Type._link_codescope.TypeLayout, v, pmembers[i]);
+
+								//if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+								//{
+								//	bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+								//	Debug.Assert(successd);
+								//}
+								//else
+								//{
+								//	((RtInstance)instance).SetSlot(v, (ushort)i, this);
+								//}
 
 								argementsPtr += 4;
 							}
@@ -5103,6 +5159,8 @@ namespace juicescript.runtime
 				{
 					fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
 					{
+						var struct_store = ((RtInstance)instance).GetStoreData(this, (ASInstance)instance.Type);
+
 						var pmembers = ctor.Body._link_codescope.Members;
 						for (int i = 0; i < ctor.Parameters.Count; i++)
 						{
@@ -5122,15 +5180,18 @@ namespace juicescript.runtime
 							ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
 							Debug.Assert(!error.raised);
 
-							if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
-							{
-								bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
-								Debug.Assert(successd);
-							}
-							else
-							{
-								((RtInstance)instance).SetSlot(v, (ushort)i, this);
-							}
+							Fill_StructAutoCtor(struct_store, (ushort)i, instance.Type._link_codescope.TypeLayout, v, pmembers[i]);
+
+
+							//if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+							//{
+							//	bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+							//	Debug.Assert(successd);
+							//}
+							//else
+							//{
+							//	((RtInstance)instance).SetSlot(v, (ushort)i, this);
+							//}
 
 							argementsPtr += 4;
 						}
@@ -5183,6 +5244,8 @@ namespace juicescript.runtime
 				{
 					fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
 					{
+						var struct_store = ((RtInstance)instance).GetStoreData(this, (ASInstance)instance.Type);
+
 						var pmembers = ctor.Body._link_codescope.Members;
 						for (int i = 0; i < ctor.Parameters.Count; i++)
 						{
@@ -5202,15 +5265,17 @@ namespace juicescript.runtime
 							ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
 							Debug.Assert(!error.raised);
 
-							if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
-							{
-								bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
-								Debug.Assert(successd);
-							}
-							else
-							{
-								((RtInstance)instance).SetSlot(v, (ushort)i, this);
-							}
+							Fill_StructAutoCtor(struct_store, (ushort)i, instance.Type._link_codescope.TypeLayout, v, pmembers[i]);
+
+							//if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+							//{
+							//	bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+							//	Debug.Assert(successd);
+							//}
+							//else
+							//{
+							//	((RtInstance)instance).SetSlot(v, (ushort)i, this);
+							//}
 
 							argementsPtr += 4;
 						}
@@ -5347,6 +5412,197 @@ namespace juicescript.runtime
 
 
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void O_Store_InstanceField(int src_index, byte** PC, Span<NaNBoxing> stackslots,
+			int stackStPos, int scope_ptr, RtHeapBase methodscope, ref ReceiveError error)
+		{
+			StackLocater source;
+			source.index = src_index;
+
+			StackLocater insloc;
+			LoadStackLocater(&insloc, PC);
+
+			ushort typekind;
+			ushort scopemember_index;
+
+			ushort offset;
+			ushort slotsize;
+
+			typekind = *(ushort*)(*PC); *PC += 2;
+			scopemember_index = *(ushort*)(*PC); *PC += 2;
+			offset = *(ushort*)(*PC); *PC += 2;
+			slotsize = *(ushort*)(*PC); *PC += 2;
+
+			NaNBoxing instance_box;
+
+			Debug.Assert(insloc.index >= 0);
+
+			instance_box = stackslots[insloc.index];
+
+			if (instance_box.ValueType == BoxType.Null)
+			{
+				RaiseTypeError_AccessNull(ref error);
+				goto flag_handle_error;
+			}
+
+			Debug.Assert(instance_box.ValueType == BoxType.HeapPtr);
+
+			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE);
+			
+			var instance = Context.GC.Heap[instance_box.HeapPtr];
+			RtInstance payload = (RtInstance)instance;
+
+			var box = stackslots[source.index];
+
+			
+
+
+			if (instance_box.IsStruct())
+			{
+				if (typekind == 0xfeff)
+				{
+					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
+					if (box.ValueType == BoxType.HeapPtr)
+					{
+						Debug.Assert(box.IsStruct());
+
+						var src_payload = ((RtInstance)Context.GC.Heap[box.HeapPtr]);
+						var src = src_payload.GetStoreData(this, (ASInstance)src_payload.Type).Slice(0,slotsize);
+
+						var span = store.Slice(offset, slotsize);
+						src.CopyTo(span);
+
+
+					}
+					else
+					{
+						fixed (byte* p = store)
+						{
+							byte* ptr = p + offset;
+							RtInstance.InitAtBuffer(ptr, payload.Type._link_codescope.Members[scopemember_index].__rt_type_class__.Instance._link_codescope);
+						}
+
+						//throw new NotImplementedException();
+					}
+				}
+				else
+				{
+					Debug.Assert(typekind < (byte)TypeKind.Object);
+					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
+					fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
+					{
+						byte* ptr = p + offset;
+
+						ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+						//Context.StackPosition++;
+						ConvertValueType(ref error, box, (TypeKind)typekind, null, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+						//Context.StackPosition--;
+						Debug.Assert(!error.raised);
+
+
+						RtInstance.SetSlotDataByValue((TypeKind)typekind, ptr, conv);
+
+					}
+				}
+				
+			}
+			else
+			{
+				if (typekind == 0xffff || typekind == (byte)TypeKind.Any || typekind > (byte)TypeKind.Unknown)
+				{
+					if (box.ValueType == BoxType.HeapPtr)
+					{
+						GetSaveValue_InstanceType(ref box, ref error);
+						if (error.raised)
+						{
+							goto flag_handle_error;
+						}
+					}
+					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
+
+					fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
+					{
+						byte* ptr = p + offset;
+						*(NaNBoxing*)ptr = box;
+					}
+
+				}
+				else if (typekind == 0xfeff)
+				{
+					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
+					if (box.ValueType == BoxType.HeapPtr)
+					{
+						fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
+						{
+							byte* ptr = p + offset;
+							NaNBoxing dst = *(NaNBoxing*)ptr;
+
+							if (CopyIfSameTypeStructAndReplaceSrc(dst, ref box))
+							{
+
+							}
+							else
+							{
+								GetSaveValue_InstanceType(ref box, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								*(NaNBoxing*)ptr = box;
+
+							}
+
+						}
+					}
+					else
+					{
+						fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
+						{
+							byte* ptr = p + offset;
+							*(NaNBoxing*)ptr = box;
+						}
+					}
+				}
+				else
+				{
+					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
+					fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
+					{
+						byte* ptr = p + offset;
+
+						ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+						//Context.StackPosition++;
+						ConvertValueType(ref error, box, (TypeKind)typekind, null, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+						//Context.StackPosition--;
+						Debug.Assert(!error.raised);
+						
+
+						RtInstance.SetSlotDataByValue((TypeKind)typekind, ptr, conv);
+
+					}
+				}
+			}
+
+
+
+
+			//Store_Instance_Slow(box, (RtInstance)instance, scopemember_index, (RtMethodScope)methodscope, scope_ptr, ref error);
+
+			
+			
+
+		flag_handle_error:;
+
+		}
+
+
+
+
+
+
+
+
+
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void O_NewStruct(int dst_index, byte** PC, int stackStPos,
 			Span<NaNBoxing> stackslots,
@@ -5410,6 +5666,8 @@ namespace juicescript.runtime
 			var ctor = ((ASInstance)instance.Type).Constructor;
 			fixed (byte* bp = ctor.Flags.HasFlag(MethodFlags.HasOptional) ? ctor.Body.param_defaultvalues : null)
 			{
+				var struct_store = ((RtInstance)instance).GetStoreData(this, (ASInstance)instance.Type);
+
 				var pmembers = ctor.Body._link_codescope.Members;
 				for (int i = 0; i < ctor.Parameters.Count; i++)
 				{
@@ -5430,15 +5688,17 @@ namespace juicescript.runtime
 					ConvertValueType(ref error, v, pmembers[i].TypeKind, pmembers[i].__rt_type_class__, ref v);
 					Debug.Assert(!error.raised);
 
-					if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
-					{
-						bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
-						Debug.Assert(successd);
-					}
-					else
-					{
-						((RtInstance)instance).SetSlot(v, (ushort)i, this);
-					}
+					Fill_StructAutoCtor(struct_store, (ushort)i, instance.Type._link_codescope.TypeLayout, v, pmembers[i]);
+
+					//if (v.ValueType == BoxType.Null || v.ValueType == BoxType.HeapPtr)
+					//{
+					//	bool successd = ((RtInstance)instance).IsUpdateStructOrEqual(Context, (ushort)i, v);
+					//	Debug.Assert(successd);
+					//}
+					//else
+					//{
+					//	((RtInstance)instance).SetSlot(v, (ushort)i, this);
+					//}
 
 					argementsPtr += 4;
 				}
@@ -8563,7 +8823,7 @@ namespace juicescript.runtime
 								Context.StackPosition--;
 								goto flag_handle_error;
 							}
-							if (heap.IsUpdateStructOrEqual(Context, heapLocater.MemberIndex, conv))
+							if ( heap.IsUpdateStructOrEqual(Context, heapLocater.MemberIndex, conv))
 							{
 								Context.StackPosition--;
 							}
@@ -9014,10 +9274,113 @@ namespace juicescript.runtime
 
 
 
+		
+		private unsafe void Store_Instance_Slow( NaNBoxing box, RtInstance instance,ushort scopemember_index , RtMethodScope methodscope, int scope_ptr , ref ReceiveError error)
+		{
+			ASTrait trait = instance.Type._link_codescope.Members[(ushort)scopemember_index].trait;
+
+			Debug.Assert(
+				trait.Kind == TraitKind.Slot);
 
 
-	
-		private unsafe void Store_InstanceMember(int src_index, byte** PC, Span<NaNBoxing> stackslots,
+
+
+			Context.GC.CheckGC(ref error);
+			if (Context.StackPosition >= Context.STACK_LENGTH)
+			{
+				RaiseStackOverflow(ref error);
+				return;
+			}
+
+			ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+			Context.StackPosition++;
+			ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+			if (error.raised)
+			{
+				Context.StackPosition--;
+				return;
+			}
+			if (instance.IsUpdateStructOrEqual(Context, (ushort)scopemember_index, conv))
+			{
+				Context.StackPosition--;
+			}
+			else
+			{
+				box = GetSaveValue(conv, ref error);
+				Context.StackPosition--;
+
+				if (error.raised)
+				{
+					return;
+				}
+
+				instance.SetSlot(box, (ushort)scopemember_index, this);
+			}
+		}
+
+
+		private unsafe void Store_Global_Class(NaNBoxing instance_box,ushort scopemember_index,ref ReceiveError error,
+			Span<NaNBoxing> stackslots,int source_index,int scope_ptr,RtMethodScope methodscope)
+		{
+			var instance = Context.GC.Heap[instance_box.HeapPtr];
+			RtScriptClass heap = (RtScriptClass)instance;
+
+
+
+			ASTrait t = heap.Meta._link_codescope.Members[(ushort)scopemember_index].trait;
+#if DEBUG
+			Debug.Assert(
+				(t.Kind == TraitKind.Slot ||
+					t.Kind == TraitKind.Constant
+				)
+				);
+#endif
+
+
+			RtScriptClass payload = (RtScriptClass)instance;
+
+			ASTrait trait = t;
+
+			Debug.Assert(trait.Kind == TraitKind.Slot);
+
+			Context.GC.CheckGC(ref error);
+			if (Context.StackPosition >= Context.STACK_LENGTH)
+			{
+				RaiseStackOverflow(ref error);
+				return;
+			}
+
+			var box = stackslots[source_index];
+
+			ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
+			Context.StackPosition++;
+
+			ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+			if (error.raised)
+			{
+				Context.StackPosition--;
+				return;
+			}
+			if (payload.IsUpdateStructOrEqual(Context, (int)scopemember_index, conv))
+			{
+				Context.StackPosition--;
+			}
+			else
+			{
+				box = GetSaveValue(conv, ref error);
+				Context.StackPosition--;
+				if (error.raised)
+				{
+					return;
+				}
+
+				payload.SetSlot(box, (int)scopemember_index);
+			}
+
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void Store_InstanceOrScopeMember(int src_index, byte** PC, Span<NaNBoxing> stackslots,
 			int stackStPos, int scope_ptr, RtHeapBase methodscope, ref ReceiveError error)
 		{
 			StackLocater source;
@@ -9026,177 +9389,47 @@ namespace juicescript.runtime
 			StackLocater insloc;
 			LoadStackLocater(&insloc, PC);
 
-			//ushort trait_index;
-			uint scopemember_index;
+			ushort typekind;
+			ushort scopemember_index;
 
-			//LoadUShort(&trait_index, &PC);
-			LoadUInt(&scopemember_index, PC);
-
+			typekind = *(ushort*)(*PC);*PC += 2;
+			scopemember_index = *(ushort*)(*PC);*PC += 2;
 
 			NaNBoxing instance_box;
-			RtHeapTypeKind kind;
-			//ASContainer as_type;
 
 			Debug.Assert(insloc.index >= 0);
 
 			instance_box = stackslots[insloc.index];
-			kind = (RtHeapTypeKind)(instance_box.ValueType == BoxType.HeapPtr ? instance_box.HeapKind : 255);
-
-
-			switch (instance_box.ValueType)
+			
+			if (instance_box.ValueType == BoxType.Null)
 			{
-				case NaNBoxing.BoxType.Null:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_AccessNull(ref error);
-					goto flag_handle_error;
-				case NaNBoxing.BoxType.HeapPtr:
-					break;
-#if DEBUG
-				case NaNBoxing.BoxType.Number:
-				case NaNBoxing.BoxType.Boolean:
-				case NaNBoxing.BoxType.Int:
-				case NaNBoxing.BoxType.Uint:
-				case NaNBoxing.BoxType.Sbyte:
-				case NaNBoxing.BoxType.Byte:
-				case NaNBoxing.BoxType.Short:
-				case NaNBoxing.BoxType.UShort:
-				case NaNBoxing.BoxType.Float:
-					throw new InvalidOperationException(); //这些东西没有成员
-
-				case NaNBoxing.BoxType.Undefined:
-				case NaNBoxing.BoxType.Fault:
-				default:
-					throw new InvalidOperationException();
-#endif
+				RaiseTypeError_AccessNull(ref error);
+				goto flag_handle_error;
 			}
 
+			Debug.Assert(instance_box.ValueType == BoxType.HeapPtr);
 
-
-
-
-			do
+			if (instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 			{
-				if (instance_box.HeapKind == (byte)RtHeapTypeKind.CLASS || instance_box.HeapKind == (byte)RtHeapTypeKind.GLOBAL)
-				{
+				var instance = Context.GC.Heap[instance_box.HeapPtr];
+				RtInstance payload = (RtInstance)instance;
 
-					var instance = Context.GC.Heap[instance_box.HeapPtr];
-					RtScriptClass heap = (RtScriptClass)instance;
-
-
-
-					ASTrait t = heap.Meta._link_codescope.Members[(ushort)scopemember_index].trait;
-#if DEBUG
-					Debug.Assert(
-						(t.Kind == TraitKind.Slot ||
-							t.Kind == TraitKind.Constant
-						)
-						);
-#endif
-
-
-					RtScriptClass payload = (RtScriptClass)instance;
-
-					ASTrait trait = t;
-
-					Debug.Assert(trait.Kind == TraitKind.Slot);
-
-					Context.GC.CheckGC(ref error);
-					if (Context.StackPosition >= Context.STACK_LENGTH)
-					{
-						RaiseStackOverflow(ref error);
-						goto flag_handle_error;
-					}
-
-					var box = stackslots[source.index];
-
-					ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
-					Context.StackPosition++;
-
-					ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
-					if (error.raised)
-					{
-						Context.StackPosition--;
-						goto flag_handle_error;
-					}
-					if (payload.IsUpdateStructOrEqual(Context, (int)scopemember_index, conv))
-					{
-						Context.StackPosition--;
-					}
-					else
-					{
-						box = GetSaveValue(conv, ref error);
-						Context.StackPosition--;
-						if (error.raised)
-						{
-							goto flag_handle_error;
-						}
-
-						payload.SetSlot(box, (int)scopemember_index);
-					}
-
-				}
-				else if (instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
-				{
-
-					var instance = Context.GC.Heap[instance_box.HeapPtr];
-					RtInstance payload = (RtInstance)instance;
-
-					ASTrait trait = instance.Type._link_codescope.Members[(ushort)scopemember_index].trait;
-
-					Debug.Assert(
-						trait.Kind == TraitKind.Slot);
-
-					var box = stackslots[source.index];
-
-
-					Context.GC.CheckGC(ref error);
-					if (Context.StackPosition >= Context.STACK_LENGTH)
-					{
-						RaiseStackOverflow(ref error);
-						goto flag_handle_error;
-					}
-
-					ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
-					Context.StackPosition++;
-					ConvertValueType(ref error, box, trait.TypeKind, trait.__rt_type_class__, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
-					if (error.raised)
-					{
-						Context.StackPosition--;
-						goto flag_handle_error;
-					}
-					if (payload.IsUpdateStructOrEqual(Context, (ushort)scopemember_index, conv))
-					{
-						Context.StackPosition--;
-					}
-					else
-					{
-						box = GetSaveValue(conv, ref error);
-						Context.StackPosition--;
-
-						if (error.raised)
-						{
-							goto flag_handle_error;
-						}
-
-						payload.SetSlot(box, (ushort)scopemember_index, this);
-					}
-				}
-#if DEBUG
-				else
-				{
-					throw new InvalidOperationException();
-				}
-#endif
-				break;
+				var box = stackslots[source.index];
+				Store_Instance_Slow(box, (RtInstance)instance, scopemember_index, (RtMethodScope)methodscope, scope_ptr, ref error);
+				
 			}
-			while (true);
-
-
-
-
-
-
-
+			else if (instance_box.HeapKind == (byte)RtHeapTypeKind.CLASS || instance_box.HeapKind == (byte)RtHeapTypeKind.GLOBAL)
+			{
+				Store_Global_Class(instance_box, scopemember_index, ref error, stackslots, source.index, scope_ptr, (RtMethodScope)methodscope);				
+			}
+			
+#if DEBUG
+			else
+			{
+				throw new InvalidOperationException();
+			}
+#endif
+			
 
 		flag_handle_error:;
 
@@ -12421,6 +12654,82 @@ namespace juicescript.runtime
 		}
 
 
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Return_Value(int dst_index,int returnSlotIndex, 
+			ASMethod method ,Span<NaNBoxing> stackslots,int stackStPos,
+			int calleelastPos,int scope_ptr,
+			ref ReceiveError error)
+		{
+			Debug.Assert(returnSlotIndex >= 0);
+
+			//Context.GC.CheckGC(ref error);
+			//StackLocater value;
+			//value.index = dst_index;
+
+			var v = stackslots[dst_index];
+
+			var v_valuetype = v.ValueType;
+			var returnTypeKind = method.ReturnTypeKind;
+
+			if (v.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
+			{
+				v = LoadValue((RtStackCache)Context.GC.Heap[v.HeapPtr],
+						stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + dst_index);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (method.Flags.HasFlag(MethodFlags.ASYNC))
+			{
+			}
+			else if (returnTypeKind == TypeKind.Any
+				|| ((byte)v_valuetype - 3 == (byte)returnTypeKind && returnTypeKind <= TypeKind.Float)
+				|| (v_valuetype == BoxType.LocalString && returnTypeKind == TypeKind.String))
+			{
+
+			}
+			else if (returnTypeKind == TypeKind.Int && (byte)(v_valuetype - 2) < (byte)BoxType.UShort - 1)
+			{
+				v.SetInt(v.IntValue);
+
+			}
+			else if (returnTypeKind == TypeKind.Uint && (byte)(v_valuetype - 2) < (byte)BoxType.UShort - 1)
+			{
+				v.SetUInt(v.UIntValue);
+			}
+			else
+			{
+				ConvertValueType(ref error, v, returnTypeKind, method.__return_type_class__, ref v);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+
+			if (
+				v_valuetype == BoxType.HeapPtr &&
+				v.HeapKind >= (byte)RtHeapTypeKind.INSTANCE //||
+															//v.HeapKind == (byte)RtHeapTypeKind.ARRAY ||
+															//v.HeapKind == (byte)RtHeapTypeKind.VECTOR ||
+															//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
+				)
+			{
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, v, ref error);
+				if (error.raised)
+				{
+					Context.StackSlots[returnSlotIndex].SetUndefined();
+					return;
+				}
+			}
+			else
+			{
+				Context.StackSlots[returnSlotIndex] = v;
+			}
+
+		}
 
 	}
 }

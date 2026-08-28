@@ -463,7 +463,7 @@ namespace juicescript.compiler.IL.Optimize
 			instructions = FirstStep(instructions);
 
 
-			var cfg = ControlFlowGraphBuilder.Build(instructions, method);
+			var cfg = ControlFlowGraphBuilder.Build(instructions, method); instructions = null;
 			cfg.DeathCodeErase();
 
 			cfg.FindNaturalLoop(true);
@@ -485,6 +485,7 @@ namespace juicescript.compiler.IL.Optimize
 					foreach (var item in cfg.Blocks)
 					{
 						item.Instructions.RemoveAll(i => i.INS_Code == INS_Code.super_ctor);
+						
 					}
 				}
 				else
@@ -539,6 +540,7 @@ namespace juicescript.compiler.IL.Optimize
 							foreach (var item in cfg.Blocks)
 							{
 								item.Instructions.RemoveAll(i => i.INS_Code == INS_Code.super_ctor);
+								
 							}
 						}
 					}
@@ -624,6 +626,11 @@ namespace juicescript.compiler.IL.Optimize
 
 			optimizedInstructions = JmpJmp(optimizedInstructions);
 
+
+			if (optimizedInstructions.All(i => i.INS_Code == INS_Code.END || i.INS_Code == INS_Code.expression_barrier))
+			{
+				optimizedInstructions = new Instruction[0];
+			}
 
 			method.Body.ByteCode = Assembler.Assemble(maxslots, constants, optimizedInstructions);
 

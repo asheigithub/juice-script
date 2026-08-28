@@ -23,6 +23,348 @@ namespace juicescript.runtime
 #endif
 	{
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void GetSaveValue_Instance( ref NaNBoxing value, ref ReceiveError error)
+		{
+			Debug.Assert(value.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+			RtInstance target;
+			var src_ptr = RtInstance.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out target); //查找最终指向的目标
+			if (src_ptr < Context.CacheInstancePtr + Context.STACK_LENGTH)
+			{
+
+				RtHeapBase heapObj;
+				int ptr = Context.GC.AllocInstance((ASInstance)target.Type, out heapObj);
+				if (ptr == 0)
+				{
+					//这种情况应该为致命错误，就不要再catch了
+					RaiseFault(ref error);
+					return;
+				}
+
+
+				((RtInstance)heapObj).CopyFrom(target, (ASInstance)heapObj.Type, this, target.Type._link_codescope.TypeLayout.Size);
+				target.HEAPINSTANCE_PTR = ptr;
+
+				value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+
+			}
+			else
+			{
+				value.SetHeapPtr(src_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+			}
+		}
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void GetSaveValue_InstanceType(ref NaNBoxing value, ref ReceiveError error)
+		{
+			Debug.Assert(value.ValueType == NaNBoxing.BoxType.HeapPtr);
+
+
+			//RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+			if ( value.IsStruct() )//((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Struct))
+			{
+				RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+				//结构体，必要复制一份。
+				RtHeapBase heapObj;
+				int ptr = Context.GC.AllocInstance((ASInstance)instance.Type, out heapObj);
+				if (ptr == 0)
+				{
+					//这种情况应该为致命错误，就不要再catch了
+					RaiseFault(ref error);
+					return;
+				}
+				((RtInstance)heapObj).CopyFrom(instance, this, instance.Type._link_codescope.TypeLayout.Size);
+				value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+			}
+			else if (value.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH)//((RtPayloadInstance)instance).isCache)
+			{
+				//RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+				GetSaveValue_Instance(ref value, ref error);
+			}
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private void DoGetSaveValue(RtHeapTypeKind htype, ref NaNBoxing value, ref ReceiveError error)
+		{
+
+			switch (htype)
+			{
+				case RtHeapTypeKind.CLASS:
+				case RtHeapTypeKind.GLOBAL:
+				case RtHeapTypeKind.STRING:
+				case RtHeapTypeKind.DYNAMIC_PROPERTYS:
+				case RtHeapTypeKind.NAMESPACE:
+					break;
+				case RtHeapTypeKind.INSTANCE:
+					{
+						GetSaveValue_InstanceType(ref value, ref error);
+					}
+					break;
+
+				case RtHeapTypeKind.CLOSURE:
+					{
+#if FORCOMPILER
+							if (IsComputeConstExpr)
+							{
+								throw new EvalConstException();
+							}
+#endif
+
+						if (value.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH)
+						{
+							RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+							RtClosure cache = (RtClosure)instance;
+							var src_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out cache);
+
+							if (src_ptr < Context.M_ClosurePtr + Context.STACK_LENGTH)
+							{
+
+								if (cache.cloneing_ptr != 0)
+								{
+									value.SetHeapPtr(cache.cloneing_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+									break;
+								}
+
+
+
+								RtHeapBase heapObj;
+								int ptr = Context.GC.AllocClosure(((ASMethodBody)instance.Type).Method);
+								if (ptr == 0)
+								{
+									//这种情况应该为致命错误，就不要再catch了
+									RaiseFault(ref error);
+									return ;
+								}
+
+								cache.cloneing_ptr = ptr;
+
+								heapObj = Context.GC.Heap[ptr];
+								RtClosure closure = (RtClosure)heapObj;
+
+								closure.CopyDataFrom(cache, this);
+
+								//原cache的堆对象追踪到堆指针上
+								cache.HEAPINSTANCE_PTR = ptr;
+
+								//将缓存的MethodScope生成到堆里
+								int scope_p = cache.ScopePtr;
+								if (scope_p != 0)
+								{
+									NaNBoxing s = new NaNBoxing();
+									s.SetHeapPtr(scope_p, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);//反正会马上递归
+									s = GetSaveValue(s, ref error);
+									if (error.raised)
+									{
+										cache.cloneing_ptr = 0;
+										value = default;
+										return;
+									}
+
+#if DEBUG
+									if (s.ValueType != NaNBoxing.BoxType.HeapPtr)
+										throw new InvalidOperationException();
+#endif
+									closure.ScopePtr = s.HeapPtr;
+
+									//原cache也指向新生成的堆中.
+									cache.ScopePtr = s.HeapPtr;
+								}
+								else
+								{
+									closure.ScopePtr = cache.ScopePtr;
+								}
+
+								cache.cloneing_ptr = 0;
+
+								value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+
+
+							}
+							else
+							{
+								value.SetHeapPtr(src_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+							}
+						}
+
+					}
+					break;
+				case RtHeapTypeKind.MethodScope:
+					{
+						if (value.HeapPtr < Context.M_MethodScopePtr + Context.MAX_BACKTRACE)
+						{
+							RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+							if (!((ASMethodBody)instance.Type).Method.Flags.HasFlag(MethodFlags.NeedActivation))
+							{
+								//不被引用的method,跳过
+								RtMethodScope scope = (RtMethodScope)instance;
+								if (scope.ParentPtr == 0)
+								{
+									value.SetHeapPtr(0, (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
+								}
+								else
+								{
+									NaNBoxing p = new NaNBoxing();
+									p.SetHeapPtr(scope.ParentPtr, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);//反正马上递归
+									p = GetSaveValue(p, ref error);
+									if (error.raised)
+									{
+										value = default;
+										return ;
+									}
+
+									value = p; //.SetHeapPtr(p.HeapPtr);
+
+								}
+
+							}
+							else
+							{
+								RtMethodScope cacheMscope = (RtMethodScope)instance;
+								if (cacheMscope.cloneout_ptr != 0)
+								{
+									value.SetHeapPtr(cacheMscope.cloneout_ptr, (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
+									break;
+								}
+
+								var cacheSpan = cacheMscope.__get_slots_for_gc;
+
+								RtHeapBase heapObj;
+								int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, instance.Type._link_codescope);
+								if (ptr == 0)
+								{
+									//这种情况应该为致命错误，就不要再catch了
+									RaiseFault(ref error);
+									value = default;
+									return;
+								}
+
+								cacheMscope.cloneout_ptr = ptr;
+
+								heapObj = Context.GC.Heap[ptr];
+								heapObj.Type = instance.Type;
+
+								RtMethodScope heap_scope = (RtMethodScope)heapObj;
+
+								for (int i = 0; i < cacheSpan.Length; i++)
+								{
+									var oldSpanValue = cacheSpan[i];
+									//cacheSpan[i].SetUndefined();//原值删除 最后会整体替代到新的堆的值。
+
+									NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
+									if (error.raised)
+									{
+										cacheMscope.cloneout_ptr = 0;
+										value = default;
+										return;
+									}
+
+									//cacheSpan[i] = slotV;
+									heap_scope.SetSlot(slotV, (ushort)i);
+								}
+								cacheMscope.ChangeStore(heap_scope);
+
+								//cacheMscope.cloneing_ptr = 0;
+
+								if (cacheMscope.ParentPtr != 0)
+								{
+									NaNBoxing p = new NaNBoxing();
+									p.SetHeapPtr(cacheMscope.ParentPtr, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);//马上递归
+									p = GetSaveValue(p, ref error);
+									if (error.raised)
+									{
+										value = default;
+										return ;
+									}
+
+#if DEBUG
+									if (p.ValueType != NaNBoxing.BoxType.HeapPtr)
+										throw new InvalidOperationException();
+#endif
+
+									heap_scope.ParentPtr = p.HeapPtr;
+
+								}
+								else
+								{
+									heap_scope.ParentPtr = 0;
+								}
+
+								value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
+							}
+						}
+					}
+					break;
+				case RtHeapTypeKind.ARRAY:
+					{
+						RtArray arrStore;// = (RtPayloadArray)instance;
+						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arrStore);
+
+						if (arrStore.StoreMode == RtArray.ArrayStoreMode.normal)
+						{
+							value.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+							break;
+						}
+						else if (arrStore.StoreMode == RtArray.ArrayStoreMode.cache_on_stack)
+						{
+							int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
+							if (error.raised)
+							{
+								return;
+							}
+							value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+						}
+						else
+						{
+#if DEBUG
+							if (arrStore.StoreMode != RtArray.ArrayStoreMode.cache)
+							{
+								throw new InvalidOperationException();
+							}
+#endif
+
+							int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
+							if (error.raised)
+							{
+								return;
+							}
+							value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+						}
+					}
+					break;
+				case RtHeapTypeKind.VECTOR:
+					{
+						RtVector vector;
+						int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vector);
+						if (vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)
+						{
+							RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+							vec_ptr = vector.ChangeStoreToHeap((ASInstance)instance.Type, this, ref error, out VectorImpl.VectorStore newstore);
+							if (error.raised)
+							{
+								return;
+							}
+
+						}
+						value.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+					}
+
+					break;
+				case RtHeapTypeKind.SHAPE:
+				case RtHeapTypeKind.STACK_CACHE_OBJ:
+				default:
+#if DEBUG
+					throw new InvalidOperationException();
+#else
+						Environment.FailFast("出错了，这里跑不到"); return;
+#endif
+			}
+
+		}
+
 		/// <summary>
 		/// 保存到堆前，如有缓存对象需要先复制到堆。
 		/// 由于此操作可能会创建一个新对象，并且没有保存到栈里，所以凡是使用了此操作的指令，在使用新对象之前不能引发GC否则会出现意外。
@@ -30,6 +372,7 @@ namespace juicescript.runtime
 		/// <param name="value"></param>
 		/// <param name="error"></param>
 		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal NaNBoxing GetSaveValue(NaNBoxing value, ref ReceiveError error)
 		{
 			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -39,319 +382,16 @@ namespace juicescript.runtime
 				RtHeapTypeKind htype = (RtHeapTypeKind)value.HeapKind;
 				if ((byte)htype == NaNBoxing.UNKNOWN_HEAPKIND)
 				{ 
-					htype = Context.GC.Heap[value.HeapPtr].Kind;
+					RtHeapBase o = Context.GC.Heap[value.HeapPtr];
+
+					htype = o.Kind;
+					if (htype == RtHeapTypeKind.INSTANCE)
+					{
+						value.SetHeapPtr(value.HeapPtr, (byte)htype, (byte)(o.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)o.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
+					}
 				}
 
-				switch (htype)
-				{
-					case RtHeapTypeKind.CLASS:
-					case RtHeapTypeKind.GLOBAL:
-					case RtHeapTypeKind.STRING:
-					case RtHeapTypeKind.DYNAMIC_PROPERTYS:
-					case RtHeapTypeKind.NAMESPACE:
-						break;
-					case RtHeapTypeKind.INSTANCE:
-						{
-							RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-							if (((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Struct))
-							{
-								//结构体，必要复制一份。
-								RtHeapBase heapObj;
-								int ptr = Context.GC.AllocInstance((ASInstance)instance.Type, out heapObj);
-								if (ptr == 0)
-								{
-									//这种情况应该为致命错误，就不要再catch了
-									RaiseFault(ref error);
-									return value;
-								}
-								((RtInstance)heapObj).CopyFrom(instance, this, instance.Type._link_codescope.TypeLayout.Size);
-								value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE,(byte)HeapKindFlag.FLAG_STRUCT);
-							}
-							else if (value.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH)//((RtPayloadInstance)instance).isCache)
-							{
-								RtInstance target;
-								var src_ptr = RtInstance.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out target); //查找最终指向的目标
-								if (src_ptr < Context.CacheInstancePtr + Context.STACK_LENGTH)
-								{
-
-									RtHeapBase heapObj;
-									int ptr = Context.GC.AllocInstance((ASInstance)instance.Type, out heapObj);
-									if (ptr == 0)
-									{
-										//这种情况应该为致命错误，就不要再catch了
-										RaiseFault(ref error);
-										return value;
-									}
-
-									
-									((RtInstance)heapObj).CopyFrom(target, (ASInstance)heapObj.Type ,this, instance.Type._link_codescope.TypeLayout.Size);
-									target.HEAPINSTANCE_PTR = ptr;
-
-									value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
-
-								}
-								else
-								{
-									value.SetHeapPtr(src_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
-								}
-							}
-						}
-						break;
-
-					case RtHeapTypeKind.CLOSURE:
-						{
-#if FORCOMPILER
-							if (IsComputeConstExpr)
-							{
-								throw new EvalConstException();
-							}
-#endif
-
-							if (value.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH)
-							{
-								RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-								RtClosure cache = (RtClosure)instance;
-								var src_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out cache);
-
-								if (src_ptr < Context.M_ClosurePtr + Context.STACK_LENGTH)
-								{
-
-									if (cache.cloneing_ptr != 0)
-									{
-										value.SetHeapPtr(cache.cloneing_ptr , (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
-										break;
-									}
-
-
-
-									RtHeapBase heapObj;
-									int ptr = Context.GC.AllocClosure(((ASMethodBody)instance.Type).Method);
-									if (ptr == 0)
-									{
-										//这种情况应该为致命错误，就不要再catch了
-										RaiseFault(ref error);
-										return value;
-									}
-
-									cache.cloneing_ptr = ptr;
-
-									heapObj = Context.GC.Heap[ptr];
-									RtClosure closure = (RtClosure)heapObj;
-
-									closure.CopyDataFrom(cache, this);
-
-									//原cache的堆对象追踪到堆指针上
-									cache.HEAPINSTANCE_PTR = ptr;
-
-									//将缓存的MethodScope生成到堆里
-									int scope_p = cache.ScopePtr;
-									if (scope_p != 0)
-									{
-										NaNBoxing s = new NaNBoxing();
-										s.SetHeapPtr(scope_p, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);//反正会马上递归
-										s = GetSaveValue(s, ref error);
-										if (error.raised)
-										{
-											cache.cloneing_ptr = 0;
-
-											return new NaNBoxing();
-										}
-
-#if DEBUG
-										if (s.ValueType != NaNBoxing.BoxType.HeapPtr)
-											throw new InvalidOperationException();
-#endif
-										closure.ScopePtr = s.HeapPtr;
-
-										//原cache也指向新生成的堆中.
-										cache.ScopePtr = s.HeapPtr;
-									}
-									else
-									{
-										closure.ScopePtr = cache.ScopePtr;
-									}
-
-									cache.cloneing_ptr = 0;
-
-									value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
-
-
-								}
-								else
-								{
-									value.SetHeapPtr(src_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
-								}
-							}
-
-						}
-						break;
-					case RtHeapTypeKind.MethodScope:
-						{
-							if (value.HeapPtr < Context.M_MethodScopePtr + Context.MAX_BACKTRACE)
-							{
-								RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-								if (!((ASMethodBody)instance.Type).Method.Flags.HasFlag(MethodFlags.NeedActivation))
-								{
-									//不被引用的method,跳过
-									RtMethodScope scope = (RtMethodScope)instance;
-									if (scope.ParentPtr == 0)
-									{
-										value.SetHeapPtr(0 , (byte)RtHeapTypeKind.MethodScope , (byte)HeapKindFlag.NONE);
-									}
-									else
-									{
-										NaNBoxing p = new NaNBoxing();
-										p.SetHeapPtr(scope.ParentPtr,NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);//反正马上递归
-										p = GetSaveValue(p, ref error);
-										if (error.raised)
-										{
-											return new NaNBoxing();
-										}
-
-										value = p; //.SetHeapPtr(p.HeapPtr);
-
-									}
-
-								}
-								else
-								{
-									RtMethodScope cacheMscope = (RtMethodScope)instance;
-									if (cacheMscope.cloneout_ptr != 0)
-									{
-										value.SetHeapPtr(cacheMscope.cloneout_ptr, (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
-										break;
-									}
-
-									var cacheSpan = cacheMscope.__get_slots_for_gc;
-
-									RtHeapBase heapObj;
-									int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, instance.Type._link_codescope);
-									if (ptr == 0)
-									{
-										//这种情况应该为致命错误，就不要再catch了
-										RaiseFault(ref error);
-										return value;
-									}
-
-									cacheMscope.cloneout_ptr = ptr;
-
-									heapObj = Context.GC.Heap[ptr];
-									heapObj.Type = instance.Type;
-
-									RtMethodScope heap_scope = (RtMethodScope)heapObj;
-
-									for (int i = 0; i < cacheSpan.Length; i++)
-									{
-										var oldSpanValue = cacheSpan[i];
-										//cacheSpan[i].SetUndefined();//原值删除 最后会整体替代到新的堆的值。
-
-										NaNBoxing slotV = GetSaveValue(oldSpanValue, ref error);
-										if (error.raised)
-										{
-											cacheMscope.cloneout_ptr = 0;
-											return new NaNBoxing();
-										}
-
-										//cacheSpan[i] = slotV;
-										heap_scope.SetSlot(slotV, (ushort)i);
-									}
-									cacheMscope.ChangeStore(heap_scope);
-
-									//cacheMscope.cloneing_ptr = 0;
-
-									if (cacheMscope.ParentPtr != 0)
-									{
-										NaNBoxing p = new NaNBoxing();
-										p.SetHeapPtr(cacheMscope.ParentPtr, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);//马上递归
-										p = GetSaveValue(p, ref error);
-										if (error.raised)
-										{
-											return new NaNBoxing();
-										}
-
-#if DEBUG
-										if (p.ValueType != NaNBoxing.BoxType.HeapPtr)
-											throw new InvalidOperationException();
-#endif
-
-										heap_scope.ParentPtr = p.HeapPtr;
-
-									}
-									else
-									{
-										heap_scope.ParentPtr = 0;
-									}
-
-									value.SetHeapPtr(ptr, (byte)RtHeapTypeKind.MethodScope, (byte)HeapKindFlag.NONE);
-								}
-							}
-						}
-						break;
-					case RtHeapTypeKind.ARRAY:
-						{
-							RtArray arrStore;// = (RtPayloadArray)instance;
-							int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr,this,out arrStore);
-
-							if (arrStore.StoreMode == RtArray.ArrayStoreMode.normal)
-							{
-								value.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-								break;
-							}
-							else if (arrStore.StoreMode == RtArray.ArrayStoreMode.cache_on_stack)
-							{
-								int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
-								if (error.raised)
-								{
-									return value;
-								}
-								value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-							}
-							else
-							{
-#if DEBUG
-								if (arrStore.StoreMode != RtArray.ArrayStoreMode.cache)
-								{
-									throw new InvalidOperationException();
-								}
-#endif
-								
-								int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
-								if (error.raised)
-								{
-									return value;
-								}
-								value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-							}
-						}
-						break;
-					case RtHeapTypeKind.VECTOR:
-						{
-							RtVector vector;
-							int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vector);
-							if (vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)
-							{
-								RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-								vec_ptr = vector.ChangeStoreToHeap( (ASInstance)instance.Type ,this,ref error,out VectorImpl.VectorStore newstore);
-								if (error.raised)
-								{ 
-									return value;	
-								}
-								
-							}
-							value.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
-						}
-						
-						break;
-					case RtHeapTypeKind.SHAPE:
-					case RtHeapTypeKind.STACK_CACHE_OBJ:
-					default:
-#if DEBUG
-						throw new InvalidOperationException();
-#else
-						Environment.FailFast("出错了，这里跑不到"); return default;
-#endif
-				}
-
+				DoGetSaveValue(htype,ref value,ref error);
 			}
 
 			return value;
@@ -2430,19 +2470,22 @@ namespace juicescript.runtime
 		}
 
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool CopyIfSameTypeStructAndReplaceSrc(NaNBoxing dst,ref NaNBoxing src)
 		{
 			if (dst.Raw == src.Raw)
 				return true;
 
-			if (dst.ValueType == NaNBoxing.BoxType.HeapPtr && src.ValueType == NaNBoxing.BoxType.HeapPtr && dst.HeapKind == src.HeapKind && dst.HeapKind == (byte)RtHeapTypeKind.INSTANCE )
+			if (dst.IsStruct() && src.IsStruct() )//dst.ValueType == NaNBoxing.BoxType.HeapPtr && src.ValueType == NaNBoxing.BoxType.HeapPtr && dst.HeapKind == src.HeapKind && dst.HeapKind == (byte)RtHeapTypeKind.INSTANCE )
 			{
 				var oldv = Context.GC.Heap[dst.HeapPtr];
 				var newv = Context.GC.Heap[src.HeapPtr];
 
 				//if (oldv.Kind == newv.Kind && oldv.Kind == RtHeapTypeKind.INSTANCE)
 				{
-					if (((ASInstance)oldv.Type).Flags.HasFlag(ClassFlags.Struct))
+					Debug.Assert(((ASInstance)oldv.Type).Flags.HasFlag(ClassFlags.Struct));
+
+					if(oldv.Type == newv.Type)
 					{
 						((RtInstance)oldv).CopyFrom(newv, Context.player, oldv.Type._link_codescope.TypeLayout.Size);
 						src.SetHeapPtr(dst.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);

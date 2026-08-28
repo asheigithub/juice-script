@@ -100,11 +100,7 @@ namespace juicescript.runtime
 
 			do
 			{
-				if (Context.BackTraceIndex >= Context.MAX_BACKTRACE)
-				{
-					break;
-				}
-
+				
 
 				int para_argcount = 0;
 
@@ -1013,26 +1009,33 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining )]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void RunMethod_MatchArgs(ASMethod method, NaNBoxing _this_, int scope_ptr, Span<NaNBoxing> stackslots, ushort argsCount, byte* argementsPtr,
 
 			int returnSlotIndex,
-			ref ReceiveError error
+			ref ReceiveError error,
+
+			ref NaNBoxing result
+
 			)
 		{
-			if (Context.BackTraceIndex >= Context.MAX_BACKTRACE)
+			
+			
+			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
+			method.Body.GetInfo(ref info);
+
+			if (info.instructions == 0 && argsCount == 0 && (method.Flags & MethodFlags.Native) == 0)
 			{
-				RaiseStackOverflow(ref error);
-				goto flag_handle_error;
+				result.setDefault(method.ReturnTypeKind);
+				return;
 			}
+
 			var method_body_linkcodesocpe = method.Body._link_codescope;
 
 			int scopeHoleSlots = method_body_linkcodesocpe.Members.Count
 				+ 1 //holdthis
 				;
 
-			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
-			method.Body.GetInfo(ref info);
 
 			if (Context.StackPosition + scopeHoleSlots + info.useSlots
 				//+ 1 
@@ -1077,18 +1080,22 @@ namespace juicescript.runtime
 			}
 
 			var pmembers = method_body_linkcodesocpe.Members;
-			Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, method.Parameters.Count);
+			Span<NaNBoxing> param_slots = Context.StackSlots.AsSpan(Context.StackPosition, argsCount);
 			//param_slots.Clear(); //防止GC 错误意外访问
-			for (ushort i = 0; i < param_slots.Length; i++)
+
+
+			for (ushort i = 0; i < argsCount; i++)
 			{
 				var p = method.Parameters[i];
 
-				StackLocater argLocater;
-				LoadStackLocater(&argLocater, &argementsPtr);
+				//StackLocater argLocater;
+				//LoadStackLocater(&argLocater, &argementsPtr);
 
 				//StackLocater argLocater = *(StackLocater*)argementsPtr; argementsPtr += 4;
+				int arg_index = *(int*)argementsPtr; argementsPtr += 4;
 
-				NaNBoxing box = stackslots[argLocater.index];
+
+				NaNBoxing box = stackslots[arg_index];
 
 				var ptypekind = p.TypeKind;
 				var boxtype = box.ValueType;
@@ -1148,7 +1155,11 @@ namespace juicescript.runtime
 				InstructionProfiler.Profile_MethodStart(method);
 #endif
 
-			Context.StackSlots[returnSlotIndex].setDefault(method.ReturnTypeKind);
+			if (returnSlotIndex > -1)
+			{
+				result.setDefault(method.ReturnTypeKind);
+				//Context.StackSlots[returnSlotIndex].setDefault(method.ReturnTypeKind);
+			}
 
 			if (info.instructions > 0)
 			{
@@ -1208,7 +1219,7 @@ namespace juicescript.runtime
 
 
 				}
-				return;
+				return ;
 			}
 			else if ((method.Flags & MethodFlags.Native) == MethodFlags.Native)
 			{
@@ -1277,6 +1288,12 @@ namespace juicescript.runtime
 			}
 #endif
 
+			if (Context.BackTraceIndex >= Context.MAX_BACKTRACE)
+			{
+				RaiseStackOverflow(ref error);
+				return default;
+			}
+
 #if DEBUG && !DEBUG_PLAYER
 			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
 			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
@@ -1290,13 +1307,22 @@ namespace juicescript.runtime
 			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
 				&&
 				method.Parameters.Count == args
-				&&
-				returnSlotIndex > -1
+				
 				)
 			{
-				RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error);
-
-				return Context.StackSlots[returnSlotIndex];
+				if (returnSlotIndex > -1)
+				{
+					ref NaNBoxing r = ref Context.StackSlots[returnSlotIndex];
+					RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error, ref r);
+					return r;
+				}
+				else
+				{
+					NaNBoxing t = default;
+					ref NaNBoxing r = ref t;
+					RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error, ref r);
+					return r;
+				}
 
 			}
 			else

@@ -629,7 +629,7 @@ namespace juicescript.runtime.gc
        
         private int thresholed;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining )]
 		internal void CheckGC(ref Player.ReceiveError receiveError)
         {
             //还需要额外扫描receiveError里引用的堆对象,不要忘记

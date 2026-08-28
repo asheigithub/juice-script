@@ -7,19 +7,15 @@ using System.Threading.Tasks;
 
 namespace juicescript.ABC.INS
 {
-	/// <summary>
-	/// 保存进instance的成员中
-	/// 用dst承载要保存的值
-	/// </summary>
-	public sealed class INS_Store_InstanceOrScopeMember : Instruction
+	public sealed class INS_O_Store_InstanceField : Instruction
 	{
-		public override INS_Code INS_Code => INS_Code.store_instanceMember;
+		public override INS_Code INS_Code => INS_Code.O_Store_InstanceField;
 
 		public override int Size
 		{
 			get
 			{
-				return 4 + 4 + 4;
+				return 4 + 4 + 4 + 4;
 			}
 		}
 
@@ -27,8 +23,11 @@ namespace juicescript.ABC.INS
 
 		public ushort typekind;
 		public ushort scopemember_index;
+		public ushort offset;
+		public ushort slotsize;
 
-		public INS_Store_InstanceOrScopeMember(Token token) : base(token)
+
+		public INS_O_Store_InstanceField(Token token) : base(token)
 		{
 		}
 
@@ -38,6 +37,8 @@ namespace juicescript.ABC.INS
 			instance.Write(bw);
 			bw.Write(typekind);
 			bw.Write(scopemember_index);
+			bw.Write(offset);
+			bw.Write(slotsize);
 		}
 
 		protected override void ReadFromBinary(BinaryReader br)
@@ -46,11 +47,13 @@ namespace juicescript.ABC.INS
 			instance.ReadFromBinary(br);
 			typekind = br.ReadUInt16();
 			scopemember_index = br.ReadUInt16();
+			offset = br.ReadUInt16();
+			slotsize = br.ReadUInt16();
 		}
 
 		public override string ToString()
 		{
-			return $"Store_InstanceOrScopeMember   [{instance} . scopemember: {scopemember_index}]<- [{dst}]";
+			return $"O_Store_InstanceField   [{instance} . field: {scopemember_index}]<- [{dst}]";
 		}
 
 		public override IEnumerable<StackLocater> GetDef()
@@ -78,7 +81,6 @@ namespace juicescript.ABC.INS
 			if (mapping.TryGetValue(instance.index, out int newIndex1))
 				instance.index = newIndex1;
 		}
-
 
 
 	}

@@ -386,6 +386,7 @@ namespace juicescript.ABC.INS
         O_Ld_Indexer = 106,              //从索引器对象中读
         O_Store_Indexer = 107,           //往索引器对象中写
 
+        O_Store_InstanceField = 108,     //写Instance成员
 
 
 		//***矩阵，向量类***

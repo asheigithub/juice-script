@@ -489,8 +489,8 @@ namespace juicescript.compiler.IL.Optimize
 							INS_Store_InstanceOrScopeMember store_InstanceMember = new INS_Store_InstanceOrScopeMember(store.token);
 							store_InstanceMember.dst = ((INS_Store_HeapValueRef)store).source;
 							store_InstanceMember.instance = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).instance;
-							store_InstanceMember.scopemember_index = ((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
-
+							store_InstanceMember.scopemember_index = (ushort)((INS_Ld_InstanceOrSocpeMemberRef)instruction).scopemember_index;
+							store_InstanceMember.typekind = 0xff;
 
 							basicBlock.Instructions.Insert(j, store_InstanceMember);
 							basicBlock.Instructions.Remove(store);
@@ -1237,7 +1237,7 @@ namespace juicescript.compiler.IL.Optimize
 					var ins = block.Instructions[i];
 					if (ins.INS_Code == INS_Code.ld_instacneOrScopeMember_Val)
 					{
-						var def =FindStackSlotDefAt(((INS_Ld_InstanceOrScopeMember_Val)ins).instance, cfg);
+						var def = FindStackSlotDefAt(((INS_Ld_InstanceOrScopeMember_Val)ins).instance, cfg);
 						if (def.Count == 1 && instructionType.ContainsKey(def[0].Item1))
 						{
 							var type = instructionType[def[0].Item1][def[0].Item2];
@@ -1284,12 +1284,120 @@ namespace juicescript.compiler.IL.Optimize
 								}
 							}
 							else
-							{ 
-								
+							{
+
 							}
 						}
 
 					}
+					else if (ins.INS_Code == INS_Code.store_instanceMember)
+					{
+						INS_Store_InstanceOrScopeMember ins_storemember = (INS_Store_InstanceOrScopeMember)ins;
+						var def = FindStackSlotDefAt(ins_storemember.instance , cfg);
+
+						if (def.Count == 1 && instructionType.ContainsKey(def[0].Item1))
+						{
+							var type = instructionType[def[0].Item1][def[0].Item2];
+							if (type.DefType == InstructionDefType.global)
+							{
+
+							}
+							else if (type.DefType == InstructionDefType.asclass)
+							{
+
+							}
+							else if ((type.DefType == InstructionDefType.obj
+								|| type.DefType == InstructionDefType.obj_maybeCacheable
+								|| type.DefType == InstructionDefType.Struct) && type.Obj is ASInstance)
+							{
+
+								
+								ASInstance obj = (ASInstance)type.Obj;
+
+								int offset = obj._link_codescope.TypeLayout.Offset[ins_storemember.scopemember_index];
+								int slotsize = obj._link_codescope.TypeLayout.SlotSize[ins_storemember.scopemember_index];
+
+								if (offset < ushort.MaxValue && slotsize < ushort.MaxValue)
+								{
+									INS_O_Store_InstanceField store_InstanceField = new INS_O_Store_InstanceField(ins_storemember.token);
+									store_InstanceField.dst = ins_storemember.dst;
+									store_InstanceField.typekind = ins_storemember.typekind;
+									store_InstanceField.instance = ins_storemember.instance;
+									store_InstanceField.scopemember_index = ins_storemember.scopemember_index;
+									store_InstanceField.offset = (ushort)offset;
+									store_InstanceField.slotsize = (ushort)slotsize;
+									
+									
+									
+
+									var scopeMember = obj._link_codescope.Members[store_InstanceField.scopemember_index];
+									bool encodetypekind = false;
+									TypeKind typeKind;
+
+									ASTrait t = scopeMember.trait;
+									encodetypekind = t.TypeKind <= TypeKind.Namespace;
+									typeKind = t.TypeKind;
+
+									if (!encodetypekind)
+									{
+										typeKind = (TypeKind)0xff;
+									}
+
+									store_InstanceField.typekind = (ushort)typeKind;
+
+									//检查是否类型匹配
+									if (!encodetypekind)
+									{
+										def = FindStackSlotDefAt(store_InstanceField.dst, cfg);
+
+										if (def.All(d => instructionType.ContainsKey(d.Item1)
+										&& instructionType[d.Item1][d.Item2].Obj is ASInstance
+										&& (
+										instructionType[d.Item1][d.Item2].DefType == InstructionDefType.Struct ||
+										instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable ||
+										instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj
+										)
+										&&
+										TypeUtils.TestImplicitConvert(
+											(TypeKind)((ASInstance)instructionType[d.Item1][d.Item2].Obj)._link_codescope.TypeLayout.ASType.Type_identifier, scopeMember.TypeKind, context
+											)
+										))
+										{
+											var allClasses = context.scriptDefs.SelectMany(
+												s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+											var c = allClasses.First(c => c.Type_identifier == (ulong)t.TypeKind);
+
+											if (c.Instance.Flags.HasFlag(ClassFlags.Struct))
+											{
+												store_InstanceField.typekind = 0xfeff; //百分之百匹配,并且是成员是结构体
+											}
+											else
+											{
+												store_InstanceField.typekind = 0xffff; //百分之百类型匹配。
+											}
+
+											block.Instructions[i] = store_InstanceField;
+
+										}
+										else
+										{
+											
+										}
+
+									}
+									else
+									{
+										block.Instructions[i] = store_InstanceField;
+									}
+								}
+							}
+						}
+						else
+						{
+							throw new InvalidOperationException();
+						}
+					}
+
 				}
 			}
 
