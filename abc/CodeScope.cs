@@ -114,6 +114,7 @@ namespace juicescript
 
         public Memory<NaNBoxing> _rt_cache_init_data;
 
+        public Memory<byte> _rt_cache_instance_data;
 
         public override string ToString()
         {

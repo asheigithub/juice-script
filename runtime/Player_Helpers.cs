@@ -5412,7 +5412,7 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		
 		private unsafe void O_Store_InstanceField(int src_index, byte** PC, Span<NaNBoxing> stackslots,
 			int stackStPos, int scope_ptr, RtHeapBase methodscope, ref ReceiveError error)
 		{

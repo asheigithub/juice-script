@@ -402,6 +402,16 @@ namespace juicescript.runtime
 
 			if (initmember)
 			{
+#if !FORCOMPILER
+
+				if (!link_codescope._rt_cache_instance_data.IsEmpty)
+				{
+					link_codescope._rt_cache_instance_data.Span.CopyTo(store.Span);
+					return;
+				}
+
+#endif
+
 				unsafe
 				{
 					fixed (byte* p = store.Span)
@@ -434,6 +444,11 @@ namespace juicescript.runtime
 						}
 					}
 				}
+
+#if !FORCOMPILER
+				link_codescope._rt_cache_instance_data = new Memory<byte>( new byte[ link_codescope.TypeLayout.Size] );
+				store.Span.Slice(0,link_codescope.TypeLayout.Size).CopyTo(link_codescope._rt_cache_instance_data.Span);
+#endif
 			}
         }
 

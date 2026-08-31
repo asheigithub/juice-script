@@ -113,6 +113,8 @@ namespace juicescript.runtime
 			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
 			var origin = payload;
 			target = origin;
+
+
 			while (payload.HEAPINSTANCE_PTR != 0)
 			{
 				ptr = payload.HEAPINSTANCE_PTR;
@@ -121,6 +123,7 @@ namespace juicescript.runtime
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
 			}
+
 			return ptr;
 		}
 
@@ -2188,17 +2191,17 @@ namespace juicescript.runtime
 
 
 
-		internal void SetIsRest(bool v)
-		{
-			if (v)
-			{
-				storeMode = (short)((storeMode & 0xff) | 0x100);
-			}
-			else
-			{
-				storeMode &= 0xff;
-			}
-		}
+		//internal void SetIsRest(bool v)
+		//{
+		//	if (v)
+		//	{
+		//		storeMode = (short)((storeMode & 0xff) | 0x100);
+		//	}
+		//	else
+		//	{
+		//		storeMode &= 0xff;
+		//	}
+		//}
 
 		internal void SetIsArguments(bool v)
 		{
@@ -2217,10 +2220,10 @@ namespace juicescript.runtime
 			return (storeMode >> 8) == 0x2;
 		}
 
-		internal bool isRest()
-		{
-			return (storeMode >> 8) == 0x1;
-		}
+		//internal bool isRest()
+		//{
+		//	return (storeMode >> 8) == 0x1;
+		//}
 
 		internal void CopyCacheFrom(RtArray arr_store, Player player)
 		{

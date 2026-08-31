@@ -447,7 +447,7 @@ namespace juicescript.runtime
 							((RtArray)arg_rest).stack_store_startindex = Context.StackPosition - para_argcount;
 							((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
 							((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
-							((RtArray)arg_rest).SetIsRest(true);
+							//((RtArray)arg_rest).SetIsRest(true);
 
 
 							NaNBoxing box = new NaNBoxing();
@@ -1294,7 +1294,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-#if DEBUG && !DEBUG_PLAYER
+#if DEBUG && !DEBUG_PLAYER //&& false
 			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
 			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
 			Context.GC.ForceGC(ref error);
