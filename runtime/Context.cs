@@ -22,8 +22,8 @@ namespace juicescript.runtime
 #endif
     class Context
     {
-        private const int REAL_STACK_LENGTH = 514;
-        public const int STACK_LENGTH = REAL_STACK_LENGTH - 2;
+        private const int REAL_STACK_LENGTH = 512;
+        public const int STACK_LENGTH = REAL_STACK_LENGTH - 0;
         
 
 #if DEBUG

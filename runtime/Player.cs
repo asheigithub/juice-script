@@ -10829,11 +10829,12 @@ namespace juicescript.runtime
 				var instance = Context.GC.Heap[instancePtr];
 				instance.Type = Context.ARRAY.Instance;
 
-				((RtArray)instance).array_len = 0;
-				((RtArray)instance).methodscopeslot_ref_state = 0;
-				((RtArray)instance).HEAPINSTANCE_PTR = 0;
+				//((RtArray)instance).array_len = 0;
+				//((RtArray)instance).methodscopeslot_ref_state = 0;
+				//((RtArray)instance).HEAPINSTANCE_PTR = 0;
+				((RtArray)instance).SetStoreCacheZero(true);
 
-				
+
 				NaNBoxing invalue = default;
 				invalue.SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 

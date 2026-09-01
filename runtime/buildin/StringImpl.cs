@@ -1065,10 +1065,10 @@ namespace juicescript.runtime.buildin
 				var instance = context.GC.Heap[instancePtr];
 				instance.Type = context.ARRAY.Instance;
 
-				((RtArray)instance).array_len = 0;
-				((RtArray)instance).methodscopeslot_ref_state = 0;
-				((RtArray)instance).HEAPINSTANCE_PTR = 0;
-
+				//((RtArray)instance).array_len = 0;
+				//((RtArray)instance).methodscopeslot_ref_state = 0;
+				//((RtArray)instance).HEAPINSTANCE_PTR = 0;
+				((RtArray)instance).SetStoreCacheZero(true);
 
 				context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 

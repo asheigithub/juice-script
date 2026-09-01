@@ -240,22 +240,22 @@ import flash.utils.Dictionary;
 	   
 (function k1()
 {
-	var i:Array;
+	var i:Vector.<int> =new <int> [1,2,3];
 	
-	(function()
+	var j;
+	
+	trace(
+	i.map(function (v,id,a) 
 	{
-		var j = new Array();
-		var k:Array = j;
+		i = null;
 		
-		i = k;
+		j = a;
 		
-		j = null;
-		
-		k[100] = 1;
+		trace(v);
 		
 		
-		
-	})();
+	}
+	));
 	
 	trace(i);
 	

@@ -1749,7 +1749,7 @@ namespace juicescript.compiler
 
 
 			var testCode = SWCWriter.Encode(context, System.IO.Path.GetFileName(outswcfile) == "juice_global.swc" ? Path.GetFileName(outswcfile) : Guid.NewGuid().ToString());
-			juicescript.runtime.Player computeplayer = new Player(int.MaxValue, true);
+			Player computeplayer = new Player(int.MaxValue, true);
 
 
 

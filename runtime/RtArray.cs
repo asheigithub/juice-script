@@ -105,9 +105,41 @@ namespace juicescript.runtime
 		/// 如果是缓存对象(包括argements)，并且已经被保存到堆中，则保存堆中对象的指针
 		/// 后续操作将直接对堆里的对象操作了。
 		/// </summary>
-		internal int HEAPINSTANCE_PTR;
+		internal int HEAPINSTANCE_PTR { get; private set; }
 
-		
+		internal void SetStoreRest(Memory<NaNBoxing> store,int store_startindex)
+		{
+			array_len = (uint)store.Length;
+			stack_store = store;
+			stack_store_startindex = store_startindex;
+			HEAPINSTANCE_PTR = 0;
+			m_property_ptr = 0;
+		}
+
+		internal void SetStoreCacheZero(bool clear)
+		{
+			StoreMode = ArrayStoreMode.cache;
+			HEAPINSTANCE_PTR = 0;
+			methodscopeslot_ref_state = 0;
+			thisslot_ref_state = 0;
+			array_len = 0;
+			if (clear)
+			{
+				for (uint i = array_len; i < cache_store.Length; i++)
+				{
+					cache_store[(int)i].setFault();
+				}
+			}
+		}
+
+		internal void LinkTo(RtArray dst, int dstptr)
+		{ 
+			HEAPINSTANCE_PTR = dstptr;
+			
+		}
+
+
+
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
 			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
@@ -172,7 +204,12 @@ namespace juicescript.runtime
 		/// 
 		/// </summary>
 		internal byte methodscopeslot_ref_state;
-		
+
+		/// <summary>
+		/// 当被作为this对象时，设置成当前scope_ptr。表示被当作this对象引用，当没有其他变量引用时，还可能被this引用。
+		/// </summary>
+		internal byte thisslot_ref_state;
+
 
 		internal uint array_len = 0;
 
@@ -2237,7 +2274,7 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 			}
 #endif
-
+			HEAPINSTANCE_PTR = 0;
 			m_property_ptr = arr_store.m_property_ptr;
 
 			array_len = arr_store.array_len;

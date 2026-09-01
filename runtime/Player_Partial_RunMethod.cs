@@ -67,6 +67,24 @@ namespace juicescript.runtime
 		}
 
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void CleanRefThisSlotFlag(RtHeapBase _this)
+		{
+			switch (_this.Kind)
+			{
+				case RtHeapTypeKind.INSTANCE:
+					break;
+				case RtHeapTypeKind.ARRAY:
+					((RtArray)_this).thisslot_ref_state = 0;
+					break;
+				case RtHeapTypeKind.VECTOR:
+					break;
+				case RtHeapTypeKind.CLOSURE:
+					break;
+				default:
+					break;
+			}
+		}
 
 		/// <summary>
 		/// 特别注意在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
@@ -279,11 +297,12 @@ namespace juicescript.runtime
 					}
 #endif
 					arg_rest.Type = Context.ARRAY.Instance;
-					((RtArray)arg_rest).array_len = (uint)arguments.Length;
-					((RtArray)arg_rest).stack_store = arguments;
-					((RtArray)arg_rest).stack_store_startindex = Context.StackPosition;
-					((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
-					((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
+					//((RtArray)arg_rest).array_len = (uint)arguments.Length;
+					//((RtArray)arg_rest).stack_store = arguments;
+					//((RtArray)arg_rest).stack_store_startindex = Context.StackPosition;
+					//((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
+					//((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
+					((RtArray)arg_rest).SetStoreRest(arguments, Context.StackPosition);
 					((RtArray)arg_rest).SetIsArguments(true);
 
 					if (callee_closure_ptr != 0)
@@ -364,19 +383,22 @@ namespace juicescript.runtime
 
 				m_scopePayload.__sendargcount = args;
 
-				//save this
+				//save this --如果saved_this被赋值，在结束函数调用后需要将this_slot清空，因为this已经结束了
+				RtHeapBase saved_this = null;
 				{
 
-					if (thisPtr.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
+					if ( thisPtr.ValueType == BoxType.HeapPtr && thisPtr.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
 					{
 						ScopeHeapLocater scopeHeapLocater;
 						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
 
-
-						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref thisPtr, null, null, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
+						prepare_savescope_pass(ref thisPtr, m_scopePayload, scopeHeapLocater, default, 0, 0, mScopeId, out saved_this, ref error, true);						
+						//PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref thisPtr, null, 0, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 						if (error.raised)
 						{
+							if (saved_this != null) CleanRefThisSlotFlag(saved_this);
+
 							Context.StackPosition -= para_argcount;
 							goto lbl_handle_arg_err;
 						}
@@ -442,11 +464,13 @@ namespace juicescript.runtime
 							}
 #endif
 							arg_rest.Type = Context.ARRAY.Instance;
-							((RtArray)arg_rest).array_len = (uint)rest.Length;
-							((RtArray)arg_rest).stack_store = rest;
-							((RtArray)arg_rest).stack_store_startindex = Context.StackPosition - para_argcount;
-							((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
-							((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
+							//((RtArray)arg_rest).array_len = (uint)rest.Length;
+							//((RtArray)arg_rest).stack_store = rest;
+							//((RtArray)arg_rest).stack_store_startindex = Context.StackPosition - para_argcount;
+							//((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
+							//((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
+							((RtArray)arg_rest).SetStoreRest(rest, Context.StackPosition - para_argcount);
+
 							//((RtArray)arg_rest).SetIsRest(true);
 
 
@@ -492,6 +516,8 @@ namespace juicescript.runtime
 
 									if (error.raised)
 									{
+										if (saved_this != null) CleanRefThisSlotFlag(saved_this);
+
 										Context.StackPosition -= para_argcount;
 										goto lbl_handle_arg_err;
 									}
@@ -514,7 +540,7 @@ namespace juicescript.runtime
 											scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 											scopeHeapLocater.MemberIndex = i;
 
-											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, null, ref error, false /*结构体拷贝传递*/);
+											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, &scope_ptr, ref error, false /*结构体拷贝传递*/);
 #if DEBUG
 											if (error.raised)
 											{
@@ -615,13 +641,14 @@ namespace juicescript.runtime
 					Context.StackSlots[returnSlotIndex].setDefault(method.ReturnTypeKind);
 				}
 
-
+				
 				if (((method.Flags & (MethodFlags.Generator)) != 0))
 				{
 					if (Context.StackPosition + 2
 					//+ 1 
 					>= Context.STACK_LENGTH)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition -= para_argcount;
 						break;
 					}
@@ -632,6 +659,7 @@ namespace juicescript.runtime
 					g_scope = GetSaveValue(g_scope, ref error);
 					if (error.raised)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
 					}
@@ -645,6 +673,7 @@ namespace juicescript.runtime
 					NaNBoxing _this = GetSaveValue(thisPtr, ref error);
 					if (error.raised)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition -= 2;
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
@@ -662,6 +691,7 @@ namespace juicescript.runtime
 
 					if (generator_ptr == 0)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition -= 2;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
@@ -701,6 +731,7 @@ namespace juicescript.runtime
 					InstructionProfiler.Profile_MethodEnd();
 #endif
 
+					if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 					return result;
 
 				}
@@ -751,6 +782,7 @@ namespace juicescript.runtime
 						+ scopeHoleSlots + info.useSlots
 					>= Context.STACK_LENGTH)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition -= para_argcount;
 						break;
 					}
@@ -760,6 +792,7 @@ namespace juicescript.runtime
 					g_scope = GetSaveValue(g_scope, ref error);
 					if (error.raised)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
 					}
@@ -774,6 +807,7 @@ namespace juicescript.runtime
 					NaNBoxing _this = GetSaveValue(thisPtr, ref error);
 					if (error.raised)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
@@ -787,6 +821,7 @@ namespace juicescript.runtime
 
 					if (generator_ptr == 0)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
@@ -811,6 +846,7 @@ namespace juicescript.runtime
 					int promise_ptr = Context.GC.AllocInstance(Context.PROMISE.Instance, out promise);
 					if (promise_ptr == 0)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
@@ -845,6 +881,7 @@ namespace juicescript.runtime
 
 					if (error.raised)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						goto lbl_handle_arg_err;
 					}
 
@@ -860,6 +897,7 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_MethodEnd();
 #endif
+					if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 					return result;
 
 					//throw new NotImplementedException();
@@ -912,10 +950,12 @@ namespace juicescript.runtime
 
 							if (returnSlotIndex >= 0)
 							{
+								if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 								return Context.StackSlots[returnSlotIndex];
 							}
 							else
 							{
+								if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 								return default(NaNBoxing);
 							}
 						}
@@ -925,6 +965,8 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 						InstructionProfiler.Profile_MethodEnd();
 #endif
+
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 
 						//记录当前报错堆栈，看上级调用是否处理这个错误
 						Context.errorStack.AddTrace(method, P_PC);
@@ -942,6 +984,7 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_MethodEnd();
 #endif
+					if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 
 					//Context.StackPosition--;
 					Context.StackPosition -= para_argcount;
@@ -953,7 +996,7 @@ namespace juicescript.runtime
 
 				SetNativeDelegate(method, ref error);
 				if (error.raised)
-				{
+				{					
 					goto lbl_native_called;
 				}
 
@@ -970,7 +1013,12 @@ namespace juicescript.runtime
 				InstructionProfiler.Profile_MethodEnd();
 #endif
 
+
+
 			lbl_native_called:
+
+				if (saved_this != null) CleanRefThisSlotFlag(saved_this);
+
 				m_scopePayload.ParentPtr = 0;
 				mScope.Type = null;
 				Context.StackPosition -= para_argcount;
@@ -1059,17 +1107,19 @@ namespace juicescript.runtime
 
 			m_scopePayload.__sendargcount = argsCount;
 
+
 			//save this
+			RtHeapBase saved_this = null;
 			{
 
-				if (_this_.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
+				if (_this_.ValueType== BoxType.HeapPtr && _this_.HeapKind >= (byte)RtHeapTypeKind.INSTANCE) //原this槽位肯定是空的
 				{
 					ScopeHeapLocater scopeHeapLocater;
 					scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
 
-
-					PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref _this_, null, null, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
+					prepare_savescope_pass(ref _this_, m_scopePayload, scopeHeapLocater, default, 0, 0, mScopeId, out saved_this, ref error, true);
+					//PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref _this_, null, &mScopeId , ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 					if (error.raised)
 					{
 						goto flag_handle_error;
@@ -1123,6 +1173,7 @@ namespace juicescript.runtime
 
 					if (error.raised)
 					{
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 						goto flag_handle_error;
 					}
 
@@ -1143,7 +1194,7 @@ namespace juicescript.runtime
 						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = i;
 
-						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, null, ref error, false /*结构体拷贝传递*/);
+						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, &scope_ptr, ref error, false /*结构体拷贝传递*/);
 						Debug.Assert(!error.raised);
 					}
 					param_slots[i] = box;
@@ -1205,6 +1256,7 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 							InstructionProfiler.Profile_MethodEnd();
 #endif
+						if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 
 					}
 				}
@@ -1213,6 +1265,8 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 						InstructionProfiler.Profile_MethodEnd();
 #endif
+
+					if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 
 					//记录当前报错堆栈，看上级调用是否处理这个错误
 					Context.errorStack.AddTrace(method, P_PC);
@@ -1230,6 +1284,7 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_MethodEnd();
 #endif
+				if (saved_this != null) CleanRefThisSlotFlag(saved_this);
 				return;
 			}
 
@@ -1255,6 +1310,9 @@ namespace juicescript.runtime
 #endif
 
 		lbl_native_called:
+
+			if (saved_this != null) CleanRefThisSlotFlag(saved_this);
+
 			m_scopePayload.ParentPtr = 0;
 			mScope.Type = null;
 

@@ -342,10 +342,10 @@ namespace juicescript.runtime.buildin
 			instance.Type = context.ARRAY.Instance;
 
 			RtArray targetArray = (RtArray)instance;
-			targetArray.methodscopeslot_ref_state = 0;
-			targetArray.HEAPINSTANCE_PTR = 0;
-			targetArray.SetLength(0, context.player, ref error);
-
+			//targetArray.methodscopeslot_ref_state = 0;
+			//targetArray.HEAPINSTANCE_PTR = 0;
+			//targetArray.SetLength(0, context.player, ref error);
+			targetArray.SetStoreCacheZero(true);
 
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);//先保存
@@ -1455,10 +1455,10 @@ namespace juicescript.runtime.buildin
 			result_instance.Type = context.ARRAY.Instance;
 
 			var result = (RtArray)result_instance;
-
-			result.array_len = 0;
-			result.methodscopeslot_ref_state = 0;
-			result.HEAPINSTANCE_PTR = 0;
+			result.SetStoreCacheZero(true);
+			//result.array_len = 0;
+			//result.methodscopeslot_ref_state = 0;
+			//result.HEAPINSTANCE_PTR = 0;
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
@@ -1626,10 +1626,10 @@ namespace juicescript.runtime.buildin
 			result_instance.Type = context.ARRAY.Instance;
 
 			var result = (RtArray)result_instance;
-
-			result.array_len = 0;
-			result.methodscopeslot_ref_state = 0;
-			result.HEAPINSTANCE_PTR = 0;
+			result.SetStoreCacheZero(true);
+			//result.array_len = 0;
+			//result.methodscopeslot_ref_state = 0;
+			//result.HEAPINSTANCE_PTR = 0;
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
@@ -1892,9 +1892,10 @@ namespace juicescript.runtime.buildin
 			var result_instance = context.GC.Heap[result_instancePtr];
 			result_instance.Type = context.ARRAY.Instance;
 			var result = (RtArray)result_instance;
-			result.array_len = 0;
-			result.methodscopeslot_ref_state = 0;
-			result.HEAPINSTANCE_PTR = 0;
+			//result.array_len = 0;
+			//result.methodscopeslot_ref_state = 0;
+			//result.HEAPINSTANCE_PTR = 0;
+			result.SetStoreCacheZero(true);
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 			// 6. Copy elements from start to end
 			for (int i = start; i < end && i < len; i++)
@@ -1987,9 +1988,10 @@ namespace juicescript.runtime.buildin
 			var result_instance = context.GC.Heap[result_instancePtr];
 			result_instance.Type = context.ARRAY.Instance;
 			var result = (RtArray)result_instance;
-			result.array_len = 0;
-			result.HEAPINSTANCE_PTR = 0;
-			result.methodscopeslot_ref_state = 0;
+			//result.array_len = 0;
+			//result.HEAPINSTANCE_PTR = 0;
+			//result.methodscopeslot_ref_state = 0;
+			result.SetStoreCacheZero(true);
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE); //先存上，防止GC!很重要
 
 

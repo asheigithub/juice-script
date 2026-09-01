@@ -4579,10 +4579,10 @@ namespace juicescript.runtime
 								instance = Context.GC.Heap[instancePtr.HeapPtr];
 								instance.Type = Context.ARRAY.Instance;
 
-								((RtArray)instance).array_len = 0;
-								((RtArray)instance).methodscopeslot_ref_state = 0;
-								((RtArray)instance).HEAPINSTANCE_PTR = 0;
-
+								//((RtArray)instance).array_len = 0;
+								//((RtArray)instance).methodscopeslot_ref_state = 0;
+								//((RtArray)instance).HEAPINSTANCE_PTR = 0;
+								((RtArray)instance).SetStoreCacheZero(false);
 
 							}
 							else
@@ -5492,6 +5492,13 @@ namespace juicescript.runtime
 				}
 				else
 				{
+					Context.GC.CheckGC(ref error);
+					if (Context.StackPosition >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
 					Debug.Assert(typekind < (byte)TypeKind.Object);
 					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
 					fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
@@ -5499,11 +5506,12 @@ namespace juicescript.runtime
 						byte* ptr = p + offset;
 
 						ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
-						//Context.StackPosition++;
+						Context.StackPosition++;
 						ConvertValueType(ref error, box, (TypeKind)typekind, null, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
-						//Context.StackPosition--;
-						Debug.Assert(!error.raised);
+						Context.StackPosition--;
 
+						if (error.raised)
+							return;
 
 						RtInstance.SetSlotDataByValue((TypeKind)typekind, ptr, conv);
 
@@ -5570,16 +5578,25 @@ namespace juicescript.runtime
 				}
 				else
 				{
+					Context.GC.CheckGC(ref error);
+					if (Context.StackPosition >= Context.STACK_LENGTH)
+					{
+						RaiseStackOverflow(ref error);
+						return;
+					}
+
 					var store = payload.GetStoreData(this, (ASInstance)payload.Type);
 					fixed (byte* p = store)//codeScope.TypeLayout.ASType.Instance))
 					{
 						byte* ptr = p + offset;
 
 						ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
-						//Context.StackPosition++;
+						Context.StackPosition++;
 						ConvertValueType(ref error, box, (TypeKind)typekind, null, ref conv, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
-						//Context.StackPosition--;
-						Debug.Assert(!error.raised);
+						Context.StackPosition--;
+
+						if (error.raised)
+							return;
 						
 
 						RtInstance.SetSlotDataByValue((TypeKind)typekind, ptr, conv);
