@@ -230,7 +230,7 @@ namespace juicescript.runtime
 									break;
 								}
 
-								var cacheSpan = cacheMscope.__get_slots_for_gc;
+								var cacheSpan = cacheMscope.__get_slots_internal;
 
 								RtHeapBase heapObj;
 								int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, instance.Type._link_codescope);
@@ -782,7 +782,7 @@ namespace juicescript.runtime
 											{
 
 												RtMethodScope cacheMscope = (RtMethodScope)scope;
-												var cacheSpan = cacheMscope.__get_slots_for_gc;
+												var cacheSpan = cacheMscope.__get_slots_internal;
 
 												RtHeapBase heapObj;
 												int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, scope.Type._link_codescope);
@@ -889,27 +889,10 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe int prepare_savemethodscope_updateref(RtMethodScope heap, int ptr, ref ScopeHeapLocater heapLocater, ASContainer type, int* m_scope, int* method_scopes)
+		private unsafe int prepare_savemethodscope_updateref(RtMethodScope heap, int ptr, ref ScopeHeapLocater heapLocater, ASContainer type, int min, int max)
 		{
-			int* __test = m_scope;
-			int max = int.MinValue;
-			int min = int.MaxValue;
-			do
-			{
-				--__test;
-
-				if (*__test - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
-				{
-					max = Math.Max(max, *__test);
-					min = Math.Min(min, *__test);
-				}
-
-			} while (__test != method_scopes);
-
-
-			Debug.Assert(max < Context.MAX_BACKTRACE);
-
-			Debug.Assert(m_scope != null && method_scopes != null);
+			
+			
 			int iptr = ptr;
 			RtInstance oldPayload;
 			ptr = RtInstance.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
@@ -1241,29 +1224,18 @@ namespace juicescript.runtime
 				}
 			}
 
+			//if (copyed_ptr == 0)
+			//{
+			//	Debug.Assert( heap.ReadSlot(heapLocater.MemberIndex).HeapPtr == ptr);
+			//	copyed_ptr = ptr;
+			//}
 
 			return copyed_ptr;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe NaNBoxing prepare_savemethodscope_beforeSave(RtMethodScope heap, NaNBoxing old, ScopeHeapLocater heapLocater, int* m_scope, int* method_scopes)
+		private  NaNBoxing prepare_savemethodscope_beforeSave(RtMethodScope heap, NaNBoxing old, ScopeHeapLocater heapLocater, ref int min, ref int max,int scope_ptr)
 		{
-			int* __test = m_scope;
-			int max = int.MinValue;
-			int min = int.MaxValue;
-			do
-			{
-				--__test;
-
-				if (*__test - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
-				{
-					max = Math.Max(max, *__test);
-					min = Math.Min(min, *__test);
-				}
-
-			} while (__test != method_scopes);
-
-			Debug.Assert(max - Context.M_MethodScopePtr < Context.MAX_BACKTRACE);
-
+			
 			//lbl_redo:
 			int ptr = old.HeapPtr;
 			
@@ -1290,9 +1262,14 @@ namespace juicescript.runtime
 
 						//return prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, m_scope, method_scopes);
 
+						if (min == 0 && max == 0)
+						{
+							ComputeMinMaxMethodScope(ref min, ref max, scope_ptr);
+						}
+
 						NaNBoxing r = default;
 						r.SetHeapPtr( 
-							prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, m_scope, method_scopes), (byte)RtHeapTypeKind.INSTANCE,
+							prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, min, max), (byte)RtHeapTypeKind.INSTANCE,
 							(byte)(old.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
 						return r;
 					}
@@ -1331,13 +1308,18 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						Debug.Assert(m_scope != null && method_scopes != null);
+						//Debug.Assert(m_scope != null && method_scopes != null);
+						//Debug.Assert(method_scopes != null);
 
 						//函数闭包里保存的this,也需要拷贝一份引用到别的地方
 						var This = ((RtClosure)oldObj).This;
-						if (This.ValueType == NaNBoxing.BoxType.HeapPtr)
+						if (!This.IsStruct() && This.ValueType == NaNBoxing.BoxType.HeapPtr && This.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 						{
-							var this_ptr = prepare_savemethodscope_beforeSave(heap, This, heapLocater,m_scope,method_scopes); //更新原this,然后下面才能正确更新.
+							if (min == 0 && max == 0)
+							{
+								ComputeMinMaxMethodScope(ref min, ref max, scope_ptr);
+							}
+							var this_ptr = prepare_savemethodscope_beforeSave(heap, This, heapLocater,ref min,ref max, scope_ptr); //更新原this,然后下面才能正确更新.
 							((RtClosure)oldObj).This = this_ptr; //.SetHeapPtr(this_ptr);
 							//goto lbl_redo;
 						}
@@ -1408,7 +1390,10 @@ namespace juicescript.runtime
 						//									}
 						//								}
 						//							} while (__scope != method_scopes);
-
+						if (min == 0 && max == 0)
+						{
+							ComputeMinMaxMethodScope(ref min, ref max, scope_ptr);
+						}
 						for (int k = min; k <= max; k++)
 						{
 							RtMethodScope scope = (RtMethodScope)Context.GC.Heap[k];
@@ -1534,7 +1519,8 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						Debug.Assert(m_scope != null && method_scopes != null);
+						//Debug.Assert(m_scope != null && method_scopes != null);
+						//Debug.Assert(method_scopes != null);
 
 						//更新数组的引用
 						RtArray oldPayload;
@@ -1615,67 +1601,75 @@ namespace juicescript.runtime
 						//								}
 
 						//							} while (__scope != method_scopes);
-
+						if (min == 0 && max == 0)
+						{
+							ComputeMinMaxMethodScope(ref min, ref max, scope_ptr);
+						}
 						for (int k = min; k <= max; k++)
 						{
 							RtMethodScope scope = (RtMethodScope)Context.GC.Heap[k];
 							for (int i = 0; i < scope.SlotCount; ++i)
 							{
+								var scope_span = scope.__get_slots_internal;
 								if (!(scope == heap && i == heapLocater.MemberIndex))
 								{
-									var v = scope.ReadSlot((ushort)i);
-									if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
+									var v = scope_span[i];
+									if (v.ValueType == NaNBoxing.BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.ARRAY)
 									{
 										var inmember = Context.GC.Heap[v.HeapPtr];
-										if (inmember.Kind == RtHeapTypeKind.ARRAY)
+										Debug.Assert(inmember.Kind == RtHeapTypeKind.ARRAY);
+										
+											
+										if (v.HeapPtr == ptr || RtArray.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out RtArray _temp) == ptr)
 										{
-											RtArray _temp;
-											if (v.HeapPtr == ptr || RtArray.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out _temp) == ptr)
+											if (copyed_ptr == 0)
 											{
-												if (copyed_ptr == 0)
-												{
-													copyed_ptr = scope.StackPos + i + Context.CacheArrayPtr;
+												copyed_ptr = scope.StackPos + i + Context.CacheArrayPtr;
 #if DEBUG
-													if (copyed_ptr == ptr)
-													{
-														throw new InvalidOperationException();
-													}
+												if (copyed_ptr == ptr && scope == heap)
+												{
+													throw new InvalidOperationException();
+												}
 #endif
-
-													var dst = Context.GC.Heap[copyed_ptr];
-
+													
+												var dst = Context.GC.Heap[copyed_ptr];
+												if (copyed_ptr != ptr)
+												{
 													dst.Type = Context.ARRAY.Instance;
 													((RtArray)dst).HEAPINSTANCE_PTR = 0;
 													((RtArray)dst).methodscopeslot_ref_state = 1;
 													((RtArray)dst).CopyCacheFrom(oldPayload, this);
 
 													((RtArray)oldObj).HEAPINSTANCE_PTR = copyed_ptr;
-
-													v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-													scope.SetSlot(v, (ushort)i);
-
-													toupdateref = (RtArray)dst;
-
 												}
-												else
+
+												v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+												//scope.SetSlot(v, (ushort)i);
+												scope_span[i] = v;
+
+												toupdateref = (RtArray)dst;
+
+											}
+											else
+											{
+												if (toupdateref != null)
 												{
-													if (toupdateref != null)
-													{
 #if DEBUG
-														if (toupdateref.methodscopeslot_ref_state != 1)
-														{
-															throw new InvalidOperationException();
-														}
-#endif
-														toupdateref.methodscopeslot_ref_state = 2;
+													if (toupdateref.methodscopeslot_ref_state != 1)
+													{
+														throw new InvalidOperationException();
 													}
-
-													//更新引用
-													v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-													scope.SetSlot(v, (ushort)i);
+#endif
+													toupdateref.methodscopeslot_ref_state = 2;
 												}
+
+												//更新引用
+												v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+												//scope.SetSlot(v, (ushort)i);
+												scope_span[i] = v;
 											}
 										}
+										
 									}
 								}
 							}
@@ -1716,7 +1710,8 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						Debug.Assert(m_scope != null && method_scopes != null);
+						//Debug.Assert(m_scope != null && method_scopes != null);
+						//Debug.Assert(method_scopes != null);
 
 						//更新数组的引用
 						RtVector oldPayload;
@@ -1801,7 +1796,10 @@ namespace juicescript.runtime
 
 						//							} while (__scope != method_scopes);
 
-
+						if (min == 0 && max == 0)
+						{
+							ComputeMinMaxMethodScope(ref min, ref max, scope_ptr);
+						}
 						for (int k = min; k <= max; k++)
 						{
 
@@ -2012,6 +2010,50 @@ namespace juicescript.runtime
 			}
 		}
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		private void ComputeMinMaxMethodScope(ref int min,ref int max,int scopeptr)
+		{
+			max = int.MinValue;
+			min = int.MaxValue;
+
+			//if (m_scope == null)
+			{
+				max = scopeptr; //*method_scopes;
+				min = max;
+
+				var s = (RtMethodScope)Context.GC.Heap[max];
+				while (s.ParentPtr - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
+				{
+					Debug.Assert(s.ParentPtr < max);
+
+					int p = s.ParentPtr;
+					s = (RtMethodScope)Context.GC.Heap[p];
+					if (!s.IsStackSlot)
+						break;
+
+					min = min < p ? min : p; //Math.Min(min, p);
+				}
+
+			}
+			//else
+			//{
+			//	int* __test = m_scope;
+			//	do
+			//	{
+			//		--__test;
+
+			//		if (*__test - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
+			//		{
+			//			max = max > *__test ? max : *__test;  //Math.Max(max, *__test);
+			//			min = min < *__test ? min : *__test; //Math.Min(min, *__test);
+			//		}
+
+			//	} while (__test != method_scopes);
+			//}
+			Debug.Assert(min > 0);
+			Debug.Assert(max - Context.M_MethodScopePtr < Context.MAX_BACKTRACE);
+
+		}
 
 		/// <summary>
 		///准备保存到methodscope.需要考虑各种缓存的情况
@@ -2050,9 +2092,12 @@ namespace juicescript.runtime
 					return;
 				}
 
-				if (old.ValueType == NaNBoxing.BoxType.HeapPtr)
+				int min = 0;int max = 0;
+
+				if (old.ValueType == NaNBoxing.BoxType.HeapPtr && old.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 				{
-					prepare_savemethodscope_beforeSave( heap ,old,  heapLocater, m_scope,method_scopes);
+					Debug.Assert(*method_scopes != 0);
+					prepare_savemethodscope_beforeSave( heap ,old,  heapLocater, ref min,ref max,*method_scopes);
 				}
 
 				//存储阶段
@@ -2251,8 +2296,8 @@ namespace juicescript.runtime
 								{
 									//var _this = Context.GC.Heap[dstClosure.This.HeapPtr];
 									if (old.ValueType == NaNBoxing.BoxType.HeapPtr)
-									{
-										prepare_savemethodscope_beforeSave(heap, old, heapLocater, m_scope, method_scopes);
+									{										
+										prepare_savemethodscope_beforeSave(heap, old, heapLocater, ref min, ref max,*method_scopes);
 									}
 
 									prepare_savemethodscope_saveinstacne( heap ,ref dstClosure.This,  heapLocater,is_pass_this);
@@ -2367,7 +2412,7 @@ namespace juicescript.runtime
 												if (((ASMethodBody)scope.Type).Method.Flags.HasFlag(MethodFlags.NeedActivation))
 												{
 													RtMethodScope cacheMscope = (RtMethodScope)scope;
-													var cacheSpan = cacheMscope.__get_slots_for_gc;
+													var cacheSpan = cacheMscope.__get_slots_internal;
 
 													RtHeapBase heapObj;
 													int ptr = Context.GC.AllocMethodScope(new NaNBoxing[cacheSpan.Length], 0, scope.Type._link_codescope);
@@ -2456,7 +2501,7 @@ namespace juicescript.runtime
 			else
 			{
 				//完全相同结构体可以不分配内存，就地覆盖
-				NaNBoxing old = heap.__get_slots_for_gc[heapLocater.MemberIndex];
+				NaNBoxing old = heap.__get_slots_internal[heapLocater.MemberIndex];
 				if (CopyIfSameTypeStructAndReplaceSrc(old, ref value))
 				{
 

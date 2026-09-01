@@ -27,7 +27,7 @@ namespace juicescript.runtime
         
 
 #if DEBUG
-		public const int MAX_BACKTRACE = 25;
+		public const int MAX_BACKTRACE = 16;
 #else
 		public const int MAX_BACKTRACE = 50;
 #endif

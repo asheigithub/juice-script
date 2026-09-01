@@ -1164,6 +1164,10 @@ namespace juicescript
             { 
                 _setheapptr_validator(indexofheap, heapkind,heapflag);
             }
+
+			if (indexofheap == 0 && heapkind != 15 )
+				throw new InvalidOperationException();
+
 #endif
 
             store = TAG_HEAP_POINTER | ((ulong)(heapkind | (heapflag << 4 ) ) << 32)  | (uint)indexofheap;

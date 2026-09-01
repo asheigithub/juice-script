@@ -31,7 +31,7 @@ namespace compilerTests
         {
             for (int i = 0; i < 16; i++)
             {
-                for (int j = 0; j < short.MaxValue; j++)
+                for (int j = 1; j < short.MaxValue; j++)
                 {
                     for (int k = 0; k < 16; k++)
 					{
@@ -282,7 +282,7 @@ namespace compilerTests
 
 			{
 
-                a.SetHeapPtr(0,255,0);
+                a.SetHeapPtr(0,15,0);
 				b.SetNumber(3);
 
 				bool eq;

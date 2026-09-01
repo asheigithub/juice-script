@@ -890,7 +890,7 @@ namespace juicescript.runtime.gc
                             }
                             else
                             {
-                                var slots = rtPayload.__get_slots_for_gc;
+                                var slots = rtPayload.__get_slots_internal;
                                 for (int i = 0; i < slots.Length; i++)
                                 {
                                     if (slots[i].ValueType == NaNBoxing.BoxType.HeapPtr)

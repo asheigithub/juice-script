@@ -12634,7 +12634,7 @@ namespace juicescript.runtime
 						v.SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 						//保存到method的成员中，可以考虑到缓存
-						PrepareSaveMethodScope((RtMethodScope)s,  heapLocater, ref v, m_scope, method_scopes, ref error);
+						PrepareSaveMethodScope((RtMethodScope)s,  heapLocater, ref v, null, method_scopes, ref error);
 						if (error.raised)
 						{
 							closure_instance = null;
@@ -13981,7 +13981,7 @@ namespace juicescript.runtime
 									int* m_scope = method_scopes;
 									*m_scope++ = scope_ptr;
 
-									PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
+									PrepareSaveMethodScope(heap, heapLocater, ref value, null, method_scopes, ref error);
 									Debug.Assert(!error.raised);
 									heapV = value;
 								}
@@ -15509,7 +15509,7 @@ namespace juicescript.runtime
 										throw new InvalidOperationException(); // 这里的类型转换是不会失败的
 									}
 #endif
-									PrepareSaveMethodScope(heap,  heapLocater, ref value, m_scope, method_scopes, ref store_err);
+									PrepareSaveMethodScope(heap,  heapLocater, ref value, null, method_scopes, ref store_err);
 									if (store_err.raised)
 									{
 										error.error.setFault();

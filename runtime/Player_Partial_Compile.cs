@@ -542,7 +542,7 @@ namespace juicescript.runtime
 
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
-							return ((RtMethodScope)scopeinstance).__get_slots_for_gc[idx];
+							return ((RtMethodScope)scopeinstance).__get_slots_internal[idx];
 						}
 						else if (scope.Kind == CodeScopeKind.Class)
 						{
@@ -601,7 +601,7 @@ namespace juicescript.runtime
 							}
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
-							return ((RtMethodScope)scopeinstance).__get_slots_for_gc[idx];
+							return ((RtMethodScope)scopeinstance).__get_slots_internal[idx];
 
 						}
 						else if (scope.Kind == CodeScopeKind.Instance)
@@ -710,7 +710,7 @@ namespace juicescript.runtime
 							}
 
 							int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
-							return ((RtMethodScope)scopeinstance).__get_slots_for_gc[idx];
+							return ((RtMethodScope)scopeinstance).__get_slots_internal[idx];
 
 						}
 						else

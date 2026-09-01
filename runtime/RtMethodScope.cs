@@ -254,7 +254,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal Span<NaNBoxing> __get_slots_for_gc
+		internal Span<NaNBoxing> __get_slots_internal
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get

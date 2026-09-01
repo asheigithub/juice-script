@@ -172,7 +172,7 @@ namespace juicescript.runtime
 		/// 
 		/// </summary>
 		internal byte methodscopeslot_ref_state;
-
+		
 
 		internal uint array_len = 0;
 

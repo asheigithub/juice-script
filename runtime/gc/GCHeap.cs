@@ -75,6 +75,8 @@ namespace juicescript.runtime.gc
 				GCHeap heap;
 				if (reference !=null && reference.TryGetTarget(out heap))
 				{
+                    
+
 					if (ptr != 0 && kind != NaNBoxing.UNKNOWN_HEAPKIND)
 					{
 						Debug.Assert((byte)heap[ptr].Kind == kind);
