@@ -234,37 +234,4 @@ import flash.utils.Dictionary;
   //
 	   //
 	   //trace( getTimer() - st);
-	   
 
-
-(function k1()
-{
-	var i;
-	var d;
-	var e;
-	(
-		function ():void 
-		{
-			i = {};	
-			var j = i;
-			
-			d = j;
-			e = j;
-		}
-	
-	)();
-	
-	//(
-		//function ():void 
-		//{
-			//i = null;
-		//}
-	//
-	//)();
-	
-	
-	i = null;
-	trace(d,e);
-	
-})();
-	

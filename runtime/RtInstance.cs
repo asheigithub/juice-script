@@ -12,6 +12,7 @@ using System.Runtime.Intrinsics;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
@@ -360,6 +361,7 @@ namespace juicescript.runtime
 			Type = other.Type;
 
 			methodscopeslot_ref_state = 0;
+			nextframe_ref_state = default;
 			HEAPINSTANCE_PTR = 0;
 			CopyFrom(other, player, Type._link_codescope.TypeLayout.Size);
 		}
@@ -368,6 +370,7 @@ namespace juicescript.runtime
 		internal void LinkToPayloadOffset(int offset,int vecPtr)
 		{			
 			methodscopeslot_ref_state = 0;
+			nextframe_ref_state = default;
 			m_property_ptr = offset; //标记偏移量.
 			HEAPINSTANCE_PTR = vecPtr; //指向Vector.
 		}
@@ -380,6 +383,7 @@ namespace juicescript.runtime
 			m__proto__ = _proto_;
 			
 			methodscopeslot_ref_state = 0;
+			nextframe_ref_state = default;
 		}
 
 
@@ -399,15 +403,18 @@ namespace juicescript.runtime
 		/// 
 		/// </summary>
 		internal byte methodscopeslot_ref_state;
+		/// <summary>
+		/// 被调用的下级函数引用情况,包含指针和版本
+		/// </summary>
+		internal refbynextframe nextframe_ref_state;
 
 
 
 
-       
 
 
 
-        public override int Size
+		public override int Size
         {
             get
             { 
@@ -714,8 +721,10 @@ namespace juicescript.runtime
 								RtInstance struct_payload = (RtInstance)cache;
 
 								struct_payload.methodscopeslot_ref_state = 0;
+								struct_payload.nextframe_ref_state = default;
 								struct_payload.m_property_ptr = m_property_ptr + layout.Offset[memberIndex]; //标记index.
 								struct_payload.HEAPINSTANCE_PTR = HEAPINSTANCE_PTR == 0? this_instance_Ptr : HEAPINSTANCE_PTR ; //指向当前对象.
+								
 
 								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
 								return result;

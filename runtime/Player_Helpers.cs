@@ -3526,6 +3526,11 @@ namespace juicescript.runtime
 					{
 						var protoobj = Context.GC.Heap[proto];
 						stackslots[insLoc.index].SetHeapPtr(proto, (byte)protoobj.Kind, (byte)(protoobj.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)protoobj.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
+						//NaNBoxing protobox = default;protobox.SetHeapPtr(proto, (byte)protoobj.Kind, (byte)(protoobj.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)protoobj.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
+						//int heap_sptr = heap.mScopePtr;
+						//PrepareSaveMethodScope(heap, holderLoc, ref protobox , null, &heap_sptr , ref error);
+						//stackslots[insLoc.index] = protobox;
+
 						//跳回get_iter,访问_proto_.
 						exception_ctx->FINALLY_JUMPTO_PTR = iter_ctx_wapper.PC;
 					}
@@ -5221,6 +5226,7 @@ namespace juicescript.runtime
 				else
 				{
 					_instance.methodscopeslot_ref_state = 1;
+					_instance.nextframe_ref_state = default;
 				}
 
 
