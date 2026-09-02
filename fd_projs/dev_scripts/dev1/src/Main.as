@@ -235,9 +235,8 @@ import flash.utils.Dictionary;
 	   //
 	   //trace( getTimer() - st);
 	   
-	   
-	   
-	   
+
+
 (function k1()
 {
 	var i:Vector.<int> =new <int> [1,2,3];
@@ -249,14 +248,17 @@ import flash.utils.Dictionary;
 	{
 		i = null;
 		
-		j = a;
+		//var j = a;
+		trace(v, id,a);
 		
-		trace(v);
-		
-		
+		if(id==2)
+		{
+			j = a;
+		}
 	}
 	));
 	
 	trace(i);
-	
+	trace(j);
 })();
+	

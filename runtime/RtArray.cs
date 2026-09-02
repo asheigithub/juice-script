@@ -78,7 +78,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m_property_ptr;
 
 				//return ((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
@@ -95,7 +95,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.m_property_ptr = ptr;
 			}
 		}
@@ -107,6 +107,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int HEAPINSTANCE_PTR { get; private set; }
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreRest(Memory<NaNBoxing> store,int store_startindex)
 		{
 			array_len = (uint)store.Length;
@@ -114,8 +115,10 @@ namespace juicescript.runtime
 			stack_store_startindex = store_startindex;
 			HEAPINSTANCE_PTR = 0;
 			m_property_ptr = 0;
+			thisslot_ref_state = 0;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreCacheZero(bool clear)
 		{
 			StoreMode = ArrayStoreMode.cache;
@@ -132,10 +135,11 @@ namespace juicescript.runtime
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void LinkTo(RtArray dst, int dstptr)
 		{ 
 			HEAPINSTANCE_PTR = dstptr;
-			
+			thisslot_ref_state = 0; //不是直接保存在this槽，所以标志清空
 		}
 
 
@@ -154,6 +158,7 @@ namespace juicescript.runtime
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
+				origin.thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
 			}
 
 			return ptr;
@@ -224,7 +229,7 @@ namespace juicescript.runtime
 			else
 			{
 				//RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.array_len;
 			}
 		}
@@ -239,7 +244,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.DoSetLength(len, player, ref error);
 			}
 		}
@@ -475,6 +480,7 @@ namespace juicescript.runtime
 
 			//链接GC
 			HEAPINSTANCE_PTR = arr_ptr;
+			thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
 
 			return arr_ptr;
 		}
@@ -579,7 +585,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.DoDelete(index);
 			}
 		}
@@ -2316,7 +2322,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
 				target.DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
 			}
 		}
@@ -2469,7 +2475,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtArray target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
 				return target.DoTryReadIterItem(index, out key, out next_index, out v);
 			}
 		}

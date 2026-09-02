@@ -10,6 +10,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -85,12 +86,38 @@ namespace juicescript.runtime
         }
 
 
-		/// <summary>
-		/// 如果是缓存对象，并且已经被保存到堆中，则保存堆中对象的指针
-		/// 后续操作将直接对堆里的对象操作了。
-		/// </summary>
-		internal int HEAPINSTANCE_PTR;
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        /// <summary>
+        /// 如果是缓存对象，并且已经被保存到堆中，则保存堆中对象的指针
+        /// 后续操作将直接对堆里的对象操作了。
+        /// </summary>
+        internal int HEAPINSTANCE_PTR { get; private set; }
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void SetStoreCacheZero(ASInstance asinstance)
+        {
+			Type = asinstance;
+			HEAPINSTANCE_PTR = 0;
+            methodscopeslot_ref_state = 0;
+            thisslot_ref_state = 0;
+
+			element_asclass = asinstance._element_class;
+			element_type = asinstance._element_class == null ? TypeKind.Any : (TypeKind)asinstance._element_class.Type_identifier;
+
+			store.length = 0;
+			store.elementSize = VectorImpl.VectorStore.GetElementSize(element_type, element_asclass);
+
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void LinkTo(RtVector dst, int dstptr)
+        { 
+            HEAPINSTANCE_PTR = dstptr;
+			thisslot_ref_state = 0; //不是直接保存在this槽，所以标志清空
+		}
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
 
@@ -104,6 +131,7 @@ namespace juicescript.runtime
 				payload = ((RtVector)player.Context.GC.Heap[ptr]);
 				target = payload;
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
+				origin.thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
 			}
 			return ptr;
 		}
@@ -132,7 +160,10 @@ namespace juicescript.runtime
 		/// 
 		/// </summary>
 		internal byte methodscopeslot_ref_state;
-
+		/// <summary>
+		/// 当被作为this对象时，设置成当前scope_ptr。表示被当作this对象引用，当没有其他变量引用时，还可能被this引用。
+		/// </summary>
+		internal byte thisslot_ref_state;
 
 
 
@@ -417,7 +448,7 @@ namespace juicescript.runtime
             }
 
 #endif
-            
+            HEAPINSTANCE_PTR = 0;
             element_asclass = vector.element_asclass;
             element_type = vector.element_type;
 
@@ -427,6 +458,9 @@ namespace juicescript.runtime
 
 		internal int ChangeStoreToHeap(ASInstance type, Player player, ref Player.ReceiveError error,out VectorImpl.VectorStore newstore)
 		{
+			Debug.Assert(HEAPINSTANCE_PTR == 0);//store == GetStore(player));
+			Debug.Assert(store.IsCache);
+
             RtHeapBase heap_vector;
             int heap_ptr = player.Context.GC.AllocInstance(type, out heap_vector);
             if (heap_ptr == 0)
@@ -436,7 +470,7 @@ namespace juicescript.runtime
                 return 0;
             }
 
-            Debug.Assert(HEAPINSTANCE_PTR == 0);//store == GetStore(player));
+            
 
 			if (player.Context.GC.MemUsage +  store.length * store.elementSize > player.Context.GC.USAGE_LIMIT)
 			{
@@ -451,6 +485,7 @@ namespace juicescript.runtime
 
             //链接到堆对象, 堆对象此时被此对象链接
             HEAPINSTANCE_PTR = heap_ptr;
+            thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
 
             return heap_ptr;
 		}

@@ -10920,12 +10920,14 @@ namespace juicescript.runtime
 					int instancePtr = Context.CacheVectorPtr + ptrIndex;
 					var instance = Context.GC.Heap[instancePtr];
 
-					instance.Type = totype_class.Instance;
-					((RtVector)instance).HEAPINSTANCE_PTR = 0;
-					((RtVector)instance).element_asclass = totype_class.Instance._element_class;
-					((RtVector)instance).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
-					//((RtPayloadVector)instance).GetStore(this).SetBuffer(0);
-					((RtVector)instance).GetStore().length = 0;
+					//instance.Type = totype_class.Instance;
+					//((RtVector)instance).HEAPINSTANCE_PTR = 0;
+					//((RtVector)instance).element_asclass = totype_class.Instance._element_class;
+					//((RtVector)instance).element_type = totype_class.Instance._element_class == null ? TypeKind.Any : (TypeKind)totype_class.Instance._element_class.Type_identifier;
+
+					//((RtVector)instance).GetStore().length = 0;
+					//((RtVector)instance).GetStore().elementSize = VectorImpl.VectorStore.GetElementSize(((RtVector)instance).element_type, ((RtVector)instance).element_asclass) ;
+					((RtVector)instance).SetStoreCacheZero(totype_class.Instance);
 
 					Context.StackSlots[returnSlotindex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 

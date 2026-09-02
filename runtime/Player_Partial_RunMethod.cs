@@ -78,6 +78,7 @@ namespace juicescript.runtime
 					((RtArray)_this).thisslot_ref_state = 0;
 					break;
 				case RtHeapTypeKind.VECTOR:
+					((RtVector)_this).thisslot_ref_state = 0;
 					break;
 				case RtHeapTypeKind.CLOSURE:
 					break;

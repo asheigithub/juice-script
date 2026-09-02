@@ -279,14 +279,14 @@ namespace juicescript.runtime.buildin
 			int instancePtr = Context.CacheVectorPtr + ptrIndex;
 			var instance = context.GC.Heap[instancePtr];
 
-
-			instance.Type = (ASInstance)vecinstance.Type;
-			((RtVector)instance).HEAPINSTANCE_PTR = 0;
-			((RtVector)instance).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
-			((RtVector)instance).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
-			((RtVector)instance).GetStore().SetBuffer(0);
-			((RtVector)instance).GetStore().length = 0;
-			((RtVector)instance).GetStore().elementSize = elementSize;
+			((RtVector)instance).SetStoreCacheZero((ASInstance)vecinstance.Type);
+			//instance.Type = (ASInstance)vecinstance.Type;
+			//((RtVector)instance).HEAPINSTANCE_PTR = 0;
+			//((RtVector)instance).element_asclass = ((ASInstance)vecinstance.Type)._element_class;
+			//((RtVector)instance).element_type = ((ASInstance)vecinstance.Type)._element_class == null ? TypeKind.Any : (TypeKind)((ASInstance)vecinstance.Type)._element_class.Type_identifier;
+			////((RtVector)instance).GetStore().SetBuffer(0);
+			//((RtVector)instance).GetStore().length = 0;
+			//((RtVector)instance).GetStore().elementSize = elementSize;
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
@@ -4135,13 +4135,14 @@ namespace juicescript.runtime.buildin
 
 			int resultVecPtr = Context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
-			resultInstance.Type = vType;
-			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
-			((RtVector)resultInstance).element_asclass = elementcls;
-			((RtVector)resultInstance).element_type = elementkind;
-			((RtVector)resultInstance).GetStore().SetBuffer(0);
-			((RtVector)resultInstance).GetStore().length = 0;
-			((RtVector)resultInstance).GetStore().elementSize = elementSize;
+			//resultInstance.Type = vType;
+			//((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
+			//((RtVector)resultInstance).element_asclass = elementcls;
+			//((RtVector)resultInstance).element_type = elementkind;
+			////((RtVector)resultInstance).GetStore().SetBuffer(0);
+			//((RtVector)resultInstance).GetStore().length = 0;
+			//((RtVector)resultInstance).GetStore().elementSize = elementSize;
+			((RtVector)resultInstance).SetStoreCacheZero(vType);
 
 			//var resultVector = (RtVector)resultInstance;
 
@@ -4575,13 +4576,14 @@ namespace juicescript.runtime.buildin
 			//目标
 			int resultVecPtr = Context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
-			resultInstance.Type = vType;
-			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
-			((RtVector)resultInstance).element_asclass = elementcls;
-			((RtVector)resultInstance).element_type = elementkind;
-			((RtVector)resultInstance).GetStore().SetBuffer(0);
-			((RtVector)resultInstance).GetStore().length = 0;
-			((RtVector)resultInstance).GetStore().elementSize = elementSize;
+			//resultInstance.Type = vType;
+			//((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
+			//((RtVector)resultInstance).element_asclass = elementcls;
+			//((RtVector)resultInstance).element_type = elementkind;
+			////((RtVector)resultInstance).GetStore().SetBuffer(0);
+			//((RtVector)resultInstance).GetStore().length = 0;
+			//((RtVector)resultInstance).GetStore().elementSize = elementSize;
+			((RtVector)resultInstance).SetStoreCacheZero(vType);
 
 			var resultVector = (RtVector)resultInstance;
 
@@ -4728,13 +4730,14 @@ namespace juicescript.runtime.buildin
 			//目标
 			int resultVecPtr = Context.CacheVectorPtr + returnSlotIndex;
 			var resultInstance = context.GC.Heap[resultVecPtr];
-			resultInstance.Type = vType;
-			((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
-			((RtVector)resultInstance).element_asclass = elementcls;
-			((RtVector)resultInstance).element_type = elementkind;
-			((RtVector)resultInstance).GetStore().SetBuffer(0);
-			((RtVector)resultInstance).GetStore().length = 0;
-			((RtVector)resultInstance).GetStore().elementSize = elementSize;
+			//resultInstance.Type = vType;
+			//((RtVector)resultInstance).HEAPINSTANCE_PTR = 0;
+			//((RtVector)resultInstance).element_asclass = elementcls;
+			//((RtVector)resultInstance).element_type = elementkind;
+			////((RtVector)resultInstance).GetStore().SetBuffer(0);
+			//((RtVector)resultInstance).GetStore().length = 0;
+			//((RtVector)resultInstance).GetStore().elementSize = elementSize;
+			((RtVector)resultInstance).SetStoreCacheZero(vType);
 
 			var resultVector = (RtVector)resultInstance;
 
