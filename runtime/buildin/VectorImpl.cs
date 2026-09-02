@@ -540,11 +540,12 @@ namespace juicescript.runtime.buildin
 						//clone结构体
 						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
-						cacheObj.Type = check.Type;
+						//cacheObj.Type = check.Type;
 
-						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						((RtInstance)cacheObj).CloneOther((RtInstance)check, context.player);
 
 						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 
@@ -714,11 +715,12 @@ namespace juicescript.runtime.buildin
 					{
 						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
-						cacheObj.Type = check.Type;
+						//cacheObj.Type = check.Type;
 
-						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						((RtInstance)cacheObj).CloneOther((RtInstance)check, context.player);
 
 						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 					}
@@ -933,11 +935,12 @@ namespace juicescript.runtime.buildin
 				{
 					int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
-					cacheObj.Type = check.Type;
+					//cacheObj.Type = check.Type;
 
-					((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-					((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-					((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+					//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+					//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+					//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+					((RtInstance)cacheObj).CloneOther((RtInstance)check, context.player);
 
 					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}
@@ -3215,11 +3218,12 @@ namespace juicescript.runtime.buildin
 
 										cache.Type =  vector.element_asclass.Instance;
 										RtInstance struct_payload = (RtInstance)cache;
-										struct_payload.HEAPINSTANCE_PTR = 0;
+										//struct_payload.HEAPINSTANCE_PTR = 0;
 
-										struct_payload.methodscopeslot_ref_state = 0;
-										struct_payload.Set_PROPERTY_PTR(l * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
-										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+										//struct_payload.methodscopeslot_ref_state = 0;
+										//struct_payload.Set_PROPERTY_PTR(l * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
+										//struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+										struct_payload.LinkToPayloadOffset(l * store.elementSize, vecPtr);
 
 										v1.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT ));
 									}
@@ -3231,11 +3235,12 @@ namespace juicescript.runtime.buildin
 
 										cache.Type =  vector.element_asclass.Instance;
 										RtInstance struct_payload = (RtInstance)cache;
-										struct_payload.HEAPINSTANCE_PTR = 0;
+										//struct_payload.HEAPINSTANCE_PTR = 0;
 
-										struct_payload.methodscopeslot_ref_state = 0;
-										struct_payload.Set_PROPERTY_PTR(r * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
-										struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+										//struct_payload.methodscopeslot_ref_state = 0;
+										//struct_payload.Set_PROPERTY_PTR(r * store.elementSize , context.player, vector.element_asclass.Instance); //标记偏移量.
+										//struct_payload.HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+										struct_payload.LinkToPayloadOffset(r * store.elementSize, vecPtr);
 
 										v2.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT ));
 									}
@@ -4025,14 +4030,7 @@ namespace juicescript.runtime.buildin
 			}
 
 
-			private static void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
-			{
-				dst.Type = src.Type;
-				((RtInstance)dst).HEAPINSTANCE_PTR = 0;
-				((RtInstance)dst).methodscopeslot_ref_state = 0;
-				((RtInstance)dst).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
-
-			}
+			
 
 			internal static void Swap(VectorStore store, int a, int b)
 			{
@@ -5636,12 +5634,12 @@ namespace juicescript.runtime.buildin
 
 								cache.Type = element_asclass.Instance;
 								RtInstance struct_payload = (RtInstance)cache;
-								struct_payload.HEAPINSTANCE_PTR = 0;
+								//struct_payload.HEAPINSTANCE_PTR = 0;
 
-								struct_payload.methodscopeslot_ref_state = 0;
-								struct_payload.Set_PROPERTY_PTR(validid * bytes.Length, null, element_asclass.Instance); //标记偏移量.
-								struct_payload.HEAPINSTANCE_PTR = vector_ptr; //指向Vector.
-
+								//struct_payload.methodscopeslot_ref_state = 0;
+								//struct_payload.Set_PROPERTY_PTR(validid * bytes.Length, null, element_asclass.Instance); //标记偏移量.
+								//struct_payload.HEAPINSTANCE_PTR = vector_ptr; //指向Vector.
+								struct_payload.LinkToPayloadOffset(validid * elementSize, vector_ptr);
 
 
 								result.SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));

@@ -115,7 +115,7 @@ namespace juicescript.runtime
 			stack_store_startindex = store_startindex;
 			HEAPINSTANCE_PTR = 0;
 			m_property_ptr = 0;
-			thisslot_ref_state = 0;
+			nextframe_ref_state = default;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -124,7 +124,7 @@ namespace juicescript.runtime
 			StoreMode = ArrayStoreMode.cache;
 			HEAPINSTANCE_PTR = 0;
 			methodscopeslot_ref_state = 0;
-			thisslot_ref_state = 0;
+			nextframe_ref_state = default;
 			array_len = 0;
 			if (clear)
 			{
@@ -139,7 +139,7 @@ namespace juicescript.runtime
 		internal void LinkTo(RtArray dst, int dstptr)
 		{ 
 			HEAPINSTANCE_PTR = dstptr;
-			thisslot_ref_state = 0; //不是直接保存在this槽，所以标志清空
+			
 		}
 
 
@@ -158,7 +158,7 @@ namespace juicescript.runtime
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
-				origin.thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
+				
 			}
 
 			return ptr;
@@ -211,9 +211,10 @@ namespace juicescript.runtime
 		internal byte methodscopeslot_ref_state;
 
 		/// <summary>
-		/// 当被作为this对象时，设置成当前scope_ptr。表示被当作this对象引用，当没有其他变量引用时，还可能被this引用。
+		/// 被调用的下级函数引用情况,包含指针和版本
 		/// </summary>
-		internal byte thisslot_ref_state;
+		internal refbynextframe nextframe_ref_state;
+		
 
 
 		internal uint array_len = 0;
@@ -480,7 +481,7 @@ namespace juicescript.runtime
 
 			//链接GC
 			HEAPINSTANCE_PTR = arr_ptr;
-			thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
+			
 
 			return arr_ptr;
 		}
@@ -745,12 +746,13 @@ namespace juicescript.runtime
 						Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
 							int clonedptr = tempSlot + Context.CacheInstancePtr;
-							var cacheObj = context.GC.Heap[clonedptr];
-							cacheObj.Type = check.Type;
+							var cacheObj = (RtInstance)context.GC.Heap[clonedptr];
+							//cacheObj.Type = check.Type;
 
-							((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-							((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+							//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+							//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+							//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+							cacheObj.CloneOther((RtInstance)check, context.player);
 
 							context.StackSlots[tempSlot].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 						}
@@ -1897,11 +1899,12 @@ namespace juicescript.runtime
 		{
 			if(dst == src) return;
 
-			dst.Type = src.Type;
-			((RtInstance)dst).HEAPINSTANCE_PTR = 0;
-			((RtInstance)dst).methodscopeslot_ref_state = 0;
-			((RtInstance)dst).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
+			//dst.Type = src.Type;
+			//((RtInstance)dst).HEAPINSTANCE_PTR = 0;
+			//((RtInstance)dst).methodscopeslot_ref_state = 0;
+			//((RtInstance)dst).CopyFrom(src, player, src.Type._link_codescope.TypeLayout.Size);
 
+			((RtInstance)dst).CloneOther((RtInstance)src, player);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]

@@ -12470,10 +12470,12 @@ namespace juicescript.runtime
 			var cache = Context.GC.Heap[cache_ptr];
 			cache.Type = @class.Instance;
 
-			((RtInstance)cache).HEAPINSTANCE_PTR = 0;
-			((RtInstance)cache).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
-			((RtInstance)cache).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
-			((RtInstance)cache).methodscopeslot_ref_state = 0;
+			//((RtInstance)cache).HEAPINSTANCE_PTR = 0;
+			//((RtInstance)cache).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
+			//((RtInstance)cache).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
+			//((RtInstance)cache).methodscopeslot_ref_state = 0;
+			((RtInstance)cache).SetDefaultCacheData(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR);
+
 
 			CodeScope cscope = @class.Instance._link_codescope;
 			if (cscope.TypeLayout.Size > 0)

@@ -239,26 +239,32 @@ import flash.utils.Dictionary;
 
 (function k1()
 {
-	var i:Vector.<int> =new <int> [1,2,3];
-	
-	var j;
-	
-	trace(
-	i.map(function (v,id,a) 
-	{
-		i = null;
-		
-		//var j = a;
-		trace(v, id,a);
-		
-		if(id==2)
+	var i;
+	var d;
+	var e;
+	(
+		function ():void 
 		{
-			j = a;
+			i = {};	
+			var j = i;
+			
+			d = j;
+			e = j;
 		}
-	}
-	));
 	
-	trace(i);
-	trace(j);
+	)();
+	
+	//(
+		//function ():void 
+		//{
+			//i = null;
+		//}
+	//
+	//)();
+	
+	
+	i = null;
+	trace(d,e);
+	
 })();
 	

@@ -3324,20 +3324,22 @@ namespace juicescript.runtime
 				{
 					var key = result_payload.ReadSlot(1, this);
 					//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
-					if (key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+					//if (key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+					if (key.IsStruct())
 					{
-						var check = Context.GC.Heap[key.HeapPtr];
-						if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+						var check = (RtInstance)Context.GC.Heap[key.HeapPtr];
+						Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
 							Debug.Assert(reseveSlot != stackStPos + resultLoc.index);
 							//clone结构体
 							int clonedptr = stackStPos + resultLoc.index + Context.CacheInstancePtr;
-							var cacheObj = Context.GC.Heap[clonedptr];
-							cacheObj.Type = check.Type;
+							var cacheObj = (RtInstance)Context.GC.Heap[clonedptr];
+							//cacheObj.Type = check.Type;
 
-							((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-							((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+							//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+							//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+							//((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+							cacheObj.CloneOther(check, this);
 
 							key.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 
@@ -3352,19 +3354,20 @@ namespace juicescript.runtime
 				{
 					var value = result_payload.ReadSlot(2, this);
 					//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
-					if (value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+					if (value.IsStruct() )//value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var check = Context.GC.Heap[value.HeapPtr];
-						if (((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct))
+						var check = (RtInstance)Context.GC.Heap[value.HeapPtr];
+						Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
 							//clone结构体
 							int clonedptr = stackStPos + resultLoc.index + Context.CacheInstancePtr;
-							var cacheObj = Context.GC.Heap[clonedptr];
-							cacheObj.Type = check.Type;
+							var cacheObj = (RtInstance)Context.GC.Heap[clonedptr];
+							//cacheObj.Type = check.Type;
 
-							((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-							((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-							((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+							//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+							//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+							//((RtInstance)cacheObj).CopyFrom(check, this, check.Type._link_codescope.TypeLayout.Size);
+							cacheObj.CloneOther(check, this);
 
 							value.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 
@@ -4951,10 +4954,11 @@ namespace juicescript.runtime
 					var instance = Context.GC.Heap[instancePtr];
 					instance.Type = Context.OBJECT.Instance;
 
-					((RtInstance)instance).HEAPINSTANCE_PTR = 0;
-					((RtInstance)instance).Set_PROPERTY_PTR(0, this, Context.OBJECT.Instance);
-					((RtInstance)instance).Set_PROTOTYPE(function_proto, this);
-					((RtInstance)instance).methodscopeslot_ref_state = 0;
+					//((RtInstance)instance).HEAPINSTANCE_PTR = 0;
+					//((RtInstance)instance).Set_PROPERTY_PTR(0, this, Context.OBJECT.Instance);
+					//((RtInstance)instance).Set_PROTOTYPE(function_proto, this);
+					//((RtInstance)instance).methodscopeslot_ref_state = 0;
+					((RtInstance)instance).SetDefaultCacheData(function_proto);
 
 					Context.StackSlots[ptrIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 
@@ -5003,21 +5007,16 @@ namespace juicescript.runtime
 							int target_index = stackStPos + target.index;
 							var target_instancePtr = Context.CacheInstancePtr + target_index;
 
-							var target_ins = Context.GC.Heap[target_instancePtr];
-							target_ins.Type = Context.OBJECT.Instance;
+							Debug.Assert(Context.OBJECT.Instance._link_codescope.TypeLayout.Size == 0);
+							
 
-							if (target_ins.Type._link_codescope.TypeLayout.Size != 0)
-							{
-#if DEBUG
-								throw new InvalidOperationException();
-#else
-													Environment.FailFast("出错了，这里跑不到");  return;
-#endif
-							}
+							var target_ins = (RtInstance)Context.GC.Heap[target_instancePtr];
+							//target_ins.Type = Context.OBJECT.Instance;
 
-							((RtInstance)target_ins).HEAPINSTANCE_PTR = 0;
-							((RtInstance)target_ins).methodscopeslot_ref_state = 0;
-							((RtInstance)target_ins).CopyFrom(instance, this, 0);
+							//((RtInstance)target_ins).HEAPINSTANCE_PTR = 0;
+							//((RtInstance)target_ins).methodscopeslot_ref_state = 0;
+							//((RtInstance)target_ins).CopyFrom(instance, this, 0);
+							target_ins.CloneOther((RtInstance)instance, this);
 
 							stackslots[target.index].SetHeapPtr(target_instancePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 						}
@@ -5666,10 +5665,11 @@ namespace juicescript.runtime
 				var cache = Context.GC.Heap[cache_ptr];
 				cache.Type = @class.Instance;
 
-				((RtInstance)cache).HEAPINSTANCE_PTR = 0;
-				((RtInstance)cache).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
-				((RtInstance)cache).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
-				((RtInstance)cache).methodscopeslot_ref_state = 0;
+				//((RtInstance)cache).HEAPINSTANCE_PTR = 0;
+				//((RtInstance)cache).Set_PROPERTY_PTR(0, Context.player, @class.Instance);
+				//((RtInstance)cache).Set_PROTOTYPE(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR, this);
+				//((RtInstance)cache).methodscopeslot_ref_state = 0;
+				((RtInstance)cache).SetDefaultCacheData(((RtScriptClass)Context.GC.Heap[@class.__instance_index__]).PROTO__PTR);
 
 				CodeScope cscope = @class.Instance._link_codescope;
 
@@ -5794,9 +5794,11 @@ namespace juicescript.runtime
 					cache.Type = instance.Type._link_codescope.Members[(ushort)scopemember_index].__rt_type_class__.Instance;
 					RtInstance struct_payload = (RtInstance)cache;
 
-					struct_payload.methodscopeslot_ref_state = 0;
-					struct_payload.inner_struct_ptr = instance.inner_struct_ptr + offset; //标记index.
-					struct_payload.HEAPINSTANCE_PTR = instance.HEAPINSTANCE_PTR == 0 ? instance_box.HeapPtr : instance.HEAPINSTANCE_PTR; //指向当前对象.
+					//struct_payload.methodscopeslot_ref_state = 0;
+					//struct_payload.inner_struct_ptr = instance.inner_struct_ptr + offset; //标记index.
+					//struct_payload.HEAPINSTANCE_PTR = instance.HEAPINSTANCE_PTR == 0 ? instance_box.HeapPtr : instance.HEAPINSTANCE_PTR; //指向当前对象.
+
+					struct_payload.LinkToPayloadOffset(instance.inner_struct_ptr + offset, instance.HEAPINSTANCE_PTR == 0 ? instance_box.HeapPtr : instance.HEAPINSTANCE_PTR);
 
 					stackslots[dst_index].SetHeapPtr(cache_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
 

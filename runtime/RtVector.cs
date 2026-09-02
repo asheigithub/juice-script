@@ -98,7 +98,7 @@ namespace juicescript.runtime
 			Type = asinstance;
 			HEAPINSTANCE_PTR = 0;
             methodscopeslot_ref_state = 0;
-            thisslot_ref_state = 0;
+            nextframe_ref_state = default;
 
 			element_asclass = asinstance._element_class;
 			element_type = asinstance._element_class == null ? TypeKind.Any : (TypeKind)asinstance._element_class.Type_identifier;
@@ -112,7 +112,7 @@ namespace juicescript.runtime
 		internal void LinkTo(RtVector dst, int dstptr)
         { 
             HEAPINSTANCE_PTR = dstptr;
-			thisslot_ref_state = 0; //不是直接保存在this槽，所以标志清空
+			
 		}
 
 
@@ -131,7 +131,7 @@ namespace juicescript.runtime
 				payload = ((RtVector)player.Context.GC.Heap[ptr]);
 				target = payload;
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
-				origin.thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
+				
 			}
 			return ptr;
 		}
@@ -160,18 +160,14 @@ namespace juicescript.runtime
 		/// 
 		/// </summary>
 		internal byte methodscopeslot_ref_state;
+
 		/// <summary>
-		/// 当被作为this对象时，设置成当前scope_ptr。表示被当作this对象引用，当没有其他变量引用时，还可能被this引用。
+		/// 被调用的下级函数引用情况,包含指针和版本
 		/// </summary>
-		internal byte thisslot_ref_state;
+		internal Player.refbynextframe nextframe_ref_state;
 
 
-
-		//internal Span<byte> ReadStoreAt(int validid, Player player)
-		//      {			
-		//	Span<byte> bytes = GetStore(player).ReadStoreAt(validid);
-		//          return bytes;
-		//}
+		
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal Span<byte> ReadStoreOffset(int offset, Player player,int size)
@@ -485,7 +481,7 @@ namespace juicescript.runtime
 
             //链接到堆对象, 堆对象此时被此对象链接
             HEAPINSTANCE_PTR = heap_ptr;
-            thisslot_ref_state = 0; //只要链接到其他对象，就说明它不是占用this槽存储空间。
+            
 
             return heap_ptr;
 		}

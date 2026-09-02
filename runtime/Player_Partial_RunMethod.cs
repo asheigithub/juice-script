@@ -75,10 +75,10 @@ namespace juicescript.runtime
 				case RtHeapTypeKind.INSTANCE:
 					break;
 				case RtHeapTypeKind.ARRAY:
-					((RtArray)_this).thisslot_ref_state = 0;
+					((RtArray)_this).nextframe_ref_state = default;
 					break;
 				case RtHeapTypeKind.VECTOR:
-					((RtVector)_this).thisslot_ref_state = 0;
+					((RtVector)_this).nextframe_ref_state = default;
 					break;
 				case RtHeapTypeKind.CLOSURE:
 					break;
@@ -382,6 +382,7 @@ namespace juicescript.runtime
 				m_scopePayload.ParentPtr = scope_ptr;
 				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method_body_linkcodesocpe, true);
 
+				m_scopePayload.mScopePtr = (byte)mScopeId;
 				m_scopePayload.__sendargcount = args;
 
 				//save this --如果saved_this被赋值，在结束函数调用后需要将this_slot清空，因为this已经结束了
@@ -1106,6 +1107,7 @@ namespace juicescript.runtime
 			m_scopePayload.ParentPtr = scope_ptr;
 			m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method_body_linkcodesocpe, true);
 
+			m_scopePayload.mScopePtr = (byte)mScopeId;
 			m_scopePayload.__sendargcount = argsCount;
 
 

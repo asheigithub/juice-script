@@ -8,6 +8,8 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -284,7 +286,7 @@ namespace juicescript.runtime
             else
             {
                 RtInstance target;
-                HEAPINSTANCE_PTR = DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type,out target);
+                DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type,out target);
                 return target.m_property_ptr;
 
 				//return ((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
@@ -301,7 +303,7 @@ namespace juicescript.runtime
             else
             {
 				RtInstance target;
-				HEAPINSTANCE_PTR = DoFindAndUpdatePtr(HEAPINSTANCE_PTR,  player, type ,out target);
+				DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type, out target);
                 target.m_property_ptr = ptr;
 
 				//((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).Set_PROPERTY_PTR(ptr, player);
@@ -320,7 +322,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtInstance target;
-				HEAPINSTANCE_PTR = DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type ,out target);
+				DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type, out target);
 				return target.m__proto__;
 			}
 		}
@@ -349,9 +351,43 @@ namespace juicescript.runtime
 		/// 如果是缓存对象，并且已经被保存到堆中，则保存堆中对象的指针
 		/// 后续操作将直接对堆里的对象操作了。
 		/// </summary>
-		internal int HEAPINSTANCE_PTR;
+		internal int HEAPINSTANCE_PTR { get; private set; }
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		internal void CloneOther(RtInstance other,Player player)
+		{
+			
+			Type = other.Type;
+
+			methodscopeslot_ref_state = 0;
+			HEAPINSTANCE_PTR = 0;
+			CopyFrom(other, player, Type._link_codescope.TypeLayout.Size);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void LinkToPayloadOffset(int offset,int vecPtr)
+		{			
+			methodscopeslot_ref_state = 0;
+			m_property_ptr = offset; //标记偏移量.
+			HEAPINSTANCE_PTR = vecPtr; //指向Vector.
+		}
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		internal void SetDefaultCacheData(int _proto_)
+		{
+			HEAPINSTANCE_PTR = 0;
+			m_property_ptr = 0;
+			m__proto__ = _proto_;
+			
+			methodscopeslot_ref_state = 0;
+		}
 
 
+		internal void LinkTo(RtInstance dst, int dstPtr)
+		{
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+			HEAPINSTANCE_PTR = dstPtr;
+		}
 
 		/// <summary>
 		/// 仅用于跟踪缓存对象被function的slot引用的情况

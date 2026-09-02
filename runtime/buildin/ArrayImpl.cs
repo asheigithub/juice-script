@@ -151,12 +151,13 @@ namespace juicescript.runtime.buildin
 
 							int cache_struct_ptr = array.cache_structs[i];
 
-							var v_struct = context.GC.Heap[cache_struct_ptr]; 
+							var v_struct = (RtInstance)context.GC.Heap[cache_struct_ptr];
 
-							v_struct.Type = obj.Type;
-							((RtInstance)v_struct).HEAPINSTANCE_PTR = 0;
-							((RtInstance)v_struct).methodscopeslot_ref_state = 0;
-							((RtInstance)v_struct).CopyFrom(obj, context.player, obj.Type._link_codescope.TypeLayout.Size);
+							//v_struct.Type = obj.Type;
+							//((RtInstance)v_struct).HEAPINSTANCE_PTR = 0;
+							//((RtInstance)v_struct).methodscopeslot_ref_state = 0;
+							//((RtInstance)v_struct).CopyFrom(obj, context.player, obj.Type._link_codescope.TypeLayout.Size);
+							v_struct.CloneOther((RtInstance)obj, context.player);
 
 							array.cache_store[i].SetHeapPtr(cache_struct_ptr, (byte)RtHeapTypeKind.INSTANCE , (byte)HeapKindFlag.FLAG_STRUCT);
 						}
@@ -606,12 +607,13 @@ namespace juicescript.runtime.buildin
 					Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
-						var cacheObj = context.GC.Heap[clonedptr];
-						cacheObj.Type = check.Type;
+						var cacheObj = (RtInstance)context.GC.Heap[clonedptr];
+						//cacheObj.Type = check.Type;
 
-						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						cacheObj.CloneOther((RtInstance)check, context.player);
 
 						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 					}
@@ -784,11 +786,12 @@ namespace juicescript.runtime.buildin
 					{
 						int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 						var cacheObj = context.GC.Heap[clonedptr];
-						cacheObj.Type = check.Type;
+						//cacheObj.Type = check.Type;
 
-						((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-						((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-						((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+						//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+						//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+						((RtInstance)cacheObj).CloneOther((RtInstance)check, context.player);
 
 						context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 					}
@@ -2123,11 +2126,12 @@ namespace juicescript.runtime.buildin
 				{
 					int clonedptr = returnSlotIndex + Context.CacheInstancePtr;
 					var cacheObj = context.GC.Heap[clonedptr];
-					cacheObj.Type = check.Type;
+					//cacheObj.Type = check.Type;
 
-					((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
-					((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
-					((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+					//((RtInstance)cacheObj).methodscopeslot_ref_state = 0;
+					//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+					//((RtInstance)cacheObj).CopyFrom(check, context.player, check.Type._link_codescope.TypeLayout.Size);
+					((RtInstance)cacheObj).CloneOther((RtInstance)check, context.player);
 
 					context.StackSlots[returnSlotIndex].SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 				}

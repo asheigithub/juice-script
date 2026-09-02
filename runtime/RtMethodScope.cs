@@ -17,6 +17,9 @@ namespace juicescript.runtime
 #endif
 		sealed class RtMethodScope : RtHeapBase
 	{
+		private static uint verseed;
+
+
 		public RtMethodScope() : base( RtHeapTypeKind.MethodScope) { }
 
 		private Memory<NaNBoxing> Slots;
@@ -36,15 +39,12 @@ namespace juicescript.runtime
 		}
 
 		
-		internal bool IsStackSlot;
-		internal int StackPos;
-		internal int SlotCount;
+		
 
 		/// <summary>
 		/// 在RunMethod 构造时，记录实际上代码里写了几个参数。
 		/// </summary>
 		internal int __sendargcount;
-
 
 		public NaNBoxing ThisPtr
 		{
@@ -54,6 +54,14 @@ namespace juicescript.runtime
 			}
 		}
 
+		internal uint version;
+		
+		internal int StackPos;
+		internal int SlotCount;
+		internal bool IsStackSlot;
+		internal byte mScopePtr;
+
+		
 
 		/// <summary>
 		/// 实际上，只有RunMethod里的调用才会是在栈帧上分配
@@ -74,6 +82,9 @@ namespace juicescript.runtime
 			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count + 1);
 
 			cloneout_ptr = 0;
+
+			version = ++verseed;
+
 #if FORCOMPILER
 
 			
