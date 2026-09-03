@@ -235,30 +235,3 @@ import flash.utils.Dictionary;
 	   //
 	   //trace( getTimer() - st);
 
-
-class O
-{
-	public var A;
-	
-	public function Test()
-	{
-		trace("y" ,A );
-	}
-	
-};
- 
-(function k1()
-{
-	var o = new O();
-	
-	(function(){
-	
-	var f = o.Test;
-	o = f;	
-	f = {};
-	
-	})();
-	
-	o();
-	
-})();

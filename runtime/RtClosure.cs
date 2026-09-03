@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static juicescript.runtime.Player;
 
 namespace juicescript.runtime
 {
@@ -52,7 +53,9 @@ namespace juicescript.runtime
 			//closure.ScopeType = _resolve.DefineAt;
 			_ref_as_type = as_type;
 
-			methodscopeslot_ref_state = 0; 
+			methodscopeslot_ref_state = 0;
+			nextframe_ref_state = default;
+
 			HEAPINSTANCE_PTR = 0;
 
 		}
@@ -76,7 +79,10 @@ namespace juicescript.runtime
 		/// 
 		/// </summary>
 		internal byte methodscopeslot_ref_state;
-
+		/// <summary>
+		/// 被调用的下级函数引用情况,包含指针和版本
+		/// </summary>
+		internal refbynextframe nextframe_ref_state;
 
 
 
