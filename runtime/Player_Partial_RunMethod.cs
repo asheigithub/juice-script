@@ -521,7 +521,7 @@ namespace juicescript.runtime
 											scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 											scopeHeapLocater.MemberIndex = i;
 
-											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, &scope_ptr, ref error, false /*结构体拷贝传递*/);
+											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, scope_ptr, ref error, false /*结构体拷贝传递*/);
 #if DEBUG
 											if (error.raised)
 											{
@@ -1176,7 +1176,7 @@ namespace juicescript.runtime
 						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = i;
 
-						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, &scope_ptr, ref error, false /*结构体拷贝传递*/);
+						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, scope_ptr, ref error, false /*结构体拷贝传递*/);
 						Debug.Assert(!error.raised);
 					}
 					param_slots[i] = box;

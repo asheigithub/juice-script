@@ -3053,7 +3053,7 @@ namespace juicescript.runtime
 #endif
 
 
-				PrepareSaveMethodScope(heap, iterSrcObj_Holder, ref ins, null, method_scopes, ref error);
+				PrepareSaveMethodScope(heap, iterSrcObj_Holder, ref ins, scope_ptr, ref error);
 				if (error.raised)
 				{
 					Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3079,7 +3079,7 @@ namespace juicescript.runtime
 						var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 						InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
-						PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], null, method_scopes, ref error);
+						PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], scope_ptr, ref error);
 						if (error.raised)
 						{
 							Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3129,7 +3129,7 @@ namespace juicescript.runtime
 							}
 #endif
 
-							PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], null, method_scopes, ref error);
+							PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], scope_ptr, ref error);
 							if (error.raised)
 							{
 								Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3151,7 +3151,7 @@ namespace juicescript.runtime
 					var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 					InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
-					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], null, method_scopes, ref error);
+					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot],scope_ptr, ref error);
 					if (error.raised)
 					{
 						Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -5151,8 +5151,8 @@ namespace juicescript.runtime
 			{
 				//先准备更新原对象
 
-				int min = 0; int max = 0;
-				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, ref max,scope_ptr);
+				int min = 0;
+				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, scope_ptr);
 			}
 
 			if (
@@ -5403,8 +5403,8 @@ namespace juicescript.runtime
 					//*m_scope++ = scope_ptr;
 					//prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, null, method_scopes);
 
-					int min = 0, max = 0;
-					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, ref max,scope_ptr);
+					int min = 0;
+					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, scope_ptr);
 				}
 
 
@@ -7555,7 +7555,7 @@ namespace juicescript.runtime
 							else
 							{
 
-								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
+								PrepareSaveMethodScope(heap, heapLocater, ref value, scope_ptr, ref error);
 								Debug.Assert(!error.raised);
 								heapV = value;
 							}
@@ -8968,7 +8968,7 @@ namespace juicescript.runtime
 							RtMethodScope heap = (RtMethodScope)s;
 							if (isheaptype)
 							{
-								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
+								PrepareSaveMethodScope(heap, heapLocater, ref value, scope_ptr, ref error);
 
 								if (error.raised)
 								{
@@ -12407,7 +12407,7 @@ namespace juicescript.runtime
 			{
 				int* m_scope = method_scopes;
 				*m_scope++ = scope_ptr;
-				PrepareSaveMethodScope((RtMethodScope)methodscope, heapLocater, ref value, null, method_scopes, ref error);
+				PrepareSaveMethodScope((RtMethodScope)methodscope, heapLocater, ref value, scope_ptr, ref error);
 
 				if (error.raised)
 				{
