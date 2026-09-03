@@ -2752,7 +2752,7 @@ namespace juicescript.runtime
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe void IncrDecrStoreVar(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,
-			int* method_scopes,
+			
 			ref ReceiveError error)
 		{
 			StackLocater dst;
@@ -2853,7 +2853,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			StoreMethodVariable_Slow(methodscope, heapLocater, incr_decr_v, ref heapV, scope_ptr, method_scopes, ref error);
+			StoreMethodVariable_Slow(methodscope, heapLocater, incr_decr_v, ref heapV, scope_ptr, ref error);
 			stackslots[convertedloc.index] = heapV;
 
 
@@ -2989,7 +2989,7 @@ namespace juicescript.runtime
 
 		private unsafe void ITER_GET(int dst_index, byte** PC, RtHeapBase methodscope,
 
-			Span<NaNBoxing> stackslots, int* method_scopes, int scope_ptr,
+			Span<NaNBoxing> stackslots, int scope_ptr,
 			ref ReceiveError error,
 			byte* PC_START
 
@@ -3035,9 +3035,7 @@ namespace juicescript.runtime
 				}
 
 
-				int* m_scope = method_scopes;
-				*m_scope++ = scope_ptr;
-
+				
 				RtMethodScope heap = (RtMethodScope)methodscope;
 #if DEBUG
 				if (methodscope.Type._link_codescope.index != iterSrcObj_Holder.ScopeIndex)
@@ -3053,7 +3051,7 @@ namespace juicescript.runtime
 #endif
 
 
-				PrepareSaveMethodScope(heap, iterSrcObj_Holder, ref ins, null, method_scopes, ref error);
+				PrepareSaveMethodScope(heap, iterSrcObj_Holder, ref ins, scope_ptr, ref error);
 				if (error.raised)
 				{
 					Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3079,7 +3077,7 @@ namespace juicescript.runtime
 						var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 						InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
-						PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], null, method_scopes, ref error);
+						PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], scope_ptr, ref error);
 						if (error.raised)
 						{
 							Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3129,7 +3127,7 @@ namespace juicescript.runtime
 							}
 #endif
 
-							PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], null, method_scopes, ref error);
+							PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], scope_ptr, ref error);
 							if (error.raised)
 							{
 								Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3151,7 +3149,7 @@ namespace juicescript.runtime
 					var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 					InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
-					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], null, method_scopes, ref error);
+					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot],scope_ptr, ref error);
 					if (error.raised)
 					{
 						Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -4262,7 +4260,7 @@ namespace juicescript.runtime
 			Span<NaNBoxing> stackslots,
 			int scope_ptr, int stackStPos,
 
-			int* method_scopes,
+			
 			//ref NaNBoxing global_obj,
 			ref ReceiveError error
 			)
@@ -4295,7 +4293,7 @@ namespace juicescript.runtime
 			int closure_ptr;
 
 
-			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, out closure);
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -4363,7 +4361,7 @@ namespace juicescript.runtime
 			Span<NaNBoxing> stackslots,
 			int scope_ptr, int stackStPos,
 
-			int* method_scopes,
+			
 			//ref NaNBoxing global_obj,
 			ref ReceiveError error)
 		{
@@ -4390,7 +4388,7 @@ namespace juicescript.runtime
 			int closure_ptr;
 
 
-			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, out closure);
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -5111,7 +5109,7 @@ namespace juicescript.runtime
 
 		private unsafe void O_NewInstance_Var(int dst_index, byte** PC, int stackStPos, int scope_ptr,
 			Span<NaNBoxing> stackslots,
-			RtHeapBase methodscope, int* method_scopes,
+			RtHeapBase methodscope, 
 			ref ReceiveError error)
 		{
 			ScopeHeapLocater heapLocater;
@@ -5151,8 +5149,8 @@ namespace juicescript.runtime
 			{
 				//先准备更新原对象
 
-				int min = 0; int max = 0;
-				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, ref max,scope_ptr);
+				int min = 0;
+				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, scope_ptr);
 			}
 
 			if (
@@ -5363,7 +5361,7 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void O_StoreMethodVariable_Instance(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int* method_scopes, ref ReceiveError error)
+		private unsafe void O_StoreMethodVariable_Instance(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr,  ref ReceiveError error)
 		{
 
 			ScopeHeapLocater heapLocater;
@@ -5403,8 +5401,8 @@ namespace juicescript.runtime
 					//*m_scope++ = scope_ptr;
 					//prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, null, method_scopes);
 
-					int min = 0, max = 0;
-					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, ref max,scope_ptr);
+					int min = 0;
+					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, scope_ptr);
 				}
 
 
@@ -7466,7 +7464,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Ld_memberInitValue(byte** PC, RtHeapBase methodscope, int* method_scopes, int scope_ptr, 
+		private unsafe void Ld_memberInitValue(byte** PC, RtHeapBase methodscope, int scope_ptr, 
 			//ASContainer scopeType,
 			ref ReceiveError error)
 		{
@@ -7485,9 +7483,7 @@ namespace juicescript.runtime
 			}
 
 			var s = methodscope; //Context.GC.Heap[scope_ptr];
-			int* m_scope = method_scopes;
-			*m_scope++ = scope_ptr;
-
+			
 		label_method_parent:
 
 			switch (s.Kind)
@@ -7535,7 +7531,7 @@ namespace juicescript.runtime
 						{
 							int parentPtr = ((RtMethodScope)s).ParentPtr;
 							s = Context.GC.Heap[parentPtr];
-							*m_scope++ = parentPtr;
+							
 							goto label_method_parent;
 						}
 						else
@@ -7555,7 +7551,7 @@ namespace juicescript.runtime
 							else
 							{
 
-								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
+								PrepareSaveMethodScope(heap, heapLocater, ref value, scope_ptr, ref error);
 								Debug.Assert(!error.raised);
 								heapV = value;
 							}
@@ -8628,7 +8624,7 @@ namespace juicescript.runtime
 
 
 		private unsafe void StoreScopeH(int dst_index, byte** PC,
-			int scope_ptr, RtHeapBase methodscope, int* method_scopes, Span<NaNBoxing> stackslots,
+			int scope_ptr, RtHeapBase methodscope, Span<NaNBoxing> stackslots,
 			//ASContainer scopeType,
 			ref ReceiveError error
 			)
@@ -8659,9 +8655,7 @@ namespace juicescript.runtime
 			NaNBoxing value = stackslots[stackLocater.index];
 			var s = methodscope; //Context.GC.Heap[scope_ptr];
 
-			int* m_scope = method_scopes;
-			*m_scope++ = scope_ptr;
-
+			
 #if !FORCOMPILER
 
 			switch (kind)
@@ -8924,8 +8918,7 @@ namespace juicescript.runtime
 						{
 							int parentPtr = ((RtMethodScope)s).ParentPtr;
 							s = Context.GC.Heap[parentPtr];
-							*m_scope++ = parentPtr;
-
+							
 							goto label_method_parent;
 						}
 						else
@@ -8968,7 +8961,7 @@ namespace juicescript.runtime
 							RtMethodScope heap = (RtMethodScope)s;
 							if (isheaptype)
 							{
-								PrepareSaveMethodScope(heap, heapLocater, ref value, m_scope, method_scopes, ref error);
+								PrepareSaveMethodScope(heap, heapLocater, ref value, scope_ptr, ref error);
 
 								if (error.raised)
 								{
@@ -12053,7 +12046,7 @@ namespace juicescript.runtime
 		
 
 
-		private unsafe void Ld_function(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos, int* method_scopes, ref ReceiveError error)
+		private unsafe void Ld_function(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,  ref ReceiveError error)
 		{
 			StackLocater target;
 			target.index = dst_index;
@@ -12084,7 +12077,7 @@ namespace juicescript.runtime
 			//ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
 
 			RtHeapBase closure;
-			Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, method_scopes, out closure);
+			Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, out closure);
 
 
 		}
@@ -12347,7 +12340,7 @@ namespace juicescript.runtime
 		}
 
 		private unsafe void StoreMethodVariable_Slow(RtHeapBase methodscope, ScopeHeapLocater heapLocater, NaNBoxing value, ref NaNBoxing heapV, int scope_ptr,
-			int* method_scopes,
+			
 			ref ReceiveError error)
 		{
 			if ((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
@@ -12405,9 +12398,8 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				int* m_scope = method_scopes;
-				*m_scope++ = scope_ptr;
-				PrepareSaveMethodScope((RtMethodScope)methodscope, heapLocater, ref value, null, method_scopes, ref error);
+				
+				PrepareSaveMethodScope((RtMethodScope)methodscope, heapLocater, ref value, scope_ptr, ref error);
 
 				if (error.raised)
 				{
@@ -12427,7 +12419,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void StoreMethodVariable(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int* method_scopes, ref ReceiveError error)
+		private unsafe void StoreMethodVariable(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, ref ReceiveError error)
 		{
 			uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
 
@@ -12473,7 +12465,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			StoreMethodVariable_Slow(methodscope, heapLocater, value, ref heapV, scope_ptr, method_scopes, ref error);
+			StoreMethodVariable_Slow(methodscope, heapLocater, value, ref heapV, scope_ptr, ref error);
 			stackslots[convertedloc.index] = heapV;
 		}
 

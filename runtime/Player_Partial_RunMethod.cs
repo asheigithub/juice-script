@@ -376,7 +376,7 @@ namespace juicescript.runtime
 						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
 
-						prepare_savescope_pass(ref thisPtr, m_scopePayload, scopeHeapLocater, default, 0, 0, mScopeId, ref error, true);						
+						prepare_savescope_pass(ref thisPtr, m_scopePayload, scopeHeapLocater, default, 0, mScopeId, ref error, true);						
 						//PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref thisPtr, null, 0, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 						if (error.raised)
 						{
@@ -521,7 +521,7 @@ namespace juicescript.runtime
 											scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 											scopeHeapLocater.MemberIndex = i;
 
-											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, &scope_ptr, ref error, false /*结构体拷贝传递*/);
+											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, scope_ptr, ref error, false /*结构体拷贝传递*/);
 #if DEBUG
 											if (error.raised)
 											{
@@ -1101,7 +1101,7 @@ namespace juicescript.runtime
 					scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 					scopeHeapLocater.MemberIndex = (ushort)(m_scopePayload.SlotCount - 1);
 
-					prepare_savescope_pass(ref _this_, m_scopePayload, scopeHeapLocater, default, 0, 0, mScopeId, ref error, true);
+					prepare_savescope_pass(ref _this_, m_scopePayload, scopeHeapLocater, default, 0, mScopeId, ref error, true);
 					//PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref _this_, null, &mScopeId , ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 					if (error.raised)
 					{
@@ -1176,7 +1176,7 @@ namespace juicescript.runtime
 						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = i;
 
-						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, null, &scope_ptr, ref error, false /*结构体拷贝传递*/);
+						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, scope_ptr, ref error, false /*结构体拷贝传递*/);
 						Debug.Assert(!error.raised);
 					}
 					param_slots[i] = box;
@@ -1337,7 +1337,7 @@ namespace juicescript.runtime
 #else
 			Context.GC.CheckGC(ref error);
 #endif
-
+			
 
 			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
 				&&

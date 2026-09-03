@@ -12506,7 +12506,7 @@ namespace juicescript.runtime
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe int Ld_function_and_store_member( ASMethod function, ScopeHeapLocater heapLocater, RtHeapBase mscope, int scope_ptr,  ref ReceiveError error,
-			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, int* method_scopes, out RtHeapBase closure_instance)
+			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, out RtHeapBase closure_instance)
 		{
 			if (!(heapLocater.MemberIndex == ushort.MaxValue && heapLocater.ScopeIndex == ushort.MaxValue))
 			{
@@ -12621,8 +12621,7 @@ namespace juicescript.runtime
 				}
 				else
 				{
-					int* m_scope = method_scopes;
-					*m_scope++ = scope_ptr;
+					
 #if DEBUG
 					if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
 					{
@@ -12652,7 +12651,7 @@ namespace juicescript.runtime
 						v.SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 						//保存到method的成员中，可以考虑到缓存
-						PrepareSaveMethodScope((RtMethodScope)s,  heapLocater, ref v, null, method_scopes, ref error);
+						PrepareSaveMethodScope((RtMethodScope)s,  heapLocater, ref v, scope_ptr, ref error);
 						if (error.raised)
 						{
 							closure_instance = null;
@@ -13334,11 +13333,6 @@ namespace juicescript.runtime
 
 
 
-
-				int* method_scopes = stackalloc int[64]; //64个，肯定不可能爆了。
-				
-
-
 				Span<NaNBoxing> constants = new Span<NaNBoxing>(p + 3 * sizeof(int) + 2 * sizeof(int) * info.instructions, info.constants); //(NaNBoxing*)((int*)p + 3);
 
 				byte* PC = p + sizeof(int) * 3 + 2 * sizeof(int) * info.instructions + sizeof(NaNBoxing) * info.constants;
@@ -13750,7 +13744,7 @@ namespace juicescript.runtime
 						case INS_Code.ld_function:
 							{
 
-								Ld_function(dst_index, &PC, methodscope, constants, stackslots, scope_ptr, stackStPos, method_scopes, ref error);
+								Ld_function(dst_index, &PC, methodscope, constants, stackslots, scope_ptr, stackStPos, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13780,7 +13774,7 @@ namespace juicescript.runtime
 
 #endif
 
-								Ld_function_bindglobal_call(&PC, methodscope, dst_index,constants, stackslots, scope_ptr, stackStPos, method_scopes,
+								Ld_function_bindglobal_call(&PC, methodscope, dst_index,constants, stackslots, scope_ptr, stackStPos,
 									//ref global_obj, 
 									ref error
 									);
@@ -13939,7 +13933,7 @@ namespace juicescript.runtime
 						case INS_Code.storeScopeH:
 							{
 
-								StoreScopeH(dst_index,&PC, scope_ptr, methodscope, method_scopes, stackslots, 
+								StoreScopeH(dst_index,&PC, scope_ptr, methodscope, stackslots, 
 									//scopeType,
 									ref error);
 								if (error.raised)
@@ -13951,7 +13945,7 @@ namespace juicescript.runtime
 
 						case INS_Code.storeMethodVariable:
 							{
-								StoreMethodVariable(dst_index, &PC, methodscope, stackslots, scope_ptr, method_scopes, ref error);
+								StoreMethodVariable(dst_index, &PC, methodscope, stackslots, scope_ptr, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -13997,10 +13991,8 @@ namespace juicescript.runtime
 								}
 								else
 								{
-									int* m_scope = method_scopes;
-									*m_scope++ = scope_ptr;
-
-									PrepareSaveMethodScope(heap, heapLocater, ref value, null, method_scopes, ref error);
+								
+									PrepareSaveMethodScope(heap, heapLocater, ref value, scope_ptr, ref error);
 									Debug.Assert(!error.raised);
 									heapV = value;
 								}
@@ -14013,7 +14005,7 @@ namespace juicescript.runtime
 						case INS_Code.ld_memberInitValue:
 							{
 								
-								Ld_memberInitValue( &PC, methodscope, method_scopes, scope_ptr, //scopeType,
+								Ld_memberInitValue( &PC, methodscope, scope_ptr, //scopeType,
 																								ref error);
 								Debug.Assert(!error.raised);
 
@@ -14404,7 +14396,7 @@ namespace juicescript.runtime
 
 #endif
 
-								O_Ld_function_bindglobal(&PC, methodscope, dst_index, constants, stackslots, scope_ptr, stackStPos, method_scopes,
+								O_Ld_function_bindglobal(&PC, methodscope, dst_index, constants, stackslots, scope_ptr, stackStPos,
 									//ref global_obj, 
 									ref error
 									);
@@ -14438,7 +14430,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_IncrDecr_StoreVar:
 							{
-								IncrDecrStoreVar(dst_index, &PC, methodscope, stackslots, scope_ptr, stackStPos, method_scopes ,ref error);
+								IncrDecrStoreVar(dst_index, &PC, methodscope, stackslots, scope_ptr, stackStPos ,ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14454,7 +14446,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_NewInstance_MethodVar:
 							{
-								O_NewInstance_Var(dst_index, &PC, stackStPos, scope_ptr, stackslots, methodscope, method_scopes ,ref error);
+								O_NewInstance_Var(dst_index, &PC, stackStPos, scope_ptr, stackslots, methodscope ,ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14472,7 +14464,7 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_StoreMethodVar_Instance:
 							{
-								O_StoreMethodVariable_Instance(dst_index, &PC, methodscope, stackslots, scope_ptr, method_scopes, ref error);
+								O_StoreMethodVariable_Instance(dst_index, &PC, methodscope, stackslots, scope_ptr, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;
@@ -14984,7 +14976,7 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.iter_get:
 							{
-								ITER_GET( dst_index, &PC, methodscope,stackslots, method_scopes, scope_ptr, ref error,
+								ITER_GET( dst_index, &PC, methodscope,stackslots, scope_ptr, ref error,
 									PC_START);
 
 								if (error.raised)
@@ -15258,8 +15250,7 @@ namespace juicescript.runtime
 									//*_p = *catch_enter++;
 								}
 								var s = methodscope; //Context.GC.Heap[scope_ptr];
-								int* m_scope = method_scopes;
-								*m_scope++ = scope_ptr;
+								
 #if DEBUG
 								if (s.Type._link_codescope.index != heapLocater.ScopeIndex)
 								{
@@ -15528,7 +15519,7 @@ namespace juicescript.runtime
 										throw new InvalidOperationException(); // 这里的类型转换是不会失败的
 									}
 #endif
-									PrepareSaveMethodScope(heap,  heapLocater, ref value, null, method_scopes, ref store_err);
+									PrepareSaveMethodScope(heap,  heapLocater, ref value, scope_ptr, ref store_err);
 									if (store_err.raised)
 									{
 										error.error.setFault();
