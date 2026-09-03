@@ -3,6 +3,7 @@ using juicescript.ABC.Locaters;
 using juicescript.runtime.buildin;
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
@@ -147,7 +148,8 @@ namespace juicescript.runtime
 								closure.CopyDataFrom(cache, this);
 
 								//原cache的堆对象追踪到堆指针上
-								cache.HEAPINSTANCE_PTR = ptr;
+								//cache.HEAPINSTANCE_PTR = ptr;
+								cache.LinkTo( closure, ptr);
 
 								//将缓存的MethodScope生成到堆里
 								int scope_p = cache.ScopePtr;
@@ -659,9 +661,10 @@ namespace juicescript.runtime
 
 							dstClosure.CopyDataFrom(srcClosure, this);
 							dstClosure.methodscopeslot_ref_state = 0;
-							dstClosure.HEAPINSTANCE_PTR = 0;
 
-							srcClosure.HEAPINSTANCE_PTR = dstClosurePtr;
+
+							//srcClosure.HEAPINSTANCE_PTR = dstClosurePtr;
+							srcClosure.LinkTo(dstClosure, dstClosurePtr);
 
 							//处理 This 指针
 							if (dstClosure.This.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -1015,30 +1018,34 @@ namespace juicescript.runtime
 										{
 											//复制一份。
 											copyed_ptr = scope.StackPos + i + Context.CacheInstancePtr;
-#if DEBUG
-											if (copyed_ptr == ptr)
+											var dstObj = (RtInstance)Context.GC.Heap[copyed_ptr];
+											if (copyed_ptr != ptr)
 											{
-												throw new InvalidOperationException();
+												
+												((RtInstance)dstObj).CloneOther(oldPayload, this);
+												if (k > heap.mScopePtr)
+												{
+													(dstObj).nextframe_ref_state.scope_ptr = k;
+													(dstObj).nextframe_ref_state.version = scope.version;
+
+													(dstObj).methodscopeslot_ref_state = 0;
+												}
+												else
+												{
+													(dstObj).methodscopeslot_ref_state = 1;
+													_toupdateref = dstObj;
+												}
+
+
+
+												oldPayload.LinkTo((RtInstance)dstObj, copyed_ptr);
 											}
-#endif
-											var dstObj = Context.GC.Heap[copyed_ptr];
+											else
+											{
+												Debug.Assert(i != scope.SlotCount - 1);
+												Debug.Assert(dstObj.methodscopeslot_ref_state != 0 || (dstObj.nextframe_ref_state.scope_ptr == scope.mScopePtr && dstObj.nextframe_ref_state.version == scope.version ));
+											}
 
-											//dstObj.Type = type;
-												
-											//((RtInstance)dstObj).HEAPINSTANCE_PTR = 0;
-											//((RtInstance)dstObj).CopyFrom(oldPayload, (ASInstance)dstObj.Type, this, type._link_codescope.TypeLayout.Size);
-												
-											((RtInstance)dstObj).CloneOther(oldPayload, this);
-											((RtInstance)dstObj).methodscopeslot_ref_state = 1;
-
-											//oldPayload.HEAPINSTANCE_PTR = copyed_ptr;
-
-											oldPayload.LinkTo((RtInstance)dstObj, copyed_ptr);
-
-
-											_toupdateref = (RtInstance)dstObj;
-
-												
 											This.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(This.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
 											if (needupdateScopePtr)
 											{
@@ -1047,15 +1054,11 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											if (_toupdateref != null)
+											if (_toupdateref != null && k == heap.mScopePtr)
 											{
-#if DEBUG
-												if (_toupdateref.methodscopeslot_ref_state != 1)
-												{
-													throw new InvalidOperationException();
-												}
-#endif
+												Debug.Assert(_toupdateref.methodscopeslot_ref_state == 1);
 												_toupdateref.methodscopeslot_ref_state = 2;
+												_toupdateref = null;
 											}
 
 											This.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(This.HeapFlag & (byte)HeapKindFlag.FLAG_STRUCT));
@@ -1315,12 +1318,14 @@ namespace juicescript.runtime
 												var dstClosure = (RtClosure)Context.GC.Heap[copyed_ptr];
 												Context.GC.Heap[copyed_ptr].Type = oldObj.Type;
 
+												
+												dstClosure.CopyDataFrom(srcClosure, this);
+
 												dstClosure.methodscopeslot_ref_state = 1; //设置被其他对象引用的状态
 
-												dstClosure.CopyDataFrom(srcClosure, this);
-												dstClosure.HEAPINSTANCE_PTR = srcClosure.HEAPINSTANCE_PTR;
 
-												srcClosure.HEAPINSTANCE_PTR = copyed_ptr;
+												//srcClosure.HEAPINSTANCE_PTR = copyed_ptr;
+												srcClosure.LinkTo(dstClosure, copyed_ptr);
 
 												toupate_ref = dstClosure;
 											}
@@ -1915,14 +1920,14 @@ namespace juicescript.runtime
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private void prepare_savescope_pass(ref NaNBoxing value, RtMethodScope heap,ScopeHeapLocater heapLocater,
-			NaNBoxing old,int min,int max, int scope_ptr,out RtHeapBase save_as_this, ref ReceiveError error ,bool is_pass_this)
+			NaNBoxing old,int min,int max, int scope_ptr, ref ReceiveError error ,bool is_pass_this)
 		{
 			
 			{
 
 				if (value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
-					save_as_this = null;
+					
 					//var obj = Context.GC.Heap[value.HeapPtr];
 					prepare_savemethodscope_saveinstacne(heap, ref value, heapLocater, is_pass_this);
 				}				
@@ -1935,13 +1940,13 @@ namespace juicescript.runtime
 					{
 						if (array.stack_store_startindex < heap.StackPos + heap.SlotCount)
 						{
-							save_as_this = null;
+							
 							//pass
 							value.SetHeapPtr(array_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 						}
 						else
 						{
-							save_as_this = null;
+							
 							value = GetSaveValue(value, ref error);
 							if (error.raised)
 							{
@@ -1952,8 +1957,7 @@ namespace juicescript.runtime
 					}
 					else if (array.StoreMode == RtArray.ArrayStoreMode.cache)
 					{
-						save_as_this = null;
-
+						
 						if (array_ptr < heap.StackPos + Context.CacheArrayPtr)
 						{
 							//定义在上一层调用栈的对象, 直接存，并且标记被下一层函数栈引用
@@ -1987,7 +1991,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							save_as_this = null;
+							
 							//否则，缓存对象复制到要存入的slot的缓存池里，然后将目标slot指向它的缓存池。最后，将原对象也设置成payload指向目标slot的缓存池。
 							int dstptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheArrayPtr;
 							var dstObj = Context.GC.Heap[dstptr];
@@ -2010,14 +2014,14 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						save_as_this = null;
+						
 						//pass.
 						value.SetHeapPtr(array_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 					}
 				}
 				else if (value.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 				{
-					save_as_this = null;
+					
 					RtVector vector;
 					int vector_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vector);
 
@@ -2060,7 +2064,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						save_as_this = null;
+						
 						var obj = Context.GC.Heap[value.HeapPtr];
 						//否则，缓存对象复制到要存入的slot的缓存池里，然后将目标slot指向它的缓存池。最后，将原对象也设置成payload指向目标slot的缓存池。
 						int dstptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheVectorPtr;
@@ -2080,8 +2084,7 @@ namespace juicescript.runtime
 				}
 				else if (value.HeapKind == (byte)RtHeapTypeKind.CLOSURE)
 				{
-					save_as_this = null;
-
+					
 					var obj = Context.GC.Heap[value.HeapPtr];
 					var srcClosure = (RtClosure)obj;
 					int final_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out srcClosure);
@@ -2093,20 +2096,24 @@ namespace juicescript.runtime
 					}
 					else if (value.HeapPtr < heap.StackPos + heap.SlotCount + Context.M_ClosurePtr)
 					{
-
+						
 						if (srcClosure.methodscopeslot_ref_state == 1)
 						{
 							srcClosure.methodscopeslot_ref_state = 2;
 						}
 
 						//此处只需更新This指针的引用情况
-						if (srcClosure.This.ValueType == NaNBoxing.BoxType.HeapPtr)
+
+						NaNBoxing closureThis = srcClosure.This;
+						if (closureThis.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
 							//var _this = Context.GC.Heap[srcClosure.This.HeapPtr];
-							var _thisKind = (RtHeapTypeKind)srcClosure.This.HeapKind;
-							if (_thisKind == RtHeapTypeKind.INSTANCE)
+							var _thisKind = (RtHeapTypeKind)closureThis.HeapKind;
+							if (_thisKind == RtHeapTypeKind.INSTANCE && closureThis.HeapPtr < Context.CacheInstancePtr + Context.STACK_LENGTH)
 							{
-								var _this = Context.GC.Heap[srcClosure.This.HeapPtr];
+								var _this = Context.GC.Heap[closureThis.HeapPtr];
+
+								//Debug.Assert(((RtInstance)_this).methodscopeslot_ref_state != 0);
 								if (((RtInstance)_this).methodscopeslot_ref_state == 1)
 								{
 									((RtInstance)_this).methodscopeslot_ref_state = 2;
@@ -2122,7 +2129,7 @@ namespace juicescript.runtime
 							}
 							else if (_thisKind == RtHeapTypeKind.ARRAY)
 							{
-								var _this = Context.GC.Heap[srcClosure.This.HeapPtr];
+								var _this = Context.GC.Heap[closureThis.HeapPtr];
 								if (((RtArray)_this).StoreMode != RtArray.ArrayStoreMode.normal)
 								{
 									throw new InvalidOperationException();
@@ -2130,7 +2137,8 @@ namespace juicescript.runtime
 							}
 							else if (_thisKind == RtHeapTypeKind.VECTOR)
 							{
-								throw new InvalidOperationException();
+								Debug.Assert(closureThis.HeapPtr >= Context.CacheVectorPtr + Context.STACK_LENGTH);
+								//throw new InvalidOperationException();
 							}
 
 							else if (_thisKind == RtHeapTypeKind.MethodScope)
@@ -2155,9 +2163,10 @@ namespace juicescript.runtime
 
 						dstClosure.CopyDataFrom(srcClosure, this);
 						dstClosure.methodscopeslot_ref_state = 1;
-						dstClosure.HEAPINSTANCE_PTR = srcClosure.HEAPINSTANCE_PTR;
 
-						srcClosure.HEAPINSTANCE_PTR = dstClosurePtr;
+
+						//srcClosure.HEAPINSTANCE_PTR = dstClosurePtr;
+						srcClosure.LinkTo(dstClosure, dstClosurePtr);
 
 						//处理 This 指针
 						if (dstClosure.This.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -2167,8 +2176,9 @@ namespace juicescript.runtime
 							var _thisKind = (RtHeapTypeKind)dstClosure.This.HeapKind;
 							if (_thisKind == RtHeapTypeKind.INSTANCE)
 							{
-								//var _this = Context.GC.Heap[dstClosure.This.HeapPtr];
-								if (old.ValueType == NaNBoxing.BoxType.HeapPtr)
+								
+								//if (old.ValueType == NaNBoxing.BoxType.HeapPtr)
+								if (!old.IsStruct() && old.ValueType == NaNBoxing.BoxType.HeapPtr && old.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 								{
 									prepare_savemethodscope_beforeSave(heap, old, heapLocater, ref min, ref max,scope_ptr );
 								}
@@ -2372,7 +2382,7 @@ namespace juicescript.runtime
 								   value.HeapKind == (byte)RtHeapTypeKind.GLOBAL));
 					
 
-					save_as_this = null;
+					
 					value = GetSaveValue(value, ref error);
 				}
 			}
@@ -2429,7 +2439,7 @@ namespace juicescript.runtime
 				if (value.ValueType == NaNBoxing.BoxType.HeapPtr && value.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 				{
 					//存储阶段
-					prepare_savescope_pass(ref value, heap, heapLocater, old, min, max, *method_scopes,out RtHeapBase saved, ref error, is_pass_this);
+					prepare_savescope_pass(ref value, heap, heapLocater, old, min, max, *method_scopes, ref error, is_pass_this);
 				}
 			}
 			else

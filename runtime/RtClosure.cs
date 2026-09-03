@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace juicescript.runtime
 #else
     public
 #endif
-		sealed class RtClosure : RtHeapBase
+	sealed class RtClosure : RtHeapBase
     {
 		public RtClosure() : base(RtHeapTypeKind.CLOSURE) { }
 
@@ -35,16 +36,35 @@ namespace juicescript.runtime
 		//当在保存到堆中时，由于它本身还可能被methodscope中的变量引用，当已分配内存时，就把分配的内存记录在此，防止重复分配。
 		internal int cloneing_ptr;
 
-
-
 		private int m_property_ptr;
-
 
 		private int m__proto__;
 
 
+
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void ClearData(NaNBoxing thisPtr,int scope_ptr,ASContainer as_type)
+		{
+			This = thisPtr;
+			ScopePtr = scope_ptr;
+			//closure.ScopeType = _resolve.DefineAt;
+			_ref_as_type = as_type;
+
+			methodscopeslot_ref_state = 0; 
+			HEAPINSTANCE_PTR = 0;
+
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void LinkTo(RtClosure dst, int dstPtr)
+		{ 
+			HEAPINSTANCE_PTR = dstPtr;
+		}
+
 		//追踪动态属性和prototype.
-		internal int HEAPINSTANCE_PTR;
+		internal int HEAPINSTANCE_PTR { get; private set; }
 
 		/// <summary>
 		/// 仅用于跟踪缓存对象被function的slot引用的情况
@@ -88,7 +108,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtClosure target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m_property_ptr;
 			}
 		}
@@ -102,7 +122,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtClosure target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.m_property_ptr = ptr;
 			}
 		}
@@ -117,7 +137,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtClosure target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m__proto__;
 			}
 		}
@@ -131,7 +151,7 @@ namespace juicescript.runtime
 			else
 			{
 				RtClosure target;
-				HEAPINSTANCE_PTR = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				target.m__proto__ = proto_ptr;
 			}
 		}
@@ -140,8 +160,10 @@ namespace juicescript.runtime
 
 		public void CopyDataFrom(RtClosure facility , Player player )
 		{
+			HEAPINSTANCE_PTR = 0;
+
 			_ref_as_type = facility._ref_as_type;
-			//ScopeType = facility.ScopeType;
+			
 			ScopePtr = facility.ScopePtr;
 			This = facility.This;
 

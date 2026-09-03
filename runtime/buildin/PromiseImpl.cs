@@ -60,11 +60,12 @@ namespace juicescript.runtime.buildin
 
 				context.GC.Heap[m_closurePtr].Type = _resolve.Trait.Method.Body;
 				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
-				closure.This = thisPtr;
-				closure.ScopePtr = scope_ptr;
-				//closure.ScopeType = _resolve.DefineAt;
-				closure._ref_as_type = _resolve.DefineAt;
-				closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+				//closure.This = thisPtr;
+				//closure.ScopePtr = scope_ptr;
+				////closure.ScopeType = _resolve.DefineAt;
+				//closure._ref_as_type = _resolve.DefineAt;
+				//closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+				closure.ClearData(thisPtr, scope_ptr, _resolve.DefineAt);
 
 				context.StackSlots[ptrIndex].SetHeapPtr(m_closurePtr,(byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 			}
@@ -76,11 +77,12 @@ namespace juicescript.runtime.buildin
 
 				context.GC.Heap[m_closurePtr].Type = _reject.Trait.Method.Body;
 				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
-				closure.This = thisPtr;
-				closure.ScopePtr = scope_ptr;
-				//closure.ScopeType = _reject.DefineAt;
-				closure._ref_as_type = _reject.DefineAt;
-				closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+				//closure.This = thisPtr;
+				//closure.ScopePtr = scope_ptr;
+				////closure.ScopeType = _reject.DefineAt;
+				//closure._ref_as_type = _reject.DefineAt;
+				//closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+				closure.ClearData(thisPtr,scope_ptr, _reject.DefineAt);
 
 				context.StackSlots[ptrIndex].SetHeapPtr(m_closurePtr,(byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 			}
@@ -1493,11 +1495,13 @@ namespace juicescript.runtime.buildin
 
 				RtClosure resolveClosure = (RtClosure)context.GC.Heap[resolveCb];
 				context.GC.Heap[resolveCb].Type = thenableResolve.Body;
-				resolveClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
-				resolveClosure.ScopePtr = statePtr;
-				//resolveClosure.ScopeType = stateObj.Type;
-				resolveClosure._ref_as_type = context.PROMISE;
-				resolveClosure.methodscopeslot_ref_state = 0; resolveClosure.HEAPINSTANCE_PTR = 0;
+				//resolveClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+				//resolveClosure.ScopePtr = statePtr;
+				////resolveClosure.ScopeType = stateObj.Type;
+				//resolveClosure._ref_as_type = context.PROMISE;
+				//resolveClosure.methodscopeslot_ref_state = 0; resolveClosure.HEAPINSTANCE_PTR = 0;
+				NaNBoxing thisP = default;thisP.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+				resolveClosure.ClearData(thisP, statePtr, context.PROMISE);
 
 				NaNBoxing resolveCallback = default;
 				resolveCallback.SetHeapPtr(resolveCb, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -1507,11 +1511,13 @@ namespace juicescript.runtime.buildin
 
 				RtClosure rejectClosure = (RtClosure)context.GC.Heap[rejectCb];
 				context.GC.Heap[rejectCb].Type = thenableReject.Body;
-				rejectClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
-				rejectClosure.ScopePtr = statePtr;
-				//rejectClosure.ScopeType = stateObj.Type;
-				rejectClosure._ref_as_type = context.PROMISE;
-				rejectClosure.methodscopeslot_ref_state = 0; rejectClosure.HEAPINSTANCE_PTR = 0;
+				//rejectClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
+				//rejectClosure.ScopePtr = statePtr;
+				////rejectClosure.ScopeType = stateObj.Type;
+				//rejectClosure._ref_as_type = context.PROMISE;
+				//rejectClosure.methodscopeslot_ref_state = 0; rejectClosure.HEAPINSTANCE_PTR = 0;
+				rejectClosure.ClearData(thisP, statePtr, context.PROMISE);
+
 
 				NaNBoxing rejectCallback = default;
 				rejectCallback.SetHeapPtr(rejectCb, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -2154,12 +2160,12 @@ namespace juicescript.runtime.buildin
 
 					RtClosure onfulfilledClosure = (RtClosure)context.GC.Heap[onfulfilled];
 					context.GC.Heap[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
-					onfulfilledClosure.This = promisePtr;
-					onfulfilledClosure.ScopePtr = genwapper_ptr;
-					//onfulfilledClosure.ScopeType = genwapper.scopeType;
-					onfulfilledClosure._ref_as_type = context.PROMISE;
-					onfulfilledClosure.methodscopeslot_ref_state = 0; onfulfilledClosure.HEAPINSTANCE_PTR = 0;
-
+					//onfulfilledClosure.This = promisePtr;
+					//onfulfilledClosure.ScopePtr = genwapper_ptr;
+					////onfulfilledClosure.ScopeType = genwapper.scopeType;
+					//onfulfilledClosure._ref_as_type = context.PROMISE;
+					//onfulfilledClosure.methodscopeslot_ref_state = 0; onfulfilledClosure.HEAPINSTANCE_PTR = 0;
+					onfulfilledClosure.ClearData(promisePtr, genwapper_ptr, context.PROMISE);
 
 					slots = context.StackSlots.AsSpan(context.StackPosition, 2);
 					slots[0].SetHeapPtr(onfulfilled, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
@@ -2168,11 +2174,12 @@ namespace juicescript.runtime.buildin
 					int onrejected = Context.M_ClosurePtr + context.StackPosition + 1;
 					RtClosure onrejectedClosure = (RtClosure)context.GC.Heap[onrejected];
 					context.GC.Heap[onrejected].Type = context.MicroTaskQueue.async_then_onrejected.Body;
-					onrejectedClosure.This = promisePtr;
-					onrejectedClosure.ScopePtr = genwapper_ptr;
-					//onrejectedClosure.ScopeType = genwapper.scopeType;
-					onrejectedClosure._ref_as_type = context.PROMISE;
-					onrejectedClosure.methodscopeslot_ref_state = 0; onrejectedClosure.HEAPINSTANCE_PTR = 0;
+					//onrejectedClosure.This = promisePtr;
+					//onrejectedClosure.ScopePtr = genwapper_ptr;
+					////onrejectedClosure.ScopeType = genwapper.scopeType;
+					//onrejectedClosure._ref_as_type = context.PROMISE;
+					//onrejectedClosure.methodscopeslot_ref_state = 0; onrejectedClosure.HEAPINSTANCE_PTR = 0;
+					onrejectedClosure.ClearData(promisePtr, genwapper_ptr, context.PROMISE);
 
 					slots[1].SetHeapPtr(onrejected, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 

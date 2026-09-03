@@ -3662,12 +3662,14 @@ namespace juicescript.runtime
 
 				var closure = Context.GC.Heap[closurePtr];
 				closure.Type = function.Body;
-				((RtClosure)closure).ScopePtr = 0;////thisValue.HeapPtr;
-				//((RtClosure)closure).ScopeType = define;
-				((RtClosure)closure).This = thisValue;
-				((RtClosure)closure)._ref_as_type = define;
-				((RtClosure)closure).methodscopeslot_ref_state = 0;
-				((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+				//((RtClosure)closure).ScopePtr = 0;////thisValue.HeapPtr;
+				////((RtClosure)closure).ScopeType = define;
+				//((RtClosure)closure).This = thisValue;
+				//((RtClosure)closure)._ref_as_type = define;
+				//((RtClosure)closure).methodscopeslot_ref_state = 0;
+				//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+				((RtClosure)closure).ClearData(thisValue, 0, define);
+
 				stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 			}
@@ -3687,12 +3689,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = define;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = define;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = define;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = define;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else if (thisValue.HeapKind == (byte)RtHeapTypeKind.STRING)
@@ -3706,12 +3711,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = define;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = define;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = define;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = define;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else if (thisValue.HeapKind == (byte)RtHeapTypeKind.CLASS)
@@ -3725,12 +3733,14 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = @class;
-					((RtClosure)closure)._ref_as_type = @class;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = @class;
+					//((RtClosure)closure)._ref_as_type = @class;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, @class);
 
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
@@ -3743,12 +3753,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = Context.FUNCTION.Instance;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = Context.FUNCTION.Instance;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = Context.FUNCTION.Instance;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = Context.FUNCTION.Instance;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, Context.FUNCTION.Instance);
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else if (thisValue.HeapKind == (byte)RtHeapTypeKind.ARRAY)
@@ -3760,12 +3773,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = Context.ARRAY.Instance;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = Context.ARRAY.Instance;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = Context.ARRAY.Instance;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = Context.ARRAY.Instance;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, Context.ARRAY.Instance);
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 #if DEBUG
@@ -4791,12 +4807,15 @@ namespace juicescript.runtime
 
 								var closure = Context.GC.Heap[closurePtr];
 								closure.Type = function.Body;
-								((RtClosure)closure).ScopePtr = scope_ptr;
-								//((RtClosure)closure).ScopeType = scopeType;
-								((RtClosure)closure).This.SetNull();
-								((RtClosure)closure)._ref_as_type = define;
-								((RtClosure)closure).methodscopeslot_ref_state = 0;
-								((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+								//((RtClosure)closure).ScopePtr = scope_ptr;
+								////((RtClosure)closure).ScopeType = scopeType;
+								//((RtClosure)closure).This.SetNull();
+								//((RtClosure)closure)._ref_as_type = define;
+								//((RtClosure)closure).methodscopeslot_ref_state = 0;
+								//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+								((RtClosure)closure).ClearData(new NaNBoxing(NULL), scope_ptr, define);
+
 								stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 
@@ -6922,12 +6941,15 @@ namespace juicescript.runtime
 
 				var closure = Context.GC.Heap[closurePtr];
 				closure.Type = function.Body;
-				((RtClosure)closure).ScopePtr = 0;////thisValue.HeapPtr;
-				//((RtClosure)closure).ScopeType = define;
-				((RtClosure)closure).This = thisValue;
-				((RtClosure)closure)._ref_as_type = define;
-				((RtClosure)closure).methodscopeslot_ref_state = 0;
-				((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+				//((RtClosure)closure).ScopePtr = 0;////thisValue.HeapPtr;
+				////((RtClosure)closure).ScopeType = define;
+				//((RtClosure)closure).This = thisValue;
+				//((RtClosure)closure)._ref_as_type = define;
+				//((RtClosure)closure).methodscopeslot_ref_state = 0;
+				//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+				((RtClosure)closure).ClearData(thisValue, 0, define);
+
 				stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 			}
@@ -6947,12 +6969,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = define;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = define;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = define;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = define;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else if (thisValue.HeapKind == (byte)RtHeapTypeKind.STRING)
@@ -6966,12 +6991,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = define;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = define;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = define;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = define;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else if (thisValue.HeapKind == (byte)RtHeapTypeKind.CLASS)
@@ -6985,12 +7013,14 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = @class;
-					((RtClosure)closure)._ref_as_type = @class;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = @class;
+					//((RtClosure)closure)._ref_as_type = @class;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, @class);
 
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
@@ -7003,12 +7033,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = Context.FUNCTION.Instance;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = Context.FUNCTION.Instance;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = Context.FUNCTION.Instance;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = Context.FUNCTION.Instance;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, Context.FUNCTION.Instance);
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else if (thisValue.HeapKind == (byte)RtHeapTypeKind.ARRAY)
@@ -7020,12 +7053,15 @@ namespace juicescript.runtime
 
 					var closure = Context.GC.Heap[closurePtr];
 					closure.Type = function.Body;
-					((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-					//((RtClosure)closure).ScopeType = Context.ARRAY.Instance;
-					((RtClosure)closure).This = thisValue;
-					((RtClosure)closure)._ref_as_type = Context.ARRAY.Instance;
-					((RtClosure)closure).methodscopeslot_ref_state = 0;
-					((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+					//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+					////((RtClosure)closure).ScopeType = Context.ARRAY.Instance;
+					//((RtClosure)closure).This = thisValue;
+					//((RtClosure)closure)._ref_as_type = Context.ARRAY.Instance;
+					//((RtClosure)closure).methodscopeslot_ref_state = 0;
+					//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, Context.ARRAY.Instance);
+
 					stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 #if DEBUG
@@ -8193,11 +8229,14 @@ namespace juicescript.runtime
 
 					Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
 					RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
-					closure.This = instance_box;
-					closure.ScopePtr = 0;
-					//closure.ScopeType = vitem.DefineAt;
-					closure._ref_as_type = GetASTypeFromValue(instance_box); //as_type;
-					closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+					//closure.This = instance_box;
+					//closure.ScopePtr = 0;
+					////closure.ScopeType = vitem.DefineAt;
+					//closure._ref_as_type = GetASTypeFromValue(instance_box); //as_type;
+					//closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+
+					((RtClosure)closure).ClearData(instance_box, 0, GetASTypeFromValue(instance_box));
+
 					stackslots[dst_loc.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				}
 				else
@@ -8311,11 +8350,14 @@ namespace juicescript.runtime
 
 						Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
 						RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
-						closure.This = instancePtr; //.SetHeapPtr(instancePtr);
-						closure.ScopePtr = instancePtr.HeapPtr;
-						//closure.ScopeType = vitem.DefineAt;
-						closure._ref_as_type = instance.Type;  //as_type;
-						closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+						//closure.This = instancePtr; //.SetHeapPtr(instancePtr);
+						//closure.ScopePtr = instancePtr.HeapPtr;
+						////closure.ScopeType = vitem.DefineAt;
+						//closure._ref_as_type = instance.Type;  //as_type;
+						//closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+
+						closure.ClearData(instancePtr, instancePtr.HeapPtr, instance.Type);
+
 						stackslots[dst_loc.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 					}
@@ -8446,11 +8488,14 @@ namespace juicescript.runtime
 
 						Context.GC.Heap[m_closurePtr].Type = vitem.Trait.Method.Body;
 						RtClosure closure = (RtClosure)Context.GC.Heap[m_closurePtr];
-						closure.This.SetNull();
-						closure.ScopePtr = instancePtr.HeapPtr;
-						//closure.ScopeType = vitem.DefineAt;
-						closure._ref_as_type = cls.Container; //as_type;
-						closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+						//closure.This.SetNull();
+						//closure.ScopePtr = instancePtr.HeapPtr;
+						////closure.ScopeType = vitem.DefineAt;
+						//closure._ref_as_type = cls.Container; //as_type;
+						//closure.methodscopeslot_ref_state = 0; closure.HEAPINSTANCE_PTR = 0;
+
+						closure.ClearData(new NaNBoxing(NULL), instancePtr.HeapPtr, cls.Container);
+
 						stackslots[dst_loc.index].SetHeapPtr(m_closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 					}
@@ -12093,12 +12138,15 @@ namespace juicescript.runtime
 
 			var closure = Context.GC.Heap[closurePtr];
 			closure.Type = function.Body;
-			((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-			//((RtClosure)closure).ScopeType = define;
-			((RtClosure)closure).This = thisValue;
-			((RtClosure)closure)._ref_as_type = define;
-			((RtClosure)closure).methodscopeslot_ref_state = 0;
-			((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+			//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+			////((RtClosure)closure).ScopeType = define;
+			//((RtClosure)closure).This = thisValue;
+			//((RtClosure)closure)._ref_as_type = define;
+			//((RtClosure)closure).methodscopeslot_ref_state = 0;
+			//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+			((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
 			stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 		}
@@ -12161,12 +12209,15 @@ namespace juicescript.runtime
 
 			var closure = Context.GC.Heap[closurePtr];
 			closure.Type = function.Body;
-			((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-			//((RtClosure)closure).ScopeType = define;
-			((RtClosure)closure).This = thisValue;
-			((RtClosure)closure)._ref_as_type = define;
-			((RtClosure)closure).methodscopeslot_ref_state = 0;
-			((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+			//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+			////((RtClosure)closure).ScopeType = define;
+			//((RtClosure)closure).This = thisValue;
+			//((RtClosure)closure)._ref_as_type = define;
+			//((RtClosure)closure).methodscopeslot_ref_state = 0;
+			//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+			((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
 			stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 
@@ -12232,12 +12283,15 @@ namespace juicescript.runtime
 
 			var closure = Context.GC.Heap[closurePtr];
 			closure.Type = function.Body;
-			((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
-			//((RtClosure)closure).ScopeType = define;
-			((RtClosure)closure).This = thisValue;
-			((RtClosure)closure)._ref_as_type = define;
-			((RtClosure)closure).methodscopeslot_ref_state = 0;
-			((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+			//((RtClosure)closure).ScopePtr = thisValue.HeapPtr;
+			////((RtClosure)closure).ScopeType = define;
+			//((RtClosure)closure).This = thisValue;
+			//((RtClosure)closure)._ref_as_type = define;
+			//((RtClosure)closure).methodscopeslot_ref_state = 0;
+			//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
+
+			((RtClosure)closure).ClearData(thisValue, thisValue.HeapPtr, define);
+
 			stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
 

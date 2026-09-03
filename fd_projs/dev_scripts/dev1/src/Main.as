@@ -235,19 +235,30 @@ import flash.utils.Dictionary;
 	   //
 	   //trace( getTimer() - st);
 
+
+class O
+{
+	public var A;
+	
+	public function Test()
+	{
+		trace("y" ,A );
+	}
+	
+};
+ 
 (function k1()
 {
-	var v = new <int>[2,1];
+	var o = new O();
 	
-	var i = v.sort;
+	(function(){
 	
-	var j;
-	j = i;
+	var f = o.Test;
+	o = f;	
+	f = {};
 	
-	v = null;
+	})();
 	
-	j();
-	
-	trace(v);
+	o();
 	
 })();
