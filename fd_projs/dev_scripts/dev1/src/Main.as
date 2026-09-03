@@ -235,3 +235,19 @@ import flash.utils.Dictionary;
 	   //
 	   //trace( getTimer() - st);
 
+(function k1()
+{
+	var v = new <int>[2,1];
+	
+	var i = v.sort;
+	
+	var j;
+	j = i;
+	
+	v = null;
+	
+	j();
+	
+	trace(v);
+	
+})();
