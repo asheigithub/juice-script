@@ -417,12 +417,6 @@ namespace juicescript.runtime
 				if (value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
 
-					//if (!isyieldreturn_or_holderror && obj.Type == Context.GENERATOR.Instance)
-					//{
-					//	RaiseTypeError(ref error, value, TypeKind.Function);
-					//}
-					//else 
-
 					if (value.IsStruct())
 					{
 						var obj = Context.GC.Heap[value.HeapPtr];
@@ -630,13 +624,6 @@ namespace juicescript.runtime
 						returnSlot = value;
 
 						Debug.Assert( RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out RtClosure _temp) == returnSlot.HeapPtr);
-
-
-
-						//RtClosure _temp;
-						//int t = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out _temp);
-
-						//returnSlot.SetHeapPtr(t, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 					}
 					else
 					{
@@ -1152,7 +1139,7 @@ namespace juicescript.runtime
 						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
 						if (min == 0 )
 						{
-							ComputeMinMaxMethodScope(ref min, max);
+							ComputeMinMaxMethodScope(ref min, heap, max);
 						}
 
 					
@@ -1228,11 +1215,11 @@ namespace juicescript.runtime
 						}
 
 						int copyed_ptr = 0;
-						int final_ptr = RtClosure.FindAndUpdateHeapInstancePtr(ptr, this, out oldObj);
+						ptr = RtClosure.FindAndUpdateHeapInstancePtr(ptr, this, out oldObj);
 
-						if (!(final_ptr < Context.M_ClosurePtr + Context.STACK_LENGTH)) //追踪是否已经在堆中。
+						if (!(ptr < Context.M_ClosurePtr + Context.STACK_LENGTH)) //追踪是否已经在堆中。
 						{
-							copyed_ptr = final_ptr;
+							copyed_ptr = ptr;
 						}
 						
 						RtClosure toupate_ref = null;
@@ -1244,7 +1231,7 @@ namespace juicescript.runtime
 						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
 						if (min == 0)
 						{
-							ComputeMinMaxMethodScope(ref min, max);
+							ComputeMinMaxMethodScope(ref min,heap, max);
 						}
 
 						for (int k = min; k <= max; k++)
@@ -1266,19 +1253,14 @@ namespace juicescript.runtime
 										if (copyed_ptr == 0)
 										{
 											copyed_ptr = scope.StackPos + i + Context.M_ClosurePtr;
+											var dstClosure = (RtClosure)Context.GC.Heap[copyed_ptr];
 
 											if (copyed_ptr != ptr)
 											{
 												var srcClosure = (RtClosure)oldObj;
 
-
-
-												var dstClosure = (RtClosure)Context.GC.Heap[copyed_ptr];
+												
 												dstClosure.Type = oldObj.Type;
-
-
-
-
 
 
 												dstClosure.CopyDataFrom(srcClosure, this);
@@ -1301,15 +1283,16 @@ namespace juicescript.runtime
 												//srcClosure.HEAPINSTANCE_PTR = copyed_ptr;
 												srcClosure.LinkTo(dstClosure, copyed_ptr);
 											}
-#if DEBUG	
+
 											else
 											{
 
-												throw new InvalidOperationException("找不到触发这个分支的案例.");
+												Debug.Assert(i != scope.SlotCount - 1);
+												Debug.Assert(dstClosure.methodscopeslot_ref_state != 0);
 
 											}
 
-#endif
+
 											v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 											scope.SetSlot(v, (ushort)i);
 										}
@@ -1438,9 +1421,9 @@ namespace juicescript.runtime
 						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
 						if (min == 0)
 						{
-							ComputeMinMaxMethodScope(ref min, max);
+							ComputeMinMaxMethodScope(ref min,heap, max);
 						}
-
+						
 						for (int k = min; k <= max; k++)
 						{
 							RtMethodScope scope = (RtMethodScope)Context.GC.Heap[k];
@@ -1619,7 +1602,7 @@ namespace juicescript.runtime
 						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
 						if (min == 0)
 						{
-							ComputeMinMaxMethodScope(ref min, max);
+							ComputeMinMaxMethodScope(ref min,heap, max);
 						}
 
 						for (int k = min; k <= max; k++)
@@ -1878,44 +1861,39 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void ComputeMinMaxMethodScope(ref int min,  int scopeptr)
+		private void ComputeMinMaxMethodScope(ref int min, RtMethodScope heap, int scopeptr)
 		{
 			int max = scopeptr;
-			
-			//if (m_scope == null)
+
+			if ((heap.methodFlags & MethodFlags.AccessClosure) == 0)
 			{
-				//max = scopeptr; //*method_scopes;
-				min = max;
+				min = heap.mScopePtr;
+			}
+			else
+			{
 
-				var s = (RtMethodScope)Context.GC.Heap[max];
-				while (s.ParentPtr - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
+				
 				{
-					Debug.Assert(s.ParentPtr < max);
+					
+					min = max;
 
-					int p = s.ParentPtr;
-					s = (RtMethodScope)Context.GC.Heap[p];
-					if (!s.IsStackSlot)
-						break;
+					var s = (RtMethodScope)Context.GC.Heap[max];
+					while (s.ParentPtr - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
+					{
+						Debug.Assert(s.ParentPtr < max);
 
-					min = min < p ? min : p; //Math.Min(min, p);
+						int p = s.ParentPtr;
+						s = (RtMethodScope)Context.GC.Heap[p];
+						if (!s.IsStackSlot)
+							break;
+
+						min = min < p ? min : p; //Math.Min(min, p);
+					}
+
 				}
 
 			}
-			//else
-			//{
-			//	int* __test = m_scope;
-			//	do
-			//	{
-			//		--__test;
-
-			//		if (*__test - Context.M_MethodScopePtr < Context.MAX_BACKTRACE)
-			//		{
-			//			max = max > *__test ? max : *__test;  //Math.Max(max, *__test);
-			//			min = min < *__test ? min : *__test; //Math.Min(min, *__test);
-			//		}
-
-			//	} while (__test != method_scopes);
-			//}
+			Debug.Assert(min <= max);
 			Debug.Assert(min > 0);
 			Debug.Assert(max - Context.M_MethodScopePtr < Context.MAX_BACKTRACE);
 

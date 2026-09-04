@@ -34,10 +34,12 @@ namespace juicescript.ABC
         /// Native函数
         /// </summary>
         Native = 32,
-        ///// <summary>
-        ///// 结构体的方法，排除了各种危险操作。
-        ///// </summary>
-        //StructMethod = 0x40,
+        
+        /// <summary>
+        /// 表示会访问闭包变量
+        /// </summary>
+        AccessClosure =64,
+
         /// <summary>
         /// 用于外部工具，Methodinfo中保存了参数名
         /// </summary>

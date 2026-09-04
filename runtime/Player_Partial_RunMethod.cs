@@ -363,6 +363,7 @@ namespace juicescript.runtime
 				RtMethodScope m_scopePayload = (RtMethodScope)mScope;
 				m_scopePayload.ParentPtr = scope_ptr;
 				m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method_body_linkcodesocpe, true);
+				m_scopePayload.methodFlags = method.Flags;
 
 				m_scopePayload.mScopePtr = (byte)mScopeId;
 				m_scopePayload.__sendargcount = args;
@@ -1087,6 +1088,7 @@ namespace juicescript.runtime
 			RtMethodScope m_scopePayload = (RtMethodScope)mScope;
 			m_scopePayload.ParentPtr = scope_ptr;
 			m_scopePayload.InitSlot(Context.StackSlots, Context.StackPosition, method_body_linkcodesocpe, true);
+			m_scopePayload.methodFlags = method.Flags;
 
 			m_scopePayload.mScopePtr = (byte)mScopeId;
 			m_scopePayload.__sendargcount = argsCount;

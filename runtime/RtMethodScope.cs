@@ -46,6 +46,9 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int __sendargcount;
 
+		internal MethodFlags methodFlags;
+
+
 		public NaNBoxing ThisPtr
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]

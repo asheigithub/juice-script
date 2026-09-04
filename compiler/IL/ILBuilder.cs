@@ -155,6 +155,9 @@ namespace juicescript.compiler.IL
 							if (flag)
 							{
 								((ASMethodBody)check.Container).Method.Flags |= MethodFlags.NeedActivation;
+
+								((ASMethodBody)compileEnv.Scope.Container).Method.Flags |= MethodFlags.AccessClosure;
+
 								//break;
 							}
 						}
