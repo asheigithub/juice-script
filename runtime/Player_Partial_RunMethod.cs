@@ -381,7 +381,7 @@ namespace juicescript.runtime
 						//PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref thisPtr, null, 0, ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 						if (error.raised)
 						{
-							
+							m_scopePayload.EmptyStackSlot();
 							Context.StackPosition -= para_argcount;
 							goto lbl_handle_arg_err;
 						}
@@ -420,7 +420,7 @@ namespace juicescript.runtime
 					{
 						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 						RtHeapBase arg_arguments = Context.GC.Heap[argumentsPtr];
-						arguments_span = ((RtArray)arg_arguments).stack_store.Span;
+						arguments_span = ((RtArray)arg_arguments).store_memory.Span;
 					}
 
 					var pmembers = method_body_linkcodesocpe.Members;
@@ -499,7 +499,7 @@ namespace juicescript.runtime
 
 									if (error.raised)
 									{
-										
+										m_scopePayload.EmptyStackSlot();
 										Context.StackPosition -= para_argcount;
 										goto lbl_handle_arg_err;
 									}
@@ -559,6 +559,7 @@ namespace juicescript.runtime
 											box = GetSaveValue(box, ref error);
 											if (error.raised)
 											{
+												m_scopePayload.EmptyStackSlot();
 												Context.StackPosition -= para_argcount;
 												goto lbl_handle_arg_err;
 											}
@@ -630,7 +631,7 @@ namespace juicescript.runtime
 					//+ 1 
 					>= Context.STACK_LENGTH)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition -= para_argcount;
 						break;
 					}
@@ -641,7 +642,7 @@ namespace juicescript.runtime
 					g_scope = GetSaveValue(g_scope, ref error);
 					if (error.raised)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
 					}
@@ -655,7 +656,7 @@ namespace juicescript.runtime
 					NaNBoxing _this = GetSaveValue(thisPtr, ref error);
 					if (error.raised)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition -= 2;
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
@@ -673,7 +674,7 @@ namespace juicescript.runtime
 
 					if (generator_ptr == 0)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition -= 2;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
@@ -696,6 +697,7 @@ namespace juicescript.runtime
 
 					((RtInstance)gen).wapperedObject = wapper;
 
+					m_scopePayload.EmptyStackSlot();
 					Context.StackPosition -= 2;
 					Context.StackPosition -= para_argcount;
 
@@ -764,7 +766,7 @@ namespace juicescript.runtime
 						+ scopeHoleSlots + info.useSlots
 					>= Context.STACK_LENGTH)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition -= para_argcount;
 						break;
 					}
@@ -774,7 +776,7 @@ namespace juicescript.runtime
 					g_scope = GetSaveValue(g_scope, ref error);
 					if (error.raised)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
 					}
@@ -789,7 +791,7 @@ namespace juicescript.runtime
 					NaNBoxing _this = GetSaveValue(thisPtr, ref error);
 					if (error.raised)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
 						goto lbl_handle_arg_err;
@@ -803,7 +805,7 @@ namespace juicescript.runtime
 
 					if (generator_ptr == 0)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
@@ -828,7 +830,7 @@ namespace juicescript.runtime
 					int promise_ptr = Context.GC.AllocInstance(Context.PROMISE.Instance, out promise);
 					if (promise_ptr == 0)
 					{
-						
+						m_scopePayload.EmptyStackSlot();
 						Context.StackPosition = basePos;
 						Context.StackPosition -= para_argcount;
 						RaiseOutOfMemory(ref error);
@@ -862,7 +864,7 @@ namespace juicescript.runtime
 						//Context.PROMISE.Instance,
 						1, (byte*)&stackLocater, slots, ref error, -1, 0, true);
 
-
+					m_scopePayload.EmptyStackSlot();
 					Context.StackPosition = basePos;
 					Context.StackPosition -= para_argcount;
 
@@ -909,8 +911,7 @@ namespace juicescript.runtime
 					Context.BackTraceIndex--;
 					//Context.BackTrace[Context.BackTraceIndex].Method = null;
 
-
-
+					
 					Context.StackPosition -= info.useSlots;
 					Context.StackPosition -= scopeHoleSlots;
 
@@ -931,6 +932,7 @@ namespace juicescript.runtime
 						}
 						else
 						{
+							m_scopePayload.EmptyStackSlot();
 #if PROFILEPLAYER
 							InstructionProfiler.Profile_MethodEnd();
 #endif
@@ -949,11 +951,12 @@ namespace juicescript.runtime
 					}
 					else
 					{
+						m_scopePayload.EmptyStackSlot();
 #if PROFILEPLAYER
 						InstructionProfiler.Profile_MethodEnd();
 #endif
 
-						
+
 						//记录当前报错堆栈，看上级调用是否处理这个错误
 						Context.errorStack.AddTrace(method, P_PC);
 
@@ -970,7 +973,7 @@ namespace juicescript.runtime
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_MethodEnd();
 #endif
-					
+					m_scopePayload.EmptyStackSlot();
 					//Context.StackPosition--;
 					Context.StackPosition -= para_argcount;
 					return new NaNBoxing();
@@ -991,9 +994,9 @@ namespace juicescript.runtime
 				((NativeFun)method.nativefunction_delegate)(Context, method, mScopeId, thisPtr, Context.StackPosition, ref error, returnSlotIndex);
 				Context.StackPosition -= scopeHoleSlots;
 				Context.BackTraceIndex--;
-			//Context.BackTrace[Context.BackTraceIndex].Method = null;
+				//Context.BackTrace[Context.BackTraceIndex].Method = null;
 
-
+				
 #if PROFILEPLAYER
 				InstructionProfiler.Profile_MethodEnd();
 #endif
@@ -1002,7 +1005,7 @@ namespace juicescript.runtime
 
 			lbl_native_called:
 
-				
+				m_scopePayload.EmptyStackSlot();
 				m_scopePayload.ParentPtr = 0;
 				mScope.Type = null;
 				Context.StackPosition -= para_argcount;
@@ -1107,6 +1110,7 @@ namespace juicescript.runtime
 					//PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref _this_, null, &mScopeId , ref error, true);//C#里 从容器访问结构体This就是直接拷了一份,构造函数会传引用			
 					if (error.raised)
 					{
+						m_scopePayload.EmptyStackSlot();
 						goto flag_handle_error;
 					}
 				}
@@ -1158,6 +1162,7 @@ namespace juicescript.runtime
 
 					if (error.raised)
 					{
+						m_scopePayload.EmptyStackSlot();
 						goto flag_handle_error;
 					}
 
@@ -1224,6 +1229,7 @@ namespace juicescript.runtime
 				Context.StackPosition -= info.useSlots;
 				Context.StackPosition -= scopeHoleSlots;
 
+				m_scopePayload.EmptyStackSlot();
 				m_scopePayload.ParentPtr = 0;
 				mScope.Type = null;
 
@@ -1263,6 +1269,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
+				m_scopePayload.EmptyStackSlot();
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_MethodEnd();
 #endif
@@ -1292,8 +1299,10 @@ namespace juicescript.runtime
 
 		lbl_native_called:
 
+			m_scopePayload.EmptyStackSlot();
 			m_scopePayload.ParentPtr = 0;
 			mScope.Type = null;
+
 
 			if (!error.raised)
 			{

@@ -1095,7 +1095,11 @@ namespace juicescript.runtime.buildin
 							return;
 						}
 						context.BackTraceIndex++;
-						((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+
+#if DEBUG
+						//((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+						Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+#endif
 						((RtArray)instance).Trace(context, stackStPos, ref error, scope_ptr, printer, instance, ",");
 						context.BackTraceIndex--;
 						if (error.raised)
@@ -1115,7 +1119,10 @@ namespace juicescript.runtime.buildin
 
 						RtVector vector = (RtVector)instance;
 						context.BackTraceIndex++;
-						((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+#if DEBUG
+						//((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+						Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+#endif
 						vector.Trace(context, stackStPos, ref error, scope_ptr, printer);
 						context.BackTraceIndex--;
 						if (error.raised)
@@ -1156,7 +1163,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 
 			for (var i = 0; i < arguments.Length; i++)
 			{

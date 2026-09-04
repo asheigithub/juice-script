@@ -10832,7 +10832,7 @@ namespace juicescript.runtime
 				//((RtArray)instance).array_len = 0;
 				//((RtArray)instance).methodscopeslot_ref_state = 0;
 				//((RtArray)instance).HEAPINSTANCE_PTR = 0;
-				((RtArray)instance).SetStoreCacheZero(true);
+				((RtArray)instance).SetStoreCacheZero(true, Context.cache_array_memory[ptrIndex], Context.cache_array_structindex[ptrIndex]);
 
 
 				NaNBoxing invalue = default;

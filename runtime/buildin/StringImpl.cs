@@ -90,7 +90,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 
 			StringBuilder sb = new StringBuilder();
 
@@ -355,7 +355,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 
 			StringBuilder sb = new StringBuilder();
 
@@ -1068,7 +1068,7 @@ namespace juicescript.runtime.buildin
 				//((RtArray)instance).array_len = 0;
 				//((RtArray)instance).methodscopeslot_ref_state = 0;
 				//((RtArray)instance).HEAPINSTANCE_PTR = 0;
-				((RtArray)instance).SetStoreCacheZero(true);
+				((RtArray)instance).SetStoreCacheZero(true, context.cache_array_memory[returnSlotIndex], context.cache_array_structindex[returnSlotIndex]);
 
 				context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 

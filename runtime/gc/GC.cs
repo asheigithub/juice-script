@@ -232,7 +232,7 @@ namespace juicescript.runtime.gc
         /// <param name="instance"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        internal int AllocArray(out RtHeapBase instance, RtArray.ArrayStoreMode storeMode,int cache_struct_st = 0)
+        internal int AllocArray(out RtHeapBase instance, RtArray.ArrayStoreMode storeMode)
         {
             RtHeapBase heapInstance = new RtArray();
            
@@ -247,12 +247,8 @@ namespace juicescript.runtime.gc
                     break;
                 case RtArray.ArrayStoreMode.cache:
                     heapInstance.Type = null;
-                    payload.cache_store = new NaNBoxing[RtArray.MAX_CACHE_ELEMENT];
-                    payload.cache_structs = new int[RtArray.MAX_CACHE_ELEMENT];
-                    for (int i = 0; i < RtArray.MAX_CACHE_ELEMENT; i++)
-                    {
-                        payload.cache_structs[i] = cache_struct_st + i;
-                    }
+                    
+                    
 
                     Root.Add(heapInstance);
                     break;

@@ -75,7 +75,7 @@ namespace juicescript.runtime.buildin
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
 
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 
 			if (stackStPos + arguments.Length >= Context.STACK_LENGTH)
 			{
@@ -123,7 +123,7 @@ namespace juicescript.runtime.buildin
 				context.player.RunMethod(callmethod, _this,
 					((RtClosure)closureinstance).ScopePtr,
 					//((RtClosure)closureinstance).ScopeType,
-					(ushort)rest_array.stack_store.Length , (byte*)args,
+					(ushort)rest_array.store_memory.Length , (byte*)args,
 					slots,
 					ref error,
 					returnSlotIndex,

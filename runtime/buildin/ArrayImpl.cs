@@ -46,7 +46,7 @@ namespace juicescript.runtime.buildin
 
 			var array = (RtArray)arrayinstance;
 
-			var rest_span = rest_array.stack_store.Span;
+			var rest_span = rest_array.store_memory.Span;
 
 			if (rest_span.Length > 0)
 			{
@@ -92,16 +92,17 @@ namespace juicescript.runtime.buildin
 							uint count = (uint)Math.Floor(len);
 
 							array.array_len = count;
+							var array_store = array.store_memory.Span;
 							if (count <= RtArray.MAX_CACHE_ELEMENT)
 							{
 								for (int i = 0; i < count; i++)
 								{
-									array.cache_store[i].SetUndefined();
+									array_store[i].SetUndefined();
 								}
 
 								for (uint i = count; i < RtArray.MAX_CACHE_ELEMENT; i++)
 								{
-									array.cache_store[i].setFault();
+									array_store[(int)i].setFault();
 								}
 
 								return;
@@ -136,6 +137,7 @@ namespace juicescript.runtime.buildin
 			if (array.StoreMode == RtArray.ArrayStoreMode.cache)
 			{
 				array.array_len = (uint)rest_span.Length;
+				var array_store = array.store_memory.Span;
 				for (int i = 0; i < rest_span.Length; i++)
 				{
 					var oldv = rest_span[i];
@@ -159,7 +161,7 @@ namespace juicescript.runtime.buildin
 							//((RtInstance)v_struct).CopyFrom(obj, context.player, obj.Type._link_codescope.TypeLayout.Size);
 							v_struct.CloneOther((RtInstance)obj, context.player);
 
-							array.cache_store[i].SetHeapPtr(cache_struct_ptr, (byte)RtHeapTypeKind.INSTANCE , (byte)HeapKindFlag.FLAG_STRUCT);
+							array_store[i].SetHeapPtr(cache_struct_ptr, (byte)RtHeapTypeKind.INSTANCE , (byte)HeapKindFlag.FLAG_STRUCT);
 						}
 						else
 						{
@@ -168,19 +170,19 @@ namespace juicescript.runtime.buildin
 							{
 								return;
 							}
-							array.cache_store[i] = v;
+							array_store[i] = v;
 						}
 
 					}
 					else
 					{
-						array.cache_store[i] = oldv;
+						array_store[i] = oldv;
 					}
 				}
 
 				for (int i = rest_span.Length; i < RtArray.MAX_CACHE_ELEMENT; i++)
 				{
-					array.cache_store[i].setFault(); //另未赋值对象为fault.
+					array_store[i].setFault(); //另未赋值对象为fault.
 				}
 			}
 			else
@@ -335,7 +337,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(rest_array.StoreMode == RtArray.ArrayStoreMode.cache_on_stack);
 
 			//var array = (RtPayloadArray)arrayinstance;
-			var rest_span = rest_array.stack_store.Span;
+			var rest_span = rest_array.store_memory.Span;
 
 			int ptrIndex = returnSlotIndex;
 			int instancePtr = Context.CacheArrayPtr + ptrIndex;
@@ -346,7 +348,7 @@ namespace juicescript.runtime.buildin
 			//targetArray.methodscopeslot_ref_state = 0;
 			//targetArray.HEAPINSTANCE_PTR = 0;
 			//targetArray.SetLength(0, context.player, ref error);
-			targetArray.SetStoreCacheZero(true);
+			targetArray.SetStoreCacheZero(true, context.cache_array_memory[ptrIndex], context.cache_array_structindex[ptrIndex] );
 
 
 			context.StackSlots[returnSlotIndex].SetHeapPtr(instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);//先保存
@@ -519,7 +521,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
-			var restSpan = restArray.stack_store.Span;
+			var restSpan = restArray.store_memory.Span;
 
 			// 3. Get current length
 			var array = (RtArray)arrayInstance;
@@ -855,7 +857,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
-			var restSpan = restArray.stack_store.Span;
+			var restSpan = restArray.store_memory.Span;
 
 			RtArray array;
 			int instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
@@ -1458,7 +1460,7 @@ namespace juicescript.runtime.buildin
 			result_instance.Type = context.ARRAY.Instance;
 
 			var result = (RtArray)result_instance;
-			result.SetStoreCacheZero(true);
+			result.SetStoreCacheZero(true, context.cache_array_memory[ ptrIndex], context.cache_array_structindex[ptrIndex]);
 			//result.array_len = 0;
 			//result.methodscopeslot_ref_state = 0;
 			//result.HEAPINSTANCE_PTR = 0;
@@ -1629,7 +1631,7 @@ namespace juicescript.runtime.buildin
 			result_instance.Type = context.ARRAY.Instance;
 
 			var result = (RtArray)result_instance;
-			result.SetStoreCacheZero(true);
+			result.SetStoreCacheZero(true, context.cache_array_memory[ptrIndex], context.cache_array_structindex[ptrIndex]);
 			//result.array_len = 0;
 			//result.methodscopeslot_ref_state = 0;
 			//result.HEAPINSTANCE_PTR = 0;
@@ -1898,7 +1900,7 @@ namespace juicescript.runtime.buildin
 			//result.array_len = 0;
 			//result.methodscopeslot_ref_state = 0;
 			//result.HEAPINSTANCE_PTR = 0;
-			result.SetStoreCacheZero(true);
+			result.SetStoreCacheZero(true, context.cache_array_memory[ptrIndex], context.cache_array_structindex[ptrIndex]);
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 			// 6. Copy elements from start to end
 			for (int i = start; i < end && i < len; i++)
@@ -1971,7 +1973,7 @@ namespace juicescript.runtime.buildin
 
 			// 检查是否会越界
 			var values_array = (RtArray)context.GC.Heap[values.HeapPtr];
-			var values_span = values_array.stack_store.Span;
+			var values_span = values_array.store_memory.Span;
 			// 注意：values 的存储方式是 cache_on_stack
 
 			Debug.Assert((long)len - deleteCount + values_span.Length >= 0);
@@ -1994,7 +1996,7 @@ namespace juicescript.runtime.buildin
 			//result.array_len = 0;
 			//result.HEAPINSTANCE_PTR = 0;
 			//result.methodscopeslot_ref_state = 0;
-			result.SetStoreCacheZero(true);
+			result.SetStoreCacheZero(true, context.cache_array_memory[returnSlotIndex], context.cache_array_structindex[returnSlotIndex]);
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE); //先存上，防止GC!很重要
 
 
@@ -2178,7 +2180,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
 			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.GC.Heap[rest.HeapPtr];
-			var restSpan = restArray.stack_store.Span;
+			var restSpan = restArray.store_memory.Span;
 
 
 			if (restSpan.Length == 0)

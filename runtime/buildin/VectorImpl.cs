@@ -53,7 +53,7 @@ namespace juicescript.runtime.buildin
 
 			int element_size = VectorStore.GetElementSize(vector.element_type, vector.element_asclass);
 
-			var rest_span = rest_array.stack_store.Span;
+			var rest_span = rest_array.store_memory.Span;
 
 			if (rest_span.Length > 2)
 			{
@@ -305,7 +305,7 @@ namespace juicescript.runtime.buildin
 
 			int len = 0;
 
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 			for (var i = -1; i < arguments.Length; i++)
 			{
 				RtVector srcVec;
@@ -430,7 +430,7 @@ namespace juicescript.runtime.buildin
 
 			int len = store.length;
 
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 
 			vector.Resize(len + arguments.Length, ref error, context.player, (ASInstance)vector.Type,out VectorStore resizedstore);
 			if (error.raised)
@@ -587,7 +587,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int len = store.length;
-			var arguments = rest_array.stack_store.Span;
+			var arguments = rest_array.store_memory.Span;
 			int newElements = arguments.Length;
 
 			if (newElements == 0)
@@ -4119,7 +4119,7 @@ namespace juicescript.runtime.buildin
 			{
 				var rest = scope.ReadSlot(2);
 				rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
-				insertCount = rest_array.stack_store.Span.Length;
+				insertCount = rest_array.store_memory.Span.Length;
 			}
 
 			willChangeLength = willChangeLength || insertCount > 0;
@@ -4233,7 +4233,7 @@ namespace juicescript.runtime.buildin
 					int basePos = context.StackPosition;
 					context.StackPosition += 1;
 
-					var argsSpan = rest_array.stack_store.Span;
+					var argsSpan = rest_array.store_memory.Span;
 					for (int i = 0; i < insertCount; i++)
 					{
 						NaNBoxing item = argsSpan[i];

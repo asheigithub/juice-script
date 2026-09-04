@@ -175,6 +175,9 @@ namespace juicescript.runtime
         public const int MIN_HEAPPTR = 1+ MAX_BACKTRACE + REAL_STACK_LENGTH + REAL_STACK_LENGTH + REAL_STACK_LENGTH + MAX_BACKTRACE + REAL_STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT + REAL_STACK_LENGTH + REAL_STACK_LENGTH;
 
 
+        internal Memory<NaNBoxing>[] cache_array_memory;
+        internal int[][] cache_array_structindex;
+
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
             this.player = player;
@@ -234,10 +237,18 @@ namespace juicescript.runtime
                     throw new LoaderException("alloc M_RestArrayPtr failed,out of memory.");
             }
 
-            int cache_struct_p =0;
+
+
+			cache_array_memory = new Memory<NaNBoxing>[REAL_STACK_LENGTH];
+            cache_array_structindex = new int[REAL_STACK_LENGTH][];
+
+			
             //先分配Array的缓存struct
             for (int i = 0; i < REAL_STACK_LENGTH; i++)
             {
+                cache_array_memory[i] = new Memory<NaNBoxing>(new NaNBoxing[RtArray.MAX_CACHE_ELEMENT]);
+                cache_array_structindex[i] = new int[RtArray.MAX_CACHE_ELEMENT];
+
                 for (int j = 0; j < RtArray.MAX_CACHE_ELEMENT; j++)
                 {
                     int cache_struct = GC.AllocCacheInstance();
@@ -245,19 +256,27 @@ namespace juicescript.runtime
                     {
                         throw new LoaderException("alloc CacheArrayElements failed,out of memory");
                     }
-                    else if (cache_struct_p == 0)
-                    {
-                        cache_struct_p = cache_struct;
-                    }
+
+                    cache_array_structindex[i][j] = cache_struct;
                 }
             }
+
            
-            int _CacheArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p); if (_CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
+			//payload.cache_store = new NaNBoxing[RtArray.MAX_CACHE_ELEMENT];
+			//payload.cache_structs = new int[RtArray.MAX_CACHE_ELEMENT];
+
+			//for (int i = 0; i < RtArray.MAX_CACHE_ELEMENT; i++)
+			//{
+			//    payload.cache_structs[i] = cache_struct_st + i;
+			//}
+
+
+			int _CacheArrayPtr = GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache); if (_CacheArrayPtr == 0) { throw new LoaderException("alloc CacheArrayPtr failed,out of memory."); }
             Debug.Assert(_CacheArrayPtr == CacheArrayPtr);
             
             for (int i = 1; i < REAL_STACK_LENGTH; i++)
             {
-                if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache,cache_struct_p + i* RtArray.MAX_CACHE_ELEMENT) == 0)
+                if (GC.AllocArray(out arr, RtArray.ArrayStoreMode.cache) == 0)
                     throw new LoaderException("alloc CacheArrayPtr failed,out of memory.");
             }
 

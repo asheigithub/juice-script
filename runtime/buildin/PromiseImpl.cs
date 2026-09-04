@@ -2019,11 +2019,12 @@ namespace juicescript.runtime.buildin
 			int retslot = context.StackPosition;
 			context.StackPosition += 1;
 			context.StackSlots[retslot].SetUndefined();
-
-			((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+#if DEBUG
+			Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+#endif
 			//if (!g_method.Flags.HasFlag(MethodFlags.Native))
 			//{
-				context.player.Execute(ref info, m, genwapper.async_body,
+			context.player.Execute(ref info, m, genwapper.async_body,
 					//genwapper.scopeType,
 					slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
 			//}

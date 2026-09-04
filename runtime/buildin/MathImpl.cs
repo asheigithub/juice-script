@@ -176,7 +176,7 @@ namespace juicescript.runtime.buildin
 						break;
 					}
 					var restArray = (RtArray)context.GC.Heap[slot.HeapPtr];
-					var restSpan = restArray.stack_store.Span;
+					var restSpan = restArray.store_memory.Span;
 					for (int i = 0; i < restSpan.Length; i++)
 					{
 						context.player.ConvertValueType(ref error, restSpan[i], TypeKind.Number,
@@ -255,7 +255,7 @@ namespace juicescript.runtime.buildin
 						break;
 					}
 					var restArray = (RtArray)context.GC.Heap[slot.HeapPtr];
-					var restSpan = restArray.stack_store.Span;
+					var restSpan = restArray.store_memory.Span;
 					for (int i = 0; i < restSpan.Length; i++)
 					{
 						context.player.ConvertValueType(ref error, restSpan[i], TypeKind.Number,

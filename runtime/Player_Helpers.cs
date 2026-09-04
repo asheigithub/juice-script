@@ -4605,7 +4605,7 @@ namespace juicescript.runtime
 								//((RtArray)instance).array_len = 0;
 								//((RtArray)instance).methodscopeslot_ref_state = 0;
 								//((RtArray)instance).HEAPINSTANCE_PTR = 0;
-								((RtArray)instance).SetStoreCacheZero(false);
+								((RtArray)instance).SetStoreCacheZero(false, Context.cache_array_memory[ptrIndex], Context.cache_array_structindex[ptrIndex]);
 
 							}
 							else
@@ -12529,7 +12529,7 @@ namespace juicescript.runtime
 
 				Debug.Assert(arr_payload.StoreMode != RtArray.ArrayStoreMode.cache_on_stack);
 
-				if (arr_payload.StoreMode != RtArray.ArrayStoreMode.normal && index >= arr_payload.cache_store.Length)
+				if (arr_payload.StoreMode != RtArray.ArrayStoreMode.normal && index >= RtArray.MAX_CACHE_ELEMENT)
 				{
 					int heaparr = arr_payload.ChangeStoreToHeap(Context.player, ref error);
 					if (error.raised)
