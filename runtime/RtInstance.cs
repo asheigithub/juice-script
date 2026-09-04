@@ -992,7 +992,7 @@ namespace juicescript.runtime
 
 		}
 
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CopyFrom(RtInstance facility, ASInstance type , Player player,int size)
 		{
 #if DEBUG
@@ -1035,6 +1035,7 @@ namespace juicescript.runtime
 		/// </summary>
 		/// <param name="facility"></param>
 		/// <exception cref="NotImplementedException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CopyFrom(RtHeapBase src,Player player,int size)
         {
 			RtInstance facility = (RtInstance)src;

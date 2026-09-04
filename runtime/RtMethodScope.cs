@@ -41,11 +41,7 @@ namespace juicescript.runtime
 		
 		
 
-		/// <summary>
-		/// 在RunMethod 构造时，记录实际上代码里写了几个参数。
-		/// </summary>
-		internal int __sendargcount;
-
+		
 		internal MethodFlags methodFlags;
 
 
@@ -64,7 +60,11 @@ namespace juicescript.runtime
 		internal bool IsStackSlot;
 		internal byte mScopePtr;
 
-		
+		/// <summary>
+		/// 在RunMethod 构造时，记录实际上代码里写了几个参数。
+		/// </summary>
+		internal byte __sendargcount;
+
 
 		/// <summary>
 		/// 实际上，只有RunMethod里的调用才会是在栈帧上分配
@@ -284,6 +284,7 @@ namespace juicescript.runtime
 		/// 在直接调用player.Execute时，没有用RunMethod生成methodscope。需要用这个把当前BackTraceIndex 指向的缓存MethocScope的槽清理掉
 		/// 否则GC会去查找错误的引用。
 		/// </summary>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal void EmptyStackSlot()
 		{
 			Slots = default; //new Memory<NaNBoxing>();

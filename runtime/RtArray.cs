@@ -139,6 +139,7 @@ namespace juicescript.runtime
 
 			if (clear)
 			{
+				var cache_store = store.Span;
 				for (uint i = array_len; i < cache_store.Length; i++)
 				{
 					cache_store[(int)i].setFault();
@@ -180,7 +181,7 @@ namespace juicescript.runtime
 		internal int stack_store_startindex;
 		internal Memory<NaNBoxing> store_memory;
 
-		private Span<NaNBoxing> cache_store { get => store_memory.Span; }
+		//private Span<NaNBoxing> cache_store { get => store_memory.Span; }
 
 		//internal NaNBoxing[] cache_store;
 		//internal int[] cache_structs;
@@ -299,6 +300,7 @@ namespace juicescript.runtime
 						else
 						{
 							array_len = len;
+							var cache_store = store_memory.Span;
 							for (uint i = array_len; i < cache_store.Length; i++)
 							{
 								cache_store[(int)i].setFault();
@@ -437,24 +439,27 @@ namespace juicescript.runtime
 
 			arr = (RtArray)arr_instance;
 
-			Span<NaNBoxing> store_span;
+			
+			Debug.Assert(StoreMode != ArrayStoreMode.normal);
+
+			Span<NaNBoxing> store_span = store_memory.Span;
 
 			//转换基本块
-			if (StoreMode == ArrayStoreMode.cache_on_stack)
-			{
-				store_span = store_memory.Span;
-			}
-			else
-			{
-#if DEBUG
-				if (StoreMode != ArrayStoreMode.cache)
-				{
-					throw new InvalidOperationException();
-				}
-#endif
+			//			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			//			{
+			//				store_span = store_memory.Span;
+			//			}
+			//			else
+			//			{
+			//#if DEBUG
+			//				if (StoreMode != ArrayStoreMode.cache)
+			//				{
+			//					throw new InvalidOperationException();
+			//				}
+			//#endif
 
-				store_span = cache_store;
-			}
+			//				store_span = cache_store;
+			//			}
 
 			arr.array_len = array_len;
 			arr.InitHeapData(store_span, player, ref error);
@@ -518,7 +523,7 @@ namespace juicescript.runtime
 			switch (StoreMode)
 			{
 				case ArrayStoreMode.cache_on_stack:
-
+				case ArrayStoreMode.cache:
 					{
 						var elements = store_memory.Span;
 						for (int i = 0; i < array_len; i++)
@@ -530,18 +535,18 @@ namespace juicescript.runtime
 						}
 					}
 					break;
-				case ArrayStoreMode.cache:
-					{
-						var elements = cache_store;
-						for (int i = 0; i < array_len; i++)
-						{
-							if (elements[i].ValueType == NaNBoxing.BoxType.HeapPtr)
-							{
-								context.GC.mark(context.GC.Heap[elements[i].HeapPtr]);
-							}
-						}
-					}
-					break;
+				//case ArrayStoreMode.cache:
+				//	{
+				//		var elements = cache_store;
+				//		for (int i = 0; i < array_len; i++)
+				//		{
+				//			if (elements[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+				//			{
+				//				context.GC.mark(context.GC.Heap[elements[i].HeapPtr]);
+				//			}
+				//		}
+				//	}
+				//	break;
 				case ArrayStoreMode.normal:
 
 					{
@@ -610,7 +615,7 @@ namespace juicescript.runtime
 
 		private bool DoDelete(uint index)
 		{
-			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			if (StoreMode != ArrayStoreMode.normal)
 			{
 				var stack_span = store_memory.Span;
 				if (index < stack_span.Length)
@@ -620,15 +625,15 @@ namespace juicescript.runtime
 
 				return true;
 			}
-			else if (StoreMode == ArrayStoreMode.cache)
-			{
-				if (index < array_len)
-				{
-					cache_store[(int)index].setFault();
-				}
+			//else if (StoreMode == ArrayStoreMode.cache)
+			//{
+			//	if (index < array_len)
+			//	{
+			//		cache_store[(int)index].setFault();
+			//	}
 
-				return true;
-			}
+			//	return true;
+			//}
 			else
 			{
 				if (index < array_len)
@@ -664,7 +669,7 @@ namespace juicescript.runtime
 
 		private void DoSetSlot(NaNBoxing box, uint array_index, ref ReceiveError error, Player player)
 		{
-			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			if (StoreMode != ArrayStoreMode.normal)
 			{
 #if DEBUG
 				if (array_index >= store_memory.Length)
@@ -680,24 +685,24 @@ namespace juicescript.runtime
 					array_len = array_index + 1;
 				}
 			}
-			else if (StoreMode == ArrayStoreMode.cache)
-			{
-#if DEBUG
-				if (array_index >= cache_store.Length)
-				{
-					throw new InvalidOperationException();
-				}
-#endif
+//			else if (StoreMode == ArrayStoreMode.cache)
+//			{
+//#if DEBUG
+//				if (array_index >= cache_store.Length)
+//				{
+//					throw new InvalidOperationException();
+//				}
+//#endif
 
-				cache_store[(int)array_index] = box;
+//				cache_store[(int)array_index] = box;
 
 
-				if (array_index + 1 > array_len)
-				{
-					array_len = array_index + 1;
-				}
+//				if (array_index + 1 > array_len)
+//				{
+//					array_len = array_index + 1;
+//				}
 
-			}
+//			}
 			else
 			{
 				var oldsize = Size;
@@ -751,7 +756,7 @@ namespace juicescript.runtime
 			{
 				int st = 0;
 				int ed = (int)array_len - 1;
-
+				var cache_store = store_memory.Span;
 				while (st < ed) //可能存在struct_cache问题，所以要走全流程
 				{
 					var v1 = cache_store[st];
@@ -993,7 +998,7 @@ namespace juicescript.runtime
 			int start, uint deleteCount,
 			int len, long newLen, long netChange)
 		{
-			var span = cache_store;
+			var span = store_memory.Span; //cache_store;
 			// 检查是否溢出缓存
 			if (newLen > span.Length)
 			{
@@ -1347,40 +1352,9 @@ namespace juicescript.runtime
 				for (int i = (int)array_len - 1; i >= 0; i--)
 				{
 					var box = stack_span[i];
-					//if (box.IsStruct())//box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
-					//{
-
-					//	{
-					//		var dst_v = stack_span[i + restSpan.Length];
-					//		if (dst_v.IsStruct())//dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
-					//		{
-					//			var src = player.Context.GC.Heap[box.HeapPtr];
-					//			Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
-
-					//			var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-					//			Debug.Assert(((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct));
-					//			{
-					//				CopyStruct(dst, src, player);
-					//			}
-					//			//else
-					//			//{
-					//			//	stack_span[i + restSpan.Length] = box;
-					//			//}
-					//		}
-					//		else
-					//		{
-					//			stack_span[i + restSpan.Length] = box;
-					//		}
-					//	}
-					//	//else
-					//	//{
-					//	//	stack_span[i + restSpan.Length] = box;
-					//	//}
-					//}
-					//else
-					//{
+					
 					stack_span[i + restSpan.Length] = box;
-					//}
+					
 					stack_span[i].setFault();
 				}
 
@@ -1389,6 +1363,8 @@ namespace juicescript.runtime
 			}
 			else if (StoreMode == ArrayStoreMode.cache)
 			{
+				var cache_store = store_memory.Span;
+
 				if (restSpan.Length + array_len > cache_store.Length)
 				{
 					int heaparrayptr = ChangeStoreToHeap(player, ref error);
@@ -1550,51 +1526,14 @@ namespace juicescript.runtime
 				for (int i = 1; i < stack_span.Length; i++)
 				{
 					var box = stack_span[i]; // cache_on_stack和normal一样，结构体都在堆中，不需要考虑缓存问题.
-					//if (box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
-					//{
-					//	var src = player.Context.GC.Heap[box.HeapPtr];
-					//	if (((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct))
-					//	{
-
-
-					//		var dst_v = stack_span[i - 1];
-					//		if (dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
-					//		{
-					//			var dst = player.Context.GC.Heap[dst_v.HeapPtr];
-					//			if (((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct))
-					//			{
-					//				CopyStruct(dst, src, player);
-
-					//			}
-					//			else
-					//			{
-					//				stack_span[i - 1] = box;
-					//			}
-					//		}
-					//		else
-					//		{
-					//			stack_span[i - 1] = box;
-					//		}
-					//	}
-					//	else
-					//	{
-					//		stack_span[i - 1] = box;
-					//	}
-					//}
-					//else
-					{
-
-						stack_span[i - 1] = box;
-
-
-					}
-
+					stack_span[i - 1] = box;
 				}
 
 
 			}
 			else if (StoreMode == ArrayStoreMode.cache)
 			{
+				var cache_store = store_memory.Span;
 				for (int i = 1; i < cache_store.Length; i++)
 				{
 					var box = cache_store[i];
@@ -1743,14 +1682,18 @@ namespace juicescript.runtime
 
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
 			{
-				var v1 = store_memory.Span[(int)i];
-				var v2 = store_memory.Span[(int)j];
+				var span = store_memory.Span; 
 
-				store_memory.Span[(int)i] = v2;
-				store_memory.Span[(int)j] = v1;
+				var v1 = span[(int)i];
+				var v2 = span[(int)j];
+
+				span[(int)i] = v2;
+				span[(int)j] = v1;
 			}
 			else if (StoreMode == ArrayStoreMode.cache)
 			{
+				var cache_store = store_memory.Span;
+				
 				var v1 = cache_store[(int)i];
 				var v2 = cache_store[(int)j];
 
@@ -2003,7 +1946,7 @@ namespace juicescript.runtime
 			}
 			else if (StoreMode == ArrayStoreMode.cache)
 			{
-				
+				var cache_store = store_memory.Span;
 				if (array_index >= cache_store.Length)
 				{
 					ChangeStoreToHeap(array_index, player, ref error, out arr);
@@ -2149,7 +2092,7 @@ namespace juicescript.runtime
 			//	return target.DoReadSlot(array_index, player, out isoutofindex_or_ishole);
 			//}
 
-			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			if (StoreMode != ArrayStoreMode.normal)
 			{
 				if (array_index < array_len)
 				{
@@ -2175,35 +2118,35 @@ namespace juicescript.runtime
 					return v;
 				}
 			}
-			else if (StoreMode == ArrayStoreMode.cache)
-			{
-				if (array_index < array_len)
-				{
+			//else if (StoreMode == ArrayStoreMode.cache)
+			//{
+			//	if (array_index < array_len)
+			//	{
 
-					var v = cache_store[(int)array_index];
-					if (v.ValueType == NaNBoxing.BoxType.Fault)
-					{
-						isoutofindex_or_ishole = true;
-						v.SetUndefined();
-						return v;
-					}
-					else
-					{
-						isoutofindex_or_ishole = false;
-						return v;
-					}
+			//		var v = cache_store[(int)array_index];
+			//		if (v.ValueType == NaNBoxing.BoxType.Fault)
+			//		{
+			//			isoutofindex_or_ishole = true;
+			//			v.SetUndefined();
+			//			return v;
+			//		}
+			//		else
+			//		{
+			//			isoutofindex_or_ishole = false;
+			//			return v;
+			//		}
 
-				}
-				else
-				{
-					isoutofindex_or_ishole = true;
-					NaNBoxing v = default;
-					v.SetUndefined();
-					return v;
-				}
+			//	}
+			//	else
+			//	{
+			//		isoutofindex_or_ishole = true;
+			//		NaNBoxing v = default;
+			//		v.SetUndefined();
+			//		return v;
+			//	}
 
-				//throw new NotImplementedException();
-			}
+			//	//throw new NotImplementedException();
+			//}
 			else
 			{
 				if (array_index < array_len)
@@ -2308,11 +2251,15 @@ namespace juicescript.runtime
 			m_property_ptr = arr_store.m_property_ptr;
 
 			array_len = arr_store.array_len;
+
+			var cache_store = store_memory.Span;
+			var src_store = arr_store.store_memory.Span;
+
 			for (int i = 0; i < MAX_CACHE_ELEMENT; i++)
 			{
-				if (arr_store.cache_store[i].ValueType == NaNBoxing.BoxType.HeapPtr)
+				if (src_store[i].ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					if (arr_store.cache_store[i].HeapPtr == arr_store.cache_struct_ptr + i)
+					if (src_store[i].HeapPtr == arr_store.cache_struct_ptr + i)
 					{
 						var dst = player.Context.GC.Heap[cache_struct_ptr + (int)i];
 						var src = player.Context.GC.Heap[arr_store.cache_struct_ptr + i];
@@ -2324,12 +2271,12 @@ namespace juicescript.runtime
 					else
 					{
 						//除了struct,凡是存入array的对象都禁用cache对象，完事。。。
-						cache_store[i] = arr_store.cache_store[i];
+						cache_store[i] = src_store[i];
 					}
 				}
 				else
 				{
-					cache_store[i] = arr_store.cache_store[i];
+					cache_store[i] = src_store[i];
 				}
 
 			}
@@ -2353,7 +2300,7 @@ namespace juicescript.runtime
 
 		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapBase arrObj, ReadOnlySpan<char> sep)
 		{
-			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			if (StoreMode != ArrayStoreMode.normal)
 			{
 				var stack_span = store_memory.Span;
 				for (int i = 0; i < array_len; i++)
@@ -2387,39 +2334,39 @@ namespace juicescript.runtime
 				}
 
 			}
-			else if (StoreMode == ArrayStoreMode.cache)
-			{
-				for (int i = 0; i < array_len; i++)
-				{
+			//else if (StoreMode == ArrayStoreMode.cache)
+			//{
+			//	for (int i = 0; i < array_len; i++)
+			//	{
 
-					if (cache_store[i].ValueType != NaNBoxing.BoxType.Null && cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
-					{
-						TopLevel.TraceElement(cache_store[i], context, stackStPos, ref error, scope_ptr, default, printer);
-						if (error.raised)
-						{
-							return;
-						}
-					}
-					else
-					{
-						bool isoutofindex_or_ishole;
-						NaNBoxing l = context.player.LoadSlotFromArray((uint)i, arrObj, out isoutofindex_or_ishole);
-						if (l.ValueType != NaNBoxing.BoxType.Fault && l.ValueType != NaNBoxing.BoxType.Null && l.ValueType != NaNBoxing.BoxType.Undefined)
-						{
-							TopLevel.TraceElement(l, context, stackStPos, ref error, scope_ptr, default, printer);
-							if (error.raised)
-							{
-								return;
-							}
-						}
-					}
+			//		if (cache_store[i].ValueType != NaNBoxing.BoxType.Null && cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
+			//		{
+			//			TopLevel.TraceElement(cache_store[i], context, stackStPos, ref error, scope_ptr, default, printer);
+			//			if (error.raised)
+			//			{
+			//				return;
+			//			}
+			//		}
+			//		else
+			//		{
+			//			bool isoutofindex_or_ishole;
+			//			NaNBoxing l = context.player.LoadSlotFromArray((uint)i, arrObj, out isoutofindex_or_ishole);
+			//			if (l.ValueType != NaNBoxing.BoxType.Fault && l.ValueType != NaNBoxing.BoxType.Null && l.ValueType != NaNBoxing.BoxType.Undefined)
+			//			{
+			//				TopLevel.TraceElement(l, context, stackStPos, ref error, scope_ptr, default, printer);
+			//				if (error.raised)
+			//				{
+			//					return;
+			//				}
+			//			}
+			//		}
 
-					if (i < array_len - 1)
-					{
-						printer.Write(sep);
-					}
-				}
-			}
+			//		if (i < array_len - 1)
+			//		{
+			//			printer.Write(sep);
+			//		}
+			//	}
+			//}
 			else
 			{
 				if (array_len > 0)
@@ -2506,7 +2453,7 @@ namespace juicescript.runtime
 
 		private bool DoTryReadIterItem(int index, out uint key, out uint next_index, out NaNBoxing v)
 		{
-			if (StoreMode == ArrayStoreMode.cache_on_stack)
+			if (StoreMode != ArrayStoreMode.normal)
 			{
 				var stack_span = store_memory.Span;
 
@@ -2530,29 +2477,29 @@ namespace juicescript.runtime
 				}
 				return false;
 			}
-			else if (StoreMode == ArrayStoreMode.cache)
-			{
-				key = 0;
-				next_index = 0;
-				v = default;
-				for (int i = index; i < array_len; i++)
-				{
+			//else if (StoreMode == ArrayStoreMode.cache)
+			//{
+			//	key = 0;
+			//	next_index = 0;
+			//	v = default;
+			//	for (int i = index; i < array_len; i++)
+			//	{
 
-					if (//cache_store[i].ValueType != NaNBoxing.BoxType.Null &&
-						//cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && 
-						cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
-					{
-						key = (uint)i;
-						next_index = (uint)i + 1;
-						v = cache_store[i];
+			//		if (//cache_store[i].ValueType != NaNBoxing.BoxType.Null &&
+			//			//cache_store[i].ValueType != NaNBoxing.BoxType.Undefined && 
+			//			cache_store[i].ValueType != NaNBoxing.BoxType.Fault)
+			//		{
+			//			key = (uint)i;
+			//			next_index = (uint)i + 1;
+			//			v = cache_store[i];
 
-						return true;
+			//			return true;
 
-					}
+			//		}
 
-				}
-				return false;
-			}
+			//	}
+			//	return false;
+			//}
 			else
 			{
 				key = 0;

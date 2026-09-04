@@ -70,7 +70,7 @@ import flash.utils.Dictionary;
 
 
 
-
+//
 //import flash.utils.getTimer;
 //
 //
@@ -93,8 +93,8 @@ import flash.utils.Dictionary;
 	//
 	//var st = getTimer();
 //trace(fib(35),getTimer() - st );
-
-
+//
+//
 
 
 
