@@ -170,10 +170,30 @@ namespace juicescript.runtime
 				target = payload;
 
 				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
-				
+
 			}
 
 			return ptr;
+
+			//开始优化为杜绝二段跳。
+
+			//var payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			//if (payload.HEAPINSTANCE_PTR == 0)
+			//{
+			//	target = payload;
+			//	return ptr;
+			//}
+			//else
+			//{
+			//	int p = payload.HEAPINSTANCE_PTR;
+
+			//	payload = (RtArray)player.Context.GC.Heap[payload.HEAPINSTANCE_PTR];
+			//	Debug.Assert(payload.HEAPINSTANCE_PTR == 0);
+
+			//	target = payload;
+
+			//	return p;
+			//}
 		}
 
 

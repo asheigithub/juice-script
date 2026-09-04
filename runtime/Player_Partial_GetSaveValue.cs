@@ -1822,10 +1822,14 @@ namespace juicescript.runtime
 					//定义在上一层调用栈的对象，直接存,标记被下一层引用
 					saveSlot.SetHeapPtr(src_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)(((ASInstance)srcPayload.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE));
 					
-					if (srcPayload.nextframe_ref_state.scope_ptr > 0 && ((RtMethodScope)Context.GC.Heap[srcPayload.nextframe_ref_state.scope_ptr]).version
-								== srcPayload.nextframe_ref_state.version)
+					if (srcPayload.nextframe_ref_state.scope_ptr > 0 &&
+						srcPayload.nextframe_ref_state.scope_ptr < heap.mScopePtr &&
+						((RtMethodScope)Context.GC.Heap[srcPayload.nextframe_ref_state.scope_ptr]).version
+								== srcPayload.nextframe_ref_state.version
+						)
 					{
 						//那个引用帧还在
+						
 					}
 					else
 					{
@@ -1961,17 +1965,21 @@ namespace juicescript.runtime
 							//定义在上一层调用栈的对象, 直接存，并且标记被下一层函数栈引用
 							value.SetHeapPtr(array_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
-							if (array.nextframe_ref_state.scope_ptr > 0 && ((RtMethodScope)Context.GC.Heap[array.nextframe_ref_state.scope_ptr]).version
-								== array.nextframe_ref_state.version)
+							if (array.nextframe_ref_state.scope_ptr > 0 &&
+								array.nextframe_ref_state.scope_ptr< heap.mScopePtr &&								
+								((RtMethodScope)Context.GC.Heap[array.nextframe_ref_state.scope_ptr]).version== array.nextframe_ref_state.version
+								)
 							{
-								//那个引用帧还在
+								//比新的深度浅 ,并且未失效(由于 funciton.call这种事情存在，它确实有可能失效)
+								
 							}
 							else
 							{
-								//引用已失效
+								//引用比新的栈深度深，或者一样深，再次更新最新版本也没问题。
 								array.nextframe_ref_state.scope_ptr = heap.mScopePtr;
 								array.nextframe_ref_state.version = heap.version;
 							}
+
 
 						}
 						else if (array_ptr < heap.StackPos + heap.SlotCount + Context.CacheArrayPtr)
@@ -1992,7 +2000,7 @@ namespace juicescript.runtime
 							
 							//否则，缓存对象复制到要存入的slot的缓存池里，然后将目标slot指向它的缓存池。最后，将原对象也设置成payload指向目标slot的缓存池。
 							int dstptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheArrayPtr;
-							var dstObj = Context.GC.Heap[dstptr];
+							var dstObj = (RtArray)Context.GC.Heap[dstptr];
 							dstObj.Type = Context.ARRAY.Instance;
 
 							Debug.Assert(!is_pass_this);
@@ -2004,10 +2012,16 @@ namespace juicescript.runtime
 							//((RtArray)dstObj).HEAPINSTANCE_PTR = 0;
 							((RtArray)dstObj).CopyCacheFrom(array, this, Context.cache_array_memory[heapLocater.MemberIndex + heap.StackPos], Context.cache_array_structindex[heapLocater.MemberIndex + heap.StackPos] );
 
+							
 							//array.HEAPINSTANCE_PTR = dstptr;
 							array.LinkTo((RtArray)dstObj, dstptr);
 							value.SetHeapPtr(dstptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
+							//if (array.methodscopeslot_ref_state !=0 && array_ptr >= ((RtMethodScope)Context.GC.Heap[scope_ptr]).StackPos  + Context.CacheArrayPtr)
+							//{
+							//	dstObj.nextframe_ref_state.scope_ptr = scope_ptr;
+							//	dstObj.nextframe_ref_state.version = ((RtMethodScope)Context.GC.Heap[scope_ptr]).version;
+							//}
 						}
 					}
 					else
@@ -2034,9 +2048,12 @@ namespace juicescript.runtime
 						//定义在上一层调用栈的对象, 直接存，并且标记被下一层函数栈引用
 						value.SetHeapPtr(vector_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 
-						if (vector.nextframe_ref_state.scope_ptr > 0 && ((RtMethodScope)Context.GC.Heap[vector.nextframe_ref_state.scope_ptr]).version
-							== vector.nextframe_ref_state.version)
+						if (vector.nextframe_ref_state.scope_ptr > 0 &&
+							vector.nextframe_ref_state.scope_ptr < heap.mScopePtr &&
+							((RtMethodScope)Context.GC.Heap[vector.nextframe_ref_state.scope_ptr]).version == vector.nextframe_ref_state.version
+							)
 						{
+							
 							//那个引用帧还在
 						}
 						else
@@ -2097,10 +2114,14 @@ namespace juicescript.runtime
 						//定义在上一层调用栈的对象, 直接存，并且标记被下一层函数栈引用
 						value.SetHeapPtr(final_ptr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
-						if (srcClosure.nextframe_ref_state.scope_ptr > 0 && ((RtMethodScope)Context.GC.Heap[srcClosure.nextframe_ref_state.scope_ptr]).version
-							== srcClosure.nextframe_ref_state.version)
+						if (srcClosure.nextframe_ref_state.scope_ptr > 0 
+							&& srcClosure.nextframe_ref_state.scope_ptr < heap.mScopePtr
+							&& ((RtMethodScope)Context.GC.Heap[srcClosure.nextframe_ref_state.scope_ptr]).version
+									== srcClosure.nextframe_ref_state.version
+							)
 						{
 							//那个引用帧还在
+							
 						}
 						else
 						{
