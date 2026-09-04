@@ -151,7 +151,7 @@ namespace juicescript.runtime.buildin
 
 							Debug.Assert(obj.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)obj.Type).Flags.HasFlag(ClassFlags.Struct));
 
-							int cache_struct_ptr = array.cache_structs[i];
+							int cache_struct_ptr = array.cache_struct_ptr + i; //array.cache_structs[i];
 
 							var v_struct = (RtInstance)context.GC.Heap[cache_struct_ptr];
 

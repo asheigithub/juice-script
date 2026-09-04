@@ -176,7 +176,7 @@ namespace juicescript.runtime
 
 
         internal Memory<NaNBoxing>[] cache_array_memory;
-        internal int[][] cache_array_structindex;
+        internal int[] cache_array_structindex;
 
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
@@ -240,15 +240,14 @@ namespace juicescript.runtime
 
 
 			cache_array_memory = new Memory<NaNBoxing>[REAL_STACK_LENGTH];
-            cache_array_structindex = new int[REAL_STACK_LENGTH][];
+            cache_array_structindex = new int[REAL_STACK_LENGTH];
 
 			
             //先分配Array的缓存struct
             for (int i = 0; i < REAL_STACK_LENGTH; i++)
             {
                 cache_array_memory[i] = new Memory<NaNBoxing>(new NaNBoxing[RtArray.MAX_CACHE_ELEMENT]);
-                cache_array_structindex[i] = new int[RtArray.MAX_CACHE_ELEMENT];
-
+                
                 for (int j = 0; j < RtArray.MAX_CACHE_ELEMENT; j++)
                 {
                     int cache_struct = GC.AllocCacheInstance();
@@ -256,8 +255,10 @@ namespace juicescript.runtime
                     {
                         throw new LoaderException("alloc CacheArrayElements failed,out of memory");
                     }
-
-                    cache_array_structindex[i][j] = cache_struct;
+                    if (j == 0)
+                    {
+                        cache_array_structindex[i] = cache_struct;
+                    }
                 }
             }
 
