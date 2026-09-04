@@ -11686,6 +11686,31 @@ namespace juicescript.runtime
 
 				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 
+				//var array = (RtArray)Context.GC.Heap[instance_box.HeapPtr];
+				//if (array.HEAPINSTANCE_PTR == 0 && array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
+				//{
+				//	var element = array.store_memory.Span[(int)array_i];
+				//	if (element.ValueType == BoxType.Fault)
+				//	{
+
+				//	}
+				//	else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+				//	{
+				//		element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+				//		stackslots[dst_index] = element;
+				//		return;
+				//	}
+				//	else
+				//	{
+				//		stackslots[dst_index] = element;
+				//		return;
+				//	}
+					
+
+				//}
+
+
+
 				bool isoutofindex_or_ishole;
 				var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[instance_box.HeapPtr], out isoutofindex_or_ishole);
 

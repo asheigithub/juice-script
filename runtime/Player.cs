@@ -12508,7 +12508,7 @@ namespace juicescript.runtime
 		private unsafe int Ld_function_and_store_member( ASMethod function, ScopeHeapLocater heapLocater, RtHeapBase mscope, int scope_ptr,  ref ReceiveError error,
 			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, out RtHeapBase closure_instance)
 		{
-			if (!(heapLocater.MemberIndex == ushort.MaxValue && heapLocater.ScopeIndex == ushort.MaxValue))
+			if ( !(heapLocater.MemberIndex == ushort.MaxValue && heapLocater.ScopeIndex == ushort.MaxValue))
 			{
 				var s = mscope; //Context.GC.Heap[scope_ptr];
 				if (s.Type._link_codescope.index != heapLocater.ScopeIndex)

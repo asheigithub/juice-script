@@ -90,7 +90,7 @@ namespace juicescript.runtime
         /// 如果是缓存对象，并且已经被保存到堆中，则保存堆中对象的指针
         /// 后续操作将直接对堆里的对象操作了。
         /// </summary>
-        internal int HEAPINSTANCE_PTR { get; private set; }
+        internal int HEAPINSTANCE_PTR;// { get; private set; }
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreCacheZero(ASInstance asinstance)

@@ -70,7 +70,7 @@ import flash.utils.Dictionary;
 
 
 
-
+//
 //import flash.utils.getTimer;
 //
 //
@@ -93,8 +93,8 @@ import flash.utils.Dictionary;
 	//
 	//var st = getTimer();
 //trace(fib(35),getTimer() - st );
-
-
+//
+//
 
 
 
@@ -162,7 +162,7 @@ function fannkuch(n) {
    }
 }
 var st = getTimer();
-var n = 9;
+var n = 10;
 var ret = fannkuch(n);
 
 trace( getTimer() - st );

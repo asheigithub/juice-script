@@ -67,7 +67,7 @@ namespace juicescript.runtime
 		}
 
 		//追踪动态属性和prototype.
-		internal int HEAPINSTANCE_PTR { get; private set; }
+		internal int HEAPINSTANCE_PTR;// { get; private set; }
 
 		/// <summary>
 		/// 仅用于跟踪缓存对象被function的slot引用的情况
