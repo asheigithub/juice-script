@@ -54,7 +54,8 @@ namespace juicescript.runtime
 		}
 
 		internal uint version;
-		
+		internal int returnSlot;
+
 		internal int StackPos;
 		internal int SlotCount;
 		internal bool IsStackSlot;

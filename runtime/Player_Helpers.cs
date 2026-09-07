@@ -12611,7 +12611,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Yield_return(int dst_index, int pc_sub_start, ASMethod method, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
+		private unsafe void Yield_return(int dst_index, int pc_sub_start,ASMethod method, RtMethodScope methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			//ExceptionContext* exception_ctx,
 			//ExceptionContext* exception_ctx_stack,
 			int exception_at,
@@ -12637,7 +12637,7 @@ namespace juicescript.runtime
 
 			if (lv.ValueType == BoxType.HeapPtr)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr,  methodscope , lv, ref error,false);
 				if (error.raised)
 				{
 					Context.StackSlots[returnSlotIndex].SetUndefined();
@@ -12685,7 +12685,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Await_return(int dst_index, int pc_sub_start, ASMethod method, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
+		private unsafe void Await_return(int dst_index, int pc_sub_start,ASMethod method, RtMethodScope methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			//ExceptionContext* exception_ctx,
 			//ExceptionContext* exception_ctx_stack,
 			int exception_at,
@@ -12711,7 +12711,7 @@ namespace juicescript.runtime
 
 			if (lv.ValueType == BoxType.HeapPtr)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, lv, ref error, true);
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, methodscope  ,lv, ref error,false);
 				if (error.raised)
 				{
 					Context.StackSlots[returnSlotIndex].SetUndefined();
@@ -12725,7 +12725,7 @@ namespace juicescript.runtime
 
 
 			//保存上下文状态
-			int exception_ctx_count = (method.Flags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
+			int exception_ctx_count = (methodscope.methodFlags.HasFlag(MethodFlags.NoTry) ? 0 : Context.MAX_TRY_NESTED) + 2;
 			//int exception_at = (int)(exception_ctx - exception_ctx_stack);
 
 			PromiseImpl.AsyncGenWapper asyncGenWapper = (PromiseImpl.AsyncGenWapper)resume_state;
@@ -12757,11 +12757,11 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		
 		private unsafe void Return_Value(int dst_index,int returnSlotIndex, 
-			ASMethod method ,Span<NaNBoxing> stackslots,int stackStPos,
+			ASMethod method , RtMethodScope mscope , Span<NaNBoxing> stackslots,int stackStPos,
 			int calleelastPos,int scope_ptr,
-			ref ReceiveError error)
+			ref ReceiveError error,bool has_finally)
 		{
 			Debug.Assert(returnSlotIndex >= 0);
 
@@ -12819,7 +12819,7 @@ namespace juicescript.runtime
 															//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
 				)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, v, ref error);
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, mscope ,v, ref error,has_finally);
 				if (error.raised)
 				{
 					Context.StackSlots[returnSlotIndex].SetUndefined();

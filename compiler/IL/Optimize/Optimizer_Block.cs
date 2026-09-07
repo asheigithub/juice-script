@@ -3960,8 +3960,15 @@ namespace juicescript.compiler.IL.Optimize
 										var deftry = GetTryStmt(def, cfg);
 										bool IsTrySafe(Instruction instruction) //还必须考虑Try Catch的影响！
 										{
+											
 											if (deftry.Count == 0)
 											{
+												var itry = GetTryStmt(instruction, cfg);
+												if (itry.Count > 0)
+												{
+													return itry.Peek().trystate == 0;
+												}
+
 												return true;
 											}
 											else

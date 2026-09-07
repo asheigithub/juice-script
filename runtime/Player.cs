@@ -14711,33 +14711,52 @@ namespace juicescript.runtime
 						case INS_Code.return_value:
 
 							{
-								Return_Value(dst_index, returnSlotIndex, method, stackslots, stackStPos, calleelastPos, scope_ptr, ref error);
-								if (error.raised)
-								{
-									goto flag_handle_error;
-								}
-
-
+								bool has_finally = false;
 								if (exception_ctx != NO_TRY)
 								{
-									stackslots[exception_ctx->hold_error.index].setFault();//return 会吃掉异常
-
+									
 									ExceptionContext* ctx = NO_TRY + 1;
 									ctx->FINALLY_JUMPTO_PTR = PC_END;
 									do
 									{
+										has_finally = has_finally || ctx->state != 2;
+
 										var finally_p = ctx->state == 2 ? ctx->FINALLY_EXIT_PTR : ctx->FINALLY_PTR;
 										++ctx;
 										ctx->FINALLY_JUMPTO_PTR = finally_p;
 
 									} while (ctx < exception_ctx);
 
-									PC = exception_ctx->state == 2 ? exception_ctx->FINALLY_EXIT_PTR : exception_ctx->FINALLY_PTR;
+									has_finally = has_finally || exception_ctx->state != 2;
+
+									byte* FPC = exception_ctx->state == 2 ? exception_ctx->FINALLY_EXIT_PTR : exception_ctx->FINALLY_PTR;
+
+
+									//如果有finally块，需要考虑finally块里的代码对return对象的影响。
+									Return_Value(dst_index, returnSlotIndex, method, (RtMethodScope)methodscope, stackslots, stackStPos, calleelastPos, scope_ptr, ref error,has_finally);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+
+									stackslots[exception_ctx->hold_error.index].setFault();//return 会吃掉异常
+									PC = FPC;
+
 
 									break;
 								}
 								else
 								{
+									Return_Value(dst_index, returnSlotIndex, method, (RtMethodScope)methodscope, stackslots, stackStPos, calleelastPos, scope_ptr, ref error,false);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+
+
+
+
 #if PROFILEPLAYER
 									InstructionProfiler.Profile_ActionEnd(opcode);
 #endif
@@ -14901,7 +14920,7 @@ namespace juicescript.runtime
 								Debug.Assert(returnSlotIndex >= 0);
 
 								int refPC = 0;
-								Yield_return(dst_index, (int)(PC - PC_START), method, stackslots, stackStPos, scope_ptr, 
+								Yield_return(dst_index, (int)(PC - PC_START), method, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr, 
 									(int)(exception_ctx - exception_ctx_stack), NO_TRY, (GeneratorImpl.GeneratorWapper)resume_state,
 									returnSlotIndex, calleelastPos, ref error, ref refPC
 									);
@@ -14927,7 +14946,7 @@ namespace juicescript.runtime
 								Debug.Assert(returnSlotIndex >= 0);
 
 								int refPC = 0;
-								Await_return(dst_index, (int)(PC - PC_START), method, stackslots, stackStPos, scope_ptr,
+								Await_return(dst_index, (int)(PC - PC_START), method, (RtMethodScope)methodscope, stackslots, stackStPos, scope_ptr,
 									(int)(exception_ctx - exception_ctx_stack), NO_TRY, (PromiseImpl.AsyncGenWapper)resume_state,
 									returnSlotIndex, calleelastPos, ref error, ref refPC
 									);
@@ -15547,7 +15566,10 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr, error.error, ref error, true);
+								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, 
+									scope_ptr,(RtMethodScope) methodscope , error.error, ref error,
+									false //在本栈帧区域，不用考虑上级引用
+									);
 							}
 
 							error.raised = false;
@@ -15567,7 +15589,10 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr, error.error, ref error, true);
+								StoreReturnSlot(ref stackslots[exception_ctx->hold_error.index], stackStPos, stackStPos + exception_ctx->hold_error.index, calleelastPos, scope_ptr,
+									(RtMethodScope)methodscope, error.error, ref error,
+									false //在本栈帧区域，不用考虑上级引用
+									);
 							}
 
 							error.raised = false;
