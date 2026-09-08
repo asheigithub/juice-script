@@ -586,7 +586,7 @@ namespace juicescript.runtime
 								if (has_finally && arr.methodscopeslot_ref_state != 0)
 								{
 									//标记returnSlot被引用
-									//dst.methodscopeslot_ref_state = 1;
+									
 									dst.nextframe_ref_state.scope_ptr = scope_ptr;
 									dst.nextframe_ref_state.version = mscope.version;
 
@@ -597,6 +597,8 @@ namespace juicescript.runtime
 										if (sv.Raw == value.Raw)
 										{
 											sv = returnSlot;
+											if (arr.methodscopeslot_ref_state == 1)
+												break;
 										}
 									}
 									
@@ -626,12 +628,31 @@ namespace juicescript.runtime
 					{
 						RtVector vec;
 						int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vec);
-						if ((vec_ptr < Context.CacheVectorPtr + calleelastpos
-							) // 传入
-							||
+						if (
 							(!(vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)) //堆里
 						 )
 						{
+							returnSlot.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+						}
+						else if (vec_ptr < Context.CacheVectorPtr + calleelastpos
+							 // 传入
+							)
+						{
+							if (vec.nextframe_ref_state.scope_ptr > 0 &&
+									vec.nextframe_ref_state.scope_ptr < scope_ptr &&
+									((RtMethodScope)Context.GC.Heap[vec.nextframe_ref_state.scope_ptr]).version
+											== mscope.version
+									)
+							{
+								//那个引用帧还在
+							}
+							else
+							{
+								//引用已失效
+								vec.nextframe_ref_state.scope_ptr = scope_ptr;
+								vec.nextframe_ref_state.version = mscope.version;
+							}
+
 							returnSlot.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 						}
 						else
@@ -641,15 +662,37 @@ namespace juicescript.runtime
 							dstObj.Type = Context.GC.Heap[vec_ptr].Type;
 							var dst = (RtVector)dstObj;
 
-							
+
 							dst.CopyCacheFrom(vec, this);
 							dst.methodscopeslot_ref_state = 0;
 							dst.nextframe_ref_state = default;
 
 							//vec.HEAPINSTANCE_PTR = dstVecPtr;
-							vec.LinkTo(dst,dstVecPtr);
+							//vec.LinkTo(dst, dstVecPtr);
 
 							returnSlot.SetHeapPtr(dstVecPtr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+
+							if (has_finally && vec.methodscopeslot_ref_state != 0)
+							{
+								//标记returnSlot被引用
+								//dst.methodscopeslot_ref_state = 1;
+								dst.nextframe_ref_state.scope_ptr = scope_ptr;
+								dst.nextframe_ref_state.version = mscope.version;
+
+								var scope_slots = mscope.__get_slots_internal;
+								for (int i = 0; i < mscope.SlotCount; i++)
+								{
+									ref NaNBoxing sv = ref scope_slots[i];
+									if (sv.Raw == value.Raw)
+									{
+										sv = returnSlot;
+										if (vec.methodscopeslot_ref_state == 1)
+											break;
+									}
+								}
+
+							}
+
 
 						}
 					}
@@ -1379,29 +1422,6 @@ namespace juicescript.runtime
 							}
 						}
 
-						//if (toupate_ref != null && toupate_ref.methodscopeslot_ref_state == 2) //如果methodscope有其他引用，那么它的this也需更新为需要扫描状态
-						//{
-						//	if (toupate_ref.This.ValueType == NaNBoxing.BoxType.HeapPtr)
-						//	{
-						//		var newthis = Context.GC.Heap[toupate_ref.This.HeapPtr];
-						//		if (newthis.Kind == RtHeapTypeKind.INSTANCE)
-						//		{
-						//			if (((RtInstance)newthis).methodscopeslot_ref_state == 1)
-						//			{
-						//				((RtInstance)newthis).methodscopeslot_ref_state = 2;
-						//			}
-						//		}
-						//		else if (newthis.Kind == RtHeapTypeKind.CLOSURE)
-						//		{
-						//			if (((RtClosure)newthis).methodscopeslot_ref_state == 1)
-						//			{
-						//				((RtClosure)newthis).methodscopeslot_ref_state = 2;
-						//			}
-						//		}
-						//	}
-						//}
-
-						//return copyed_ptr;
 						NaNBoxing r = default;
 
 						if (copyed_ptr == 0)
@@ -1697,11 +1717,25 @@ namespace juicescript.runtime
 						{
 							RtMethodScope scope = (RtMethodScope)Context.GC.Heap[k];
 							var scope_span = scope.__get_slots_internal;
-							for (int i = 0; i < scope.SlotCount; ++i)
+							for (int i = ((k < max || scope.returnSlot < 0) ? 0 : -1); i < scope.SlotCount; ++i)
 							{
 								if (!(scope == heap && i == heapLocater.MemberIndex))
 								{
-									var v = scope_span[i];
+									NaNBoxing v;
+									int store_vec_ptr;
+
+									if (i == -1) //检查returnSlot槽
+									{
+										v = Context.StackSlots[scope.returnSlot];
+										store_vec_ptr = scope.returnSlot + Context.CacheVectorPtr;
+									}
+									else
+									{
+										v = scope_span[i];
+										store_vec_ptr = scope.StackPos + i + Context.CacheVectorPtr;
+									}
+
+
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 									{
 										//var inmember = Context.GC.Heap[v.HeapPtr];
@@ -1712,7 +1746,7 @@ namespace juicescript.runtime
 										{
 											if (copyed_ptr == 0)
 											{
-												copyed_ptr = scope.StackPos + i + Context.CacheVectorPtr;
+												copyed_ptr = store_vec_ptr;
 
 												var dst = (RtVector)Context.GC.Heap[copyed_ptr];
 
@@ -1740,7 +1774,8 @@ namespace juicescript.runtime
 													((RtVector)dst).CopyCacheFrom(oldPayload, this);
 
 													//((RtVector)oldObj).HEAPINSTANCE_PTR = copyed_ptr;
-													((RtVector)oldObj).LinkTo(dst, copyed_ptr);
+
+													//((RtVector)oldObj).LinkTo(dst, copyed_ptr);
 
 												}
 												else
@@ -1753,7 +1788,14 @@ namespace juicescript.runtime
 
 												v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 												//scope.SetSlot(v, (ushort)i);
-												scope_span[i] = v;
+												if (i >= 0)
+												{
+													scope_span[i] = v;
+												}
+												else
+												{   //更新returnslot槽
+													Context.StackSlots[scope.returnSlot] = v;
+												}
 											}
 											else
 											{
@@ -1767,7 +1809,14 @@ namespace juicescript.runtime
 												//更新引用
 												v.SetHeapPtr(copyed_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 												//scope.SetSlot(v, (ushort)i);
-												scope_span[i] = v;
+												if (i >= 0)
+												{
+													scope_span[i] = v;
+												}
+												else
+												{   //更新returnslot槽
+													Context.StackSlots[scope.returnSlot] = v;
+												}
 											}
 										}
 									}
@@ -2113,13 +2162,10 @@ namespace juicescript.runtime
 										}
 									}
 									if (i == scope_ptr && scope.returnSlot >=0)
-									{
-										if (dstObj.nextframe_ref_state.scope_ptr == 0)
-										{
-											dstObj.nextframe_ref_state.scope_ptr = scope_ptr;
-											dstObj.nextframe_ref_state.version = scope.version;
-										}
-
+									{										
+										dstObj.nextframe_ref_state.scope_ptr = scope_ptr;
+										dstObj.nextframe_ref_state.version = scope.version;
+										
 										ref NaNBoxing sv = ref Context.StackSlots[scope.returnSlot];
 										if (sv.Raw == value.Raw)
 										{
@@ -2192,7 +2238,7 @@ namespace juicescript.runtime
 						var obj = Context.GC.Heap[value.HeapPtr];
 						//否则，缓存对象复制到要存入的slot的缓存池里，然后将目标slot指向它的缓存池。最后，将原对象也设置成payload指向目标slot的缓存池。
 						int dstptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheVectorPtr;
-						var dstObj = Context.GC.Heap[dstptr];
+						var dstObj = (RtVector)Context.GC.Heap[dstptr];
 						dstObj.Type = obj.Type;
 
 						((RtVector)dstObj).CopyCacheFrom(vector, this);
@@ -2200,7 +2246,49 @@ namespace juicescript.runtime
 						((RtVector)dstObj).nextframe_ref_state = default;
 
 						//vector.HEAPINSTANCE_PTR = dstptr;
-						vector.LinkTo((RtVector)dstObj, dstptr);
+						//vector.LinkTo((RtVector)dstObj, dstptr);
+
+
+						if (vector.methodscopeslot_ref_state != 0 ||
+							(vector.nextframe_ref_state.scope_ptr > 0 && vector.nextframe_ref_state.scope_ptr <= scope_ptr &&
+							vector.nextframe_ref_state.version == ((RtMethodScope)Context.GC.Heap[scope_ptr]).version)
+							)
+						{
+							//查找引用array_ptr的槽，改为指向dst
+							for (int i = heap.mScopePtr + 1; i <= scope_ptr; i++)
+							{
+								var scope = (RtMethodScope)Context.GC.Heap[i];
+								if (vector_ptr < (scope.returnSlot < 0 ? scope.StackPos : scope.returnSlot) + Context.CacheArrayPtr)
+									continue;
+
+								var scope_slots = scope.__get_slots_internal;
+								for (int j = 0; j < scope_slots.Length; j++)
+								{
+									dstObj.nextframe_ref_state.scope_ptr = scope_ptr;
+									dstObj.nextframe_ref_state.version = scope.version;
+
+									ref NaNBoxing sv = ref scope_slots[j];
+									if (sv.Raw == value.Raw)
+									{
+										sv.SetHeapPtr(dstptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+									}
+								}
+								if (i == scope_ptr && scope.returnSlot >= 0)
+								{
+									dstObj.nextframe_ref_state.scope_ptr = scope_ptr;
+									dstObj.nextframe_ref_state.version = scope.version;
+
+									ref NaNBoxing sv = ref Context.StackSlots[scope.returnSlot];
+									if (sv.Raw == value.Raw)
+									{
+										sv.SetHeapPtr(dstptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
+									}
+								}
+							}
+						}
+
+
+
 
 						value.SetHeapPtr(dstptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 

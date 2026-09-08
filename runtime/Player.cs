@@ -14733,7 +14733,8 @@ namespace juicescript.runtime
 
 
 									//如果有finally块，需要考虑finally块里的代码对return对象的影响。
-									Return_Value(dst_index, returnSlotIndex, method, (RtMethodScope)methodscope, stackslots, stackStPos, calleelastPos, scope_ptr, ref error,has_finally);
+									Return_Value(dst_index, returnSlotIndex, method, (RtMethodScope)methodscope, stackslots, stackStPos, calleelastPos, scope_ptr,
+										ref error,has_finally );
 									if (error.raised)
 									{
 										goto flag_handle_error;

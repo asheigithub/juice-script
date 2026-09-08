@@ -12761,7 +12761,7 @@ namespace juicescript.runtime
 		private unsafe void Return_Value(int dst_index,int returnSlotIndex, 
 			ASMethod method , RtMethodScope mscope , Span<NaNBoxing> stackslots,int stackStPos,
 			int calleelastPos,int scope_ptr,
-			ref ReceiveError error,bool has_finally)
+			ref ReceiveError error,bool compute_ref)
 		{
 			Debug.Assert(returnSlotIndex >= 0);
 
@@ -12819,7 +12819,7 @@ namespace juicescript.runtime
 															//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
 				)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, mscope ,v, ref error,has_finally);
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, mscope ,v, ref error,compute_ref);
 				if (error.raised)
 				{
 					Context.StackSlots[returnSlotIndex].SetUndefined();

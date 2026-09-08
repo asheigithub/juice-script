@@ -6837,18 +6837,17 @@ namespace juicescript.compiler.IL.Generator
 
 
 
-
-
-						StackLocater stackLocater = makeOrGetLocater2(TypeKind.Vector, vector.Identifier);
-
-						INS_Ld_VectorType ld_Const = new INS_Ld_VectorType(token);
-						ld_Const.dst = stackLocater;
-						ld_Const.vectortype_index = constindex;
-
-						compileEnv.instructions.Add(ld_Const);
-
 						if (as3vector.Constructor == null)
 						{
+							StackLocater stackLocater = makeOrGetLocater2(TypeKind.Vector, vector.Identifier);
+
+							INS_Ld_VectorType ld_Const = new INS_Ld_VectorType(token);
+							ld_Const.dst = stackLocater;
+							ld_Const.vectortype_index = constindex;
+
+							compileEnv.instructions.Add(ld_Const);
+
+
 							compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, stackLocater);
 							return stackLocater;
 						}
@@ -6856,6 +6855,14 @@ namespace juicescript.compiler.IL.Generator
 						{
 							if (newop != null)
 							{
+								StackLocater stackLocater = makeOrGetLocater2(TypeKind.Vector, vector.Identifier);
+
+								INS_Ld_VectorType ld_Const = new INS_Ld_VectorType(token);
+								ld_Const.dst = stackLocater;
+								ld_Const.vectortype_index = constindex;
+
+								compileEnv.instructions.Add(ld_Const);
+
 								newop.Arg3 = as3vector.Constructor;
 
 								compileEnv.stack_loaded_heapunit.Peek().Add(data.Data.Value, stackLocater);
@@ -6865,6 +6872,10 @@ namespace juicescript.compiler.IL.Generator
 							}
 							else
 							{
+								
+
+
+
 								var items = (List<AS3DataStackElement>)as3vector.Constructor.Data.Value;
 								List<StackLocater> arguments = new List<StackLocater>();
 								for (int i = 0; i < items.Count; i++)
@@ -6888,7 +6899,18 @@ namespace juicescript.compiler.IL.Generator
 
 								}
 
+
+
+								INS_Ld_VectorType ld_Const = new INS_Ld_VectorType(token);
 								ld_Const.dst = compileEnv.MakeStackLocater(TypeKind.Vector, vector.Identifier);
+								ld_Const.vectortype_index = constindex;
+
+								compileEnv.instructions.Add(ld_Const);
+
+
+
+								StackLocater stackLocater = makeOrGetLocater2((TypeKind)vector.Identifier , TypeKind.Any);
+
 
 								INS_bindGlobal_Call method_Call = new INS_bindGlobal_Call(token);
 								method_Call.dst = stackLocater;

@@ -98,7 +98,7 @@ import flash.utils.Dictionary;
 
 
 
-
+//
 //import flash.utils.getTimer;
 //
 //function fannkuch(n) {
@@ -162,7 +162,7 @@ import flash.utils.Dictionary;
    //}
 //}
 //var st = getTimer();
-//var n = 10;
+//var n = 9;
 //var ret = fannkuch(n);
 //
 //trace( getTimer() - st );
@@ -234,5 +234,4 @@ import flash.utils.Dictionary;
   //
 	   //
 	   //trace( getTimer() - st);
-
-	 
+   
