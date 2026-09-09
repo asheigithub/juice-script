@@ -4111,32 +4111,32 @@ namespace juicescript.compiler.IL.Optimize
 									if (def != null)
 									{
 										var deftry = GetTryStmt(def, cfg);
-										bool IsTrySafe(Instruction instruction) //还必须考虑Try Catch的影响！
-										{
+										//bool IsTrySafe(Instruction instruction) //还必须考虑Try Catch的影响！
+										//{
 											
-											if (deftry.Count == 0)
-											{
-												var itry = GetTryStmt(instruction, cfg);
-												if (itry.Count > 0)
-												{
-													//避免return 变量后，finally块又去读取变量，这里finally块中需要读取变量，不能跳过
-													return !catch_finally_firstld.Contains(instruction);
-												}
+										//	if (deftry.Count == 0)
+										//	{
+										//		var itry = GetTryStmt(instruction, cfg);
+										//		if (itry.Count > 0)
+										//		{
+										//			//避免return 变量后，finally块又去读取变量，这里finally块中需要读取变量，不能跳过
+										//			return !catch_finally_firstld.Contains(instruction);
+										//		}
 
-												return true;
-											}
-											else
-											{
+										//		return true;
+										//	}
+										//	else
+										//	{
 
-												var itry = GetTryStmt(instruction, cfg);
+										//		var itry = GetTryStmt(instruction, cfg);
 
-												if (itry.Count < deftry.Count)
-													return false;
+										//		if (itry.Count < deftry.Count)
+										//			return false;
 
-												var ii = itry.Peek();
-												return deftry.Any(d => d.tryid == ii.tryid && d.trystate == ii.trystate);
-											}
-										}
+										//		var ii = itry.Peek();
+										//		return deftry.Any(d => d.tryid == ii.tryid && d.trystate == ii.trystate);
+										//	}
+										//}
 
 										if (safeInstructions.Contains(def))
 										{

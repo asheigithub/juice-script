@@ -5407,7 +5407,7 @@ namespace juicescript.runtime
 
 
 
-				prepare_savemethodscope_saveinstacne(heap, ref value, heapLocater, false);
+				prepare_savemethodscope_saveinstacne(heap, ref value, heapLocater,scope_ptr, false);
 				heapV = value;
 			}
 			else
