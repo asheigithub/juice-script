@@ -387,7 +387,7 @@ namespace juicescript.runtime
 		}
 
 
-		internal void LinkTo(RtInstance dst, int dstPtr)
+		internal void LinkToHeap(RtInstance dst, int dstPtr)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);
 			HEAPINSTANCE_PTR = dstPtr;

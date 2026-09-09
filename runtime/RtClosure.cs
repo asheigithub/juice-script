@@ -61,7 +61,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void LinkTo(RtClosure dst, int dstPtr)
+		internal void LinkToHeap(RtClosure dst, int dstPtr)
 		{ 
 			HEAPINSTANCE_PTR = dstPtr;
 		}

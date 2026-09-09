@@ -12601,7 +12601,7 @@ namespace juicescript.runtime
 						}
 
 						closure_instance = closure;
-						return closurePtr;
+						return v.HeapPtr;
 					}
 					else
 					{
