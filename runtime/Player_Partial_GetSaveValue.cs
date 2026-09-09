@@ -130,6 +130,11 @@ namespace juicescript.runtime
 									break;
 								}
 
+								cache.This = GetSaveValue(cache.This,ref error); //this需提升到堆
+								if (error.raised)
+								{
+									return;
+								}
 
 
 								RtHeapBase heapObj;

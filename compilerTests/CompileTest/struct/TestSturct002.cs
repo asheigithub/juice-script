@@ -93,7 +93,7 @@ var p;
 		{
 			Assert.IsNull(ex);
 
-			Assert.AreEqual(2, player.Context.GC.Heap.DumpHeap()
+			Assert.AreEqual(4, player.Context.GC.Heap.DumpHeap()
 				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "O").Count());
 
 			Assert.AreEqual(0, player.Context.GC.Heap.DumpHeap()
