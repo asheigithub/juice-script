@@ -204,7 +204,7 @@ namespace juicescript.runtime.buildin
 		{
 			var arrayinstance = context.GC.Heap[thisPtr.HeapPtr];
 
-			context.StackSlots[returnSlotIndex].SetUInt(((RtArray)arrayinstance).GetLength(context.player,out RtArray t));
+			context.StackSlots[returnSlotIndex].SetUInt(((RtArray)arrayinstance).GetLength(out RtArray t));
 
 		}
 
@@ -479,7 +479,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			int finalptr = RtArray.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out targetArray);
+			int finalptr = ((RtArray)instance).HEAPINSTANCE_PTR == 0 ? instancePtr : ((RtArray)instance).HEAPINSTANCE_PTR; //RtArray.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out targetArray);
 			context.StackSlots[returnSlotIndex].SetHeapPtr(finalptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
 		}
@@ -525,7 +525,7 @@ namespace juicescript.runtime.buildin
 
 			// 3. Get current length
 			var array = (RtArray)arrayInstance;
-			uint currentLength = array.GetLength(context.player, out array);
+			uint currentLength = array.GetLength(out array);
 
 			// 4. Handle empty push case
 			if (restSpan.Length == 0)
@@ -600,7 +600,7 @@ namespace juicescript.runtime.buildin
 			if (array.array_len > 0)
 			{
 				bool isoutindex;
-				NaNBoxing e = array.ReadSlot(array.array_len - 1, context.player, out isoutindex);
+				NaNBoxing e = array.ReadSlot(array.array_len - 1,  out isoutindex);
 				context.StackSlots[returnSlotIndex] = e;
 
 				if ( e.IsStruct() )//e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
@@ -778,7 +778,7 @@ namespace juicescript.runtime.buildin
 				RtHeapBase instance = context.GC.Heap[instancePtr];
 
 				bool isoutindex;
-				NaNBoxing e = array.ReadSlot(0, context.player, out isoutindex);
+				NaNBoxing e = array.ReadSlot(0, out isoutindex);
 				context.StackSlots[returnSlotIndex] = e;
 
 				if (e.IsStruct() )//e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
@@ -863,7 +863,7 @@ namespace juicescript.runtime.buildin
 			int instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
 
 			// 3. Get current length
-			uint currentLength = array.GetLength(context.player,out array);
+			uint currentLength = array.GetLength(out array);
 
 			// 4. Handle empty push case
 			if (restSpan.Length == 0)
@@ -888,8 +888,8 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
-			var instance = context.GC.Heap[instancePtr];
+			//instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
+			var instance = array.payload; //context.GC.Heap[instancePtr];
 			//复制元素
 			for (int i = 0; i < restSpan.Length; i++)
 			{
@@ -917,7 +917,7 @@ namespace juicescript.runtime.buildin
 
 			RtArray array;
 			int instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
-			var instance = context.GC.Heap[instancePtr];
+			var instance = array; //context.GC.Heap[instancePtr];
 
 			array.DoReverse(context, ref error, returnSlotIndex);
 
@@ -1037,7 +1037,7 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < len && i < olen; i++)
 				{
 					bool isoutofindex;
-					NaNBoxing v = array.ReadSlot(i, context.player, out isoutofindex);
+					NaNBoxing v = array.ReadSlot(i, out isoutofindex);
 
 					argSlots[2] = v;
 					argSlots[3].SetInt((int)i);
@@ -1190,7 +1190,7 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < len && i < olen; i++)
 				{
 					bool isoutofindex;
-					NaNBoxing v = array.ReadSlot(i, context.player, out isoutofindex);
+					NaNBoxing v = array.ReadSlot(i, out isoutofindex);
 
 					argSlots[2] = v;
 					argSlots[3].SetInt((int)i);
@@ -1335,7 +1335,7 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < len && i < olen; i++)
 				{
 					bool isoutofindex;
-					NaNBoxing v = array.ReadSlot(i, context.player, out isoutofindex);
+					NaNBoxing v = array.ReadSlot(i, out isoutofindex);
 
 					argSlots[2] = v;
 					argSlots[3].SetInt((int)i);
@@ -1487,7 +1487,7 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < len && i < olen; i++)
 				{
 					bool isoutofindex;
-					NaNBoxing v = array.ReadSlot(i, context.player, out isoutofindex);
+					NaNBoxing v = array.ReadSlot(i, out isoutofindex);
 
 					argSlots[2] = v;
 					argSlots[3].SetInt((int)i);
@@ -1518,8 +1518,8 @@ namespace juicescript.runtime.buildin
 							return;
 						}
 
-						result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
-
+						result_instancePtr = result.HEAPINSTANCE_PTR == 0 ? result_instancePtr : result.HEAPINSTANCE_PTR;  //RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+						result = result.payload;
 					}
 
 				}
@@ -1658,7 +1658,7 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < len && i < olen; i++)
 				{
 					bool isoutofindex;
-					NaNBoxing v = array.ReadSlot(i, context.player, out isoutofindex);
+					NaNBoxing v = array.ReadSlot(i, out isoutofindex);
 
 					argSlots[2] = v;
 					argSlots[3].SetInt((int)i);
@@ -1683,8 +1683,9 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 
-					result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
-
+					//result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+					result_instancePtr = result.HEAPINSTANCE_PTR == 0 ? result_instancePtr : result.HEAPINSTANCE_PTR; 
+					result = result.payload;
 				}
 			}
 
@@ -1745,7 +1746,7 @@ namespace juicescript.runtime.buildin
 			for (uint i = fromIndex; i < len; i++)
 			{
 				bool isoutofindex;
-				NaNBoxing element = array.ReadSlot(i, context.player, out isoutofindex);
+				NaNBoxing element = array.ReadSlot(i, out isoutofindex);
 				if (context.player.IsStrictlyEqual(element, searchElement))
 				{
 					context.StackSlots[returnSlotIndex].SetInt((int)i);
@@ -1827,7 +1828,7 @@ namespace juicescript.runtime.buildin
 			for (int i = startIndex; i >= 0; i--)
 			{
 				bool isoutofindex;
-				NaNBoxing element = array.ReadSlot((uint)i, context.player, out isoutofindex);
+				NaNBoxing element = array.ReadSlot((uint)i, out isoutofindex);
 				if (context.player.IsStrictlyEqual(element, searchElement))
 				{
 					context.StackSlots[returnSlotIndex].SetInt(i);
@@ -1906,7 +1907,7 @@ namespace juicescript.runtime.buildin
 			for (int i = start; i < end && i < len; i++)
 			{
 				bool ishole;
-				NaNBoxing v = array.ReadSlot((uint)i, context.player, out ishole);
+				NaNBoxing v = array.ReadSlot((uint)i, out ishole);
 				if (!ishole)
 				{
 					context.player.SetArraySlot(v, result.array_len, context.GC.Heap[result_instancePtr], ref error);
@@ -1917,7 +1918,9 @@ namespace juicescript.runtime.buildin
 					result.SetLength(result.array_len + 1, context.player, ref error);
 					if (error.raised) return;
 				}
-				result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+				//result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+				result_instancePtr = result.HEAPINSTANCE_PTR == 0 ? result_instancePtr : result.HEAPINSTANCE_PTR;  //RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+				result = result.payload;
 			}
 			context.StackSlots[returnSlotIndex].SetHeapPtr(result_instancePtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 		}
@@ -2005,7 +2008,7 @@ namespace juicescript.runtime.buildin
 			for (uint i = (uint)start; i < (uint)start + deleteCount && i < len; i++)
 			{
 				bool ishole;
-				NaNBoxing v = array.ReadSlot(i, context.player, out ishole);
+				NaNBoxing v = array.ReadSlot(i, out ishole);
 				if (!ishole)
 				{
 					context.player.SetArraySlot(v, result.array_len, context.GC.Heap[result_instancePtr], ref error);
@@ -2017,7 +2020,9 @@ namespace juicescript.runtime.buildin
 					if (error.raised) return;
 				}
 
-				result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+				//result_instancePtr = RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+				result_instancePtr = result.HEAPINSTANCE_PTR == 0 ? result_instancePtr : result.HEAPINSTANCE_PTR;  //RtArray.FindAndUpdateHeapInstancePtr(result_instancePtr, context.player, out result);
+				result = result.payload;
 			}
 
 
@@ -2118,7 +2123,7 @@ namespace juicescript.runtime.buildin
 			RtHeapBase instance = context.GC.Heap[arrPtr];
 
 			bool isoutindex;
-			NaNBoxing e = array.ReadSlot((uint)index, context.player, out isoutindex);
+			NaNBoxing e = array.ReadSlot((uint)index, out isoutindex);
 			context.StackSlots[returnSlotIndex] = e;
 
 			if ( e.IsStruct() )//e.ValueType == BoxType.HeapPtr && e.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
@@ -2545,7 +2550,7 @@ namespace juicescript.runtime.buildin
 
 						for (int i = 0; i < oLen; i++)
 						{
-							NaNBoxing v = vpayload.ReadSlot((uint)i, context.player, out bool ishole);
+							NaNBoxing v = vpayload.ReadSlot((uint)i,  out bool ishole);
 							if (ishole)
 							{
 								values[i].setFault();
@@ -2622,7 +2627,7 @@ namespace juicescript.runtime.buildin
 						for (int i = 0; i < oLen; i++)
 						{
 
-							NaNBoxing v = vpayload.ReadSlot((uint)i, context.player, out bool ishole);
+							NaNBoxing v = vpayload.ReadSlot((uint)i, out bool ishole);
 							if (ishole)
 							{
 								values[i].setFault();
@@ -2850,7 +2855,7 @@ namespace juicescript.runtime.buildin
 					for (i = left + 1; i <= right; i++)
 					{
 						//key = arr[i];  // 当前待排序元素
-						NaNBoxing key = vpayload.ReadSlot((uint)i, context.player, out bool ishole_p);
+						NaNBoxing key = vpayload.ReadSlot((uint)i, out bool ishole_p);
 						context.StackSlots[tempslot] = key;
 						if (key.IsStruct())//key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 						{
@@ -2879,7 +2884,7 @@ namespace juicescript.runtime.buildin
 
 						while (j >= 0)
 						{
-							NaNBoxing vj = vpayload.ReadSlot((uint)j, context.player, out bool ishole_j);
+							NaNBoxing vj = vpayload.ReadSlot((uint)j, out bool ishole_j);
 							long comp = comparer(vj, key, sortBehavior, context, scope_ptr, ref error);
 							if (error.raised)
 							{
@@ -2950,7 +2955,7 @@ namespace juicescript.runtime.buildin
 				long j = right;
 				//long keyi = left;
 
-				NaNBoxing pivot = vpayload.ReadSlot((uint)left, context.player, out bool ishole_p);
+				NaNBoxing pivot = vpayload.ReadSlot((uint)left, out bool ishole_p);
 				context.StackSlots[tempslot] = pivot;
 				if (pivot.IsStruct())//pivot.ValueType == BoxType.HeapPtr && pivot.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
@@ -2972,7 +2977,7 @@ namespace juicescript.runtime.buildin
 				{
 					while (i < j)
 					{
-						NaNBoxing vj = vpayload.ReadSlot((uint)j, context.player, out bool ishole_j);
+						NaNBoxing vj = vpayload.ReadSlot((uint)j, out bool ishole_j);
 
 						long comp = comparer(vj, pivot, sortBehavior, context, scope_ptr, ref error);
 						if (error.raised)
@@ -3000,7 +3005,7 @@ namespace juicescript.runtime.buildin
 
 					if (i < j)
 					{
-						NaNBoxing vj = vpayload.ReadSlot((uint)j, context.player, out bool ishole_j);
+						NaNBoxing vj = vpayload.ReadSlot((uint)j, out bool ishole_j);
 						context.player.SetArraySlot(vj, (uint)i, vpayload, ref error);
 						if (error.raised)
 						{
@@ -3010,7 +3015,7 @@ namespace juicescript.runtime.buildin
 
 					while (i < j)
 					{
-						NaNBoxing vi = vpayload.ReadSlot((uint)i, context.player, out bool ishole_i);
+						NaNBoxing vi = vpayload.ReadSlot((uint)i, out bool ishole_i);
 						long comp = comparer(vi, pivot, sortBehavior, context, scope_ptr, ref error);
 						if (error.raised)
 						{
@@ -3035,7 +3040,7 @@ namespace juicescript.runtime.buildin
 
 					if (i < j)
 					{
-						NaNBoxing vi = vpayload.ReadSlot((uint)i, context.player, out bool ishole_i);
+						NaNBoxing vi = vpayload.ReadSlot((uint)i, out bool ishole_i);
 						context.player.SetArraySlot(vi, (uint)j, vpayload, ref error);
 						if (error.raised)
 						{
@@ -3132,9 +3137,9 @@ namespace juicescript.runtime.buildin
 				long mid = left + (right - left) / 2;
 
 
-				NaNBoxing l = vpayload.ReadSlot((uint)left, context.player, out bool isholeL);
-				NaNBoxing m = vpayload.ReadSlot((uint)mid, context.player, out bool isholeM);
-				NaNBoxing r = vpayload.ReadSlot((uint)right, context.player, out bool ishleR);
+				NaNBoxing l = vpayload.ReadSlot((uint)left, out bool isholeL);
+				NaNBoxing m = vpayload.ReadSlot((uint)mid, out bool isholeM);
+				NaNBoxing r = vpayload.ReadSlot((uint)right, out bool ishleR);
 
 				var olen = vpayload.array_len;
 
@@ -3284,7 +3289,7 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < fields.array_len; i++)
 				{
 					bool ishole;
-					NaNBoxing f = fields.ReadSlot(i, context.player, out ishole);
+					NaNBoxing f = fields.ReadSlot(i, out ishole);
 					if (f.ValueType == BoxType.LocalString)
 					{
 
@@ -3623,13 +3628,13 @@ namespace juicescript.runtime.buildin
 				for (uint i = 0; i < fieldarr.array_len; i++)
 				{
 					bool ishole;
-					NaNBoxing f = fieldarr.ReadSlot(i, context.player, out ishole);
+					NaNBoxing f = fieldarr.ReadSlot(i, out ishole);
 
 					NaNBoxing o = option_box;
 
 					if (optionisarray)
 					{
-						o = optionarr.ReadSlot(i, context.player, out ishole);
+						o = optionarr.ReadSlot(i, out ishole);
 					}
 
 					long c = do_sorton(test, pivot, f, o, context, scope_ptr, ref error);
@@ -3643,7 +3648,7 @@ namespace juicescript.runtime.buildin
 						return c;
 					}
 
-					fieldarr.GetLength(context.player, out fieldarr);
+					fieldarr.GetLength(out fieldarr);
 				}
 
 				return 0;
@@ -3729,7 +3734,7 @@ namespace juicescript.runtime.buildin
 					for (int j = 0; j < oLen; j++)
 					{
 						//读对象
-						NaNBoxing key = vpayload.ReadSlot((uint)j, context.player, out bool ishole);
+						NaNBoxing key = vpayload.ReadSlot((uint)j, out bool ishole);
 
 						if (!ishole)
 						{
@@ -3757,7 +3762,7 @@ namespace juicescript.runtime.buildin
 							if (fieldisarray)
 							{
 								RtArray.FindAndUpdateHeapInstancePtr(field.HeapPtr, context.player, out fieldarr);
-								seachName = fieldarr.ReadSlot((uint)i, context.player, out bool ifhole);
+								seachName = fieldarr.ReadSlot((uint)i, out bool ifhole);
 								if (ifhole)
 								{
 									ishole = true;
@@ -3768,7 +3773,7 @@ namespace juicescript.runtime.buildin
 
 									RtArray.FindAndUpdateHeapInstancePtr(option.HeapPtr, context.player, out optionarr);
 
-									NaNBoxing o = optionarr.ReadSlot((uint)i, context.player, out bool isohole);
+									NaNBoxing o = optionarr.ReadSlot((uint)i, out bool isohole);
 									if (isohole)
 									{
 										s_option = 0;
@@ -4149,7 +4154,7 @@ namespace juicescript.runtime.buildin
 					{
 
 						//key = arr[i];  // 当前待排序元素
-						NaNBoxing key = vpayload.ReadSlot((uint)i, context.player, out bool ishole_p);
+						NaNBoxing key = vpayload.ReadSlot((uint)i, out bool ishole_p);
 						context.StackSlots[tempslot] = key;
 						if (key.IsStruct())//key.ValueType == BoxType.HeapPtr && key.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 						{
@@ -4177,7 +4182,7 @@ namespace juicescript.runtime.buildin
 
 						while (j >= left)
 						{
-							NaNBoxing vj = vpayload.ReadSlot((uint)j, context.player, out bool ishole_j);
+							NaNBoxing vj = vpayload.ReadSlot((uint)j, out bool ishole_j);
 							long comp = sorton_comparer(vj, key, fieldisarray, optionisarray, field, option, context, scope_ptr, ref error);
 							if (error.raised)
 							{
@@ -4242,7 +4247,7 @@ namespace juicescript.runtime.buildin
 					return 0;
 				}
 
-				NaNBoxing pivot = vpayload.ReadSlot((uint)left, context.player, out bool ishole_p);
+				NaNBoxing pivot = vpayload.ReadSlot((uint)left, out bool ishole_p);
 				long i = left;
 				long j = right;
 				long keyi = left;
@@ -4269,7 +4274,7 @@ namespace juicescript.runtime.buildin
 				{
 					while (i < j)
 					{
-						NaNBoxing vj = vpayload.ReadSlot((uint)j, context.player, out bool ishole_j);
+						NaNBoxing vj = vpayload.ReadSlot((uint)j, out bool ishole_j);
 
 						long comp = sorton_comparer(vj, pivot, fieldisarray, optionisarray, field, option, context, scope_ptr, ref error);
 						if (error.raised)
@@ -4297,7 +4302,7 @@ namespace juicescript.runtime.buildin
 
 					if (i < j)
 					{
-						NaNBoxing vj = vpayload.ReadSlot((uint)j, context.player, out bool ishole_j);
+						NaNBoxing vj = vpayload.ReadSlot((uint)j, out bool ishole_j);
 						context.player.SetArraySlot(vj, (uint)i, vpayload, ref error);
 						if (error.raised)
 						{
@@ -4307,7 +4312,7 @@ namespace juicescript.runtime.buildin
 
 					while (i < j)
 					{
-						NaNBoxing vi = vpayload.ReadSlot((uint)i, context.player, out bool ishole_i);
+						NaNBoxing vi = vpayload.ReadSlot((uint)i, out bool ishole_i);
 						long comp = sorton_comparer(vi, pivot, fieldisarray, optionisarray, field, option, context, scope_ptr, ref error);
 						if (error.raised)
 						{
@@ -4332,7 +4337,7 @@ namespace juicescript.runtime.buildin
 
 					if (i < j)
 					{
-						NaNBoxing vi = vpayload.ReadSlot((uint)i, context.player, out bool ishole_i);
+						NaNBoxing vi = vpayload.ReadSlot((uint)i, out bool ishole_i);
 						context.player.SetArraySlot(vi, (uint)j, vpayload, ref error);
 						if (error.raised)
 						{
@@ -4460,9 +4465,9 @@ namespace juicescript.runtime.buildin
 				long mid = left + (right - left) / 2;
 
 
-				NaNBoxing l = vpayload.ReadSlot((uint)left, context.player, out bool isholeL);
-				NaNBoxing m = vpayload.ReadSlot((uint)mid, context.player, out bool isholeM);
-				NaNBoxing r = vpayload.ReadSlot((uint)right, context.player, out bool ishleR);
+				NaNBoxing l = vpayload.ReadSlot((uint)left, out bool isholeL);
+				NaNBoxing m = vpayload.ReadSlot((uint)mid, out bool isholeM);
+				NaNBoxing r = vpayload.ReadSlot((uint)right, out bool ishleR);
 
 				var olen = vpayload.array_len;
 

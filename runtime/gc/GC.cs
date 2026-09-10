@@ -631,7 +631,7 @@ namespace juicescript.runtime.gc
             //还需要额外扫描receiveError里引用的堆对象,不要忘记
 
 
-#if !DEBUG //|| true
+#if !DEBUG || true
             if (MemUsage - CacheUsage > thresholed)
 #endif
             {
@@ -1043,6 +1043,14 @@ namespace juicescript.runtime.gc
             {
                 mark(Heap[receiveError.error.HeapPtr]);
             }
+
+            //清理缓存对象的遗留
+            for (int i = context.StackPosition; i < Context.STACK_LENGTH; i++)
+            {
+                ((RtArray)Heap[i + Context.CacheArrayPtr]).SetStoreCacheZero(false, default, 0);
+            }
+
+
 
             //遍历临时保持对象
             foreach (var item in temporyholder)

@@ -221,7 +221,7 @@ namespace juicescript.runtime.buildin
 								{
 									bool isoutofindex_or_ishole;
 									
-									NaNBoxing result = ((RtArray)_this).ReadSlot(isindex, context.player, out isoutofindex_or_ishole);
+									NaNBoxing result = ((RtArray)_this).ReadSlot(isindex, out isoutofindex_or_ishole);
 
 									if (!isoutofindex_or_ishole)
 									{

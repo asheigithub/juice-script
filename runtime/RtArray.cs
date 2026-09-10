@@ -21,7 +21,7 @@ namespace juicescript.runtime
 #else
     public
 #endif
-		sealed class RtArray : RtHeapBase
+	sealed class RtArray : RtHeapBase
 	{
 		public RtArray() : base(RtHeapTypeKind.ARRAY)
 		{
@@ -63,41 +63,46 @@ namespace juicescript.runtime
 			}
 		}
 
+		internal RtArray payload { get; private set; }
 
+		
 		private int m_property_ptr;
 		/// <summary>
 		/// 动态属性
 		/// </summary>
 		public int PROPERTY_PTR(Player player)
 		{
+			return payload.m_property_ptr;
 
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				return m_property_ptr;
-			}
-			else
-			{
-				RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.m_property_ptr;
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	return m_property_ptr;
+			//}
+			//else
+			//{
+			//	RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	return target.m_property_ptr;
 
-				//return ((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
-			}
+			//	//return ((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
+			//}
 
 		}
 
 		public void Set_PROPERTY_PTR(int ptr, Player player)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				m_property_ptr = ptr;
-			}
-			else
-			{
-				RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				target.m_property_ptr = ptr;
-			}
+			payload.m_property_ptr = ptr;
+
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	m_property_ptr = ptr;
+			//}
+			//else
+			//{
+			//	RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	target.m_property_ptr = ptr;
+			//}
 		}
 
 
@@ -110,6 +115,8 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreRest(Memory<NaNBoxing> store,int store_startindex)
 		{
+			payload = this;
+
 			array_len = (uint)store.Length;
 			store_memory = store;
 
@@ -126,6 +133,8 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreCacheZero(bool clear, Memory<NaNBoxing> store, int cache_struct_p )
 		{
+			payload = this;
+
 			StoreMode = ArrayStoreMode.cache;
 			HEAPINSTANCE_PTR = 0;
 			methodscopeslot_ref_state = 0;
@@ -147,53 +156,60 @@ namespace juicescript.runtime
 			}
 		}
 
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//internal void LinkTo(RtArray dst, int dstptr)
+		//{ 
+		//	HEAPINSTANCE_PTR = dstptr;
+
+		//}
+
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void LinkTo(RtArray dst, int dstptr)
-		{ 
-			HEAPINSTANCE_PTR = dstptr;
-			
-		}
-
-
-
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
-			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
-			var origin = payload;
-			target = origin;
+			//var payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			//var origin = payload;
+			//target = origin;
 
 
-			while (payload.HEAPINSTANCE_PTR != 0)
-			{
-				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtArray)player.Context.GC.Heap[ptr]);
-				target = payload;
+			//while (payload.HEAPINSTANCE_PTR != 0)
+			//{
+			//	ptr = payload.HEAPINSTANCE_PTR;
+			//	payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			//	target = payload;
 
-				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
+			//	origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
 
-			}
+			//}
 
-			return ptr;
+			//return ptr;
 
 			//开始优化为杜绝二段跳。
 
-			//var payload = ((RtArray)player.Context.GC.Heap[ptr]);
-			//if (payload.HEAPINSTANCE_PTR == 0)
-			//{
-			//	target = payload;
-			//	return ptr;
-			//}
-			//else
-			//{
-			//	int p = payload.HEAPINSTANCE_PTR;
+			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			target = payload.payload;
 
-			//	payload = (RtArray)player.Context.GC.Heap[payload.HEAPINSTANCE_PTR];
-			//	Debug.Assert(payload.HEAPINSTANCE_PTR == 0);
+			if (payload.HEAPINSTANCE_PTR == 0)
+			{				
+				return ptr;
+			}
+			else
+			{
+				
+				Debug.Assert(target.HEAPINSTANCE_PTR == 0 );
+				Debug.Assert(player.Context.GC.Heap[payload.HEAPINSTANCE_PTR] == target);
 
-			//	target = payload;
+				return payload.HEAPINSTANCE_PTR;
 
-			//	return p;
-			//}
+				//int p = payload.HEAPINSTANCE_PTR;
+
+				//payload = (RtArray)player.Context.GC.Heap[payload.HEAPINSTANCE_PTR];
+				//Debug.Assert(payload.HEAPINSTANCE_PTR == 0);
+
+				//target = payload;
+
+				//return p;
+			}
 		}
 
 
@@ -201,10 +217,6 @@ namespace juicescript.runtime
 		internal int stack_store_startindex;
 		internal Memory<NaNBoxing> store_memory;
 
-		//private Span<NaNBoxing> cache_store { get => store_memory.Span; }
-
-		//internal NaNBoxing[] cache_store;
-		//internal int[] cache_structs;
 		internal int cache_struct_ptr;
 
 
@@ -230,6 +242,7 @@ namespace juicescript.runtime
 
 		internal void InitNormalStore()
 		{
+			payload = this;
 			sparse_map = new Dictionary<uint, NaNBoxing[]>();
 			
 
@@ -258,34 +271,38 @@ namespace juicescript.runtime
 		internal uint array_len = 0;
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public uint GetLength(Player player,out RtArray target)
+		public uint GetLength(out RtArray target)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				target = this;
-				return array_len;
-			}
-			else
-			{
-				//RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.array_len;
-			}
+			target = payload;
+			return payload.array_len;
+
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	target = this;
+			//	return array_len;
+			//}
+			//else
+			//{
+			//	//RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	return target.array_len;
+			//}
 		}
 
 
 		public void SetLength(uint len, Player player, ref ReceiveError error)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				DoSetLength(len, player, ref error);
-			}
-			else
-			{
-				RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				target.DoSetLength(len, player, ref error);
-			}
+			payload.DoSetLength(len,player,ref error);
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	DoSetLength(len, player, ref error);
+			//}
+			//else
+			//{
+			//	RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	target.DoSetLength(len, player, ref error);
+			//}
 		}
 
 		private void DoSetLength(uint len, Player player, ref ReceiveError error)
@@ -367,21 +384,19 @@ namespace juicescript.runtime
 				default:
 #if DEBUG
 					throw new InvalidOperationException();
-#else
-					Environment.FailFast("出错了，这里跑不到"); return;
-#endif
 
+#endif
+					break;
 			}
 		}
 
 
 		internal int ChangeStoreToHeap(Player player, ref ReceiveError error)
 		{
-#if DEBUG
-			if (HEAPINSTANCE_PTR != 0)
-				throw new InvalidOperationException();
-#endif
-			uint len = GetLength(player,out RtArray t);
+
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+
+			uint len = array_len; //GetLength(player,out RtArray t);
 			return ChangeStoreToHeap(len, player, ref error, out RtArray arr);
 
 		}
@@ -458,7 +473,7 @@ namespace juicescript.runtime
 			}
 
 			arr = (RtArray)arr_instance;
-
+			
 			
 			Debug.Assert(StoreMode != ArrayStoreMode.normal);
 
@@ -523,7 +538,8 @@ namespace juicescript.runtime
 
 			//链接GC
 			HEAPINSTANCE_PTR = arr_ptr;
-			
+
+			payload = arr;
 
 			return arr_ptr;
 		}
@@ -534,12 +550,9 @@ namespace juicescript.runtime
 
 		internal void GCMarkAllElements(Context context)
 		{
-#if DEBUG
-			if (HEAPINSTANCE_PTR != 0)
-			{
-				throw new InvalidOperationException();
-			}
-#endif
+
+			Debug.Assert(HEAPINSTANCE_PTR == 0);
+
 			switch (StoreMode)
 			{
 				case ArrayStoreMode.cache_on_stack:
@@ -593,7 +606,7 @@ namespace juicescript.runtime
 #if DEBUG
 					throw new InvalidOperationException();
 #else
-					Environment.FailFast("出错了，这里跑不到"); return;
+					return;
 #endif
 			}
 
@@ -619,18 +632,20 @@ namespace juicescript.runtime
 			}
 		}
 
-		public bool Delete(uint index, Player player)
+		public bool Delete(uint index)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				return DoDelete(index);
-			}
-			else
-			{
-				RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				return target.DoDelete(index);
-			}
+			return payload.DoDelete(index);
+
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	return DoDelete(index);
+			//}
+			//else
+			//{
+			//	RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+			//	return target.DoDelete(index);
+			//}
 		}
 
 		private bool DoDelete(uint index)
@@ -676,9 +691,9 @@ namespace juicescript.runtime
 		internal void SetSlot(NaNBoxing box, uint array_index, Player player, ref ReceiveError error)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);
-			{
-				DoSetSlot(box, array_index, ref error, player);
-			}
+			
+			DoSetSlot(box, array_index, ref error, player);
+			
 			//else
 			//{
 			//	RtArray target;
@@ -1859,11 +1874,25 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, out RtArray target, ref ReceiveError error)
 		{
-			Debug.Assert(HEAPINSTANCE_PTR == 0);
+			//Debug.Assert(HEAPINSTANCE_PTR == 0);
 
 			//if (HEAPINSTANCE_PTR == 0)
 			{
-				return DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player,out target, ref error);
+				target = payload;
+
+				if (payload.StoreMode != ArrayStoreMode.normal && array_index < payload.store_memory.Length && box.ValueType != BoxType.HeapPtr)
+				{
+
+					payload.store_memory.Span[(int)array_index] = box;
+
+					if (array_index + 1 > payload.array_len)
+					{
+						payload.array_len = array_index + 1;
+					}
+					return true;
+				}
+
+				return payload.DoTrySetSlotIfReplaceStructOrNotHeap(box, array_index, player,out target, ref error);
 			}
 			//else
 			//{
@@ -2097,7 +2126,7 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public NaNBoxing ReadSlot(uint array_index, Player player, out bool isoutofindex_or_ishole)
+		public NaNBoxing ReadSlot(uint array_index,  out bool isoutofindex_or_ishole)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);
 
@@ -2265,7 +2294,7 @@ namespace juicescript.runtime
 #endif
 			store_memory = cachestore;
 			cache_struct_ptr = cachestruct_p;
-			
+			payload = this;
 			
 			HEAPINSTANCE_PTR = 0;
 			m_property_ptr = arr_store.m_property_ptr;
@@ -2306,16 +2335,18 @@ namespace juicescript.runtime
 
 		internal void Trace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapBase arrObj, ReadOnlySpan<char> sep)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
-			}
-			else
-			{
-				RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
-				target.DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
-			}
+			payload.DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
+
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
+			//}
+			//else
+			//{
+			//	RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
+			//	target.DoTrace(context, stackStPos, ref error, scope_ptr, printer, arrObj, sep);
+			//}
 		}
 
 		private void DoTrace(Context context, int stackStPos, ref ReceiveError error, int scope_ptr, IPrint printer, RtHeapBase arrObj, ReadOnlySpan<char> sep)
@@ -2459,16 +2490,18 @@ namespace juicescript.runtime
 
 		internal bool TryReadIterItem(int index, out uint key, out uint next_index, out NaNBoxing v, Context context)
 		{
-			if (HEAPINSTANCE_PTR == 0)
-			{
-				return DoTryReadIterItem(index, out key, out next_index, out v);
-			}
-			else
-			{
-				RtArray target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
-				return target.DoTryReadIterItem(index, out key, out next_index, out v);
-			}
+			return payload.DoTryReadIterItem(index, out key, out next_index, out v);
+
+			//if (HEAPINSTANCE_PTR == 0)
+			//{
+			//	return DoTryReadIterItem(index, out key, out next_index, out v);
+			//}
+			//else
+			//{
+			//	RtArray target;
+			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, context.player, out target);
+			//	return target.DoTryReadIterItem(index, out key, out next_index, out v);
+			//}
 		}
 
 		private bool DoTryReadIterItem(int index, out uint key, out uint next_index, out NaNBoxing v)

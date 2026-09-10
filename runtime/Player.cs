@@ -5753,13 +5753,13 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal NaNBoxing LoadSlotFromArray(uint uindex, RtHeapBase arrObj, out bool isoutofindex_or_ishole)
 		{
-			uint len = ((RtArray)arrObj).GetLength(this, out RtArray target);
+			uint len = ((RtArray)arrObj).GetLength(out RtArray target);
 
 			NaNBoxing result = default;
 
 			if (uindex < len)
 			{
-				result = ((RtArray)target).ReadSlot(uindex, this, out isoutofindex_or_ishole);
+				result = ((RtArray)target).ReadSlot(uindex, out isoutofindex_or_ishole);
 			}
 			else
 			{
@@ -5803,9 +5803,9 @@ namespace juicescript.runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetArraySlot(NaNBoxing box, uint index, RtHeapBase instance, ref ReceiveError error)
 		{
-			((RtArray)instance).GetLength(this, out RtArray target);
+			//((RtArray)instance).GetLength(out RtArray target);
 
-			if (target.TrySetSlotIfReplaceStructOrNotHeap(box, index, this,out target, ref error))
+			if (((RtArray)instance).TrySetSlotIfReplaceStructOrNotHeap(box, index, this,out RtArray target, ref error))
 			{
 
 			}
@@ -10958,7 +10958,7 @@ namespace juicescript.runtime
 					for (int i = 0; i < (int)len; i++)
 					{
 						bool isoutindex;
-						NaNBoxing e = srcArr.ReadSlot((uint)i, this, out isoutindex);
+						NaNBoxing e = srcArr.ReadSlot((uint)i, out isoutindex);
 
 						ConvertValueType(ref error, e, dst.element_type, dst.element_asclass, ref e);
 

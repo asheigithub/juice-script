@@ -195,7 +195,7 @@ namespace juicescript.runtime.buildin
 			if (_arr.ValueType != NaNBoxing.BoxType.Null)
 			{
 				argArray = (RtArray)context.GC.Heap[_arr.HeapPtr];
-				len = (int)argArray.GetLength(context.player,out argArray);
+				len = (int)argArray.GetLength(out argArray);
 			}
 			else
 			{
@@ -216,7 +216,7 @@ namespace juicescript.runtime.buildin
 				for (int i = 0; i < len; i++)
 				{
 					bool isoutofindex;
-					context.StackSlots[context.StackPosition + i] = argArray.ReadSlot((uint)i,context.player,out isoutofindex);
+					context.StackSlots[context.StackPosition + i] = argArray.ReadSlot((uint)i,out isoutofindex);
 					(args + i)->index = i;
 				}
 

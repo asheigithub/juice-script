@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
+using static juicescript.runtime.RtArray;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace juicescript.runtime
@@ -4900,7 +4901,8 @@ namespace juicescript.runtime
 
 					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.ARRAY)
 					{
-						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtArray t);
+						//int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtArray t);
+						int arr_ptr = ((RtArray)instance).HEAPINSTANCE_PTR == 0 ? instancePtr.HeapPtr : ((RtArray)instance).HEAPINSTANCE_PTR;
 						stackslots[target.index].SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 					}
 					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((RtInstance)instance).HEAPINSTANCE_PTR != 0 && !instancePtr.IsStruct())
@@ -5149,8 +5151,8 @@ namespace juicescript.runtime
 			{
 				//先准备更新原对象
 
-				int min = 0;
-				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, scope_ptr);
+				
+				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, scope_ptr);
 			}
 
 			if (
@@ -5401,8 +5403,8 @@ namespace juicescript.runtime
 					//*m_scope++ = scope_ptr;
 					//prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, null, method_scopes);
 
-					int min = 0;
-					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, ref min, scope_ptr);
+					
+					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, scope_ptr);
 				}
 
 
@@ -6066,7 +6068,7 @@ namespace juicescript.runtime
 									if (_obj.indexer_key.ValueType == BoxType.Uint)
 #endif
 									{
-										stackslots[stack.index].SetBoolean(((RtArray)refObj).Delete(_obj.indexer_key.UIntValue, this));
+										stackslots[stack.index].SetBoolean(((RtArray)refObj).Delete(_obj.indexer_key.UIntValue));
 									}
 #if DEBUG
 									else
@@ -10869,8 +10871,24 @@ namespace juicescript.runtime
 				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 				RtHeapBase instance = Context.GC.Heap[instance_box.HeapPtr];
 
-				SetArraySlot(stackslots[source.index], array_i, instance, ref error);
-				return;
+				var box = stackslots[source.index];
+
+				var payload = ((RtArray)instance).payload;
+				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && box.ValueType != BoxType.HeapPtr)
+				{
+					payload.store_memory.Span[(int)array_i] = box;
+
+					if (array_i + 1 > payload.array_len)
+					{
+						payload.array_len = array_i + 1;
+					}
+					return;
+				}
+				else
+				{
+					SetArraySlot(box, array_i, instance, ref error);
+					return;
+				}
 			}			
 			else
 			{
@@ -11686,33 +11704,32 @@ namespace juicescript.runtime
 
 				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 
-				//var array = (RtArray)Context.GC.Heap[instance_box.HeapPtr];
-				//if (array.HEAPINSTANCE_PTR == 0 && array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
-				//{
-				//	var element = array.store_memory.Span[(int)array_i];
-				//	if (element.ValueType == BoxType.Fault)
-				//	{
+				var array = ((RtArray)Context.GC.Heap[instance_box.HeapPtr]).payload;
+				if (array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
+				{
+					var element = array.store_memory.Span[(int)array_i];
+					if (element.ValueType == BoxType.Fault)
+					{
 
-				//	}
-				//	else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
-				//	{
-				//		element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
-				//		stackslots[dst_index] = element;
-				//		return;
-				//	}
-				//	else
-				//	{
-				//		stackslots[dst_index] = element;
-				//		return;
-				//	}
-					
+					}
+					else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+					{
+						element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+						stackslots[dst_index] = element;
+						return;
+					}
+					else
+					{
+						stackslots[dst_index] = element;
+						return;
+					}
 
-				//}
 
+				}
 
 
 				bool isoutofindex_or_ishole;
-				var a_element = LoadSlotFromArray(array_i, Context.GC.Heap[instance_box.HeapPtr], out isoutofindex_or_ishole);
+				var a_element = LoadSlotFromArray(array_i,array, out isoutofindex_or_ishole);
 
 				if (a_element.ValueType == BoxType.Fault)
 				{
@@ -12344,7 +12361,7 @@ namespace juicescript.runtime
 			var obj = Context.GC.Heap[thisValue.HeapPtr];
 			if (obj.Kind == RtHeapTypeKind.ARRAY)
 			{
-				uint len = ((RtArray)obj).GetLength(this,out RtArray t);
+				uint len = ((RtArray)obj).GetLength(out RtArray t);
 				stackslots[target.index].SetUInt(len);
 			}
 			else if (obj.Kind == RtHeapTypeKind.STRING)

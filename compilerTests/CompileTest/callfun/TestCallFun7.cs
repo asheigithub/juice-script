@@ -104,7 +104,7 @@ var a;
             Assert.AreEqual(RtHeapTypeKind.ARRAY, instance.Kind);
             Assert.AreEqual(RtArray.ArrayStoreMode.normal, ((RtArray)instance).StoreMode);
 
-            Assert.AreEqual(3u, ((RtArray)instance).GetLength(player, out RtArray t));
+            Assert.AreEqual(3u, ((RtArray)instance).GetLength(out RtArray t));
         }
 
 
