@@ -307,56 +307,62 @@ namespace juicescript.runtime
 					break;
 				case RtHeapTypeKind.ARRAY:
 					{
-						RtArray arrStore;// = (RtPayloadArray)instance;
-						int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arrStore);
+						if (value.HeapPtr < Context.CacheArrayPtr + Context.STACK_LENGTH)
+						{
+							RtArray arrStore;// = (RtPayloadArray)instance;
+							int arr_ptr = RtArray.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out arrStore);
 
-						if (arrStore.StoreMode == RtArray.ArrayStoreMode.normal)
-						{
-							value.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-							break;
-						}
-						else if (arrStore.StoreMode == RtArray.ArrayStoreMode.cache_on_stack)
-						{
-							int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
-							if (error.raised)
+							if (arrStore.StoreMode == RtArray.ArrayStoreMode.normal)
 							{
-								return;
+								value.SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+								break;
 							}
-							value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
-						}
-						else
-						{
+							else if (arrStore.StoreMode == RtArray.ArrayStoreMode.cache_on_stack)
+							{
+								int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
+								if (error.raised)
+								{
+									return;
+								}
+								value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
+							}
+							else
+							{
 #if DEBUG
-							if (arrStore.StoreMode != RtArray.ArrayStoreMode.cache)
-							{
-								throw new InvalidOperationException();
-							}
+								if (arrStore.StoreMode != RtArray.ArrayStoreMode.cache)
+								{
+									throw new InvalidOperationException();
+								}
 #endif
 
-							int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
-							if (error.raised)
-							{
-								return;
+								int arr_heap_ptr = arrStore.ChangeStoreToHeap(this, ref error);
+								if (error.raised)
+								{
+									return;
+								}
+								value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 							}
-							value.SetHeapPtr(arr_heap_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 						}
 					}
 					break;
 				case RtHeapTypeKind.VECTOR:
 					{
-						RtVector vector;
-						int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vector);
-						if (vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)
+						if (value.HeapPtr < Context.CacheVectorPtr + Context.STACK_LENGTH)
 						{
-							RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-							vec_ptr = vector.ChangeStoreToHeap((ASInstance)instance.Type, this, ref error, out VectorImpl.VectorStore newstore);
-							if (error.raised)
+							RtVector vector;
+							int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out vector);
+							if (vec_ptr < Context.CacheVectorPtr + Context.STACK_LENGTH)
 							{
-								return;
-							}
+								RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+								vec_ptr = vector.ChangeStoreToHeap((ASInstance)instance.Type, this, ref error, out VectorImpl.VectorStore newstore);
+								if (error.raised)
+								{
+									return;
+								}
 
+							}
+							value.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 						}
-						value.SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 					}
 
 					break;
@@ -1621,8 +1627,12 @@ namespace juicescript.runtime
 						//有2个或以上的引用。变量算一个,this也算一个。
 
 						//更新数组的引用
-						RtArray oldPayload;
-						int nptr = RtArray.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
+						//RtArray oldPayload;
+						//int nptr = RtArray.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
+
+						int nptr = ((RtArray)oldObj).HEAPINSTANCE_PTR == 0 ? ptr : ((RtArray)oldObj).HEAPINSTANCE_PTR;
+						RtArray oldPayload = ((RtArray)oldObj).payload;
+
 
 						int copyed_ptr = 0;
 						if (!(nptr < Context.CacheArrayPtr + Context.STACK_LENGTH)) //堆里的对象,无需拷贝
