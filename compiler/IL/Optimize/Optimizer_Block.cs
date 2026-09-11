@@ -3770,98 +3770,33 @@ namespace juicescript.compiler.IL.Optimize
 
 
 				HashSet<Instruction> storeHpath = new HashSet<Instruction>();
-				#region 计算给闭包变量赋值语句造成的影响。
-
-				var access = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.storeScopeH);
-				foreach (var item in access)
+				foreach (var ssa_m in variables_ssa)
 				{
-					HashSet<Instruction> control_instructions = new HashSet<Instruction>();
+					var m_index = ssa_m.Key;
 
-					var b = cfg.Blocks.First(b => b.Instructions.Contains(item));
+					#region 计算给闭包变量赋值语句造成的影响。
 
-					int i = b.Instructions.IndexOf(item) + 1;
-					for (; i < b.Instructions.Count; i++)
+					var access = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.storeScopeH);
+					foreach (var item in access)
 					{
-						var ins = b.Instructions[i];
-						control_instructions.Add( ins );
-						if (ins.INS_Code == INS_Code.ld_MethodVariableInitValue || ins.INS_Code == INS_Code.storeMethodVariable || ins.INS_Code == INS_Code.ld_methodVariable)
-						{
-							break;
-						}
-					}
+						HashSet<Instruction> control_instructions = new HashSet<Instruction>();
 
-					if (i == b.Instructions.Count)
-					{
-						HashSet<BasicBlock> visited=new HashSet<BasicBlock>();
-						Queue<BasicBlock> blocks = new Queue<BasicBlock>();
+						var b = cfg.Blocks.First(b => b.Instructions.Contains(item));
 
-						foreach (var s in b.Successors)
-						{							 
-							blocks.Enqueue(s);					
-						}
-
-						while (blocks.Count>0)
-						{
-							b = blocks.Dequeue();
-							if (visited.Contains(b))
-								continue;
-
-							visited.Add(b);
-
-							i = 0;
-							for (; i < b.Instructions.Count; i++)
-							{
-								var ins = b.Instructions[i];
-								control_instructions.Add(ins);
-								if (ins.INS_Code == INS_Code.ld_MethodVariableInitValue || ins.INS_Code == INS_Code.storeMethodVariable || ins.INS_Code == INS_Code.ld_methodVariable)
-								{
-									break;
-								}
-							}
-
-							if (i == b.Instructions.Count)
-							{
-								foreach (var s in b.Successors)
-								{
-									blocks.Enqueue(s);
-								}
-							}
-
-						}
-					
-						
-						
-					}
-
-					foreach (var ins in control_instructions)
-					{
-						storeHpath.Add(ins);
-					}
-				}
-				#endregion
-
-
-
-				HashSet<Instruction> catch_finally_firstld = new HashSet<Instruction>();
-				#region catch和finally块内遇到的第一个ld_methodvar,不能优化
-				foreach (var b in cfg.Blocks)
-				{
-					if (b.Instructions.Count > 0 && (b.Instructions[0].INS_Code == INS_Code.finally_enter || b.Instructions[0].INS_Code == INS_Code.catch_enter))
-					{
-						var c = b.Instructions[0].INS_Code;
-						var t = GetTryStmt(b.Instructions[0], cfg);
-						var end = cfg.Blocks.SelectMany(b => b.Instructions).First(i => i.INS_Code == ( c == INS_Code.finally_enter ? INS_Code.finally_exit : INS_Code.catch_exit )&& GetTryStmt(i, cfg).Peek().tryid == t.Peek().tryid);
-						
-						int i = 1;
+						int i = b.Instructions.IndexOf(item) + 1;
 						for (; i < b.Instructions.Count; i++)
 						{
 							var ins = b.Instructions[i];
-							if (ins.INS_Code == INS_Code.ld_methodVariable)
+
+							if (ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == m_index)
 							{
-								catch_finally_firstld.Add(ins);
+								control_instructions.Add(ins);
 								break;
 							}
-							else if (ins == end)
+							if (
+								(ins.INS_Code == INS_Code.ld_MethodVariableInitValue  && ((INS_Ld_MethodVariableInitValue)ins).heap.MemberIndex == m_index )
+								|| 								
+								(ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == m_index ))
 							{
 								break;
 							}
@@ -3879,30 +3814,33 @@ namespace juicescript.compiler.IL.Optimize
 
 							while (blocks.Count > 0)
 							{
-								var nb = blocks.Dequeue();
-								if (visited.Contains(nb))
+								b = blocks.Dequeue();
+								if (visited.Contains(b))
 									continue;
 
-								visited.Add(nb);
+								visited.Add(b);
 
 								i = 0;
-								for (; i < nb.Instructions.Count; i++)
+								for (; i < b.Instructions.Count; i++)
 								{
-									var ins = nb.Instructions[i];
-									if (ins.INS_Code == INS_Code.ld_methodVariable)
+									var ins = b.Instructions[i];
+									if (ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == m_index)
 									{
-										catch_finally_firstld.Add(ins);
+										control_instructions.Add(ins);
 										break;
 									}
-									else if (ins == end)
+									if (
+										(ins.INS_Code == INS_Code.ld_MethodVariableInitValue && ((INS_Ld_MethodVariableInitValue)ins).heap.MemberIndex == m_index)
+										||
+										(ins.INS_Code == INS_Code.storeMethodVariable && ((INS_Store_MethodVariable)ins).heap.MemberIndex == m_index))
 									{
 										break;
 									}
 								}
 
-								if (i == nb.Instructions.Count)
+								if (i == b.Instructions.Count)
 								{
-									foreach (var s in nb.Successors)
+									foreach (var s in b.Successors)
 									{
 										blocks.Enqueue(s);
 									}
@@ -3914,13 +3852,98 @@ namespace juicescript.compiler.IL.Optimize
 
 						}
 
+						foreach (var ins in control_instructions)
+						{
+							storeHpath.Add(ins);
+						}
 					}
+					#endregion
 				}
 
+				HashSet<Instruction> catch_finally_firstld = new HashSet<Instruction>();
 
-				#endregion
+				foreach (var ssa_m in variables_ssa)
+				{
+					var m_index = ssa_m.Key;
+
+					#region catch和finally块内遇到的第一个ld_methodvar,不能优化
+					foreach (var b in cfg.Blocks)
+					{
+						if (b.Instructions.Count > 0 && (b.Instructions[0].INS_Code == INS_Code.finally_enter || b.Instructions[0].INS_Code == INS_Code.catch_enter))
+						{
+							var c = b.Instructions[0].INS_Code;
+							var t = GetTryStmt(b.Instructions[0], cfg);
+							var end = cfg.Blocks.SelectMany(b => b.Instructions).First(i => i.INS_Code == (c == INS_Code.finally_enter ? INS_Code.finally_exit : INS_Code.catch_exit) && GetTryStmt(i, cfg).Peek().tryid == t.Peek().tryid);
+
+							int i = 1;
+							for (; i < b.Instructions.Count; i++)
+							{
+								var ins = b.Instructions[i];
+								if (ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == m_index)
+								{
+									catch_finally_firstld.Add(ins);
+									break;
+								}
+								else if (ins == end)
+								{
+									break;
+								}
+							}
+
+							if (i == b.Instructions.Count)
+							{
+								HashSet<BasicBlock> visited = new HashSet<BasicBlock>();
+								Queue<BasicBlock> blocks = new Queue<BasicBlock>();
+
+								foreach (var s in b.Successors)
+								{
+									blocks.Enqueue(s);
+								}
+
+								while (blocks.Count > 0)
+								{
+									var nb = blocks.Dequeue();
+									if (visited.Contains(nb))
+										continue;
+
+									visited.Add(nb);
+
+									i = 0;
+									for (; i < nb.Instructions.Count; i++)
+									{
+										var ins = nb.Instructions[i];
+										if (ins.INS_Code == INS_Code.ld_methodVariable && ((INS_Ld_MethodVariable)ins).heap.MemberIndex == m_index)
+										{
+											catch_finally_firstld.Add(ins);
+											break;
+										}
+										else if (ins == end)
+										{
+											break;
+										}
+									}
+
+									if (i == nb.Instructions.Count)
+									{
+										foreach (var s in nb.Successors)
+										{
+											blocks.Enqueue(s);
+										}
+									}
+
+								}
 
 
+
+							}
+
+						}
+					}
+
+
+					#endregion
+
+				}
 
 				//SSA优化
 				foreach (var item in variables_ssa)
