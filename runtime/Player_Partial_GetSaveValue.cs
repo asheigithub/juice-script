@@ -1850,12 +1850,16 @@ namespace juicescript.runtime
 						//Debug.Assert(method_scopes != null);
 
 						//更新Vector的引用
-						RtVector oldPayload;
-						ptr = RtVector.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload);
+						//RtVector oldPayload;
+						//var nptr = RtVector.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload);
+
+						int nptr = ((RtVector)oldObj).HEAPINSTANCE_PTR == 0 ? ptr : ((RtVector)oldObj).HEAPINSTANCE_PTR;
+						RtVector oldPayload = (oldObj).payload;
+
 						int copyed_ptr = 0;
-						if (!(ptr < Context.CacheVectorPtr + Context.STACK_LENGTH))
+						if (!(nptr < Context.CacheVectorPtr + Context.STACK_LENGTH))
 						{
-							copyed_ptr = ptr;
+							copyed_ptr = nptr;
 						}
 
 						RtVector toupdateref = null; //追踪对新拷贝对象的引用
@@ -1895,8 +1899,10 @@ namespace juicescript.runtime
 										//var inmember = Context.GC.Heap[v.HeapPtr];
 										Debug.Assert(Context.GC.Heap[v.HeapPtr].Kind == RtHeapTypeKind.VECTOR);
 
-										RtVector _temp;
-										if (v.HeapPtr == ptr || RtVector.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out _temp) == ptr)
+										//RtVector _temp;
+										if (v.HeapPtr == ptr 
+											//|| RtVector.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out _temp) == ptr
+											)
 										{
 											if (copyed_ptr == 0)
 											{

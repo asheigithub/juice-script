@@ -164,7 +164,7 @@ namespace juicescript.runtime.gc
                     {
                         Heap[i].gc_mark = false;
                     }
-                    else if (i >= start)
+                    else if (i > start) //Root的数量比Heap里正好少一个，Heap[0]是null,所以start+1开始才是Heap中真正可以清理的对象
                     {
                         sub += GC.CalculMemusage(Heap[i]);
 

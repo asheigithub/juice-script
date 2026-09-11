@@ -333,7 +333,7 @@ namespace juicescript.runtime.buildin
 					}
 
 					srcVec = (RtVector)obj;
-					srcVecPtr = RtVector.FindAndUpdateHeapInstancePtr(a.HeapPtr, context.player, out srcVec);
+					srcVecPtr = srcVec.HEAPINSTANCE_PTR == 0 ? a.HeapPtr : srcVec.HEAPINSTANCE_PTR;  //RtVector.FindAndUpdateHeapInstancePtr(a.HeapPtr, context.player, out srcVec);
 
 					if (((ASInstance)vecinstance.Type)._element_class != null)
 					{
@@ -356,7 +356,7 @@ namespace juicescript.runtime.buildin
 				else
 				{
 					srcVec = (RtVector)vecinstance;
-					srcVecPtr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out srcVec);
+					srcVecPtr = srcVec.HEAPINSTANCE_PTR == 0 ? thisPtr.HeapPtr : srcVec.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out srcVec);
 				}
 
 				//pass
@@ -368,7 +368,7 @@ namespace juicescript.runtime.buildin
 				{
 					return;
 				}
-				int vptr = RtVector.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out dstVec);
+				int vptr = dstVec.HEAPINSTANCE_PTR == 0 ? instancePtr : dstVec.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(instancePtr, context.player, out dstVec);
 
 				int sindex = context.StackPosition;
 				context.StackPosition++;
@@ -452,7 +452,7 @@ namespace juicescript.runtime.buildin
 					return;
 				}
 				
-				int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
+				int vptr = vector.HEAPINSTANCE_PTR == 0 ? thisPtr.HeapPtr : vector.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
 				vector.SetSlot(len + i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 
 				if (error.raised)
@@ -602,8 +602,8 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			RtVector vectorAfterResize;
-			int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
+			RtVector vectorAfterResize = vector.payload;
+			int vptr = vector.HEAPINSTANCE_PTR == 0 ? thisPtr.HeapPtr : vector.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
 
 			store = vectorAfterResize.GetStore();
 			var span = CollectionsMarshal.AsSpan(store.buffer);
@@ -1014,8 +1014,8 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			RtVector vectorAfterResize;
-			int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
+			RtVector vectorAfterResize = vector.payload ;
+			int vptr = vector.HEAPINSTANCE_PTR == 0 ? thisPtr.HeapPtr : vector.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
 
 			var store = vectorAfterResize.GetStore();
 			var span = CollectionsMarshal.AsSpan(store.buffer);
@@ -4171,11 +4171,11 @@ namespace juicescript.runtime.buildin
 			{
 				int newLen = len - (int)actualDeleteCount + insertCount;
 
-				RtVector vectorAfterResize;
-				int vptr = RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
+				RtVector vectorAfterResize = vector.payload;
+				int vptr = vector.HEAPINSTANCE_PTR == 0 ? thisPtr.HeapPtr : vector.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vectorAfterResize);
 
-			
-				
+
+
 
 				int moveOffset = -(int)actualDeleteCount + insertCount;
 				if (moveOffset < 0)

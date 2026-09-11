@@ -4895,7 +4895,7 @@ namespace juicescript.runtime
 
 					if (instancePtr.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 					{
-						int vec_ptr = RtVector.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtVector t);
+						int vec_ptr = ((RtVector)instance).HEAPINSTANCE_PTR == 0 ? instancePtr.HeapPtr : ((RtVector)instance).HEAPINSTANCE_PTR;  //RtVector.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtVector t);
 						stackslots[target.index].SetHeapPtr(vec_ptr, (byte)RtHeapTypeKind.VECTOR, (byte)HeapKindFlag.NONE);
 					}
 

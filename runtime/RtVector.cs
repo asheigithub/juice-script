@@ -37,6 +37,7 @@ namespace juicescript.runtime
 
         public TypeKind element_type;
 
+        internal RtVector payload { get; private set; }
 
         public RtVector( ASClass element_type ) :base( RtHeapTypeKind.VECTOR)
         { 
@@ -50,6 +51,9 @@ namespace juicescript.runtime
                 this.element_asclass = element_type;
                 this.element_type = (TypeKind)element_type.Type_identifier;
             }
+
+            payload = this;
+
         }
 
 
@@ -62,9 +66,11 @@ namespace juicescript.runtime
 
         internal VectorImpl.VectorStore GetStore(Player player)
         {
-			RtVector target;int p = 0;
-			FindAndUpdateHeapInstancePtr(player, out target,ref p);
-            return target.store;
+            //RtVector target;int p = 0;
+            //FindAndUpdateHeapInstancePtr(player, out target,ref p);
+            //return target.store;
+
+            return payload.store;
 
 		}
 
@@ -106,48 +112,67 @@ namespace juicescript.runtime
 			store.length = 0;
 			store.elementSize = VectorImpl.VectorStore.GetElementSize(element_type, element_asclass);
 
+            payload = this;
+
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void LinkTo(RtVector dst, int dstptr)
-        { 
-            HEAPINSTANCE_PTR = dstptr;
+        internal void CleanPayload()
+        {
+            payload = this;
+        }
+
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//internal void LinkTo(RtVector dst, int dstptr)
+  //      { 
+  //          HEAPINSTANCE_PTR = dstptr;
 			
-		}
+		//}
 
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
+            var vec = ((RtVector)player.Context.GC.Heap[ptr]);
+            target = vec.payload;
 
-
-			var payload = ((RtVector)player.Context.GC.Heap[ptr]);
-			var origin = payload;
-			target = origin;
-			while (payload.HEAPINSTANCE_PTR != 0)
-			{
-				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtVector)player.Context.GC.Heap[ptr]);
-				target = payload;
-				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
-				
+			Debug.Assert(target.HEAPINSTANCE_PTR == 0);
+#if DEBUG
+			if (vec.HEAPINSTANCE_PTR != 0)
+            {				
+				Debug.Assert(player.Context.GC.Heap[vec.HEAPINSTANCE_PTR] == target);
 			}
-			return ptr;
+#endif
+
+			return vec.HEAPINSTANCE_PTR == 0 ? ptr : vec.HEAPINSTANCE_PTR;
+
+
+			//var payload = ((RtVector)player.Context.GC.Heap[ptr]);
+			//var origin = payload;
+			//target = origin;
+			//while (payload.HEAPINSTANCE_PTR != 0)
+			//{
+			//	ptr = payload.HEAPINSTANCE_PTR;
+			//	payload = ((RtVector)player.Context.GC.Heap[ptr]);
+			//	target = payload;
+			//	origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
+
+			//}
+			//return ptr;
 		}
 
-        private void FindAndUpdateHeapInstancePtr(Player player, out RtVector target,ref int inout_ptr)
-        {
-            if (HEAPINSTANCE_PTR == 0)
-            {
-                target = this;
+    //    private void FindAndUpdateHeapInstancePtr(Player player, out RtVector target,ref int inout_ptr)
+    //    {
+    //        if (HEAPINSTANCE_PTR == 0)
+    //        {
+    //            target = this;
                 
-            }
-            else
-            {
-				inout_ptr = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-            }
-        }
+    //        }
+    //        else
+    //        {
+				//inout_ptr = FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+    //        }
+    //    }
 
 
 		/// <summary>
@@ -448,6 +473,8 @@ namespace juicescript.runtime
             element_asclass = vector.element_asclass;
             element_type = vector.element_type;
 
+            payload = this;
+
             store.CopyFrom(vector.store);
 
 		}
@@ -481,7 +508,8 @@ namespace juicescript.runtime
 
             //链接到堆对象, 堆对象此时被此对象链接
             HEAPINSTANCE_PTR = heap_ptr;
-            
+
+            payload = (RtVector)heap_vector;
 
             return heap_ptr;
 		}

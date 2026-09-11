@@ -1048,6 +1048,8 @@ namespace juicescript.runtime.gc
             for (int i = context.StackPosition; i < Context.STACK_LENGTH; i++)
             {
                 ((RtArray)Heap[i + Context.CacheArrayPtr]).SetStoreCacheZero(false, default, 0);
+                ((RtVector)Heap[i + Context.CacheVectorPtr]).CleanPayload();
+
             }
 
 
