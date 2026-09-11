@@ -4905,9 +4905,11 @@ namespace juicescript.runtime
 						int arr_ptr = ((RtArray)instance).HEAPINSTANCE_PTR == 0 ? instancePtr.HeapPtr : ((RtArray)instance).HEAPINSTANCE_PTR;
 						stackslots[target.index].SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 					}
-					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((RtInstance)instance).HEAPINSTANCE_PTR != 0 && !instancePtr.IsStruct())
+					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((RtInstance)instance).HEAPINSTANCE_PTR != 0 )
 					{
-						int obj_ptr = ((RtInstance)instance).FindAndUpdateHeapInstancePtr(this, out RtInstance t); //RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr,this,out RtInstance t);
+						Debug.Assert(!instancePtr.IsStruct());
+
+						int obj_ptr = ((RtInstance)instance).HEAPINSTANCE_PTR;   //((RtInstance)instance).FindAndUpdateHeapInstancePtr(this, out RtInstance t); //RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr,this,out RtInstance t);
 						stackslots[target.index].SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 					}
 
@@ -5236,7 +5238,7 @@ namespace juicescript.runtime
 
 				if (!instancePtr.IsStruct() && ((RtInstance)instance).HEAPINSTANCE_PTR != 0) //构造函数将自己提升到了堆中的情况
 				{
-					int obj_ptr = ((RtInstance)instance).FindAndUpdateHeapInstancePtr(this, out RtInstance t); //RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtInstance t);
+					int obj_ptr = ((RtInstance)instance).HEAPINSTANCE_PTR;// //((RtInstance)instance).FindAndUpdateHeapInstancePtr(this, out RtInstance t); //RtInstance.FindAndUpdateHeapInstancePtr(instancePtr.HeapPtr, this, out RtInstance t);
 					stackslots[target.index].SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 
 					instancePtr.SetHeapPtr(obj_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);

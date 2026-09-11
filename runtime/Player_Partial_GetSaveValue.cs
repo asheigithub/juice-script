@@ -1056,15 +1056,15 @@ namespace juicescript.runtime
 		{
 			
 			
-			int iptr = ptr;
+			//int iptr = ptr;
 			RtInstance oldPayload;
-			ptr = RtInstance.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
+			int nptr = RtInstance.FindAndUpdateHeapInstancePtr(ptr, this, out oldPayload); //更新最终指向的目标
 
 			int copyed_ptr = 0;
 
-			if (!(ptr < Context.CacheInstancePtr + Context.STACK_LENGTH)) //堆里的对象,无需拷贝
+			if (!(nptr < Context.CacheInstancePtr + Context.STACK_LENGTH)) //堆里的对象,无需拷贝
 			{
-				copyed_ptr = ptr;
+				copyed_ptr = nptr;
 			}
 
 
@@ -1101,8 +1101,11 @@ namespace juicescript.runtime
 						{
 							
 
-							if (v.HeapPtr == ptr || 
-								(v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && RtInstance.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out RtInstance _temp) == ptr) )
+							if (v.HeapPtr == ptr 
+								
+								//|| (v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && RtInstance.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out RtInstance _temp) == ptr) 
+								
+								)
 							{
 								
 								if (copyed_ptr == 0)
@@ -1197,7 +1200,9 @@ namespace juicescript.runtime
 									//var _this = Context.GC.Heap[This.HeapPtr];
 									Debug.Assert(Context.GC.Heap[This.HeapPtr].Kind == RtHeapTypeKind.INSTANCE);
 												
-									if (This.HeapPtr == ptr || RtInstance.FindAndUpdateHeapInstancePtr(This.HeapPtr, this, out _temp) == ptr)
+									if (This.HeapPtr == ptr 
+										//|| RtInstance.FindAndUpdateHeapInstancePtr(This.HeapPtr, this, out _temp) == ptr
+										)
 									{
 										if (copyed_ptr == 0)
 										{
@@ -1265,7 +1270,7 @@ namespace juicescript.runtime
 					}
 				}
 
-				if (scope.ParentPtr == iptr)
+				if (scope.ParentPtr == ptr)
 				{
 					Debug.Assert(copyed_ptr != 0);
 					scope.ParentPtr = copyed_ptr;
@@ -2072,13 +2077,14 @@ namespace juicescript.runtime
 
 					return;
 				}
+#if DEBUG
 				else
 				{
 					Debug.Assert(((RtInstance)Context.GC.Heap[saveSlot.HeapPtr]).IsRefVectorOrFromContainerOrRefStruct(this, (ASInstance)Context.GC.Heap[saveSlot.HeapPtr].Type)
 						== ((((HeapKindFlag)saveSlot.HeapFlag & HeapKindFlag.FLAG_REFSTRUCT) == HeapKindFlag.FLAG_REFSTRUCT))
 						);
 				}
-
+#endif
 
 			}
 
