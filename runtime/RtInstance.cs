@@ -154,7 +154,7 @@ namespace juicescript.runtime
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		
 		private Span<byte> GetStoreData(Player player, ASInstance type, out bool is_ref_vector, out bool is_ref_struct)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR != 0);

@@ -117,9 +117,9 @@ namespace juicescript.runtime
 
 						if (value.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH)
 						{
-							RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
-							RtClosure cache = (RtClosure)instance;
-							var src_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out cache);
+							//RtHeapBase instance = Context.GC.Heap[value.HeapPtr];
+							//RtClosure cache = (RtClosure)instance;
+							var src_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out RtClosure cache);
 
 							if (src_ptr < Context.M_ClosurePtr + Context.STACK_LENGTH)
 							{
@@ -138,7 +138,7 @@ namespace juicescript.runtime
 
 
 								RtHeapBase heapObj;
-								int ptr = Context.GC.AllocClosure(((ASMethodBody)instance.Type).Method);
+								int ptr = Context.GC.AllocClosure(((ASMethodBody)cache.Type).Method);
 								if (ptr == 0)
 								{
 									//这种情况应该为致命错误，就不要再catch了
@@ -1288,7 +1288,7 @@ namespace juicescript.runtime
 			return copyed_ptr;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private  NaNBoxing prepare_savemethodscope_beforeSave(RtMethodScope heap, NaNBoxing old, ScopeHeapLocater heapLocater,  int scope_ptr)
+		private  NaNBoxing prepare_savemethodscope_beforeSave(RtMethodScope stackframe, NaNBoxing old, ScopeHeapLocater heapLocater,  int scope_ptr)
 		{
 			
 			//lbl_redo:
@@ -1302,12 +1302,12 @@ namespace juicescript.runtime
 				//	return ptr;
 				//}
 				//else 
-				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.CacheInstancePtr)
+				if (ptr == stackframe.StackPos + heapLocater.MemberIndex + Context.CacheInstancePtr)
 				{
 					var oldObj = (RtInstance)Context.GC.Heap[ptr];
 					
 					int ref_nextframe = 0;
-					if (heap.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
+					if (stackframe.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
 						&& ((RtMethodScope)Context.GC.Heap[oldObj.nextframe_ref_state.scope_ptr]).version == oldObj.nextframe_ref_state.version)
 					{
 						ref_nextframe = 1;
@@ -1344,8 +1344,8 @@ namespace juicescript.runtime
 
 						//return prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, oldObj.Type, m_scope, method_scopes);
 
-						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
-						int min = heap.mScopePtr + (oldObj.methodscopeslot_ref_state<2?1:0);
+						int max = ref_nextframe == 0 ? stackframe.mScopePtr : scope_ptr;
+						int min = stackframe.mScopePtr + (oldObj.methodscopeslot_ref_state<2?1:0);
 						//if (min == 0)
 						//{
 						//	ComputeMinMaxMethodScope(ref min, heap, max);
@@ -1354,7 +1354,7 @@ namespace juicescript.runtime
 
 						NaNBoxing r = default;
 
-						int copy_ptr = prepare_savemethodscope_updateref(heap, ptr, ref heapLocater, min, max);
+						int copy_ptr = prepare_savemethodscope_updateref(stackframe, ptr, ref heapLocater, min, max);
 						if (copy_ptr != 0)
 						{
 							r.SetHeapPtr(copy_ptr
@@ -1388,12 +1388,12 @@ namespace juicescript.runtime
 			else if (old.HeapKind == (byte)RtHeapTypeKind.CLOSURE)
 			{
 				//更新Closure的引用
-				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.M_ClosurePtr)
+				if (ptr == stackframe.StackPos + heapLocater.MemberIndex + Context.M_ClosurePtr)
 				{
 					var oldObj = (RtClosure)Context.GC.Heap[ptr];
 
 					int ref_nextframe = 0;
-					if (heap.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
+					if (stackframe.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
 						&& ((RtMethodScope)Context.GC.Heap[oldObj.nextframe_ref_state.scope_ptr]).version == oldObj.nextframe_ref_state.version)
 					{
 						ref_nextframe = 1;
@@ -1421,17 +1421,17 @@ namespace juicescript.runtime
 						if (!This.IsStruct() && This.ValueType == NaNBoxing.BoxType.HeapPtr && This.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 						{
 
-							var this_ptr = prepare_savemethodscope_beforeSave(heap, This, heapLocater, scope_ptr); //更新原this,然后下面才能正确更新.
+							var this_ptr = prepare_savemethodscope_beforeSave(stackframe, This, heapLocater, scope_ptr); //更新原this,然后下面才能正确更新.
 							((RtClosure)oldObj).This = this_ptr; //.SetHeapPtr(this_ptr);
 																 //goto lbl_redo;
 						}
 
 						int copyed_ptr = 0;
-						ptr = RtClosure.FindAndUpdateHeapInstancePtr(ptr, this, out oldObj);
+						int nptr = oldObj.HEAPINSTANCE_PTR == 0 ? ptr : oldObj.HEAPINSTANCE_PTR; //RtClosure.FindAndUpdateHeapInstancePtr(ptr, this, out oldObj);
 
-						if (!(ptr < Context.M_ClosurePtr + Context.STACK_LENGTH)) //追踪是否已经在堆中。
+						if (!(nptr < Context.M_ClosurePtr + Context.STACK_LENGTH)) //追踪是否已经在堆中。
 						{
-							copyed_ptr = ptr;
+							copyed_ptr = nptr;
 						}
 
 						RtClosure toupate_ref = null;
@@ -1440,8 +1440,8 @@ namespace juicescript.runtime
 						//{
 						//	ComputeMinMaxMethodScope(ref min, ref max, scope_ptr);
 						//}
-						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
-						int min = heap.mScopePtr + (oldObj.methodscopeslot_ref_state < 2 ? 1 : 0);
+						int max = ref_nextframe == 0 ? stackframe.mScopePtr : scope_ptr;
+						int min = stackframe.mScopePtr + (oldObj.methodscopeslot_ref_state < 2 ? 1 : 0);
 						//if (min == 0)
 						//{
 						//	ComputeMinMaxMethodScope(ref min, heap, max);
@@ -1453,7 +1453,7 @@ namespace juicescript.runtime
 							var scope_span = scope.__get_slots_internal;
 							for (int i = ((k < max || scope.returnSlot < 0) ? 0 : -1); i < scope.SlotCount; ++i)
 							{
-								if (!(scope == heap && i == heapLocater.MemberIndex))
+								if (!(scope == stackframe && i == heapLocater.MemberIndex))
 								{
 									NaNBoxing v;
 									int store_closure_ptr;
@@ -1473,8 +1473,10 @@ namespace juicescript.runtime
 									if (v.ValueType == NaNBoxing.BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
 										&&
 										(
-											v.HeapPtr == ptr ||
-											RtClosure.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out RtClosure _temp) == ptr)
+											v.HeapPtr == ptr 
+											//||
+											//RtClosure.FindAndUpdateHeapInstancePtr(v.HeapPtr, this, out RtClosure _temp) == ptr
+											)
 										)
 									{
 										//复制一份新的Clousure
@@ -1495,9 +1497,9 @@ namespace juicescript.runtime
 
 												dstClosure.CopyDataFrom(srcClosure, this);
 
-												Debug.Assert(k >= heap.mScopePtr);
+												Debug.Assert(k >= stackframe.mScopePtr);
 
-												if (k > heap.mScopePtr)
+												if (k > stackframe.mScopePtr)
 												{
 													(dstClosure).nextframe_ref_state.scope_ptr = k;
 													(dstClosure).nextframe_ref_state.version = scope.version;
@@ -1535,7 +1537,7 @@ namespace juicescript.runtime
 										}
 										else
 										{
-											if (toupate_ref != null && k == heap.mScopePtr)
+											if (toupate_ref != null && k == stackframe.mScopePtr)
 											{
 												Debug.Assert(toupate_ref.methodscopeslot_ref_state != 0);
 												toupate_ref.methodscopeslot_ref_state = 2;
@@ -1599,7 +1601,7 @@ namespace juicescript.runtime
 			}
 			else if (old.HeapKind == (byte)RtHeapTypeKind.ARRAY)
 			{
-				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.CacheArrayPtr)
+				if (ptr == stackframe.StackPos + heapLocater.MemberIndex + Context.CacheArrayPtr)
 				{
 					var oldObj = (RtArray)Context.GC.Heap[ptr];
 #if DEBUG
@@ -1610,7 +1612,7 @@ namespace juicescript.runtime
 #endif
 
 					int ref_nextframe = 0;
-					if (heap.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
+					if (stackframe.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
 						&& ((RtMethodScope)Context.GC.Heap[oldObj.nextframe_ref_state.scope_ptr]).version == oldObj.nextframe_ref_state.version)
 					{
 						ref_nextframe = 1;
@@ -1647,8 +1649,8 @@ namespace juicescript.runtime
 
 						RtArray toupdateref = null; //追踪对新拷贝对象的引用
 
-						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
-						int min = heap.mScopePtr + (oldObj.methodscopeslot_ref_state < 2 ? 1 : 0);
+						int max = ref_nextframe == 0 ? stackframe.mScopePtr : scope_ptr;
+						int min = stackframe.mScopePtr + (oldObj.methodscopeslot_ref_state < 2 ? 1 : 0);
 						//if (min == 0)
 						//{
 						//	ComputeMinMaxMethodScope(ref min, heap, max);
@@ -1661,7 +1663,7 @@ namespace juicescript.runtime
 							for (int i = ( ( k<max || scope.returnSlot<0) ? 0 : -1) ; i < scope.SlotCount; ++i)
 							{
 							
-								if (!(scope == heap && i == heapLocater.MemberIndex))
+								if (!(scope == stackframe && i == heapLocater.MemberIndex))
 								{
 									NaNBoxing v ;
 									int store_arr_ptr;
@@ -1709,9 +1711,9 @@ namespace juicescript.runtime
 													//	((RtArray)dst).methodscopeslot_ref_state = 1;
 													//}
 
-													Debug.Assert(k >= heap.mScopePtr);
+													Debug.Assert(k >= stackframe.mScopePtr);
 
-													if (k > heap.mScopePtr)
+													if (k > stackframe.mScopePtr)
 													{
 														((RtArray)dst).nextframe_ref_state.scope_ptr = k;
 														((RtArray)dst).nextframe_ref_state.version = scope.version;
@@ -1751,7 +1753,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												if (toupdateref != null && k == heap.mScopePtr)
+												if (toupdateref != null && k == stackframe.mScopePtr)
 												{
 													Debug.Assert(toupdateref.methodscopeslot_ref_state == 1);
 													toupdateref.methodscopeslot_ref_state = 2;
@@ -1826,12 +1828,12 @@ namespace juicescript.runtime
 			}
 			else if (old.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 			{
-				if (ptr == heap.StackPos + heapLocater.MemberIndex + Context.CacheVectorPtr)
+				if (ptr == stackframe.StackPos + heapLocater.MemberIndex + Context.CacheVectorPtr)
 				{
 					var oldObj = (RtVector)Context.GC.Heap[ptr];
 
 					int ref_nextframe = 0;
-					if (heap.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
+					if (stackframe.mScopePtr < scope_ptr && oldObj.nextframe_ref_state.scope_ptr > 0
 						&& ((RtMethodScope)Context.GC.Heap[oldObj.nextframe_ref_state.scope_ptr]).version == oldObj.nextframe_ref_state.version)
 					{
 						ref_nextframe = 1;
@@ -1869,8 +1871,8 @@ namespace juicescript.runtime
 
 						RtVector toupdateref = null; //追踪对新拷贝对象的引用
 
-						int max = ref_nextframe == 0 ? heap.mScopePtr : scope_ptr;
-						int min = heap.mScopePtr + (oldObj.methodscopeslot_ref_state < 2 ? 1 : 0);
+						int max = ref_nextframe == 0 ? stackframe.mScopePtr : scope_ptr;
+						int min = stackframe.mScopePtr + (oldObj.methodscopeslot_ref_state < 2 ? 1 : 0);
 						//if (min == 0)
 						//{
 						//	ComputeMinMaxMethodScope(ref min, heap, max);
@@ -1882,7 +1884,7 @@ namespace juicescript.runtime
 							var scope_span = scope.__get_slots_internal;
 							for (int i = ((k < max || scope.returnSlot < 0) ? 0 : -1); i < scope.SlotCount; ++i)
 							{
-								if (!(scope == heap && i == heapLocater.MemberIndex))
+								if (!(scope == stackframe && i == heapLocater.MemberIndex))
 								{
 									NaNBoxing v;
 									int store_vec_ptr;
@@ -1922,9 +1924,9 @@ namespace juicescript.runtime
 
 													dst.Type = oldObj.Type;
 
-													Debug.Assert(k >= heap.mScopePtr);
+													Debug.Assert(k >= stackframe.mScopePtr);
 
-													if (k > heap.mScopePtr)
+													if (k > stackframe.mScopePtr)
 													{
 														(dst).nextframe_ref_state.scope_ptr = k;
 														(dst).nextframe_ref_state.version = scope.version;
@@ -1966,7 +1968,7 @@ namespace juicescript.runtime
 											}
 											else
 											{
-												if (toupdateref != null && k == heap.mScopePtr)
+												if (toupdateref != null && k == stackframe.mScopePtr)
 												{
 													Debug.Assert(toupdateref.methodscopeslot_ref_state == 1);
 													toupdateref.methodscopeslot_ref_state = 2;
@@ -2576,9 +2578,9 @@ namespace juicescript.runtime
 				{
 					if (value.HeapPtr < Context.M_ClosurePtr + Context.STACK_LENGTH)
 					{
-						var obj = Context.GC.Heap[value.HeapPtr];
-						var srcClosure = (RtClosure)obj;
-						int final_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out srcClosure);
+						//var obj = Context.GC.Heap[value.HeapPtr];
+						//var srcClosure = (RtClosure)obj;
+						int final_ptr = RtClosure.FindAndUpdateHeapInstancePtr(value.HeapPtr, this, out RtClosure srcClosure);
 
 						if (!(final_ptr < Context.M_ClosurePtr + Context.STACK_LENGTH))
 						{
@@ -2693,7 +2695,7 @@ namespace juicescript.runtime
 							int dstClosurePtr = heapLocater.MemberIndex + heap.StackPos + Context.M_ClosurePtr;
 							var dstClosure = (RtClosure)Context.GC.Heap[dstClosurePtr];
 
-							Context.GC.Heap[dstClosurePtr].Type = obj.Type;
+							Context.GC.Heap[dstClosurePtr].Type = srcClosure.Type;
 
 							dstClosure.CopyDataFrom(srcClosure, this);
 							dstClosure.methodscopeslot_ref_state = 1;
@@ -2794,7 +2796,7 @@ namespace juicescript.runtime
 
 							{
 								//处理MethodScope
-								if (!((ASMethodBody)obj.Type).Method.__ismethod)
+								if (!((ASMethodBody)srcClosure.Type).Method.__ismethod)
 								{
 									if (dstClosure.ScopePtr != 0)
 									{
@@ -3003,11 +3005,11 @@ namespace juicescript.runtime
 		///否则，复制到堆。
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void PrepareSaveMethodScope(RtMethodScope heap,  ScopeHeapLocater heapLocater, ref NaNBoxing value,  int scope_ptr, ref ReceiveError error , bool is_pass_this = false)
+		private void PrepareSaveMethodScope(RtMethodScope stackfarme,  ScopeHeapLocater heapLocater, ref NaNBoxing value,  int scope_ptr, ref ReceiveError error , bool is_pass_this = false)
 		{
-			if (heap.IsStackSlot)
+			if (stackfarme.IsStackSlot)
 			{
-				NaNBoxing old = heap.ReadSlot(heapLocater.MemberIndex
+				NaNBoxing old = stackfarme.ReadSlot(heapLocater.MemberIndex
 
 					);
 
@@ -3020,19 +3022,19 @@ namespace juicescript.runtime
 				if (old.ValueType == NaNBoxing.BoxType.HeapPtr && old.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 				{
 					Debug.Assert(scope_ptr!= 0);
-					prepare_savemethodscope_beforeSave( heap ,old,  heapLocater,scope_ptr);
+					prepare_savemethodscope_beforeSave( stackfarme ,old,  heapLocater,scope_ptr);
 
 				}
 				if (value.ValueType == NaNBoxing.BoxType.HeapPtr && value.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 				{
 					//存储阶段
-					prepare_savescope_pass(ref value, heap, heapLocater, old, min, scope_ptr, ref error, is_pass_this);
+					prepare_savescope_pass(ref value, stackfarme, heapLocater, old, min, scope_ptr, ref error, is_pass_this);
 				}
 			}
 			else
 			{
 				//完全相同结构体可以不分配内存，就地覆盖
-				NaNBoxing old = heap.__get_slots_internal[heapLocater.MemberIndex];
+				NaNBoxing old = stackfarme.__get_slots_internal[heapLocater.MemberIndex];
 				if (CopyIfSameTypeStructAndReplaceSrc(old, ref value))
 				{
 

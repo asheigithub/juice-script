@@ -8179,8 +8179,14 @@ namespace juicescript.runtime
 				}
 				else if (v1.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v2.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
-					var ins1 = Context.GC.Heap[v1.HeapPtr];
-					var ins2 = Context.GC.Heap[v2.HeapPtr];
+					//var ins1 = Context.GC.Heap[v1.HeapPtr];
+					//var ins2 = Context.GC.Heap[v2.HeapPtr];
+
+					RtInstance ins1;
+					int f1 = RtInstance.FindAndUpdateHeapInstancePtr(v1.HeapPtr, this, out ins1);
+					RtInstance ins2;
+					int f2 = RtInstance.FindAndUpdateHeapInstancePtr(v2.HeapPtr, this, out ins2);
+
 					if (((ASInstance)ins1.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						var layoutsize = ins1.Type._link_codescope.TypeLayout.Size;
@@ -8196,9 +8202,11 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						RtInstance tmp1, tmp2;
-						return RtInstance.FindAndUpdateHeapInstancePtr(v1.HeapPtr, this, out tmp1) ==
-							RtInstance.FindAndUpdateHeapInstancePtr(v2.HeapPtr, this, out tmp2);
+						return f1 == f2;
+
+						//RtInstance tmp1, tmp2;
+						//return RtInstance.FindAndUpdateHeapInstancePtr(v1.HeapPtr, this, out tmp1) ==
+						//	RtInstance.FindAndUpdateHeapInstancePtr(v2.HeapPtr, this, out tmp2);
 
 						//return v1.HeapPtr == v2.HeapPtr;
 					}
@@ -8221,19 +8229,28 @@ namespace juicescript.runtime
 									RtArray.FindAndUpdateHeapInstancePtr(v2.HeapPtr, this, out tmp2);
 							}
 						case RtHeapTypeKind.VECTOR:
-							return v1.HeapPtr == v2.HeapPtr;
+							{
+								
+								RtVector tmp1, tmp2;
+								int p1 = RtVector.FindAndUpdateHeapInstancePtr(v1.HeapPtr, this, out tmp1);
+								int p2 = RtVector.FindAndUpdateHeapInstancePtr(v2.HeapPtr, this, out tmp2);
+
+								return p1 == p2;
+								
+							}
+							//return v1.HeapPtr == v2.HeapPtr;
 						case RtHeapTypeKind.CLOSURE:
 							{
-								var ins1 = Context.GC.Heap[v1.HeapPtr];
-								var ins2 = Context.GC.Heap[v2.HeapPtr];
+								//var ins1 = Context.GC.Heap[v1.HeapPtr];
+								//var ins2 = Context.GC.Heap[v2.HeapPtr];
 
 								RtClosure tmp1, tmp2;
 								int ptr1 = RtClosure.FindAndUpdateHeapInstancePtr(v1.HeapPtr, this, out tmp1);
 								int ptr2 = RtClosure.FindAndUpdateHeapInstancePtr(v2.HeapPtr, this, out tmp2);
 
-								if (((ASMethodBody)ins1.Type).Method.__ismethod)
+								if (((ASMethodBody)tmp1.Type).Method.__ismethod)
 								{
-									return ins1.Type == ins2.Type && IsStrictlyEqual(tmp1.This, tmp2.This);
+									return tmp1.Type == tmp2.Type && IsStrictlyEqual(tmp1.This, tmp2.This);
 								}
 								else
 								{
@@ -8683,8 +8700,13 @@ namespace juicescript.runtime
 				}
 				else if (key1.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
-					var ins1 = Context.GC.Heap[key1.HeapPtr];
-					var ins2 = Context.GC.Heap[key2.HeapPtr];
+					//var ins1 = Context.GC.Heap[key1.HeapPtr];
+					//var ins2 = Context.GC.Heap[key2.HeapPtr];
+					RtInstance ins1;
+					int f1 = RtInstance.FindAndUpdateHeapInstancePtr(key1.HeapPtr, this, out ins1);
+					RtInstance ins2;
+					int f2 = RtInstance.FindAndUpdateHeapInstancePtr(key2.HeapPtr, this, out ins2);
+
 					if (((ASInstance)ins1.Type).Flags.HasFlag(ClassFlags.Struct))
 					{
 						var layoutsize = ins1.Type._link_codescope.TypeLayout.Size;
@@ -8700,9 +8722,10 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						RtInstance tmp1, tmp2;
-						return RtInstance.FindAndUpdateHeapInstancePtr(key1.HeapPtr, this, out tmp1) ==
-							RtInstance.FindAndUpdateHeapInstancePtr(key2.HeapPtr, this, out tmp2);
+						return f1 == f2;
+						//RtInstance tmp1, tmp2;
+						//return RtInstance.FindAndUpdateHeapInstancePtr(key1.HeapPtr, this, out tmp1) ==
+						//	RtInstance.FindAndUpdateHeapInstancePtr(key2.HeapPtr, this, out tmp2);
 						//return key1.HeapPtr == key2.HeapPtr;
 					}
 				}
@@ -8733,15 +8756,15 @@ namespace juicescript.runtime
 
 						case RtHeapTypeKind.CLOSURE:
 							{
-								var ins1 = Context.GC.Heap[key1.HeapPtr];
-								var ins2 = Context.GC.Heap[key2.HeapPtr];
+								//var ins1 = Context.GC.Heap[key1.HeapPtr];
+								//var ins2 = Context.GC.Heap[key2.HeapPtr];
 								RtClosure tmp1, tmp2;
 								int ptr1 = RtClosure.FindAndUpdateHeapInstancePtr(key1.HeapPtr, this, out tmp1);
 								int ptr2 = RtClosure.FindAndUpdateHeapInstancePtr(key2.HeapPtr, this, out tmp2);
 
-								if (((ASMethodBody)ins1.Type).Method.__ismethod)
+								if (((ASMethodBody)tmp1.Type).Method.__ismethod)
 								{
-									return ins1.Type == ins2.Type && IsStrictlyEqual(tmp1.This, tmp2.This);
+									return tmp1.Type == tmp2.Type && IsStrictlyEqual(tmp1.This, tmp2.This);
 								}
 								else
 								{

@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -85,21 +86,34 @@ namespace juicescript.runtime
 		internal refbynextframe nextframe_ref_state;
 
 
-
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtClosure target)
 		{
 			var payload = ((RtClosure)player.Context.GC.Heap[ptr]);
-			var origin = payload;
-			target = origin;
-			while (payload.HEAPINSTANCE_PTR != 0)
+			if (payload.HEAPINSTANCE_PTR == 0)
 			{
-				ptr = payload.HEAPINSTANCE_PTR;
-				payload = ((RtClosure)player.Context.GC.Heap[ptr]);
 				target = payload;
-
-				origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
+				return ptr;
 			}
-			return ptr;
+			else
+			{ 
+				target = ((RtClosure)player.Context.GC.Heap[payload.HEAPINSTANCE_PTR]);
+				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
+				return payload.HEAPINSTANCE_PTR;
+			}
+
+			//var payload = ((RtClosure)player.Context.GC.Heap[ptr]);
+			//var origin = payload;
+			//target = origin;
+			//while (payload.HEAPINSTANCE_PTR != 0)
+			//{
+			//	ptr = payload.HEAPINSTANCE_PTR;
+			//	payload = ((RtClosure)player.Context.GC.Heap[ptr]);
+			//	target = payload;
+
+			//	origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
+			//}
+			//return ptr;
 		}
 
 		/// <summary>
@@ -113,8 +127,9 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtClosure target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				RtClosure target = ((RtClosure)player.Context.GC.Heap[HEAPINSTANCE_PTR]);
+				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
+				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m_property_ptr;
 			}
 		}
@@ -127,8 +142,10 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtClosure target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				//RtClosure target;
+				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				RtClosure target = ((RtClosure)player.Context.GC.Heap[HEAPINSTANCE_PTR]);
+				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				target.m_property_ptr = ptr;
 			}
 		}
@@ -142,8 +159,10 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtClosure target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				//RtClosure target;
+				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				RtClosure target = ((RtClosure)player.Context.GC.Heap[HEAPINSTANCE_PTR]);
+				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				return target.m__proto__;
 			}
 		}
@@ -156,8 +175,10 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtClosure target;
-				FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				//RtClosure target;
+				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
+				RtClosure target = ((RtClosure)player.Context.GC.Heap[HEAPINSTANCE_PTR]);
+				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				target.m__proto__ = proto_ptr;
 			}
 		}
