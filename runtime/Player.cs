@@ -50,6 +50,30 @@ namespace juicescript.runtime
 
 		public Context Context { get; }
 
+
+
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(TopLevel))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ArrayImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(BooleanImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ByteImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Error))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(FlashDictionary))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(FloatImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Function))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(GeneratorImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(GeomImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(IntImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(MathfImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(MathImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Numeric))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ObjectImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(PromiseImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(SByteImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ShortImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(UShortImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(StringImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(UintImpl))]
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(VectorImpl))]
 		public Player(int gc_limit = int.MaxValue
 #if FORCOMPILER
 			,
@@ -12529,7 +12553,7 @@ namespace juicescript.runtime
 
 		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe int Ld_function_and_store_member( ASMethod function, ScopeHeapLocater heapLocater, RtHeapBase mscope, int scope_ptr,  ref ReceiveError error,
-			int stackStPos, StackLocater target, Span<NaNBoxing> stackslots, out RtHeapBase closure_instance)
+			int stackStPos, int target, Span<NaNBoxing> stackslots, out RtHeapBase closure_instance)
 		{
 			if ( !(heapLocater.MemberIndex == ushort.MaxValue && heapLocater.ScopeIndex == ushort.MaxValue))
 			{
@@ -12587,7 +12611,7 @@ namespace juicescript.runtime
 					{
 						//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
 
-						int ptrIndex = stackStPos + target.index;
+						int ptrIndex = stackStPos + target;
 						int closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 						var closure = Context.GC.Heap[closurePtr];
@@ -12615,12 +12639,12 @@ namespace juicescript.runtime
 						if (s.Kind == RtHeapTypeKind.GLOBAL)
 						{
 							((RtScriptClass)s).SetSlot(v, heapLocater.MemberIndex);
-							stackslots[target.index] = v;
+							stackslots[target] = v;
 						}
 						else if (s.Kind == RtHeapTypeKind.MethodScope)
 						{
 							((RtMethodScope)s).SetSlot(v, heapLocater.MemberIndex);
-							stackslots[target.index] = v;
+							stackslots[target] = v;
 						}
 
 						closure_instance = closure;
@@ -12636,7 +12660,7 @@ namespace juicescript.runtime
 
 #endif
 
-						stackslots[target.index] = c;
+						stackslots[target] = c;
 						closure_instance = Context.GC.Heap[c.HeapPtr];
 						return c.HeapPtr;
 					}
@@ -12656,7 +12680,7 @@ namespace juicescript.runtime
 					{
 						//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
 
-						int ptrIndex = stackStPos + target.index;
+						int ptrIndex = stackStPos + target;
 						int closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 						var closure = Context.GC.Heap[closurePtr];
@@ -12683,7 +12707,7 @@ namespace juicescript.runtime
 
 
 						((RtMethodScope)s).SetSlot(v, heapLocater.MemberIndex);
-						stackslots[target.index] = v;
+						stackslots[target] = v;
 						closure_instance = Context.GC.Heap[v.HeapPtr]; ;
 						return v.HeapPtr;
 					}
@@ -12696,7 +12720,7 @@ namespace juicescript.runtime
 							throw new InvalidOperationException();
 
 #endif
-						stackslots[target.index] = c;
+						stackslots[target] = c;
 						closure_instance = Context.GC.Heap[c.HeapPtr];
 						return c.HeapPtr;
 					}
@@ -12710,7 +12734,7 @@ namespace juicescript.runtime
 			{
 				//ASMethod function = Context.link_const_methods[(int)fbox];  //((ASMethodBody)obj.Type).Method;
 
-				int ptrIndex = stackStPos + target.index;
+				int ptrIndex = stackStPos + target;
 				int closurePtr = Context.M_ClosurePtr + ptrIndex;
 
 				var closure = Context.GC.Heap[closurePtr];
@@ -12722,7 +12746,7 @@ namespace juicescript.runtime
 				//((RtClosure)closure).HEAPINSTANCE_PTR = 0;
 				((RtClosure)closure).ClearData(new NaNBoxing(NULL), scope_ptr, null);
 
-				stackslots[target.index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
+				stackslots[target].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 				closure_instance = closure;
 				return closurePtr;
 			}
@@ -14558,6 +14582,15 @@ namespace juicescript.runtime
 						case INS_Code.O_Store_InstanceField:
 							{
 								O_Store_InstanceField(dst_index,&PC,stackslots,stackStPos,scope_ptr,methodscope,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.O_BindGlobal_Recurse_Call:
+							{
+								O_BindGlobal_Recurse_Call(dst_index, stackStPos, &PC, methodscope, method, scope_ptr, stackslots, ref error);
 								if (error.raised)
 								{
 									goto flag_handle_error;

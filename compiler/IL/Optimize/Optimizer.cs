@@ -566,6 +566,8 @@ namespace juicescript.compiler.IL.Optimize
 
 			slotCount = OptimizeLdStaticMember(cfg,slotCount,context); //外提静态成员。
 
+			slotCount = OptimizeDirect_Recurse_Call(cfg, constants,slotCount); //探测递归
+
 			slotCount = OptimizeLdFunctionBindGlobal(cfg,slotCount);//提取ld_function_bindglobal的公共部分.[注意try catch的情况，必须提取到try块的头]
 
 			slotCount = OptimizeInstance(cfg, slotCount, context); //特化对INSTANCE的存取

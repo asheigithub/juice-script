@@ -85,6 +85,71 @@ namespace juicescript.compiler.IL.Optimize
 		}
 
 
+		private static InstructionDef DoFromTypeKind(TypeKind kind,CompileContext context)
+		{
+			var allClasses = context.scriptDefs.SelectMany(
+						s => s.scriptClasses).Union(context.player_for_compiler.Context.dictTypes.Select(p => p.Value)).Where(t => t != null);
+
+			switch (kind)
+			{
+				case TypeKind.Any:
+					return new InstructionDef(InstructionDefType.unkown, null);
+				case TypeKind.Boolean:
+				case TypeKind.Int:
+				case TypeKind.Uint:
+				case TypeKind.SByte:
+				case TypeKind.Byte:
+				case TypeKind.Short:
+				case TypeKind.UShort:
+				case TypeKind.Float:
+				case TypeKind.Number:
+					return new InstructionDef(InstructionDefType.primitive, allClasses.First(c => c.Type_identifier == (ulong)kind).Instance);
+				case TypeKind.Fun_Void:
+					return new InstructionDef(InstructionDefType.primitive, TypeKind.Any);
+				case TypeKind.TraitDataReference:
+				case TypeKind.RTQName_MultiName_DataReference:
+				case TypeKind.CParseNS_Traits:
+				case TypeKind.RTQNameRTQNameL_N:
+				case TypeKind.SearchNameSpaceFromImports:
+				case TypeKind.Unknown:
+					return new InstructionDef(InstructionDefType.unkown, null);
+				case TypeKind.Null:
+					return new InstructionDef(InstructionDefType.primitive, TypeKind.Null);
+				case TypeKind.Object:
+					return new InstructionDef(InstructionDefType.obj_maybeCacheable, null);
+				case TypeKind.Class:
+					return new InstructionDef(InstructionDefType.asclass, null);
+				case TypeKind.Super:
+					return new InstructionDef(InstructionDefType.obj_maybeCacheable, null);
+				case TypeKind.String:
+					return new InstructionDef(InstructionDefType.primitive, allClasses.First(c => c.Type_identifier == (ulong)kind).Instance);
+				case TypeKind.Function:
+					return new InstructionDef(InstructionDefType.method, null);
+				case TypeKind.Array:
+					return new InstructionDef(InstructionDefType.array, null);
+				case TypeKind.Vector:
+					return new InstructionDef(InstructionDefType.vector, null);
+				case TypeKind.Namespace:
+					return new InstructionDef(InstructionDefType.obj, null);
+				default:
+					ASClass @class = allClasses.First(c => c.Type_identifier == (ulong)kind);
+
+					if (@class.Instance.Flags.HasFlag(ClassFlags.Struct))
+					{
+						return new InstructionDef(InstructionDefType.Struct, @class.Instance);
+					}
+					else if (@class.Instance.Flags.HasFlag(ClassFlags.Vector))
+					{
+						return new InstructionDef(InstructionDefType.vector, @class.Instance);
+					}
+					else
+					{
+						return new InstructionDef(InstructionDefType.obj_maybeCacheable, @class.Instance);
+					}
+			}
+		}
+
+
 		private static Dictionary<Instruction, List<InstructionDef>> DetectType(ASMethod method, List<Instruction> instructions, CompileContext context)
 		{
 			var allClasses = context.scriptDefs.SelectMany(
@@ -106,64 +171,7 @@ namespace juicescript.compiler.IL.Optimize
 
 			InstructionDef FromTypeKind(TypeKind kind)
 			{
-				switch (kind)
-				{
-					case TypeKind.Any:
-						return new InstructionDef(InstructionDefType.unkown, null);
-					case TypeKind.Boolean:
-					case TypeKind.Int:
-					case TypeKind.Uint:
-					case TypeKind.SByte:
-					case TypeKind.Byte:
-					case TypeKind.Short:
-					case TypeKind.UShort:
-					case TypeKind.Float:
-					case TypeKind.Number:
-						return new InstructionDef(InstructionDefType.primitive,  allClasses.First(c=>c.Type_identifier == (ulong)kind).Instance );
-					case TypeKind.Fun_Void:
-						return new InstructionDef(InstructionDefType.primitive, TypeKind.Any);
-					case TypeKind.TraitDataReference:
-					case TypeKind.RTQName_MultiName_DataReference:
-					case TypeKind.CParseNS_Traits:
-					case TypeKind.RTQNameRTQNameL_N:
-					case TypeKind.SearchNameSpaceFromImports:
-					case TypeKind.Unknown:
-						return new InstructionDef(InstructionDefType.unkown, null);
-					case TypeKind.Null:
-						return new InstructionDef(InstructionDefType.primitive, TypeKind.Null);
-					case TypeKind.Object:
-						return new InstructionDef(InstructionDefType.obj_maybeCacheable, null);
-					case TypeKind.Class:
-						return new InstructionDef(InstructionDefType.asclass, null);
-					case TypeKind.Super:
-						return new InstructionDef(InstructionDefType.obj_maybeCacheable, null);
-					case TypeKind.String:
-						return new InstructionDef(InstructionDefType.primitive, allClasses.First(c => c.Type_identifier == (ulong)kind).Instance);
-					case TypeKind.Function:
-						return new InstructionDef(InstructionDefType.method, null);
-					case TypeKind.Array:
-						return new InstructionDef(InstructionDefType.array, null);
-					case TypeKind.Vector:
-						return new InstructionDef(InstructionDefType.vector, null);
-					case TypeKind.Namespace:
-						return new InstructionDef(InstructionDefType.obj, null);
-					default:
-						ASClass @class = allClasses.First(c => c.Type_identifier == (ulong)kind);
-
-						if (@class.Instance.Flags.HasFlag(ClassFlags.Struct))
-						{
-							return new InstructionDef(InstructionDefType.Struct, @class.Instance);
-						}
-						else if (@class.Instance.Flags.HasFlag(ClassFlags.Vector))
-						{
-							return new InstructionDef(InstructionDefType.vector, @class.Instance);
-						}
-						else
-						{
-							return new InstructionDef(InstructionDefType.obj_maybeCacheable, @class.Instance);
-						}
-				}
-
+				return DoFromTypeKind(kind, context);
 			}
 
 
@@ -862,11 +870,82 @@ namespace juicescript.compiler.IL.Optimize
 							break;
 						case INS_Code.ld_MethodVariableInitValue:
 							{
+								INS_Ld_MethodVariableInitValue ld_var_initvalue = (INS_Ld_MethodVariableInitValue)instruction;
 
-								result.Add(instruction, new List<InstructionDef>() {
-							 new InstructionDef( InstructionDefType.primitive,TypeKind.Any)
-							});
+								ASTrait t = method.Body._link_codescope.Members[ld_var_initvalue.heap.MemberIndex].trait;
+								NaNBoxing value = t.Value.initValue.Value;
 
+								if (t.TypeKind == TypeKind.Any)
+								{
+									//todo 根据实际初始化类型设置
+									TypeKind kind = TypeKind.Any;
+									switch (value.ValueType)
+									{
+										case NaNBoxing.BoxType.Number:
+											kind = TypeKind.Number;
+											break;
+										case NaNBoxing.BoxType.Undefined:
+											kind = TypeKind.Any;
+											break;
+										case NaNBoxing.BoxType.Null:
+											kind = TypeKind.Null;
+											break;
+										case NaNBoxing.BoxType.Boolean:
+											kind = TypeKind.Boolean;
+											break;
+										case NaNBoxing.BoxType.Int:
+											kind = TypeKind.Int;
+											break;
+										case NaNBoxing.BoxType.Uint:
+											kind = TypeKind.Uint;
+											break;
+										case NaNBoxing.BoxType.Sbyte:
+											kind = TypeKind.SByte;
+											break;
+										case NaNBoxing.BoxType.Byte:
+											kind = TypeKind.Byte;
+											break;
+										case NaNBoxing.BoxType.Short:
+											kind = TypeKind.Short;
+											break;
+										case NaNBoxing.BoxType.UShort:
+											kind = TypeKind.UShort;
+											break;
+										case NaNBoxing.BoxType.Float:
+											kind = TypeKind.Float;
+											break;
+										case NaNBoxing.BoxType.HeapPtr:
+											kind = TypeKind.String; //初始化值又是堆对象肯定是string
+											break;
+										case NaNBoxing.BoxType.LocalString:
+											kind = TypeKind.String;
+											break;
+										case NaNBoxing.BoxType.Fault:
+											throw new InvalidOperationException();
+											
+										default:
+											break;
+									}
+
+
+
+									result.Add(instruction, new List<InstructionDef> { new InstructionDef(InstructionDefType.primitive, 
+										kind
+										
+										) });
+								}
+								else
+								{
+									result.Add(instruction, new List<InstructionDef>() {
+
+									FromTypeKind( method.Body._link_codescope.Members[ ld_var_initvalue.heap.MemberIndex ].TypeKind
+
+
+									)
+
+
+									});
+								}
 								flag = true;
 							}
 							break;
@@ -2450,6 +2529,16 @@ namespace juicescript.compiler.IL.Optimize
 						case INS_Code.O_Store_Indexer:
 						case INS_Code.O_Store_InstanceField:
 							break;
+						case INS_Code.O_BindGlobal_Recurse_Call:
+							{								
+								var m = method;
+								
+								result.Add(instruction, new List<InstructionDef>() { FromTypeKind(m.ReturnTypeKind) });
+								flag = true;
+
+							}
+							break;
+							
 						case INS_Code.iter_initctx:
 
 						case INS_Code.iter_get:

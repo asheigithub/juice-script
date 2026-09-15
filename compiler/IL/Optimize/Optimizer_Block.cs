@@ -1113,6 +1113,38 @@ namespace juicescript.compiler.IL.Optimize
 
 
 
+		private static int OptimizeDirect_Recurse_Call(ControlFlowGraph cfg, NaNBoxing[] constants,  int slotcount)
+		{
+			foreach (var b in cfg.Blocks)
+			{
+				for (int i = 0; i < b.Instructions.Count; i++)
+				{
+					if (b.Instructions[i].INS_Code == INS_Code.ld_function_bindglobal_call)
+					{
+						INS_Ld_Function_BindGlobal_Call ld_Function_BindGlobal_Call = (INS_Ld_Function_BindGlobal_Call)b.Instructions[i];
+						var box = constants[ld_Function_BindGlobal_Call.const_index];
+						
+						ASMethod fun = (ASMethod) cfg.Method.Body.heapConstants.pool_values[box.IntValue ];
+						if (fun == cfg.Method && !fun.Flags.HasFlag( MethodFlags.NeedArguments) && !fun.Flags.HasFlag( MethodFlags.Generator ) && !fun.Flags.HasFlag( MethodFlags.ASYNC))
+						{
+							INS_O_BindG_Recurse_Call o_BindG_Recurse_Call = new INS_O_BindG_Recurse_Call(ld_Function_BindGlobal_Call.token);
+							o_BindG_Recurse_Call.dst = ld_Function_BindGlobal_Call.dst;
+							o_BindG_Recurse_Call.args = ld_Function_BindGlobal_Call.args;
+
+
+							b.Instructions[i] = o_BindG_Recurse_Call;				
+						}
+					}
+
+				}
+
+
+			}
+
+			return slotcount;
+		}
+
+
 
 		private static int OptimizeLdFunctionBindGlobal(ControlFlowGraph cfg, int slotcount)
 		{
@@ -2433,6 +2465,10 @@ namespace juicescript.compiler.IL.Optimize
 
 			foreach (var block in cfg.Blocks)
 			{
+			lbl_retry:
+
+				bool has_vector = false;
+
 				for (int i = 0; i < block.Instructions.Count; i++)
 				{
 					var ins = block.Instructions[i];
@@ -2512,8 +2548,6 @@ namespace juicescript.compiler.IL.Optimize
 
 							block.Instructions[i] = o_Store_VectorElement;
 
-
-
 						}
 						else if (def.All(d => instructionType.ContainsKey(d.Item1)
 							&& (instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj || instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable)
@@ -2573,8 +2607,40 @@ namespace juicescript.compiler.IL.Optimize
 
 							block.Instructions[i] = ld_Vector_Element;
 
-							instructionType.Add(ld_Vector_Element, instructionType[ld_MultiNameL_Val]);
+							if (def.Count == 1)
+							{
+								var vt = instructionType[def[0].Item1][def[0].Item2];
+								Debug.Assert(vt.Obj != null && vt.DefType == InstructionDefType.vector); 
+								Debug.Assert(vt.Obj is ASInstance);
 
+								var name = FindStackSlotDefAt(ld_Vector_Element.name, cfg);
+								if ( ((ASInstance)vt.Obj)._element_class != null &&   name.All(n => instructionType.ContainsKey(n.Item1)
+									&&
+									instructionType[n.Item1][n.Item2].DefType == InstructionDefType.primitive &&
+									instructionType[n.Item1][n.Item2].Obj is ASInstance &&
+
+									(TypeKind)((ASInstance)instructionType[n.Item1][n.Item2].Obj)._link_codescope.TypeLayout.ASType.Type_identifier >= TypeKind.Int &&
+									(TypeKind)((ASInstance)instructionType[n.Item1][n.Item2].Obj)._link_codescope.TypeLayout.ASType.Type_identifier <= TypeKind.Number
+
+								))
+								{
+
+									var d = DoFromTypeKind((TypeKind)((ASInstance)vt.Obj)._element_class.Type_identifier, context);
+									instructionType.Add(ld_Vector_Element, new List<InstructionDef> { d });
+									has_vector = true;
+								}
+								else
+								{
+									instructionType.Add(ld_Vector_Element, instructionType[ld_MultiNameL_Val]);
+								}
+							}
+							else
+							{ 
+								instructionType.Add(ld_Vector_Element, instructionType[ld_MultiNameL_Val]);
+							}
+
+								
+							
 						}
 						else if (def.All(d => instructionType.ContainsKey(d.Item1)
 							&& (instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj || instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable )
@@ -2600,6 +2666,10 @@ namespace juicescript.compiler.IL.Optimize
 
 
 				}
+
+				if (has_vector)
+					goto lbl_retry;
+
 			}
 			return slotcount;
 		}
@@ -2610,6 +2680,8 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
+			#region 变量自增自减
+
 			foreach (var block in cfg.Blocks)
 			{
 				for (int i = 0; i < block.Instructions.Count-1; i++)
@@ -2639,6 +2711,13 @@ namespace juicescript.compiler.IL.Optimize
 				}
 
 			}
+
+			#endregion
+
+
+
+
+
 
 			return slotcount;
 		}

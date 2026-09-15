@@ -388,6 +388,7 @@ namespace juicescript.ABC.INS
 
         O_Store_InstanceField = 108,     //写Instance成员
 
+		O_BindGlobal_Recurse_Call =109,  //递归调用 
 
 		//***矩阵，向量类***
 

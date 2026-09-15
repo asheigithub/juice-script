@@ -359,6 +359,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_Store_InstanceField:
 					instruction = new INS_O_Store_InstanceField(token);
 					break;
+				case INS_Code.O_BindGlobal_Recurse_Call:
+					instruction = new INS_O_BindG_Recurse_Call(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;
