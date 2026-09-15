@@ -4266,8 +4266,8 @@ namespace juicescript.runtime
 			ref ReceiveError error
 			)
 		{
-			StackLocater target;
-			target.index = dst_index;
+			//StackLocater target;
+			//target.index = dst_index;
 
 			int function_id; LoadInt32(&function_id, PC);
 			ScopeHeapLocater heapLocater = *(ScopeHeapLocater*)(*PC); *PC += 4;
@@ -4294,7 +4294,7 @@ namespace juicescript.runtime
 			int closure_ptr;
 
 
-			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, out closure);
+			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, dst_index, stackslots, out closure);
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -4341,13 +4341,13 @@ namespace juicescript.runtime
 
 				NaNBoxing ret = RunMethod(method, _this_,
 					((RtClosure)closure).ScopePtr,
-					(ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + target.index, closure_ptr);
+					(ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + dst_index, closure_ptr);
 				if (error.raised)
 				{
 					goto flag_handle_error;
 				}
 
-				stackslots[target.index] = ret;
+				stackslots[dst_index] = ret;
 			}
 
 		flag_handle_error:
@@ -4367,8 +4367,8 @@ namespace juicescript.runtime
 			ref ReceiveError error)
 		{
 
-			StackLocater target;
-			target.index = dst_index;
+			//StackLocater target;
+			//target.index = dst_index;
 
 
 			ScopeHeapLocater heapLocater = *(ScopeHeapLocater*)(*PC); *PC += 4;
@@ -4389,7 +4389,7 @@ namespace juicescript.runtime
 			int closure_ptr;
 
 
-			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, out closure);
+			closure_ptr = Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, dst_index, stackslots, out closure);
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -12092,8 +12092,8 @@ namespace juicescript.runtime
 
 		private unsafe void Ld_function(int dst_index, byte** PC, RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,  ref ReceiveError error)
 		{
-			StackLocater target;
-			target.index = dst_index;
+			//StackLocater target;
+			//target.index = dst_index;
 
 			ScopeHeapLocater heapLocater;
 			{
@@ -12121,7 +12121,7 @@ namespace juicescript.runtime
 			//ASMethod function = Context.link_const_methods[(int)fbox.UIntValue];
 
 			RtHeapBase closure;
-			Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, target, stackslots, out closure);
+			Ld_function_and_store_member(function, heapLocater, methodscope, scope_ptr, ref error, stackStPos, dst_index, stackslots, out closure);
 
 
 		}
@@ -12803,7 +12803,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			if (method.Flags.HasFlag(MethodFlags.ASYNC))
+			if ((method.Flags & MethodFlags.ASYNC) == MethodFlags.ASYNC )//.HasFlag(MethodFlags.ASYNC))
 			{
 			}
 			else if (returnTypeKind == TypeKind.Any
