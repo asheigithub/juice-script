@@ -133,10 +133,10 @@ namespace juicescript.runtime.buildin
 #endif
 				Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 				slots.Clear(); //栈清空 -- 防止GC时错误访问
-				int P_PC;
+				int P_PC =
 				context.player.Execute(ref info, m,  generatorWapper.generator,
 					//generatorWapper.scopeType, 
-					slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos, generatorWapper);
+					slots, stPos, ref error, returnSlotIndex, calleelastpos, generatorWapper);
 
 				context.BackTraceIndex--;
 
@@ -207,10 +207,10 @@ namespace juicescript.runtime.buildin
 #endif
 			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 			slots.Clear(); //栈清空 -- 防止GC时错误访问
-			int P_PC;
+			int P_PC = 
 			context.player.Execute(ref info, m,  generatorWapper.generator  ,
 				//generatorWapper.scopeType, 
-				slots, stPos, out P_PC, ref error, returnSlotIndex, calleelastpos,generatorWapper);
+				slots, stPos, ref error, returnSlotIndex, calleelastpos,generatorWapper);
 
 			context.BackTraceIndex--;
 			

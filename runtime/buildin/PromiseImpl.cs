@@ -2012,7 +2012,7 @@ namespace juicescript.runtime.buildin
 
 			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots + 1);
 			slots.Clear(); //栈清空 -- 防止GC时错误访问
-			int P_PC;
+			
 
 			ReceiveError asyncErr = default;
 
@@ -2026,7 +2026,7 @@ namespace juicescript.runtime.buildin
 			//{
 			context.player.Execute(ref info, m, genwapper.async_body,
 					//genwapper.scopeType,
-					slots, stPos, out P_PC, ref asyncErr, retslot, calleelastpos, genwapper);
+					slots, stPos,  ref asyncErr, retslot, calleelastpos, genwapper);
 			//}
 			//else
 			//{

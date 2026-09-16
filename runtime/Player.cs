@@ -13351,9 +13351,9 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization)]
-		internal unsafe void Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapBase methodscope, int scope_ptr, //ASContainer scopeType,
+		internal unsafe int Execute(ref ASMethodBody.MethodBodyInfo info, RtHeapBase methodscope, int scope_ptr, //ASContainer scopeType,
 			Span<NaNBoxing> stackslots,
-			int stackStPos, out int PC_PTR, ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
+			int stackStPos,  ref ReceiveError error, int returnSlotIndex, int calleelastPos, IResume_State resume_state)
 		{
 			//ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			//method.Body.GetInfo(ref info);
@@ -14986,9 +14986,9 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								PC_PTR = refPC;
+								//PC_PTR = refPC;
 								//中断运行
-								return;
+								return refPC;
 							}
 
 						case INS_Code.await_return:
@@ -15012,9 +15012,9 @@ namespace juicescript.runtime
 									goto flag_handle_error;
 								}
 
-								PC_PTR = refPC;
+								//PC_PTR = refPC;
 								//中断运行
-								return;
+								return refPC;
 
 
 							}
@@ -15676,21 +15676,31 @@ namespace juicescript.runtime
 			flag_end:
 				;
 
-				PC_PTR = (int)(PC - PC_START);
-			}
 
 
 #if DEBUG
-			if ((error.raised && error.error.ValueType != BoxType.Fault) || !error.raised)
-			{
-
-				if (iter_ctx_index != Context.GC.IterCtxIndex)
+				if ((error.raised && error.error.ValueType != BoxType.Fault) || !error.raised)
 				{
-					throw new InvalidOperationException();
-				}
 
-			}
+					if (iter_ctx_index != Context.GC.IterCtxIndex)
+					{
+						throw new InvalidOperationException();
+					}
+
+				}
 #endif
+
+
+
+
+
+				//PC_PTR = (int)(PC - PC_START);
+
+				return (int)(PC - PC_START);
+			}
+
+
+
 
 
 		}

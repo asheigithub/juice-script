@@ -509,7 +509,7 @@ namespace juicescript.runtime
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
-							int P_PC;
+							
 
 							try
 							{
@@ -522,7 +522,7 @@ namespace juicescript.runtime
 								Context.StackPosition += slots.Length;
 
 								Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
-									slots, Context.StackPosition, out P_PC, ref error, -1 , Context.StackPosition-1,null);
+									slots, Context.StackPosition, ref error, -1 , Context.StackPosition-1,null);
 							}
 							finally
 							{
@@ -572,7 +572,7 @@ namespace juicescript.runtime
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
-							int P_PC;
+							
 
 							try
 							{
@@ -583,7 +583,7 @@ namespace juicescript.runtime
 								Context.StackPosition += slots.Length;
 								//((RtPayloadScriptClass)@class).computing_member = member;
 								Execute(ref info,scopeinstance, run_methodscope,// is_closure ? scopeinstance.Type : null, 
-									slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+									slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
@@ -681,7 +681,7 @@ namespace juicescript.runtime
 
 							Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 							slots.Clear(); //栈清空 -- 防止GC时错误访问
-							int P_PC;
+							
 
 							try
 							{
@@ -692,7 +692,7 @@ namespace juicescript.runtime
 								Context.StackPosition += slots.Length;
 								Execute(ref info,scopeinstance, run_methodscope
 									//,is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
-									, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+									, slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
 							}
 							finally
 							{
@@ -923,11 +923,11 @@ namespace juicescript.runtime
 
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
-						int P_PC;
+						
 
 						Context.StackPosition += slots.Length;
 						Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
-							slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+							slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
 						Context.StackPosition -= slots.Length;
 						if (error.raised)
 						{
@@ -958,11 +958,11 @@ namespace juicescript.runtime
 
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
-						int P_PC;
+						
 
 						Context.StackPosition += slots.Length;
 						Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null, 
-							slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+							slots, Context.StackPosition,ref error, -1, Context.StackPosition - 1,null);
 						Context.StackPosition -= slots.Length;
 
 						if (error.raised)
@@ -1054,13 +1054,13 @@ namespace juicescript.runtime
 
 						Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, info.useSlots);
 						slots.Clear(); //栈清空 -- 防止GC时错误访问
-						int P_PC;
+						
 
 						Context.StackPosition += slots.Length;
 						Execute(ref info, scopeinstance, run_methodscope
 							//,is_closure ? scopeinstance.Type : scope.Container
 							//scope.Container
-							, slots, Context.StackPosition, out P_PC, ref error, -1, Context.StackPosition - 1,null);
+							, slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
 						Context.StackPosition -= slots.Length;
 
 
