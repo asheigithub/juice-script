@@ -521,8 +521,23 @@ namespace juicescript.runtime
 
 								Context.StackPosition += slots.Length;
 
-								Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
-									slots, Context.StackPosition, ref error, -1 , Context.StackPosition-1,null);
+								FrameContext frame = default;
+								frame.method = method;
+								frame.methodscope = scopeinstance;
+								frame.info = info;
+								frame.scope_ptr = run_methodscope;
+								frame.stackslots = slots;
+								frame.calleelastPos = Context.StackPosition - 1;
+								frame.resume_state = null;
+								frame.stackStPos = Context.StackPosition;
+								frame.returnSlotIndex = -1;
+
+
+								//Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
+								//	slots, Context.StackPosition, ref error, -1 , Context.StackPosition-1,null);
+
+								Execute(ref frame, ref error);
+
 							}
 							finally
 							{
@@ -582,8 +597,23 @@ namespace juicescript.runtime
 								}
 								Context.StackPosition += slots.Length;
 								//((RtPayloadScriptClass)@class).computing_member = member;
-								Execute(ref info,scopeinstance, run_methodscope,// is_closure ? scopeinstance.Type : null, 
-									slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
+
+
+								FrameContext frame = default;
+								frame.method = method;
+								frame.methodscope = scopeinstance;
+								frame.info = info;
+								frame.scope_ptr = run_methodscope;
+								frame.stackslots = slots;
+								frame.calleelastPos = Context.StackPosition - 1;
+								frame.resume_state = null;
+								frame.stackStPos = Context.StackPosition;
+								frame.returnSlotIndex = -1;
+
+								//Execute(ref info,scopeinstance, run_methodscope,// is_closure ? scopeinstance.Type : null, 
+								//	slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
+
+								Execute(ref frame, ref error);
 							}
 							finally
 							{
@@ -690,9 +720,25 @@ namespace juicescript.runtime
 									//iscomputintg_closure_initmember = member;
 								}
 								Context.StackPosition += slots.Length;
-								Execute(ref info,scopeinstance, run_methodscope
-									//,is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
-									, slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
+
+								FrameContext frame = default;
+								frame.method= method;
+								frame.methodscope = scopeinstance;
+								frame.info = info;
+								frame.scope_ptr = run_methodscope;
+								frame.stackslots = slots;
+								frame.calleelastPos = Context.StackPosition - 1;
+								frame.resume_state = null;
+								frame.stackStPos = Context.StackPosition;
+								frame.returnSlotIndex = -1;
+
+
+								//Execute(ref info,scopeinstance, run_methodscope
+								//	//,is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
+								//	, slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
+
+								Execute(ref frame, ref error);
+
 							}
 							finally
 							{
@@ -926,8 +972,23 @@ namespace juicescript.runtime
 						
 
 						Context.StackPosition += slots.Length;
-						Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
-							slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
+
+						FrameContext frame = default;
+						frame.method = method;
+						frame.methodscope = scopeinstance;
+						frame.info = info;
+						frame.scope_ptr = run_methodscope;
+						frame.stackslots = slots;
+						frame.calleelastPos = Context.StackPosition - 1;
+						frame.resume_state = null;
+						frame.stackStPos = Context.StackPosition;
+						frame.returnSlotIndex = -1;
+
+						//Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
+						//	slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
+
+						Execute(ref frame, ref error);
+
 						Context.StackPosition -= slots.Length;
 						if (error.raised)
 						{
@@ -961,8 +1022,25 @@ namespace juicescript.runtime
 						
 
 						Context.StackPosition += slots.Length;
-						Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null, 
-							slots, Context.StackPosition,ref error, -1, Context.StackPosition - 1,null);
+
+						FrameContext frame = default;
+						frame.method = method;
+						frame.methodscope = scopeinstance;
+						frame.info = info;
+						frame.scope_ptr = run_methodscope;
+						frame.stackslots = slots;
+						frame.calleelastPos = Context.StackPosition - 1;
+						frame.resume_state = null;
+						frame.stackStPos = Context.StackPosition;
+						frame.returnSlotIndex = -1;
+
+
+						//Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null, 
+						//	slots, Context.StackPosition,ref error, -1, Context.StackPosition - 1,null);
+
+						Execute(ref frame, ref error);
+
+
 						Context.StackPosition -= slots.Length;
 
 						if (error.raised)
@@ -1057,10 +1135,27 @@ namespace juicescript.runtime
 						
 
 						Context.StackPosition += slots.Length;
-						Execute(ref info, scopeinstance, run_methodscope
-							//,is_closure ? scopeinstance.Type : scope.Container
-							//scope.Container
-							, slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
+
+						FrameContext frame = default;
+						frame.method = method;
+						frame.methodscope = scopeinstance;
+						frame.info = info;
+						frame.scope_ptr = run_methodscope;
+						frame.stackslots = slots;
+						frame.calleelastPos = Context.StackPosition - 1;
+						frame.resume_state = null;
+						frame.stackStPos = Context.StackPosition;
+						frame.returnSlotIndex = -1;
+
+
+						//Execute(ref info, scopeinstance, run_methodscope
+						//	//,is_closure ? scopeinstance.Type : scope.Container
+						//	//scope.Container
+						//	, slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
+
+						Execute(ref frame, ref error);
+
+
 						Context.StackPosition -= slots.Length;
 
 

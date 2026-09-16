@@ -71,7 +71,7 @@ namespace juicescript.ABC
 
 
         [StructLayout(LayoutKind.Explicit)]
-		public struct MethodBodyInfo
+		public ref struct MethodBodyInfo
         {
             [FieldOffset(0)]
             public int useSlots;

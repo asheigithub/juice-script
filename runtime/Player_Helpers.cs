@@ -1096,7 +1096,7 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe void Exec_Add(int dst_index, byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		private unsafe void Exec_Add(int dst_index, byte** PC, ref FrameContext frame, ref ReceiveError error)
 		{
 			
 			StackLocater v1;
@@ -1107,6 +1107,7 @@ namespace juicescript.runtime
 			LoadStackLocater(&v1, PC);
 			LoadStackLocater(&v2, PC);
 
+			var stackslots = frame.stackslots;
 
 			NaNBoxing n1 = stackslots[v1.index];
 			NaNBoxing n2 = stackslots[v2.index];
@@ -1122,7 +1123,7 @@ namespace juicescript.runtime
 			else
 			{
 
-				Exec_AddSlow(dst_index, n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
+				Exec_AddSlow(dst_index, n1, n2, frame.scope_ptr, frame.stackStPos, stackslots, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
 			}
 
 		}
@@ -1423,7 +1424,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe void Exec_Sub(int dst_index, byte** PC, ref ReceiveError error, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr)
+		private unsafe void Exec_Sub(int dst_index, byte** PC, ref FrameContext frame, ref ReceiveError error)
 		{
 
 			//StackLocater v1;
@@ -1438,6 +1439,8 @@ namespace juicescript.runtime
 			LoadInt32(&v2, PC);
 
 
+			var stackslots = frame.stackslots;
+
 			NaNBoxing n1 = stackslots[v1];
 			NaNBoxing n2 = stackslots[v2];
 
@@ -1451,7 +1454,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Exec_SubSlow(dst_index,  n1, n2, scope_ptr, stackStPos, stackslots, thisPtr, ref error);
+				Exec_SubSlow(dst_index,  n1, n2, frame.scope_ptr, frame.stackStPos, frame.stackslots, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
 			}
 
 		}
@@ -4358,9 +4361,11 @@ namespace juicescript.runtime
 
 
 		
-		private unsafe void O_BindGlobal_Recurse_Call( int dst_index, int stackStPos, byte** PC,RtHeapBase methodscope,ASMethod method,
-			int scope_ptr,Span<NaNBoxing> stackslots,ref ReceiveError error)
+		private unsafe void O_BindGlobal_Recurse_Call( int dst_index, byte** PC,ref FrameContext frame,
+			ref ReceiveError error)
 		{
+			var method = ((ASMethodBody)frame.methodscope.Type).Method;
+
 			int argsCount;
 			LoadInt32(&argsCount, PC);
 
@@ -4369,19 +4374,30 @@ namespace juicescript.runtime
 			*PC += argsCount * 4;
 
 			NaNBoxing _this_ = default;
-			_this_.SetHeapPtr(((ASMethodBody)methodscope.Type).rt__globalindex, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
+			_this_.SetHeapPtr(((ASMethodBody)frame.methodscope.Type).rt__globalindex, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
-			NaNBoxing ret = RunMethod(method, _this_,
-				((RtMethodScope)methodscope).ParentPtr,
-				(ushort)argsCount, argementsPtr, stackslots, ref error, stackStPos + dst_index
+			//NaNBoxing ret = RunMethod(method, _this_,
+			//	((RtMethodScope)frame.methodscope).ParentPtr,
+			//	(ushort)argsCount, argementsPtr, frame.stackslots, ref error, frame.stackStPos + dst_index
 
-				);
+			//	);
+
+			RunMethodArgs methodArgs = default;
+			methodArgs.scope_ptr = ((RtMethodScope)frame.methodscope).ParentPtr;
+			methodArgs.thisPtr = _this_;
+			methodArgs.argementPtr = argementsPtr;
+			methodArgs.argsCount = (ushort)argsCount;
+			methodArgs.returnSlotIndex = frame.stackStPos + dst_index;
+			methodArgs.slot = frame.stackslots;
+
+			NaNBoxing ret = RunMethod(method, ref methodArgs, ref error);
+
 			if (error.raised)
 			{
 				return;
 			}
 
-			stackslots[dst_index] = ret;
+			frame.stackslots[dst_index] = ret;
 		}
 
 
@@ -12806,18 +12822,29 @@ namespace juicescript.runtime
 
 
 		
-		private unsafe void Return_Value(int dst_index,int returnSlotIndex, 
-			ASMethod method , RtMethodScope mscope , Span<NaNBoxing> stackslots,int stackStPos,
-			int calleelastPos,int scope_ptr,
-			ref ReceiveError error,bool compute_ref)
+		private unsafe void Return_Value(int dst_index,
+
+			//int returnSlotIndex, 
+			//ASMethod method , 
+			//RtMethodScope mscope , 
+			//Span<NaNBoxing> stackslots,
+			//int stackStPos,
+			//int calleelastPos,
+			//int scope_ptr,
+			
+			ref FrameContext frame,
+
+			ref ReceiveError error,
+			bool compute_ref)
 		{
-			Debug.Assert(returnSlotIndex >= 0);
+			Debug.Assert(frame.returnSlotIndex >= 0);
 
 			//Context.GC.CheckGC(ref error);
 			//StackLocater value;
 			//value.index = dst_index;
+			var method = frame.method; //((ASMethodBody)frame.methodscope.Type).Method;
 
-			var v = stackslots[dst_index];
+			var v = frame.stackslots[dst_index];
 
 			var v_valuetype = v.ValueType;
 			var returnTypeKind = method.ReturnTypeKind;
@@ -12825,7 +12852,7 @@ namespace juicescript.runtime
 			if (v.HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ)
 			{
 				v = LoadValue((RtStackCache)Context.GC.Heap[v.HeapPtr],
-						stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, stackslots, stackStPos + dst_index);
+						frame.stackStPos - method.Body._link_codescope.Members.Count - 2, ref error, frame.stackslots, frame.stackStPos + dst_index);
 				if (error.raised)
 				{
 					return;
@@ -12867,16 +12894,17 @@ namespace juicescript.runtime
 															//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
 				)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, mscope ,v, ref error,compute_ref);
+				StoreReturnSlot(ref Context.StackSlots[frame.returnSlotIndex], frame.stackStPos, frame.returnSlotIndex, frame.calleelastPos, frame.scope_ptr, 
+					(RtMethodScope)frame.methodscope ,v, ref error,compute_ref);
 				if (error.raised)
 				{
-					Context.StackSlots[returnSlotIndex].SetUndefined();
+					Context.StackSlots[frame.returnSlotIndex].SetUndefined();
 					return;
 				}
 			}
 			else
 			{
-				Context.StackSlots[returnSlotIndex] = v;
+				Context.StackSlots[frame.returnSlotIndex] = v;
 			}
 
 		}

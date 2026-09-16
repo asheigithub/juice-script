@@ -2022,24 +2022,28 @@ namespace juicescript.runtime.buildin
 #if DEBUG
 			Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
 #endif
-			//if (!g_method.Flags.HasFlag(MethodFlags.Native))
-			//{
-			context.player.Execute(ref info, m, genwapper.async_body,
-					//genwapper.scopeType,
-					slots, stPos,  ref asyncErr, retslot, calleelastpos, genwapper);
-			//}
-			//else
-			//{
-			//	context.player.SetNativeDelegate(g_method, ref asyncErr);
+			
 
-			//	if (!asyncErr.raised)
-			//	{
-			//		((NativeFun)g_method.nativefunction_delegate)(context, g_method, genwapper.async_body , genwapper.thisPtr, context.StackPosition,
-			//			ref asyncErr, retslot);
-			//	}
-				
-			//}
+			FrameContext frame = default;
+			frame.method = g_method;
+			frame.methodscope = m;
+			frame.info = info;
+			frame.scope_ptr = genwapper.async_body;
+			frame.stackslots = slots;
+			frame.calleelastPos = calleelastpos;
+			frame.resume_state = genwapper;
+			frame.stackStPos = stPos;
+			frame.returnSlotIndex = retslot;
 
+
+
+			//context.player.Execute(ref info, m, genwapper.async_body,
+			//		//genwapper.scopeType,
+			//		slots, stPos,  ref asyncErr, retslot, calleelastpos, genwapper);
+
+			context.player.Execute(ref frame, ref asyncErr);
+
+			
 
 
 			if (asyncErr.raised)

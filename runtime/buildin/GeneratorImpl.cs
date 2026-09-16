@@ -133,10 +133,26 @@ namespace juicescript.runtime.buildin
 #endif
 				Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 				slots.Clear(); //栈清空 -- 防止GC时错误访问
-				int P_PC =
-				context.player.Execute(ref info, m,  generatorWapper.generator,
-					//generatorWapper.scopeType, 
-					slots, stPos, ref error, returnSlotIndex, calleelastpos, generatorWapper);
+
+				FrameContext frame = default;
+				frame.method = g_method;
+				frame.methodscope = m;
+				frame.info = info;
+				frame.scope_ptr = generatorWapper.generator;
+				frame.stackslots = slots;
+				frame.calleelastPos = calleelastpos;
+				frame.resume_state = generatorWapper;
+				frame.stackStPos = stPos;
+				frame.returnSlotIndex = returnSlotIndex;
+
+
+
+				//int P_PC =
+				//context.player.Execute(ref info, m,  generatorWapper.generator,
+				//	//generatorWapper.scopeType, 
+				//	slots, stPos, ref error, returnSlotIndex, calleelastpos, generatorWapper);
+
+				int P_PC = context.player.Execute(ref frame, ref error);
 
 				context.BackTraceIndex--;
 
@@ -207,10 +223,26 @@ namespace juicescript.runtime.buildin
 #endif
 			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 			slots.Clear(); //栈清空 -- 防止GC时错误访问
-			int P_PC = 
-			context.player.Execute(ref info, m,  generatorWapper.generator  ,
-				//generatorWapper.scopeType, 
-				slots, stPos, ref error, returnSlotIndex, calleelastpos,generatorWapper);
+
+
+			FrameContext frame = default;
+			frame.method = g_method;
+			frame.methodscope = m;
+			frame.info = info;
+			frame.scope_ptr = generatorWapper.generator;
+			frame.stackslots = slots;
+			frame.calleelastPos = calleelastpos;
+			frame.resume_state = generatorWapper;
+			frame.stackStPos = stPos;
+			frame.returnSlotIndex = returnSlotIndex;
+
+
+			//int P_PC = 
+			//context.player.Execute(ref info, m,  generatorWapper.generator  ,
+			//	//generatorWapper.scopeType, 
+			//	slots, stPos, ref error, returnSlotIndex, calleelastpos,generatorWapper);
+
+			int P_PC = context.player.Execute(ref frame, ref error);
 
 			context.BackTraceIndex--;
 			
