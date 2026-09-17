@@ -193,7 +193,7 @@ namespace juicescript.runtime
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        [MethodImpl( MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl( MethodImplOptions.AggressiveInlining)]
         public NaNBoxing ReadSlot(int index)
         {
 #if FORCOMPILER

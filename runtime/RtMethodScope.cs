@@ -47,7 +47,7 @@ namespace juicescript.runtime
 
 		public NaNBoxing ThisPtr
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get {
 				return Slots.Span[SlotCount - 1];
 			}
@@ -74,7 +74,7 @@ namespace juicescript.runtime
 		/// <param name="start"></param>
 		/// <param name="codescope"></param>
 		/// <param name="isStackSlot"></param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void InitSlot(NaNBoxing[] array, int start, CodeScope codescope,bool isStackSlot)
 		{
 			IsStackSlot = isStackSlot;
@@ -229,7 +229,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int cloneout_ptr;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetSlot(NaNBoxing value, ushort memberIndex)
 		{
 			Slots.Span[memberIndex] = value;
@@ -242,7 +242,7 @@ namespace juicescript.runtime
 #endif
 
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(ushort memberIndex
 			)
 		{
@@ -261,7 +261,7 @@ namespace juicescript.runtime
 			return Slots.Span[memberIndex];
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal ref NaNBoxing ReadSlotRef(ushort memberIndex)
 		{ 
 
@@ -271,7 +271,7 @@ namespace juicescript.runtime
 
 		internal Span<NaNBoxing> __get_slots_internal
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Slots.Span;
@@ -285,7 +285,7 @@ namespace juicescript.runtime
 		/// 在直接调用player.Execute时，没有用RunMethod生成methodscope。需要用这个把当前BackTraceIndex 指向的缓存MethocScope的槽清理掉
 		/// 否则GC会去查找错误的引用。
 		/// </summary>
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal void EmptyStackSlot()
 		{
 			Slots = default; //new Memory<NaNBoxing>();

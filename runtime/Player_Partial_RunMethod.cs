@@ -85,7 +85,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe NaNBoxing RunMethod_FullCheck(ASMethod method, 
 			//NaNBoxing thisPtr, int scope_ptr,			
 			//ushort args, byte* argementPtr,
@@ -1074,7 +1074,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void RunMethod_MatchArgs(ASMethod method, 
 			ref RunMethodArgs args,
 			ref ReceiveError error,
@@ -1382,7 +1382,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal unsafe NaNBoxing RunMethod(ASMethod method,
 
 			//NaNBoxing thisPtr, int scope_ptr,
@@ -1460,7 +1460,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining )]
 		internal unsafe NaNBoxing RunMethod(ASMethod method,
 
 			NaNBoxing thisPtr, int scope_ptr,

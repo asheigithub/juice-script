@@ -81,12 +81,12 @@ namespace juicescript.ABC
             public int instructions;
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void GetInfo(ref MethodBodyInfo info)
         {
             GetInfo(ref info, ByteCode);
         }
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static unsafe void GetInfo(ref MethodBodyInfo info, byte[] ByteCode)
         {
 			fixed (void* p = ByteCode)

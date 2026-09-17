@@ -23,7 +23,7 @@ namespace juicescript.runtime
 			h_number,
 			h_string
 		}
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		internal bool IsNumeric(NaNBoxing value)
 		{
 			switch (value.ValueType)
@@ -42,7 +42,7 @@ namespace juicescript.runtime
 			}
 		}
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool IsPrimitive(NaNBoxing value)
 		{
 			//return (value.ValueType != NaNBoxing.BoxType.HeapPtr || Context.GC.Heap[value.HeapPtr].Kind == RtHeapTypeKind.STRING);

@@ -46,7 +46,7 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void ClearData(NaNBoxing thisPtr,int scope_ptr,ASContainer as_type)
 		{
 			This = thisPtr;
@@ -61,7 +61,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void LinkToHeap(RtClosure dst, int dstPtr)
 		{ 
 			HEAPINSTANCE_PTR = dstPtr;
@@ -86,7 +86,7 @@ namespace juicescript.runtime
 		internal refbynextframe nextframe_ref_state;
 
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtClosure target)
 		{
 			var payload = ((RtClosure)player.Context.GC.Heap[ptr]);

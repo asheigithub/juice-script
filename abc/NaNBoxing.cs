@@ -115,7 +115,7 @@ namespace juicescript
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool FastTestComp(NaNBoxing other,out bool isequal)
         {
             var vt1 = ValueType;
@@ -141,7 +141,7 @@ namespace juicescript
                 return FastTestComp_Step2(other, out isequal);
             }            
 		}
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private bool FastTestComp_Step2(NaNBoxing other, out bool isequal)
         {
 			//if (store == QNAN || other.store == QNAN)
@@ -337,7 +337,7 @@ namespace juicescript
         /// <param name="b"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        [MethodImpl( MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl( MethodImplOptions.AggressiveInlining)]
         public static bool FastAdd(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
         {
             result = default;
@@ -373,7 +373,7 @@ namespace juicescript
            
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static bool FastAdd_Step2(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
         {
 			result = default;
@@ -670,7 +670,7 @@ namespace juicescript
         /// <param name="b"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
 			var vta = a.ValueType;
@@ -702,7 +702,7 @@ namespace juicescript
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static bool FastMinus_Step2(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
 
@@ -944,7 +944,7 @@ namespace juicescript
 
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static double GetDouble(NaNBoxing v)
         {
             if (v.store == QNAN)
@@ -993,7 +993,7 @@ namespace juicescript
 			}
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static float GetFloat(NaNBoxing v)
 		{
 			if (v.store == QNAN)
@@ -1042,7 +1042,7 @@ namespace juicescript
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static int GetInt(NaNBoxing v)
         {
 #if DEBUG
@@ -1091,7 +1091,7 @@ namespace juicescript
 
         public BoxType ValueType
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
 
@@ -1155,7 +1155,7 @@ namespace juicescript
         //未知的堆类型 实际上运行时只在GetSaveValue内部用到!
         public const int UNKNOWN_HEAPKIND = 0xF;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetHeapPtr(int indexofheap,byte heapkind , byte heapflag)
         {
 
@@ -1176,7 +1176,7 @@ namespace juicescript
 
         public int HeapPtr
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return (int)(store & 0xffffffff);
@@ -1185,7 +1185,7 @@ namespace juicescript
 
         public byte HeapKind
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             { 
                 return store < UNDEFINED ? (byte)0 : (byte)((store >> 32) & 0xf);
@@ -1194,14 +1194,14 @@ namespace juicescript
 
         public byte HeapFlag
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
 				return (byte)((store >> 32 >> 4) & 0xf);
 			}
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetNumber(double value)
         {
             if (double.IsNaN(value))
@@ -1217,7 +1217,7 @@ namespace juicescript
 
         public double Number
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 if (store == QNAN)
@@ -1231,19 +1231,19 @@ namespace juicescript
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetNull()
         {
             store = NULL;
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetUndefined()
         {
             store = UNDEFINED;
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetBoolean(bool v)
         {
             if (v)
@@ -1254,14 +1254,14 @@ namespace juicescript
 
         public bool Boolean
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return store == TRUE;
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetSByte(sbyte v)
         { 
             store = TAG_SBYTE | (uint)v;
@@ -1269,14 +1269,14 @@ namespace juicescript
 
         public sbyte SByteValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return (sbyte)(store & 0xffffffff);
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetByte(byte v)
         { 
             store = TAG_BYTE | (uint)v;
@@ -1284,14 +1284,14 @@ namespace juicescript
 
         public byte ByteValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return (byte)(store & 0xffffffff);
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetShort(short v)
         {
             store = TAG_SHORT | (uint)v;
@@ -1299,14 +1299,14 @@ namespace juicescript
 
         public short ShortValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return (short)(store & 0xffffffff);
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetUShort(ushort v)
         { 
             store = TAG_USHORT | v;
@@ -1314,14 +1314,14 @@ namespace juicescript
 
         public ushort UShortValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return (ushort)(store & 0xffffffff);
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetFloat(float v)
         {
             unsafe
@@ -1337,7 +1337,7 @@ namespace juicescript
 
         public float FloatValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             { 
                 unsafe
@@ -1351,7 +1351,7 @@ namespace juicescript
         }
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetInt(int v)
         {
             store = TAG_INT | (uint)v;
@@ -1359,14 +1359,14 @@ namespace juicescript
 
         public int IntValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return (int)(store & 0xffffffff);
             }
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetUInt(uint v)
         {
             store = TAG_UINT | v;
@@ -1374,7 +1374,7 @@ namespace juicescript
 
         public uint UIntValue
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
              return   (uint)(store & 0xffffffff);
@@ -1505,7 +1505,7 @@ namespace juicescript
         /// </summary>
         public ulong Raw
         {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
                 return store;
@@ -1681,7 +1681,7 @@ namespace juicescript
             return false;
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void setDefault(TypeKind returnTypeKind)
 		{
             switch (returnTypeKind)

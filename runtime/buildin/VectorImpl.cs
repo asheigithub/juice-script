@@ -5481,7 +5481,7 @@ namespace juicescript.runtime.buildin
 			internal bool isFixed;
 
 
-			[MethodImpl( MethodImplOptions.AggressiveOptimization )]
+			//[MethodImpl( MethodImplOptions.AggressiveOptimization )]
 			internal bool IsValidIndexRange(NaNBoxing index, out int valided_index)
 			{
 
@@ -5559,7 +5559,7 @@ namespace juicescript.runtime.buildin
 				return CollectionsMarshal.AsSpan(buffer).Slice(offset, size);
 			}
 
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			internal NaNBoxing ReadSlot( TypeKind element_type, int validid, Player player, int vector_ptr, int reseveSlot, ASClass element_asclass)
 			{
 				NaNBoxing result = default;

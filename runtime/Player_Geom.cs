@@ -18,8 +18,8 @@ namespace juicescript.runtime
 #endif
 	{
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Add_Vec2_Vec2(int dst_index, ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots,int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Add_Vec2_Vec2(int dst_index, ref byte* PC, ref FrameContext frame ,ref ReceiveError error
 			)
 		{
 			//StackLocater dst;
@@ -32,8 +32,8 @@ namespace juicescript.runtime
 			int v2 = LoadStackLocater(ref PC);
 
 
-			NaNBoxing n1 = stackslots[v1];
-			NaNBoxing n2 = stackslots[v2];
+			NaNBoxing n1 = frame.stackslots[v1];
+			NaNBoxing n2 = frame.stackslots[v2];
 
 			if (n1.ValueType == NaNBoxing.BoxType.Null || n2.ValueType == NaNBoxing.BoxType.Null)
 			{ 
@@ -84,7 +84,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			int resultptr = InitCacheInstance(Context.VEC2 , stackStPos + dst_index , false, out RtInstance payload_result);
+			int resultptr = InitCacheInstance(Context.VEC2 , frame.stackStPos + dst_index , false, out RtInstance payload_result);
 			
 			var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 			unsafe
@@ -101,8 +101,8 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Sub_Vec2_Vec2(int dst_index,ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Sub_Vec2_Vec2(int dst_index,ref byte* PC,ref FrameContext frame , ref ReceiveError error
 			)
 		{
 			//StackLocater dst;
@@ -115,8 +115,8 @@ namespace juicescript.runtime
 			int v2 = LoadStackLocater(ref PC);
 
 
-			NaNBoxing n1 = stackslots[v1];
-			NaNBoxing n2 = stackslots[v2];
+			NaNBoxing n1 = frame.stackslots[v1];
+			NaNBoxing n2 = frame.stackslots[v2];
 
 			if (n1.ValueType == NaNBoxing.BoxType.Null || n2.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -167,7 +167,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+			int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 			var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 			unsafe
@@ -184,8 +184,8 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Scale_Vec2(int dst_index,ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Scale_Vec2(int dst_index,ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -198,8 +198,8 @@ namespace juicescript.runtime
 			int v2 = LoadStackLocater(ref PC);
 
 
-			NaNBoxing n1 = stackslots[v1];
-			NaNBoxing n2 = stackslots[v2];
+			NaNBoxing n1 = frame.stackslots[v1];
+			NaNBoxing n2 = frame.stackslots[v2];
 
 			if (n1.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -233,7 +233,7 @@ namespace juicescript.runtime
 			{
 				double factor = Extensions.GetDoubleValue(n2);
 
-				int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+				int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 				var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 				unsafe
@@ -249,7 +249,7 @@ namespace juicescript.runtime
 			{
 				float factor = Extensions.GetFloatValue(n2);
 
-				int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+				int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 				var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 				unsafe
@@ -265,8 +265,8 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Scale_Vec2_Reciprocal(int dst_index, ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Scale_Vec2_Reciprocal(int dst_index, ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -280,8 +280,8 @@ namespace juicescript.runtime
 			int v1 = LoadStackLocater(ref PC);
 			int v2 = LoadStackLocater(ref PC);
 
-			NaNBoxing n1 = stackslots[v1];
-			NaNBoxing n2 = stackslots[v2];
+			NaNBoxing n1 = frame.stackslots[v1];
+			NaNBoxing n2 = frame.stackslots[v2];
 
 			if (n1.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -315,7 +315,7 @@ namespace juicescript.runtime
 			{
 				double factor = 1.0/Extensions.GetDoubleValue(n2);
 
-				int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+				int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 				var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 				unsafe
@@ -331,7 +331,7 @@ namespace juicescript.runtime
 			{
 				float factor = 1.0f/Extensions.GetFloatValue(n2);
 
-				int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+				int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 				var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 				unsafe
@@ -348,8 +348,8 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Neg_Pos_Vec2(int dst_index, ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Neg_Pos_Vec2(int dst_index, ref byte* PC,ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -365,7 +365,7 @@ namespace juicescript.runtime
 
 			int v1_index = _store >> 1;
 
-			NaNBoxing n1 = stackslots[v1_index];
+			NaNBoxing n1 = frame.stackslots[v1_index];
 			
 			if (n1.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -397,7 +397,7 @@ namespace juicescript.runtime
 			if (is_positive)
 			{
 				
-				int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+				int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 				var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 				unsafe
@@ -411,7 +411,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index, false, out RtInstance payload_result);
+				int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 
 				var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 				unsafe
@@ -427,8 +427,8 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Mul_Mat22_Vec2(int dst_index,ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Mul_Mat22_Vec2(int dst_index,ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -442,8 +442,8 @@ namespace juicescript.runtime
 			int v1 = LoadStackLocater(ref PC);
 			int v2 = LoadStackLocater(ref PC);
 
-			NaNBoxing mat = stackslots[v1];
-			NaNBoxing vec = stackslots[v2];
+			NaNBoxing mat = frame.stackslots[v1];
+			NaNBoxing vec = frame.stackslots[v2];
 
 			if (mat.ValueType == NaNBoxing.BoxType.Null || vec.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -488,7 +488,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			int resultptr = InitCacheInstance(Context.VEC2, stackStPos + dst_index , false, out RtInstance payload_result);
+			int resultptr = InitCacheInstance(Context.VEC2, frame.stackStPos + dst_index , false, out RtInstance payload_result);
 			var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 			unsafe
 			{
@@ -503,8 +503,8 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Mul_Mat22_Mat22(int dst_index,ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Mul_Mat22_Mat22(int dst_index,ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -520,8 +520,8 @@ namespace juicescript.runtime
 			int v2 = LoadStackLocater(ref PC);
 
 
-			NaNBoxing m1 = stackslots[v1];
-			NaNBoxing m2 = stackslots[v2];
+			NaNBoxing m1 = frame.stackslots[v1];
+			NaNBoxing m2 = frame.stackslots[v2];
 	
 			if (m1.ValueType == NaNBoxing.BoxType.Null || m2.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -574,7 +574,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			int resultptr = InitCacheInstance(Context.MAT22, stackStPos + dst_index, false, out RtInstance payload_result);
+			int resultptr = InitCacheInstance(Context.MAT22, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 			var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 			unsafe
 			{
@@ -593,8 +593,8 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Add_Mat22_Mat22(int dst_index, ref byte* PC, ref ReceiveError error, Span<NaNBoxing> stackslots, int stackStPos
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		private unsafe void Exec_Add_Mat22_Mat22(int dst_index, ref byte* PC,ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -610,8 +610,8 @@ namespace juicescript.runtime
 			int v2 = LoadStackLocater(ref PC);
 
 
-			NaNBoxing m1 = stackslots[v1];
-			NaNBoxing m2 = stackslots[v2];
+			NaNBoxing m1 = frame.stackslots[v1];
+			NaNBoxing m2 = frame.stackslots[v2];
 	
 			if (m1.ValueType == NaNBoxing.BoxType.Null || m2.ValueType == NaNBoxing.BoxType.Null)
 			{
@@ -664,7 +664,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			int resultptr = InitCacheInstance(Context.MAT22, stackStPos + dst_index, false, out RtInstance payload_result);
+			int resultptr = InitCacheInstance(Context.MAT22, frame.stackStPos + dst_index, false, out RtInstance payload_result);
 			var store = ((RtInstance)payload_result).GetStoreData(this, (ASInstance)payload_result.Type);
 			unsafe
 			{

@@ -112,7 +112,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int HEAPINSTANCE_PTR;// { get; private set; }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreRest(Memory<NaNBoxing> store,int store_startindex)
 		{
 			payload = this;
@@ -130,7 +130,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetStoreCacheZero(bool clear, Memory<NaNBoxing> store, int cache_struct_p )
 		{
 			payload = this;
@@ -164,7 +164,7 @@ namespace juicescript.runtime
 		//}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
 			//var payload = ((RtArray)player.Context.GC.Heap[ptr]);
@@ -270,7 +270,7 @@ namespace juicescript.runtime
 
 		internal uint array_len = 0;
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public uint GetLength(out RtArray target)
 		{
 			target = payload;
@@ -1871,7 +1871,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal bool TrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player, out RtArray target, ref ReceiveError error)
 		{
 			//Debug.Assert(HEAPINSTANCE_PTR == 0);
@@ -1903,7 +1903,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CopyStruct(RtHeapBase dst, RtHeapBase src, Player player)
 		{
 			if(dst == src) return;
@@ -1916,7 +1916,7 @@ namespace juicescript.runtime
 			((RtInstance)dst).CloneOther((RtInstance)src, player);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private bool DoTrySetSlotIfReplaceStructOrNotHeap(NaNBoxing box, uint array_index, Player player,out RtArray arr ,ref ReceiveError error)
 		{
 			if (StoreMode == ArrayStoreMode.cache_on_stack)
@@ -2125,7 +2125,7 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(uint array_index,  out bool isoutofindex_or_ishole)
 		{
 			Debug.Assert(HEAPINSTANCE_PTR == 0);

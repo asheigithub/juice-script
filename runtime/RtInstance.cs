@@ -33,7 +33,7 @@ namespace juicescript.runtime
 		/// </summary>
 		public const int MAX_CACHEABLE_SIZE = 16 * 8;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static int DoFindAndUpdatePtr(int ptr, Player player, ASInstance type, out RtInstance target)
 		{
 
@@ -94,7 +94,7 @@ namespace juicescript.runtime
 
 		//}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtInstance target)
 		{
 			RtHeapBase tmp = player.Context.GC.Heap[ptr];
@@ -141,7 +141,7 @@ namespace juicescript.runtime
 
 		private Memory<byte> store;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Span<byte> GetStoreData(Player player, ASInstance type)
 		{
 			if (HEAPINSTANCE_PTR == 0)
@@ -327,7 +327,7 @@ namespace juicescript.runtime
 
 		private int m__proto__;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int PROTOTYPE(Player player, ASInstance type)
 		{
 			if (HEAPINSTANCE_PTR == 0)
@@ -368,7 +368,7 @@ namespace juicescript.runtime
 		/// </summary>
 		internal int HEAPINSTANCE_PTR;// { get; private set; }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CloneOther(RtInstance other, Player player)
 		{
 
@@ -380,7 +380,7 @@ namespace juicescript.runtime
 			CopyFrom(other, player, Type._link_codescope.TypeLayout.Size);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void LinkToPayloadOffset(int offset, int storePtr)
 		{
 			methodscopeslot_ref_state = 0;
@@ -389,7 +389,7 @@ namespace juicescript.runtime
 			HEAPINSTANCE_PTR = storePtr; //指向Vector.
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetDefaultCacheData(int _proto_)
 		{
 			HEAPINSTANCE_PTR = 0;
@@ -756,13 +756,13 @@ namespace juicescript.runtime
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public NaNBoxing ReadSlot(ushort memberIndex, Player player)
 		{
 			return ReadSlot(memberIndex, player, -1, 0);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetSlot(NaNBoxing value, ushort memberIndex, Player player)
 		{
 #if FORCOMPILER
@@ -788,7 +788,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal unsafe static void SetSlotDataByValue(TypeKind kind, void* ptr, NaNBoxing value)
 		{
 			switch (kind)
@@ -899,7 +899,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal unsafe static void SetSlotDataByValue(ScopeMember member, void* ptr, NaNBoxing value)
 		{
 			SetSlotDataByValue(member.TypeKind, ptr, value);
@@ -918,7 +918,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal bool IsUpdateStructOrEqual(Context contxt, ushort memberIndex, NaNBoxing newValue)
 		{
 			var type = (ASInstance)Type;
@@ -1006,7 +1006,7 @@ namespace juicescript.runtime
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CopyFrom(RtInstance facility, ASInstance type, Player player, int size)
 		{
 #if DEBUG
@@ -1049,7 +1049,7 @@ namespace juicescript.runtime
 		/// </summary>
 		/// <param name="facility"></param>
 		/// <exception cref="NotImplementedException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CopyFrom(RtHeapBase src, Player player, int size)
 		{
 			RtInstance facility = (RtInstance)src;

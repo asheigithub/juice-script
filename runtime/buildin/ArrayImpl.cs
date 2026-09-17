@@ -2251,7 +2251,7 @@ namespace juicescript.runtime.buildin
 
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private static int comparer(NaNBoxing a, NaNBoxing b, NaNBoxing sortBehavior, Context context, int scope_ptr, ref ReceiveError error)
 		{
 

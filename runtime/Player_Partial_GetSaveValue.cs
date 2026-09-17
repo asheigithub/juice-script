@@ -23,7 +23,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void GetSaveValue_Instance( ref NaNBoxing value, ref ReceiveError error)
 		{
 			Debug.Assert(value.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -58,7 +58,7 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void GetSaveValue_InstanceType(ref NaNBoxing value, ref ReceiveError error)
 		{
 			Debug.Assert(value.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -88,7 +88,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private void DoGetSaveValue(RtHeapTypeKind htype, ref NaNBoxing value, ref ReceiveError error)
 		{
 
@@ -385,7 +385,7 @@ namespace juicescript.runtime
 		/// <param name="value"></param>
 		/// <param name="error"></param>
 		/// <returns></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal NaNBoxing GetSaveValue(NaNBoxing value, ref ReceiveError error)
 		{
 			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -1051,7 +1051,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe int prepare_savemethodscope_updateref(RtMethodScope heap, int ptr, ref ScopeHeapLocater heapLocater, int min, int max)
 		{
 			
@@ -1287,7 +1287,7 @@ namespace juicescript.runtime
 
 			return copyed_ptr;
 		}
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private  NaNBoxing prepare_savemethodscope_beforeSave(RtMethodScope stackframe, NaNBoxing old, ScopeHeapLocater heapLocater,  int scope_ptr)
 		{
 			
@@ -2035,7 +2035,7 @@ namespace juicescript.runtime
 				return old;
 			}
 		}
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private void prepare_savemethodscope_saveinstacne(RtMethodScope heap, ref NaNBoxing saveSlot,   ScopeHeapLocater heapLocater, int scope_ptr ,bool is_pass_this)
 		{
 			int srcPtr = saveSlot.HeapPtr;
@@ -2297,7 +2297,7 @@ namespace juicescript.runtime
 		//}
 
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private void prepare_savescope_pass(ref NaNBoxing value, RtMethodScope heap,ScopeHeapLocater heapLocater,
 			NaNBoxing old,int min, int scope_ptr, ref ReceiveError error ,bool is_pass_this)
 		{
@@ -3004,7 +3004,7 @@ namespace juicescript.runtime
 		/// }
 		///否则，复制到堆。
 		/// </summary>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void PrepareSaveMethodScope(RtMethodScope stackfarme,  ScopeHeapLocater heapLocater, ref NaNBoxing value,  int scope_ptr, ref ReceiveError error , bool is_pass_this = false)
 		{
 			if (stackfarme.IsStackSlot)
@@ -3048,7 +3048,7 @@ namespace juicescript.runtime
 		}
 
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool CopyIfSameTypeStructAndReplaceSrc(NaNBoxing dst,ref NaNBoxing src)
 		{
 			if (dst.Raw == src.Raw)
