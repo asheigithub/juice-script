@@ -82,7 +82,7 @@ namespace juicescript.runtime.buildin
 				{
 					*(e_ctx + i) = exceptionContext[i];
 
-					stackslots[exceptionContext[i].hold_error.index].setFault();
+					stackslots[exceptionContext[i].hold_error].setFault();
 
 				}
 

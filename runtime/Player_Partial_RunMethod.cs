@@ -85,7 +85,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 		private unsafe NaNBoxing RunMethod_FullCheck(ASMethod method, 
 			//NaNBoxing thisPtr, int scope_ptr,			
 			//ushort args, byte* argementPtr,
@@ -176,8 +176,8 @@ namespace juicescript.runtime
 						var slot = methodArgs.slot;
 						for (int i = 0; i < restCount; i++)
 						{
-							StackLocater argLocater;
-							LoadStackLocater(&argLocater, &P);
+							int argLocater =
+							LoadStackLocater(ref P);
 
 							//考虑如下代码的存在，所以我们只能在存入数组时保存到实体
 							//class A{}
@@ -192,7 +192,7 @@ namespace juicescript.runtime
 							//	}
 							//	k(b);
 							//})();
-							NaNBoxing box = slot[argLocater.index];
+							NaNBoxing box = slot[argLocater];
 							if (!((method.Flags & (MethodFlags.Native)) != 0))
 							{
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
@@ -253,10 +253,10 @@ namespace juicescript.runtime
 					byte* P = methodArgs.argementPtr + method.Parameters.Count * sizeof(StackLocater);
 					for (int i = method.Parameters.Count; i < args; i++)
 					{
-						StackLocater argLocater;
-						LoadStackLocater(&argLocater, &(P));
+						int argLocater =
+						LoadStackLocater(ref (P));
 
-						NaNBoxing box = slot[argLocater.index];
+						NaNBoxing box = slot[argLocater];
 						if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
 							if (box.IsStruct())
@@ -485,10 +485,10 @@ namespace juicescript.runtime
 
 							if (i < args)
 							{
-								StackLocater argLocater;
-								LoadStackLocater(&argLocater, &argementPtr);
+								int argLocater =
+								LoadStackLocater(ref argementPtr);
 
-								NaNBoxing box = slot[argLocater.index];
+								NaNBoxing box = slot[argLocater];
 
 								var ptypekind = p.TypeKind;
 								var boxtype = box.ValueType;
@@ -1382,7 +1382,7 @@ namespace juicescript.runtime
 
 		}
 
-		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal unsafe NaNBoxing RunMethod(ASMethod method,
 
 			//NaNBoxing thisPtr, int scope_ptr,
@@ -1401,13 +1401,13 @@ namespace juicescript.runtime
 			}
 #endif
 
-			if (Context.BackTraceIndex >= Context.MAX_BACKTRACE)
+			if (Context.BackTraceIndex >= Context.MAX_BACKTRACE || Context.StackPosition >= Context.STACK_LENGTH)
 			{
 				RaiseStackOverflow(ref error);
 				return default;
 			}
 
-#if DEBUG && !DEBUG_PLAYER //&& false
+#if DEBUG && !DEBUG_PLAYER && false
 			// 在执行函数前，所有未保存的堆对象都需要保存，避免在接下来可能的GC中被意外回收。
 			// 测试时此处强行执行一次回收，如有问题，则可能会暴露。
 			Context.GC.ForceGC(ref error);
@@ -1423,23 +1423,32 @@ namespace juicescript.runtime
 
 				)
 			{
-				
+				int add = args.returnSlotIndex > -1 ? 0 : 1;
 
-				if (args.returnSlotIndex > -1)
-				{
-					ref NaNBoxing r = ref Context.StackSlots[args.returnSlotIndex];
-					//RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error, ref r);
-					RunMethod_MatchArgs(method, ref args, ref error, ref r);
-					return r;
-				}
-				else
-				{
-					NaNBoxing t = default;
-					ref NaNBoxing r = ref t;
-					//RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error, ref r);
-					RunMethod_MatchArgs(method, ref args, ref error, ref r);
-					return r;
-				}
+				ref NaNBoxing r = ref Context.StackSlots[args.returnSlotIndex >-1? args.returnSlotIndex:Context.StackPosition ];
+				if (add == 1)
+					r.SetUndefined();
+
+				Context.StackPosition+=add;
+				RunMethod_MatchArgs(method, ref args, ref error, ref r);
+				Context.StackPosition-=add;
+
+				return r;
+				//if (args.returnSlotIndex > -1)
+				//{
+				//	ref NaNBoxing r = ref Context.StackSlots[args.returnSlotIndex];
+				//	//RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error, ref r);
+				//	RunMethod_MatchArgs(method, ref args, ref error, ref r);
+				//	return r;
+				//}
+				//else
+				//{
+				//	NaNBoxing t = default;
+				//	ref NaNBoxing r = ref t;
+				//	//RunMethod_MatchArgs(method, thisPtr, scope_ptr, slot, args, argementPtr, returnSlotIndex, ref error, ref r);
+				//	RunMethod_MatchArgs(method, ref args, ref error, ref r);
+				//	return r;
+				//}
 
 			}
 			else

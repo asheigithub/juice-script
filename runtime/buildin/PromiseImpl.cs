@@ -1267,7 +1267,7 @@ namespace juicescript.runtime.buildin
 
 
 				// Use MultiNameLSearch to find "then" property
-				StackLocater stack = new StackLocater { index = 0 };
+				
 				var stackslots = context.StackSlots.AsSpan(basePos, 4);
 				stackslots.Clear();
 
@@ -1276,7 +1276,7 @@ namespace juicescript.runtime.buildin
 					kind,
 					as_type,
 					"then",0,
-					stack,
+					0,
 					stackslots,
 					basePos,
 					value,
@@ -1909,7 +1909,7 @@ namespace juicescript.runtime.buildin
 				{
 					*(e_ctx + i) = exceptionContext[i];
 
-					stackslots[exceptionContext[i].hold_error.index].setFault();
+					stackslots[exceptionContext[i].hold_error].setFault();
 
 				}
 

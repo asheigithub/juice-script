@@ -3366,7 +3366,7 @@ namespace juicescript.runtime.buildin
 
 
 			int code = context.player.MultiNameLSearch(ns_set, instance.Kind,
-				as_type, mode, namestr, new StackLocater() { index = 0 }, stackslots, stPos, obj, context.player.check_MultiNameLSearch_issameorinherit(obj, null), ref error, true);
+				as_type, mode, namestr, 0, stackslots, stPos, obj, context.player.check_MultiNameLSearch_issameorinherit(obj, null), ref error, true);
 			switch (code)
 			{
 				case 0:

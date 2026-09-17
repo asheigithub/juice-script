@@ -972,7 +972,7 @@ namespace juicescript.runtime.buildin
 							var ns_set = context.GC.Heap[scope_ptr].Type._link_codescope.NamespaceSet;
 							ASContainer as_type = instance.Type;
 							int code = context.player.MultiNameLSearch(ns_set, instance.Kind,
-								as_type, mode, 0, new StackLocater() { index = 0 }, stackslots, stPos, arg, context.player.check_MultiNameLSearch_issameorinherit(arg, callee_bindthis.ValueType == NaNBoxing.BoxType.HeapPtr ? (context.GC.Heap[callee_bindthis.HeapPtr]) : null), ref error, true);
+								as_type, mode, 0, 0, stackslots, stPos, arg, context.player.check_MultiNameLSearch_issameorinherit(arg, callee_bindthis.ValueType == NaNBoxing.BoxType.HeapPtr ? (context.GC.Heap[callee_bindthis.HeapPtr]) : null), ref error, true);
 							switch (code)
 							{
 								case 0:

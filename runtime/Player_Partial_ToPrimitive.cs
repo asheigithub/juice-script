@@ -65,7 +65,7 @@ namespace juicescript.runtime
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="NotImplementedException"></exception>
-		internal NaNBoxing ToPrimitive(ref ReceiveError error, NaNBoxing value , HINT hint , int scope_ptr ,StackLocater result, StackLocater tmp,
+		internal NaNBoxing ToPrimitive(ref ReceiveError error, NaNBoxing value , HINT hint , int scope_ptr ,int result_index, int tmp,
 			Span<NaNBoxing> stackslots, int stackStPos , NaNBoxing caller_bindthis_ptr)
 		{
 
@@ -138,13 +138,13 @@ namespace juicescript.runtime
 #endif
 			}
 
-			if (stackslots[tmp.index].ValueType != NaNBoxing.BoxType.HeapPtr)
+			if (stackslots[tmp].ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
-				RaiseTypeError(ref error, stackslots[tmp.index], TypeKind.Function);
+				RaiseTypeError(ref error, stackslots[tmp], TypeKind.Function);
 				return default;
 			}
 
-			NaNBoxing fun; unsafe { fun = stackslots[tmp.index].HeapKind ==(byte)RtHeapTypeKind.STACK_CACHE_OBJ ?  LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp.index].HeapPtr], -1, ref error, stackslots, stackStPos + tmp.index): stackslots[tmp.index] ; }
+			NaNBoxing fun; unsafe { fun = stackslots[tmp].HeapKind ==(byte)RtHeapTypeKind.STACK_CACHE_OBJ ?  LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp].HeapPtr], -1, ref error, stackslots, stackStPos + tmp): stackslots[tmp] ; }
 			
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧，不管了
 			{
@@ -167,7 +167,7 @@ namespace juicescript.runtime
 			unsafe
 			{
 				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr , //((RtClosure)funinstance).ScopeType ,
-					0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
+					0, null, null, ref error, stackStPos + tmp,fun.HeapPtr);
 				if (error.raised)
 				{
 					return default;
@@ -175,7 +175,7 @@ namespace juicescript.runtime
 
 				if (IsPrimitive(ret))
 				{
-					stackslots[result.index] = ret;
+					stackslots[result_index] = ret;
 					return ret;
 				}
 				
@@ -204,13 +204,13 @@ namespace juicescript.runtime
 #endif
 			}
 
-			if (stackslots[tmp.index].ValueType != NaNBoxing.BoxType.HeapPtr)
+			if (stackslots[tmp].ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
-				RaiseTypeError(ref error, stackslots[tmp.index], TypeKind.Function);
+				RaiseTypeError(ref error, stackslots[tmp], TypeKind.Function);
 				return default;
 			}
 
-			unsafe { fun = stackslots[tmp.index].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ? LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp.index].HeapPtr], -1, ref error, stackslots, stackStPos + tmp.index):stackslots[tmp.index]; }
+			unsafe { fun = stackslots[tmp].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ? LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp].HeapPtr], -1, ref error, stackslots, stackStPos + tmp):stackslots[tmp]; }
 #if DEBUG
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。
 			{
@@ -232,7 +232,7 @@ namespace juicescript.runtime
 
 			unsafe
 			{
-				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr, 0, null, null, ref error, stackStPos + tmp.index,fun.HeapPtr);
+				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method, value, ((RtClosure)funinstance).ScopePtr, 0, null, null, ref error, stackStPos + tmp,fun.HeapPtr);
 				if (error.raised)
 				{
 					return default;
@@ -240,7 +240,7 @@ namespace juicescript.runtime
 				
 				if (IsPrimitive(ret))
 				{
-					stackslots[result.index] = ret;
+					stackslots[result_index] = ret;
 					return ret;
 				}
 
