@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static juicescript.ABC.INS.INS_If_LogicOp_Goto;
 using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
 using static juicescript.runtime.RtArray;
@@ -31,6 +32,161 @@ namespace juicescript.runtime
 	public partial class Player
 #endif
 	{
+		
+		private unsafe void If_logicOp_Goto(ref byte* PC,ref FrameContext frame,byte* PC_START,ref ReceiveError error)
+		{
+			var stackslots = frame.stackslots;
+
+			int compResult = LoadInt32(ref PC);
+			int offset = LoadInt32(ref PC); //br.ReadInt32();
+			uint store = LoadUInt(ref PC);
+
+			var compMode = (CompMode)(store & 0xff);
+			bool jump_mode = (store >> 8 & 0xff) > 0;
+			byte v1 = (byte)(store >> 16 & 0xff);
+			byte v2 = (byte)(store >> 24 & 0xff);
+
+			if (compMode <= CompMode.strict_neq)
+			{
+				bool c = IsStrictlyEqual(stackslots[v1], stackslots[v2]);
+				c = compMode == CompMode.strict_equal ? c : !c;
+				stackslots[compResult].SetBoolean(c);
+				if (c == jump_mode)
+				{
+					PC = PC_START + offset;
+				}
+			}
+			else if (compMode <= CompMode.notequal)
+			{
+				bool c = IsEqual(stackslots[v1], stackslots[v2], compResult, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+				c = compMode == CompMode.equal ? c : !c;
+
+				stackslots[compResult].SetBoolean(c);
+				if (c == jump_mode)
+				{
+					PC = PC_START + offset;
+				}
+			}
+			else
+			{
+				bool c = DoCompress((byte)(compMode - 4), compResult, stackslots[v1], stackslots[v2], frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
+				if (error.raised)
+				{
+					goto flag_handle_error;
+				}
+
+				if (c == jump_mode)
+				{
+					PC = PC_START + offset;
+				}
+
+			}
+
+		flag_handle_error:
+			;
+		}
+
+		private unsafe void Goto_InTry(ref byte* PC,int trys,ExceptionContext* exception_ctx,byte* finally_jumpto)
+		{
+			
+			trys--;
+			ExceptionContext* ex_cursor = exception_ctx - trys;
+			ex_cursor->FINALLY_JUMPTO_PTR = finally_jumpto;
+
+			while (ex_cursor != exception_ctx)
+			{
+				var finally_p = ex_cursor->state == 2 ? ex_cursor->FINALLY_EXIT_PTR : ex_cursor->FINALLY_PTR;
+				++ex_cursor;
+				ex_cursor->FINALLY_JUMPTO_PTR = finally_p;
+			}
+
+			PC = exception_ctx->state == 2 ? exception_ctx->FINALLY_EXIT_PTR : exception_ctx->FINALLY_PTR;
+
+		}
+
+
+		private unsafe void ReturnVoid_Intry(ref byte* PC, ExceptionContext* exception_ctx, ExceptionContext* NO_TRY,byte* PC_END)
+		{
+			ExceptionContext* ctx = NO_TRY + 1;
+			ctx->FINALLY_JUMPTO_PTR = PC_END;
+			do
+			{
+				var finally_p = ctx->state == 2 ? ctx->FINALLY_EXIT_PTR : ctx->FINALLY_PTR;
+				++ctx;
+				ctx->FINALLY_JUMPTO_PTR = finally_p;
+
+			} while (ctx < exception_ctx);
+
+			PC = exception_ctx->state == 2 ? exception_ctx->FINALLY_EXIT_PTR : exception_ctx->FINALLY_PTR;
+
+		}
+
+		private unsafe void ReturnValue_InTry(int dst_index, ref FrameContext frame,  ref byte* PC, ExceptionContext* exception_ctx, ExceptionContext* NO_TRY, byte* PC_END,ref ReceiveError error)
+		{
+			bool has_finally = false;
+			ExceptionContext* ctx = NO_TRY + 1;
+			ctx->FINALLY_JUMPTO_PTR = PC_END;
+			do
+			{
+				has_finally = has_finally || ctx->state != 2;
+
+				var finally_p = ctx->state == 2 ? ctx->FINALLY_EXIT_PTR : ctx->FINALLY_PTR;
+				++ctx;
+				ctx->FINALLY_JUMPTO_PTR = finally_p;
+
+			} while (ctx < exception_ctx);
+
+			has_finally = has_finally || exception_ctx->state != 2;
+
+			byte* FPC = exception_ctx->state == 2 ? exception_ctx->FINALLY_EXIT_PTR : exception_ctx->FINALLY_PTR;
+
+
+			//如果有finally块，需要考虑finally块里的代码对return对象的影响。
+			//Return_Value(dst_index, frame.returnSlotIndex, method, (RtMethodScope)frame.methodscope, stackslots, frame.stackStPos, frame.calleelastPos, frame.scope_ptr,
+			//	ref error,has_finally );
+			Return_Value(dst_index, ref frame,
+				ref error, has_finally);
+
+
+
+			if (error.raised)
+			{
+				goto flag_handle_error;
+			}
+
+
+			frame.stackslots[exception_ctx->hold_error].setFault();//return 会吃掉异常
+			PC = FPC;
+
+		flag_handle_error:;
+
+		}
+
+		private unsafe void YieldBreak_InTry(ref byte* PC,ExceptionContext* NO_TRY,ExceptionContext* exception_ctx,byte* PC_END)
+		{
+			
+			ExceptionContext* ctx = NO_TRY + 1;
+			ctx->FINALLY_JUMPTO_PTR = PC_END;
+			do
+			{
+				Debug.Assert(ctx->state == 0); // yield只能在try中发出
+
+				var finally_p = ctx->FINALLY_PTR;
+				++ctx;
+
+				ctx->FINALLY_JUMPTO_PTR = finally_p;
+
+			} while (ctx < exception_ctx);
+
+			PC = exception_ctx->FINALLY_PTR;
+		}
+
+
 
 		private unsafe void Ld_class(int dst_index, ref byte* PC, 
 			//ASMethodBody.MethodHeapConstants heap_consts ,Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, 
@@ -4457,7 +4613,7 @@ namespace juicescript.runtime
 		private unsafe void O_BindGlobal_Recurse_Call( int dst_index, ref byte* PC,ref FrameContext frame,
 			ref ReceiveError error)
 		{
-			var method = ((ASMethodBody)frame.methodscope.Type).Method;
+			var method = frame.method;
 
 			int argsCount=
 			LoadInt32(ref PC);
@@ -4801,13 +4957,8 @@ namespace juicescript.runtime
 								int argLocater = LoadStackLocater(ref P);
 
 								NaNBoxing box = stackslots[argLocater];
-								ConvertValueType(ref error, box, TypeKind.Boolean, Context.BOOLEAN, ref stackslots[target]);
-#if DEBUG
-								if (error.raised)
-								{
-									throw new InvalidOperationException();  //转BOOL不会失败
-								}
-#endif
+								ConvertToBoolean( box, ref stackslots[target]);
+
 							}
 
 							return;
@@ -5564,7 +5715,7 @@ namespace juicescript.runtime
 
 
 
-				prepare_savemethodscope_saveinstacne(heap, ref value, heapLocater, frame.scope_ptr, false);
+				prepare_savemethodscope_saveinstance(heap, ref value, heapLocater, frame.scope_ptr, false);
 				heapV = value;
 			}
 			else

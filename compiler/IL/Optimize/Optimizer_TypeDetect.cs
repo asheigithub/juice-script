@@ -202,7 +202,8 @@ namespace juicescript.compiler.IL.Optimize
 							break;
 						case INS_Code.ld_const:
 							{
-								var v = constants[((INS_Ld_Const)instruction).const_index];
+								int cindex = ((INS_Ld_Const)instruction).const_index;
+								var v = constants[cindex & 0xffffff];
 								result.Add(instruction, new List<InstructionDef>() { new InstructionDef(InstructionDefType.primitive, v) });
 								flag = true;
 							}

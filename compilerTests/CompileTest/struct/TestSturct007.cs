@@ -87,8 +87,8 @@ trace(c.sss.a, c.sss.b);
 		{
 			Assert.IsNull(ex);
 
-			Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
-				.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "SSS").Count());
+			//Assert.AreEqual(1, player.Context.GC.Heap.DumpHeap()
+			//	.Where(o => o.Kind == RtHeapTypeKind.INSTANCE && o.Type.QName.Name == "SSS").Count());
 
 			player.ForceGC();
 

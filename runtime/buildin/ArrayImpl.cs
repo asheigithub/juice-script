@@ -1055,7 +1055,7 @@ namespace juicescript.runtime.buildin
 					len = array.array_len;
 
 
-					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
+					context.player.ConvertToBoolean(r, ref r);
 					Debug.Assert(!error.raised); //转BOOLEAN不会失败
 
 					if (r.Boolean)
@@ -1208,7 +1208,7 @@ namespace juicescript.runtime.buildin
 					len = array.array_len;
 
 
-					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
+					context.player.ConvertToBoolean(r, ref r);
 					Debug.Assert(!error.raised); //转BOOLEAN不会失败
 
 					if (!r.Boolean)
@@ -1505,7 +1505,7 @@ namespace juicescript.runtime.buildin
 					len = array.array_len;
 
 
-					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
+					context.player.ConvertToBoolean(r, ref r);
 					Debug.Assert(!error.raised); //转BOOLEAN不会失败
 
 					if (r.Boolean)

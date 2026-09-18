@@ -2714,9 +2714,39 @@ namespace juicescript.compiler.IL.Optimize
 
 			#endregion
 
+			#region Ld_const 合批
+
+			foreach (var b in cfg.Blocks)
+			{
+				for (int i = 0; i < b.Instructions.Count; i++)
+				{
+					var ins=b.Instructions[i];
+
+					if (ins.INS_Code == INS_Code.ld_const)
+					{
+						int k = i + 1;
+						int c = 0;
+						while (k<b.Instructions.Count && b.Instructions[k].INS_Code== INS_Code.ld_const)
+						{
+							++k;++c;
+						}
+
+						if (c > 0)
+						{
+							((INS_Ld_Const)ins).const_index |= c << 24; 
+
+							i = k-1;
+						}
+					}
 
 
+				}
 
+
+			}
+
+
+			#endregion
 
 
 			return slotcount;

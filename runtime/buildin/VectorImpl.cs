@@ -4365,9 +4365,8 @@ namespace juicescript.runtime.buildin
 					store = vector.GetStore();
 					len = store.length;
 
-					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
-					Debug.Assert(!error.raised); //转BOOLEAN不会失败
-
+					context.player.ConvertToBoolean(r, ref r);
+					
 
 					isEvery = isEvery & r.Boolean;
 					if (!isEvery)
@@ -4487,8 +4486,8 @@ namespace juicescript.runtime.buildin
 						len = store.length;
 					}
 
-					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
-					Debug.Assert(!error.raised); //转BOOLEAN不会失败
+					context.player.ConvertToBoolean(r, ref r);
+					
 
 					if (r.Boolean)
 					{
@@ -4626,9 +4625,8 @@ namespace juicescript.runtime.buildin
 					store = vector.GetStore();
 					len = store.length;
 
-					context.player.ConvertValueType(ref error, r, TypeKind.Boolean, context.BOOLEAN, ref r);
-					Debug.Assert(!error.raised); //转BOOLEAN不会失败
-
+					context.player.ConvertToBoolean(r,  ref r);
+					
 					
 					if (r.Boolean)
 					{
