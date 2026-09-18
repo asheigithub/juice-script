@@ -2748,6 +2748,28 @@ namespace juicescript.compiler.IL.Optimize
 
 			#endregion
 
+			#region Ld_ArrayElement->Var
+			foreach (var b in cfg.Blocks)
+			{
+				for (int i = 0; i < b.Instructions.Count ; i++)
+				{
+					var ins = b.Instructions[i];
+					if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
+					{
+						var next = b.Instructions.Skip(i+1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
+						if (next != null && next.INS_Code == INS_Code.storeMethodVariable)
+						{ 
+							
+						}
+
+					}
+				}
+
+				
+
+			}
+			#endregion
+
 
 			return slotcount;
 		}

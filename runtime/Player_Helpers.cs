@@ -12064,7 +12064,7 @@ namespace juicescript.runtime
 		}
 
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		
 		private unsafe void O_Ld_ArrayElement (int dst_index,ref byte* PC, 
 			ref FrameContext frame
 			, ref ReceiveError error)

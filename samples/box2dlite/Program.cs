@@ -3,16 +3,20 @@ using juicescript.ABC;
 using juicescript.runtime;
 using Silk.NET.Core.Attributes;
 using Silk.NET.Input;
+using Silk.NET.Input.Glfw;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Glfw;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Reflection;
 using static juicescript.runtime.Player;
 
 namespace box2dlite
 {
+	
 	internal class Program
 	{
 		private static IWindow window;
@@ -24,6 +28,8 @@ namespace box2dlite
 
 		static void Main(string[] args)
 		{
+			GlfwWindowing.Use();
+			GlfwInput.RegisterPlatform();
 			//Create a window.
 			var options = WindowOptions.Default;
 			options.Size = new Vector2D<int>(1280, 720);
@@ -112,6 +118,8 @@ namespace box2dlite
 			0,1,2,3
 		};
 
+
+		[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(natives))]
 		private static Player Player;
 
 		private static ASMethod Step;
@@ -143,28 +151,32 @@ namespace box2dlite
 
 			//加载全局swc
 			{
-				var path = Assembly.GetExecutingAssembly().Location;
+				var path = Environment.ProcessPath;
 				var i = path.IndexOf("samples");
 				path = path.Substring(0, i);
 
 				string global_swc_path = path + "player\\bin\\Debug\\net6.0\\juice_global.swc";
+				Console.WriteLine(global_swc_path);
+
 
 				Player.LoadLib( System.IO.File.ReadAllBytes(global_swc_path) );
 			}
 			//加载box2d-lite脚本
 			{
-				var path = Assembly.GetExecutingAssembly().Location;
+				var path = Environment.ProcessPath;
 				var i = path.IndexOf("samples");
 				path = path.Substring(0, i);
 
 				string box2dlite_swc_path = path + "fd_projs\\dev_scripts\\box2d-lite\\obj\\o.swc";
+
+				Console.WriteLine(box2dlite_swc_path);
 
 				Player.LoadLib(File.ReadAllBytes(box2dlite_swc_path));
 
 				bool error = false;
 
 				Player.Run((ex) => {
-					Console.Error.WriteLine(ex.Message);
+					Console.Error.WriteLine(ex.error.ToDebugString(Player) +  ex.Message);
 					window.Close();
 					error = true;
 				});
@@ -205,11 +217,13 @@ namespace box2dlite
 
 
 				var demo = main.Traits.First(t=>t.QName.Name == "Demo1").Method;
-				
-				Player.InvokeStaticMethod(demo);
-
+				lock (Player)
+				{
+					Player.InvokeStaticMethod(demo);
+					
+				}
 				Step = main.Traits.First(t => t.QName.Name == "Step").Method;
-
+				
 			}
 
 
@@ -565,9 +579,11 @@ namespace box2dlite
 		private static void OnUpdate(double obj)
 		{
 			//Here all updates to the program should be done.
-
-			Player.InvokeStaticMethod(Step);
-
+			lock (Player)
+			{
+				Player.InvokeStaticMethod(Step);
+				
+			}
 		}
 
 		private static void OnFramebufferResize(Vector2D<int> newSize)
@@ -590,114 +606,121 @@ namespace box2dlite
 		private static bool hasbomb = false;
 		private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)
 		{
-			//Check to close the window on escape.
-			if (arg2 == Key.Escape)
+			lock (Player)
 			{
-				window.Close();
+
+
+
+				//Check to close the window on escape.
+				if (arg2 == Key.Escape)
+				{
+					window.Close();
+				}
+
+
+
+				if (arg2 == Key.Space)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var bomb = main.Traits.First(t => t.QName.Name == "LaunchBomb").Method;
+
+					Player.InvokeStaticMethod(bomb);
+
+					hasbomb = true;
+				}
+				else if (arg2 == Key.Number1)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo1").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "A Single Box";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number2)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo2").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "A simple pendulum";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number3)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo3").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "Varying friction coefficients";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number4)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo4").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "A vertical stack";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number5)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo5").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "A pyramid";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number6)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo6").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "A teeter";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number7)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo7").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "A suspension bridge";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number8)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo8").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "Dominos";
+					hasbomb = false;
+				}
+				else if (arg2 == Key.Number9)
+				{
+					var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
+					var demo = main.Traits.First(t => t.QName.Name == "Demo9").Method;
+
+					Player.InvokeStaticMethod(demo);
+
+					window.Title = "Multi-pendulum";
+					hasbomb = false;
+				}
 			}
 
-			if (arg2 == Key.Space)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var bomb = main.Traits.First(t => t.QName.Name == "LaunchBomb").Method;
-
-				Player.InvokeStaticMethod(bomb);
-
-				hasbomb = true;
-			}
-			else if (arg2 == Key.Number1)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo1").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "A Single Box";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number2)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo2").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "A simple pendulum";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number3)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo3").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "Varying friction coefficients";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number4)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo4").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "A vertical stack";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number5)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo5").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "A pyramid";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number6)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo6").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "A teeter";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number7)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo7").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "A suspension bridge";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number8)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo8").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "Dominos";
-				hasbomb = false;
-			}
-			else if (arg2 == Key.Number9)
-			{
-				var main = Player.Context.libs.SelectMany(l => l.Classes).First(c => c != null && c.QName.Name == "Main");
-				var demo = main.Traits.First(t => t.QName.Name == "Demo9").Method;
-
-				Player.InvokeStaticMethod(demo);
-
-				window.Title = "Multi-pendulum";
-				hasbomb = false;
-			}
 		}
-
-
 	}
 
 
