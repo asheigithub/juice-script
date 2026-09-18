@@ -628,7 +628,7 @@ namespace juicescript.compiler.IL
    //                         return i;
    //                     }
 
-   //                     //RtHeapInstance heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+   //                     //RtHeapInstance heapInstance = CompileContext.player_for_compiler.HeapShotCut[p & 0xffffff];
    //                     //if (heapInstance.TypeKind == RtHeapTypeKind.CACHE_LD_CLASS
    //                     //    && heapInstance.Type == @class)
    //                     //{
@@ -734,7 +734,7 @@ namespace juicescript.compiler.IL
 			//        if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Namespace)
 			//        {
 
-			//            RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+			//            RtHeapBase heapInstance = CompileContext.player_for_compiler.HeapShotCut[p & 0xffffff];
 			//            if (heapInstance.Kind == RtHeapTypeKind.NAMESPACE
 			//                && ((RtNameSpace)heapInstance).ASNamespace == @namespace)
 			//            {
@@ -815,7 +815,7 @@ namespace juicescript.compiler.IL
             methodbody.heapConstants.pool_kinds = kinds.ToArray();
 
             List<object> hobjs = new List<object>(methodbody.heapConstants.pool_values);
-            hobjs.Add(CompileContext.player_for_compiler.Context.GC.Heap[heapptr]);
+            hobjs.Add(CompileContext.player_for_compiler.HeapShotCut[heapptr]);
             methodbody.heapConstants.pool_values = hobjs.ToArray();
 
             
@@ -835,7 +835,7 @@ namespace juicescript.compiler.IL
             //        if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.String)
             //        {
 
-            //            RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[ p & 0xffffff ];
+            //            RtHeapBase heapInstance = CompileContext.player_for_compiler.HeapShotCut[ p & 0xffffff ];
             //            if (heapInstance.Kind == RtHeapTypeKind.STRING
             //                && string.Equals(((RtString)heapInstance).Str, v, StringComparison.Ordinal))
             //            {
@@ -932,7 +932,7 @@ namespace juicescript.compiler.IL
 			//		int p = Constants[i].HeapPtr;
 			//		if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.Method)
 			//		{
-			//			RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+			//			RtHeapBase heapInstance = CompileContext.player_for_compiler.HeapShotCut[p & 0xffffff];
 			//			if (heapInstance.Kind == RtHeapTypeKind.MethodScope
 			//				&& heapInstance.Type == method.Body )
 			//			{
@@ -950,7 +950,7 @@ namespace juicescript.compiler.IL
 			//             throw new ParseException("heapptr > 0xffffff");
 			//         }
 
-			//         CompileContext.player_for_compiler.Context.GC.Heap[heapptr].Type = method.Body;
+			//         CompileContext.player_for_compiler.HeapShotCut[heapptr].Type = method.Body;
 
 			//         int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.Method << 24);
 
@@ -1008,7 +1008,7 @@ namespace juicescript.compiler.IL
 			//		int p = Constants[i].HeapPtr;
 			//		if (p >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.SuperMethod)
 			//		{
-			//			RtHeapBase heapInstance = CompileContext.player_for_compiler.Context.GC.Heap[p & 0xffffff];
+			//			RtHeapBase heapInstance = CompileContext.player_for_compiler.HeapShotCut[p & 0xffffff];
 			//			if (heapInstance.Kind == RtHeapTypeKind.MethodScope
 			//				&& heapInstance.Type == _this_)
 			//			{
@@ -1026,8 +1026,8 @@ namespace juicescript.compiler.IL
 			//             throw new ParseException("heapptr > 0xffffff");
 			//         }
 
-			//         CompileContext.player_for_compiler.Context.GC.Heap[heapptr].Type = _this_;
-			//         ((RtMethodScope)CompileContext.player_for_compiler.Context.GC.Heap[heapptr]).ParentPtr = vtable_index;
+			//         CompileContext.player_for_compiler.HeapShotCut[heapptr].Type = _this_;
+			//         ((RtMethodScope)CompileContext.player_for_compiler.HeapShotCut[heapptr]).ParentPtr = vtable_index;
 
 			//         int ptr = (0xffffff & heapptr) | ((byte)ASMethodBody.PoolHeapPtrKind.SuperMethod << 24);
 

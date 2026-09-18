@@ -198,11 +198,11 @@ namespace juicescript.runtime
 								if (box.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
 
-									if (box.IsStruct())//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)Context.GC.Heap[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
+									if (box.IsStruct())//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((ASInstance)HeapShotCut[box.HeapPtr].Type).Flags.HasFlag(ClassFlags.Struct))
 									{
-										var v = Context.GC.Heap[box.HeapPtr];
+										var v = HeapShotCut[box.HeapPtr];
 										var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i, false, out RtInstance struct_ins);
-										//var struct_ins = Context.GC.Heap[struct_ptr];
+										//var struct_ins = HeapShotCut[struct_ptr];
 
 										((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 										box.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
@@ -261,9 +261,9 @@ namespace juicescript.runtime
 						{
 							if (box.IsStruct())
 							{
-								var v = Context.GC.Heap[box.HeapPtr];
+								var v = HeapShotCut[box.HeapPtr];
 								var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType, Context.StackPosition + i, false, out RtInstance struct_ins);
-								//var struct_ins = Context.GC.Heap[struct_ptr];
+								//var struct_ins = HeapShotCut[struct_ptr];
 
 								((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 								box.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
@@ -284,7 +284,7 @@ namespace juicescript.runtime
 					Memory<NaNBoxing> arguments = Context.StackSlots.AsMemory(Context.StackPosition, args);
 
 					int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
-					RtHeapBase arg_rest = Context.GC.Heap[argumentsPtr];
+					RtHeapBase arg_rest = HeapShotCut[argumentsPtr];
 #if DEBUG
 					if (((RtArray)arg_rest).StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 					{
@@ -310,15 +310,15 @@ namespace juicescript.runtime
 
 						int calleePtr = Context.M_ClosurePtr + Context.StackPosition + args + 1;
 #if DEBUG
-						if (Context.GC.Heap[calleePtr].Kind != RtHeapTypeKind.CLOSURE)
+						if (HeapShotCut[calleePtr].Kind != RtHeapTypeKind.CLOSURE)
 						{
 							throw new InvalidOperationException();
 						}
 #endif
 
 
-						Context.GC.Heap[calleePtr].Type = method.Body;
-						RtClosure payloadClosure = (RtClosure)Context.GC.Heap[calleePtr];
+						HeapShotCut[calleePtr].Type = method.Body;
+						RtClosure payloadClosure = (RtClosure)HeapShotCut[calleePtr];
 						payloadClosure.This = methodArgs.thisPtr;
 						payloadClosure.ScopePtr = methodArgs.scope_ptr;
 						//payloadClosure.ScopeType = null;
@@ -333,7 +333,7 @@ namespace juicescript.runtime
 					//	goto lbl_handle_arg_err;
 					//}
 
-					//RtPayloadClosure payloadClosure = (RtPayloadClosure)Context.GC.Heap[calleePtr];
+					//RtPayloadClosure payloadClosure = (RtPayloadClosure)HeapShotCut[calleePtr];
 					//payloadClosure.This = thisPtr;
 					//payloadClosure.ScopePtr = scope_ptr;
 					//payloadClosure.ScopeType = null; payloadClosure._ref_as_type = null;
@@ -369,7 +369,7 @@ namespace juicescript.runtime
 				int backTraceId = Context.BackTraceIndex;
 
 				int mScopeId = backTraceId + Context.M_MethodScopePtr;
-				RtHeapBase mScope = Context.GC.Heap[mScopeId];
+				RtHeapBase mScope = HeapShotCut[mScopeId];
 
 				mScope.Type = method.Body;
 				RtMethodScope m_scopePayload = (RtMethodScope)mScope;
@@ -432,7 +432,7 @@ namespace juicescript.runtime
 					if ((method.Flags & (MethodFlags.NeedArguments)) != 0)
 					{
 						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
-						RtHeapBase arg_arguments = Context.GC.Heap[argumentsPtr];
+						RtHeapBase arg_arguments = HeapShotCut[argumentsPtr];
 						arguments_span = ((RtArray)arg_arguments).store_memory.Span;
 					}
 
@@ -455,7 +455,7 @@ namespace juicescript.runtime
 
 							int restPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 
-							RtHeapBase arg_rest = Context.GC.Heap[restPtr];
+							RtHeapBase arg_rest = HeapShotCut[restPtr];
 
 #if DEBUG
 							if (((RtArray)arg_rest).StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
@@ -561,12 +561,12 @@ namespace juicescript.runtime
 
 										if (box.IsStruct())
 										{
-											var v = Context.GC.Heap[box.HeapPtr];
+											var v = HeapShotCut[box.HeapPtr];
 											var struct_ptr = InitCacheInstance(v.Type._link_codescope.TypeLayout.ASType,
 												Context.StackPosition - para_argcount + i //实例到arguments数组
 												, false, out RtInstance struct_ins
 												);
-											//var struct_ins = Context.GC.Heap[struct_ptr];
+											//var struct_ins = HeapShotCut[struct_ptr];
 
 											((RtInstance)struct_ins).CopyFrom(v, this, v.Type._link_codescope.TypeLayout.Size);
 											box.SetHeapPtr(struct_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
@@ -664,7 +664,7 @@ namespace juicescript.runtime
 						goto lbl_handle_arg_err;
 					}
 
-					mScope = Context.GC.Heap[g_scope.HeapPtr];
+					mScope = HeapShotCut[g_scope.HeapPtr];
 
 
 					Context.StackPosition += 2;
@@ -798,7 +798,7 @@ namespace juicescript.runtime
 						goto lbl_handle_arg_err;
 					}
 
-					mScope = Context.GC.Heap[g_scope.HeapPtr];
+					mScope = HeapShotCut[g_scope.HeapPtr];
 
 					int basePos = Context.StackPosition;
 
@@ -859,8 +859,8 @@ namespace juicescript.runtime
 					//创建构造函数闭包
 					int template_ctor = Context.M_ClosurePtr + basePos + 3;
 
-					RtClosure ctorClosure = (RtClosure)Context.GC.Heap[template_ctor];
-					Context.GC.Heap[template_ctor].Type = Context.MicroTaskQueue.async_template_ctor.Body;
+					RtClosure ctorClosure = (RtClosure)HeapShotCut[template_ctor];
+					HeapShotCut[template_ctor].Type = Context.MicroTaskQueue.async_template_ctor.Body;
 
 					//ctorClosure.This.SetHeapPtr(promise_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 					//ctorClosure.ScopePtr = generator_ptr;
@@ -1114,7 +1114,7 @@ namespace juicescript.runtime
 			int backTraceId = Context.BackTraceIndex;
 
 			int mScopeId = backTraceId + Context.M_MethodScopePtr;
-			RtHeapBase mScope = Context.GC.Heap[mScopeId];
+			RtHeapBase mScope = HeapShotCut[mScopeId];
 
 			mScope.Type = method.Body;
 			RtMethodScope m_scopePayload = (RtMethodScope)mScope;

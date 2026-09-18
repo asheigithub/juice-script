@@ -77,7 +77,7 @@ namespace juicescript.runtime
                 case NaNBoxing.BoxType.HeapPtr:
 
                     {
-                        RtHeapBase instance = ex.player.Context.GC.Heap[ex.error.HeapPtr];
+                        RtHeapBase instance = ex.player.HeapShotCut[ex.error.HeapPtr];
 
                         switch (instance.Kind)
                         {
@@ -113,7 +113,7 @@ namespace juicescript.runtime
 
                                         if (msg.ValueType == NaNBoxing.BoxType.HeapPtr)
                                         {
-                                            RtString @string = (RtString)ex.player.Context.GC.Heap[msg.HeapPtr];
+                                            RtString @string = (RtString)ex.player.HeapShotCut[msg.HeapPtr];
                                             stringBuilder.Append(@string.Str);
                                         }
                                         else

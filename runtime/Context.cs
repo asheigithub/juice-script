@@ -178,6 +178,8 @@ namespace juicescript.runtime
         internal Memory<NaNBoxing>[] cache_array_memory;
         internal int[] cache_array_structindex;
 
+        public readonly List<RtHeapBase> HeapShotCut;
+
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
             this.player = player;
@@ -190,6 +192,9 @@ namespace juicescript.runtime
 
 
             GC = new gc.GC(this,gc_limit);
+
+            HeapShotCut = GC.Heap.HeapShotCut;
+
             StackSlots = new NaNBoxing[REAL_STACK_LENGTH];
 
             int _MethodScopePtr = GC.AllocMethodScope(null,0,null);if (_MethodScopePtr == 0) { throw new LoaderException("alloc Method Scope failed,out of memory."); }

@@ -37,7 +37,7 @@ namespace juicescript.runtime
 		private static int DoFindAndUpdatePtr(int ptr, Player player, ASInstance type, out RtInstance target)
 		{
 
-			var ref_instance = player.Context.GC.Heap[ptr];
+			var ref_instance = player.HeapShotCut[ptr];
 			Debug.Assert(ref_instance.Kind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(!type.Flags.HasFlag(ClassFlags.Struct));
 			Debug.Assert(!((ASInstance)ref_instance.Type).Flags.HasFlag(ClassFlags.Struct));
@@ -73,12 +73,12 @@ namespace juicescript.runtime
 			////while (payload.HEAPINSTANCE_PTR != 0)
 			////{
 
-			////	Debug.Assert(player.Context.GC.Heap[payload.HEAPINSTANCE_PTR].Kind != RtHeapTypeKind.VECTOR);
+			////	Debug.Assert(player.HeapShotCut[payload.HEAPINSTANCE_PTR].Kind != RtHeapTypeKind.VECTOR);
 
 
 
 			////	ptr = payload.HEAPINSTANCE_PTR;
-			////	payload = ((RtInstance)player.Context.GC.Heap[ptr]);
+			////	payload = ((RtInstance)player.HeapShotCut[ptr]);
 			////	target = payload;
 
 			////	origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -97,7 +97,7 @@ namespace juicescript.runtime
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtInstance target)
 		{
-			RtHeapBase tmp = player.Context.GC.Heap[ptr];
+			RtHeapBase tmp = player.HeapShotCut[ptr];
 			RtInstance check = (RtInstance)tmp;
 
 			if (check.HEAPINSTANCE_PTR == 0)
@@ -108,7 +108,7 @@ namespace juicescript.runtime
 			else if (((ASInstance)tmp.Type).Flags.HasFlag(ClassFlags.Struct))
 			{
 
-				var tmp2 = player.Context.GC.Heap[check.HEAPINSTANCE_PTR];
+				var tmp2 = player.HeapShotCut[check.HEAPINSTANCE_PTR];
 
 				if (tmp2.Kind == RtHeapTypeKind.INSTANCE)
 				{
@@ -129,7 +129,7 @@ namespace juicescript.runtime
 			else
 			{
 
-				target = (RtInstance)player.Context.GC.Heap[check.HEAPINSTANCE_PTR];
+				target = (RtInstance)player.HeapShotCut[check.HEAPINSTANCE_PTR];
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				return check.HEAPINSTANCE_PTR;
 
@@ -170,7 +170,7 @@ namespace juicescript.runtime
 
 
 
-			var target = player.Context.GC.Heap[HEAPINSTANCE_PTR];
+			var target = player.HeapShotCut[HEAPINSTANCE_PTR];
 			if (target.Kind == RtHeapTypeKind.VECTOR)
 			{
 				Debug.Assert(((RtVector)target).HEAPINSTANCE_PTR == 0);
@@ -220,7 +220,7 @@ namespace juicescript.runtime
 			//		target = this;
 			//	}
 
-			//	RtVector vector = (RtVector)player.Context.GC.Heap[target.HEAPINSTANCE_PTR];
+			//	RtVector vector = (RtVector)player.HeapShotCut[target.HEAPINSTANCE_PTR];
 			//	is_ref_vector = true;
 			//	is_ref_struct = false;
 
@@ -304,7 +304,7 @@ namespace juicescript.runtime
 				DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type, out target);
 				return target.m_property_ptr;
 
-				//return ((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
+				//return ((RtPayloadInstance)player.HeapShotCut[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
 			}
 
 		}
@@ -321,7 +321,7 @@ namespace juicescript.runtime
 				DoFindAndUpdatePtr(HEAPINSTANCE_PTR, player, type, out target);
 				target.m_property_ptr = ptr;
 
-				//((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).Set_PROPERTY_PTR(ptr, player);
+				//((RtPayloadInstance)player.HeapShotCut[HEAPINSTANCE_PTR].facility).Set_PROPERTY_PTR(ptr, player);
 			}
 		}
 
@@ -729,7 +729,7 @@ namespace juicescript.runtime
 								)
 							{
 								int cache_ptr = Context.CacheInstancePtr + returnSlotIndex;
-								var cache = player.Context.GC.Heap[cache_ptr];
+								var cache = player.HeapShotCut[cache_ptr];
 
 								cache.Type = member.__rt_type_class__.Instance;
 								RtInstance struct_payload = (RtInstance)cache;
@@ -1015,7 +1015,7 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 			}
 
-			if (facility.HEAPINSTANCE_PTR != 0 && player.Context.GC.Heap[facility.HEAPINSTANCE_PTR] == this)
+			if (facility.HEAPINSTANCE_PTR != 0 && player.HeapShotCut[facility.HEAPINSTANCE_PTR] == this)
 			{
 				throw new InvalidOperationException();
 			}

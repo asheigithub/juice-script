@@ -84,7 +84,7 @@ namespace juicescript.runtime
 			//	FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 			//	return target.m_property_ptr;
 
-			//	//return ((RtPayloadInstance)player.Context.GC.Heap[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
+			//	//return ((RtPayloadInstance)player.HeapShotCut[HEAPINSTANCE_PTR].facility).PROPERTY_PTR(player);
 			//}
 
 		}
@@ -167,7 +167,7 @@ namespace juicescript.runtime
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtArray target)
 		{
-			//var payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			//var payload = ((RtArray)player.HeapShotCut[ptr]);
 			//var origin = payload;
 			//target = origin;
 
@@ -175,7 +175,7 @@ namespace juicescript.runtime
 			//while (payload.HEAPINSTANCE_PTR != 0)
 			//{
 			//	ptr = payload.HEAPINSTANCE_PTR;
-			//	payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			//	payload = ((RtArray)player.HeapShotCut[ptr]);
 			//	target = payload;
 
 			//	origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
@@ -186,7 +186,7 @@ namespace juicescript.runtime
 
 			//开始优化为杜绝二段跳。
 
-			var payload = ((RtArray)player.Context.GC.Heap[ptr]);
+			var payload = ((RtArray)player.HeapShotCut[ptr]);
 			target = payload.payload;
 
 			if (payload.HEAPINSTANCE_PTR == 0)
@@ -197,13 +197,13 @@ namespace juicescript.runtime
 			{
 				
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0 );
-				Debug.Assert(player.Context.GC.Heap[payload.HEAPINSTANCE_PTR] == target);
+				Debug.Assert(player.HeapShotCut[payload.HEAPINSTANCE_PTR] == target);
 
 				return payload.HEAPINSTANCE_PTR;
 
 				//int p = payload.HEAPINSTANCE_PTR;
 
-				//payload = (RtArray)player.Context.GC.Heap[payload.HEAPINSTANCE_PTR];
+				//payload = (RtArray)player.HeapShotCut[payload.HEAPINSTANCE_PTR];
 				//Debug.Assert(payload.HEAPINSTANCE_PTR == 0);
 
 				//target = payload;
@@ -427,7 +427,7 @@ namespace juicescript.runtime
 				{
 					//if (v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var ins = player.Context.GC.Heap[v.HeapPtr];
+						var ins = player.HeapShotCut[v.HeapPtr];
 						Debug.Assert(((ASInstance)ins.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
 							RtHeapBase struct_instance;
@@ -987,7 +987,7 @@ namespace juicescript.runtime
 				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
 				if (error.raised) return;
 
-				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr];
+				RtArray heap = (RtArray)context.player.HeapShotCut[heaparrayptr];
 				heap.DoSplice(context, ref error, start, deleteCount, netChange);
 				return;
 			}
@@ -1041,7 +1041,7 @@ namespace juicescript.runtime
 				int heaparrayptr = ChangeStoreToHeap(context.player, ref error);
 				if (error.raised) return;
 
-				RtArray heap = (RtArray)context.player.Context.GC.Heap[heaparrayptr];
+				RtArray heap = (RtArray)context.player.HeapShotCut[heaparrayptr];
 				heap.DoSplice(context, ref error, start, deleteCount, netChange);
 				return;
 			}
@@ -1088,13 +1088,13 @@ namespace juicescript.runtime
 
 			if (box.IsStruct())//box.ValueType == BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 			{
-				var src = player.Context.GC.Heap[box.HeapPtr];
+				var src = player.HeapShotCut[box.HeapPtr];
 				Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 
 				
 				//if (dst_v.IsStruct())//dst_v.ValueType == BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 				{
-					var dst = player.Context.GC.Heap[cache_struct_ptr + dstIndex];//cache_structs[dstIndex]];
+					var dst = player.HeapShotCut[cache_struct_ptr + dstIndex];//cache_structs[dstIndex]];
 					//Debug.Assert(((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct));
 					{
 						CopyStruct(dst, src, player);
@@ -1377,7 +1377,7 @@ namespace juicescript.runtime
 						return;
 					}
 
-					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr];
+					RtArray heap = (RtArray)player.HeapShotCut[heaparrayptr];
 					heap.DoUnshift(player, ref error, restSpan);
 					return;
 				}
@@ -1408,7 +1408,7 @@ namespace juicescript.runtime
 						return;
 					}
 
-					RtArray heap = (RtArray)player.Context.GC.Heap[heaparrayptr];
+					RtArray heap = (RtArray)player.HeapShotCut[heaparrayptr];
 					heap.DoUnshift(player, ref error, restSpan);
 					return;
 				}
@@ -1420,10 +1420,10 @@ namespace juicescript.runtime
 					var box = cache_store[i];
 					if (box.IsStruct())//box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var src = player.Context.GC.Heap[box.HeapPtr];
+						var src = player.HeapShotCut[box.HeapPtr];
 						Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 
-						var dst = player.Context.GC.Heap[ cache_struct_ptr + i+restSpan.Length ];
+						var dst = player.HeapShotCut[ cache_struct_ptr + i+restSpan.Length ];
 								
 						CopyStruct(dst, src, player);
 
@@ -1574,10 +1574,10 @@ namespace juicescript.runtime
 					var box = cache_store[i];
 					if (box.IsStruct())//box.ValueType == NaNBoxing.BoxType.HeapPtr && box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var src = player.Context.GC.Heap[box.HeapPtr];
+						var src = player.HeapShotCut[box.HeapPtr];
 						Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 						//{
-						var dst = player.Context.GC.Heap[cache_struct_ptr + i - 1];
+						var dst = player.HeapShotCut[cache_struct_ptr + i - 1];
 						CopyStruct(dst, src, player);
 						cache_store[i - 1].SetHeapPtr( cache_struct_ptr + i - 1, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 						//}
@@ -1940,7 +1940,7 @@ namespace juicescript.runtime
 					arr = this;
 					if ( box.IsStruct() )//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var src = player.Context.GC.Heap[box.HeapPtr];
+						var src = player.HeapShotCut[box.HeapPtr];
 						Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
 							var stack_span = store_memory.Span;
@@ -1948,7 +1948,7 @@ namespace juicescript.runtime
 							var dst_v = stack_span[(int)array_index];
 							if (dst_v.IsStruct())//dst_v.ValueType == NaNBoxing.BoxType.HeapPtr)
 							{
-								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+								var dst = player.HeapShotCut[dst_v.HeapPtr];
 								Debug.Assert(dst.Kind == RtHeapTypeKind.INSTANCE && ((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct));
 								{
 									CopyStruct(dst, src, player);
@@ -2013,10 +2013,10 @@ namespace juicescript.runtime
 
 					if (box.IsStruct())//box.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
-						var src = player.Context.GC.Heap[box.HeapPtr];
+						var src = player.HeapShotCut[box.HeapPtr];
 						Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 						{
-							var dst = player.Context.GC.Heap[cache_struct_ptr + (int)array_index];
+							var dst = player.HeapShotCut[cache_struct_ptr + (int)array_index];
 							CopyStruct(dst, src, player);
 							cache_store[(int)array_index].SetHeapPtr(cache_struct_ptr + (int)array_index, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
 
@@ -2079,8 +2079,8 @@ namespace juicescript.runtime
 							var dst_v = block[array_index % SPARSE_BLOCK_SIZE];
 							if (dst_v.IsStruct() )//dst_v.ValueType == NaNBoxing.BoxType.HeapPtr && dst_v.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 							{
-								var src = player.Context.GC.Heap[box.HeapPtr];
-								var dst = player.Context.GC.Heap[dst_v.HeapPtr];
+								var src = player.HeapShotCut[box.HeapPtr];
+								var dst = player.HeapShotCut[dst_v.HeapPtr];
 								Debug.Assert(((ASInstance)dst.Type).Flags.HasFlag(ClassFlags.Struct));
 								Debug.Assert(((ASInstance)src.Type).Flags.HasFlag(ClassFlags.Struct));
 								{
@@ -2310,8 +2310,8 @@ namespace juicescript.runtime
 				{
 					if (src_store[i].HeapPtr == arr_store.cache_struct_ptr + i)
 					{
-						var dst = player.Context.GC.Heap[cache_struct_ptr + (int)i];
-						var src = player.Context.GC.Heap[arr_store.cache_struct_ptr + i];
+						var dst = player.HeapShotCut[cache_struct_ptr + (int)i];
+						var src = player.HeapShotCut[arr_store.cache_struct_ptr + i];
 
 						CopyStruct(dst, src, player);
 

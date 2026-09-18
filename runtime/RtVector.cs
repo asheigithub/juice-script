@@ -133,27 +133,27 @@ namespace juicescript.runtime
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
-            var vec = ((RtVector)player.Context.GC.Heap[ptr]);
+            var vec = ((RtVector)player.HeapShotCut[ptr]);
             target = vec.payload;
 
 			Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 #if DEBUG
 			if (vec.HEAPINSTANCE_PTR != 0)
             {				
-				Debug.Assert(player.Context.GC.Heap[vec.HEAPINSTANCE_PTR] == target);
+				Debug.Assert(player.HeapShotCut[vec.HEAPINSTANCE_PTR] == target);
 			}
 #endif
 
 			return vec.HEAPINSTANCE_PTR == 0 ? ptr : vec.HEAPINSTANCE_PTR;
 
 
-			//var payload = ((RtVector)player.Context.GC.Heap[ptr]);
+			//var payload = ((RtVector)player.HeapShotCut[ptr]);
 			//var origin = payload;
 			//target = origin;
 			//while (payload.HEAPINSTANCE_PTR != 0)
 			//{
 			//	ptr = payload.HEAPINSTANCE_PTR;
-			//	payload = ((RtVector)player.Context.GC.Heap[ptr]);
+			//	payload = ((RtVector)player.HeapShotCut[ptr]);
 			//	target = payload;
 			//	origin.HEAPINSTANCE_PTR = ptr;//更新,避免后续跳转
 
@@ -331,7 +331,7 @@ namespace juicescript.runtime
                                 }
 #endif
 
-								RtInstance src = ((RtInstance)player.Context.GC.Heap[value.HeapPtr]);
+								RtInstance src = ((RtInstance)player.HeapShotCut[value.HeapPtr]);
                                 src.GetStoreData(player,(ASInstance)element_asclass.Instance).Slice(0, bytes.Length).CopyTo(bytes);
                                 return;
                             }

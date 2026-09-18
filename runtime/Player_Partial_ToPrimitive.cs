@@ -45,7 +45,7 @@ namespace juicescript.runtime
 		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal bool IsPrimitive(NaNBoxing value)
 		{
-			//return (value.ValueType != NaNBoxing.BoxType.HeapPtr || Context.GC.Heap[value.HeapPtr].Kind == RtHeapTypeKind.STRING);
+			//return (value.ValueType != NaNBoxing.BoxType.HeapPtr || HeapShotCut[value.HeapPtr].Kind == RtHeapTypeKind.STRING);
 			return (value.ValueType != NaNBoxing.BoxType.HeapPtr || value.HeapKind == (byte)RtHeapTypeKind.STRING );
 		}
 
@@ -75,7 +75,7 @@ namespace juicescript.runtime
 				return value;
 			}
 
-			var scope = Context.GC.Heap[scope_ptr];
+			var scope = HeapShotCut[scope_ptr];
 			//#if DEBUG
 			//			if (scope.TypeKind != RtHeapTypeKind.MethodScope)
 			//			{
@@ -83,9 +83,9 @@ namespace juicescript.runtime
 			//			}
 			//#endif
 
-			bool mcheck = check_MultiNameLSearch_issameorinherit(value, caller_bindthis_ptr.ValueType ==  NaNBoxing.BoxType.HeapPtr? Context.GC.Heap[caller_bindthis_ptr.HeapPtr] : null);
+			bool mcheck = check_MultiNameLSearch_issameorinherit(value, caller_bindthis_ptr.ValueType ==  NaNBoxing.BoxType.HeapPtr? HeapShotCut[caller_bindthis_ptr.HeapPtr] : null);
 
-			var instance = Context.GC.Heap[value.HeapPtr];
+			var instance = HeapShotCut[value.HeapPtr];
 			var ns_set = scope.Type._link_codescope.NamespaceSet;
 
 			ASContainer as_type = null;
@@ -144,7 +144,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-			NaNBoxing fun; unsafe { fun = stackslots[tmp].HeapKind ==(byte)RtHeapTypeKind.STACK_CACHE_OBJ ?  LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp].HeapPtr], -1, ref error, stackslots, stackStPos + tmp): stackslots[tmp] ; }
+			NaNBoxing fun; unsafe { fun = stackslots[tmp].HeapKind ==(byte)RtHeapTypeKind.STACK_CACHE_OBJ ?  LoadValue( (RtStackCache)HeapShotCut[ stackslots[tmp].HeapPtr], -1, ref error, stackslots, stackStPos + tmp): stackslots[tmp] ; }
 			
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧，不管了
 			{
@@ -157,7 +157,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-			var funinstance = Context.GC.Heap[fun.HeapPtr];
+			var funinstance = HeapShotCut[fun.HeapPtr];
 			if (funinstance.Kind != RtHeapTypeKind.CLOSURE)
 			{
 				RaiseTypeError(ref error, fun, TypeKind.Function);
@@ -210,7 +210,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-			unsafe { fun = stackslots[tmp].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ? LoadValue( (RtStackCache)Context.GC.Heap[ stackslots[tmp].HeapPtr], -1, ref error, stackslots, stackStPos + tmp):stackslots[tmp]; }
+			unsafe { fun = stackslots[tmp].HeapKind == (byte)RtHeapTypeKind.STACK_CACHE_OBJ? LoadValue( (RtStackCache)HeapShotCut[ stackslots[tmp].HeapPtr], -1, ref error, stackslots, stackStPos + tmp):stackslots[tmp]; }
 #if DEBUG
 			if (error.raised) //由于object原型的存在，这里是肯定能找到的。
 			{
@@ -223,7 +223,7 @@ namespace juicescript.runtime
 				return default;
 			}
 
-			funinstance = Context.GC.Heap[fun.HeapPtr];
+			funinstance = HeapShotCut[fun.HeapPtr];
 			if (funinstance.Kind != RtHeapTypeKind.CLOSURE)
 			{
 				RaiseTypeError(ref error, fun, TypeKind.Function);

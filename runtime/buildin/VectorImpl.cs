@@ -4312,7 +4312,7 @@ namespace juicescript.runtime.buildin
 			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 
-				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
@@ -4433,7 +4433,7 @@ namespace juicescript.runtime.buildin
 			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 
-				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
@@ -4559,7 +4559,7 @@ namespace juicescript.runtime.buildin
 			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 
-				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
@@ -4712,7 +4712,7 @@ namespace juicescript.runtime.buildin
 			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 
-				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
@@ -4881,7 +4881,7 @@ namespace juicescript.runtime.buildin
 			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 
-				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = context.GC.Heap[cb.HeapPtr].Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
@@ -5628,7 +5628,7 @@ namespace juicescript.runtime.buildin
 							{
 								//在reseveSlot位置上
 								int cache_ptr = Context.CacheInstancePtr + reseveSlot;
-								var cache = player.Context.GC.Heap[cache_ptr];
+								var cache = player.HeapShotCut[cache_ptr];
 
 								cache.Type = element_asclass.Instance;
 								RtInstance struct_payload = (RtInstance)cache;

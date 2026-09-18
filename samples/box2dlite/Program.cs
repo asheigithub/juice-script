@@ -200,8 +200,8 @@ namespace box2dlite
 
 				int index = doc._link_codescope.Members.FindIndex( m=>m.QName.Name =="world" ) ;
 
-				NaNBoxing world_value = ((RtScriptClass)Player.Context.GC.Heap[doc.__global_index__]).ReadSlot(index);
-				world = (RtInstance)Player.Context.GC.Heap[world_value.HeapPtr];
+				NaNBoxing world_value = ((RtScriptClass)Player.HeapShotCut[doc.__global_index__]).ReadSlot(index);
+				world = (RtInstance)Player.HeapShotCut[world_value.HeapPtr];
 
 
 				var demo = main.Traits.First(t=>t.QName.Name == "Demo1").Method;
@@ -391,17 +391,17 @@ namespace box2dlite
 			{
 				var body_v = Player.GetVectorElement( bodies_v, i);
 
-				RtInstance body = (RtInstance)Player.Context.GC.Heap[body_v.HeapPtr];
+				RtInstance body = (RtInstance)Player.HeapShotCut[body_v.HeapPtr];
 
 				//float rotation
 				var rotation_v = body.ReadSlot((ushort)body_rotation, Player);
 				float rotation = rotation_v.FloatValue;
 
 				var pos_v = body.ReadSlot((ushort)body_positoin, Player);
-				RtInstance pos = (RtInstance)Player.Context.GC.Heap[pos_v.HeapPtr];
+				RtInstance pos = (RtInstance)Player.HeapShotCut[pos_v.HeapPtr];
 
 				var width_v = body.ReadSlot((ushort)body_width, Player);
-				RtInstance width = (RtInstance)Player.Context.GC.Heap[width_v.HeapPtr];
+				RtInstance width = (RtInstance)Player.HeapShotCut[width_v.HeapPtr];
 
 				float pos_x = pos.ReadSlot(0,Player).FloatValue;
 				float pos_y = pos.ReadSlot(1,Player).FloatValue;
@@ -437,31 +437,31 @@ namespace box2dlite
 			for (int i = 0; i < Player.GetVectorLen(joints_v); i++)
 			{
 				var joint_v = Player.GetVectorElement(joints_v, i);
-				RtInstance joint = (RtInstance)Player.Context.GC.Heap[joint_v.HeapPtr];
+				RtInstance joint = (RtInstance)Player.HeapShotCut[joint_v.HeapPtr];
 
 				var body1_v = joint.ReadSlot((ushort)joint_body1, Player);
-				RtInstance body1 = (RtInstance)Player.Context.GC.Heap[body1_v.HeapPtr];
+				RtInstance body1 = (RtInstance)Player.HeapShotCut[body1_v.HeapPtr];
 
 				//float rotation
 				var rotation1_v = body1.ReadSlot((ushort)body_rotation, Player);
 				float rotation1 = rotation1_v.FloatValue;
 				var pos1_v = body1.ReadSlot((ushort)body_positoin, Player);
-				RtInstance pos1 = (RtInstance)Player.Context.GC.Heap[pos1_v.HeapPtr];
+				RtInstance pos1 = (RtInstance)Player.HeapShotCut[pos1_v.HeapPtr];
 
 				var body2_v = joint.ReadSlot((ushort)joint_body2, Player);
-				RtInstance body2 = (RtInstance)Player.Context.GC.Heap[body2_v.HeapPtr];
+				RtInstance body2 = (RtInstance)Player.HeapShotCut[body2_v.HeapPtr];
 
 				//float rotation
 				var rotation2_v = body2.ReadSlot((ushort)body_rotation, Player);
 				float rotation2 = rotation2_v.FloatValue;
 				var pos2_v = body2.ReadSlot((ushort)body_positoin, Player);
-				RtInstance pos2 = (RtInstance)Player.Context.GC.Heap[pos2_v.HeapPtr];
+				RtInstance pos2 = (RtInstance)Player.HeapShotCut[pos2_v.HeapPtr];
 
 				var localAnchor1_v = joint.ReadSlot((ushort) joint_localAnchor1, Player);
-				RtInstance localAnchor1 = (RtInstance)Player.Context.GC.Heap[localAnchor1_v.HeapPtr];
+				RtInstance localAnchor1 = (RtInstance)Player.HeapShotCut[localAnchor1_v.HeapPtr];
 
 				var localAnchor2_v = joint.ReadSlot((ushort)joint_localAnchor2, Player);
-				RtInstance localAnchor2 = (RtInstance)Player.Context.GC.Heap[localAnchor2_v.HeapPtr];
+				RtInstance localAnchor2 = (RtInstance)Player.HeapShotCut[localAnchor2_v.HeapPtr];
 
 				//Mat22 R1(b1->rotation);
 				//Mat22 R2(b2->rotation);
@@ -529,7 +529,7 @@ namespace box2dlite
 				if (arbiter_v.ValueType == NaNBoxing.BoxType.Null)
 					continue;
 
-				RtInstance arbiter = (RtInstance)Player.Context.GC.Heap[arbiter_v.HeapPtr];
+				RtInstance arbiter = (RtInstance)Player.HeapShotCut[arbiter_v.HeapPtr];
 
 				int num = arbiter.ReadSlot((ushort)arbiter_numContacts, Player).IntValue;
 
@@ -538,10 +538,10 @@ namespace box2dlite
 				for (int j = 0; j < num; j++)
 				{
 					var contact_v = Player.GetVectorElement(contacts, j);
-					RtInstance contact = (RtInstance)Player.Context.GC.Heap[contact_v.HeapPtr];
+					RtInstance contact = (RtInstance)Player.HeapShotCut[contact_v.HeapPtr];
 
 					var pos_v = contact.ReadSlot(0,  Player, Context.STACK_LENGTH-1,contact_v.HeapPtr );
-					RtInstance pos = (RtInstance)Player.Context.GC.Heap[pos_v.HeapPtr];
+					RtInstance pos = (RtInstance)Player.HeapShotCut[pos_v.HeapPtr];
 
 					float pos_x = pos.ReadSlot(0, Player).FloatValue;
 					float pos_y = pos.ReadSlot(1, Player).FloatValue;

@@ -214,11 +214,11 @@ namespace juicescript.compiler
                         //ASMethodBody.PoolHeapPtrKind kind = (ASMethodBody.PoolHeapPtrKind)(c.HeapPtr >> 24);
                         //if (kind == ASMethodBody.PoolHeapPtrKind.String)
                         //{
-                        //    _string_.Add(((RtString)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF]).Str);
+                        //    _string_.Add(((RtString)context.player_for_compiler.HeapShotCut[c.HeapPtr & 0xFFFFFF]).Str);
                         //}
                         //else if (kind == ASMethodBody.PoolHeapPtrKind.LD_Class)
                         //{
-                        //    //ulong cid = ((ASClass)context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF].Type).Type_identifier;
+                        //    //ulong cid = ((ASClass)context.player_for_compiler.HeapShotCut[c.HeapPtr & 0xFFFFFF].Type).Type_identifier;
                         //    ulong cid = context.constpool_ldclass[ c.HeapPtr & 0xFFFFFF ];
                         //    _ld_classes.Add(cid);
                         //}
@@ -236,7 +236,7 @@ namespace juicescript.compiler
                         //}
                         //else if (kind == ASMethodBody.PoolHeapPtrKind.SuperMethod)
                         //{
-                        //    var heapInstance = context.player_for_compiler.Context.GC.Heap[c.HeapPtr & 0xFFFFFF];
+                        //    var heapInstance = context.player_for_compiler.HeapShotCut[c.HeapPtr & 0xFFFFFF];
                         //    ulong type = ((ASClass)heapInstance.Type).Type_identifier;
                         //    int vtable_index = ((RtMethodScope)heapInstance).ParentPtr;
 
@@ -715,7 +715,7 @@ namespace juicescript.compiler
     //            }
 				//else
     //            {
-    //                RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[boxing.HeapPtr & 0xFFFFFF];
+    //                RtHeapBase heapInstance = context.player_for_compiler.HeapShotCut[boxing.HeapPtr & 0xFFFFFF];
     //                if (heapInstance.Kind == RtHeapTypeKind.STRING && kind == ASMethodBody.PoolHeapPtrKind.String)
     //                {
     //                    int pool_index = _stringPool_.IndexOf(((RtString)heapInstance).Str);

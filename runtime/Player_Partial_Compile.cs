@@ -35,22 +35,22 @@ namespace juicescript.runtime
 			}
 
 			EMPTY_STR = Context.GC.AllocString(""); if (EMPTY_STR == 0) { throw new LoaderException("EMPTY_STR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[EMPTY_STR]);
+			Context.GC.Root.Add(HeapShotCut[EMPTY_STR]);
 
 			TRUE_STR = Context.GC.AllocString("true"); if (TRUE_STR == 0) { throw new LoaderException("TRUESTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[TRUE_STR]);
+			Context.GC.Root.Add(HeapShotCut[TRUE_STR]);
 
 			FALSE_STR = Context.GC.AllocString("false"); if (FALSE_STR == 0) { throw new LoaderException("FALSESTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[FALSE_STR]);
+			Context.GC.Root.Add(HeapShotCut[FALSE_STR]);
 
 			NAN_STR = Context.GC.AllocString("NaN"); if (NAN_STR == 0) { throw new LoaderException("NANPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[NAN_STR]);
+			Context.GC.Root.Add(HeapShotCut[NAN_STR]);
 
 			POSITIVEINF_STR = Context.GC.AllocString("Infinity"); if (POSITIVEINF_STR == 0) { throw new LoaderException("POSITIVEINFPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[POSITIVEINF_STR]);
+			Context.GC.Root.Add(HeapShotCut[POSITIVEINF_STR]);
 
 			NEGATIVEINF_STR = Context.GC.AllocString("-Infinity"); if (NEGATIVEINF_STR == 0) { throw new LoaderException("NEGATIVEINFPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[NEGATIVEINF_STR]);
+			Context.GC.Root.Add(HeapShotCut[NEGATIVEINF_STR]);
 
 
 			foreach (var script in Context.libs.SelectMany(l => l.Scripts))
@@ -101,25 +101,25 @@ namespace juicescript.runtime
 			}
 
 			CONSTRUCTOR_STR = Context.GC.AllocString("constructor"); if (CONSTRUCTOR_STR == 0) { throw new LoaderException("CONSTRUCTORPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[CONSTRUCTOR_STR]);
+			Context.GC.Root.Add(HeapShotCut[CONSTRUCTOR_STR]);
 
 			EMPTY_STR = Context.GC.AllocString(""); if (EMPTY_STR == 0) { throw new LoaderException("EMPTY_STR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[EMPTY_STR]);
+			Context.GC.Root.Add(HeapShotCut[EMPTY_STR]);
 
 			TRUE_STR = Context.GC.AllocString("true"); if (TRUE_STR == 0) { throw new LoaderException("TRUESTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[TRUE_STR]);
+			Context.GC.Root.Add(HeapShotCut[TRUE_STR]);
 
 			FALSE_STR = Context.GC.AllocString("false"); if (FALSE_STR == 0) { throw new LoaderException("FALSESTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[FALSE_STR]);
+			Context.GC.Root.Add(HeapShotCut[FALSE_STR]);
 
 			NAN_STR = Context.GC.AllocString("NaN"); if (NAN_STR == 0) { throw new LoaderException("NANPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[NAN_STR]);
+			Context.GC.Root.Add(HeapShotCut[NAN_STR]);
 
 			POSITIVEINF_STR = Context.GC.AllocString("Infinity"); if (POSITIVEINF_STR == 0) { throw new LoaderException("POSITIVEINFPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[POSITIVEINF_STR]);
+			Context.GC.Root.Add(HeapShotCut[POSITIVEINF_STR]);
 
 			NEGATIVEINF_STR = Context.GC.AllocString("-Infinity"); if (NEGATIVEINF_STR == 0) { throw new LoaderException("NEGATIVEINFPTR alloc failed"); }
-			Context.GC.Root.Add(Context.GC.Heap[NEGATIVEINF_STR]);
+			Context.GC.Root.Add(HeapShotCut[NEGATIVEINF_STR]);
 
 
 			foreach (var script in Context.libs.SelectMany(l => l.Scripts))
@@ -279,7 +279,7 @@ namespace juicescript.runtime
 						NaNBoxing nullP = default;
 						nullP.SetNull();
 
-						var @class = Context.GC.Heap[((ASClass)c._link_codescope.Container).__instance_index__];
+						var @class = HeapShotCut[((ASClass)c._link_codescope.Container).__instance_index__];
 						try
 						{
 							
@@ -296,7 +296,7 @@ namespace juicescript.runtime
 							throw new EvalConstException();
 						}
 
-						var clsinstance = Context.GC.Heap[((ASClass)c._link_codescope.Container).__instance_index__];
+						var clsinstance = HeapShotCut[((ASClass)c._link_codescope.Container).__instance_index__];
 						var clspayload = (RtScriptClass)clsinstance;
 
 						int idx = member.DefineAt._link_codescope.Members.IndexOf(member);
@@ -308,7 +308,7 @@ namespace juicescript.runtime
 						NaNBoxing thisP = default;
 						
 
-						var globalinstance = Context.GC.Heap[((ASScript)c._link_codescope.Container).__global_index__];
+						var globalinstance = HeapShotCut[((ASScript)c._link_codescope.Container).__global_index__];
 
 						thisP.SetHeapPtr(((ASScript)c._link_codescope.Container).__global_index__, (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
@@ -341,8 +341,8 @@ namespace juicescript.runtime
 							throw new InvalidOperationException();
 						}
 
-						int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].Kind == RtHeapTypeKind.INSTANCE &&
-							Context.GC.Heap[p].Type == @type.Instance
+						int cache_idx = computemember_cacheinstance.FindIndex(p => HeapShotCut[p].Kind == RtHeapTypeKind.INSTANCE &&
+							HeapShotCut[p].Type == @type.Instance
 						);
 
 						//构造实例
@@ -351,7 +351,7 @@ namespace juicescript.runtime
 						if (cache_idx > -1)
 						{
 							instancePtr = computemember_cacheinstance[cache_idx];
-							instance = Context.GC.Heap[instancePtr];
+							instance = HeapShotCut[instancePtr];
 						}
 						else
 						{
@@ -426,7 +426,7 @@ namespace juicescript.runtime
 								throw new LoaderException("out of memory");
 							}
 
-							Context.GC.Root.Add(Context.GC.Heap[methodscopeptr]);
+							Context.GC.Root.Add(HeapShotCut[methodscopeptr]);
 							computermember_cachemethodscope.Add(scope.Container, methodscopeptr);
 						}
 
@@ -438,12 +438,12 @@ namespace juicescript.runtime
 						scope = scope.Parent;
 
 						List< Tuple< RtMethodScope,int>> link = new List<Tuple<RtMethodScope, int>>();
-						link.Add( new Tuple<RtMethodScope, int>( (RtMethodScope)Context.GC.Heap[methodscopeptr],methodscopeptr));
+						link.Add( new Tuple<RtMethodScope, int>( (RtMethodScope)HeapShotCut[methodscopeptr],methodscopeptr));
 
 						while (scope.Kind == CodeScopeKind.Method)
 						{
 							is_closure = true;
-							var pre_scopeinstance = Context.GC.Heap[methodscopeptr];
+							var pre_scopeinstance = HeapShotCut[methodscopeptr];
 
 							if (!computermember_cachemethodscope.ContainsKey(scope.Container))
 							{
@@ -457,8 +457,8 @@ namespace juicescript.runtime
 									throw new LoaderException("out of memory");
 								}
 
-								Context.GC.Heap[methodscopeptr].Type = scope.Container;
-								Context.GC.Root.Add(Context.GC.Heap[methodscopeptr]);
+								HeapShotCut[methodscopeptr].Type = scope.Container;
+								Context.GC.Root.Add(HeapShotCut[methodscopeptr]);
 								computermember_cachemethodscope.Add(scope.Container, methodscopeptr);
 								((RtMethodScope)pre_scopeinstance).ParentPtr = methodscopeptr;
 							}
@@ -469,7 +469,7 @@ namespace juicescript.runtime
 								methodscopeptr = computermember_cachemethodscope[scope.Container];
 								((RtMethodScope)pre_scopeinstance).ParentPtr = methodscopeptr;
 							}
-							link.Add( new Tuple<RtMethodScope, int>( (RtMethodScope)Context.GC.Heap[methodscopeptr], methodscopeptr));
+							link.Add( new Tuple<RtMethodScope, int>( (RtMethodScope)HeapShotCut[methodscopeptr], methodscopeptr));
 							
 							scope = scope.Parent;
 						}
@@ -487,7 +487,7 @@ namespace juicescript.runtime
 								link[0].Item1.ParentPtr = ((ASScript)scope.Container).__global_index__;
 							}
 
-							var scopeinstance = Context.GC.Heap[run_methodscope];
+							var scopeinstance = HeapShotCut[run_methodscope];
 							if (!hassetparent)
 							{
 								((RtMethodScope)scopeinstance).ParentPtr = ((ASScript)scope.Container).__global_index__;
@@ -497,7 +497,7 @@ namespace juicescript.runtime
 							NaNBoxing thisP = default;
 							
 
-							var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
+							var global = HeapShotCut[((ASScript)scope.Container).__global_index__];
 							thisP.SetHeapPtr(((ASScript)scope.Container).__global_index__ , (byte)RtHeapTypeKind.GLOBAL, (byte)HeapKindFlag.NONE);
 
 							if (info.useSlots > Context.StackSlots.Length)
@@ -566,7 +566,7 @@ namespace juicescript.runtime
 								link[0].Item1.ParentPtr = ((ASClass)scope.Container).__instance_index__;
 							}
 
-							var scopeinstance = Context.GC.Heap[run_methodscope];
+							var scopeinstance = HeapShotCut[run_methodscope];
 							if (!hassetparent)
 							{
 								((RtMethodScope)scopeinstance).ParentPtr = ((ASClass)scope.Container).__instance_index__;								
@@ -576,7 +576,7 @@ namespace juicescript.runtime
 							NaNBoxing thisP = default;
 							thisP.SetNull();
 
-							var @class = Context.GC.Heap[((ASClass)scope.Container).__instance_index__];
+							var @class = HeapShotCut[((ASClass)scope.Container).__instance_index__];
 
 							if (info.useSlots > Context.StackSlots.Length)
 							{
@@ -637,8 +637,8 @@ namespace juicescript.runtime
 						else if (scope.Kind == CodeScopeKind.Instance)
 						{
 
-							int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].Kind == RtHeapTypeKind.INSTANCE &&
-							Context.GC.Heap[p].Type == scope.TypeLayout.ASType.Instance);
+							int cache_idx = computemember_cacheinstance.FindIndex(p => HeapShotCut[p].Kind == RtHeapTypeKind.INSTANCE &&
+							HeapShotCut[p].Type == scope.TypeLayout.ASType.Instance);
 
 							if (cache_idx < 0) // 基类定义在其他文件时，有可能....
 							{
@@ -648,7 +648,7 @@ namespace juicescript.runtime
 								if (cache_idx > -1)
 								{
 									instancePtr = computemember_cacheinstance[cache_idx];
-									instance = Context.GC.Heap[instancePtr];
+									instance = HeapShotCut[instancePtr];
 								}
 								else
 								{
@@ -685,11 +685,11 @@ namespace juicescript.runtime
 							int this_instancePtr;
 
 							this_instancePtr = computemember_cacheinstance[cache_idx];
-							this_instance = Context.GC.Heap[this_instancePtr];
+							this_instance = HeapShotCut[this_instancePtr];
 
-							((RtMethodScope)Context.GC.Heap[methodscopeptr]).ParentPtr = this_instancePtr;
+							((RtMethodScope)HeapShotCut[methodscopeptr]).ParentPtr = this_instancePtr;
 							
-							var scopeinstance = Context.GC.Heap[run_methodscope];
+							var scopeinstance = HeapShotCut[run_methodscope];
 							scopeinstance.Type = method.Body;
 
 							NaNBoxing thisP = default;
@@ -821,38 +821,38 @@ namespace juicescript.runtime
 			if (CONSTRUCTOR_STR == 0)
 			{
 				CONSTRUCTOR_STR = Context.GC.AllocString("constructor"); if (CONSTRUCTOR_STR == 0) { throw new LoaderException("CONSTRUCTORPTR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[CONSTRUCTOR_STR]);
+				Context.GC.Root.Add(HeapShotCut[CONSTRUCTOR_STR]);
 			}
 			if (EMPTY_STR == 0)
 			{
 				EMPTY_STR = Context.GC.AllocString(""); if (EMPTY_STR == 0) { throw new LoaderException("EMPTY_STR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[EMPTY_STR]);
+				Context.GC.Root.Add(HeapShotCut[EMPTY_STR]);
 			}
 			if (TRUE_STR == 0)
 			{
 				TRUE_STR = Context.GC.AllocString("true"); if (TRUE_STR == 0) { throw new LoaderException("TRUESTR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[TRUE_STR]);
+				Context.GC.Root.Add(HeapShotCut[TRUE_STR]);
 			}
 
 			if (FALSE_STR == 0)
 			{
 				FALSE_STR = Context.GC.AllocString("false"); if (FALSE_STR == 0) { throw new LoaderException("FALSESTR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[FALSE_STR]);
+				Context.GC.Root.Add(HeapShotCut[FALSE_STR]);
 			}
 			if (NAN_STR == 0)
 			{
 				NAN_STR = Context.GC.AllocString("NaN"); if (NAN_STR == 0) { throw new LoaderException("NANPTR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[NAN_STR]);
+				Context.GC.Root.Add(HeapShotCut[NAN_STR]);
 			}
 			if (POSITIVEINF_STR == 0)
 			{
 				POSITIVEINF_STR = Context.GC.AllocString("Infinity"); if (POSITIVEINF_STR == 0) { throw new LoaderException("POSITIVEINFPTR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[POSITIVEINF_STR]);
+				Context.GC.Root.Add(HeapShotCut[POSITIVEINF_STR]);
 			}
 			if (NEGATIVEINF_STR == 0)
 			{
 				NEGATIVEINF_STR = Context.GC.AllocString("-Infinity"); if (NEGATIVEINF_STR == 0) { throw new LoaderException("NEGATIVEINFPTR alloc failed"); }
-				Context.GC.Root.Add(Context.GC.Heap[NEGATIVEINF_STR]);
+				Context.GC.Root.Add(HeapShotCut[NEGATIVEINF_STR]);
 			}
 
 
@@ -902,7 +902,7 @@ namespace juicescript.runtime
 							throw new LoaderException("out of memory");
 						}
 
-						Context.GC.Root.Add(Context.GC.Heap[methodscopeptr]);
+						Context.GC.Root.Add(HeapShotCut[methodscopeptr]);
 						computermember_cachemethodscope.Add(scope.Container, methodscopeptr);
 					}
 
@@ -915,7 +915,7 @@ namespace juicescript.runtime
 					while (scope.Kind == CodeScopeKind.Method)
 					{
 						is_closure = true;
-						var pre_scopeinstance = Context.GC.Heap[methodscopeptr];
+						var pre_scopeinstance = HeapShotCut[methodscopeptr];
 
 						if (!computermember_cachemethodscope.ContainsKey(scope.Container))
 						{
@@ -930,8 +930,8 @@ namespace juicescript.runtime
 								throw new LoaderException("out of memory");
 							}
 
-							Context.GC.Heap[methodscopeptr].Type = scope.Container;
-							Context.GC.Root.Add(Context.GC.Heap[methodscopeptr]);
+							HeapShotCut[methodscopeptr].Type = scope.Container;
+							Context.GC.Root.Add(HeapShotCut[methodscopeptr]);
 							computermember_cachemethodscope.Add(scope.Container, methodscopeptr);
 							((RtMethodScope)pre_scopeinstance).ParentPtr = methodscopeptr;
 						}
@@ -947,7 +947,7 @@ namespace juicescript.runtime
 
 					if (scope.Kind == CodeScopeKind.Script)
 					{
-						var scopeinstance = Context.GC.Heap[run_methodscope];
+						var scopeinstance = HeapShotCut[run_methodscope];
 						if (!hassetparent)
 						{
 							((RtMethodScope)scopeinstance).ParentPtr = ((ASScript)scope.Container).__global_index__;
@@ -960,7 +960,7 @@ namespace juicescript.runtime
 						((RtMethodScope)scopeinstance).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance).SlotCount - 1));
 
 
-						var global = Context.GC.Heap[((ASScript)scope.Container).__global_index__];
+						var global = HeapShotCut[((ASScript)scope.Container).__global_index__];
 
 						if (info.useSlots > Context.StackSlots.Length)
 						{
@@ -998,7 +998,7 @@ namespace juicescript.runtime
 					}
 					else if (scope.Kind == CodeScopeKind.Class)
 					{
-						var scopeinstance = Context.GC.Heap[run_methodscope];
+						var scopeinstance = HeapShotCut[run_methodscope];
 						if (!hassetparent)
 						{
 							((RtMethodScope)scopeinstance).ParentPtr = ((ASClass)scope.Container).__instance_index__;
@@ -1010,7 +1010,7 @@ namespace juicescript.runtime
 
 						((RtMethodScope)scopeinstance).SetSlot(thisP, (ushort)(((RtMethodScope)scopeinstance).SlotCount - 1));
 
-						var @class = Context.GC.Heap[((ASClass)scope.Container).__instance_index__];
+						var @class = HeapShotCut[((ASClass)scope.Container).__instance_index__];
 
 						if (info.useSlots > Context.StackSlots.Length)
 						{
@@ -1058,8 +1058,8 @@ namespace juicescript.runtime
 						}
 						else
 						{
-							int cache_idx = computemember_cacheinstance.FindIndex(p => Context.GC.Heap[p].Kind == RtHeapTypeKind.INSTANCE &&
-							Context.GC.Heap[p].Type == scope.TypeLayout.ASType.Instance);
+							int cache_idx = computemember_cacheinstance.FindIndex(p => HeapShotCut[p].Kind == RtHeapTypeKind.INSTANCE &&
+							HeapShotCut[p].Type == scope.TypeLayout.ASType.Instance);
 
 							if (cache_idx < 0) // 基类定义在其他文件时，有可能....
 							{
@@ -1069,7 +1069,7 @@ namespace juicescript.runtime
 								if (cache_idx > -1)
 								{
 									instancePtr = computemember_cacheinstance[cache_idx];
-									instance = Context.GC.Heap[instancePtr];
+									instance = HeapShotCut[instancePtr];
 								}
 								else
 								{
@@ -1099,18 +1099,18 @@ namespace juicescript.runtime
 							RtHeapBase this_instance  ;
 
 							//this_instancePtr = computemember_cacheinstance[cache_idx];
-							//this_instance = Context.GC.Heap[this_instancePtr];
+							//this_instance = HeapShotCut[this_instancePtr];
 
 							int t = computemember_cacheinstance[cache_idx];
-							this_instance = Context.GC.Heap[t];
+							this_instance = HeapShotCut[t];
 							this_instancePtr.SetHeapPtr(t, (byte)this_instance.Kind, (byte)(this_instance.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)this_instance.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 
 
 
-							((RtMethodScope)Context.GC.Heap[methodscopeptr]).ParentPtr = t;  //this_instancePtr;
+							((RtMethodScope)HeapShotCut[methodscopeptr]).ParentPtr = t;  //this_instancePtr;
 						}
 
-						var scopeinstance = Context.GC.Heap[run_methodscope];
+						var scopeinstance = HeapShotCut[run_methodscope];
 						scopeinstance.Type = method.Body;
 
 						NaNBoxing thisP = default;

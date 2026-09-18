@@ -52,7 +52,8 @@ namespace juicescript.runtime.gc
 #endif
 #endif
 
-
+        internal List<RtHeapBase> HeapShotCut { get => Heap; }
+        
 
         public GCHeap()
         { 

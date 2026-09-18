@@ -546,7 +546,7 @@ namespace juicescript.compiler.IL.Optimize
 								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
 								//int ptr = boxing.HeapPtr & 0xFFFFFF;
-								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//var methodscope = context.player_for_compiler.HeapShotCut[ptr];
 								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
 								//var m = ((ASMethodBody)methodscope.Type).Method;
 
@@ -786,7 +786,7 @@ namespace juicescript.compiler.IL.Optimize
 								//Debug.Assert(fbox.ValueType == NaNBoxing.BoxType.HeapPtr);
 								//Debug.Assert(fbox.HeapPtr >> 24 == (byte)ASMethodBody.PoolHeapPtrKind.SuperMethod);
 
-								//RtHeapBase heapInstance = context.player_for_compiler.Context.GC.Heap[fbox.HeapPtr & 0xffffff];
+								//RtHeapBase heapInstance = context.player_for_compiler.HeapShotCut[fbox.HeapPtr & 0xffffff];
 								//Debug.Assert(heapInstance.Kind == RtHeapTypeKind.MethodScope);
 
 								//var m = ((ASClass)heapInstance.Type).Instance._vtable.Items[((RtMethodScope)heapInstance).ParentPtr].Trait.Method;
@@ -1504,7 +1504,7 @@ namespace juicescript.compiler.IL.Optimize
 								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
 								//int ptr = boxing.HeapPtr & 0xFFFFFF;
-								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//var methodscope = context.player_for_compiler.HeapShotCut[ptr];
 								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
 								//var m = ((ASMethodBody)methodscope.Type).Method;
 
@@ -1525,7 +1525,7 @@ namespace juicescript.compiler.IL.Optimize
 								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
 								//int ptr = boxing.HeapPtr & 0xFFFFFF;
-								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//var methodscope = context.player_for_compiler.HeapShotCut[ptr];
 								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
 
 								//var m = ((ASMethodBody)methodscope.Type).Method;
@@ -1934,7 +1934,7 @@ namespace juicescript.compiler.IL.Optimize
 								//Debug.Assert((kind == ASMethodBody.PoolHeapPtrKind.Method));
 
 								//int ptr = boxing.HeapPtr & 0xFFFFFF;
-								//var methodscope = context.player_for_compiler.Context.GC.Heap[ptr];
+								//var methodscope = context.player_for_compiler.HeapShotCut[ptr];
 								//Debug.Assert(methodscope.Kind == RtHeapTypeKind.MethodScope);
 
 								//var m = ((ASMethodBody)methodscope.Type).Method;

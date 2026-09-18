@@ -191,7 +191,7 @@ namespace juicescript.runtime
 
 				if (instance.ValueType == BoxType.HeapPtr)
 				{
-					var ins = Context.GC.Heap[instance.HeapPtr];
+					var ins = HeapShotCut[instance.HeapPtr];
 
 					if (ins.Kind == RtHeapTypeKind.CLASS)
 					{

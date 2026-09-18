@@ -37,13 +37,13 @@ namespace juicescript.runtime
 
 		public int GetVectorLen(NaNBoxing vector)
 		{
-			RtVector rtVector = (RtVector)Context.GC.Heap[vector.HeapPtr];
+			RtVector rtVector = (RtVector)HeapShotCut[vector.HeapPtr];
 			return rtVector.GetStore(this).length;
 		}
 
 		public NaNBoxing GetVectorElement(NaNBoxing vector, int index)
 		{
-			RtVector rtVector = (RtVector)Context.GC.Heap[vector.HeapPtr];
+			RtVector rtVector = (RtVector)HeapShotCut[vector.HeapPtr];
 			var store = rtVector.GetStore(this);
 
 			return store.ReadSlot(rtVector.element_type, index, this, vector.HeapPtr, Context.StackPosition, rtVector.element_asclass);

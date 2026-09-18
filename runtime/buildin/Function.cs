@@ -96,7 +96,7 @@ namespace juicescript.runtime.buildin
 			else if (_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 
-				var sss = closureinstance.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = closureinstance.Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
@@ -179,7 +179,7 @@ namespace juicescript.runtime.buildin
 			else if(_this.ValueType == NaNBoxing.BoxType.Undefined || _this.ValueType == NaNBoxing.BoxType.Null)
 			{
 				
-				var sss = closureinstance.Type._link_codescope.Parent; //Context.GC.Heap[scope_ptr].Type._link_codescope.Parent;
+				var sss = closureinstance.Type._link_codescope.Parent; //HeapShotCut[scope_ptr].Type._link_codescope.Parent;
 				while (sss.Kind != CodeScopeKind.Script)
 				{
 					sss = sss.Parent;
