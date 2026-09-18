@@ -37,7 +37,7 @@ namespace juicescript.runtime
 		private static int DoFindAndUpdatePtr(int ptr, Player player, ASInstance type, out RtInstance target)
 		{
 
-			var ref_instance = player.HeapShotCut[ptr];
+			var ref_instance = player.HeapShortCut[ptr];
 			Debug.Assert(ref_instance.Kind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(!type.Flags.HasFlag(ClassFlags.Struct));
 			Debug.Assert(!((ASInstance)ref_instance.Type).Flags.HasFlag(ClassFlags.Struct));
@@ -97,7 +97,7 @@ namespace juicescript.runtime
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtInstance target)
 		{
-			RtHeapBase tmp = player.HeapShotCut[ptr];
+			RtHeapBase tmp = player.HeapShortCut[ptr];
 			RtInstance check = (RtInstance)tmp;
 
 			if (check.HEAPINSTANCE_PTR == 0)
@@ -108,7 +108,7 @@ namespace juicescript.runtime
 			else if (((ASInstance)tmp.Type).Flags.HasFlag(ClassFlags.Struct))
 			{
 
-				var tmp2 = player.HeapShotCut[check.HEAPINSTANCE_PTR];
+				var tmp2 = player.HeapShortCut[check.HEAPINSTANCE_PTR];
 
 				if (tmp2.Kind == RtHeapTypeKind.INSTANCE)
 				{
@@ -129,7 +129,7 @@ namespace juicescript.runtime
 			else
 			{
 
-				target = (RtInstance)player.HeapShotCut[check.HEAPINSTANCE_PTR];
+				target = (RtInstance)player.HeapShortCut[check.HEAPINSTANCE_PTR];
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				return check.HEAPINSTANCE_PTR;
 
@@ -170,7 +170,7 @@ namespace juicescript.runtime
 
 
 
-			var target = player.HeapShotCut[HEAPINSTANCE_PTR];
+			var target = player.HeapShortCut[HEAPINSTANCE_PTR];
 			if (target.Kind == RtHeapTypeKind.VECTOR)
 			{
 				Debug.Assert(((RtVector)target).HEAPINSTANCE_PTR == 0);
@@ -729,7 +729,7 @@ namespace juicescript.runtime
 								)
 							{
 								int cache_ptr = Context.CacheInstancePtr + returnSlotIndex;
-								var cache = player.HeapShotCut[cache_ptr];
+								var cache = player.HeapShortCut[cache_ptr];
 
 								cache.Type = member.__rt_type_class__.Instance;
 								RtInstance struct_payload = (RtInstance)cache;
@@ -1015,7 +1015,7 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();
 			}
 
-			if (facility.HEAPINSTANCE_PTR != 0 && player.HeapShotCut[facility.HEAPINSTANCE_PTR] == this)
+			if (facility.HEAPINSTANCE_PTR != 0 && player.HeapShortCut[facility.HEAPINSTANCE_PTR] == this)
 			{
 				throw new InvalidOperationException();
 			}

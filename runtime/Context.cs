@@ -178,7 +178,7 @@ namespace juicescript.runtime
         internal Memory<NaNBoxing>[] cache_array_memory;
         internal int[] cache_array_structindex;
 
-        public readonly List<RtHeapBase> HeapShotCut;
+        public readonly List<RtHeapBase> HeapShortCut;
 
 		public Context(Player player, int gc_limit = int.MaxValue)
         {
@@ -193,7 +193,7 @@ namespace juicescript.runtime
 
             GC = new gc.GC(this,gc_limit);
 
-            HeapShotCut = GC.Heap.HeapShotCut;
+            HeapShortCut = GC.Heap.HeapShotCut;
 
             StackSlots = new NaNBoxing[REAL_STACK_LENGTH];
 

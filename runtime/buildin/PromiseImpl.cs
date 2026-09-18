@@ -26,11 +26,11 @@ namespace juicescript.runtime.buildin
 		{
 			Debug.Assert(thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			RtHeapBase _this = context.GC.Heap[thisPtr.HeapPtr];
+			RtHeapBase _this = context.HeapShortCut[thisPtr.HeapPtr];
 			Debug.Assert(_this.Kind == RtHeapTypeKind.INSTANCE);
 			Debug.Assert(_this.Type.QName.Name == "Promise");
 
-			var executor = ((RtMethodScope)context.GC.Heap[scope_ptr]).ReadSlot(0);
+			var executor = ((RtMethodScope)context.HeapShortCut[scope_ptr]).ReadSlot(0);
 
 			RtHeapBase executor_closure;
 			// 2. 验证executor是否为函数
@@ -58,8 +58,8 @@ namespace juicescript.runtime.buildin
 				int ptrIndex = stackStPos;
 				int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
-				context.GC.Heap[m_closurePtr].Type = _resolve.Trait.Method.Body;
-				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
+				context.HeapShortCut[m_closurePtr].Type = _resolve.Trait.Method.Body;
+				RtClosure closure = (RtClosure)context.HeapShortCut[m_closurePtr];
 				//closure.This = thisPtr;
 				//closure.ScopePtr = scope_ptr;
 				////closure.ScopeType = _resolve.DefineAt;
@@ -75,8 +75,8 @@ namespace juicescript.runtime.buildin
 				int ptrIndex = stackStPos + 1;
 				int m_closurePtr = Context.M_ClosurePtr + ptrIndex;
 
-				context.GC.Heap[m_closurePtr].Type = _reject.Trait.Method.Body;
-				RtClosure closure = (RtClosure)context.GC.Heap[m_closurePtr];
+				context.HeapShortCut[m_closurePtr].Type = _reject.Trait.Method.Body;
+				RtClosure closure = (RtClosure)context.HeapShortCut[m_closurePtr];
 				//closure.This = thisPtr;
 				//closure.ScopePtr = scope_ptr;
 				////closure.ScopeType = _reject.DefineAt;
@@ -157,12 +157,12 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			// 1. 获取resolve的参数值
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var value = scope.ReadSlot(0);
 
 			// 2. 获取Promise实例和状态
 			Debug.Assert(thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr);
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
@@ -185,13 +185,13 @@ namespace juicescript.runtime.buildin
 
 			//if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 			//{
-			//	var heapInstance = context.GC.Heap[value.HeapPtr];
+			//	var heapInstance = context.HeapShotCut[value.HeapPtr];
 			//	if (heapInstance.TypeKind == RtHeapTypeKind.INSTANCE &&
 			//		heapInstance.Type is ASInstance asInstance &&
 			//		asInstance._link_codescope.TypeLayout.ASType.Type_identifier == context.PROMISE.Type_identifier
 			//		)
 			//	{
-			//		var p = (PromiseWapper)((RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr]).wapperedObject;
+			//		var p = (PromiseWapper)((RtPayloadInstance)context.HeapShotCut[thisPtr.HeapPtr]).wapperedObject;
 			//		// Value is a Promise, adopt its state
 			//		var valuePromise = (PromiseWapper)((RtPayloadInstance)heapInstance).wapperedObject;
 
@@ -267,11 +267,11 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 			// 1. 获取reject的参数reason
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var reason = scope.ReadSlot(0);
 
 			// 2. 获取Promise实例和状态
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
@@ -333,7 +333,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			// 读取两个参数
 			var onFulfilled = scope.ReadSlot(0);
 			var onRejected = scope.ReadSlot(1);
@@ -370,7 +370,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
@@ -441,7 +441,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
 			var onRejected = scope.ReadSlot(0);
 
@@ -461,7 +461,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
@@ -531,12 +531,12 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var value = scope.ReadSlot(0);
 
 			if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 			{
-				var heapobj = context.GC.Heap[value.HeapPtr];
+				var heapobj = context.HeapShortCut[value.HeapPtr];
 				if (heapobj.Kind == RtHeapTypeKind.INSTANCE && heapobj.Type == context.PROMISE.Instance)
 				{
 					context.StackSlots[returnSlotIndex] = value;
@@ -588,7 +588,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var reason = scope.ReadSlot(0);
 
 			// 提升 reason 到堆
@@ -623,7 +623,7 @@ namespace juicescript.runtime.buildin
 			switch (value.ValueType)
 			{
 				case NaNBoxing.BoxType.HeapPtr:
-					var heapInstance = context.GC.Heap[value.HeapPtr];
+					var heapInstance = context.HeapShortCut[value.HeapPtr];
 					closure = heapInstance;
 					return heapInstance.Kind == RtHeapTypeKind.CLOSURE;
 				case NaNBoxing.BoxType.Null:
@@ -870,7 +870,7 @@ namespace juicescript.runtime.buildin
 								continue;
 							}
 
-							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
+							var cbInstance = context.HeapShortCut[task.CallbackFunction.HeapPtr];
 							if (cbInstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
 								if (context.StackPosition + 4 >= Context.STACK_LENGTH)
@@ -912,7 +912,7 @@ namespace juicescript.runtime.buildin
 									return;
 								}
 
-								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
+								((PromiseWapper)((RtInstance)context.HeapShortCut[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, tempErr.error);
 
 								continue;
@@ -965,7 +965,7 @@ namespace juicescript.runtime.buildin
 									return;
 								}
 
-								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
+								((PromiseWapper)((RtInstance)context.HeapShortCut[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, reason);
 
 								continue;
@@ -990,15 +990,15 @@ namespace juicescript.runtime.buildin
 							if (task.CallbackFunction.ValueType != NaNBoxing.BoxType.HeapPtr)
 							{
 								// onRejected 未提供，直接向后透传拒绝
-								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
+								((PromiseWapper)((RtInstance)context.HeapShortCut[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, task.Value);
 								continue;
 							}
 
-							var cbInstance = context.GC.Heap[task.CallbackFunction.HeapPtr];
+							var cbInstance = context.HeapShortCut[task.CallbackFunction.HeapPtr];
 							if (cbInstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
-								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
+								((PromiseWapper)((RtInstance)context.HeapShortCut[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, task.Value);
 								continue;
 							}
@@ -1016,7 +1016,7 @@ namespace juicescript.runtime.buildin
 									return;
 								}
 
-								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
+								((PromiseWapper)((RtInstance)context.HeapShortCut[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, tempErr.error);
 
 								continue;
@@ -1070,7 +1070,7 @@ namespace juicescript.runtime.buildin
 									return;
 								}
 
-								((PromiseWapper)((RtInstance)context.GC.Heap[task.NextPromiseInstance.HeapPtr]).wapperedObject)
+								((PromiseWapper)((RtInstance)context.HeapShortCut[task.NextPromiseInstance.HeapPtr]).wapperedObject)
 									.Reject(context, reason);
 
 								continue;
@@ -1096,7 +1096,7 @@ namespace juicescript.runtime.buildin
 
 			internal void ResolvePromise(Context context, NaNBoxing nextPromiseInstance, NaNBoxing value, ref ReceiveError resolve_falut)
 			{
-				var p = (PromiseWapper)((RtInstance)context.GC.Heap[nextPromiseInstance.HeapPtr]).wapperedObject;
+				var p = (PromiseWapper)((RtInstance)context.HeapShortCut[nextPromiseInstance.HeapPtr]).wapperedObject;
 
 				if (context.player.IsStrictlyEqual(nextPromiseInstance, value))
 				{
@@ -1119,7 +1119,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				// Step 5: Check if value is a Promise instance
-				var heapInstance = context.GC.Heap[value.HeapPtr];
+				var heapInstance = context.HeapShortCut[value.HeapPtr];
 				if (heapInstance.Kind == RtHeapTypeKind.INSTANCE &&
 					heapInstance.Type is ASInstance asInstance &&
 					asInstance._link_codescope.TypeLayout.ASType.Type_identifier == context.PROMISE.Type_identifier
@@ -1236,7 +1236,7 @@ namespace juicescript.runtime.buildin
 					return true; // Not an object, "then" is undefined
 				}
 
-				var heapInstance = context.GC.Heap[value.HeapPtr];
+				var heapInstance = context.HeapShortCut[value.HeapPtr];
 
 				// Get type information
 				RtHeapTypeKind kind = heapInstance.Kind;
@@ -1306,7 +1306,7 @@ namespace juicescript.runtime.buildin
 					// Check if result is a cache object (getter/setter)
 					if (result.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						var resultHeap = context.GC.Heap[result.HeapPtr];
+						var resultHeap = context.HeapShortCut[result.HeapPtr];
 
 						if (resultHeap.Kind == RtHeapTypeKind.STACK_CACHE_OBJ)
 						{
@@ -1381,18 +1381,18 @@ namespace juicescript.runtime.buildin
 								}
 								else if (heapInstance.Kind == RtHeapTypeKind.ARRAY)
 								{
-									protoPtr = ((RtScriptClass)context.GC.Heap[context.ARRAY.__instance_index__]).PROTO__PTR;
+									protoPtr = ((RtScriptClass)context.HeapShortCut[context.ARRAY.__instance_index__]).PROTO__PTR;
 								}
 								else if (heapInstance.Kind == RtHeapTypeKind.GLOBAL)
 								{
-									protoPtr = ((RtScriptClass)context.GC.Heap[context.OBJECT.__instance_index__]).PROTO__PTR;
+									protoPtr = ((RtScriptClass)context.HeapShortCut[context.OBJECT.__instance_index__]).PROTO__PTR;
 								}
 
 								// Walk the prototype chain
 								int maxSteps = 32; // Prevent infinite loops
 								while (protoPtr > 0 && maxSteps > 0)
 								{
-									var protoObj = context.GC.Heap[protoPtr];
+									var protoObj = context.HeapShortCut[protoPtr];
 
 									if (context.player.FindDynamicValue(protoObj, "then", out dynValue, out matchShapePtr, out slotIndex, out dynProp))
 									{
@@ -1493,8 +1493,8 @@ namespace juicescript.runtime.buildin
 				// 创建 resolve 回调闭包
 				int resolveCb = Context.M_ClosurePtr + basePos;
 
-				RtClosure resolveClosure = (RtClosure)context.GC.Heap[resolveCb];
-				context.GC.Heap[resolveCb].Type = thenableResolve.Body;
+				RtClosure resolveClosure = (RtClosure)context.HeapShortCut[resolveCb];
+				context.HeapShortCut[resolveCb].Type = thenableResolve.Body;
 				//resolveClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 				//resolveClosure.ScopePtr = statePtr;
 				////resolveClosure.ScopeType = stateObj.Type;
@@ -1509,8 +1509,8 @@ namespace juicescript.runtime.buildin
 				// 创建 reject 回调闭包
 				int rejectCb = Context.M_ClosurePtr + basePos + 1;
 
-				RtClosure rejectClosure = (RtClosure)context.GC.Heap[rejectCb];
-				context.GC.Heap[rejectCb].Type = thenableReject.Body;
+				RtClosure rejectClosure = (RtClosure)context.HeapShortCut[rejectCb];
+				context.HeapShortCut[rejectCb].Type = thenableReject.Body;
 				//rejectClosure.This.SetHeapPtr(statePtr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 				//rejectClosure.ScopePtr = statePtr;
 				////rejectClosure.ScopeType = stateObj.Type;
@@ -1528,7 +1528,7 @@ namespace juicescript.runtime.buildin
 				context.StackSlots[basePos + 1] = rejectCallback;
 
 				// 调用 thenable.then(resolveCallback, rejectCallback)
-				var thenClosure = context.GC.Heap[thenFunction.HeapPtr];
+				var thenClosure = context.HeapShortCut[thenFunction.HeapPtr];
 				var thenMethod = ((ASMethodBody)thenClosure.Type).Method;
 				var thenPayload = (RtClosure)thenClosure;
 
@@ -1571,7 +1571,7 @@ namespace juicescript.runtime.buildin
 							return; // Unrecoverable fault
 						}
 
-						var targetWapper = (PromiseWapper)((RtInstance)context.GC.Heap[targetPromise.HeapPtr]).wapperedObject;
+						var targetWapper = (PromiseWapper)((RtInstance)context.HeapShortCut[targetPromise.HeapPtr]).wapperedObject;
 						targetWapper.Reject(context, reason);
 					}
 				}
@@ -1595,15 +1595,15 @@ namespace juicescript.runtime.buildin
 
 					if (task.NextPromiseInstance.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						context.GC.mark(context.GC.Heap[task.NextPromiseInstance.HeapPtr]);
+						context.GC.mark(context.HeapShortCut[task.NextPromiseInstance.HeapPtr]);
 					}
 					if (task.Value.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						context.GC.mark(context.GC.Heap[task.Value.HeapPtr]);
+						context.GC.mark(context.HeapShortCut[task.Value.HeapPtr]);
 					}
 					if (task.CallbackFunction.ValueType == NaNBoxing.BoxType.HeapPtr)
 					{
-						context.GC.mark(context.GC.Heap[task.CallbackFunction.HeapPtr]);
+						context.GC.mark(context.HeapShortCut[task.CallbackFunction.HeapPtr]);
 					}
 
 
@@ -1710,12 +1710,12 @@ namespace juicescript.runtime.buildin
 			{
 				if (_value.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					context.GC.mark(context.GC.Heap[_value.HeapPtr]);
+					context.GC.mark(context.HeapShortCut[_value.HeapPtr]);
 				}
 
 				if (_reason.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					context.GC.mark(context.GC.Heap[_reason.HeapPtr]);
+					context.GC.mark(context.HeapShortCut[_reason.HeapPtr]);
 				}
 
 				if (reactions != null)
@@ -1725,15 +1725,15 @@ namespace juicescript.runtime.buildin
 						var reaction = reactions[i];
 						if (reaction.onRejected.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
-							context.GC.mark(context.GC.Heap[reaction.onRejected.HeapPtr]);
+							context.GC.mark(context.HeapShortCut[reaction.onRejected.HeapPtr]);
 						}
 						if (reaction.onFulfilled.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
-							context.GC.mark(context.GC.Heap[reaction.onFulfilled.HeapPtr]);
+							context.GC.mark(context.HeapShortCut[reaction.onFulfilled.HeapPtr]);
 						}
 						if (reaction.nextPromise.ValueType == NaNBoxing.BoxType.HeapPtr)
 						{
-							context.GC.mark(context.GC.Heap[reaction.nextPromise.HeapPtr]);
+							context.GC.mark(context.HeapShortCut[reaction.nextPromise.HeapPtr]);
 						}
 					}
 				}
@@ -1752,7 +1752,7 @@ namespace juicescript.runtime.buildin
 			{
 				if (targetPromise.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					context.GC.mark(context.GC.Heap[targetPromise.HeapPtr]);
+					context.GC.mark(context.HeapShortCut[targetPromise.HeapPtr]);
 				}
 			}
 
@@ -1776,7 +1776,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var stateObj = context.GC.Heap[thisPtr.HeapPtr];
+			var stateObj = context.HeapShortCut[thisPtr.HeapPtr];
 			var state = ((RtInstance)stateObj).wapperedObject as ThenableCallbackState;
 
 			if (state == null || state.alreadyCalled)
@@ -1787,7 +1787,7 @@ namespace juicescript.runtime.buildin
 			state.alreadyCalled = true;
 
 			// 从 scope 读取参数
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var value = scope.ReadSlot(0);
 
 			// 递归调用 ResolvePromise
@@ -1807,7 +1807,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var stateObj = context.GC.Heap[thisPtr.HeapPtr];
+			var stateObj = context.HeapShortCut[thisPtr.HeapPtr];
 			var state = ((RtInstance)stateObj).wapperedObject as ThenableCallbackState;
 
 			if (state == null || state.alreadyCalled)
@@ -1818,7 +1818,7 @@ namespace juicescript.runtime.buildin
 			state.alreadyCalled = true;
 
 			// 从 scope 读取参数
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var reason = scope.ReadSlot(0);
 
 			// reason 提升到堆
@@ -1830,7 +1830,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			// 拒绝目标 Promise
-			var targetWapper = (PromiseWapper)((RtInstance)context.GC.Heap[state.targetPromise.HeapPtr]).wapperedObject;
+			var targetWapper = (PromiseWapper)((RtInstance)context.HeapShortCut[state.targetPromise.HeapPtr]).wapperedObject;
 			targetWapper.Reject(context, reason);
 		}
 
@@ -1890,11 +1890,11 @@ namespace juicescript.runtime.buildin
 
 			public override void OnGCMark(Context context)
 			{
-				context.GC.mark(context.GC.Heap[async_body]);
+				context.GC.mark(context.HeapShortCut[async_body]);
 
 				if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					context.GC.mark(context.GC.Heap[thisPtr.HeapPtr]);
+					context.GC.mark(context.HeapShortCut[thisPtr.HeapPtr]);
 				}
 
 			}
@@ -1925,18 +1925,18 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
 			Debug.Assert(promiseWapper._state == PromiseState.pending);
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
 			var v = scope.ReadSlot(0);
 			int genwapper_ptr = scope.ParentPtr;
 
-			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.GC.Heap[genwapper_ptr]).wapperedObject;
+			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.HeapShortCut[genwapper_ptr]).wapperedObject;
 			genwapper.rejected_value = v;
 			genwapper.isrejected = true;
 
@@ -1950,18 +1950,18 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
 			Debug.Assert(promiseWapper._state == PromiseState.pending);
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
 			var v = scope.ReadSlot(0);
 			int genwapper_ptr = scope.ParentPtr;
 
-			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.GC.Heap[genwapper_ptr]).wapperedObject;
+			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.HeapShortCut[genwapper_ptr]).wapperedObject;
 			genwapper.resolved_value = v;
 			genwapper.isrejected = false;
 
@@ -1976,9 +1976,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing promisePtr,
 			ref ReceiveError error)
 		{
-			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.GC.Heap[genwapper_ptr]).wapperedObject;
+			var genwapper = (PromiseImpl.AsyncGenWapper)((RtInstance)context.HeapShortCut[genwapper_ptr]).wapperedObject;
 
-			var m = context.GC.Heap[genwapper.async_body];
+			var m = context.HeapShortCut[genwapper.async_body];
 			ASMethod g_method = ((ASMethodBody)m.Type).Method;
 
 			Debug.Assert(!g_method.Flags.HasFlag( MethodFlags.Native) );
@@ -2020,7 +2020,7 @@ namespace juicescript.runtime.buildin
 			context.StackPosition += 1;
 			context.StackSlots[retslot].SetUndefined();
 #if DEBUG
-			Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+			Debug.Assert(((RtMethodScope)context.HeapShortCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
 #endif
 			
 
@@ -2153,7 +2153,7 @@ namespace juicescript.runtime.buildin
 						return;
 					}
 					NaNBoxing resolved = context.StackSlots[resolved_promise];
-					PromiseWapper resolvedPromise = (PromiseWapper)((RtInstance)context.GC.Heap[resolved.HeapPtr]).wapperedObject;
+					PromiseWapper resolvedPromise = (PromiseWapper)((RtInstance)context.HeapShortCut[resolved.HeapPtr]).wapperedObject;
 
 					ASMethod private_then = context.PROMISE.Instance._vtable.Items[0].Trait.Method;
 					Debug.Assert(private_then.Name == "then");
@@ -2163,8 +2163,8 @@ namespace juicescript.runtime.buildin
 
 					int onfulfilled = Context.M_ClosurePtr + context.StackPosition;
 
-					RtClosure onfulfilledClosure = (RtClosure)context.GC.Heap[onfulfilled];
-					context.GC.Heap[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
+					RtClosure onfulfilledClosure = (RtClosure)context.HeapShortCut[onfulfilled];
+					context.HeapShortCut[onfulfilled].Type = context.MicroTaskQueue.async_then_onfulfilled.Body;
 					//onfulfilledClosure.This = promisePtr;
 					//onfulfilledClosure.ScopePtr = genwapper_ptr;
 					////onfulfilledClosure.ScopeType = genwapper.scopeType;
@@ -2177,8 +2177,8 @@ namespace juicescript.runtime.buildin
 
 
 					int onrejected = Context.M_ClosurePtr + context.StackPosition + 1;
-					RtClosure onrejectedClosure = (RtClosure)context.GC.Heap[onrejected];
-					context.GC.Heap[onrejected].Type = context.MicroTaskQueue.async_then_onrejected.Body;
+					RtClosure onrejectedClosure = (RtClosure)context.HeapShortCut[onrejected];
+					context.HeapShortCut[onrejected].Type = context.MicroTaskQueue.async_then_onrejected.Body;
 					//onrejectedClosure.This = promisePtr;
 					//onrejectedClosure.ScopePtr = genwapper_ptr;
 					////onrejectedClosure.ScopeType = genwapper.scopeType;
@@ -2223,14 +2223,14 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var promiseInstance = context.GC.Heap[thisPtr.HeapPtr];
+			var promiseInstance = context.HeapShortCut[thisPtr.HeapPtr];
 			var promiseFacility = (RtInstance)promiseInstance;
 			var promiseWapper = (PromiseWapper)promiseFacility.wapperedObject;
 
 			Debug.Assert(promiseWapper._state == PromiseState.pending);
 
-			var mscope = context.GC.Heap[scope_ptr];
-			var gen =  context.GC.Heap[ ((RtMethodScope)mscope).ParentPtr];
+			var mscope = context.HeapShortCut[scope_ptr];
+			var gen =  context.HeapShortCut[ ((RtMethodScope)mscope).ParentPtr];
 			var genwapper = (AsyncGenWapper)((RtInstance)gen).wapperedObject;
 
 			AsyncTemplate_Step(context, ((RtMethodScope)mscope).ParentPtr, thisPtr, ref error);

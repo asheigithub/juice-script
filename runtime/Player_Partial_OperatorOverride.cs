@@ -572,7 +572,7 @@ namespace juicescript.runtime
 								type = null;
 								return 10;
 							case RtHeapTypeKind.INSTANCE:
-								var obj = HeapShotCut[v.HeapPtr];
+								var obj = HeapShortCut[v.HeapPtr];
 								type = ((ASInstance)obj.Type)._operator_type;
 								return ((ASInstance)obj.Type)._operator_type_index;
 							case RtHeapTypeKind.NAMESPACE:

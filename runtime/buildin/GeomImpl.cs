@@ -20,9 +20,9 @@ namespace juicescript.runtime.buildin
 //			NaNBoxing thisPtr,
 //			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 //		{
-//			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+//			var scope = (RtMethodScope)context.HeapShotCut[scope_ptr];
 
-//			var vector2 = context.GC.Heap[thisPtr.HeapPtr];
+//			var vector2 = context.HeapShotCut[thisPtr.HeapPtr];
 
 //			NaNBoxing x = scope.ReadSlot(0, context.player);
 //			NaNBoxing y = scope.ReadSlot(1, context.player);
@@ -58,9 +58,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vector2 = context.GC.Heap[thisPtr.HeapPtr];
+			var vector2 = context.HeapShortCut[thisPtr.HeapPtr];
 			var payload = (RtInstance)vector2;
 
 
@@ -97,9 +97,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v1 = scope.ReadSlot(0);
 			NaNBoxing v2 = scope.ReadSlot(1);
@@ -114,7 +114,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(v2.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -135,7 +135,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var vector2_b = context.GC.Heap[v2.HeapPtr];
+			var vector2_b = context.HeapShortCut[v2.HeapPtr];
 			var payload_b = (RtInstance)vector2_b;
 
 			//NaNBoxing x2 = payload_b.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -157,7 +157,7 @@ namespace juicescript.runtime.buildin
 
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default;x.SetFloat( x1.FloatValue + x2.FloatValue );
@@ -187,9 +187,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v1 = scope.ReadSlot(0);
 			NaNBoxing v2 = scope.ReadSlot(1);
@@ -203,7 +203,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(v2.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			float x1;
@@ -221,7 +221,7 @@ namespace juicescript.runtime.buildin
 
 
 
-			var vector2_b = context.GC.Heap[v2.HeapPtr];
+			var vector2_b = context.HeapShortCut[v2.HeapPtr];
 			var payload_b = (RtInstance)vector2_b;
 
 			float x2;
@@ -240,7 +240,7 @@ namespace juicescript.runtime.buildin
 
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false, out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			var store = ((RtInstance)payload_result).GetStoreData(context.player, (ASInstance)payload_result.Type);
@@ -264,9 +264,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vector2_this = context.GC.Heap[thisPtr.HeapPtr];
+			var vector2_this = context.HeapShortCut[thisPtr.HeapPtr];
 			var payload_this = (RtInstance)vector2_this;
 
 			//NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
@@ -296,7 +296,7 @@ namespace juicescript.runtime.buildin
 
 			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
+			var vector2_arg = context.HeapShortCut[v_arg.HeapPtr];
 			var payload_arg = (RtInstance)vector2_arg;
 
 			//NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
@@ -330,9 +330,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vector2_this = context.GC.Heap[thisPtr.HeapPtr];
+			var vector2_this = context.HeapShortCut[thisPtr.HeapPtr];
 			var payload_this = (RtInstance)vector2_this;
 
 			//NaNBoxing x1 = payload_this.ReadSlot(0, vector2_this.Type._link_codescope, context.player);
@@ -364,7 +364,7 @@ namespace juicescript.runtime.buildin
 
 			Debug.Assert(v_arg.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_arg = context.GC.Heap[v_arg.HeapPtr];
+			var vector2_arg = context.HeapShortCut[v_arg.HeapPtr];
 			var payload_arg = (RtInstance)vector2_arg;
 
 			//NaNBoxing x2 = payload_arg.ReadSlot(0, vector2_arg.Type._link_codescope, context.player);
@@ -397,9 +397,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v1 = scope.ReadSlot(0);
 			NaNBoxing s = scope.ReadSlot(1);
@@ -414,7 +414,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -437,7 +437,7 @@ namespace juicescript.runtime.buildin
 			float scalar = s.FloatValue;
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
@@ -466,9 +466,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v1 = scope.ReadSlot(0);
 			NaNBoxing s = scope.ReadSlot(1);
@@ -481,7 +481,7 @@ namespace juicescript.runtime.buildin
 
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -505,7 +505,7 @@ namespace juicescript.runtime.buildin
 			float scalar = (float)s.Number;
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue * scalar);
@@ -533,9 +533,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v1 = scope.ReadSlot(0);
 			NaNBoxing s = scope.ReadSlot(1);
@@ -550,7 +550,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(s.ValueType == NaNBoxing.BoxType.Float);
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -572,7 +572,7 @@ namespace juicescript.runtime.buildin
 			float scalar = s.FloatValue;
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
@@ -600,9 +600,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v1 = scope.ReadSlot(0);
 			NaNBoxing s = scope.ReadSlot(1);
@@ -615,7 +615,7 @@ namespace juicescript.runtime.buildin
 
 			Debug.Assert(v1.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -637,7 +637,7 @@ namespace juicescript.runtime.buildin
 			float scalar = (float)s.Number;
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(x1.FloatValue / scalar);
@@ -665,9 +665,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing s = scope.ReadSlot(0);
 			NaNBoxing v1 = scope.ReadSlot(1);
@@ -683,7 +683,7 @@ namespace juicescript.runtime.buildin
 
 			float scalar = s.FloatValue;
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -703,7 +703,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
@@ -731,9 +731,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing s = scope.ReadSlot(0);
 			NaNBoxing v1 = scope.ReadSlot(1);
@@ -748,7 +748,7 @@ namespace juicescript.runtime.buildin
 
 			float scalar = (float)s.Number;
 
-			var vector2_a = context.GC.Heap[v1.HeapPtr];
+			var vector2_a = context.HeapShortCut[v1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -768,7 +768,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//NaNBoxing x = default; x.SetFloat(scalar * x1.FloatValue);
@@ -797,9 +797,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v = scope.ReadSlot(0);
 
@@ -812,7 +812,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(v.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			
-			var vector2_a = context.GC.Heap[v.HeapPtr];
+			var vector2_a = context.HeapShortCut[v.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -832,7 +832,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//x1.SetFloat(-x1.FloatValue);
@@ -861,9 +861,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var vec2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var vec2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing v = scope.ReadSlot(0);
 
@@ -876,7 +876,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(v.ValueType == NaNBoxing.BoxType.HeapPtr);
 
 			
-			var vector2_a = context.GC.Heap[v.HeapPtr];
+			var vector2_a = context.HeapShortCut[v.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -897,7 +897,7 @@ namespace juicescript.runtime.buildin
 
 
 			int resultptr = context.player.InitCacheInstance(vec2, returnSlotIndex, false,out RtInstance payload_result);
-			//var vector2_result = context.GC.Heap[resultptr];
+			//var vector2_result = context.HeapShotCut[resultptr];
 			//var payload_result = (RtInstance)vector2_result;
 
 			//x1.SetFloat(+x1.FloatValue);
@@ -929,7 +929,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var mat2 = method.__return_type_class__;
 
 			float angle = scope.ReadSlot(0).FloatValue;
@@ -963,11 +963,11 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var mat2 = method.__return_type_class__;
 
 
-			var m2_a = context.GC.Heap[thisPtr.HeapPtr];
+			var m2_a = context.HeapShortCut[thisPtr.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -1023,11 +1023,11 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var mat2 = method.__return_type_class__;
 
 
-			var m2_a = context.GC.Heap[thisPtr.HeapPtr];
+			var m2_a = context.HeapShortCut[thisPtr.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -1107,8 +1107,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var mat2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
+			var mat2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing m1 = scope.ReadSlot(0);
 			NaNBoxing m2 = scope.ReadSlot(1);
@@ -1119,7 +1119,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var m2_a = context.GC.Heap[m1.HeapPtr];
+			var m2_a = context.HeapShortCut[m1.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -1144,7 +1144,7 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			var m2_b = context.GC.Heap[m2.HeapPtr];
+			var m2_b = context.HeapShortCut[m2.HeapPtr];
 			var payload_b = (RtInstance)m2_b;
 			float Bcol1_x;
 			float Bcol1_y;
@@ -1192,8 +1192,8 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var mat2 = (ASClass)((RtScriptClass)context.GC.Heap[thisPtr.HeapPtr]).Meta;
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
+			var mat2 = (ASClass)((RtScriptClass)context.HeapShortCut[thisPtr.HeapPtr]).Meta;
 
 			NaNBoxing m1 = scope.ReadSlot(0);
 			NaNBoxing m2 = scope.ReadSlot(1);
@@ -1204,7 +1204,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var m2_a = context.GC.Heap[m1.HeapPtr];
+			var m2_a = context.HeapShortCut[m1.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -1229,7 +1229,7 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			var m2_b = context.GC.Heap[m2.HeapPtr];
+			var m2_b = context.HeapShortCut[m2.HeapPtr];
 			var payload_b = (RtInstance)m2_b;
 			float Bcol1_x;
 			float Bcol1_y;
@@ -1275,9 +1275,9 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
-			var mat22 = context.GC.Heap[thisPtr.HeapPtr];
+			var mat22 = context.HeapShortCut[thisPtr.HeapPtr];
 			var payload = (RtInstance)mat22;
 
 
@@ -1321,7 +1321,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var vec2 = method.__return_type_class__;
 
 			NaNBoxing mat = scope.ReadSlot(0);
@@ -1333,7 +1333,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var m2_a = context.GC.Heap[mat.HeapPtr];
+			var m2_a = context.HeapShortCut[mat.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			float col1_x;
@@ -1355,7 +1355,7 @@ namespace juicescript.runtime.buildin
 				}
 			}
 
-			var vec_b = context.GC.Heap[vec.HeapPtr];
+			var vec_b = context.HeapShortCut[vec.HeapPtr];
 			var payload_b = (RtInstance)vec_b;
 
 			float x;

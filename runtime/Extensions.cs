@@ -383,7 +383,7 @@ namespace juicescript.runtime
                     return value.FloatValue.ToString();
                 case NaNBoxing.BoxType.HeapPtr:
                     {
-                        RtHeapBase instance = player.HeapShotCut[value.HeapPtr];
+                        RtHeapBase instance = player.HeapShortCut[value.HeapPtr];
 
                         switch (instance.Kind)
                         {
@@ -703,7 +703,7 @@ namespace juicescript.runtime
                 case BoxType.HeapPtr:
                     {
                         
-                        var instance = (player.HeapShotCut[prop_name.HeapPtr]);
+                        var instance = (player.HeapShortCut[prop_name.HeapPtr]);
 
                         if (instance.Kind == RtHeapTypeKind.STRING)
                         {

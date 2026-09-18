@@ -44,7 +44,7 @@ namespace juicescript.runtime
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(n2.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_a = HeapShotCut[n1.HeapPtr];
+			var vector2_a = HeapShortCut[n1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -65,7 +65,7 @@ namespace juicescript.runtime
 
 
 
-			var vector2_b = HeapShotCut[n2.HeapPtr];
+			var vector2_b = HeapShortCut[n2.HeapPtr];
 			var payload_b = (RtInstance)vector2_b;
 
 			//NaNBoxing x2 = payload_b.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -127,7 +127,7 @@ namespace juicescript.runtime
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(n2.ValueType == NaNBoxing.BoxType.HeapPtr);
 
-			var vector2_a = HeapShotCut[n1.HeapPtr];
+			var vector2_a = HeapShortCut[n1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -148,7 +148,7 @@ namespace juicescript.runtime
 
 
 
-			var vector2_b = HeapShotCut[n2.HeapPtr];
+			var vector2_b = HeapShortCut[n2.HeapPtr];
 			var payload_b = (RtInstance)vector2_b;
 
 			//NaNBoxing x2 = payload_b.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -210,7 +210,7 @@ namespace juicescript.runtime
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(n2.ValueType >= NaNBoxing.BoxType.Int && n2.ValueType <= NaNBoxing.BoxType.Float || n2.ValueType == NaNBoxing.BoxType.Number);
 			
-			var vector2_a = HeapShotCut[n1.HeapPtr];
+			var vector2_a = HeapShortCut[n1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -292,7 +292,7 @@ namespace juicescript.runtime
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			Debug.Assert(n2.ValueType >= NaNBoxing.BoxType.Int && n2.ValueType <= NaNBoxing.BoxType.Float || n2.ValueType == NaNBoxing.BoxType.Number);
 
-			var vector2_a = HeapShotCut[n1.HeapPtr];
+			var vector2_a = HeapShortCut[n1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -375,7 +375,7 @@ namespace juicescript.runtime
 
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
 			
-			var vector2_a = HeapShotCut[n1.HeapPtr];
+			var vector2_a = HeapShortCut[n1.HeapPtr];
 			var payload_a = (RtInstance)vector2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -451,7 +451,7 @@ namespace juicescript.runtime
 				return;
 			}
 
-			var m2_a = HeapShotCut[mat.HeapPtr];
+			var m2_a = HeapShortCut[mat.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			float col1_x;
@@ -473,7 +473,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			var vec_b = HeapShotCut[vec.HeapPtr];
+			var vec_b = HeapShortCut[vec.HeapPtr];
 			var payload_b = (RtInstance)vec_b;
 
 			float x;
@@ -529,7 +529,7 @@ namespace juicescript.runtime
 				return;
 			}
 
-			var m2_a = HeapShotCut[m1.HeapPtr];
+			var m2_a = HeapShortCut[m1.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -554,7 +554,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			var m2_b = HeapShotCut[m2.HeapPtr];
+			var m2_b = HeapShortCut[m2.HeapPtr];
 			var payload_b = (RtInstance)m2_b;
 			float Bcol1_x;
 			float Bcol1_y;
@@ -619,7 +619,7 @@ namespace juicescript.runtime
 				return;
 			}
 
-			var m2_a = HeapShotCut[m1.HeapPtr];
+			var m2_a = HeapShortCut[m1.HeapPtr];
 			var payload_a = (RtInstance)m2_a;
 
 			//NaNBoxing x1 = payload_a.ReadSlot(0, vec2.Instance._link_codescope, context.player);
@@ -644,7 +644,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			var m2_b = HeapShotCut[m2.HeapPtr];
+			var m2_b = HeapShortCut[m2.HeapPtr];
 			var payload_b = (RtInstance)m2_b;
 			float Bcol1_x;
 			float Bcol1_y;

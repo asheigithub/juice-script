@@ -50,7 +50,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 
 			ref var funslot = ref context.StackSlots[returnSlotIndex];
 			context.player.ConvertValueType(ref error, thisPtr, TypeKind.Function, context.FUNCTION, ref funslot);
@@ -64,13 +64,13 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var closureinstance = context.GC.Heap[funslot.HeapPtr];
+			var closureinstance = context.HeapShortCut[funslot.HeapPtr];
 
 
 			var _this = scope.ReadSlot(0);
 			var rest = scope.ReadSlot(1);
 
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
+			var rest_array = (RtArray)context.HeapShortCut[rest.HeapPtr];
 
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
 				throw new InvalidOperationException();
@@ -145,7 +145,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			
 
 			ref var funslot = ref context.StackSlots[returnSlotIndex];
@@ -160,7 +160,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var closureinstance = context.GC.Heap[funslot.HeapPtr];
+			var closureinstance = context.HeapShortCut[funslot.HeapPtr];
 
 
 			var _this = scope.ReadSlot(0);
@@ -194,7 +194,7 @@ namespace juicescript.runtime.buildin
 			int len; RtArray argArray = null;
 			if (_arr.ValueType != NaNBoxing.BoxType.Null)
 			{
-				argArray = (RtArray)context.GC.Heap[_arr.HeapPtr];
+				argArray = (RtArray)context.HeapShortCut[_arr.HeapPtr];
 				len = (int)argArray.GetLength(out argArray);
 			}
 			else

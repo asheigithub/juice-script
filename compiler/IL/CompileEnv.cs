@@ -815,7 +815,7 @@ namespace juicescript.compiler.IL
             methodbody.heapConstants.pool_kinds = kinds.ToArray();
 
             List<object> hobjs = new List<object>(methodbody.heapConstants.pool_values);
-            hobjs.Add(CompileContext.player_for_compiler.HeapShotCut[heapptr]);
+            hobjs.Add(CompileContext.player_for_compiler.HeapShortCut[heapptr]);
             methodbody.heapConstants.pool_values = hobjs.ToArray();
 
             

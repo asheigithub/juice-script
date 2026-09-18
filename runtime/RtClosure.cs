@@ -89,7 +89,7 @@ namespace juicescript.runtime
 		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtClosure target)
 		{
-			var payload = ((RtClosure)player.HeapShotCut[ptr]);
+			var payload = ((RtClosure)player.HeapShortCut[ptr]);
 			if (payload.HEAPINSTANCE_PTR == 0)
 			{
 				target = payload;
@@ -97,7 +97,7 @@ namespace juicescript.runtime
 			}
 			else
 			{ 
-				target = ((RtClosure)player.HeapShotCut[payload.HEAPINSTANCE_PTR]);
+				target = ((RtClosure)player.HeapShortCut[payload.HEAPINSTANCE_PTR]);
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				return payload.HEAPINSTANCE_PTR;
 			}
@@ -127,7 +127,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				RtClosure target = ((RtClosure)player.HeapShotCut[HEAPINSTANCE_PTR]);
+				RtClosure target = ((RtClosure)player.HeapShortCut[HEAPINSTANCE_PTR]);
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
 				return target.m_property_ptr;
@@ -144,7 +144,7 @@ namespace juicescript.runtime
 			{
 				//RtClosure target;
 				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				RtClosure target = ((RtClosure)player.HeapShotCut[HEAPINSTANCE_PTR]);
+				RtClosure target = ((RtClosure)player.HeapShortCut[HEAPINSTANCE_PTR]);
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				target.m_property_ptr = ptr;
 			}
@@ -161,7 +161,7 @@ namespace juicescript.runtime
 			{
 				//RtClosure target;
 				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				RtClosure target = ((RtClosure)player.HeapShotCut[HEAPINSTANCE_PTR]);
+				RtClosure target = ((RtClosure)player.HeapShortCut[HEAPINSTANCE_PTR]);
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				return target.m__proto__;
 			}
@@ -177,7 +177,7 @@ namespace juicescript.runtime
 			{
 				//RtClosure target;
 				//FindAndUpdateHeapInstancePtr(HEAPINSTANCE_PTR, player, out target);
-				RtClosure target = ((RtClosure)player.HeapShotCut[HEAPINSTANCE_PTR]);
+				RtClosure target = ((RtClosure)player.HeapShortCut[HEAPINSTANCE_PTR]);
 				Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 				target.m__proto__ = proto_ptr;
 			}

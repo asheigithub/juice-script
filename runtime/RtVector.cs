@@ -133,14 +133,14 @@ namespace juicescript.runtime
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static int FindAndUpdateHeapInstancePtr(int ptr, Player player, out RtVector target)
 		{
-            var vec = ((RtVector)player.HeapShotCut[ptr]);
+            var vec = ((RtVector)player.HeapShortCut[ptr]);
             target = vec.payload;
 
 			Debug.Assert(target.HEAPINSTANCE_PTR == 0);
 #if DEBUG
 			if (vec.HEAPINSTANCE_PTR != 0)
             {				
-				Debug.Assert(player.HeapShotCut[vec.HEAPINSTANCE_PTR] == target);
+				Debug.Assert(player.HeapShortCut[vec.HEAPINSTANCE_PTR] == target);
 			}
 #endif
 
@@ -331,7 +331,7 @@ namespace juicescript.runtime
                                 }
 #endif
 
-								RtInstance src = ((RtInstance)player.HeapShotCut[value.HeapPtr]);
+								RtInstance src = ((RtInstance)player.HeapShortCut[value.HeapPtr]);
                                 src.GetStoreData(player,(ASInstance)element_asclass.Instance).Slice(0, bytes.Length).CopyTo(bytes);
                                 return;
                             }
@@ -357,27 +357,29 @@ namespace juicescript.runtime
 
 
         //[MethodImpl( MethodImplOptions.AggressiveInlining)]
-		public static bool IsValidIndexType(NaNBoxing index)
+		public static bool IsValidIndexType(NaNBoxing index,out int v_index)
         {
-            switch (index.ValueType)
-            {
-                case NaNBoxing.BoxType.Number:
-                case NaNBoxing.BoxType.Int:
-                case NaNBoxing.BoxType.Uint:
-                case NaNBoxing.BoxType.Sbyte:
-                case NaNBoxing.BoxType.Byte:
-                case NaNBoxing.BoxType.Short:
-                case NaNBoxing.BoxType.UShort:
-                case NaNBoxing.BoxType.Float:
-                    return true;
-				case NaNBoxing.BoxType.Boolean:
-				case NaNBoxing.BoxType.HeapPtr:
-                case NaNBoxing.BoxType.Fault:
-				case NaNBoxing.BoxType.Undefined:
-				case NaNBoxing.BoxType.Null:
-				default:
-                    return false;
-            }
+            v_index = VectorImpl.VectorStore.GetValidIndex(index);
+            return v_index >= 0;
+            //switch (index.ValueType)
+            //{
+            //    case NaNBoxing.BoxType.Number:
+            //    case NaNBoxing.BoxType.Int:
+            //    case NaNBoxing.BoxType.Uint:
+            //    case NaNBoxing.BoxType.Sbyte:
+            //    case NaNBoxing.BoxType.Byte:
+            //    case NaNBoxing.BoxType.Short:
+            //    case NaNBoxing.BoxType.UShort:
+            //    case NaNBoxing.BoxType.Float:
+            //        return true;
+            //    case NaNBoxing.BoxType.Boolean:
+            //    case NaNBoxing.BoxType.HeapPtr:
+            //    case NaNBoxing.BoxType.Fault:
+            //    case NaNBoxing.BoxType.Undefined:
+            //    case NaNBoxing.BoxType.Null:
+            //    default:
+            //        return false;
+            //}
         }
 
         //public bool IsValidIndexRange(NaNBoxing index, out int valididx, out int maxlen , Player player)

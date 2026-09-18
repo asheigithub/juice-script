@@ -875,7 +875,7 @@ namespace juicescript.compiler
 													if (heap_ptr == 0)
 														throw new InvalidOperationException();
 
-													method.Body.heapConstants.pool_values[j] = context.player_for_compiler.HeapShotCut[heap_ptr];
+													method.Body.heapConstants.pool_values[j] = context.player_for_compiler.HeapShortCut[heap_ptr];
 
 
 												}
@@ -1982,7 +1982,7 @@ namespace juicescript.compiler
 															update_method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
 															List<object> hobjs = new List<object>(update_method.Body.heapConstants.pool_values);
-															hobjs.Add(context.player_for_compiler.HeapShotCut[heapptr]);
+															hobjs.Add(context.player_for_compiler.HeapShortCut[heapptr]);
 															update_method.Body.heapConstants.pool_values = hobjs.ToArray();
 
 															dv.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
@@ -2170,7 +2170,7 @@ namespace juicescript.compiler
 								NaNBoxing v = computeplayer.ComputeMemberInitValue(t_member, _temp, testswc, (byte[])test_method.Body.ByteCode.Clone(), loadfromcache.Contains(script));
 								if (v.ValueType == NaNBoxing.BoxType.HeapPtr)
 								{
-									var obj = computeplayer.HeapShotCut[v.HeapPtr];
+									var obj = computeplayer.HeapShortCut[v.HeapPtr];
 									if (obj.Kind == RtHeapTypeKind.STRING)                        //堆中的对象只有String可以被作为初始化值
 									{
 										string str = ((RtString)obj).Str;
@@ -2200,7 +2200,7 @@ namespace juicescript.compiler
 											update_method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
 											List<object> hobjs = new List<object>(update_method.Body.heapConstants.pool_values);
-											hobjs.Add(context.player_for_compiler.HeapShotCut[heapptr] );
+											hobjs.Add(context.player_for_compiler.HeapShortCut[heapptr] );
 											update_method.Body.heapConstants.pool_values = hobjs.ToArray();
 
 											v.SetHeapPtr( kinds.Count -1 , NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
@@ -2261,7 +2261,7 @@ namespace juicescript.compiler
 										update_method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
 										List<object> hobjs = new List<object>(update_method.Body.heapConstants.pool_values);
-										hobjs.Add(context.player_for_compiler.HeapShotCut[heapptr]);
+										hobjs.Add(context.player_for_compiler.HeapShortCut[heapptr]);
 										update_method.Body.heapConstants.pool_values = hobjs.ToArray();
 
 										v.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
@@ -2780,7 +2780,7 @@ namespace juicescript.compiler
 														method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
 														List<object> hobjs = new List<object>(method.Body.heapConstants.pool_values);
-														hobjs.Add(context.player_for_compiler.HeapShotCut[heapptr]);
+														hobjs.Add(context.player_for_compiler.HeapShortCut[heapptr]);
 														method.Body.heapConstants.pool_values = hobjs.ToArray();
 
 														boxing.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
@@ -3123,7 +3123,7 @@ namespace juicescript.compiler
 									NaNBoxing value = computeplayer.ComputeConstExpr(_temp, testswc, para.compute_result_index);
 									if (value.ValueType == NaNBoxing.BoxType.HeapPtr)
 									{
-										var obj = computeplayer.HeapShotCut[value.HeapPtr];
+										var obj = computeplayer.HeapShortCut[value.HeapPtr];
 										if (obj.Kind == RtHeapTypeKind.STRING)
 										{
 											string str = ((RtString)obj).Str;
@@ -3156,7 +3156,7 @@ namespace juicescript.compiler
 												method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
 												List<object> hobjs = new List<object>(method.Body.heapConstants.pool_values);
-												hobjs.Add(context.player_for_compiler.HeapShotCut[heapptr]);
+												hobjs.Add(context.player_for_compiler.HeapShortCut[heapptr]);
 												method.Body.heapConstants.pool_values = hobjs.ToArray();
 
 												v.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);
@@ -3208,7 +3208,7 @@ namespace juicescript.compiler
 											method.Body.heapConstants.pool_kinds = kinds.ToArray();
 
 											List<object> hobjs = new List<object>(method.Body.heapConstants.pool_values);
-											hobjs.Add(context.player_for_compiler.HeapShotCut[heapptr]);
+											hobjs.Add(context.player_for_compiler.HeapShortCut[heapptr]);
 											method.Body.heapConstants.pool_values = hobjs.ToArray();
 
 											v.SetHeapPtr(kinds.Count - 1, NaNBoxing.UNKNOWN_HEAPKIND, (byte)HeapKindFlag.NONE);

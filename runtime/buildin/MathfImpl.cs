@@ -14,7 +14,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = scope.ReadSlot(0);
             float val = Extensions.GetFloatValue(f);
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Sin(val));
@@ -27,7 +27,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = scope.ReadSlot(0);
             float val = Extensions.GetFloatValue(f);
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Cos(val));
@@ -40,7 +40,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = scope.ReadSlot(0);
             float val = Extensions.GetFloatValue(f);
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Tan(val));
@@ -53,7 +53,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = scope.ReadSlot(0);
             float val = Extensions.GetFloatValue(f);
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Asin(val));
@@ -66,7 +66,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = scope.ReadSlot(0);
             float val = Extensions.GetFloatValue(f);
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Acos(val));
@@ -79,7 +79,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = scope.ReadSlot(0);
             float val = Extensions.GetFloatValue(f);
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Atan(val));
@@ -92,7 +92,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var y = Extensions.GetFloatValue(scope.ReadSlot(0));
             var x = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Atan2(y, x));
@@ -105,7 +105,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Ceiling(f));
         }
@@ -117,7 +117,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetInt((int)MathF.Ceiling(f));
         }
@@ -129,7 +129,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Floor(f));
         }
@@ -141,7 +141,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetInt((int)MathF.Floor(f));
         }
@@ -153,7 +153,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Round(f));
         }
@@ -165,7 +165,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetInt((int)MathF.Round(f));
         }
@@ -177,7 +177,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Abs(f));
         }
@@ -189,7 +189,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
 
             try
@@ -211,7 +211,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Max(a, b));
@@ -224,7 +224,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Min(a, b));
@@ -237,7 +237,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var value = Extensions.GetFloatValue(scope.ReadSlot(0));
             var min = Extensions.GetFloatValue(scope.ReadSlot(1));
             var max = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -251,7 +251,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var value = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Max(0, MathF.Min(1, value)));
         }
@@ -263,7 +263,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var t = Extensions.GetFloatValue(scope.ReadSlot(0));
             var length = Extensions.GetFloatValue(scope.ReadSlot(1));
             if (length == 0) 
@@ -283,7 +283,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var t = Extensions.GetFloatValue(scope.ReadSlot(0));
             var length = Extensions.GetFloatValue(scope.ReadSlot(1));
             if (length == 0)
@@ -304,7 +304,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             var t = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -320,7 +320,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             var t = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -334,7 +334,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             var t = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -351,7 +351,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             var value = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -370,7 +370,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var from = Extensions.GetFloatValue(scope.ReadSlot(0));
             var to = Extensions.GetFloatValue(scope.ReadSlot(1));
             var t = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -396,7 +396,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var current = Extensions.GetFloatValue(scope.ReadSlot(0));
             var target = Extensions.GetFloatValue(scope.ReadSlot(1));
             var maxDelta = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -415,7 +415,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var current = Extensions.GetFloatValue(scope.ReadSlot(0));
             var target = Extensions.GetFloatValue(scope.ReadSlot(1));
             var maxDelta = Extensions.GetFloatValue(scope.ReadSlot(2));
@@ -435,7 +435,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var current = Extensions.GetFloatValue(scope.ReadSlot(0));
             var target = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetFloat(DeltaAngle(current, target));
@@ -457,7 +457,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             var p = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Pow(f, p));
@@ -470,7 +470,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var power = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Exp(power));
         }
@@ -482,7 +482,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Sqrt(f));
         }
@@ -494,7 +494,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Log(f));
         }
@@ -506,7 +506,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             var p = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Log(f) / MathF.Log(p));
@@ -519,7 +519,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var f = Extensions.GetFloatValue(scope.ReadSlot(0));
             context.StackSlots[returnSlotIndex].SetFloat(MathF.Log10(f));
         }
@@ -531,7 +531,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var a = Extensions.GetFloatValue(scope.ReadSlot(0));
             var b = Extensions.GetFloatValue(scope.ReadSlot(1));
             context.StackSlots[returnSlotIndex].SetBoolean(MathF.Abs(a - b) <= float.Epsilon);
@@ -544,7 +544,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var value = scope.ReadSlot(0).IntValue;
             context.StackSlots[returnSlotIndex].SetBoolean((value & (value - 1)) == 0 && value > 0);
         }
@@ -556,7 +556,7 @@ namespace juicescript.runtime.buildin
             NaNBoxing thisPtr,
             int stackStPos, ref ReceiveError error, int returnSlotIndex)
         {
-            var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+            var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
             var value = scope.ReadSlot(0).IntValue;
             if (value <= 0)
             {

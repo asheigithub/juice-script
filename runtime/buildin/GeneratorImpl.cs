@@ -63,11 +63,11 @@ namespace juicescript.runtime.buildin
 
 			public override void OnGCMark(Context context)
 			{
-				context.GC.mark(context.GC.Heap[generator]);
+				context.GC.mark(context.HeapShortCut[generator]);
 
 				if (thisPtr.ValueType == NaNBoxing.BoxType.HeapPtr)
 				{
-					context.GC.mark(context.GC.Heap[thisPtr.HeapPtr]);
+					context.GC.mark(context.HeapShortCut[thisPtr.HeapPtr]);
 				}
 
 			}
@@ -100,7 +100,7 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			RtInstance generator_ins = (RtInstance)context.GC.Heap[thisPtr.HeapPtr];
+			RtInstance generator_ins = (RtInstance)context.HeapShortCut[thisPtr.HeapPtr];
 
 			GeneratorWapper generatorWapper = generator_ins.wapperedObject as GeneratorWapper;
 			Debug.Assert(generatorWapper !=null);
@@ -110,11 +110,11 @@ namespace juicescript.runtime.buildin
 				//需要正常让代码跑完
 				generatorWapper.state = 999;
 
-				var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-				var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
+				var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
+				var iter_ins = context.HeapShortCut[thisPtr.HeapPtr];
 				var iter = (RtInstance)iter_ins;
 
-				var m = context.GC.Heap[generatorWapper.generator];
+				var m = context.HeapShortCut[generatorWapper.generator];
 
 				ASMethod g_method = ((ASMethodBody)m.Type).Method;
 
@@ -128,8 +128,8 @@ namespace juicescript.runtime.buildin
 
 				context.BackTraceIndex++; ;
 #if DEBUG
-				//((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
-				Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+				//((RtMethodScope)context.HeapShotCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+				Debug.Assert(((RtMethodScope)context.HeapShortCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
 #endif
 				Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 				slots.Clear(); //栈清空 -- 防止GC时错误访问
@@ -179,22 +179,22 @@ namespace juicescript.runtime.buildin
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
 
-			//RtPayloadInstance generator_ins = (RtPayloadInstance)context.GC.Heap[thisPtr.HeapPtr];
+			//RtPayloadInstance generator_ins = (RtPayloadInstance)context.HeapShotCut[thisPtr.HeapPtr];
 
 			//GeneratorWapper generatorWapper = generator_ins.wapperedObject as GeneratorWapper;
 			//Debug.Assert(generatorWapper != null);
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
-			var iter_ins = context.GC.Heap[thisPtr.HeapPtr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
+			var iter_ins = context.HeapShortCut[thisPtr.HeapPtr];
 			var iter = (RtInstance)iter_ins;
 
 			var _result = scope.ReadSlot(1);
 			var _obj = scope.ReadSlot(0);
 
 
-			var result_ins = context.GC.Heap[_result.HeapPtr];
+			var result_ins = context.HeapShortCut[_result.HeapPtr];
 			var result = (RtInstance)result_ins;
-			var obj_ins = context.GC.Heap[_obj.HeapPtr];
+			var obj_ins = context.HeapShortCut[_obj.HeapPtr];
 
 			Debug.Assert(_obj.Raw == thisPtr.Raw);
 
@@ -202,7 +202,7 @@ namespace juicescript.runtime.buildin
 			GeneratorWapper generatorWapper = generator_ins.wapperedObject as GeneratorWapper;
 			Debug.Assert(generatorWapper != null);
 
-			var m = context.GC.Heap[generatorWapper.generator];
+			var m = context.HeapShortCut[generatorWapper.generator];
 			
 
 			ASMethod g_method = ((ASMethodBody)m.Type).Method;
@@ -218,8 +218,8 @@ namespace juicescript.runtime.buildin
 		
 			context.BackTraceIndex++; ;
 #if DEBUG
-			//((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
-			Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+			//((RtMethodScope)context.HeapShotCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+			Debug.Assert(((RtMethodScope)context.HeapShortCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
 #endif
 			Span<NaNBoxing> slots = context.StackSlots.AsSpan(stPos, info.useSlots);
 			slots.Clear(); //栈清空 -- 防止GC时错误访问

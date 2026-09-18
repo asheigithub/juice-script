@@ -24,7 +24,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 
 #if DEBUG
@@ -43,7 +43,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 
 #if DEBUG
@@ -78,7 +78,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 
 			switch (arg0.ValueType)
@@ -118,7 +118,7 @@ namespace juicescript.runtime.buildin
 					break;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
-						RtHeapBase instance = context.GC.Heap[arg0.HeapPtr];
+						RtHeapBase instance = context.HeapShortCut[arg0.HeapPtr];
 
 						switch (instance.Kind)
 						{
@@ -194,7 +194,7 @@ namespace juicescript.runtime.buildin
 
 			//if (arg0.ValueType == NaNBoxing.BoxType.HeapPtr)
 			//{
-			//	var instance = context.GC.Heap[arg0.HeapPtr];
+			//	var instance = context.HeapShotCut[arg0.HeapPtr];
 			//	if (instance.Type != null)
 			//	{
 			//		string name = instance.Type.QName.ToDebugTypeName();
@@ -217,7 +217,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 
 			switch (arg0.ValueType)
@@ -257,7 +257,7 @@ namespace juicescript.runtime.buildin
 					break;
 				case NaNBoxing.BoxType.HeapPtr:
 					{
-						RtHeapBase instance = context.GC.Heap[arg0.HeapPtr];
+						RtHeapBase instance = context.HeapShortCut[arg0.HeapPtr];
 
 						switch (instance.Kind)
 						{
@@ -333,7 +333,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 
 			if (arg0.ValueType == NaNBoxing.BoxType.Null)
@@ -352,7 +352,7 @@ namespace juicescript.runtime.buildin
 			}
 			else
 			{
-				chars = ((RtString)context.GC.Heap[ arg0.HeapPtr ]).Str;
+				chars = ((RtString)context.HeapShortCut[ arg0.HeapPtr ]).Str;
 			}
 
 			foreach (var c in context.libs.SelectMany(o => o.Scripts.Select(s => s.Traits[0].Class)))
@@ -405,7 +405,7 @@ namespace juicescript.runtime.buildin
 		NaNBoxing thisPtr,
 		int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 
 			if (arg0.ValueType == NaNBoxing.BoxType.Null || arg0.ValueType == NaNBoxing.BoxType.Undefined)
@@ -427,7 +427,7 @@ namespace juicescript.runtime.buildin
 					}
 					else
 					{
-						thisStr = ((RtString)context.GC.Heap[arg0.HeapPtr]).Str.AsSpan();
+						thisStr = ((RtString)context.HeapShortCut[arg0.HeapPtr]).Str.AsSpan();
 					}
 
 
@@ -734,7 +734,7 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var arg0 = scope.ReadSlot(0);
 			var arg1 = scope.ReadSlot(1);
 
@@ -754,7 +754,7 @@ namespace juicescript.runtime.buildin
 				}
 				else
 				{
-					thisStr = ((RtString)context.GC.Heap[arg0.HeapPtr]).Str.AsSpan();
+					thisStr = ((RtString)context.HeapShortCut[arg0.HeapPtr]).Str.AsSpan();
 				}
 
 				uint radix = (uint)arg1.IntValue;
@@ -904,7 +904,7 @@ namespace juicescript.runtime.buildin
 			//	case NaNBoxing.BoxType.Float:
 			//		printer.Write(arg.FloatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)); return;
 			//	case NaNBoxing.BoxType.HeapPtr:
-			//		printer.Write(((RtString)context.GC.Heap[arg.HeapPtr]).Str); return;
+			//		printer.Write(((RtString)context.HeapShotCut[arg.HeapPtr]).Str); return;
 			//	case NaNBoxing.BoxType.LocalString:
 			//		{
 			//			Span<char> chars = stackalloc char[16]; // 5个UTF-8字节最多能解码出的字符数
@@ -936,7 +936,7 @@ namespace juicescript.runtime.buildin
 			else
 #endif
 			{
-				var instance = context.GC.Heap[arg.HeapPtr];
+				var instance = context.HeapShortCut[arg.HeapPtr];
 				switch (instance.Kind)
 				{
 					case RtHeapTypeKind.CLASS:
@@ -969,10 +969,10 @@ namespace juicescript.runtime.buildin
 							var stPos = context.StackPosition;
 							context.StackPosition += 2;
 
-							var ns_set = context.GC.Heap[scope_ptr].Type._link_codescope.NamespaceSet;
+							var ns_set = context.HeapShortCut[scope_ptr].Type._link_codescope.NamespaceSet;
 							ASContainer as_type = instance.Type;
 							int code = context.player.MultiNameLSearch(ns_set, instance.Kind,
-								as_type, mode, 0, 0, stackslots, stPos, arg, context.player.check_MultiNameLSearch_issameorinherit(arg, callee_bindthis.ValueType == NaNBoxing.BoxType.HeapPtr ? (context.GC.Heap[callee_bindthis.HeapPtr]) : null), ref error, true);
+								as_type, mode, 0, 0, stackslots, stPos, arg, context.player.check_MultiNameLSearch_issameorinherit(arg, callee_bindthis.ValueType == NaNBoxing.BoxType.HeapPtr ? (context.HeapShortCut[callee_bindthis.HeapPtr]) : null), ref error, true);
 							switch (code)
 							{
 								case 0:
@@ -997,7 +997,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 
-							NaNBoxing fun; unsafe { fun = stackslots[0].HeapKind==(byte) RtHeapTypeKind.STACK_CACHE_OBJ ?  context.player.LoadValue( (RtStackCache)context.GC.Heap[ stackslots[0].HeapPtr], -1, ref error, stackslots, stPos) : stackslots[0] ; }
+							NaNBoxing fun; unsafe { fun = stackslots[0].HeapKind==(byte) RtHeapTypeKind.STACK_CACHE_OBJ ?  context.player.LoadValue( (RtStackCache)context.HeapShortCut[ stackslots[0].HeapPtr], -1, ref error, stackslots, stPos) : stackslots[0] ; }
 							if (error.raised) //由于object原型的存在，这里是肯定能找到的。找不到就报错吧
 							{
 								context.StackPosition -= 2;
@@ -1011,7 +1011,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 
-							var funinstance = context.GC.Heap[fun.HeapPtr];
+							var funinstance = context.HeapShortCut[fun.HeapPtr];
 							if ( funinstance.Kind != RtHeapTypeKind.CLOSURE)
 							{
 								context.StackPosition -= 2;
@@ -1097,8 +1097,8 @@ namespace juicescript.runtime.buildin
 						context.BackTraceIndex++;
 
 #if DEBUG
-						//((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
-						Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+						//((RtMethodScope)context.HeapShotCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+						Debug.Assert(((RtMethodScope)context.HeapShortCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
 #endif
 						((RtArray)instance).Trace(context, stackStPos, ref error, scope_ptr, printer, instance, ",");
 						context.BackTraceIndex--;
@@ -1120,8 +1120,8 @@ namespace juicescript.runtime.buildin
 						RtVector vector = (RtVector)instance;
 						context.BackTraceIndex++;
 #if DEBUG
-						//((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
-						Debug.Assert(((RtMethodScope)context.GC.Heap[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
+						//((RtMethodScope)context.HeapShotCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).EmptyStackSlot();
+						Debug.Assert(((RtMethodScope)context.HeapShortCut[Context.M_MethodScopePtr + context.BackTraceIndex - 1]).isEmptySlot);
 #endif
 						vector.Trace(context, stackStPos, ref error, scope_ptr, printer);
 						context.BackTraceIndex--;
@@ -1152,11 +1152,11 @@ namespace juicescript.runtime.buildin
 			NaNBoxing thisPtr,
 			int stackStPos, ref ReceiveError error, int returnSlotIndex)
 		{
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			context.StackSlots[returnSlotIndex].SetUndefined();
 
 			var rest = scope.ReadSlot(0);
-			var rest_array = (RtArray)context.GC.Heap[rest.HeapPtr];
+			var rest_array = (RtArray)context.HeapShortCut[rest.HeapPtr];
 
 #if DEBUG
 			if (rest_array.StoreMode != RtArray.ArrayStoreMode.cache_on_stack)
@@ -1207,7 +1207,7 @@ namespace juicescript.runtime.buildin
 				return;
 			}
 
-			var scope = (RtMethodScope)context.GC.Heap[scope_ptr];
+			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			NaNBoxing url = scope.ReadSlot(0);
 			if (url.ValueType == NaNBoxing.BoxType.Null || url.ValueType == NaNBoxing.BoxType.Undefined)
 			{
@@ -1226,7 +1226,7 @@ namespace juicescript.runtime.buildin
 			else
 			{
 				Debug.Assert(url.ValueType == NaNBoxing.BoxType.HeapPtr);
-				uri = ((RtString)context.GC.Heap[url.HeapPtr]).Str;
+				uri = ((RtString)context.HeapShortCut[url.HeapPtr]).Str;
 			}
 
 
