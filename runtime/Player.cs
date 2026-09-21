@@ -14646,6 +14646,19 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+						case INS_Code.LoopFoot_IncrVar_CmpSlot:
+							{
+								int offset = LoopFoot_IncrVar_CmpSlot(dst_index,ref PC,ref frame,ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								if (offset != 0)
+								{
+									PC = PC_START + offset;
+								}
+								break;
+							}
 						case INS_Code.add_Vec2_Vec2:
 							{
 								//Exec_Add_Vec2_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);

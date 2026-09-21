@@ -362,6 +362,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_BindGlobal_Recurse_Call:
 					instruction = new INS_O_BindG_Recurse_Call(token);
 					break;
+				case INS_Code.LoopFoot_IncrVar_CmpSlot:
+					instruction = new INS_LoopFoot_IncrVar_CmpSlot(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;

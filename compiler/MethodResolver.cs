@@ -3640,7 +3640,33 @@ namespace juicescript.compiler
 					}
 				}
 
+				if (instruction.INS_Code == INS_Code.LoopFoot_IncrVar_CmpSlot)
+				{
+					INS_LoopFoot_IncrVar_CmpSlot loopfoot = (INS_LoopFoot_IncrVar_CmpSlot)instruction;
 
+					int flagid = loopfoot.flag_id;
+
+					bool found = false;
+					offset = 0;
+					for (int j = 0; j < instructions.Length; j++)
+					{
+						if (instructions[j].INS_Code == INS_Code.flag && ((INS_Flag)instructions[j]).flag_id == flagid)
+						{
+							found = true;
+							loopfoot.offset = offset;
+							break;
+						}
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
+						{
+							offset += instructions[j].Size;
+						}
+					}
+
+					if (!found)
+					{
+						throw new InvalidOperationException();
+					}
+				}
 
 				if (instruction.INS_Code == INS_Code.iter_get)
 				{

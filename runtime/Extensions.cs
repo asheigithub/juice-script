@@ -346,7 +346,7 @@ namespace juicescript.runtime
             }
         }
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsStruct(this NaNBoxing value)
         { 
             return value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((HeapKindFlag)value.HeapFlag & HeapKindFlag.FLAG_STRUCT) == HeapKindFlag.FLAG_STRUCT;

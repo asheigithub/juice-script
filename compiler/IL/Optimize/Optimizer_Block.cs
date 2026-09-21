@@ -3,6 +3,8 @@ using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
 using juicescript.runtime;
 using System;
+using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -14,6 +16,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
@@ -2680,6 +2683,11 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
+			var flags = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.flag).Select(i => (INS_Flag)i)
+					.Where(i => i.flag_id < 0xfffff8);
+			int flagseed = flags.Any() ? flags.Max(i => i.flag_id) + 1 : 0;
+
+
 			#region 变量自增自减
 
 			foreach (var block in cfg.Blocks)
@@ -2713,6 +2721,118 @@ namespace juicescript.compiler.IL.Optimize
 			}
 
 			#endregion
+
+			#region 循环尾
+			//6: FLAG_5
+			//7: logic_cmp[stack: 6] < - [stack:18] < [stack:13]
+			//8: If_False_Goto( if (stack:6 == false ) goto FLAG_2)
+			//9: FLAG_3
+			//10: O_Incr_StoreVar[offset: 1] < -(ctype(([stack:18->stack:9], [stack:8] = [stack:18] + (1))->stack:19), [stack:19])
+			//11: INS_Barrier[stack: 9]
+			//12: virtual jump_to_end
+			//13: Move[stack:18]<-[stack:19]
+			//14: Goto Flag_5
+
+			foreach (var b in cfg.Blocks)
+			{
+				var o_incr = (INS_O_IncrDecr_StoreVar)b.Instructions.FirstOrDefault(i => i.INS_Code == INS_Code.O_IncrDecr_StoreVar);
+				
+				if (o_incr != null &&
+
+					cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii =>ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains( o_incr.result )).Count() == 0
+					&&
+					cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii =>ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains( o_incr.dst )).Count() == 0
+					)
+				{
+					int index = b.Instructions.IndexOf(o_incr);
+					if (b.Instructions.Skip(index + 1).All(i => i.INS_Code == INS_Code.expression_barrier || i.INS_Code == INS_Code.flag)
+						&&
+						b.Instructions[b.Instructions.Count-1].INS_Code == INS_Code.flag &&
+						((INS_Flag)b.Instructions[b.Instructions.Count -1]).flag_id == 0xffffff
+						)
+					{
+						var nextb = b.Successors.FirstOrDefault(nb => nb.Instructions.Count > 1);
+						if (nextb !=null && nextb.Instructions[0].INS_Code == INS_Code.move
+							&&
+							nextb.Instructions[1].INS_Code == INS_Code.goto_flag
+							)
+						{
+							INS_Move mv = (INS_Move)nextb.Instructions[0];
+							if (o_incr.convertedloc.index == mv.source.index && o_incr.source.index == mv.dst.index )
+							{
+								Debug.Assert(nextb.Successors.Count == 1);
+								var loopheader = nextb.Successors[0];
+
+								if (loopheader.Instructions.Count == 3 &&
+									loopheader.Instructions[1].INS_Code == INS_Code.logic_comparison &&
+									((INS_Comparison)loopheader.Instructions[1]).v1.index == mv.dst.index &&
+
+									loopheader.Instructions[2].INS_Code == INS_Code.if_false_goto &&
+									loopheader.Instructions[2].GetUse().Contains(loopheader.Instructions[1].GetDef().First() ) &&
+									cfg.Blocks.SelectMany(bb=>bb.Instructions).Where( ii=>ii.GetUse().Contains(loopheader.Instructions[1].GetDef().First())).Count()==1
+									)
+								{
+									//循环尾部，比较后直接跳入循环体
+									Debug.Assert(loopheader.Successors.Count == 2);
+									var body = loopheader.Successors.First( bb=>!( bb.Instructions.Count>0
+										&& bb.Instructions[0].INS_Code == INS_Code.flag && ((INS_Flag)bb.Instructions[0]).flag_id == ((INS_If_False_Goto)loopheader.Instructions[2]).flag_id));
+
+
+									int bodyflagid;
+									if (!(body.Instructions.Count > 0 && body.Instructions[0].INS_Code == INS_Code.flag))
+									{
+										INS_Flag bodyflag = new INS_Flag(nextb.Instructions[1].token);
+										bodyflag.flag_id = flagseed++;
+										body.Instructions.Insert(0, bodyflag);
+										bodyflagid = bodyflag.flag_id;
+									}
+									else
+									{
+										bodyflagid = ((INS_Flag)body.Instructions[0]).flag_id;
+									}
+
+									b.Instructions.Remove(o_incr);
+
+									nextb.Instructions.Clear();
+									//指令融合进nextb
+									var cmp = (INS_Comparison)loopheader.Instructions[1];
+									var jmp = (INS_If_False_Goto)loopheader.Instructions[2];
+
+									
+
+									INS_LoopFoot_IncrVar_CmpSlot loopFoot_IncrVar_CmpSlot = new INS_LoopFoot_IncrVar_CmpSlot(o_incr.token);
+									loopFoot_IncrVar_CmpSlot.dst.index = o_incr.convertedloc.index;
+									//loopFoot_IncrVar_CmpSlot.result = o_incr.convertedloc;
+									loopFoot_IncrVar_CmpSlot.addvalue = o_incr.addvalue;
+									loopFoot_IncrVar_CmpSlot.heap = o_incr.heap;
+									loopFoot_IncrVar_CmpSlot.src_index = o_incr.source.index;
+									//loopFoot_IncrVar_CmpSlot.convertedloc = o_incr.convertedloc;
+
+									loopFoot_IncrVar_CmpSlot.compareto = cmp.v2;
+									loopFoot_IncrVar_CmpSlot.compmode = (INS_If_LogicOp_Goto.CompMode)(cmp.opMode + 4);
+									loopFoot_IncrVar_CmpSlot.flag_id = bodyflagid;
+									
+
+									nextb.Instructions.Add(loopFoot_IncrVar_CmpSlot);
+								}
+
+							}
+
+						}
+					}
+				}
+				
+
+			}
+
+
+
+
+
+
+			#endregion
+
+
 
 			#region Ld_const 合批
 
@@ -4481,6 +4601,8 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static int RemoveBlockMove(ControlFlowGraph cfg,int slotCount,CompileContext context)
 		{
+			
+
 
 			{
 				//算法：如果move的目标没有被任何指令引用，则删除它 如果move的目标只被barrier引用，并且它是一个普通类型，则删除

@@ -23,6 +23,8 @@ using static juicescript.NaNBoxing;
 using static juicescript.runtime.Player;
 using static juicescript.runtime.RtArray;
 using static System.Formats.Asn1.AsnWriter;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static System.Threading.Lock;
 
 namespace juicescript.runtime
 {
@@ -32,7 +34,8 @@ namespace juicescript.runtime
 	public partial class Player
 #endif
 	{
-		
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining)]
 		private unsafe void If_logicOp_Goto(ref byte* PC,ref FrameContext frame,byte* PC_START,ref ReceiveError error)
 		{
 			var stackslots = frame.stackslots;
@@ -46,19 +49,56 @@ namespace juicescript.runtime
 			byte v1 = (byte)(store >> 16 & 0xff);
 			byte v2 = (byte)(store >> 24 & 0xff);
 
-			if (compMode <= CompMode.strict_neq)
+			NaNBoxing a = stackslots[v1];
+			NaNBoxing b = stackslots[v2];
+
+			if ((a.ValueType == BoxType.Int || (a.ValueType > BoxType.Uint && a.ValueType < BoxType.Float))
+				&&
+				(b.ValueType == BoxType.Int || (b.ValueType > BoxType.Uint && b.ValueType < BoxType.Float))
+				)
 			{
-				bool c = IsStrictlyEqual(stackslots[v1], stackslots[v2]);
-				c = compMode == CompMode.strict_equal ? c : !c;
+				int cv = a.IntValue - b.IntValue;
+				bool c = (((cv < 0 && (compMode == CompMode.less || compMode == CompMode.less_equal || compMode == CompMode.notequal || compMode == CompMode.strict_neq))
+					||
+					(cv > 0 && (compMode == CompMode.greater || compMode == CompMode.greater_equal || compMode == CompMode.notequal || compMode == CompMode.strict_neq))
+					||
+					(cv == 0 && (compMode == CompMode.greater_equal || compMode == CompMode.less_equal || compMode == CompMode.equal || compMode == CompMode.strict_equal))
+					)
+
+					);
 				stackslots[compResult].SetBoolean(c);
 				if (c == jump_mode)
 				{
 					PC = PC_START + offset;
 				}
+
+			}
+			else
+			{
+				if (If_logicOpGoto_Slow(ref frame, compMode, a, b, compResult, jump_mode, ref error))
+				{
+					PC = PC_START + offset;
+				}
+			}
+		}
+
+		private unsafe bool If_logicOpGoto_Slow(ref FrameContext frame, CompMode compMode,NaNBoxing a,NaNBoxing b,int compResult, bool jump_mode ,ref ReceiveError error)
+		{
+			var stackslots = frame.stackslots;
+
+			if (compMode <= CompMode.strict_neq)
+			{
+				bool c = IsStrictlyEqual(a, b);
+				c = compMode == CompMode.strict_equal ? c : !c;
+				stackslots[compResult].SetBoolean(c);
+				return (c == jump_mode);
+				//{
+				//	//PC = PC_START + offset;
+				//}
 			}
 			else if (compMode <= CompMode.notequal)
 			{
-				bool c = IsEqual(stackslots[v1], stackslots[v2], compResult, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+				bool c = IsEqual(a, b, compResult, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -67,29 +107,31 @@ namespace juicescript.runtime
 				c = compMode == CompMode.equal ? c : !c;
 
 				stackslots[compResult].SetBoolean(c);
-				if (c == jump_mode)
-				{
-					PC = PC_START + offset;
-				}
+				return (c == jump_mode);
+				//{
+				//	PC = PC_START + offset;
+				//}
 			}
 			else
 			{
-				bool c = DoCompress((byte)(compMode - 4), compResult, stackslots[v1], stackslots[v2], frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
+				bool c = DoCompress((byte)(compMode - 4), compResult, a, b, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
 				if (error.raised)
 				{
 					goto flag_handle_error;
 				}
 
-				if (c == jump_mode)
-				{
-					PC = PC_START + offset;
-				}
+				return (c == jump_mode);
+				//{
+				//	PC = PC_START + offset;
+				//}
 
 			}
 
 		flag_handle_error:
+			return false;
 			;
 		}
+
 
 		private unsafe void Goto_InTry(ref byte* PC,int trys,ExceptionContext* exception_ctx,byte* finally_jumpto)
 		{
@@ -2791,9 +2833,12 @@ namespace juicescript.runtime
 		private unsafe bool DoCompress(byte opMode, int dst_index, NaNBoxing n1, NaNBoxing n2, int scope_ptr,
 			Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr, ref ReceiveError error)
 		{
-			if (((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
+			var n1type = n1.ValueType;
+			var n2type = n2.ValueType;
+
+			if ((n1type == BoxType.Int || (n1type > BoxType.Uint && n1type < BoxType.Float))
 				&&
-				((n2.ValueType == BoxType.Int || n2.ValueType > BoxType.Uint) && n2.ValueType < BoxType.Float)
+				(n2type == BoxType.Int || (n2type > BoxType.Uint && n2type < BoxType.Float))
 				)
 			{
 				int c_r = n1.IntValue - n2.IntValue;
@@ -2815,15 +2860,16 @@ namespace juicescript.runtime
 #if DEBUG
 						throw new InvalidOperationException();
 #else
-						Environment.FailFast("出错了，这里跑不到");
+						//Environment.FailFast("出错了，这里跑不到");
+						//return false;
 						return false;
 #endif
 
 				}
 			}
-			else if ((n1.ValueType == BoxType.Number || n1.ValueType >= BoxType.Int && n1.ValueType <= BoxType.Float)
+			else if ((n1type == BoxType.Number || n1type >= BoxType.Int && n1type <= BoxType.Float)
 				&&
-				(n2.ValueType == BoxType.Number || n2.ValueType >= BoxType.Int && n2.ValueType <= BoxType.Float)
+				(n2type == BoxType.Number || n2type >= BoxType.Int && n2type <= BoxType.Float)
 				)
 			{
 				//数值快速比较
@@ -2864,7 +2910,7 @@ namespace juicescript.runtime
 #if DEBUG
 						throw new InvalidOperationException();
 #else
-						Environment.FailFast("出错了，这里跑不到");
+						//Environment.FailFast("出错了，这里跑不到");
 						return false;
 #endif
 
@@ -2946,7 +2992,7 @@ namespace juicescript.runtime
 			int addvalue = *(int*)PC; PC += 4;
 			NaNBoxing n1 = stackslots[src_index];
 
-			if ((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
+			if (n1.ValueType == BoxType.Int || (n1.ValueType > BoxType.Uint && n1.ValueType < BoxType.Float))
 			{
 				stackslots[dst_index].SetInt(n1.IntValue + addvalue);
 
@@ -3015,7 +3061,7 @@ namespace juicescript.runtime
 			ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
 
 
-			if ((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
+			if (n1.ValueType == BoxType.Int || (n1.ValueType > BoxType.Uint && n1.ValueType < BoxType.Float))
 			{
 				stackslots[dst_index].SetInt(n1.IntValue + addvalue);
 
@@ -3025,19 +3071,19 @@ namespace juicescript.runtime
 				}
 
 
-				if (
+//				if (
 
-					heapV.ValueType == BoxType.Int
-				)
-				{
-					heapV.SetInt(n1.IntValue + addvalue);
-					stackslots[convertedloc_index] = heapV;
-#if FORCOMPILER
-					((RtMethodScope)heap).SetSlot(heapV, heapLocater.MemberIndex);
-#endif
+//					heapV.ValueType == BoxType.Int
+//				)
+//				{
+//					heapV.SetInt(n1.IntValue + addvalue);
+//					stackslots[convertedloc_index] = heapV;
+//#if FORCOMPILER
+//					((RtMethodScope)heap).SetSlot(heapV, heapLocater.MemberIndex);
+//#endif
 
-					return;
-				}
+//					return;
+//				}
 
 
 			}
@@ -3096,7 +3142,193 @@ namespace juicescript.runtime
 
 
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		private unsafe int LoopFoot_IncrVar_CmpSlot(int dst_index,ref byte* PC,ref FrameContext frame,ref ReceiveError error)
+		{
+			int flag_id = LoadStackLocater(ref PC);
+			int offset = LoadStackLocater(ref PC);
+			//int result_index = LoadStackLocater(ref PC);
 
+			uint addvalue_andresulttemp = LoadUInt(ref PC);
+			int addvalue = (sbyte)(addvalue_andresulttemp >> 24);
+			int src_index = (int)(addvalue_andresulttemp & 0xffffff);
+
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
+				heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
+			}
+
+			uint compstore = LoadUInt(ref PC);
+			INS_If_LogicOp_Goto.CompMode compMode = (INS_If_LogicOp_Goto.CompMode)(compstore >> 24);
+			int compareto_index = (int)(compstore & 0xffffff);
+
+			RtMethodScope heap = (RtMethodScope)frame.methodscope;
+			ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+			var stackslots = frame.stackslots;
+			ref NaNBoxing n1 = ref stackslots[src_index];
+
+			int convertedloc_index = dst_index; //LoadStackLocater(ref PC);
+			NaNBoxing compValue = stackslots[compareto_index];
+
+			Debug.Assert(heapV.ValueType == n1.ValueType);
+
+			Debug.Assert(compMode > CompMode.notequal);
+
+			if ((n1.ValueType == BoxType.Int || (n1.ValueType > BoxType.Uint && n1.ValueType < BoxType.Float))
+				&&
+				(compValue.ValueType == BoxType.Int || (compValue.ValueType > BoxType.Uint && compValue.ValueType < BoxType.Float))
+				)
+			{
+				int added_v = n1.IntValue + addvalue;
+				n1.SetInt(added_v);
+
+				ref NaNBoxing newvalue = ref stackslots[convertedloc_index];
+
+				//fastpath
+				newvalue = n1;
+				heapV = n1;
+
+#if FORCOMPILER
+					((RtMethodScope)heap).SetSlot(n1, heapLocater.MemberIndex);
+#endif
+				int cv = added_v - compValue.IntValue;
+
+				if ((cv < 0 && (compMode == CompMode.less || compMode == CompMode.less_equal))
+					||
+					(cv > 0 && (compMode == CompMode.greater || compMode == CompMode.greater_equal))
+					||
+					(cv == 0 && (compMode == CompMode.greater_equal || compMode == CompMode.less_equal ))
+					)
+				{
+					return offset;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				bool c = LoopFoot_IncrVar_CmpSlot_Slow(ref n1, ref frame, ref heapV, convertedloc_index, addvalue, compMode, compValue, heapLocater, ref error);
+				if (c && !error.raised)
+				{
+					return offset;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+
+		}
+
+		private bool LoopFoot_IncrVar_CmpSlot_Slow(ref NaNBoxing n1,ref FrameContext frame, ref NaNBoxing heapV, 
+			int convertedloc_index,int addvalue, CompMode compMode, NaNBoxing compValue, ScopeHeapLocater heapLocater, ref ReceiveError error)
+		{
+			var stackslots = frame.stackslots;
+
+			if (n1.ValueType == BoxType.Int || (n1.ValueType > BoxType.Uint && n1.ValueType < BoxType.Float))
+			{
+				stackslots[convertedloc_index].SetInt(n1.IntValue + addvalue);
+			}
+			else if (n1.ValueType == BoxType.Uint || n1.ValueType == BoxType.Number)
+			{
+				stackslots[convertedloc_index].SetNumber(Extensions.GetDoubleValue(n1) + addvalue);
+
+			}
+			else if (n1.ValueType == BoxType.Float)
+			{
+				stackslots[convertedloc_index].SetFloat(n1.FloatValue + addvalue);
+
+			}
+			else
+			{
+				Incr_Decr_Slow(frame.methodscope, addvalue, convertedloc_index, convertedloc_index, n1, stackslots, frame.scope_ptr, frame.stackStPos, ref error);
+				if (error.raised)
+					return false;
+			}
+
+
+
+			NaNBoxing incr_decr_v = stackslots[convertedloc_index];
+
+			Debug.Assert(incr_decr_v.ValueType != BoxType.HeapPtr);
+
+			if (
+				(
+				(heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any
+				||
+				(incr_decr_v.ValueType == heapV.ValueType)
+
+				)
+
+				&& heapV.ValueType != BoxType.HeapPtr
+				)
+			{
+				//if (heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+
+				heapV = incr_decr_v;
+
+
+
+#if FORCOMPILER
+
+
+					((RtMethodScope)(RtMethodScope)frame.methodscope).SetSlot(incr_decr_v, heapLocater.MemberIndex);
+#endif
+
+			}
+			else
+			{
+				StoreMethodVariable_Slow(frame.methodscope, heapLocater, incr_decr_v, ref heapV, frame.scope_ptr, ref error);
+
+				if (error.raised)
+				{
+					return false;
+				}
+			}
+
+
+			n1 = heapV; //原mv步骤
+
+			//if (compMode <= CompMode.strict_neq)
+			//{
+			//	bool c = IsStrictlyEqual(incr_decr_v, compValue);
+			//	c = compMode == CompMode.strict_neq ? c : !c;
+			//	return c;
+
+			//}
+			//else if (compMode <= CompMode.notequal)
+			//{
+			//	bool c = IsEqual(incr_decr_v, compValue, convertedloc_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+			//	stackslots[convertedloc_index] = heapV;
+			//	if (error.raised)
+			//	{
+			//		return false;
+			//	}
+
+			//	c = compMode == CompMode.equal ? c : !c;
+
+			//	return c;
+			//}
+			//else
+			{
+				bool c = DoCompress( (byte)(compMode-4) , convertedloc_index, n1, compValue, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
+				stackslots[convertedloc_index] = heapV;
+
+				if (error.raised)
+				{
+					return false;
+				}
+
+				return c;
+
+			}
+
+		}
 
 
 		private unsafe void GET_TYPEOF(int dst_index, ref byte* PC, Span<NaNBoxing> stackslots)
@@ -4646,7 +4878,7 @@ namespace juicescript.runtime
 				return;
 			}
 
-			frame.stackslots[dst_index] = ret;
+			//frame.stackslots[dst_index] = ret;
 		}
 
 
@@ -4846,7 +5078,10 @@ namespace juicescript.runtime
 						//((RtVector)instance).GetStore().elementSize = VectorImpl.VectorStore.GetElementSize(((RtVector)instance).element_type, ((RtVector)instance).element_asclass);
 
 						stackslots[target] = instancePtr; //.SetHeapPtr(instancePtr , (byte)RtHeapTypeKind.VECTOR);
-
+						if (argsCount == 0)
+						{
+							return;
+						}
 						//throw new NotImplementedException();
 					}
 					else if (
@@ -4910,8 +5145,12 @@ namespace juicescript.runtime
 								//((RtArray)instance).array_len = 0;
 								//((RtArray)instance).methodscopeslot_ref_state = 0;
 								//((RtArray)instance).HEAPINSTANCE_PTR = 0;
-								((RtArray)instance).SetStoreCacheZero(false, Context.cache_array_memory[ptrIndex], Context.cache_array_structindex[ptrIndex]);
-
+								((RtArray)instance).SetStoreCacheZero( argsCount == 0 , Context.cache_array_memory[ptrIndex], Context.cache_array_structindex[ptrIndex]);
+								if (argsCount == 0)
+								{
+									stackslots[target] = instancePtr;
+									return;
+								}
 							}
 							else
 							{
@@ -5180,6 +5419,10 @@ namespace juicescript.runtime
 								argementsPtr += 4;
 							}
 						}
+					}
+					else if (ctor.Flags.HasFlag(MethodFlags.BLANK))
+					{
+
 					}
 					else
 					{
@@ -5526,8 +5769,13 @@ namespace juicescript.runtime
 						}
 					}
 				}
+				else if (ctor.Flags.HasFlag(MethodFlags.BLANK))
+				{
+					
+				}
 				else
 				{
+
 					//执行构造函数
 					RunMethod(ctor, stackslots[dst_index], instancePtr.HeapPtr, //@class.Instance,
 						(ushort)argsCount, argementsPtr, stackslots, ref error, -1, 0, true);

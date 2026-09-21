@@ -1090,6 +1090,7 @@ namespace juicescript.runtime
 
 			if (info.instructions == 0 && args.argsCount == 0 && (method.Flags & MethodFlags.Native) == 0)
 			{
+				method.Flags |= MethodFlags.BLANK;
 				result.setDefault(method.ReturnTypeKind);
 				return;
 			}
@@ -1460,7 +1461,7 @@ namespace juicescript.runtime
 
 		}
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining )]
+		
 		internal unsafe NaNBoxing RunMethod(ASMethod method,
 
 			NaNBoxing thisPtr, int scope_ptr,
@@ -1470,6 +1471,13 @@ namespace juicescript.runtime
 
 			)
 		{
+			if (method.Flags.HasFlag(MethodFlags.BLANK))
+			{
+				NaNBoxing r = default;
+				r.setDefault(method.ReturnTypeKind);
+				return r;
+			}
+
 			RunMethodArgs methodArgs = default;
 			methodArgs.thisPtr = thisPtr;
 			methodArgs.scope_ptr = scope_ptr;

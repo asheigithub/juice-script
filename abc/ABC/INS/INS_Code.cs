@@ -390,6 +390,9 @@ namespace juicescript.ABC.INS
 
 		O_BindGlobal_Recurse_Call =109,  //递归调用 
 
+
+        LoopFoot_IncrVar_CmpSlot =110,                   //For循环的尾部自增变量，和Slot槽内值比较
+
 		//***矩阵，向量类***
 
 		add_Vec2_Vec2 = 112,            //二维向量相加
