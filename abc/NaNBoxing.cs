@@ -337,16 +337,14 @@ namespace juicescript
         /// <param name="b"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        //[MethodImpl( MethodImplOptions.AggressiveInlining)]
-        public static bool FastAdd(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
+        public static bool FastAdd(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
-            result = default;
-
+            
             var vta = a.ValueType;
             var vtb = b.ValueType;
 
 
-            if ((vta == BoxType.Int || vta > BoxType.Uint) && vta < BoxType.Float && (vtb > BoxType.Uint || vtb == BoxType.Int) && vtb < BoxType.Float)
+            if ((vta == BoxType.Int || (vta > BoxType.Uint && vta < BoxType.Float)) && ( vtb == BoxType.Int || (vtb > BoxType.Uint  && vtb < BoxType.Float)))
             {
                 result.SetInt(a.IntValue + b.IntValue);
                 return true;
@@ -368,13 +366,13 @@ namespace juicescript
 			}
             else
             {
-                return FastAdd_Step2(a, b, out result);
+                return FastAdd_Step2(a, b, ref result);
             }
            
         }
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private static bool FastAdd_Step2(NaNBoxing a, NaNBoxing b, out NaNBoxing result)
+		private static bool FastAdd_Step2(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
 			result = default;
 
@@ -670,13 +668,13 @@ namespace juicescript
         /// <param name="b"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
 			var vta = a.ValueType;
 			var vtb = b.ValueType;
 
-			if ((vta == BoxType.Int || vta > BoxType.Uint) && vta < BoxType.Float && (vtb > BoxType.Uint || vtb == BoxType.Int) && vtb < BoxType.Float)
+			if ((vta == BoxType.Int || (vta > BoxType.Uint && vta < BoxType.Float)) && (vtb == BoxType.Int || (vtb > BoxType.Uint  && vtb < BoxType.Float)))
             {
                 result.SetInt(a.IntValue - b.IntValue);
                 return true;
@@ -1091,7 +1089,7 @@ namespace juicescript
 
         public BoxType ValueType
         {
-			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
             {
 

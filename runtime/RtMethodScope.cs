@@ -74,7 +74,7 @@ namespace juicescript.runtime
 		/// <param name="start"></param>
 		/// <param name="codescope"></param>
 		/// <param name="isStackSlot"></param>
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		
 		public void InitSlot(NaNBoxing[] array, int start, CodeScope codescope,bool isStackSlot)
 		{
 			IsStackSlot = isStackSlot;

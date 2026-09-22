@@ -96,9 +96,9 @@ package
 
 
 
-
-
-
+//
+//
+//
 //import flash.utils.getTimer;
 //
 //function fannkuch(n) {
@@ -237,14 +237,17 @@ package
  
 	   
 	   
-var st = getTimer();	   
-(function()
-{
-var x=0;
-for(var i=0;i<100000000;i++)
-{
-	x = new Object();
-//    x=x+1;
-}
-})();
-trace( getTimer() - st);
+//var st = getTimer();	   
+//(function()
+//{
+//var x=0;
+//for(var i=0;i<100000000;i++)
+//{
+    //x += 1;
+	//
+//}
+//})();
+//trace( getTimer() - st);
+
+
+

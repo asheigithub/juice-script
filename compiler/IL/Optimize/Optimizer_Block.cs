@@ -2832,6 +2832,48 @@ namespace juicescript.compiler.IL.Optimize
 
 			#endregion
 
+			#region X=X+1
+			foreach (var b in cfg.Blocks)
+			{
+				for (var i = 0; i < b.Instructions.Count-2; i++)
+				{ 
+					var ins = b.Instructions[i];
+					if (ins.INS_Code == INS_Code.ld_methodVariable
+						&&
+						(b.Instructions[i + 1].INS_Code == INS_Code.add)
+						&&
+						b.Instructions[i + 2].INS_Code == INS_Code.storeMethodVariable
+						)
+					{
+						INS_Ld_MethodVariable ld = (INS_Ld_MethodVariable)ins;
+						INS_Store_MethodVariable st = (INS_Store_MethodVariable)b.Instructions[i + 2];
+
+						if (ld.heap.MemberIndex == st.heap.MemberIndex
+							&&
+							ld.dst.index == st.convertedloc.index
+							&&
+							b.Instructions[i + 1].GetUse().Count() == 2
+							&&
+							b.Instructions[i + 1].GetUse().First().index == ld.dst.index
+							&&
+							cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii => ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains(b.Instructions[i + 1].dst)).Count() == 1
+							)
+						{
+							INS_O_Var_Self_Add var_Self_Add = new INS_O_Var_Self_Add(ins.token);
+							var_Self_Add.dst.index = st.convertedloc.index;
+							var_Self_Add.heap = st.heap;
+							var_Self_Add.addvalue = b.Instructions[i + 1].GetUse().Skip(1).First();
+
+							b.Instructions[i] = var_Self_Add;
+
+							b.Instructions.RemoveRange(i + 1, 2);
+
+						}
+					}
+				}
+
+			}
+			#endregion
 
 
 			#region Ld_const 合批

@@ -14665,6 +14665,15 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+						case INS_Code.O_Var_Self_Add:
+							{
+								O_Var_SelfAdd(dst_index, ref PC, ref frame, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
 						case INS_Code.add_Vec2_Vec2:
 							{
 								//Exec_Add_Vec2_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
@@ -15116,28 +15125,6 @@ namespace juicescript.runtime
 
 									trace( probe());  
 								 */
-
-								//								//清理catch变量
-								//								var s = methodscope; //HeapShotCut[scope_ptr];
-								//								int* m_scope = method_scopes;
-								//								*m_scope++ = scope_ptr;
-
-								//								var memberindex = exception_ctx->catched_error.MemberIndex;
-								//								ASTrait t = s.Type._link_codescope.Members[memberindex].trait;
-								//								RtPayloadMethodScope heap = (RtPayloadMethodScope)s;
-								//								NaNBoxing value = default;
-
-								//								ReceiveError store_err = default;
-								//								PrepareSaveMethodScope(heap, ref exception_ctx->catched_error, ref value, m_scope, method_scopes, ref store_err);
-								//								if (store_err.raised)
-								//								{
-								//									error.error.setFault();
-								//#if PROFILEPLAYER
-								//									InstructionProfiler.Profile_ActionEnd(opcode);
-								//#endif
-								//									goto flag_end;
-								//								}
-								//								heap.SetSlot(value, memberindex);
 
 								PC = exception_ctx->FINALLY_PTR;//跳转到Finally
 

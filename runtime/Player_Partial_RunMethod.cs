@@ -1098,7 +1098,7 @@ namespace juicescript.runtime
 
 
 			if (Context.StackPosition + scopeHoleSlots + info.useSlots
-				//+ 1 
+				
 				>= Context.STACK_LENGTH)
 			{
 				RaiseStackOverflow(ref error);

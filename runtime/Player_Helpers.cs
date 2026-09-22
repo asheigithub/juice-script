@@ -1311,14 +1311,12 @@ namespace juicescript.runtime
 
 
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void Exec_Add(int dst_index, ref byte* PC, ref FrameContext frame, ref ReceiveError error)
 		{
 
 			//StackLocater v1;
 			//StackLocater v2;
-
-
 
 			//LoadStackLocater(&v1, PC);
 			//LoadStackLocater(&v2, PC);
@@ -1331,12 +1329,10 @@ namespace juicescript.runtime
 			NaNBoxing n1 = stackslots[v1_index];
 			NaNBoxing n2 = stackslots[v2_index];
 
-
-
-			NaNBoxing sum;
-			if (NaNBoxing.FastAdd(n1, n2, out sum))
-			{
-				stackslots[dst_index] = sum;
+		
+			
+			if (NaNBoxing.FastAdd(n1, n2, ref stackslots[dst_index]))
+			{				
 				return;
 			}
 			else
@@ -1643,7 +1639,7 @@ namespace juicescript.runtime
 			}
 		}
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe void Exec_Sub(int dst_index, ref byte* PC, ref FrameContext frame, ref ReceiveError error)
 		{
 
@@ -2956,9 +2952,9 @@ namespace juicescript.runtime
 
 			NaNBoxing n2 = default; n2.SetInt(addvalue);
 
-			bool fa = NaNBoxing.FastAdd(n1, n2, out NaNBoxing r);
+			bool fa = NaNBoxing.FastAdd(n1, n2, ref stackslots[dst]);//out NaNBoxing r);
 			Debug.Assert(fa);
-			stackslots[dst] = r;
+			//stackslots[dst] = r;
 
 			//Exec_Add(ref error, n1, n2, dst, scope_ptr, result, stackslots, stackStPos, ((RtMethodScope)methodscope).ThisPtr);
 			//if (error.raised)
@@ -3077,22 +3073,6 @@ namespace juicescript.runtime
 					stackslots[result_index] = n1;
 				}
 
-
-//				if (
-
-//					heapV.ValueType == BoxType.Int
-//				)
-//				{
-//					heapV.SetInt(n1.IntValue + addvalue);
-//					stackslots[convertedloc_index] = heapV;
-//#if FORCOMPILER
-//					((RtMethodScope)heap).SetSlot(heapV, heapLocater.MemberIndex);
-//#endif
-
-//					return;
-//				}
-
-
 			}
 			else if (n1.ValueType == BoxType.Uint || n1.ValueType == BoxType.Number)
 			{
@@ -3146,6 +3126,69 @@ namespace juicescript.runtime
 
 
 		}
+
+		
+		private unsafe void O_Var_SelfAdd(int dst_index, ref byte* PC, ref FrameContext frame, ref ReceiveError error)
+		{
+			ScopeHeapLocater heapLocater;
+			{
+				heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
+				heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
+			}
+
+			int addv_loc = LoadStackLocater(ref PC);
+
+			RtMethodScope heap = (RtMethodScope)frame.methodscope;
+			ref NaNBoxing heapV = ref heap.ReadSlotRef(heapLocater.MemberIndex);
+
+			var stackslots = frame.stackslots;
+
+			var addv = stackslots[addv_loc];
+
+			ref NaNBoxing result = ref stackslots[dst_index];
+
+			
+			if (NaNBoxing.FastAdd(heapV, addv, ref result))
+			{
+
+			}
+			else
+			{
+				Exec_AddSlow(dst_index, heapV, addv, frame.scope_ptr, frame.stackStPos, stackslots, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
+				if (error.raised)
+				{
+					return;
+				}
+			}
+			
+
+
+			if (
+				(heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any
+				||
+				(result.ValueType == heapV.ValueType)
+
+				)
+			{
+				if (heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
+				{
+					heapV = result;
+
+#if FORCOMPILER
+					((RtMethodScope)heap).SetSlot(result, heapLocater.MemberIndex);
+#endif
+
+					return;
+				}
+			}
+
+			StoreMethodVariable_Slow(frame.methodscope, heapLocater, result, ref heapV, frame.scope_ptr, ref error);
+
+			return;
+
+
+		}
+
 
 
 

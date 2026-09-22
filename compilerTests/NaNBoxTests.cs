@@ -386,8 +386,8 @@ namespace compilerTests
                 NaNBoxing.TryCreateLocalString("!", out b))
             {
                 // Test FastAdd should succeed and return LocalString result
-                NaNBoxing result;
-                bool success = NaNBoxing.FastAdd(a, b, out result);
+                NaNBoxing result = default;
+                bool success = NaNBoxing.FastAdd(a, b, ref result);
                 
                 Assert.IsTrue(success, "FastAdd should succeed for LocalString + LocalString when result fits");
                 Assert.AreEqual(NaNBoxing.BoxType.LocalString, result.ValueType, "Result should be LocalString");
@@ -397,8 +397,8 @@ namespace compilerTests
                 NaNBoxing c;
                 if (NaNBoxing.TryCreateLocalString("world", out c)) // "hi" + "world" = 7 bytes > 5 bytes limit
                 {
-                    NaNBoxing longResult;
-                    bool longSuccess = NaNBoxing.FastAdd(a, c, out longResult);
+                    NaNBoxing longResult = default;
+                    bool longSuccess = NaNBoxing.FastAdd(a, c, ref longResult);
                     
                     Assert.IsFalse(longSuccess, "FastAdd should fail when result exceeds LocalString capacity");
                 }

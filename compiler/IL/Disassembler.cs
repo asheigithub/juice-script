@@ -365,6 +365,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.LoopFoot_IncrVar_CmpSlot:
 					instruction = new INS_LoopFoot_IncrVar_CmpSlot(token);
 					break;
+				case INS_Code.O_Var_Self_Add:
+					instruction = new INS_O_Var_Self_Add(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;
