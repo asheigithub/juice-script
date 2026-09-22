@@ -18,8 +18,9 @@ namespace juicescript.runtime
 			{
 				ReceiveError error = default;
 				NaNBoxing _this = default; _this.SetNull();
+				var mctx = new RunMethodArgs(_this, ((ASClass)method.Container).__instance_index__, 0, null, new Span<NaNBoxing>(), Context.StackPosition,0,false);
 				NaNBoxing r = RunMethod(
-					method, _this, ((ASClass)method.Container).__instance_index__ ,  0, null, new Span<NaNBoxing>(), ref error, Context.StackPosition);
+					method, ref mctx, ref error);
 
 				if (error.raised)
 				{

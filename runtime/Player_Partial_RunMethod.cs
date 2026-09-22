@@ -877,9 +877,9 @@ namespace juicescript.runtime
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(basePos + 3, 1);
 
 					StackLocater stackLocater = default; stackLocater.index = 0;
-					RunMethod(Context.PROMISE.Instance.Constructor, Context.StackSlots[basePos + 2], promise_ptr,
-						//Context.PROMISE.Instance,
-						1, (byte*)&stackLocater, slots, ref error, -1, 0, true);
+					var pmctx = new RunMethodArgs(Context.StackSlots[basePos + 2], promise_ptr,
+						1, (byte*)&stackLocater, slots,-1, 0, true);
+					RunMethod(Context.PROMISE.Instance.Constructor,ref pmctx, ref error);
 
 					m_scopePayload.EmptyStackSlot();
 					Context.StackPosition = basePos;

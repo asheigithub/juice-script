@@ -1860,10 +1860,10 @@ namespace juicescript.runtime.buildin
 							args->index = 0;
 							(args + 1)->index = 1;
 							(args + 2)->index = 2;
-
-							context.player.RunMethod(((ASMethodBody)replinstance.Type).Method, closure.This, closure.ScopePtr,
-								 3, (byte*)args, slots, ref error,
-								basePos
+							var mctx = new RunMethodArgs( closure.This, closure.ScopePtr,
+								 3, (byte*)args, slots,
+								basePos,0,false);
+							context.player.RunMethod(((ASMethodBody)replinstance.Type).Method, ref mctx, ref error
 								);
 
 							if (error.raised)

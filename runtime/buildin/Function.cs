@@ -120,14 +120,16 @@ namespace juicescript.runtime.buildin
 				
 				context.StackPosition += arguments.Length;
 
-				context.player.RunMethod(callmethod, _this,
+				var mctx = new RunMethodArgs(_this,
 					((RtClosure)closureinstance).ScopePtr,
 					//((RtClosure)closureinstance).ScopeType,
-					(ushort)rest_array.store_memory.Length , (byte*)args,
+					(ushort)rest_array.store_memory.Length, (byte*)args,
 					slots,
-					ref error,
 					returnSlotIndex,
-					thisPtr.HeapPtr
+					thisPtr.HeapPtr,false);
+
+				context.player.RunMethod(callmethod, ref mctx,
+					ref error
 					);
 
 				context.StackPosition -= arguments.Length;
@@ -224,14 +226,15 @@ namespace juicescript.runtime.buildin
 
 				context.StackPosition += len;
 
-				context.player.RunMethod(callmethod, _this,
+				var mctx = new RunMethodArgs(_this,
 					((RtClosure)closureinstance).ScopePtr,
 					//((RtClosure)closureinstance).ScopeType,
 					(ushort)len, (byte*)args,
 					slots,
-					ref error,
 					returnSlotIndex,
-					thisPtr.HeapPtr
+					thisPtr.HeapPtr,false);
+				context.player.RunMethod(callmethod,ref mctx,
+					ref error
 					);
 
 				context.StackPosition -= len;

@@ -167,13 +167,13 @@ namespace juicescript.runtime
 
 						ReceiveError error = default;
 
-						context.player.RunMethod(callmethod, ((RtClosure)closureinstance).This,
+						var mctx = new RunMethodArgs(((RtClosure)closureinstance).This,
 							((RtClosure)closureinstance).ScopePtr,
-							//((RtClosure)closureinstance).ScopeType,
 							(ushort)len, (byte*)args,
 							slots,
-							ref error,
-							returnslot
+							returnslot,0,false);
+						context.player.RunMethod(callmethod, ref mctx,
+							ref error
 							);
 
 						context.StackPosition -= len + 1;
