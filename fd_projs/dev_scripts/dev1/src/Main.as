@@ -97,8 +97,8 @@ package
 
 
 
-//
-//
+
+
 //import flash.utils.getTimer;
 //
 //function fannkuch(n) {
@@ -170,9 +170,9 @@ package
 //var expected = 30;
 //if (ret != expected)
     //throw "ERROR: bad result: expected " + expected + " but got " + ret + " " + ( getTimer() - st);
-//
-//
-//
+
+
+
 
 
 //import flash.utils.getTimer;
@@ -237,14 +237,14 @@ package
  
 	   
 	   
-//var st = getTimer();	   
-//(function()
-//{
-//var x=0;
-//for(var i=0;i<100000000;i++)
-//{
-	//x = [];
-////    x=x+1;
-//}
-//})();
-//trace( getTimer() - st);
+var st = getTimer();	   
+(function()
+{
+var x=0;
+for(var i=0;i<100000000;i++)
+{
+	x = new Object();
+//    x=x+1;
+}
+})();
+trace( getTimer() - st);

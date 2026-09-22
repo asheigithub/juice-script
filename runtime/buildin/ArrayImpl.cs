@@ -1043,6 +1043,8 @@ namespace juicescript.runtime.buildin
 					argSlots[3].SetInt((int)i);
 					argSlots[4].SetHeapPtr(arrPtr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 
+
+
 					NaNBoxing r = context.player.RunMethod(cbmethod, _this, cbclosure.ScopePtr, 3, (byte*)args, argSlots, ref error, basePos + 1);
 					if (error.raised)
 					{

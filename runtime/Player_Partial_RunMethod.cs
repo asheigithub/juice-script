@@ -1088,12 +1088,7 @@ namespace juicescript.runtime
 			ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			method.Body.GetInfo(ref info);
 
-			if (info.instructions == 0 && args.argsCount == 0 && (method.Flags & MethodFlags.Native) == 0)
-			{
-				method.Flags |= MethodFlags.BLANK;
-				result.setDefault(method.ReturnTypeKind);
-				return;
-			}
+			
 
 			var method_body_linkcodesocpe = method.Body._link_codescope;
 
@@ -1369,6 +1364,23 @@ namespace juicescript.runtime
 
 		internal unsafe ref struct RunMethodArgs
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			public RunMethodArgs(NaNBoxing thisPtr, int scope_ptr,
+				ushort args, byte* argementPtr,
+				Span<NaNBoxing> slot, int returnSlotIndex,
+				int callee_closure_ptr , bool skipcheckargscount )
+			{
+				this.thisPtr = thisPtr;
+				this.scope_ptr = scope_ptr;
+				this.slot = slot;
+
+				this.returnSlotIndex = returnSlotIndex;
+				this.callee_closure_ptr = callee_closure_ptr;
+				this.argementPtr = argementPtr;
+				this.argsCount = args;
+				this.skipcheckargscount = skipcheckargscount;
+			}
+
 			public Span<NaNBoxing> slot;
 			public NaNBoxing thisPtr;
 			public int scope_ptr;
@@ -1416,8 +1428,6 @@ namespace juicescript.runtime
 #else
 			Context.GC.CheckGC(ref error);
 #endif
-
-
 			if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0)
 				&&
 				method.Parameters.Count == args.argsCount
@@ -1471,13 +1481,6 @@ namespace juicescript.runtime
 
 			)
 		{
-			if (method.Flags.HasFlag(MethodFlags.BLANK))
-			{
-				NaNBoxing r = default;
-				r.setDefault(method.ReturnTypeKind);
-				return r;
-			}
-
 			RunMethodArgs methodArgs = default;
 			methodArgs.thisPtr = thisPtr;
 			methodArgs.scope_ptr = scope_ptr;

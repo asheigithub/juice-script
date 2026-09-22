@@ -1481,7 +1481,7 @@ namespace juicescript.compiler
 
 			ComputeFunctionDefaultValue(context, workDir, libs, outswcfile, dict_scriptinit_onlyconst,expiredScripts);
 
-			//检查构造函数。
+			
 			foreach (var script in context.scriptDefs)
 			{
 				for (int i = 1; i < script.scriptMethods.Count; i++)
@@ -1615,7 +1615,7 @@ namespace juicescript.compiler
 					}
 
 
-
+					//检查构造函数。
 					ASMethod method = script.scriptMethods[i];
 					if (!method.Flags.HasFlag(MethodFlags.Native) && method.IsConstructor && method.Container is ASInstance)
 					{
@@ -1628,6 +1628,18 @@ namespace juicescript.compiler
 							}
 						}
 					}
+
+					if (method.Parameters.Count == 0 && (method.Flags & MethodFlags.Native) == 0)
+					{
+						ASMethodBody.MethodBodyInfo info = default;
+						method.Body.GetInfo(ref info);
+
+						if (info.instructions == 0)
+						{
+							method.Flags |= MethodFlags.BLANK;
+						}
+					}
+
 				}
 			}
 

@@ -4821,11 +4821,11 @@ namespace juicescript.runtime
 			//}
 			//else
 			{
-
-
-				NaNBoxing ret = RunMethod(method, _this_,
+				var mctx = new RunMethodArgs(_this_,
 					((RtClosure)closure).ScopePtr,
-					(ushort)argsCount, argementsPtr, frame.stackslots, ref error, frame.stackStPos + dst_index, closure_ptr);
+					(ushort)argsCount, argementsPtr, frame.stackslots, frame.stackStPos + dst_index, closure_ptr,false);
+
+				NaNBoxing ret = RunMethod(method,ref mctx, ref error);
 				if (error.raised)
 				{
 					goto flag_handle_error;

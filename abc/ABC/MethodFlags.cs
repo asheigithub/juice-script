@@ -70,7 +70,7 @@ namespace juicescript.ABC
         /// </summary>
         AUTO_INIT_CTOR = ASYNC << 1,
 
-        BLANK = AUTO_INIT_CTOR << 1, //标记这是一个空函数
+        BLANK = AUTO_INIT_CTOR << 1, //标记这是一个没有参数，没有代码的空函数
 
     }
 }

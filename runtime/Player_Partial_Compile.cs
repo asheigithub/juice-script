@@ -282,9 +282,10 @@ namespace juicescript.runtime
 						var @class = HeapShortCut[((ASClass)c._link_codescope.Container).__instance_index__];
 						try
 						{
-							
-							RunMethod(method, nullP, ((ASClass)c._link_codescope.Container).__instance_index__, //null, 
-								0, null, Context.StackSlots, ref error, -1);
+							var mctx = new RunMethodArgs( nullP, ((ASClass)c._link_codescope.Container).__instance_index__, //null, 
+								0, null, Context.StackSlots, -1, 0,false);
+
+							RunMethod(method,ref mctx, ref error);
 						}
 						finally
 						{
@@ -314,9 +315,9 @@ namespace juicescript.runtime
 
 						try
 						{
-							
-							RunMethod(method, thisP, ((ASScript)c._link_codescope.Container).__global_index__, //null, 
-								0, null, Context.StackSlots, ref error, -1);
+							var mctx = new RunMethodArgs(thisP, ((ASScript)c._link_codescope.Container).__global_index__, //null, 
+								0, null, Context.StackSlots,  -1,0,false);
+							RunMethod(method, ref mctx, ref error);
 						}
 						finally
 						{
@@ -381,8 +382,11 @@ namespace juicescript.runtime
 							Context.StackPosition++;
 							NaNBoxing thisP = default;
 							thisP.SetHeapPtr(instancePtr,(byte)instance.Kind, (byte)(instance.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)instance.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
-							RunMethod(method, thisP, instancePtr, //@type.Instance, 
-								0, null, Context.StackSlots, ref error, -1);
+
+							var mctx = new RunMethodArgs(thisP, instancePtr, //@type.Instance, 
+								0, null, Context.StackSlots,  -1,9,false);
+							
+							RunMethod(method,ref mctx,ref error );
 							if (error.raised)
 							{
 								throw new EvalConstException();
