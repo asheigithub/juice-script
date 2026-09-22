@@ -5964,9 +5964,29 @@ namespace juicescript.runtime
 					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, frame.scope_ptr);
 				}
 
+				if (value.IsStruct())
+				{
+					var src = HeapShortCut[value.HeapPtr];
+					//Clone结构体
+					int clonedptr = heapLocater.MemberIndex + heap.StackPos + Context.CacheInstancePtr;
+					var cacheObj = HeapShortCut[clonedptr];
+					//cacheObj.Type = src.Type;
+
+					//((RtInstance)cacheObj).HEAPINSTANCE_PTR = 0;
+					//((RtInstance)cacheObj).CopyFrom(src, this, src.Type._link_codescope.TypeLayout.Size);
+
+					((RtInstance)cacheObj).CloneOther((RtInstance)src, this);
+
+					((RtInstance)cacheObj).methodscopeslot_ref_state = 1;
 
 
-				prepare_savemethodscope_saveinstance(heap, ref value, heapLocater, frame.scope_ptr, false);
+					value.SetHeapPtr(clonedptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.FLAG_STRUCT);
+
+				}
+				else
+				{
+					prepare_savemethodscope_saveinstance(heap, ref value, heapLocater, frame.scope_ptr, false);
+				}
 				heapV = value;
 			}
 			else

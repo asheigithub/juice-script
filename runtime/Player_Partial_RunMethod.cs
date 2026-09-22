@@ -1472,27 +1472,27 @@ namespace juicescript.runtime
 		}
 
 		
-		internal unsafe NaNBoxing RunMethod(ASMethod method,
+		//internal unsafe NaNBoxing RunMethod(ASMethod method,
 
-			NaNBoxing thisPtr, int scope_ptr,
-			ushort args, byte* argementPtr,
-			Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex,
-			int callee_closure_ptr = 0, bool skipcheckargscount = false
+		//	NaNBoxing thisPtr, int scope_ptr,
+		//	ushort args, byte* argementPtr,
+		//	Span<NaNBoxing> slot, ref ReceiveError error, int returnSlotIndex,
+		//	int callee_closure_ptr = 0, bool skipcheckargscount = false
 
-			)
-		{
-			RunMethodArgs methodArgs = default;
-			methodArgs.thisPtr = thisPtr;
-			methodArgs.scope_ptr = scope_ptr;
-			methodArgs.callee_closure_ptr=callee_closure_ptr;
-			methodArgs.argementPtr=argementPtr;
-			methodArgs.argsCount = args;
-			methodArgs.slot = slot;
-			methodArgs.returnSlotIndex = returnSlotIndex;
-			methodArgs.skipcheckargscount = skipcheckargscount;
+		//	)
+		//{
+		//	RunMethodArgs methodArgs = default;
+		//	methodArgs.thisPtr = thisPtr;
+		//	methodArgs.scope_ptr = scope_ptr;
+		//	methodArgs.callee_closure_ptr=callee_closure_ptr;
+		//	methodArgs.argementPtr=argementPtr;
+		//	methodArgs.argsCount = args;
+		//	methodArgs.slot = slot;
+		//	methodArgs.returnSlotIndex = returnSlotIndex;
+		//	methodArgs.skipcheckargscount = skipcheckargscount;
 
-			return RunMethod(method,ref  methodArgs,ref error);
-		}
+		//	return RunMethod(method,ref  methodArgs,ref error);
+		//}
 
 
 		//		//[MethodImpl(MethodImplOptions.AggressiveInlining )]
