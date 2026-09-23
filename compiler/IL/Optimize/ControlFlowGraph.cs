@@ -514,6 +514,7 @@ namespace juicescript.compiler.IL.Optimize
 
 				HashSet<int> allSlotsInInstruction = new HashSet<int>();
 
+				
 				if (defs != null)
 				{
 					foreach (var d in defs)
@@ -521,6 +522,8 @@ namespace juicescript.compiler.IL.Optimize
 						if (d.index >= 0) allSlotsInInstruction.Add(d.index);
 					}
 				}
+
+
 				if (uses != null)
 				{
 					foreach (var u in uses)
@@ -753,14 +756,6 @@ namespace juicescript.compiler.IL.Optimize
 					HashSet<int> onlyUse = new HashSet<int>();
 					ComputeBlockUseDef(block, use, def, onlyUse);
 					
-					foreach (var d in def)
-					{
-						if (use.Contains(d))
-						{
-							newLiveOut.Add(d);
-						}
-					}
-					
 					HashSet<int> newLiveIn = new HashSet<int>(onlyUse);
 					foreach (var slot in newLiveOut)
 					{
@@ -782,65 +777,6 @@ namespace juicescript.compiler.IL.Optimize
 					}
 				}
 			} while (changed && iterations < maxIterations);
-
-			iterations = 0;
-			bool changed2 = true;
-			while (changed2 && iterations < maxIterations)
-			{
-				changed2 = false;
-				iterations++;
-				
-				foreach (var block in sortedBlocks)
-				{
-					if (!block.IsReachable)
-						continue;
-					
-					HashSet<int> use = new HashSet<int>();
-					HashSet<int> def = new HashSet<int>();
-					HashSet<int> onlyUse = new HashSet<int>();
-					ComputeBlockUseDef(block, use, def, onlyUse);
-					
-					HashSet<int> newLiveOut = new HashSet<int>();
-					foreach (var succ in block.Successors)
-					{
-						if (liveInAnalysis.ContainsKey(succ))
-						{
-							foreach (var slot in liveInAnalysis[succ])
-							{
-								newLiveOut.Add(slot);
-							}
-						}
-					}
-					
-					foreach (var d in def)
-					{
-						if (use.Contains(d))
-						{
-							newLiveOut.Add(d);
-						}
-					}
-					
-					HashSet<int> newLiveIn = new HashSet<int>(onlyUse);
-					foreach (var slot in newLiveOut)
-					{
-						if (!def.Contains(slot))
-						{
-							newLiveIn.Add(slot);
-						}
-					}
-					
-					if (!SetsEqual(liveInAnalysis[block], newLiveIn))
-					{
-						liveInAnalysis[block] = newLiveIn;
-						changed2 = true;
-					}
-					if (!SetsEqual(liveOutAnalysis[block], newLiveOut))
-					{
-						liveOutAnalysis[block] = newLiveOut;
-						changed2 = true;
-					}
-				}
-			}
 
 			foreach (var block in sortedBlocks)
 			{
@@ -1228,21 +1164,26 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static void ComputeBlockUseDef(BasicBlock block, HashSet<int> use, HashSet<int> def, HashSet<int> onlyUse)
 		{
-			// 对于每条指令：Use 是操作数，Def 是结果
+			// 按指令顺序计算：
+			// use/def = 块内出现过的全部 use/def
+			// onlyUse (gen) = 在首次被 def 之前就被 use 的槽（用于 LiveIn）
+			// 同一条指令内先记 use 再记 def（读操作数先于写结果），因此
+			// x = x + y 这类指令的 x 会正确进入 onlyUse。
 			foreach (var ins in block.Instructions)
 			{
-				// 添加 Use
 				var uses = ins.GetUse();
 				if (uses != null)
 				{
 					foreach (var u in uses)
 					{
 						use.Add(u.index);
-						onlyUse.Add(u.index);
+						if (!def.Contains(u.index))
+						{
+							onlyUse.Add(u.index);
+						}
 					}
 				}
-				
-				// 添加 Def
+
 				var defs = ins.GetDef();
 				if (defs != null)
 				{
@@ -1252,9 +1193,6 @@ namespace juicescript.compiler.IL.Optimize
 					}
 				}
 			}
-			
-			// OnlyUse = Use - Def (在块中使用但不在块中定义的 slot)
-			onlyUse.ExceptWith(def);
 		}
 
 		private static bool SetsEqual(HashSet<int> a, HashSet<int> b)

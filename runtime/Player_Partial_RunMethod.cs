@@ -539,7 +539,7 @@ namespace juicescript.runtime
 											scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 											scopeHeapLocater.MemberIndex = i;
 
-											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, methodArgs.scope_ptr, ref error, false /*结构体拷贝传递*/);
+											PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, methodArgs.scope_ptr, ref error);
 #if DEBUG
 											if (error.raised)
 											{
@@ -920,7 +920,7 @@ namespace juicescript.runtime
 					Context.BackTraceIndex++; ;
 
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
-					slots.Clear(); //栈清空 -- 防止GC时错误访问
+					slots.Fill(default); //栈清空 -- 防止GC时错误访问
 
 					FrameContext frame = default;
 					frame.method = method;
@@ -1211,7 +1211,7 @@ namespace juicescript.runtime
 						scopeHeapLocater.ScopeIndex = (ushort)method_body_linkcodesocpe.index;
 						scopeHeapLocater.MemberIndex = i;
 
-						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, args.scope_ptr, ref error, false /*结构体拷贝传递*/);
+						PrepareSaveMethodScope(m_scopePayload, scopeHeapLocater, ref box, args.scope_ptr, ref error);
 						Debug.Assert(!error.raised);
 					}
 					param_slots[i] = box;
@@ -1240,8 +1240,9 @@ namespace juicescript.runtime
 				//Context.BackTrace[Context.BackTraceIndex].Method = method;
 				Context.BackTraceIndex++; ;
 
-				Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);
-				slots.Clear(); //栈清空 -- 防止GC时错误访问
+				Span<NaNBoxing> slots = Context.StackSlots.AsSpan(stPos, info.useSlots);				
+				slots.Fill(default);
+				//slots.Clear(); //栈清空 -- 防止GC时错误访问
 
 				FrameContext frame = default;
 				frame.method = method;

@@ -2730,9 +2730,8 @@ namespace juicescript.compiler.IL.Optimize
 			//10: O_Incr_StoreVar[offset: 1] < -(ctype(([stack:18->stack:9], [stack:8] = [stack:18] + (1))->stack:19), [stack:19])
 			//11: INS_Barrier[stack: 9]
 			//12: virtual jump_to_end
-			//13: Move[stack:18]<-[stack:19]
-			//14: Goto Flag_5
-
+			//13: Goto Flag_5
+			
 			foreach (var b in cfg.Blocks)
 			{
 				var o_incr = (INS_O_IncrDecr_StoreVar)b.Instructions.FirstOrDefault(i => i.INS_Code == INS_Code.O_IncrDecr_StoreVar);
@@ -2751,21 +2750,21 @@ namespace juicescript.compiler.IL.Optimize
 						((INS_Flag)b.Instructions[b.Instructions.Count -1]).flag_id == 0xffffff
 						)
 					{
-						var nextb = b.Successors.FirstOrDefault(nb => nb.Instructions.Count > 1);
-						if (nextb !=null && nextb.Instructions[0].INS_Code == INS_Code.move
+						var nextb = b.Successors.FirstOrDefault(nb => nb.Instructions.Count > 0);
+						if (nextb !=null //&& nextb.Instructions[0].INS_Code == INS_Code.move
 							&&
-							nextb.Instructions[1].INS_Code == INS_Code.goto_flag
+							nextb.Instructions.Last().INS_Code == INS_Code.goto_flag
 							)
 						{
-							INS_Move mv = (INS_Move)nextb.Instructions[0];
-							if (o_incr.convertedloc.index == mv.source.index && o_incr.source.index == mv.dst.index )
+							//INS_Move mv = (INS_Move)nextb.Instructions[0];
+							if (o_incr.convertedloc.index ==  o_incr.source.index  )
 							{
 								Debug.Assert(nextb.Successors.Count == 1);
 								var loopheader = nextb.Successors[0];
 
 								if (loopheader.Instructions.Count == 3 &&
 									loopheader.Instructions[1].INS_Code == INS_Code.logic_comparison &&
-									((INS_Comparison)loopheader.Instructions[1]).v1.index == mv.dst.index &&
+									((INS_Comparison)loopheader.Instructions[1]).v1.index == o_incr.convertedloc.index &&
 
 									loopheader.Instructions[2].INS_Code == INS_Code.if_false_goto &&
 									loopheader.Instructions[2].GetUse().Contains(loopheader.Instructions[1].GetDef().First() ) &&
@@ -2781,7 +2780,7 @@ namespace juicescript.compiler.IL.Optimize
 									int bodyflagid;
 									if (!(body.Instructions.Count > 0 && body.Instructions[0].INS_Code == INS_Code.flag))
 									{
-										INS_Flag bodyflag = new INS_Flag(nextb.Instructions[1].token);
+										INS_Flag bodyflag = new INS_Flag(nextb.Instructions[0].token);
 										bodyflag.flag_id = flagseed++;
 										body.Instructions.Insert(0, bodyflag);
 										bodyflagid = bodyflag.flag_id;
@@ -2805,9 +2804,9 @@ namespace juicescript.compiler.IL.Optimize
 									//loopFoot_IncrVar_CmpSlot.result = o_incr.convertedloc;
 									loopFoot_IncrVar_CmpSlot.addvalue = o_incr.addvalue;
 									loopFoot_IncrVar_CmpSlot.heap = o_incr.heap;
-									loopFoot_IncrVar_CmpSlot.src_index = o_incr.source.index;
-									//loopFoot_IncrVar_CmpSlot.convertedloc = o_incr.convertedloc;
-
+									//loopFoot_IncrVar_CmpSlot.src_index = o_incr.source.index;
+									
+									
 									loopFoot_IncrVar_CmpSlot.compareto = cmp.v2;
 									loopFoot_IncrVar_CmpSlot.compmode = (INS_If_LogicOp_Goto.CompMode)(cmp.opMode + 4);
 									loopFoot_IncrVar_CmpSlot.flag_id = bodyflagid;
@@ -3789,7 +3788,11 @@ namespace juicescript.compiler.IL.Optimize
 								//                            如果有定值,就修改定值的slot
 								//  如果没有SSA_version里的指令，则插入到第一个可能抛出异常和跳转的指令的前面
 
-								var def = pred.Instructions.FirstOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
+								var checkpred = pred;
+								
+							lbl_retry:
+
+								var def = checkpred.Instructions.FirstOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
 																	(ins.INS_Code == INS_Code.ld_MethodVariableInitValue
 																	||
 																	ins.INS_Code == INS_Code.storeMethodVariable
@@ -3799,55 +3802,75 @@ namespace juicescript.compiler.IL.Optimize
 								{
 									Dictionary<int, int> replace = new Dictionary<int, int>();
 									replace.Add(SSA_slot + incomingVersion, SSA_slot + targetVersion);
-									foreach (var ins in cfg.Blocks.SelectMany(b => b.Instructions))
+									foreach (var ins in checkpred.Instructions)//cfg.Blocks.SelectMany(b => b.Instructions))
 									{
 										ins.RemappingSlots(replace);
 									}
-
-									//int index = pred.Instructions.IndexOf(def);
+									//int index = checkpred.Instructions.IndexOf(def);
 									//INS_Move move = new INS_Move(def.token);
 									//move.source.index = SSA_slot + incomingVersion;
 									//move.dst.index = SSA_slot + targetVersion;
 
-									//pred.Instructions.Insert(index + 1, move);
+									//checkpred.Instructions.Insert(index + 1, move);
 								}
 								else
 								{
-									var use = pred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
+									var use = checkpred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
 																	(ins.INS_Code == INS_Code.ld_methodVariable));
 
 									if (use != null)
 									{
-										int index = pred.Instructions.IndexOf(use);
+										int index = checkpred.Instructions.IndexOf(use);
 										INS_Move move = new INS_Move(use.token);
 										move.source.index = SSA_slot + incomingVersion;
 										move.dst.index = SSA_slot + targetVersion;
 
-										pred.Instructions.Insert(index + 1, move);
+										checkpred.Instructions.Insert(index + 1, move);
 
 									}
 									else
 									{
-										INS_Move move = new INS_Move(pred.Instructions[0].token);
-										move.source.index = SSA_slot + incomingVersion;
-										move.dst.index = SSA_slot + targetVersion;
+										if (checkpred.Predecessors.Count == 1
+											&&
+											checkpred.Predecessors[0].Instructions.Last() !=null 
+											//&&
+											//checkpred.Predecessors[0].Instructions.Last().INS_Code != INS_Code.goto_flag
+											
+											&&
+											checkpred.Predecessors[0].Instructions.Last().INS_Code != INS_Code.if_false_goto
+											
+											&&
+											checkpred.Predecessors[0].Instructions.Last().INS_Code != INS_Code.if_true_goto
+											
 
-										if (pred.Instructions.Count > 0 &&
-											(pred.Instructions[0].INS_Code == INS_Code.flag
-											||
-											pred.Instructions[0].INS_Code == INS_Code.try_enter
-											||
-											pred.Instructions[0].INS_Code == INS_Code.catch_enter
-											||
-											pred.Instructions[0].INS_Code == INS_Code.finally_enter
-											)
 											)
 										{
-											pred.Instructions.Insert(1, move);
+											checkpred = checkpred.Predecessors[0];
+											goto lbl_retry;
 										}
 										else
 										{
-											pred.Instructions.Insert(0, move);
+											INS_Move move = new INS_Move(checkpred.Instructions[0].token);
+											move.source.index = SSA_slot + incomingVersion;
+											move.dst.index = SSA_slot + targetVersion;
+
+											if (checkpred.Instructions.Count > 0 &&
+												(checkpred.Instructions[0].INS_Code == INS_Code.flag
+												||
+												checkpred.Instructions[0].INS_Code == INS_Code.try_enter
+												||
+												checkpred.Instructions[0].INS_Code == INS_Code.catch_enter
+												||
+												checkpred.Instructions[0].INS_Code == INS_Code.finally_enter
+												)
+												)
+											{
+												checkpred.Instructions.Insert(1, move);
+											}
+											else
+											{
+												checkpred.Instructions.Insert(0, move);
+											}
 										}
 									}
 								}
@@ -4696,13 +4719,19 @@ namespace juicescript.compiler.IL.Optimize
 			{
 
 				//算法：用干涉图计算 mv 的src和dst之间是不是没有干涉。如果没有，则直接使用同一个槽然后把mv删掉。
-				var tmp = cfg.BuildTemporaryCFGForInstructionLevel();
-				//tmp中移除所有的move。然后计算干涉图
-				foreach (var block in tmp.Blocks)
-				{
-					block.Instructions.RemoveAll(i => i.INS_Code == INS_Code.move);
-				}
+				//var tmp = cfg.BuildTemporaryCFGForInstructionLevel();
+				////tmp中移除所有的move。然后计算干涉图
+				//foreach (var block in tmp.Blocks)
+				//{
+				//	block.Instructions.RemoveAll(i => i.INS_Code == INS_Code.move);
+				//}
+				//var interference = tmp.ComputeInterferenceGraph();
+
+				var fins = cfg.FlattenInstructions().Where(i=>i.INS_Code != INS_Code.move).ToArray();
+				var tmp = ControlFlowGraphBuilder.Build(fins, cfg.Method).BuildTemporaryCFGForInstructionLevel();
 				var interference = tmp.ComputeInterferenceGraph();
+
+
 
 				var all = cfg.Blocks.SelectMany(bb => bb.Instructions).Where(i => i.INS_Code == INS_Code.move).Select(i => (INS_Move)i).ToList();
 				var toremove = new List<INS_Move>();

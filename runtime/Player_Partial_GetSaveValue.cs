@@ -3005,7 +3005,7 @@ namespace juicescript.runtime
 		///否则，复制到堆。
 		/// </summary>
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void PrepareSaveMethodScope(RtMethodScope methodscope,  ScopeHeapLocater heapLocater, ref NaNBoxing value,  int scope_ptr, ref ReceiveError error , bool is_pass_this = false)
+		private void PrepareSaveMethodScope(RtMethodScope methodscope,  ScopeHeapLocater heapLocater, ref NaNBoxing value,  int scope_ptr, ref ReceiveError error )
 		{
 			if (methodscope.IsStackSlot)
 			{
@@ -3028,7 +3028,7 @@ namespace juicescript.runtime
 				if (value.ValueType == NaNBoxing.BoxType.HeapPtr && value.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 				{
 					//存储阶段
-					prepare_savescope_pass(ref value, methodscope, heapLocater, old, min, scope_ptr, ref error, is_pass_this);
+					prepare_savescope_pass(ref value, methodscope, heapLocater, old, min, scope_ptr, ref error, false);
 				}
 			}
 			else

@@ -12,7 +12,7 @@ namespace juicescript.ABC.INS
 		{
 		}
 
-		public override int Size => 4 + 4 + 4 + 4 + 4 + 4 ;
+		public override int Size => 4 + 4 + 4 + 4 + 4;
 
 		public override INS_Code INS_Code => INS_Code.LoopFoot_IncrVar_CmpSlot;
 
@@ -23,7 +23,7 @@ namespace juicescript.ABC.INS
 		//public StackLocater result;
 
 
-		public int src_index;
+		//public int src_index;
 		public int addvalue;
 
 		public ScopeHeapLocater heap;
@@ -35,14 +35,22 @@ namespace juicescript.ABC.INS
 
 		protected override void ReadFromBinary(BinaryReader br)
 		{
-			flag_id = br.ReadInt32();
+			//flag_id = br.ReadInt32();
+
+			uint pack_flagid_addvalue = br.ReadUInt32();
+			addvalue = (sbyte)(pack_flagid_addvalue >> 24);
+			flag_id = (int)(pack_flagid_addvalue & 0xffffff);
+
 			offset = br.ReadInt32();
 
 			//source.ReadFromBinary(br);
 			//result.ReadFromBinary(br);
-			uint addvalue_andresulttemp = br.ReadUInt32();
-			addvalue = (sbyte)(addvalue_andresulttemp >> 24);
-			src_index = (int)(addvalue_andresulttemp & 0xffffff);
+			//uint addvalue_andresulttemp = br.ReadUInt32();
+			//addvalue = (sbyte)(addvalue_andresulttemp >> 24);
+			
+			//src_index = (int)(addvalue_andresulttemp & 0xffffff);
+
+
 
 			heap.ReadFromBinary(br);
 			//convertedloc.ReadFromBinary(br);
@@ -55,14 +63,21 @@ namespace juicescript.ABC.INS
 		}
 		protected override void WriteByte(BinaryWriter bw)
 		{
-			bw.Write(flag_id);
+			//bw.Write(flag_id);
+			uint pack_flagid_addvalue = (uint)flag_id | ((uint)addvalue << 24);
+			bw.Write(pack_flagid_addvalue);
+
 			bw.Write(offset);
 
 			//source.Write(bw);
 			//result.Write(bw);
 			//bw.Write(addvalue);
-			uint addvalue_andresulttemp = (uint)src_index | ((uint)addvalue << 24);
-			bw.Write(addvalue_andresulttemp);
+
+
+			//uint addvalue_andresulttemp = (uint)src_index | ((uint)addvalue << 24);
+			//bw.Write(addvalue_andresulttemp);
+
+			//bw.Write(addvalue);
 
 			heap.Write(bw);
 			//convertedloc.Write(bw);
@@ -92,7 +107,8 @@ namespace juicescript.ABC.INS
 		{
 			
 			yield return compareto;
-			yield return new StackLocater() { index = src_index };
+			yield return dst;
+			//yield return new StackLocater() { index = dst };
 		}
 
 		public override bool MaybeRaiseError()
@@ -111,8 +127,8 @@ namespace juicescript.ABC.INS
 			//if (mapping.TryGetValue(convertedloc.index, out int newIndex3))
 			//	convertedloc.index = newIndex3;
 
-			if (mapping.TryGetValue(src_index, out int newIndex5))
-				src_index = newIndex5;
+			//if (mapping.TryGetValue(src_index, out int newIndex5))
+			//	src_index = newIndex5;
 
 			if (mapping.TryGetValue(compareto.index, out int newIndex4))
 				compareto.index = newIndex4;
@@ -145,7 +161,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"LoopFoot [offset:{heap.MemberIndex}]<-([{src_index}] + {addvalue}), convertto[{dst}] , if( [{dst}] {GetCompModeString()} {compareto} ) goto FLAG_{flag_id}  ";
+			return $"LoopFoot [offset:{heap.MemberIndex}]<-([{dst}] + {addvalue}), convertto[{dst}] , if( [{dst}] {GetCompModeString()} {compareto} ) goto FLAG_{flag_id}  ";
 		}
 	}
 }

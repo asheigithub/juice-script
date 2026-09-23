@@ -3195,13 +3195,21 @@ namespace juicescript.runtime
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private unsafe int LoopFoot_IncrVar_CmpSlot(int dst_index,ref byte* PC,ref FrameContext frame,ref ReceiveError error)
 		{
-			int flag_id = LoadStackLocater(ref PC);
+			//int flag_id = LoadStackLocater(ref PC);
+
+			uint pack_flagid_addvalue = LoadUInt(ref PC);
+			int addvalue = (sbyte)(pack_flagid_addvalue >> 24);
+			int flag_id = (int)(pack_flagid_addvalue & 0xffffff);
+
+			
 			int offset = LoadStackLocater(ref PC);
 			//int result_index = LoadStackLocater(ref PC);
 
-			uint addvalue_andresulttemp = LoadUInt(ref PC);
-			int addvalue = (sbyte)(addvalue_andresulttemp >> 24);
-			int src_index = (int)(addvalue_andresulttemp & 0xffffff);
+			//int addvalue = LoadInt32(ref PC);
+			//int addvalue = (sbyte)(addvalue_andresulttemp >> 24);
+			//int src_index = (int)(addvalue_andresulttemp & 0xffffff);
+
+			int src_index = dst_index;
 
 			ScopeHeapLocater heapLocater;
 			{
