@@ -93,7 +93,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"O_Arr_MoveAndSet [{dst}] <- ({instance})[{name}]; ({instance})[{value2}]<-[{dst}];({instance})[{name}]<-[{value2}];   ";
+			return $"O_Arr_MoveAndSet [{dst}] <- ({instance})[{name}]; ({instance})[{index2}]<-[{dst}];({instance})[{name}]<-[{value2}];   ";
 		}
 
 	}

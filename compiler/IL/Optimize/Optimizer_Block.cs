@@ -2946,49 +2946,49 @@ namespace juicescript.compiler.IL.Optimize
 
 			#region 探测数组元素交换
 
-			//foreach (var block in cfg.Blocks)
-			//{
-			//	for (int i = 0; i < block.Instructions.Count; i++)
-			//	{
-			//		var ins = block.Instructions[i];
-			//		if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
-			//		{
-			//			INS_O_Ld_Array_Element ld_arr = (INS_O_Ld_Array_Element)ins;
+			foreach (var block in cfg.Blocks)
+			{
+				for (int i = 0; i < block.Instructions.Count; i++)
+				{
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
+					{
+						INS_O_Ld_Array_Element ld_arr = (INS_O_Ld_Array_Element)ins;
 
-			//			var next1 = block.Instructions.Skip(i + 1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault() as INS_O_Store_ArrayElement;
+						var next1 = block.Instructions.Skip(i + 1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault() as INS_O_Store_ArrayElement;
 
-			//			if (next1 != null && next1.instance.index == ld_arr.instance.index)
-			//			{
-			//				var next2 = block.Instructions.SkipWhile(k => k != next1).Skip(1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault() as INS_O_Store_ArrayElement;
-			//				if (next2 != null && next2.instance.index == ld_arr.instance.index)
-			//				{
-			//					if (next1.dst.index == ld_arr.dst.index || next2.name.index == ld_arr.name.index)
-			//					{
-			//						//数组元素交换part2 读取一个元素到槽，把槽里的值赋给某个元素，在把另一个槽赋给某个元素
+						if (next1 != null && next1.instance.index == ld_arr.instance.index)
+						{
+							var next2 = block.Instructions.SkipWhile(k => k != next1).Skip(1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault() as INS_O_Store_ArrayElement;
+							if (next2 != null && next2.instance.index == ld_arr.instance.index)
+							{
+								if (next1.dst.index == ld_arr.dst.index || next2.name.index == ld_arr.name.index)
+								{
+									//数组元素交换part2 读取一个元素到槽，把槽里的值赋给某个元素，在把另一个槽赋给某个元素
 
-			//						INS_O_Arr_MoveAndSet arr_MoveAndSet = new INS_O_Arr_MoveAndSet(ld_arr.token);
-			//						arr_MoveAndSet.instance = ld_arr.instance;
-			//						arr_MoveAndSet.dst = ld_arr.dst;
-			//						arr_MoveAndSet.name = ld_arr.name;
-			//						arr_MoveAndSet.refholder = ld_arr.refholder;
-			//						arr_MoveAndSet.index2 = next1.name;
-			//						arr_MoveAndSet.value2 = next2.dst;
+									INS_O_Arr_MoveAndSet arr_MoveAndSet = new INS_O_Arr_MoveAndSet(ld_arr.token);
+									arr_MoveAndSet.instance = ld_arr.instance;
+									arr_MoveAndSet.dst = ld_arr.dst;
+									arr_MoveAndSet.name = ld_arr.name;
+									arr_MoveAndSet.refholder = ld_arr.refholder;
+									arr_MoveAndSet.index2 = next1.name;
+									arr_MoveAndSet.value2 = next2.dst;
 
 
-			//						block.Instructions[i] = arr_MoveAndSet;
+									block.Instructions[i] = arr_MoveAndSet;
 
-			//						block.Instructions.Remove(next1);
-			//						block.Instructions.Remove(next2);
-			//					}
+									block.Instructions.Remove(next1);
+									block.Instructions.Remove(next2);
+								}
 								
-			//				}
-			//			}
+							}
+						}
 
-			//		}
+					}
 
-			//	}
+				}
 
-			//}
+			}
 
 
 			#endregion

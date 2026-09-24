@@ -162,7 +162,7 @@ function fannkuch(n) {
    }
 }
 var st = getTimer();
-var n = 9;
+var n = 10;
 var ret = fannkuch(n);
 
 trace( getTimer() - st );
@@ -253,6 +253,4 @@ if (ret != expected)
 //}
 //})();
 //trace( getTimer() - st);
-
-
 

@@ -12746,7 +12746,229 @@ namespace juicescript.runtime
 			stackslots[dst_index] = heapV;
 		}
 
+
 		
+		private unsafe void O_ArrayMoveAndSet(int dst_index, ref byte* PC,
+			ref FrameContext frame
+			, ref ReceiveError error)
+		{
+			int instance_index =
+			LoadStackLocater(ref PC);
+
+			int _name =
+			LoadStackLocater(ref PC);
+
+			int refholder_index =
+			LoadStackLocater(ref PC);
+
+			int index2 = LoadStackLocater(ref PC);
+			int value2 = LoadStackLocater(ref PC);
+
+
+			var stackslots = frame.stackslots;
+			var instance_box = stackslots[instance_index];
+			var name_box = stackslots[_name];
+
+			var index2_box = stackslots[index2];
+			var value2_box = stackslots[value2];
+
+			if (instance_box.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(instance_box.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return;
+			}
+
+			if (value2_box.ValueType == BoxType.HeapPtr && !value2_box.IsStruct())
+			{
+				value2_box = GetSaveValue(value2_box, ref error);
+				if (error.raised)
+					return;
+			}
+
+
+			//RtArray arr = ((RtArray)HeapShortCut[index2_box.HeapPtr]).payload;
+
+			uint name_box_index = name_box.UIntValue;
+			var name_box_type = name_box.ValueType;
+
+			uint index2_box_index = index2_box.UIntValue;
+			var index2_box_type = index2_box.ValueType;
+
+			ref NaNBoxing element = ref stackslots[dst_index];
+			var array = ((RtArray)HeapShortCut[instance_box.HeapPtr]).payload;
+
+			if (
+				(name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
+				((int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
+				
+				&&
+					(index2_box_type >= BoxType.Int && index2_box_type <= BoxType.UShort &&
+				((int)index2_box_type >= 0 || (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)))
+				)
+
+			{
+
+				if (name_box_index < array.array_len && index2_box_index< array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
+				{
+					var arrayspan = array.store_memory.Span;
+
+					element = arrayspan[(int)name_box_index];
+					if (element.ValueType == BoxType.Fault)
+					{
+						goto lbl_fast_loadfault;
+					}
+					
+					else if (!value2_box.IsStruct() && !element.IsStruct())
+					{
+						Debug.Assert(element.ValueType != BoxType.HeapPtr || element.HeapPtr >= Context.MIN_HEAPPTR);
+
+						//这里element是Heap也无所谓，反正肯定在堆里
+
+						arrayspan[(int)index2_box_index] = element;
+						arrayspan[(int)name_box_index] = value2_box;
+
+						return;
+					}
+					else
+					{
+						
+						SetArraySlot(element, index2_box_index, array, ref error);
+						SetArraySlot(value2_box, name_box_index, array, ref error);
+						return;
+					}
+				}
+			}
+
+			goto lbl_slow;
+
+		lbl_fast_loadfault:
+			{
+				element = LoadSlotFromArray(name_box_index, array, out bool isoutofindex_or_ishole);
+
+				if (element.ValueType == BoxType.Fault)
+				{
+					element.SetUndefined();
+				}
+				else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+				{
+					element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+				}
+
+				goto lbl_setpass;
+
+			}
+
+		lbl_slow:
+			//慢路径
+
+			if (
+				name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
+				((int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
+			{
+
+				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+				if (array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
+				{
+					element = array.store_memory.Span[(int)array_i];
+					if (element.ValueType == BoxType.Fault)
+					{
+
+					}
+					else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+					{
+						element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+						goto lbl_setpass;
+					}
+					else
+					{
+						goto lbl_setpass;
+					}
+				}
+
+
+				bool isoutofindex_or_ishole;
+				element = LoadSlotFromArray(array_i, array, out isoutofindex_or_ishole);
+
+				if (element.ValueType == BoxType.Fault)
+				{
+					element.SetUndefined();
+				}
+				else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+				{
+					element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+				}
+			}
+			else
+			{
+				Ld_MultiNameL_Val_Slow(dst_index, instance_index, refholder_index, _name, ref frame, ref error);
+				element = stackslots[dst_index];
+			}
+
+			if (error.raised)
+				return;
+
+			lbl_setpass:;
+
+
+			if (
+				index2_box_type >= BoxType.Int && index2_box_type <= BoxType.UShort &&
+				((int)index2_box_type >= 0 || (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)))
+			{
+				uint array_i = index2_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+
+				var box = element;
+
+				var payload = array;
+				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && box.ValueType != BoxType.HeapPtr)
+				{
+					payload.store_memory.Span[(int)array_i] = box;
+
+					if (array_i + 1 > payload.array_len)
+					{
+						payload.array_len = array_i + 1;
+					}
+				}
+				else
+				{
+					SetArraySlot(box, array_i, array, ref error);
+				}
+			}
+			else
+			{
+				Store_MultiNameL_Slow(dst_index, instance_index, 0, refholder_index, index2, ref frame, ref error);
+			}
+
+			if (error.raised)
+				return;
+
+			if (
+				name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
+				((int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
+			{
+				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+
+				var payload = array;
+				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && value2_box.ValueType != BoxType.HeapPtr)
+				{
+					payload.store_memory.Span[(int)array_i] = value2_box;
+
+					if (array_i + 1 > payload.array_len)
+					{
+						payload.array_len = array_i + 1;
+					}
+				}
+				else
+				{
+					SetArraySlot(value2_box, array_i, array, ref error);
+					return;
+				}
+			}
+			else
+			{
+				Store_MultiNameL_Slow(value2, instance_index, 0, refholder_index, _name, ref frame, ref error);
+			}
+		}
 
 
 
