@@ -48,7 +48,7 @@ namespace juicescript.ABC.INS
 
 		public override string ToString()
 		{
-			return $"O_Store_ArrayElement [({instance})[{name}] <- {dst}";
+			return $"O_Store_ArrayElement ({instance})[{name}] <- {dst}";
 		}
 
 		public override IEnumerable<StackLocater> GetDef()

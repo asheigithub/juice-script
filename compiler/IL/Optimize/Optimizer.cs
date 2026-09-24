@@ -141,11 +141,14 @@ namespace juicescript.compiler.IL.Optimize
 			slotCount = OptimizeLdInterfaceMethod(cfg, slotCount, context);
 
 			slotCount = OptimizeCommExpr(cfg, slotCount, context); //公共表达式
-			
-			
+
+			FoldNot(cfg, context); //融合not和if组合
 			
 			slotCount = RemoveBlockMove(cfg,slotCount,context); //干涉图移除move
 			
+
+
+
 
 			slotCount = OptimizeConstruction(cfg,slotCount, context);//此步骤必须放在SSA 后，因为它也是一个变量赋值源   如果是new_instance,后面是构造到变量里，优化构造的目标直接到变量里
 			
@@ -155,6 +158,8 @@ namespace juicescript.compiler.IL.Optimize
 
 
 			RemoveBarrier(cfg,context); 
+
+			RemoveGoto(cfg,context);
 
 			//着色法 槽复用
 			int maxslots = slotCount;

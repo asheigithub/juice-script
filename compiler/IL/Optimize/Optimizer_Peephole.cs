@@ -1,6 +1,7 @@
 ﻿using juicescript.ABC.INS;
 using juicescript.ABC.Locaters;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,6 +82,122 @@ namespace juicescript.compiler.IL.Optimize
 				.ToArray();
 			
 			return list.Where(i => !useless.Contains(i)).ToArray();
+		}
+
+		private static void FoldNot(ControlFlowGraph cfg, CompileContext context)
+		{
+
+
+			foreach (var block in cfg.Blocks)
+			{
+				int minindex = -1;
+
+				for (var i = 0; i < block.Instructions.Count; i++)
+				{ 
+					var ins = block.Instructions[i];
+					if (ins.INS_Code == INS_Code.logic_not)
+					{
+						if (minindex < 0) minindex = i;
+
+						INS_LogicNot logicnot = (INS_LogicNot)ins;
+
+						
+						var next = block.Instructions.Skip(i + 1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
+
+						if (next != null && next.INS_Code == INS_Code.if_false_goto || next.INS_Code == INS_Code.if_true_goto)
+						{
+							if (next.GetUse().First().index == logicnot.dst.index)
+							{ 
+								block.Instructions.RemoveAt(i);
+
+								if (next.INS_Code == INS_Code.if_false_goto)
+								{
+									INS_If_True_Goto newgoto = new INS_If_True_Goto(next.token);
+									newgoto.flag_id = ((INS_If_False_Goto)next).flag_id;
+									newgoto.condition = logicnot.src;
+
+									int index = block.Instructions.IndexOf(next);
+									block.Instructions[index] = newgoto;
+
+									i = minindex-1;
+									continue;
+								}
+								else
+								{
+									INS_If_False_Goto newgoto = new INS_If_False_Goto(next.token);
+									newgoto.flag_id = ((INS_If_True_Goto)next).flag_id;
+									newgoto.condition = logicnot.src;
+
+									int index = block.Instructions.IndexOf(next);
+									block.Instructions[index] = newgoto;
+
+
+									i = minindex-1;
+									continue;
+								}
+							}
+
+						}
+						
+
+					}
+
+				
+				}
+
+
+			}
+
+
+		}
+
+
+		private static void RemoveGoto(ControlFlowGraph cfg, CompileContext context)
+		{
+			foreach (var block in cfg.Blocks)
+			{
+				if (block.Instructions.Count >0  && block.Instructions.Last().INS_Code == INS_Code.goto_flag)
+				{
+					int flag = ((INS_Goto)block.Instructions.Last()).flag_id;
+
+					int bid = block.OriginalIndex;
+
+				lbl_redo:
+
+					var s = cfg.Blocks.OrderBy(b => b.OriginalIndex).First(b => b.OriginalIndex > bid);
+					bid = s.OriginalIndex;
+
+					int i = 0;
+					for (; i < s.Instructions.Count; i++)
+					{ 
+						var ins = s.Instructions[i];
+						if (ins.INS_Code == INS_Code.flag)
+						{
+							if (((INS_Flag)ins).flag_id == flag)
+							{
+								block.Instructions.RemoveAt(block.Instructions.Count-1);
+
+								break;
+							}
+						}
+						else if (ins.INS_Code == INS_Code.expression_barrier)
+						{
+
+						}
+						else
+						{
+							break;
+						}
+					}
+					if (i == s.Instructions.Count)
+					{
+						goto lbl_redo;
+					}
+
+				}
+
+
+			}
 		}
 
 

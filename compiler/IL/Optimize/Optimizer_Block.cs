@@ -2919,8 +2919,20 @@ namespace juicescript.compiler.IL.Optimize
 					{
 						var next = b.Instructions.Skip(i+1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
 						if (next != null && next.INS_Code == INS_Code.storeMethodVariable)
-						{ 
-							
+						{
+							var ld_arr = (INS_O_Ld_Array_Element)ins;
+							var store = (INS_Store_MethodVariable)next;
+
+							INS_O_Ld_Arr_Var ld_Arr_Var = new INS_O_Ld_Arr_Var(ld_arr.token);
+							ld_Arr_Var.name = ld_arr.name;
+							ld_Arr_Var.instance = ld_arr.instance;
+							ld_Arr_Var.refholder = ld_arr.refholder;
+							ld_Arr_Var.heap = store.heap;
+							ld_Arr_Var.dst = store.convertedloc;
+
+							b.Instructions[i] = ld_Arr_Var;
+
+							b.Instructions.Remove(next);
 						}
 
 					}
@@ -2931,6 +2943,55 @@ namespace juicescript.compiler.IL.Optimize
 			}
 			#endregion
 
+
+			#region 探测数组元素交换
+
+			//foreach (var block in cfg.Blocks)
+			//{
+			//	for (int i = 0; i < block.Instructions.Count; i++)
+			//	{
+			//		var ins = block.Instructions[i];
+			//		if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
+			//		{
+			//			INS_O_Ld_Array_Element ld_arr = (INS_O_Ld_Array_Element)ins;
+
+			//			var next1 = block.Instructions.Skip(i + 1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault() as INS_O_Store_ArrayElement;
+
+			//			if (next1 != null && next1.instance.index == ld_arr.instance.index)
+			//			{
+			//				var next2 = block.Instructions.SkipWhile(k => k != next1).Skip(1).SkipWhile(i => i.INS_Code == INS_Code.expression_barrier).FirstOrDefault() as INS_O_Store_ArrayElement;
+			//				if (next2 != null && next2.instance.index == ld_arr.instance.index)
+			//				{
+			//					if (next1.dst.index == ld_arr.dst.index || next2.name.index == ld_arr.name.index)
+			//					{
+			//						//数组元素交换part2 读取一个元素到槽，把槽里的值赋给某个元素，在把另一个槽赋给某个元素
+
+			//						INS_O_Arr_MoveAndSet arr_MoveAndSet = new INS_O_Arr_MoveAndSet(ld_arr.token);
+			//						arr_MoveAndSet.instance = ld_arr.instance;
+			//						arr_MoveAndSet.dst = ld_arr.dst;
+			//						arr_MoveAndSet.name = ld_arr.name;
+			//						arr_MoveAndSet.refholder = ld_arr.refholder;
+			//						arr_MoveAndSet.index2 = next1.name;
+			//						arr_MoveAndSet.value2 = next2.dst;
+
+
+			//						block.Instructions[i] = arr_MoveAndSet;
+
+			//						block.Instructions.Remove(next1);
+			//						block.Instructions.Remove(next2);
+			//					}
+								
+			//				}
+			//			}
+
+			//		}
+
+			//	}
+
+			//}
+
+
+			#endregion
 
 			return slotcount;
 		}

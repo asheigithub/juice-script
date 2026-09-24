@@ -294,14 +294,6 @@ namespace juicescript.ABC.INS
         store_instanceMember = 73,
 
 
-		//******短路径版本**********
-		//      short_ld_const =150,
-		//short_ld_methodVariable = 151,
-		//      short_strict_eq = 152,
-		//      short_sub = 153,
-		//      short_add = 154,
-
-
 		array_vector_initelement = 74, //array push 初始值
 
 
@@ -395,19 +387,22 @@ namespace juicescript.ABC.INS
 
         O_Var_Self_Add = 111,          //x=x+1 这种            
 
+        O_Ld_Array_To_Var = 112,       // x = a[1];
+
+        O_Array_MoveAndSet = 113, // 交换操作的后半截 var temp = perm[i]; perm[i] = perm[k - i]; perm[k - i] = temp; 的后半部分，从数组读一个值，把它赋给相同数组的另一个位置，然后给另一个位置赋一个值
 
 
 		//***矩阵，向量类***
 
-		add_Vec2_Vec2 = 112,            //二维向量相加
-		sub_Vec2_Vec2 = 113,            //二维向量相减
-		scale_Vec2 = 114,               //二维向量缩放
-		scale_Vec2_reciprocal = 115,    //二维向量缩放（1/factor） 
-		neg_pos_Vec2 = 116,             //二维向量取正或取反
+		add_Vec2_Vec2 = 182,            //二维向量相加
+		sub_Vec2_Vec2 = 183,            //二维向量相减
+		scale_Vec2 = 184,               //二维向量缩放
+		scale_Vec2_reciprocal = 185,    //二维向量缩放（1/factor） 
+		neg_pos_Vec2 = 186,             //二维向量取正或取反
 
-		mul_Mat22_Vec2 = 117,          //mat22 * vec2
-		mul_Mat22_Mat22 = 118,         //mat22 * mat22
-		add_Mat22_Mat22 = 119,         //mat22 + mat22
+		mul_Mat22_Vec2 = 187,          //mat22 * vec2
+		mul_Mat22_Mat22 = 188,         //mat22 * mat22
+		add_Mat22_Mat22 = 189,         //mat22 + mat22
 
 
 

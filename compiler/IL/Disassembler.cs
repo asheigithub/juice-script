@@ -368,6 +368,13 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_Var_Self_Add:
 					instruction = new INS_O_Var_Self_Add(token);
 					break;
+				case INS_Code.O_Ld_Array_To_Var:
+					instruction = new INS_O_Ld_Arr_Var(token);
+					break;
+
+				case INS_Code.O_Array_MoveAndSet:
+					instruction = new INS_O_Arr_MoveAndSet(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;

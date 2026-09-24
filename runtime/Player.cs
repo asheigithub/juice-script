@@ -14674,6 +14674,17 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+						case INS_Code.O_Ld_Array_To_Var:
+							{
+								O_Ld_ArrayToVar(dst_index, ref PC,
+									  ref frame, ref error);
+								if (error.raised)
+								{
+									goto flag_handle_error;
+								}
+
+								break;
+							}
 						case INS_Code.add_Vec2_Vec2:
 							{
 								//Exec_Add_Vec2_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
