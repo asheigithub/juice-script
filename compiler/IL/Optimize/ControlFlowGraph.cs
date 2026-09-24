@@ -498,7 +498,7 @@ namespace juicescript.compiler.IL.Optimize
 
 		}
 
-		internal Dictionary<int, HashSet<int>> ComputeInterferenceGraph()
+		internal Dictionary<int, HashSet<int>> ComputeInterferenceGraph(Dictionary<Instruction,HashSet<int>> liveout_withmove )
 		{
 
 			interferenceGraph = new Dictionary<int, HashSet<int>>();
@@ -509,17 +509,19 @@ namespace juicescript.compiler.IL.Optimize
 			{
 
 				var ins = block.Instructions[0];
+				
 				var defs = ins.GetDef();
 				var uses = ins.GetUse();
 
-				HashSet<int> allSlotsInInstruction = new HashSet<int>();
+				HashSet<int> defSet = new HashSet<int>();
+				HashSet<int> useSet = new HashSet<int>();
 
-				
+
 				if (defs != null)
 				{
 					foreach (var d in defs)
 					{
-						if (d.index >= 0) allSlotsInInstruction.Add(d.index);
+						if (d.index >= 0) defSet.Add(d.index);
 					}
 				}
 
@@ -528,17 +530,29 @@ namespace juicescript.compiler.IL.Optimize
 				{
 					foreach (var u in uses)
 					{
-						if (u.index >= 0) allSlotsInInstruction.Add(u.index);
+						if (u.index >= 0) useSet.Add(u.index);
 					}
 				}
 
-				foreach (var d in allSlotsInInstruction)
+				// use↔use、def↔def：同一指令内必须不同槽
+				// def↔use 不在此处无条件加边，由 Rule 2 按 LiveOut 条件化处理
+				foreach (var a in useSet)
 				{
-					foreach (var other in allSlotsInInstruction)
+					foreach (var b in useSet)
 					{
-						if (d != other)
+						if (a != b)
 						{
-							AddInterferenceEdge(d, other);
+							AddInterferenceEdge(a, b);
+						}
+					}
+				}
+				foreach (var a in defSet)
+				{
+					foreach (var b in defSet)
+					{
+						if (a != b)
+						{
+							AddInterferenceEdge(a, b);
 						}
 					}
 				}
@@ -551,10 +565,27 @@ namespace juicescript.compiler.IL.Optimize
 						foreach (var l in block.LiveIn)
 						{
 							if (l < 0) continue;
-							if (d.index != l)
+							if (d.index == l) continue;
+							// 本指令的 use 若未活出，则允许与 def 合并同槽
+							if (useSet.Contains(l) && !block.LiveOut.Contains(l)) 
+								continue;
+
+							if (liveout_withmove != null)
 							{
-								AddInterferenceEdge(d.index, l);
+								var liveout_m = liveout_withmove[ins];
+
+
+								if (useSet.Contains(l) && !liveout_m.Contains(l)) 
+									continue;
+
+								if (ins.INS_Code == INS_Code.ld_MethodVariableInitValue || ins.INS_Code == INS_Code.storeMethodVariable || ins.INS_Code == INS_Code.ld_methodVariable)
+								{
+									if (!liveout_m.Contains(l))
+										continue;
+								}
 							}
+
+							AddInterferenceEdge(d.index, l);
 						}
 					}
 				}

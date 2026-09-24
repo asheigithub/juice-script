@@ -125,6 +125,7 @@ namespace juicescript.compiler.IL.Optimize
 						}
 					}
 				}
+
 			}
 
 

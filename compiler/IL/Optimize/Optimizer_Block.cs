@@ -3797,8 +3797,9 @@ namespace juicescript.compiler.IL.Optimize
 																	||
 																	ins.INS_Code == INS_Code.storeMethodVariable
 																	));
-
-								if (def != null)
+								var use = checkpred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
+																	(ins.INS_Code == INS_Code.ld_methodVariable));
+								if (def != null )
 								{
 									Dictionary<int, int> replace = new Dictionary<int, int>();
 									replace.Add(SSA_slot + incomingVersion, SSA_slot + targetVersion);
@@ -3815,8 +3816,7 @@ namespace juicescript.compiler.IL.Optimize
 								}
 								else
 								{
-									var use = checkpred.Instructions.LastOrDefault(ins => SSA_Version.ContainsKey(ins) && SSA_Version[ins] == incomingVersion &&
-																	(ins.INS_Code == INS_Code.ld_methodVariable));
+									
 
 									if (use != null)
 									{
@@ -3832,16 +3832,16 @@ namespace juicescript.compiler.IL.Optimize
 									{
 										if (checkpred.Predecessors.Count == 1
 											&&
-											checkpred.Predecessors[0].Instructions.Last() !=null 
+											checkpred.Predecessors[0].Instructions.Last() != null
 											//&&
 											//checkpred.Predecessors[0].Instructions.Last().INS_Code != INS_Code.goto_flag
-											
+
 											&&
 											checkpred.Predecessors[0].Instructions.Last().INS_Code != INS_Code.if_false_goto
-											
+
 											&&
 											checkpred.Predecessors[0].Instructions.Last().INS_Code != INS_Code.if_true_goto
-											
+
 
 											)
 										{
@@ -4666,56 +4666,57 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static int RemoveBlockMove(ControlFlowGraph cfg,int slotCount,CompileContext context)
 		{
-			
+
 
 
 			{
 				//算法：如果move的目标没有被任何指令引用，则删除它 如果move的目标只被barrier引用，并且它是一个普通类型，则删除
 
-				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i=>i.INS_Code == INS_Code.move).Select(i=>(INS_Move)i);
-
-				var instructionType = DetectType(cfg.Method, cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(b => b.Instructions).ToList(), context);
-
-
-				foreach (var mv in all)
+				var all = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.move).Select(i => (INS_Move)i);
+				if (all.Any())
 				{
-					var use = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetUse().Contains(mv.dst)).ToArray();
-					if (use.Length == 0)
-					{
-						//后面会处理的
-					}
-					else if (use.All(u => u.INS_Code == INS_Code.expression_barrier))
-					{
-						var defs = FindStackSlotDefAt(mv.source, cfg);
+					var instructionType = DetectType(cfg.Method, cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(b => b.Instructions).ToList(), context);
 
-						if (defs.All(d => instructionType.ContainsKey(d.Item1) && instructionType[d.Item1][d.Item2].DefType == InstructionDefType.primitive))
+
+					foreach (var mv in all)
+					{
+						var use = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.GetUse().Contains(mv.dst)).ToArray();
+						if (use.Length == 0)
 						{
-							//可移除
+							//后面会处理的
+						}
+						else if (use.All(u => u.INS_Code == INS_Code.expression_barrier))
+						{
+							var defs = FindStackSlotDefAt(mv.source, cfg);
 
-							foreach (var u in use)
+							if (defs.All(d => instructionType.ContainsKey(d.Item1) && instructionType[d.Item1][d.Item2].DefType == InstructionDefType.primitive))
 							{
+								//可移除
 
-								var ul = u.GetUse().ToList();
-								ul.RemoveAll(s=>s.Equals( mv.dst ));
-								((INS_Barrier)u).uselist = ul.ToArray();
+								foreach (var u in use)
+								{
+
+									var ul = u.GetUse().ToList();
+									ul.RemoveAll(s => s.Equals(mv.dst));
+									((INS_Barrier)u).uselist = ul.ToArray();
+
+								}
+
+
 
 							}
-							
 
 
 						}
-
-
 					}
+
+
+
 				}
-
-				
-
-
 
 			}
 
-
+			if(cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.move).Select(i => (INS_Move)i).Any())
 			{
 
 				//算法：用干涉图计算 mv 的src和dst之间是不是没有干涉。如果没有，则直接使用同一个槽然后把mv删掉。
@@ -4727,9 +4728,14 @@ namespace juicescript.compiler.IL.Optimize
 				//}
 				//var interference = tmp.ComputeInterferenceGraph();
 
-				var fins = cfg.FlattenInstructions().Where(i=>i.INS_Code != INS_Code.move).ToArray();
+				var fins = cfg.FlattenInstructions();
+				//var tmp = ControlFlowGraphBuilder.Build(fins.Where(i => i.INS_Code != INS_Code.move ).ToArray(), cfg.Method).BuildTemporaryCFGForInstructionLevel();
 				var tmp = ControlFlowGraphBuilder.Build(fins, cfg.Method).BuildTemporaryCFGForInstructionLevel();
-				var interference = tmp.ComputeInterferenceGraph();
+				tmp.ComputeInterferenceGraph(null);
+				var dictliveout = tmp.Blocks.Select(b => new KeyValuePair<Instruction, HashSet<int>>(b.Instructions[0], b.LiveOut)).ToDictionary();
+
+				tmp = ControlFlowGraphBuilder.Build(fins.Where(i => i.INS_Code != INS_Code.move).ToArray(), cfg.Method).BuildTemporaryCFGForInstructionLevel();
+				var interference = tmp.ComputeInterferenceGraph(dictliveout);
 
 
 
@@ -4811,9 +4817,10 @@ namespace juicescript.compiler.IL.Optimize
 				//}
 
 
-				return slotCount;
+			
 
 			}
+			return slotCount;
 		}
 
 
