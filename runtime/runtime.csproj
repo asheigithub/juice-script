@@ -8,6 +8,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
     <Configurations>Debug;Release;ProfilePlayer</Configurations>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   

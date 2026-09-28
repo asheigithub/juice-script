@@ -19,7 +19,7 @@ namespace juicescript.runtime
 	{
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Add_Vec2_Vec2(int dst_index, ref byte* PC, ref FrameContext frame ,ref ReceiveError error
+		private unsafe byte* Exec_Add_Vec2_Vec2(int dst_index,  byte* PC, ref FrameContext frame ,ref ReceiveError error
 			)
 		{
 			//StackLocater dst;
@@ -38,7 +38,7 @@ namespace juicescript.runtime
 			if (n1.ValueType == NaNBoxing.BoxType.Null || n2.ValueType == NaNBoxing.BoxType.Null)
 			{ 
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -96,13 +96,13 @@ namespace juicescript.runtime
 				}
 			}
 
-
+			return PC;
 		}
 
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Sub_Vec2_Vec2(int dst_index,ref byte* PC,ref FrameContext frame , ref ReceiveError error
+		private unsafe byte* Exec_Sub_Vec2_Vec2(int dst_index, byte* PC,ref FrameContext frame , ref ReceiveError error
 			)
 		{
 			//StackLocater dst;
@@ -121,7 +121,7 @@ namespace juicescript.runtime
 			if (n1.ValueType == NaNBoxing.BoxType.Null || n2.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -179,13 +179,13 @@ namespace juicescript.runtime
 				}
 			}
 
-
+			return PC;
 		}
 
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Scale_Vec2(int dst_index,ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
+		private unsafe byte* Exec_Scale_Vec2(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -204,7 +204,7 @@ namespace juicescript.runtime
 			if (n1.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -261,12 +261,12 @@ namespace juicescript.runtime
 					}
 				}
 			}
-
+			return PC;
 		}
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Scale_Vec2_Reciprocal(int dst_index, ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
+		private unsafe byte* Exec_Scale_Vec2_Reciprocal(int dst_index,  byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -286,7 +286,7 @@ namespace juicescript.runtime
 			if (n1.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -343,13 +343,13 @@ namespace juicescript.runtime
 					}
 				}
 			}
-
+			return PC;
 		}
 
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Neg_Pos_Vec2(int dst_index, ref byte* PC,ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
+		private unsafe byte* Exec_Neg_Pos_Vec2(int dst_index,  byte* PC,ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -370,7 +370,7 @@ namespace juicescript.runtime
 			if (n1.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			Debug.Assert(n1.ValueType == NaNBoxing.BoxType.HeapPtr);
@@ -423,12 +423,12 @@ namespace juicescript.runtime
 					}
 				}
 			}
-
+			return PC;
 		}
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Mul_Mat22_Vec2(int dst_index,ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
+		private unsafe byte* Exec_Mul_Mat22_Vec2(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -448,7 +448,7 @@ namespace juicescript.runtime
 			if (mat.ValueType == NaNBoxing.BoxType.Null || vec.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			var m2_a = HeapShortCut[mat.HeapPtr];
@@ -499,12 +499,12 @@ namespace juicescript.runtime
 					*((float*)p + 1) = col1_y * x + col2_y * y;
 				}
 			}
-
+			return PC;
 		}
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Mul_Mat22_Mat22(int dst_index,ref byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
+		private unsafe byte* Exec_Mul_Mat22_Mat22(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -526,7 +526,7 @@ namespace juicescript.runtime
 			if (m1.ValueType == NaNBoxing.BoxType.Null || m2.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			var m2_a = HeapShortCut[m1.HeapPtr];
@@ -590,11 +590,11 @@ namespace juicescript.runtime
 
 				}
 			}
-
+			return PC;
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe void Exec_Add_Mat22_Mat22(int dst_index, ref byte* PC,ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
+		private unsafe byte* Exec_Add_Mat22_Mat22(int dst_index,  byte* PC,ref FrameContext frame, ref ReceiveError error//, Span<NaNBoxing> stackslots, int stackStPos
 			)
 		{
 			//StackLocater dst;
@@ -616,7 +616,7 @@ namespace juicescript.runtime
 			if (m1.ValueType == NaNBoxing.BoxType.Null || m2.ValueType == NaNBoxing.BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
-				return;
+				return PC;
 			}
 
 			var m2_a = HeapShortCut[m1.HeapPtr];
@@ -679,8 +679,10 @@ namespace juicescript.runtime
 				}
 			}
 
+			return PC;
+
 		}
 
-
+		
 	}
 }
