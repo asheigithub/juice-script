@@ -79,6 +79,7 @@ namespace player
 						e.Cancel = true; // 阻止程序立即退出
 					};
 
+					//Console.ReadLine();
 
 					int code = 0;
 					player.Run((ex) => {

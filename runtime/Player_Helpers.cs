@@ -34,6 +34,25 @@ namespace juicescript.runtime
 	public partial class Player
 #endif
 	{
+		unsafe ref struct HandlerResult
+		{
+			public HandlerResult(byte* pc, bool israised)
+			{
+				store = (ulong)pc | (byte)(israised ? 1 : 0);
+			}
+
+			private readonly ulong store;
+
+			public bool IsRaised => (store & 1) == 1;
+
+			public byte* PC => (byte*)((long)store & (~0));
+
+		}
+
+
+
+
+
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining)]
 		private unsafe byte* If_logicOp_Goto( byte* PC,ref FrameContext frame,byte* PC_START,ref ReceiveError error)
@@ -232,11 +251,11 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_class(int dst_index, byte* PC, 
+		private unsafe HandlerResult Ld_class(int dst_index, byte* PC, 
 			//ASMethodBody.MethodHeapConstants heap_consts ,Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, 
 			ref FrameContext frame
-			,
-			ref ReceiveError error
+			//,
+			//ref ReceiveError error
 			)
 		{
 			//StackLocater stackLocater;
@@ -253,16 +272,16 @@ namespace juicescript.runtime
 
 			//InitASClass((ASClass)instance.Type, ref error);
 			var @class = (ASClass) frame.method.Body.heapConstants.pool_values[boxing.IntValue]; //Context.link_const_class[(int)boxing.UIntValue];
-			InitScript((ASScript)@class._link_codescope.Parent.Container, ref error);
-			if (error.raised)
+			
+			if(! InitScript((ASScript)@class._link_codescope.Parent.Container, ref frame.error))
 			{
 				goto flag_handle_error;
 			}
+
 			if (@class.__instance_index__ == 0)
 			{
 				//在@class就在当前正在初始化的script中，却又没有初始化到的情况。
-				InitASClass(@class, ref error);
-				if (error.raised)
+				if(!InitASClass(@class, ref frame.error))
 				{
 					goto flag_handle_error;
 				}
@@ -270,9 +289,11 @@ namespace juicescript.runtime
 
 			frame.stackslots[dst_index].SetHeapPtr(@class.__instance_index__, (byte)RtHeapTypeKind.CLASS, (byte)HeapKindFlag.NONE);
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC,true);
 		}
 
 
@@ -6631,7 +6652,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* DELETE(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error)
+		private unsafe HandlerResult DELETE(int dst_index, byte* PC, ref FrameContext frame)
 		{
 			{
 				Span<char> frame_holdchars = stackalloc char[128];
@@ -6660,7 +6681,7 @@ namespace juicescript.runtime
 
 						if (_obj.RefInstance.ValueType != BoxType.HeapPtr)
 						{
-							RaiseReferenceError_CanNotDeleteProperty(ref error, _obj.RefInstance);
+							RaiseReferenceError_CanNotDeleteProperty(ref frame.error, _obj.RefInstance);
 							goto flag_handle_error;
 							//throw new NotImplementedException();
 						}
@@ -6736,8 +6757,8 @@ namespace juicescript.runtime
 
 										if (shape.Attribute.HasFlag(RtShape.PropertyAttribute.Configurable))
 										{
-											ChangeTranslation(prop, shape_ptr, ref error);
-											if (error.raised)
+											ChangeTranslation(prop, shape_ptr, ref frame.error);
+											if (frame.error.raised)
 											{
 												goto flag_handle_error;
 											}
@@ -6811,18 +6832,18 @@ namespace juicescript.runtime
 
 										if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 										{
-											RaiseStackOverflow(ref error);
+											RaiseStackOverflow(ref frame.error);
 											goto flag_handle_error;
 										}
 
 										var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 1);
 
 										Context.StackPosition += 1;
-										Context.GC.CheckGC(ref error);
+										Context.GC.CheckGC(ref frame.error);
 
 
-										var indexer_key = GetSaveValue(_obj.indexer_key, ref error);
-										if (error.raised)
+										var indexer_key = GetSaveValue(_obj.indexer_key, ref frame.error);
+										if (frame.error.raised)
 										{
 											Context.StackPosition -= 1;
 											goto flag_handle_error;
@@ -6839,9 +6860,9 @@ namespace juicescript.runtime
 										var mctx = new RunMethodArgs(_this,
 											_obj.RefInstance.HeapPtr, 1, (byte*)tmpArgLoc, argSpan,stackStPos + stack.index,0,false);
 										NaNBoxing result = RunMethod(((ASInstance)refObj.Type).indexer_delete,ref mctx);
-										error = mctx.error;
+										frame.error = mctx.error;
 										Context.StackPosition -= 1;
-										if (error.raised)
+										if (frame.error.raised)
 										{
 											goto flag_handle_error;
 										}
@@ -6904,9 +6925,12 @@ namespace juicescript.runtime
 
 			}
 
+			Debug.Assert(!frame.error.raised);
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC,true);
 		}
 
 
@@ -8294,10 +8318,10 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Ld_MultiName_Ref(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_MultiName_Ref(int dst_index,  byte* PC, 
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
-			ref FrameContext frame,
-			ref ReceiveError error)
+			ref FrameContext frame
+			)
 		{
 			
 	
@@ -8327,8 +8351,8 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				ReadInstanceFromStacklocater(ref error, src, stackslots, frame.stackStPos, frame.scope_ptr, out kind, out instance);
-				if (error.raised)
+				ReadInstanceFromStacklocater(ref frame.error, src, stackslots, frame.stackStPos, frame.scope_ptr, out kind, out instance);
+				if (frame.error.raised)
 				{
 					goto flag_handle_error;
 				}
@@ -8336,12 +8360,12 @@ namespace juicescript.runtime
 			switch (instance.ValueType)
 			{
 				case NaNBoxing.BoxType.Null:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_AccessNull(ref error);
+					Context.GC.CheckGC(ref frame.error);
+					RaiseTypeError_AccessNull(ref frame.error);
 					goto flag_handle_error;
 				case NaNBoxing.BoxType.Undefined:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_ATermUndefined(ref error);
+					Context.GC.CheckGC(ref frame.error);
+					RaiseTypeError_ATermUndefined(ref frame.error);
 					goto flag_handle_error;
 				case NaNBoxing.BoxType.HeapPtr:
 					as_type = GetASTypeFromValue(instance);
@@ -8408,7 +8432,7 @@ namespace juicescript.runtime
 
 			var ns_set = scope.Type._link_codescope.NamespaceSet;
 			NaNBoxing thisPtr = ((RtMethodScope)frame.methodscope).ThisPtr;
-			int code = MultiNameLSearch(ns_set, kind, as_type, name, frame.constants[const_id].HeapPtr, dst_index, stackslots, frame.stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? HeapShortCut[thisPtr.HeapPtr] : null), ref error);
+			int code = MultiNameLSearch(ns_set, kind, as_type, name, frame.constants[const_id].HeapPtr, dst_index, stackslots, frame.stackStPos, instance, check_MultiNameLSearch_issameorinherit(instance, thisPtr.ValueType == BoxType.HeapPtr ? HeapShortCut[thisPtr.HeapPtr] : null), ref frame.error);
 
 			switch (code)
 			{
@@ -8417,8 +8441,8 @@ namespace juicescript.runtime
 				case 1:
 					goto flag_handle_error;
 				case 2:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_Ambiguous(ref error, name);
+					Context.GC.CheckGC(ref frame.error);
+					RaiseTypeError_Ambiguous(ref frame.error, name);
 					goto flag_handle_error;
 				//case 3:
 				//   RaiseReferenceError_MulitNameNotFound(ref error, name, as_type.QName);
@@ -8429,10 +8453,13 @@ namespace juicescript.runtime
 #endif
 			}
 
+			Debug.Assert(!frame.error.raised);
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
-			return PC;
+			Debug.Assert(frame.error.raised);
+			return new HandlerResult(PC,true);
 
 		}
 
@@ -10253,12 +10280,12 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Ld_MulitNameL_Ref(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_MulitNameL_Ref(int dst_index,  byte* PC, 
 			//Span<NaNBoxing> constants,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
-			ref FrameContext frame,
-			ref ReceiveError error)
+			ref FrameContext frame
+			)
 		{
 			uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_MultiNameL_Ref);
 
@@ -10289,8 +10316,8 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				ReadInstanceFromStacklocater(ref error, src, stackslots, frame.stackStPos, frame.scope_ptr, out kind, out instance_box);
-				if (error.raised)
+				ReadInstanceFromStacklocater(ref frame.error, src, stackslots, frame.stackStPos, frame.scope_ptr, out kind, out instance_box);
+				if (frame.error.raised)
 				{
 					goto flag_handle_error;
 				}
@@ -10328,12 +10355,12 @@ namespace juicescript.runtime
 			switch (instance_box.ValueType)
 			{
 				case NaNBoxing.BoxType.Null:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_AccessNull(ref error);
+					Context.GC.CheckGC(ref frame.error);
+					RaiseTypeError_AccessNull(ref frame.error);
 					goto flag_handle_error;
 				case NaNBoxing.BoxType.Undefined:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_ATermUndefined(ref error);
+					Context.GC.CheckGC(ref frame.error);
+					RaiseTypeError_ATermUndefined(ref frame.error);
 					goto flag_handle_error;
 				case NaNBoxing.BoxType.HeapPtr:
 					break;
@@ -10425,7 +10452,7 @@ namespace juicescript.runtime
 
 				stackslots[stack_index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
-				return PC;
+				return new HandlerResult(PC,false);
 			}
 			else if (prop_name.ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
@@ -10582,7 +10609,7 @@ namespace juicescript.runtime
 											default:
 												Environment.FailFast("出错了，这里跑不到");
 
-												error.error.setFault();
+												frame.error.error.setFault();
 												goto flag_handle_error;
 #endif
 					}
@@ -10627,7 +10654,7 @@ namespace juicescript.runtime
 					//#endif
 
 
-					return PC;
+					return new HandlerResult(PC, false);
 
 				array_prop:;
 
@@ -10660,7 +10687,7 @@ namespace juicescript.runtime
 				{
 					if (Context.StackPosition + 1 >= Context.STACK_LENGTH)
 					{
-						RaiseStackOverflow(ref error);
+						RaiseStackOverflow(ref frame.error);
 						goto flag_handle_error;
 					}
 
@@ -10670,8 +10697,8 @@ namespace juicescript.runtime
 
 					int stpos = Context.StackPosition;
 					Context.StackPosition += 2;
-					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, frame.scope_ptr, tmp, tmp2, span, stpos, ((RtMethodScope)frame.methodscope).ThisPtr);
-					if (error.raised)
+					NaNBoxing primitive_name = ToPrimitive(ref frame.error, prop_name, HINT.h_string, frame.scope_ptr, tmp, tmp2, span, stpos, ((RtMethodScope)frame.methodscope).ThisPtr);
+					if (frame.error.raised)
 					{
 						Context.StackPosition = stpos;
 						goto flag_handle_error;
@@ -10708,7 +10735,7 @@ namespace juicescript.runtime
 
 			var ns_set = scope.Type._link_codescope.NamespaceSet;
 			NaNBoxing thisPtr = ((RtMethodScope)frame.methodscope).ThisPtr;
-			int code = MultiNameLSearch(ns_set, kind, as_type, name, 0, stack_index, stackslots, frame.stackStPos, instance_box, check_MultiNameLSearch_issameorinherit(instance_box, thisPtr.ValueType == BoxType.HeapPtr ? HeapShortCut[thisPtr.HeapPtr] : null), ref error);
+			int code = MultiNameLSearch(ns_set, kind, as_type, name, 0, stack_index, stackslots, frame.stackStPos, instance_box, check_MultiNameLSearch_issameorinherit(instance_box, thisPtr.ValueType == BoxType.HeapPtr ? HeapShortCut[thisPtr.HeapPtr] : null), ref frame.error);
 
 			switch (code)
 			{
@@ -10717,8 +10744,8 @@ namespace juicescript.runtime
 				case 1:
 					goto flag_handle_error;
 				case 2:
-					Context.GC.CheckGC(ref error);
-					RaiseTypeError_Ambiguous(ref error, name);
+					Context.GC.CheckGC(ref frame.error);
+					RaiseTypeError_Ambiguous(ref frame.error, name);
 					goto flag_handle_error;
 #if DEBUG
 				//case 3:
@@ -10728,11 +10755,12 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #endif
 			}
-
-
+			Debug.Assert(!frame.error.raised);
+			return new HandlerResult(PC, false);
 		flag_handle_error:
 			;
-			return PC;
+			Debug.Assert(frame.error.raised);
+			return new HandlerResult(PC,true);
 		}
 
 		private unsafe byte* Store_MultiName(int dst_index,  byte* PC, 

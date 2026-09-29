@@ -5258,11 +5258,11 @@ namespace juicescript.runtime
 
 		}
 
-		internal void InitScript(ASScript script, ref ReceiveError error)
+		internal bool InitScript(ASScript script, ref ReceiveError error)
 		{
 			if (script.__global_index__ != 0)
 			{
-				return;
+				return true;
 			}
 			Context.GC.CheckGC(ref error);
 			//构造script的global对象
@@ -5270,7 +5270,7 @@ namespace juicescript.runtime
 			if (index == 0)
 			{
 				RaiseOutOfMemory(ref error);
-				return;
+				return false;
 				//throw new NotImplementedException("out of memory");
 			}
 
@@ -5291,7 +5291,7 @@ namespace juicescript.runtime
 				var scope = script.codeScopes[i];
 				if (scope.Kind == CodeScopeKind.Class)
 				{
-					InitASClass((ASClass)scope.Container, ref error); if (error.raised) { return; }
+					InitASClass((ASClass)scope.Container, ref error); if (error.raised) { return false ; }
 				}
 				else if (scope.Kind == CodeScopeKind.Script)
 				{
@@ -5310,20 +5310,22 @@ namespace juicescript.runtime
 			{
 				var mctx = new RunMethodArgs(thisPtr, index, 0, null, null, -1,0,false);
 
-				RunMethod(script.Initializer, ref mctx);
+				RunMethod(script.Initializer, ref mctx);				
 				error = mctx.error;
+				return !error.raised;
+
 			}
 
 
 		}
 
 
-		internal void InitASClass(ASClass cls, ref ReceiveError error)
+		internal bool InitASClass(ASClass cls, ref ReceiveError error)
 		{
 
 			if (cls.__instance_index__ != 0)
 			{
-				return;
+				return true;
 			}
 			Context.GC.CheckGC(ref error);
 			int index = Context.GC.AllocASClassObj(cls, Context.OBJECT.Instance);
@@ -5331,7 +5333,7 @@ namespace juicescript.runtime
 			{
 				RaiseOutOfMemory(ref error); //此种情况下认为这是不可恢复的错误
 				error.error.setFault();
-				return;
+				return false;
 			}
 
 			cls.__instance_index__ = index;
@@ -5366,7 +5368,7 @@ namespace juicescript.runtime
 			if (error.raised)
 			{
 				error.error.setFault();
-				return;
+				return false;
 			}
 
 
@@ -5379,17 +5381,19 @@ namespace juicescript.runtime
 				ASScript superscript = (ASScript)super._link_codescope.Parent.Container;
 				if (superscript == cls._link_codescope.Parent.Container)
 				{
-					InitASClass(super, ref error);
-					if (error.raised)
+					if(! InitASClass(super, ref error))
+					//if (error.raised)
 					{
-						return;
+						return false;
 					}
 				}
 				else
 				{
-					InitScript(superscript, ref error);
-					if (error.raised)
-						return;
+					if (!InitScript(superscript, ref error))
+					{
+						//if (error.raised)
+						return false;
+					}
 				}
 
 			}
@@ -5401,10 +5405,10 @@ namespace juicescript.runtime
 					var t = cls.Instance.Traits[i];
 					if (t.Kind == TraitKind.Slot && t.__rt_type_class__ != null)
 					{
-						InitASClass(t.__rt_type_class__, ref error);
-						if (error.raised)
+						if(!InitASClass(t.__rt_type_class__, ref error))
+						//if (error.raised)
 						{
-							return;
+							return false;
 						}
 					}
 
@@ -5416,8 +5420,14 @@ namespace juicescript.runtime
 			{
 				if (cls.Instance._element_class != null) //如果为空则是任意类型
 				{
-					InitASClass(cls.Instance._element_class, ref error);
+					if (!InitASClass(cls.Instance._element_class, ref error))
+					{
+						return false;
+					}
 				}
+
+				return true;
+
 			}
 			else
 			{
@@ -5429,6 +5439,8 @@ namespace juicescript.runtime
 					//执行Class的初始化函数
 					RunMethod(cls.Constructor, ref mctx);
 					error = mctx.error;
+
+					return !error.raised;
 				}
 
 			}
@@ -13414,7 +13426,7 @@ namespace juicescript.runtime
 				}
 
 				//NaNBoxing global_obj = default;
-
+				
 				while (true)
 				{
 
@@ -13422,7 +13434,7 @@ namespace juicescript.runtime
 					int codeanddst = *(int*)PC; PC += 4;
 					INS_Code opcode = (INS_Code)(byte)(codeanddst & 0xff);
 					int dst_index = codeanddst >> 8;
-
+					
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_ActionStart(opcode);
 #endif
@@ -13499,8 +13511,8 @@ namespace juicescript.runtime
 						case INS_Code.ld_class:
 							{
 								//Ld_class(dst_index, ref PC, method.Body.heapConstants  ,constants, stackslots, ref error);
-								PC = Ld_class(dst_index,  PC, ref frame , ref error);
-								if (error.raised)
+								var result = Ld_class(dst_index,  PC, ref frame );PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13522,8 +13534,7 @@ namespace juicescript.runtime
 
 								ASVector vector = Context.Vectors[boxing.IntValue];
 
-								InitASClass(vector.vector_class, ref error);
-								if (error.raised)
+								if(!InitASClass(vector.vector_class, ref frame.error))
 								{
 									goto flag_handle_error;
 								}
@@ -13563,8 +13574,9 @@ namespace juicescript.runtime
 						case INS_Code.delete:
 							{
 								
-								PC = DELETE( dst_index, PC,ref frame ,  ref error);
-								if (error.raised)
+								var result = DELETE( dst_index, PC,ref frame );
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13576,8 +13588,9 @@ namespace juicescript.runtime
 								
 
 								//Ld_MultiName_Ref( dst_index, ref PC, frame.methodscope, constants, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Ld_MultiName_Ref( dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Ld_MultiName_Ref( dst_index, PC, ref frame);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13589,8 +13602,9 @@ namespace juicescript.runtime
 							{
 								
 								//Ld_MulitNameL_Ref(dst_index, ref PC, constants, stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope, ref error);
-								PC = Ld_MulitNameL_Ref(dst_index,  PC, ref frame , ref error);
-								if (error.raised)
+								var result = Ld_MulitNameL_Ref(dst_index,  PC, ref frame );
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -15227,8 +15241,10 @@ namespace juicescript.runtime
 				flag_handle_error:
 
 					{
+						Debug.Assert(frame.error.raised);
+
 						//byte* _ipc_ = PC;
-						byte* _ret = ErrorHandler(ref error, ref frame, ref exception_ctx, NO_TRY, PC_START, PC);
+						byte* _ret = ErrorHandler(ref frame, ref exception_ctx, NO_TRY, PC_START, PC);
 						PC = (byte*)(((long)_ret) & (~3));
 						int status = (int)((long)_ret & 3);
 
@@ -15268,7 +15284,7 @@ namespace juicescript.runtime
 
 
 #if DEBUG
-				if ((error.raised && error.error.ValueType != BoxType.Fault) || !error.raised)
+				if ((frame.error.raised && frame.error.error.ValueType != BoxType.Fault) || !frame.error.raised)
 				{
 
 					if (iter_ctx_index != Context.GC.IterCtxIndex)
@@ -15296,10 +15312,10 @@ namespace juicescript.runtime
 
 
 		
-		private unsafe byte* ErrorHandler(ref ReceiveError error,ref FrameContext frame, ref ExceptionContext* exception_ctx, ExceptionContext* NO_TRY,byte* PC_START, byte* PC)
+		private unsafe byte* ErrorHandler(ref FrameContext frame, ref ExceptionContext* exception_ctx, ExceptionContext* NO_TRY,byte* PC_START, byte* PC)
 		{
 			var stackslots = frame.stackslots;
-			if (error.error.ValueType != BoxType.Fault && exception_ctx != NO_TRY)
+			if ( frame.error.error.ValueType != BoxType.Fault && exception_ctx != NO_TRY)
 			{
 				if (exception_ctx->state == 0) // try中
 				{
@@ -15338,248 +15354,253 @@ namespace juicescript.runtime
 						ASTrait t = s.Type._link_codescope.Members[heapLocater.MemberIndex].trait;
 
 						bool match = false;
-						#region 捕获类型匹配
-						switch (t.TypeKind)
+
+						//block match
 						{
-							case TypeKind.Any:
-								match = true;
-								break;
-							case TypeKind.Boolean:
-								match = error.error.ValueType == NaNBoxing.BoxType.Boolean;
-								break;
-							case TypeKind.SByte:
-								match = error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
-									(error.error.ValueType == BoxType.Byte && error.error.ByteValue <= sbyte.MaxValue) ||
-									(error.error.ValueType == BoxType.Short && error.error.ShortValue <= sbyte.MaxValue && error.error.ShortValue >= sbyte.MinValue) ||
-									(error.error.ValueType == BoxType.UShort && error.error.UShortValue <= sbyte.MaxValue) ||
-									(error.error.ValueType == BoxType.Int && error.error.IntValue <= sbyte.MaxValue && error.error.IntValue >= sbyte.MinValue) ||
-									(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= sbyte.MaxValue) ||
-									(error.error.ValueType == BoxType.Float
-									&&
-									MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
-									&&
-									error.error.FloatValue >= sbyte.MinValue && error.error.FloatValue <= sbyte.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Number
-									&&
-									Math.Truncate(error.error.Number) == error.error.Number
-									&&
-									error.error.Number >= sbyte.MinValue && error.error.Number <= sbyte.MaxValue
-									)
-									;
-								break;
-							case TypeKind.Byte:
-								match = error.error.ValueType == NaNBoxing.BoxType.Byte ||
-									(error.error.ValueType == BoxType.Sbyte && error.error.SByteValue >= byte.MinValue) ||
-									(error.error.ValueType == BoxType.Short && error.error.ShortValue <= byte.MaxValue && error.error.ShortValue >= byte.MinValue) ||
-									(error.error.ValueType == BoxType.UShort && error.error.UShortValue <= byte.MaxValue) ||
-									(error.error.ValueType == BoxType.Int && error.error.IntValue <= byte.MaxValue && error.error.IntValue >= byte.MinValue) ||
-									(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= byte.MaxValue) ||
-									(error.error.ValueType == BoxType.Float
-									&&
-									MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
-									&&
-									error.error.FloatValue >= byte.MinValue && error.error.FloatValue <= byte.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Number
-									&&
-									Math.Truncate(error.error.Number) == error.error.Number
-									&&
-									error.error.Number >= byte.MinValue && error.error.Number <= byte.MaxValue
-									)
-									;
-								break;
-							case TypeKind.Short:
-								match =
-									error.error.ValueType == NaNBoxing.BoxType.Short ||
-									error.error.ValueType == BoxType.Byte ||
-									error.error.ValueType == BoxType.Sbyte ||
-									(error.error.ValueType == BoxType.UShort && error.error.UIntValue <= short.MaxValue) ||
-									(error.error.ValueType == BoxType.Int && error.error.IntValue <= short.MaxValue && error.error.IntValue >= short.MinValue) ||
-									(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= short.MaxValue) ||
-									(error.error.ValueType == BoxType.Float
-									&&
-									MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
-									&&
-									error.error.FloatValue >= short.MinValue && error.error.FloatValue <= short.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Number
-									&&
-									Math.Truncate(error.error.Number) == error.error.Number
-									&&
-									error.error.Number >= short.MinValue && error.error.Number <= short.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Number
-									&&
-									Math.Truncate(error.error.Number) == error.error.Number
-									&&
-									error.error.Number >= short.MinValue && error.error.Number <= short.MaxValue
-									)
-									;
-								break;
-							case TypeKind.UShort:
-								match = error.error.ValueType == NaNBoxing.BoxType.UShort ||
-									(error.error.ValueType == BoxType.Sbyte && error.error.SByteValue >= ushort.MinValue) ||
-									(error.error.ValueType == BoxType.Short && error.error.ShortValue >= ushort.MinValue) ||
-									(error.error.ValueType == BoxType.Byte) ||
-									(error.error.ValueType == BoxType.Int && error.error.IntValue <= ushort.MaxValue && error.error.IntValue >= ushort.MinValue) ||
-									(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= ushort.MaxValue) ||
-									(error.error.ValueType == BoxType.Float
+							var error = frame.error;
+							#region 捕获类型匹配
+							switch (t.TypeKind)
+							{
+								case TypeKind.Any:
+									match = true;
+									break;
+								case TypeKind.Boolean:
+									match = frame.error.error.ValueType == NaNBoxing.BoxType.Boolean;
+									break;
+								case TypeKind.SByte:
+									match = error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
+										(error.error.ValueType == BoxType.Byte && error.error.ByteValue <= sbyte.MaxValue) ||
+										(error.error.ValueType == BoxType.Short && error.error.ShortValue <= sbyte.MaxValue && error.error.ShortValue >= sbyte.MinValue) ||
+										(error.error.ValueType == BoxType.UShort && error.error.UShortValue <= sbyte.MaxValue) ||
+										(error.error.ValueType == BoxType.Int && error.error.IntValue <= sbyte.MaxValue && error.error.IntValue >= sbyte.MinValue) ||
+										(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= sbyte.MaxValue) ||
+										(error.error.ValueType == BoxType.Float
 										&&
 										MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
 										&&
-										error.error.FloatValue >= ushort.MinValue && error.error.FloatValue <= ushort.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Number
+										error.error.FloatValue >= sbyte.MinValue && error.error.FloatValue <= sbyte.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Number
 										&&
 										Math.Truncate(error.error.Number) == error.error.Number
 										&&
-										error.error.Number >= ushort.MinValue && error.error.Number <= ushort.MaxValue
-									)
-									;
-								break;
-							case TypeKind.Int:
-								match = error.error.ValueType == NaNBoxing.BoxType.Int ||
-									error.error.ValueType == NaNBoxing.BoxType.UShort ||
-									error.error.ValueType == NaNBoxing.BoxType.Short ||
-									error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
-									error.error.ValueType == NaNBoxing.BoxType.Byte ||
-									(error.error.ValueType == BoxType.Number
-										&&
-										Math.Truncate(error.error.Number) == error.error.Number
-										&&
-										error.error.Number >= int.MinValue && error.error.Number <= int.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Float
+										error.error.Number >= sbyte.MinValue && error.error.Number <= sbyte.MaxValue
+										)
+										;
+									break;
+								case TypeKind.Byte:
+									match = error.error.ValueType == NaNBoxing.BoxType.Byte ||
+										(error.error.ValueType == BoxType.Sbyte && error.error.SByteValue >= byte.MinValue) ||
+										(error.error.ValueType == BoxType.Short && error.error.ShortValue <= byte.MaxValue && error.error.ShortValue >= byte.MinValue) ||
+										(error.error.ValueType == BoxType.UShort && error.error.UShortValue <= byte.MaxValue) ||
+										(error.error.ValueType == BoxType.Int && error.error.IntValue <= byte.MaxValue && error.error.IntValue >= byte.MinValue) ||
+										(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= byte.MaxValue) ||
+										(error.error.ValueType == BoxType.Float
 										&&
 										MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
 										&&
-										error.error.FloatValue >= -16777216 && error.error.FloatValue <= 16777216
-									/*
-									 * 32 位浮点数（单精度浮点数，IEEE 754 标准）能精确表达的整数范围是 -2²⁴ 到 2²⁴（即 -16777216 到 16777216）。
-									 * */
-									)
-
-									;
-								break;
-							case TypeKind.Uint:
-								match = error.error.ValueType == NaNBoxing.BoxType.Uint ||
-									error.error.ValueType == NaNBoxing.BoxType.UShort ||
-									error.error.ValueType == NaNBoxing.BoxType.Byte ||
-									(error.error.ValueType == BoxType.Int && error.error.IntValue >= 0) ||
-									(error.error.ValueType == BoxType.Short && error.error.ShortValue >= 0) ||
-									(error.error.ValueType == BoxType.Sbyte && error.error.SByteValue >= 0) ||
-									(error.error.ValueType == BoxType.Number
-									&&
-									Math.Truncate(error.error.Number) == error.error.Number
-									&&
-									error.error.Number >= uint.MinValue && error.error.Number <= uint.MaxValue
-									)
-									||
-									(error.error.ValueType == BoxType.Float
-									&&
-									MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
-									&&
-									error.error.FloatValue >= 0 && error.error.FloatValue <= 16777216
-									/*
-									 * 32 位浮点数（单精度浮点数，IEEE 754 标准）能精确表达的整数范围是 -2²⁴ 到 2²⁴（即 -16777216 到 16777216）。
-									 * */
-									)
-									;
-
-								break;
-							case TypeKind.Float:
-								{
-
-									match = error.error.ValueType == NaNBoxing.BoxType.Float ||
+										error.error.FloatValue >= byte.MinValue && error.error.FloatValue <= byte.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Number
+										&&
+										Math.Truncate(error.error.Number) == error.error.Number
+										&&
+										error.error.Number >= byte.MinValue && error.error.Number <= byte.MaxValue
+										)
+										;
+									break;
+								case TypeKind.Short:
+									match =
+										error.error.ValueType == NaNBoxing.BoxType.Short ||
+										error.error.ValueType == BoxType.Byte ||
+										error.error.ValueType == BoxType.Sbyte ||
+										(error.error.ValueType == BoxType.UShort && error.error.UIntValue <= short.MaxValue) ||
+										(error.error.ValueType == BoxType.Int && error.error.IntValue <= short.MaxValue && error.error.IntValue >= short.MinValue) ||
+										(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= short.MaxValue) ||
+										(error.error.ValueType == BoxType.Float
+										&&
+										MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
+										&&
+										error.error.FloatValue >= short.MinValue && error.error.FloatValue <= short.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Number
+										&&
+										Math.Truncate(error.error.Number) == error.error.Number
+										&&
+										error.error.Number >= short.MinValue && error.error.Number <= short.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Number
+										&&
+										Math.Truncate(error.error.Number) == error.error.Number
+										&&
+										error.error.Number >= short.MinValue && error.error.Number <= short.MaxValue
+										)
+										;
+									break;
+								case TypeKind.UShort:
+									match = error.error.ValueType == NaNBoxing.BoxType.UShort ||
+										(error.error.ValueType == BoxType.Sbyte && error.error.SByteValue >= ushort.MinValue) ||
+										(error.error.ValueType == BoxType.Short && error.error.ShortValue >= ushort.MinValue) ||
+										(error.error.ValueType == BoxType.Byte) ||
+										(error.error.ValueType == BoxType.Int && error.error.IntValue <= ushort.MaxValue && error.error.IntValue >= ushort.MinValue) ||
+										(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= ushort.MaxValue) ||
+										(error.error.ValueType == BoxType.Float
+											&&
+											MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
+											&&
+											error.error.FloatValue >= ushort.MinValue && error.error.FloatValue <= ushort.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Number
+											&&
+											Math.Truncate(error.error.Number) == error.error.Number
+											&&
+											error.error.Number >= ushort.MinValue && error.error.Number <= ushort.MaxValue
+										)
+										;
+									break;
+								case TypeKind.Int:
+									match = error.error.ValueType == NaNBoxing.BoxType.Int ||
 										error.error.ValueType == NaNBoxing.BoxType.UShort ||
 										error.error.ValueType == NaNBoxing.BoxType.Short ||
 										error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
 										error.error.ValueType == NaNBoxing.BoxType.Byte ||
-										(error.error.ValueType == BoxType.Int && error.error.IntValue >= -16777216 && error.error.IntValue <= 16777216) ||
-										(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= 16777216) ||
-										(error.error.ValueType == BoxType.Number && Extensions.CanConvertToFloatLossless(error.error.Number))
+										(error.error.ValueType == BoxType.Number
+											&&
+											Math.Truncate(error.error.Number) == error.error.Number
+											&&
+											error.error.Number >= int.MinValue && error.error.Number <= int.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Float
+											&&
+											MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
+											&&
+											error.error.FloatValue >= -16777216 && error.error.FloatValue <= 16777216
+										/*
+										 * 32 位浮点数（单精度浮点数，IEEE 754 标准）能精确表达的整数范围是 -2²⁴ 到 2²⁴（即 -16777216 到 16777216）。
+										 * */
+										)
+
 										;
 									break;
-								}
-							case TypeKind.Number:
-								match =
-									error.error.ValueType == NaNBoxing.BoxType.Number ||
-									error.error.ValueType == NaNBoxing.BoxType.Int ||
-									error.error.ValueType == NaNBoxing.BoxType.Uint ||
-									error.error.ValueType == NaNBoxing.BoxType.Float ||
-									error.error.ValueType == NaNBoxing.BoxType.UShort ||
-									error.error.ValueType == NaNBoxing.BoxType.Short ||
-									error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
-									error.error.ValueType == NaNBoxing.BoxType.Byte
-									;
-								break;
-							case TypeKind.Fun_Void:
-							case TypeKind.TraitDataReference:
-							case TypeKind.RTQName_MultiName_DataReference:
-							case TypeKind.CParseNS_Traits:
-							case TypeKind.RTQNameRTQNameL_N:
-							case TypeKind.SearchNameSpaceFromImports:
-							case TypeKind.Unknown:
-							case TypeKind.Super:
-							case TypeKind.Null:
-								break;
-							case TypeKind.Object:
-								//捕获非null,非undefined的任意对象
-								match = (error.error.ValueType != NaNBoxing.BoxType.Undefined && error.error.ValueType != NaNBoxing.BoxType.Null);
-								break;
-							case TypeKind.Class:
-								match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.CLASS);
-								break;
-							case TypeKind.String:
-								match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.STRING);
-								break;
-							case TypeKind.Function:
-								match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.CLOSURE);
-								break;
-							case TypeKind.Array:
-								match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.ARRAY);
-								break;
-							case TypeKind.Vector:
-								match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.VECTOR);
-								break;
-							case TypeKind.Namespace:
-								match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.NAMESPACE);
-								break;
-							default:
-								var check_type = t.__rt_type_class__; //Context.dictTypes[(ulong)c_type];
-								if (error.error.ValueType == NaNBoxing.BoxType.HeapPtr)
-								{
+								case TypeKind.Uint:
+									match = error.error.ValueType == NaNBoxing.BoxType.Uint ||
+										error.error.ValueType == NaNBoxing.BoxType.UShort ||
+										error.error.ValueType == NaNBoxing.BoxType.Byte ||
+										(error.error.ValueType == BoxType.Int && error.error.IntValue >= 0) ||
+										(error.error.ValueType == BoxType.Short && error.error.ShortValue >= 0) ||
+										(error.error.ValueType == BoxType.Sbyte && error.error.SByteValue >= 0) ||
+										(error.error.ValueType == BoxType.Number
+										&&
+										Math.Truncate(error.error.Number) == error.error.Number
+										&&
+										error.error.Number >= uint.MinValue && error.error.Number <= uint.MaxValue
+										)
+										||
+										(error.error.ValueType == BoxType.Float
+										&&
+										MathF.Truncate(error.error.FloatValue) == error.error.FloatValue
+										&&
+										error.error.FloatValue >= 0 && error.error.FloatValue <= 16777216
+										/*
+										 * 32 位浮点数（单精度浮点数，IEEE 754 标准）能精确表达的整数范围是 -2²⁴ 到 2²⁴（即 -16777216 到 16777216）。
+										 * */
+										)
+										;
 
-									if (error.error.HeapKind == (byte)RtHeapTypeKind.INSTANCE) //只有对象实例才可能满足条件。
+									break;
+								case TypeKind.Float:
 									{
-										var obj = HeapShortCut[error.error.HeapPtr];
-										ASClass valuetype = ((ASInstance)obj.Type)._link_codescope.TypeLayout.ASType;
-										if (valuetype.Type_identifier == (ulong)t.TypeKind)
+
+										match = error.error.ValueType == NaNBoxing.BoxType.Float ||
+											error.error.ValueType == NaNBoxing.BoxType.UShort ||
+											error.error.ValueType == NaNBoxing.BoxType.Short ||
+											error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
+											error.error.ValueType == NaNBoxing.BoxType.Byte ||
+											(error.error.ValueType == BoxType.Int && error.error.IntValue >= -16777216 && error.error.IntValue <= 16777216) ||
+											(error.error.ValueType == BoxType.Uint && error.error.UIntValue <= 16777216) ||
+											(error.error.ValueType == BoxType.Number && Extensions.CanConvertToFloatLossless(error.error.Number))
+											;
+										break;
+									}
+								case TypeKind.Number:
+									match =
+										error.error.ValueType == NaNBoxing.BoxType.Number ||
+										error.error.ValueType == NaNBoxing.BoxType.Int ||
+										error.error.ValueType == NaNBoxing.BoxType.Uint ||
+										error.error.ValueType == NaNBoxing.BoxType.Float ||
+										error.error.ValueType == NaNBoxing.BoxType.UShort ||
+										error.error.ValueType == NaNBoxing.BoxType.Short ||
+										error.error.ValueType == NaNBoxing.BoxType.Sbyte ||
+										error.error.ValueType == NaNBoxing.BoxType.Byte
+										;
+									break;
+								case TypeKind.Fun_Void:
+								case TypeKind.TraitDataReference:
+								case TypeKind.RTQName_MultiName_DataReference:
+								case TypeKind.CParseNS_Traits:
+								case TypeKind.RTQNameRTQNameL_N:
+								case TypeKind.SearchNameSpaceFromImports:
+								case TypeKind.Unknown:
+								case TypeKind.Super:
+								case TypeKind.Null:
+									break;
+								case TypeKind.Object:
+									//捕获非null,非undefined的任意对象
+									match = (error.error.ValueType != NaNBoxing.BoxType.Undefined && error.error.ValueType != NaNBoxing.BoxType.Null);
+									break;
+								case TypeKind.Class:
+									match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.CLASS);
+									break;
+								case TypeKind.String:
+									match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.STRING);
+									break;
+								case TypeKind.Function:
+									match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.CLOSURE);
+									break;
+								case TypeKind.Array:
+									match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.ARRAY);
+									break;
+								case TypeKind.Vector:
+									match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.VECTOR);
+									break;
+								case TypeKind.Namespace:
+									match = (error.error.ValueType == NaNBoxing.BoxType.HeapPtr && error.error.HeapKind == (byte)RtHeapTypeKind.NAMESPACE);
+									break;
+								default:
+									var check_type = t.__rt_type_class__; //Context.dictTypes[(ulong)c_type];
+									if (error.error.ValueType == NaNBoxing.BoxType.HeapPtr)
+									{
+
+										if (error.error.HeapKind == (byte)RtHeapTypeKind.INSTANCE) //只有对象实例才可能满足条件。
 										{
-											match = true;
-											break;
-										}
-										if (valuetype.Instance.IsExtend(check_type.Instance))
-										{
-											match = true;
-											break;
-										}
-										if (valuetype.Instance.IsImplements(check_type.Instance))
-										{
-											match = true;
+											var obj = HeapShortCut[error.error.HeapPtr];
+											ASClass valuetype = ((ASInstance)obj.Type)._link_codescope.TypeLayout.ASType;
+											if (valuetype.Type_identifier == (ulong)t.TypeKind)
+											{
+												match = true;
+												break;
+											}
+											if (valuetype.Instance.IsExtend(check_type.Instance))
+											{
+												match = true;
+												break;
+											}
+											if (valuetype.Instance.IsImplements(check_type.Instance))
+											{
+												match = true;
+											}
 										}
 									}
-								}
-								break;
+									break;
+							}
+							#endregion
 						}
-						#endregion
 
 						if (match)
 						{
@@ -15589,7 +15610,7 @@ namespace juicescript.runtime
 							NaNBoxing value = default;
 
 							ReceiveError store_err = default;
-							ConvertValueType(ref store_err, error.error, t.TypeKind, t.__rt_type_class__, ref value);
+							ConvertValueType(ref store_err, frame.error.error, t.TypeKind, t.__rt_type_class__, ref value);
 #if DEBUG
 							if (store_err.raised)
 							{
@@ -15599,7 +15620,7 @@ namespace juicescript.runtime
 							PrepareSaveMethodScope(heap, heapLocater, ref value, frame.scope_ptr, ref store_err);
 							if (store_err.raised)
 							{
-								error.error.setFault();
+								frame.error.error.setFault();
 
 								return (byte*)((long)PC | 2);
 
@@ -15608,8 +15629,8 @@ namespace juicescript.runtime
 							}
 							heap.SetSlot(value, heapLocater.MemberIndex);
 
-							error.raised = false;
-							error.error = default;
+							frame.error.raised = false;
+							frame.error.error = default;
 							Context.errorStack.Clear();
 
 							//进入catch块
@@ -15621,20 +15642,20 @@ namespace juicescript.runtime
 					}
 
 					//未找到,进入finally块。	
-					if (error.error.ValueType != BoxType.HeapPtr)
+					if (frame.error.error.ValueType != BoxType.HeapPtr)
 					{
-						stackslots[exception_ctx->hold_error] = error.error; //异常信息暂存入hold_error;
+						stackslots[exception_ctx->hold_error] = frame.error.error; //异常信息暂存入hold_error;
 					}
 					else
 					{
 						StoreReturnSlot(ref stackslots[exception_ctx->hold_error], frame.stackStPos, frame.stackStPos + exception_ctx->hold_error, frame.calleelastPos,
-							 frame.scope_ptr, (RtMethodScope)frame.methodscope, error.error, ref error,
+							 frame.scope_ptr, (RtMethodScope)frame.methodscope, frame.error.error, ref frame.error,
 							false //在本栈帧区域，不用考虑上级引用
 							);
 					}
 
-					error.raised = false;
-					error.error = default;
+					frame.error.raised = false;
+					frame.error.error = default;
 
 					//跳转到finally
 					PC = exception_ctx->FINALLY_PTR;
@@ -15645,20 +15666,20 @@ namespace juicescript.runtime
 				else if (exception_ctx->state == 1)
 				{
 					//无法catch,跳转到finally.
-					if (error.error.ValueType != BoxType.HeapPtr)
+					if (frame.error.error.ValueType != BoxType.HeapPtr)
 					{
-						stackslots[exception_ctx->hold_error] = error.error; //异常信息暂存入hold_error;
+						stackslots[exception_ctx->hold_error] = frame.error.error; //异常信息暂存入hold_error;
 					}
 					else
 					{
 						StoreReturnSlot(ref stackslots[exception_ctx->hold_error], frame.stackStPos, frame.stackStPos + exception_ctx->hold_error, frame.calleelastPos, frame.scope_ptr,
-							(RtMethodScope)frame.methodscope, error.error, ref error,
+							(RtMethodScope)frame.methodscope, frame.error.error, ref frame.error,
 							false //在本栈帧区域，不用考虑上级引用
 							);
 					}
 
-					error.raised = false;
-					error.error = default;
+					frame.error.raised = false;
+					frame.error.error = default;
 
 					//跳转到finally
 					PC = exception_ctx->FINALLY_PTR;
