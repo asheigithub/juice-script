@@ -294,7 +294,8 @@ namespace juicescript.runtime
 #if DEBUG
 					throw new InvalidOperationException();
 #else
-					Environment.FailFast("出错了，这里跑不到"); return;
+					//Environment.FailFast("出错了，这里跑不到"); 
+                    return;
 #endif
 				case ABC.TypeKind.Any:
 				case ABC.TypeKind.Object:

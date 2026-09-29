@@ -54,7 +54,7 @@ namespace juicescript
 
         public const ulong UNDEFINED =          0xFFF8010000000000;
         public const ulong NULL =               0xFFF8020000000000;
-        public const ulong TRUE =               0xFFF8030000000001;
+        public const ulong TRUE =               0xFFF8040000000001;
         public const ulong FALSE =              0xFFF8040000000000;
         public const ulong TAG_INT =            0xFFF8050000000000;
         public const ulong TAG_UINT =           0xFFF8060000000000;
@@ -104,7 +104,7 @@ namespace juicescript
             HeapPtr = (uint)(TAG_HEAP_POINTER >> 40) & 0xF,
             LocalString = (uint)(TAG_LOCAL_STRING >> 40) & 0xF,
 
-            Fault = 0xE0
+            Fault = 0x0E
         }
 
 
@@ -965,7 +965,7 @@ namespace juicescript
                         return 0.0;// BoxType.Null;
 					case 3:
 					case 4:
-                        return v.Boolean ? 1.0 : 0.0; //BoxType.Boolean;
+						return v.store & 0xff; //v.Boolean ? 1.0 : 0.0; //BoxType.Boolean;
 					case 5:
                         return v.IntValue;// BoxType.Int;
 					case 6:
@@ -1014,7 +1014,7 @@ namespace juicescript
 						return 0.0f;// BoxType.Null;
 					case 3:
 					case 4:
-						return v.Boolean ? 1.0f : 0.0f; //BoxType.Boolean;
+						return v.store & 0xff; //v.Boolean ? 1.0f : 0.0f; //BoxType.Boolean;
 					case 5:
 						return v.IntValue;// BoxType.Int;
 					case 6:
@@ -1061,7 +1061,7 @@ namespace juicescript
                     
                     case 3:
                     case 4:
-                        return v.Boolean ? 1 : 0;
+						return v.IntValue; //v.Boolean ? 1 : 0;
                     case 5:
                         return v.IntValue;
                     case 7:
@@ -1099,19 +1099,26 @@ namespace juicescript
                 }
                 else
                 {
-                    uint signature = (uint)(store >> 40) & 0xF;
-                    if (signature == 3)
-                    {
-                        return BoxType.Boolean;
-                    }
-                    else if (signature < 14)
-                    {
-                        return (BoxType)signature;
-                    }
-                    else
-                    {
-                        return BoxType.Fault;
-                    }
+
+					Debug.Assert( ((store >> 40) & 0xFF)<= (byte)BoxType.Fault );
+					Debug.Assert( ((store >> 40) & 0xFF) != 3 );
+
+					return (BoxType)((store >> 40) & 0xFF);
+
+
+                    //uint signature = (uint)(store >> 40) & 0xF;
+                    //if (signature == 3)
+                    //{
+                    //    return BoxType.Boolean;
+                    //}
+                    //else if (signature < 14)
+                    //{
+                    //    return (BoxType)signature;
+                    //}
+                    //else
+                    //{
+                    //    return BoxType.Fault;
+                    //}
                     //switch (signature)
                     //{
                     //    case 1:
