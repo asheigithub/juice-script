@@ -5434,7 +5434,7 @@ namespace juicescript.runtime
 
 		}
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe int LoadStackLocater(ref byte* P)
 		{
 			
@@ -5451,7 +5451,7 @@ namespace juicescript.runtime
 			//*_p = *(*P)++;
 		}
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe int LoadInt32(ref byte* P)
 		{
 			int value = *(int*)(P); (P) += 4;
@@ -5463,7 +5463,7 @@ namespace juicescript.runtime
 			//*_p = *(*P)++;
 		}
 
-		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe uint LoadUInt(ref byte* P)
 		{
 			uint value = *(uint*)(P); (P) += 4;
@@ -13285,20 +13285,23 @@ namespace juicescript.runtime
 		{
 
 			internal int catch_count;
+			internal int state;//!<-暂定，0 - 表示在 try 中， 1-表示在catch中, 2表示在finally中。
+			internal int hold_error;
+
 			internal byte* CATCH;
 			internal byte* FINALLY_PTR;
 			internal byte* FINALLY_EXIT_PTR;
 
-			internal int state;//!<-暂定，0 - 表示在 try 中， 1-表示在catch中, 2表示在finally中。
+			
 			internal byte* FINALLY_JUMPTO_PTR;
 
-			internal int hold_error;
+			
 			//internal ScopeHeapLocater catched_error;
 		}
 
 		internal interface IResume_State
 		{
-			unsafe void Resume(ExceptionContext* e_ctx, ExceptionContext** current_e_ctx, byte* PC_START, byte** PC, Span<NaNBoxing> stackslots);
+			unsafe byte* Resume(ExceptionContext* e_ctx, ExceptionContext** current_e_ctx, byte* PC_START, byte* PC, Span<NaNBoxing> stackslots);
 
 			unsafe void End();
 
@@ -13326,6 +13329,7 @@ namespace juicescript.runtime
 			public int scope_ptr;
 
 			public NaNBoxing* constants;
+			
 		}
 
 
@@ -13370,9 +13374,9 @@ namespace juicescript.runtime
 
 				if (frame.resume_state != null)
 				{
-					byte* _ipc_ = PC;
-					frame.resume_state.Resume(exception_ctx_stack, &exception_ctx, PC_START, &_ipc_, stackslots);
-					PC = _ipc_;
+					//byte* _ipc_ = PC;
+					PC = frame.resume_state.Resume(exception_ctx_stack, &exception_ctx, PC_START, PC, stackslots);
+					//PC = _ipc_;
 
 					if (frame.resume_state.IsCallClose()) //是否被要求关闭
 					{
@@ -15214,33 +15218,38 @@ namespace juicescript.runtime
 
 				flag_handle_error:
 
-					byte* _ipc_ = PC;
-					int status = ErrorHandler(ref error, ref frame, ref exception_ctx, NO_TRY, PC_START, ref _ipc_);
-					PC = _ipc_;
+					{
+						//byte* _ipc_ = PC;
+						byte* _ret = ErrorHandler(ref error, ref frame, ref exception_ctx, NO_TRY, PC_START, PC);
+						PC = (byte*)(((long)_ret) & (~3));
+						int status = (int)((long)_ret & 3);
+
+						//PC = _ipc_;
 #if PROFILEPLAYER
 					InstructionProfiler.Profile_ActionEnd(opcode);
 #endif
-					if (status == 0)
-					{
-						continue;
-					}
-					else if (status == 1)
-					{
-						goto flag_hasintocatch;
-					}
-					else if (status == 2)
-					{
-						goto flag_end;
-					}
-					else if (status == 3)
-					{
-						goto flag_handle_error;
-					}
-					else
-					{
-						break;
-					}
+						if (status == 0)
+						{
+							continue;
+						}
+						else if (status == 1)
+						{
+							goto flag_hasintocatch;
+						}
+						else if (status == 2)
+						{
+							goto flag_end;
+						}
+						else if (status == 3)
+						{
+							goto flag_handle_error;
+						}
+						else
+						{
+							break;
+						}
 
+					}
 				flag_hasintocatch:
 					continue;
 				}
@@ -15279,7 +15288,7 @@ namespace juicescript.runtime
 
 
 		
-		private unsafe int ErrorHandler(ref ReceiveError error,ref FrameContext frame, ref ExceptionContext* exception_ctx, ExceptionContext* NO_TRY,byte* PC_START,ref byte* PC)
+		private unsafe byte* ErrorHandler(ref ReceiveError error,ref FrameContext frame, ref ExceptionContext* exception_ctx, ExceptionContext* NO_TRY,byte* PC_START, byte* PC)
 		{
 			var stackslots = frame.stackslots;
 			if (error.error.ValueType != BoxType.Fault && exception_ctx != NO_TRY)
@@ -15584,7 +15593,9 @@ namespace juicescript.runtime
 							{
 								error.error.setFault();
 
-								return 2;
+								return (byte*)((long)PC | 2);
+
+								//return 2;
 								//goto flag_end;
 							}
 							heap.SetSlot(value, heapLocater.MemberIndex);
@@ -15596,7 +15607,8 @@ namespace juicescript.runtime
 							//进入catch块
 							PC = PC_START + catch_enter_p;
 							//goto flag_hasintocatch;
-							return 1;
+							//return 1;
+							return (byte*)((long)PC | 1);
 						}
 					}
 
@@ -15619,7 +15631,8 @@ namespace juicescript.runtime
 					//跳转到finally
 					PC = exception_ctx->FINALLY_PTR;
 					//continue;
-					return 0;
+					//return 0;
+					return PC;
 				}
 				else if (exception_ctx->state == 1)
 				{
@@ -15642,17 +15655,20 @@ namespace juicescript.runtime
 					//跳转到finally
 					PC = exception_ctx->FINALLY_PTR;
 					//continue;
-					return 0;
+					//return 0;
+					return PC;
 				}
 				else
 				{
 					exception_ctx--; //跳出本层try
-					//goto flag_handle_error;
-					return 3;
+									 //goto flag_handle_error;
+									 //return 3;
+					return (byte*)((long)PC | 3);
 				}
 			}
 
-			return 2;
+			//return 2;
+			return (byte*)((long)PC | 2);
 		}
 
 

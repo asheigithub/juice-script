@@ -467,7 +467,8 @@ namespace juicescript
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 						}
@@ -504,7 +505,8 @@ namespace juicescript
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 							break;
@@ -538,7 +540,8 @@ namespace juicescript
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 							break;
@@ -581,7 +584,8 @@ namespace juicescript
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 						}
@@ -619,7 +623,8 @@ namespace juicescript
 #if DEBUG
 					                throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 						}
@@ -782,7 +787,8 @@ namespace juicescript
 #if DEBUG
 									throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到"); 
+									return default;
 #endif
 							}
 						}
@@ -816,7 +822,8 @@ namespace juicescript
 #if DEBUG
 									throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到"); 
+									return default;
 #endif
 							}
 						}
@@ -858,7 +865,8 @@ namespace juicescript
 #if DEBUG
 									throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 						}
@@ -892,7 +900,8 @@ namespace juicescript
 #if DEBUG
 									throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到");
+									return default;
 #endif
 							}
 						}
@@ -920,7 +929,8 @@ namespace juicescript
 #if DEBUG
 									throw new InvalidOperationException();
 #else
-									Environment.FailFast("出错了，这里跑不到"); return default;
+									//Environment.FailFast("出错了，这里跑不到"); 
+									return default;
 #endif
 							}
 						}
@@ -929,7 +939,8 @@ namespace juicescript
 #if DEBUG
 						throw new InvalidOperationException();
 #else
-						Environment.FailFast("出错了，这里跑不到"); return default;
+						//Environment.FailFast("出错了，这里跑不到");
+						return default;
 #endif
 				}
 
@@ -1077,7 +1088,7 @@ namespace juicescript
                         throw new InvalidOperationException();
 #else
                     default:
-						Environment.FailFast("出错了，这里跑不到");
+						//Environment.FailFast("出错了，这里跑不到");
 						return 0;
 #endif
                 }

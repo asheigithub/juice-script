@@ -2517,12 +2517,7 @@ namespace juicescript.runtime.buildin
 
 		static class SortHelper
 		{
-			class SortException : Exception
-			{
-				public ReceiveError raisedErr;
-			}
-
-
+			
 			public static void QuickSort(RtMethodScope scope, int scope_ptr, Context context, ref ReceiveError error, NaNBoxing sortBehavior)
 			{
 

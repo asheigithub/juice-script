@@ -1908,11 +1908,11 @@ namespace juicescript.runtime.buildin
 
 			}
 
-			public unsafe void Resume(ExceptionContext* e_ctx, ExceptionContext** current_e_ctx, byte* PC_START, byte** PC, Span<NaNBoxing> stackslots)
+			public unsafe byte* Resume(ExceptionContext* e_ctx, ExceptionContext** current_e_ctx, byte* PC_START, byte* PC, Span<NaNBoxing> stackslots)
 			{
 				if (state == 0)
-					return;
-				*PC = PC_START + RESUME_PC;
+					return PC;
+				PC = PC_START + RESUME_PC;
 
 				for (int i = 1; i < exception_ctx_at + 1; i++)
 				{
@@ -1923,7 +1923,7 @@ namespace juicescript.runtime.buildin
 				}
 
 				*current_e_ctx = e_ctx + exception_ctx_at;
-
+				return PC;
 			}
 		}
 

@@ -234,8 +234,10 @@ namespace juicescript.runtime
 
 		private unsafe byte* Ld_class(int dst_index, byte* PC, 
 			//ASMethodBody.MethodHeapConstants heap_consts ,Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, 
-			ref FrameContext frame,
-			ref ReceiveError error)
+			ref FrameContext frame
+			,
+			ref ReceiveError error
+			)
 		{
 			//StackLocater stackLocater;
 			//stackLocater.index = dst_index;
