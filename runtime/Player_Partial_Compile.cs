@@ -285,7 +285,8 @@ namespace juicescript.runtime
 							var mctx = new RunMethodArgs( nullP, ((ASClass)c._link_codescope.Container).__instance_index__, //null, 
 								0, null, Context.StackSlots, -1, 0,false);
 
-							RunMethod(method,ref mctx, ref error);
+							RunMethod(method,ref mctx);
+							error = mctx.error;
 						}
 						finally
 						{
@@ -317,7 +318,8 @@ namespace juicescript.runtime
 						{
 							var mctx = new RunMethodArgs(thisP, ((ASScript)c._link_codescope.Container).__global_index__, //null, 
 								0, null, Context.StackSlots,  -1,0,false);
-							RunMethod(method, ref mctx, ref error);
+							RunMethod(method, ref mctx);
+							error = mctx.error;
 						}
 						finally
 						{
@@ -386,7 +388,8 @@ namespace juicescript.runtime
 							var mctx = new RunMethodArgs(thisP, instancePtr, //@type.Instance, 
 								0, null, Context.StackSlots,  -1,9,false);
 							
-							RunMethod(method,ref mctx,ref error );
+							RunMethod(method,ref mctx );
+							error = mctx.error;
 							if (error.raised)
 							{
 								throw new EvalConstException();
@@ -535,13 +538,12 @@ namespace juicescript.runtime
 								frame.resume_state = null;
 								frame.stackStPos = Context.StackPosition;
 								frame.returnSlotIndex = -1;
-
-
+								
 								//Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
 								//	slots, Context.StackPosition, ref error, -1 , Context.StackPosition-1,null);
 
-								Execute(ref frame, ref error);
-
+								Execute(ref frame);
+								error = frame.error;
 							}
 							finally
 							{
@@ -617,7 +619,8 @@ namespace juicescript.runtime
 								//Execute(ref info,scopeinstance, run_methodscope,// is_closure ? scopeinstance.Type : null, 
 								//	slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
 
-								Execute(ref frame, ref error);
+								Execute(ref frame);
+								error = frame.error;
 							}
 							finally
 							{
@@ -741,8 +744,8 @@ namespace juicescript.runtime
 								//	//,is_closure ? scopeinstance.Type : scope.TypeLayout.ASType.Instance
 								//	, slots, Context.StackPosition,  ref error, -1, Context.StackPosition - 1,null);
 
-								Execute(ref frame, ref error);
-
+								Execute(ref frame);
+								error = frame.error;
 							}
 							finally
 							{
@@ -991,7 +994,8 @@ namespace juicescript.runtime
 						//Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null,
 						//	slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
 
-						Execute(ref frame, ref error);
+						Execute(ref frame);
+						error = frame.error;
 
 						Context.StackPosition -= slots.Length;
 						if (error.raised)
@@ -1042,8 +1046,8 @@ namespace juicescript.runtime
 						//Execute(ref info, scopeinstance, run_methodscope, //is_closure ? scopeinstance.Type : null, 
 						//	slots, Context.StackPosition,ref error, -1, Context.StackPosition - 1,null);
 
-						Execute(ref frame, ref error);
-
+						Execute(ref frame);
+						error = frame.error;
 
 						Context.StackPosition -= slots.Length;
 
@@ -1157,8 +1161,8 @@ namespace juicescript.runtime
 						//	//scope.Container
 						//	, slots, Context.StackPosition, ref error, -1, Context.StackPosition - 1,null);
 
-						Execute(ref frame, ref error);
-
+						Execute(ref frame);
+						error = frame.error;
 
 						Context.StackPosition -= slots.Length;
 

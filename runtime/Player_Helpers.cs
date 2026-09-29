@@ -342,7 +342,8 @@ namespace juicescript.runtime
 						unsafe
 						{
 							var mctx = new RunMethodArgs( cls, frame.scope_ptr, 1, (byte*)&args, slots,  frame.stackStPos + dst_index,0,false);
-							RunMethod(posmethod, ref mctx, ref error);
+							RunMethod(posmethod, ref mctx);
+							error = mctx.error;
 						}
 						Context.StackPosition -= 1;
 						if (error.raised)
@@ -472,7 +473,8 @@ namespace juicescript.runtime
 						unsafe
 						{
 							var mctx = new RunMethodArgs(cls, frame.scope_ptr, 1, (byte*)&args, slots, frame.stackStPos + dst_index,0,false);
-							RunMethod(negmethod,ref mctx, ref error);
+							RunMethod(negmethod,ref mctx);
+							error = mctx.error;
 						}
 						Context.StackPosition -= 1;
 						if (error.raised)
@@ -691,7 +693,8 @@ namespace juicescript.runtime
 						args->index = 0;
 						(args + 1)->index = 1;
 						var mctx = new RunMethodArgs(cls, scope_ptr, 2, (byte*)args, runmethd_slots, stackStPos + dst,0,false);
-						RunMethod(method, ref mctx , ref error);
+						RunMethod(method, ref mctx );
+						error = mctx.error;
 					}
 					Context.StackPosition -= 2;
 
@@ -1408,7 +1411,8 @@ namespace juicescript.runtime
 						args->index = 0;
 						(args + 1)->index = 1;
 						var mctx = new RunMethodArgs(cls, scope_ptr, 2, (byte*)args, slots,  stackStPos + dst,0,false);
-						RunMethod(method, ref mctx, ref error);
+						RunMethod(method, ref mctx);
+						error = mctx.error;
 					}
 					Context.StackPosition -= 2;
 
@@ -1763,7 +1767,8 @@ namespace juicescript.runtime
 						args->index = 0;
 						(args + 1)->index = 1;
 						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots, frame.stackStPos + dst_index,0,false);
-						RunMethod(method, ref mctx, ref error);
+						RunMethod(method, ref mctx);
+						error = mctx.error;
 					}
 					Context.StackPosition -= 2;
 
@@ -1979,7 +1984,8 @@ namespace juicescript.runtime
 						args->index = 0;
 						(args + 1)->index = 1;
 						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots,  frame.stackStPos + dst_index,0,false);
-						RunMethod(method, ref mctx, ref error);
+						RunMethod(method, ref mctx);
+						error = mctx.error;
 					}
 					Context.StackPosition -= 2;
 
@@ -2163,7 +2169,8 @@ namespace juicescript.runtime
 						args->index = 0;
 						(args + 1)->index = 1;
 						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots,  frame.stackStPos + dst_index,0,false);
-						RunMethod(method, ref mctx, ref error);
+						RunMethod(method, ref mctx);
+						error = mctx.error;
 					}
 					Context.StackPosition -= 2;
 
@@ -3651,7 +3658,7 @@ namespace juicescript.runtime
 
 						Context.StackPosition++;
 						var mctx = new RunMethodArgs(ins, scope_ptr, 0, null, null, iter_slot,0,false);
-						RunMethod(type.iterator,ref mctx , ref error);
+						RunMethod(type.iterator,ref mctx ); error = mctx.error;
 						Context.StackPosition--;
 
 						if (error.raised)
@@ -3850,8 +3857,8 @@ namespace juicescript.runtime
 			tmpArgLoc[0].index = 0;
 			tmpArgLoc[1].index = 1;
 			var mctx = new RunMethodArgs(iter_v, iter_v.HeapPtr, 2, (byte*)tmpArgLoc, argSpan,  reseveSlot,0,false);
-			RunMethod(function, ref mctx , ref error);
-
+			RunMethod(function, ref mctx);
+			error = mctx.error;
 
 			if (error.raised)
 			{
@@ -4013,9 +4020,9 @@ namespace juicescript.runtime
 
 			var mctx = new RunMethodArgs(iter_v, iter_v.HeapPtr,
 				 1, (byte*)&insLoc, stackslots,  -1,0,false);
-			RunMethod(function, ref mctx, ref error
+			RunMethod(function, ref mctx
 				);
-
+			error = mctx.error;
 			if (error.raised)
 			{
 				//Context.StackPosition--;//在获取Context时，保留了一个槽位
@@ -4392,8 +4399,8 @@ namespace juicescript.runtime
 
 			var mctx = new RunMethodArgs(_methodclosure_.This, _methodclosure_.ScopePtr, (ushort)argsCount, argementsPtr, stackslots,  frame.stackStPos + target.index, stackslots[function.index].HeapPtr,false);
 			NaNBoxing result = RunMethod(method,
-				ref mctx, ref error);
-
+				ref mctx);
+			error = mctx.error;
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -4541,7 +4548,8 @@ namespace juicescript.runtime
 			}
 
 			var mctx = new RunMethodArgs(_this_, closure.ScopePtr, (ushort)argsCount, argementsPtr, stackslots, frame.stackStPos + result.index, funValue.HeapPtr,false);
-			NaNBoxing ret = RunMethod(func, ref mctx, ref error);
+			NaNBoxing ret = RunMethod(func, ref mctx);
+			error = mctx.error;
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -4712,9 +4720,9 @@ namespace juicescript.runtime
 
 			NaNBoxing ret = RunMethod(
 				func,
-				ref mctx, ref error
+				ref mctx
 				);
-
+			error = mctx.error;
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -4799,7 +4807,8 @@ namespace juicescript.runtime
 			_this_ = instancePtr; //.SetHeapPtr(instancePtr);
 
 			var mctx = new RunMethodArgs(_this_, frame.scope_ptr, (ushort)argsCount, argementsPtr, frame.stackslots,frame.stackStPos + target.index,0,false);
-			NaNBoxing result = RunMethod(function, ref mctx, ref error);
+			NaNBoxing result = RunMethod(function, ref mctx);
+			error = mctx.error;
 			if (error.raised)
 			{
 				goto flag_handle_error;
@@ -4901,7 +4910,8 @@ namespace juicescript.runtime
 					((RtClosure)closure).ScopePtr,
 					(ushort)argsCount, argementsPtr, frame.stackslots, frame.stackStPos + dst_index, closure_ptr,false);
 
-				NaNBoxing ret = RunMethod(method,ref mctx, ref error);
+				NaNBoxing ret = RunMethod(method,ref mctx);
+				error = mctx.error;
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -4947,8 +4957,8 @@ namespace juicescript.runtime
 			methodArgs.returnSlotIndex = frame.stackStPos + dst_index;
 			methodArgs.slot = frame.stackslots;
 
-			NaNBoxing ret = RunMethod(method, ref methodArgs, ref error);
-
+			NaNBoxing ret = RunMethod(method, ref methodArgs);
+			error = methodArgs.error;
 			if (error.raised)
 			{
 				return PC;
@@ -5509,7 +5519,8 @@ namespace juicescript.runtime
 						var mctx = new RunMethodArgs(stackslots[target], instancePtr.HeapPtr,
 							(ushort)argsCount, argementsPtr, stackslots,-1, 0, true);
 						//执行构造函数
-						RunMethod(ctor, ref mctx , ref error);
+						RunMethod(ctor, ref mctx);
+						error = mctx.error;
 						if (error.raised)
 						{
 							goto flag_handle_error;
@@ -5618,7 +5629,8 @@ namespace juicescript.runtime
 						((RtClosure)constructor_closure).ScopePtr,
 						//((RtClosure)constructor_closure).ScopeType, 
 						(ushort)argsCount, argementsPtr, stackslots,  stackStPos + target, type_box.HeapPtr, true);
-					NaNBoxing ret_constructor = RunMethod(constructor,ref mctx, ref error);
+					NaNBoxing ret_constructor = RunMethod(constructor,ref mctx);
+					error = mctx.error;
 
 					if (error.raised)
 					{
@@ -5861,7 +5873,8 @@ namespace juicescript.runtime
 					var mctx = new RunMethodArgs(stackslots[dst_index], instancePtr.HeapPtr,
 						(ushort)argsCount, argementsPtr, stackslots,-1, 0, true);
 					//执行构造函数
-					RunMethod(ctor, ref mctx , ref error);
+					RunMethod(ctor, ref mctx );
+					error = mctx.error;
 					if (error.raised)
 					{
 						goto flag_handle_error;
@@ -5946,7 +5959,8 @@ namespace juicescript.runtime
 				{
 					var mctx = new RunMethodArgs(stackslots[dst_index], instancePtr.HeapPtr, (ushort)argsCount, argementsPtr, stackslots, -1, 0, true);
 					//执行构造函数
-					RunMethod(ctor, ref mctx, ref error);
+					RunMethod(ctor, ref mctx);
+					error = mctx.error;
 					if (error.raised)
 					{
 						goto flag_handle_error;
@@ -6610,7 +6624,8 @@ namespace juicescript.runtime
 			//var super_class = Context.link_const_class[(int)boxing.UIntValue];
 			var ctor = super_class.Instance.Constructor;
 			var mctx = new RunMethodArgs(((RtMethodScope)frame.methodscope).ThisPtr, frame.scope_ptr, (ushort)argsCount, argementsPtr, frame.stackslots, -1,0,false);
-			RunMethod(ctor, ref mctx , ref error);
+			RunMethod(ctor, ref mctx );
+			error = mctx.error;
 			return PC;
 		}
 
@@ -6823,8 +6838,8 @@ namespace juicescript.runtime
 
 										var mctx = new RunMethodArgs(_this,
 											_obj.RefInstance.HeapPtr, 1, (byte*)tmpArgLoc, argSpan,stackStPos + stack.index,0,false);
-										NaNBoxing result = RunMethod(((ASInstance)refObj.Type).indexer_delete,ref mctx, ref error);
-
+										NaNBoxing result = RunMethod(((ASInstance)refObj.Type).indexer_delete,ref mctx);
+										error = mctx.error;
 										Context.StackPosition -= 1;
 										if (error.raised)
 										{
@@ -7093,7 +7108,8 @@ namespace juicescript.runtime
 								Context.StackPosition++;
 								var mctx = new RunMethodArgs(_this,
 									type.HeapPtr, 1, (byte*)&argLoc, argSpan,  Context.StackPosition - 1,0,false);
-								RunMethod(((ASInstance)obj.Type).indexer_get,ref mctx, ref error);
+								RunMethod(((ASInstance)obj.Type).indexer_get,ref mctx);
+								error = mctx.error;
 								find_by_index = Context.StackSlots[Context.StackPosition - 1];
 								Context.StackPosition--;
 							}
@@ -7889,8 +7905,8 @@ namespace juicescript.runtime
 				var function = vtableitem.Trait.Method;
 				//var define = (ASInstance)vtableitem.DefineAt;
 				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, frame.stackslots, frame.stackStPos + target.index,0,false);
-				NaNBoxing result = RunMethod(function,ref mctx, ref error);
-
+				NaNBoxing result = RunMethod(function,ref mctx);
+				error = mctx.error;
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -7977,8 +7993,8 @@ namespace juicescript.runtime
 
 				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots,  -1,0,false);
 				RunMethod(function,
-					ref mctx, ref error);
-
+					ref mctx);
+				error = mctx.error;
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -7992,8 +8008,8 @@ namespace juicescript.runtime
 
 				//var define = (ASInstance)vtableitem.DefineAt;
 				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots,  -1,0,false);
-				RunMethod(function,ref mctx , ref error);
-
+				RunMethod(function,ref mctx );
+				error = mctx.error;
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -8005,8 +8021,8 @@ namespace juicescript.runtime
 				var function = @class._vtable.Items[vtable_index].Trait.Method;
 
 				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots, -1,0,false);
-				RunMethod(function,ref mctx, ref error);
-
+				RunMethod(function,ref mctx);
+				error = mctx.error;
 				if (error.raised)
 				{
 					goto flag_handle_error;
@@ -8141,8 +8157,8 @@ namespace juicescript.runtime
 
 					//var define = (ASInstance)vtableitem.DefineAt;
 					var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots,-1,0,false);
-					RunMethod(function,ref mctx, ref error);
-
+					RunMethod(function,ref mctx);
+					error = mctx.error;
 					if (error.raised)
 					{
 						goto flag_handle_error;

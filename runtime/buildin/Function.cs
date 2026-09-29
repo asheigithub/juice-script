@@ -128,10 +128,9 @@ namespace juicescript.runtime.buildin
 					returnSlotIndex,
 					thisPtr.HeapPtr,false);
 
-				context.player.RunMethod(callmethod, ref mctx,
-					ref error
+				context.player.RunMethod(callmethod, ref mctx
 					);
-
+				error = mctx.error;
 				context.StackPosition -= arguments.Length;
 
 			}
@@ -233,10 +232,10 @@ namespace juicescript.runtime.buildin
 					slots,
 					returnSlotIndex,
 					thisPtr.HeapPtr,false);
-				context.player.RunMethod(callmethod,ref mctx,
-					ref error
+				context.player.RunMethod(callmethod,ref mctx
+					
 					);
-
+				error = mctx.error;
 				context.StackPosition -= len;
 
 			}

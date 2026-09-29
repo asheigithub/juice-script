@@ -168,7 +168,8 @@ namespace juicescript.runtime
 			{
 				var mctx = new RunMethodArgs(value, ((RtClosure)funinstance).ScopePtr, //((RtClosure)funinstance).ScopeType ,
 					0, null, null, stackStPos + tmp, fun.HeapPtr,false);
-				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method,ref mctx, ref error);
+				NaNBoxing ret= RunMethod(((ASMethodBody)funinstance.Type).Method,ref mctx);
+				error = mctx.error;
 				if (error.raised)
 				{
 					return default;
@@ -234,7 +235,8 @@ namespace juicescript.runtime
 			unsafe
 			{
 				var mctx = new RunMethodArgs(value, ((RtClosure)funinstance).ScopePtr, 0, null, null, stackStPos + tmp, fun.HeapPtr,false);
-				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method,ref mctx, ref error);
+				NaNBoxing ret = RunMethod(((ASMethodBody)funinstance.Type).Method,ref mctx);
+				error = mctx.error;
 				if (error.raised)
 				{
 					return default;

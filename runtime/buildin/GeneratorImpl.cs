@@ -152,13 +152,14 @@ namespace juicescript.runtime.buildin
 				//	//generatorWapper.scopeType, 
 				//	slots, stPos, ref error, returnSlotIndex, calleelastpos, generatorWapper);
 
-				int P_PC = context.player.Execute(ref frame, ref error);
+				int P_PC = context.player.Execute(ref frame);
+				error = frame.error;
 
 				context.BackTraceIndex--;
 
 				context.StackPosition -= info.useSlots;
 
-				if (!error.raised)
+				if (! error.raised)
 				{
 
 				}
@@ -242,8 +243,8 @@ namespace juicescript.runtime.buildin
 			//	//generatorWapper.scopeType, 
 			//	slots, stPos, ref error, returnSlotIndex, calleelastpos,generatorWapper);
 
-			int P_PC = context.player.Execute(ref frame, ref error);
-
+			int P_PC = context.player.Execute(ref frame);
+			error = frame.error;
 			context.BackTraceIndex--;
 			
 			context.StackPosition -= info.useSlots;

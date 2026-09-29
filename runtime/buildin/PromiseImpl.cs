@@ -109,10 +109,10 @@ namespace juicescript.runtime.buildin
 					returnSlotIndex,
 					thisPtr.HeapPtr,false);
 
-				context.player.RunMethod(executor_method, ref mctx,
-					ref error					
+				context.player.RunMethod(executor_method, ref mctx
+						
 					);
-
+				error = mctx.error;
 				context.StackPosition -= 2;
 
 				if (error.raised)
@@ -926,7 +926,7 @@ namespace juicescript.runtime.buildin
 							context.StackSlots[basePos + 3] = task.CallbackFunction;
 							context.StackPosition += 4;
 
-							ReceiveError error = default;
+							
 							var slots = context.StackSlots.AsSpan(basePos, 1);
 							var mctx = new RunMethodArgs(cbClosure.This,
 								cbClosure.ScopePtr,
@@ -938,23 +938,22 @@ namespace juicescript.runtime.buildin
 								task.CallbackFunction.HeapPtr,false);
 							context.player.RunMethod(
 								cbMethod,
-								ref mctx,
-								ref error
+								ref mctx
 							);
 
 							context.StackPosition -= 4;
 
-							if (error.raised)
+							if (mctx.error.raised)
 							{
-								if (error.error.ValueType == NaNBoxing.BoxType.Fault)
+								if (mctx.error.error.ValueType == NaNBoxing.BoxType.Fault)
 								{
-									task_fault = error;
+									task_fault = mctx.error;
 									return;
 								}
 
-								NaNBoxing e = error.error;
-								error.error.SetUndefined();
-								error.raised = false;
+								NaNBoxing e = mctx.error.error;
+								mctx.error.error.SetUndefined();
+								mctx.error.raised = false;
 								context.errorStack.Clear();
 
 								ReceiveError tempErr = default;
@@ -982,7 +981,7 @@ namespace juicescript.runtime.buildin
 								return;
 							}
 
-							ResolvePromise(context, task.NextPromiseInstance, ret, ref error);
+							ResolvePromise(context, task.NextPromiseInstance, ret, ref mctx.error);
 						}
 						else
 						{
@@ -1031,7 +1030,7 @@ namespace juicescript.runtime.buildin
 
 							context.StackPosition += 4;
 
-							ReceiveError error = default;
+							//ReceiveError error = default;
 							var slots = context.StackSlots.AsSpan(basePos, 1);
 
 							var mctx = new RunMethodArgs(cbClosure.This,
@@ -1044,23 +1043,23 @@ namespace juicescript.runtime.buildin
 								task.CallbackFunction.HeapPtr,false);
 							context.player.RunMethod(
 								cbMethod,
-								ref mctx,
-								ref error
+								ref mctx
+								
 							);
 
 							context.StackPosition -= 4;
 
-							if (error.raised)
+							if (mctx.error.raised)
 							{
-								if (error.error.ValueType == NaNBoxing.BoxType.Fault)
+								if (mctx.error.error.ValueType == NaNBoxing.BoxType.Fault)
 								{
-									task_fault = error;
+									task_fault = mctx.error;
 									return;
 								}
 
-								NaNBoxing e = error.error;
-								error.error.SetUndefined();
-								error.raised = false;
+								NaNBoxing e = mctx.error.error;
+								mctx.error.error.SetUndefined();
+								mctx.error.raised = false;
 								context.errorStack.Clear();
 
 								ReceiveError tempErr = default;
@@ -1089,7 +1088,7 @@ namespace juicescript.runtime.buildin
 							}
 
 							// onRejected 返回值会使 nextPromise 走 resolve 流程（通常转为 fulfilled）
-							ResolvePromise(context, task.NextPromiseInstance, ret, ref error);
+							ResolvePromise(context, task.NextPromiseInstance, ret, ref mctx.error);
 						}
 
 					}
@@ -1336,10 +1335,12 @@ namespace juicescript.runtime.buildin
 											);
 										thenValue = context.player.RunMethod(
 											getterMethod,
-											ref mctx,
-											ref error
+											ref mctx//,
+											//ref error
 										);
+										error = mctx.error;
 									}
+									
 
 									if (error.raised)
 									{
@@ -1557,9 +1558,11 @@ namespace juicescript.runtime.buildin
 
 					context.player.RunMethod(
 						thenMethod,
-						ref mctx,
-						ref error
+						ref mctx//,
+						//ref error
 					);
+					error = mctx.error;
+
 				}
 
 
@@ -2050,8 +2053,8 @@ namespace juicescript.runtime.buildin
 			//		//genwapper.scopeType,
 			//		slots, stPos,  ref asyncErr, retslot, calleelastpos, genwapper);
 
-			context.player.Execute(ref frame, ref asyncErr);
-
+			context.player.Execute(ref frame);
+			asyncErr = frame.error;
 			
 
 
@@ -2081,7 +2084,8 @@ namespace juicescript.runtime.buildin
 					context.StackPosition++;
 					var mctx = new RunMethodArgs(promisePtr, 0,// context.PROMISE.Instance,
 						1, (byte*)&arg, slots,  -1,0,false);
-					context.player.RunMethod(private_reject, ref mctx , ref reject_err);
+					context.player.RunMethod(private_reject, ref mctx );
+					reject_err = mctx.error;
 					context.StackPosition--;
 				}
 
@@ -2120,7 +2124,8 @@ namespace juicescript.runtime.buildin
 						context.StackPosition++;
 						var mctx = new RunMethodArgs(promisePtr, 0,// context.PROMISE.Instance,
 							1, (byte*)&arg, slots , -1,0,false);
-						context.player.RunMethod(private_resolve, ref mctx , ref resolve_err);
+						context.player.RunMethod(private_resolve, ref mctx );
+						resolve_err = mctx.error;
 						context.StackPosition--;
 					}
 
@@ -2155,7 +2160,8 @@ namespace juicescript.runtime.buildin
 					{
 						var mctx = new RunMethodArgs(promisePtr, 0, //context.PROMISE,
 							1, (byte*)&arg, slots,  resolved_promise,0,false);
-						context.player.RunMethod(static_resolve, ref mctx , ref resolve_err);
+						context.player.RunMethod(static_resolve, ref mctx );
+						resolve_err = mctx.error;
 					}
 
 					if (resolve_err.raised)
@@ -2211,7 +2217,8 @@ namespace juicescript.runtime.buildin
 
 						var mctx = new RunMethodArgs(resolved, 0, //context.PROMISE.Instance, 
 							2, (byte*)passthrough, slots,  then_result,0,false);
-						context.player.RunMethod(private_then, ref mctx , ref then_err);
+						context.player.RunMethod(private_then, ref mctx );
+						then_err = mctx.error;
 					}
 
 					context.StackPosition = stPos;

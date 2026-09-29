@@ -1863,9 +1863,9 @@ namespace juicescript.runtime.buildin
 							var mctx = new RunMethodArgs( closure.This, closure.ScopePtr,
 								 3, (byte*)args, slots,
 								basePos,0,false);
-							context.player.RunMethod(((ASMethodBody)replinstance.Type).Method, ref mctx, ref error
+							context.player.RunMethod(((ASMethodBody)replinstance.Type).Method, ref mctx
 								);
-
+							error = mctx.error;
 							if (error.raised)
 							{
 								context.StackPosition = basePos;

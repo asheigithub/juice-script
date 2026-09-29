@@ -165,23 +165,22 @@ namespace juicescript.runtime
 
 						context.StackPosition += len ;
 
-						ReceiveError error = default;
-
+						
 						var mctx = new RunMethodArgs(((RtClosure)closureinstance).This,
 							((RtClosure)closureinstance).ScopePtr,
 							(ushort)len, (byte*)args,
 							slots,
 							returnslot,0,false);
-						context.player.RunMethod(callmethod, ref mctx,
-							ref error
+						context.player.RunMethod(callmethod, ref mctx
+							
 							);
 
 						context.StackPosition -= len + 1;
 
 
-						if (error.raised)
+						if (mctx.error.raised)
 						{
-							PlayerException ex = new PlayerException(context.player, error.error, context.errorStack.ToString());
+							PlayerException ex = new PlayerException(context.player, mctx.error.error, context.errorStack.ToString());
 							context.errorStack.Clear();
 
 							if (onErrorRaised != null)
@@ -189,9 +188,9 @@ namespace juicescript.runtime
 								onErrorRaised(ex);
 							}
 
-							if (error.error.ValueType == NaNBoxing.BoxType.Fault)
+							if (mctx.error.error.ValueType == NaNBoxing.BoxType.Fault)
 							{
-								task_fault = error;
+								task_fault = mctx.error;
 
 								Clear();
 

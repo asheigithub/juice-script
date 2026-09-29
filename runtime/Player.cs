@@ -5310,7 +5310,8 @@ namespace juicescript.runtime
 			{
 				var mctx = new RunMethodArgs(thisPtr, index, 0, null, null, -1,0,false);
 
-				RunMethod(script.Initializer, ref mctx, ref error);
+				RunMethod(script.Initializer, ref mctx);
+				error = mctx.error;
 			}
 
 
@@ -5426,7 +5427,8 @@ namespace juicescript.runtime
 					var mctx = new RunMethodArgs(new NaNBoxing(NaNBoxing.NULL), index, 0, null, null, -1, 0, false);
 
 					//执行Class的初始化函数
-					RunMethod(cls.Constructor, ref mctx,ref error);
+					RunMethod(cls.Constructor, ref mctx);
+					error = mctx.error;
 				}
 
 			}
@@ -5593,8 +5595,8 @@ namespace juicescript.runtime
 
 					var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, stackslots, returnSlotIndex,0,false);
 					NaNBoxing result = RunMethod(function,
-					ref mctx, ref error);
-
+					ref mctx);
+					error = mctx.error;
 					return result;
 
 				}
@@ -5605,9 +5607,9 @@ namespace juicescript.runtime
 
 					//var define = (ASInstance)vtableitem.DefineAt;
 					var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, stackslots,  returnSlotIndex,0,false);
-					NaNBoxing result = RunMethod(function,ref mctx,
-					 ref error);
-
+					NaNBoxing result = RunMethod(function,ref mctx
+					 );
+					error = mctx.error;
 					return result;
 				}
 				else if (thisValue.HeapPtr == Context.CLASS.__instance_index__)
@@ -5633,8 +5635,8 @@ namespace juicescript.runtime
 					//var define = (ASInstance)vtableitem.DefineAt;
 					var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, stackslots, returnSlotIndex,0,false);
 					NaNBoxing result = RunMethod(function,
-					ref mctx, ref error);
-
+					ref mctx);
+					error = mctx.error;
 					return result;
 				}
 				else if (insKind == RtHeapTypeKind.CLASS)
@@ -5663,8 +5665,8 @@ namespace juicescript.runtime
 					{
 						var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, stackslots, returnSlotIndex,0,false);
 						NaNBoxing result = RunMethod(function,
-							ref mctx, ref error);
-
+							ref mctx);
+						error = mctx.error;
 						//if (error.raised)
 						//{
 						//    goto flag_handle_error;
@@ -5776,8 +5778,8 @@ namespace juicescript.runtime
 						//var define = (ASInstance)vtableitem.DefineAt;
 						var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, stackslots, returnSlotIndex,0,false);
 						NaNBoxing result = RunMethod(function,
-						ref mctx, ref error);
-
+						ref mctx);
+						error = mctx.error;
 						return result;
 					}
 				}
@@ -5925,7 +5927,9 @@ namespace juicescript.runtime
 				{
 					//Context.StackPosition++;
 					var mctx = new RunMethodArgs(_this,RefInstance.HeapPtr, 1, (byte*)&argLoc, argSpan, returnslot,0,false);
-					RunMethod(((ASInstance)refObj.Type).indexer_get,ref mctx , ref error);
+					RunMethod(((ASInstance)refObj.Type).indexer_get,ref mctx);
+
+					error = mctx.error;
 
 					result = Context.StackSlots[returnslot];
 
@@ -6895,8 +6899,8 @@ namespace juicescript.runtime
 			NaNBoxing _this = new NaNBoxing();
 			_this = RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
 			var mctx = new RunMethodArgs(_this,RefInstance.HeapPtr, 2, (byte*)tmpArgLoc, argSpan,  -1,0,false);
-			RunMethod(((ASInstance)instance.Type).indexer_set, ref mctx, ref error);
-
+			RunMethod(((ASInstance)instance.Type).indexer_set, ref mctx);
+			error = mctx.error;
 			Context.StackPosition -= 2;
 			
 		}
@@ -7193,8 +7197,8 @@ namespace juicescript.runtime
 								_this = cacheObj.RefInstance; //.SetHeapPtr(cacheObj.RefInstance.HeapPtr);
 								var mctx = new RunMethodArgs(_this,cacheObj.RefInstance.HeapPtr, 1, (byte*)&argLoc, 
 									Context.StackSlots.AsSpan(stackStPos, stackslots.Length + 1),  -1,0,false);
-								RunMethod(cacheObj.trait[1].Method, ref mctx , ref error);
-
+								RunMethod(cacheObj.trait[1].Method, ref mctx );
+								error = mctx.error;
 								Context.StackPosition--;
 								if (error.raised)
 								{
@@ -10848,7 +10852,8 @@ namespace juicescript.runtime
 				{
 					var mctx = new RunMethodArgs(invalue, instancePtr, argsCount, (byte*)arguments, slots, Context.StackPosition - 1,0,false);
 					//构造
-					RunMethod(totype_class.Instance.Constructor, ref mctx , ref error);
+					RunMethod(totype_class.Instance.Constructor, ref mctx);
+					error = mctx.error;
 				}
 				Context.StackPosition -= 1;
 				if (error.raised)
@@ -10901,7 +10906,8 @@ namespace juicescript.runtime
 
 					//构造
 					//StackLocater send_arg = new StackLocater() { index = 1 };
-					RunMethod(totype_class.Instance.Constructor, ref mctx, ref error);
+					RunMethod(totype_class.Instance.Constructor, ref mctx);
+					error = mctx.error;
 				}
 				Context.StackPosition -= 1;
 				if (error.raised)
@@ -10953,8 +10959,8 @@ namespace juicescript.runtime
 						var mctx = new RunMethodArgs(Context.StackSlots[returnSlotindex], instancePtr,
 							 1, (byte*)&l, _tmpslot,  returnSlotindex,0,false);
 
-						RunMethod(totype_class.Instance.Constructor, ref mctx, ref error);
-
+						RunMethod(totype_class.Instance.Constructor, ref mctx);
+						error = mctx.error;
 						if (error.raised)
 						{
 							return;
@@ -13329,14 +13335,16 @@ namespace juicescript.runtime
 			public int scope_ptr;
 
 			public NaNBoxing* constants;
-			
+
+			public ReceiveError error;
+
 		}
 
 
 
 
 		//[MethodImpl( MethodImplOptions.AggressiveOptimization)]
-		internal unsafe int Execute(ref FrameContext frame , ref ReceiveError error)
+		internal unsafe int Execute(ref FrameContext frame)
 		{
 			//ASMethodBody.MethodBodyInfo info = new ASMethodBody.MethodBodyInfo();
 			//method.Body.GetInfo(ref info);
@@ -13350,7 +13358,7 @@ namespace juicescript.runtime
 			}
 
 #endif
-
+			ref ReceiveError error = ref frame.error;
 
 			var method = frame.method; //((ASMethodBody)frame.methodscope.Type).Method;
 
