@@ -13615,8 +13615,9 @@ namespace juicescript.runtime
 						case INS_Code.ld_MultiName_Val:
 							{
 								//Ld_MultiName_Val(dst_index,ref PC, method, frame.methodscope,constants,stackslots, frame.stackStPos, frame.scope_ptr,ref error);
-								PC = Ld_MultiName_Val(dst_index, PC, ref frame,ref error);
-								if (error.raised)
+								var result = Ld_MultiName_Val(dst_index, PC, ref frame,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13628,8 +13629,9 @@ namespace juicescript.runtime
 								
 
 								//Ld_MultiNameL_Val(dst_index,ref PC,  method, frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Ld_MultiNameL_Val(dst_index, PC, ref frame  , ref error);
-								if (error.raised)
+								var result = Ld_MultiNameL_Val(dst_index, PC, ref frame  , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13640,8 +13642,9 @@ namespace juicescript.runtime
 							{
 
 								//Store_MultiNameL(dst_index,ref PC, constants,  stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope, ref error);
-								PC = Store_MultiNameL(dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = Store_MultiNameL(dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13653,8 +13656,9 @@ namespace juicescript.runtime
 							{
 
 								//Store_MultiName(dst_index, ref PC, constants, stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope, ref error);
-								PC = Store_MultiName(dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = Store_MultiName(dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13664,8 +13668,9 @@ namespace juicescript.runtime
 						case INS_Code.store_instanceMember:
 							{
 								//Store_InstanceOrScopeMember(dst_index, ref PC, stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope , ref error);
-								PC = Store_InstanceOrScopeMember(dst_index,  PC, ref frame , ref error);
-								if (error.raised)
+								var result = Store_InstanceOrScopeMember(dst_index,  PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13675,8 +13680,9 @@ namespace juicescript.runtime
 							{
 								
 								//Ld_RTQNameL_Ref(dst_index,ref PC, frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Ld_RTQNameL_Ref(dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = Ld_RTQNameL_Ref(dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13687,8 +13693,9 @@ namespace juicescript.runtime
 								
 
 								//Ld_InstanceOrScopeMemberValueRef( dst_index,ref PC,stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Ld_InstanceOrScopeMemberValueRef( dst_index,PC, ref frame , ref error);
-								if (error.raised)
+								var result = Ld_InstanceOrScopeMemberValueRef( dst_index,PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13697,8 +13704,9 @@ namespace juicescript.runtime
 						case INS_Code.ld_instacneOrScopeMember_Val:
 							{
 								//Ld_InstanceOrScopeMemberVal(dst_index, ref PC, stackslots, frame.stackStPos, frame.scope_ptr,ref error);
-								PC = Ld_InstanceOrScopeMemberVal(dst_index, PC, ref frame ,ref error);
-								if (error.raised)
+								var result = Ld_InstanceOrScopeMemberVal(dst_index, PC, ref frame ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13736,11 +13744,7 @@ namespace juicescript.runtime
 								uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.ld_ValueRef);
 
 								int sourc = *(int*)(PC); (PC) += 4;
-								//int target;
-								//LoadInt32(ref PC);
-								//LoadStackLocater(&target, &PC);
-								//target.index = dst_index;
-
+								
 								var refobj = stackslots[sourc];
 
 								var v = refobj.HeapKind != (byte)RtHeapTypeKind.STACK_CACHE_OBJ ? refobj : LoadValue((RtStackCache)HeapShortCut[refobj.HeapPtr],
@@ -13823,8 +13827,9 @@ namespace juicescript.runtime
 							{
 
 								//Ld_function(dst_index, ref PC, frame.methodscope, constants, stackslots, frame.scope_ptr, frame.stackStPos, ref error);
-								PC = Ld_function(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = Ld_function(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13837,9 +13842,9 @@ namespace juicescript.runtime
 								//	 //scopeType, 
 								//	 frame.scope_ptr, frame.stackStPos, ref error);
 
-								PC = Ld_function_call(PC, dst_index,ref frame, ref error);
-
-								if (error.raised)
+								var result = Ld_function_call(PC, dst_index,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13860,13 +13865,13 @@ namespace juicescript.runtime
 								//	//ref global_obj, 
 								//	ref error
 								//	);
-								PC = Ld_function_bindglobal_call( PC,  dst_index,ref frame,
+								var result = Ld_function_bindglobal_call( PC,  dst_index,ref frame,
 									ref error
 									);
 
+								PC = result.PC;
 
-
-								if (error.raised)
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13884,8 +13889,9 @@ namespace juicescript.runtime
 								//Bindglobal_call(dst_index,ref PC,(RtMethodScope)frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, 
 								//	//ref global_obj,
 								//	ref error);
-								PC = Bindglobal_call(dst_index, PC,ref frame,ref error);
-								if (error.raised)
+								var result = Bindglobal_call(dst_index, PC,ref frame,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}

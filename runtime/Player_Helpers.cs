@@ -54,8 +54,8 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* If_logicOp_Goto( byte* PC,ref FrameContext frame,byte* PC_START,ref ReceiveError error)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe byte* If_logicOp_Goto(byte* PC, ref FrameContext frame, byte* PC_START, ref ReceiveError error)
 		{
 			var stackslots = frame.stackslots;
 
@@ -102,7 +102,7 @@ namespace juicescript.runtime
 			return PC;
 		}
 
-		private unsafe bool If_logicOpGoto_Slow(ref FrameContext frame, CompMode compMode,NaNBoxing a,NaNBoxing b,int compResult, bool jump_mode ,ref ReceiveError error)
+		private unsafe bool If_logicOpGoto_Slow(ref FrameContext frame, CompMode compMode, NaNBoxing a, NaNBoxing b, int compResult, bool jump_mode, ref ReceiveError error)
 		{
 			var stackslots = frame.stackslots;
 
@@ -153,9 +153,9 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Goto_InTry( byte* PC,int trys,ExceptionContext* exception_ctx,byte* finally_jumpto)
+		private unsafe byte* Goto_InTry(byte* PC, int trys, ExceptionContext* exception_ctx, byte* finally_jumpto)
 		{
-			
+
 			trys--;
 			ExceptionContext* ex_cursor = exception_ctx - trys;
 			ex_cursor->FINALLY_JUMPTO_PTR = finally_jumpto;
@@ -172,7 +172,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* ReturnVoid_Intry(byte* PC, ExceptionContext* exception_ctx, ExceptionContext* NO_TRY,byte* PC_END)
+		private unsafe byte* ReturnVoid_Intry(byte* PC, ExceptionContext* exception_ctx, ExceptionContext* NO_TRY, byte* PC_END)
 		{
 			ExceptionContext* ctx = NO_TRY + 1;
 			ctx->FINALLY_JUMPTO_PTR = PC_END;
@@ -188,7 +188,7 @@ namespace juicescript.runtime
 			return PC;
 		}
 
-		private unsafe byte* ReturnValue_InTry(int dst_index, ref FrameContext frame,   byte* PC, ExceptionContext* exception_ctx, ExceptionContext* NO_TRY, byte* PC_END,ref ReceiveError error)
+		private unsafe byte* ReturnValue_InTry(int dst_index, ref FrameContext frame, byte* PC, ExceptionContext* exception_ctx, ExceptionContext* NO_TRY, byte* PC_END, ref ReceiveError error)
 		{
 			bool has_finally = false;
 			ExceptionContext* ctx = NO_TRY + 1;
@@ -229,9 +229,9 @@ namespace juicescript.runtime
 			return PC;
 		}
 
-		private unsafe byte* YieldBreak_InTry( byte* PC,ExceptionContext* NO_TRY,ExceptionContext* exception_ctx,byte* PC_END)
+		private unsafe byte* YieldBreak_InTry(byte* PC, ExceptionContext* NO_TRY, ExceptionContext* exception_ctx, byte* PC_END)
 		{
-			
+
 			ExceptionContext* ctx = NO_TRY + 1;
 			ctx->FINALLY_JUMPTO_PTR = PC_END;
 			do
@@ -251,7 +251,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe HandlerResult Ld_class(int dst_index, byte* PC, 
+		private unsafe HandlerResult Ld_class(int dst_index, byte* PC,
 			//ASMethodBody.MethodHeapConstants heap_consts ,Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, 
 			ref FrameContext frame
 			//,
@@ -261,19 +261,19 @@ namespace juicescript.runtime
 			//StackLocater stackLocater;
 			//stackLocater.index = dst_index;
 
-			int classid_index = 
+			int classid_index =
 				LoadInt32(ref PC);
 
 			var boxing = frame.constants[classid_index];
 
 
-			Debug.Assert(frame.method.Body.heapConstants.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class  );
+			Debug.Assert(frame.method.Body.heapConstants.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
 
 			//InitASClass((ASClass)instance.Type, ref error);
-			var @class = (ASClass) frame.method.Body.heapConstants.pool_values[boxing.IntValue]; //Context.link_const_class[(int)boxing.UIntValue];
-			
-			if(! InitScript((ASScript)@class._link_codescope.Parent.Container, ref frame.error))
+			var @class = (ASClass)frame.method.Body.heapConstants.pool_values[boxing.IntValue]; //Context.link_const_class[(int)boxing.UIntValue];
+
+			if (!InitScript((ASScript)@class._link_codescope.Parent.Container, ref frame.error))
 			{
 				goto flag_handle_error;
 			}
@@ -281,7 +281,7 @@ namespace juicescript.runtime
 			if (@class.__instance_index__ == 0)
 			{
 				//在@class就在当前正在初始化的script中，却又没有初始化到的情况。
-				if(!InitASClass(@class, ref frame.error))
+				if (!InitASClass(@class, ref frame.error))
 				{
 					goto flag_handle_error;
 				}
@@ -293,7 +293,7 @@ namespace juicescript.runtime
 
 		flag_handle_error:
 			;
-			return new HandlerResult(PC,true);
+			return new HandlerResult(PC, true);
 		}
 
 
@@ -305,7 +305,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* POSITIVE(int dst_index,  byte* PC, 
+		private unsafe byte* POSITIVE(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -362,7 +362,7 @@ namespace juicescript.runtime
 						StackLocater args = default; args.index = 0;
 						unsafe
 						{
-							var mctx = new RunMethodArgs( cls, frame.scope_ptr, 1, (byte*)&args, slots,  frame.stackStPos + dst_index,0,false);
+							var mctx = new RunMethodArgs(cls, frame.scope_ptr, 1, (byte*)&args, slots, frame.stackStPos + dst_index, 0, false);
 							RunMethod(posmethod, ref mctx);
 							error = mctx.error;
 						}
@@ -436,7 +436,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* NEG(int dst_index,  byte* PC, 
+		private unsafe byte* NEG(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -493,8 +493,8 @@ namespace juicescript.runtime
 						StackLocater args = default; args.index = 0;
 						unsafe
 						{
-							var mctx = new RunMethodArgs(cls, frame.scope_ptr, 1, (byte*)&args, slots, frame.stackStPos + dst_index,0,false);
-							RunMethod(negmethod,ref mctx);
+							var mctx = new RunMethodArgs(cls, frame.scope_ptr, 1, (byte*)&args, slots, frame.stackStPos + dst_index, 0, false);
+							RunMethod(negmethod, ref mctx);
 							error = mctx.error;
 						}
 						Context.StackPosition -= 1;
@@ -637,7 +637,7 @@ namespace juicescript.runtime
 					chars1 = ((RtString)HeapShortCut[n1.HeapPtr]).Str;
 				}
 				else
-				{					
+				{
 					int charCount = n1.GetLocalStringChars(buffer1);
 					chars1 = buffer1.Slice(0, charCount);
 				}
@@ -653,9 +653,9 @@ namespace juicescript.runtime
 				string concatenated = $"{chars1}{chars2}";
 				// 使用安全的字符串创建方法
 				TryCreateStringValue(concatenated, out stackslots[dst], ref error);
-								
+
 				return; // 错误已经在TryCreateStringValue中处理
-				
+
 			}
 
 
@@ -713,8 +713,8 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						var mctx = new RunMethodArgs(cls, scope_ptr, 2, (byte*)args, runmethd_slots, stackStPos + dst,0,false);
-						RunMethod(method, ref mctx );
+						var mctx = new RunMethodArgs(cls, scope_ptr, 2, (byte*)args, runmethd_slots, stackStPos + dst, 0, false);
+						RunMethod(method, ref mctx);
 						error = mctx.error;
 					}
 					Context.StackPosition -= 2;
@@ -752,9 +752,9 @@ namespace juicescript.runtime
 			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 3);
 			slots.Clear();
 			Context.StackPosition += 3;
-			int conv_result1 =  0;
+			int conv_result1 = 0;
 			int conv_result2 = 1;
-			int tmpslot =  2;
+			int tmpslot = 2;
 
 			n1 = ToPrimitive(ref error, n1, hint, scope_ptr, conv_result1, tmpslot, slots, Context.StackPosition, thisPtr);
 			if (error.raised)
@@ -1340,7 +1340,7 @@ namespace juicescript.runtime
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* Exec_Add(int dst_index,  byte* PC, ref FrameContext frame, ref ReceiveError error)
+		private unsafe byte* Exec_Add(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error)
 		{
 
 			//StackLocater v1;
@@ -1357,10 +1357,10 @@ namespace juicescript.runtime
 			NaNBoxing n1 = stackslots[v1_index];
 			NaNBoxing n2 = stackslots[v2_index];
 
-		
-			
+
+
 			if (NaNBoxing.FastAdd(n1, n2, ref stackslots[dst_index]))
-			{				
+			{
 				return PC;
 			}
 			else
@@ -1431,7 +1431,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						var mctx = new RunMethodArgs(cls, scope_ptr, 2, (byte*)args, slots,  stackStPos + dst,0,false);
+						var mctx = new RunMethodArgs(cls, scope_ptr, 2, (byte*)args, slots, stackStPos + dst, 0, false);
 						RunMethod(method, ref mctx);
 						error = mctx.error;
 					}
@@ -1447,7 +1447,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n1))
 			{
-				
+
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
@@ -1462,7 +1462,7 @@ namespace juicescript.runtime
 
 			if (!IsPrimitive(n2))
 			{
-				
+
 				n2 = ToPrimitive(ref error, n2, HINT.h_number, scope_ptr, dst, dst, stackslots, stackStPos, thisPtr);
 				if (error.raised)
 				{
@@ -1670,7 +1670,7 @@ namespace juicescript.runtime
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* Exec_Sub(int dst_index,  byte* PC, ref FrameContext frame, ref ReceiveError error)
+		private unsafe byte* Exec_Sub(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error)
 		{
 
 			//StackLocater v1;
@@ -1700,7 +1700,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Exec_SubSlow(dst_index,  n1, n2, frame.scope_ptr, frame.stackStPos, frame.stackslots, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
+				Exec_SubSlow(dst_index, n1, n2, frame.scope_ptr, frame.stackStPos, frame.stackslots, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
 				return PC;
 			}
 
@@ -1708,11 +1708,11 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Exec_Multiply(int dst_index,  byte* PC,
+		private unsafe byte* Exec_Multiply(int dst_index, byte* PC,
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
-			
+
 			)
 		{
 			//StackLocater dst;
@@ -1787,7 +1787,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots, frame.stackStPos + dst_index,0,false);
+						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots, frame.stackStPos + dst_index, 0, false);
 						RunMethod(method, ref mctx);
 						error = mctx.error;
 					}
@@ -1929,7 +1929,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Exec_Division(int dst_index,  byte* PC,
+		private unsafe byte* Exec_Division(int dst_index, byte* PC,
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
@@ -2004,7 +2004,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots,  frame.stackStPos + dst_index,0,false);
+						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots, frame.stackStPos + dst_index, 0, false);
 						RunMethod(method, ref mctx);
 						error = mctx.error;
 					}
@@ -2114,8 +2114,8 @@ namespace juicescript.runtime
 			return PC;
 		}
 
-		private unsafe byte* Exec_Modulus(int dst_index,  byte* PC,
-			
+		private unsafe byte* Exec_Modulus(int dst_index, byte* PC,
+
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
@@ -2189,7 +2189,7 @@ namespace juicescript.runtime
 						StackLocater* args = stackalloc StackLocater[2];
 						args->index = 0;
 						(args + 1)->index = 1;
-						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots,  frame.stackStPos + dst_index,0,false);
+						var mctx = new RunMethodArgs(cls, frame.scope_ptr, 2, (byte*)args, slots, frame.stackStPos + dst_index, 0, false);
 						RunMethod(method, ref mctx);
 						error = mctx.error;
 					}
@@ -2315,11 +2315,11 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Exec_bitWise(int dst_index,  byte* PC,
+		private unsafe byte* Exec_bitWise(int dst_index, byte* PC,
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
-			
+
 			)
 		{
 			//StackLocater dst;
@@ -2553,9 +2553,9 @@ namespace juicescript.runtime
 			Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 3);
 			slots.Clear();
 			Context.StackPosition += 3;
-			int conv_result1 =  0;
+			int conv_result1 = 0;
 			int conv_result2 = 1;
-			int tempslot =  2;
+			int tempslot = 2;
 
 
 			if (!IsPrimitive(n1))
@@ -2754,8 +2754,8 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* Exec_Comparse(int dst_index,  byte* PC, 
-			
+		private unsafe byte* Exec_Comparse(int dst_index, byte* PC,
+
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
@@ -3008,9 +3008,9 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* Increment_decrement(int dst_index,  byte* PC, 
+		private unsafe byte* Increment_decrement(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,
-			ref FrameContext frame,			
+			ref FrameContext frame,
 			ref ReceiveError error)
 		{
 			//StackLocater dst;
@@ -3067,9 +3067,9 @@ namespace juicescript.runtime
 
 
 
-		
-		private unsafe byte* IncrDecrStoreVar(int dst_index,  byte* PC, ref FrameContext frame,
-			
+
+		private unsafe byte* IncrDecrStoreVar(int dst_index, byte* PC, ref FrameContext frame,
+
 			ref ReceiveError error)
 		{
 			//StackLocater dst;
@@ -3150,7 +3150,7 @@ namespace juicescript.runtime
 			{
 
 				Debug.Assert(incr_decr_v.ValueType != BoxType.HeapPtr);
-				
+
 				{
 					heapV = incr_decr_v;
 					stackslots[convertedloc_index] = incr_decr_v;
@@ -3162,14 +3162,14 @@ namespace juicescript.runtime
 				}
 			}
 
-			StoreMethodVariable_Slow(frame.methodscope, heapLocater, incr_decr_v, ref heapV,frame.scope_ptr, ref error);
+			StoreMethodVariable_Slow(frame.methodscope, heapLocater, incr_decr_v, ref heapV, frame.scope_ptr, ref error);
 			stackslots[convertedloc_index] = heapV;
 			return PC;
 
 		}
 
-		
-		private unsafe byte* O_Var_SelfAdd(int dst_index,  byte* PC, ref FrameContext frame, ref ReceiveError error)
+
+		private unsafe byte* O_Var_SelfAdd(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error)
 		{
 			ScopeHeapLocater heapLocater;
 			{
@@ -3188,7 +3188,7 @@ namespace juicescript.runtime
 
 			ref NaNBoxing result = ref stackslots[dst_index];
 
-			
+
 			if (NaNBoxing.FastAdd(heapV, addv, ref result))
 			{
 
@@ -3201,7 +3201,7 @@ namespace juicescript.runtime
 					return PC;
 				}
 			}
-			
+
 
 
 			if (
@@ -3236,8 +3236,8 @@ namespace juicescript.runtime
 
 
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private unsafe int LoopFoot_IncrVar_CmpSlot(int dst_index,byte* PC,ref FrameContext frame,ref ReceiveError error)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe int LoopFoot_IncrVar_CmpSlot(int dst_index, byte* PC, ref FrameContext frame, ref ReceiveError error)
 		{
 			//int flag_id = LoadStackLocater(ref PC);
 
@@ -3245,7 +3245,7 @@ namespace juicescript.runtime
 			int addvalue = (sbyte)(pack_flagid_addvalue >> 24);
 			int flag_id = (int)(pack_flagid_addvalue & 0xffffff);
 
-			
+
 			int offset = LoadStackLocater(ref PC);
 			//int result_index = LoadStackLocater(ref PC);
 
@@ -3293,7 +3293,7 @@ namespace juicescript.runtime
 				heapV = n1;
 
 #if FORCOMPILER
-					((RtMethodScope)heap).SetSlot(n1, heapLocater.MemberIndex);
+				((RtMethodScope)heap).SetSlot(n1, heapLocater.MemberIndex);
 #endif
 				int cv = added_v - compValue.IntValue;
 
@@ -3301,7 +3301,7 @@ namespace juicescript.runtime
 					||
 					(cv > 0 && (compMode == CompMode.greater || compMode == CompMode.greater_equal))
 					||
-					(cv == 0 && (compMode == CompMode.greater_equal || compMode == CompMode.less_equal ))
+					(cv == 0 && (compMode == CompMode.greater_equal || compMode == CompMode.less_equal))
 					)
 				{
 					return offset;
@@ -3327,8 +3327,8 @@ namespace juicescript.runtime
 
 		}
 
-		private bool LoopFoot_IncrVar_CmpSlot_Slow(ref NaNBoxing n1,ref FrameContext frame, ref NaNBoxing heapV, 
-			int convertedloc_index,int addvalue, CompMode compMode, NaNBoxing compValue, ScopeHeapLocater heapLocater, ref ReceiveError error)
+		private bool LoopFoot_IncrVar_CmpSlot_Slow(ref NaNBoxing n1, ref FrameContext frame, ref NaNBoxing heapV,
+			int convertedloc_index, int addvalue, CompMode compMode, NaNBoxing compValue, ScopeHeapLocater heapLocater, ref ReceiveError error)
 		{
 			var stackslots = frame.stackslots;
 
@@ -3371,11 +3371,11 @@ namespace juicescript.runtime
 				)
 			{
 				Debug.Assert(incr_decr_v.ValueType != BoxType.HeapPtr);
-				
+
 				//if ( 
-					
+
 				//	//incr_decr_v.ValueType != BoxType.HeapPtr &&
-					
+
 				//	heapV.ValueType != BoxType.HeapPtr)//!((TypeKind)(heapLocater.ScopeIndex & 0xff)).IsHeapType())
 				{
 					heapV = incr_decr_v;
@@ -3424,7 +3424,7 @@ namespace juicescript.runtime
 			//}
 			//else
 			{
-				bool c = DoCompress( (byte)(compMode-4) , convertedloc_index, n1, compValue, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
+				bool c = DoCompress((byte)(compMode - 4), convertedloc_index, n1, compValue, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr, ref error);
 				stackslots[convertedloc_index] = heapV;
 
 				if (error.raised)
@@ -3514,7 +3514,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void ITER_INITCTX(int dst_index,  byte* PC, RtHeapBase methodscope, ref ReceiveError error)
+		private unsafe void ITER_INITCTX(int dst_index, byte* PC, RtHeapBase methodscope, ref ReceiveError error)
 		{
 			InitScript((ASScript)Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__._link_codescope.Parent.Container, ref error);
 			if (error.raised)
@@ -3612,7 +3612,7 @@ namespace juicescript.runtime
 				}
 
 
-				
+
 				RtMethodScope heap = (RtMethodScope)methodscope;
 #if DEBUG
 				if (methodscope.Type._link_codescope.index != iterSrcObj_Holder.ScopeIndex)
@@ -3678,8 +3678,8 @@ namespace juicescript.runtime
 					{
 
 						Context.StackPosition++;
-						var mctx = new RunMethodArgs(ins, scope_ptr, 0, null, null, iter_slot,0,false);
-						RunMethod(type.iterator,ref mctx ); error = mctx.error;
+						var mctx = new RunMethodArgs(ins, scope_ptr, 0, null, null, iter_slot, 0, false);
+						RunMethod(type.iterator, ref mctx); error = mctx.error;
 						Context.StackPosition--;
 
 						if (error.raised)
@@ -3727,7 +3727,7 @@ namespace juicescript.runtime
 					var obj_iter = Context.IITERATOR._link_codescope.Parent.Container.Traits[1].Class;
 					InitCacheInstance(obj_iter, iter_slot, false, out RtInstance _instance);
 
-					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot],scope_ptr, ref error);
+					PrepareSaveMethodScope(heap, iterVar, ref Context.StackSlots[iter_slot], scope_ptr, ref error);
 					if (error.raised)
 					{
 						Context.GC.ReturnIterContextWhenGetIterFailed();
@@ -3774,7 +3774,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* ITER_NEXT(int dst_index,  byte* PC, RtHeapBase methodscope,
+		private unsafe byte* ITER_NEXT(int dst_index, byte* PC, RtHeapBase methodscope,
 			int stackStPos,
 			Span<NaNBoxing> stackslots,
 			byte* PC_START,
@@ -3877,7 +3877,7 @@ namespace juicescript.runtime
 			StackLocater* tmpArgLoc = stackalloc StackLocater[2];
 			tmpArgLoc[0].index = 0;
 			tmpArgLoc[1].index = 1;
-			var mctx = new RunMethodArgs(iter_v, iter_v.HeapPtr, 2, (byte*)tmpArgLoc, argSpan,  reseveSlot,0,false);
+			var mctx = new RunMethodArgs(iter_v, iter_v.HeapPtr, 2, (byte*)tmpArgLoc, argSpan, reseveSlot, 0, false);
 			RunMethod(function, ref mctx);
 			error = mctx.error;
 
@@ -3933,7 +3933,7 @@ namespace juicescript.runtime
 				{
 					var value = result_payload.ReadSlot(2, this);
 					//检查这里是否是一个struct!如果是，需要从Context.StackPosition-1槽里复制到stackslots[resultLoc.index]里!
-					if (value.IsStruct() )//value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
+					if (value.IsStruct())//value.ValueType == BoxType.HeapPtr && value.HeapKind == (byte)RtHeapTypeKind.INSTANCE)
 					{
 						var check = (RtInstance)HeapShortCut[value.HeapPtr];
 						Debug.Assert(((ASInstance)check.Type).Flags.HasFlag(ClassFlags.Struct));
@@ -4040,7 +4040,7 @@ namespace juicescript.runtime
 			var function = vtableitem.Trait.Method;
 
 			var mctx = new RunMethodArgs(iter_v, iter_v.HeapPtr,
-				 1, (byte*)&insLoc, stackslots,  -1,0,false);
+				 1, (byte*)&insLoc, stackslots, -1, 0, false);
 			RunMethod(function, ref mctx
 				);
 			error = mctx.error;
@@ -4055,7 +4055,7 @@ namespace juicescript.runtime
 				goto flag_handle_error;
 			}
 
-			
+
 
 			NaNBoxing load_error = stackslots[exception_ctx->hold_error];
 			if (load_error.ValueType != BoxType.Fault)
@@ -4141,7 +4141,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* O_ld_method(int dst_index,  byte* PC,
+		private unsafe byte* O_ld_method(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos
 			ref FrameContext frame
 			)
@@ -4150,9 +4150,9 @@ namespace juicescript.runtime
 			target.index = dst_index;
 
 			StackLocater instance;
-		 	instance.index =  LoadStackLocater(ref PC);
+			instance.index = LoadStackLocater(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -4165,7 +4165,7 @@ namespace juicescript.runtime
 			else
 			{
 				var o = frame.methodscope; //HeapShotCut[scope_ptr];
-									 //int instancePtr = scope_ptr;
+										   //int instancePtr = scope_ptr;
 				NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(frame.scope_ptr, (byte)o.Kind, (byte)(o.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)o.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 				do
 				{
@@ -4381,7 +4381,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization )]
-		private unsafe byte* M_Call(int dst_index,  byte* PC, 
+		private unsafe byte* M_Call(int dst_index, byte* PC,
 			//RtMethodScope methodscope,
 			//Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			ref FrameContext frame,
@@ -4418,7 +4418,7 @@ namespace juicescript.runtime
 
 
 
-			var mctx = new RunMethodArgs(_methodclosure_.This, _methodclosure_.ScopePtr, (ushort)argsCount, argementsPtr, stackslots,  frame.stackStPos + target.index, stackslots[function.index].HeapPtr,false);
+			var mctx = new RunMethodArgs(_methodclosure_.This, _methodclosure_.ScopePtr, (ushort)argsCount, argementsPtr, stackslots, frame.stackStPos + target.index, stackslots[function.index].HeapPtr, false);
 			NaNBoxing result = RunMethod(method,
 				ref mctx);
 			error = mctx.error;
@@ -4436,10 +4436,10 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Bindglobal_call(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Bindglobal_call(int dst_index, byte* PC,
 			//RtMethodScope methodscope,
 			//Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
-			
+
 			ref FrameContext frame,
 			ref ReceiveError error)
 		{
@@ -4494,7 +4494,7 @@ namespace juicescript.runtime
 							{
 								goto flag_handle_error;
 							}
-							return PC;
+							return new HandlerResult(PC, false);
 
 						}
 						//else
@@ -4568,7 +4568,7 @@ namespace juicescript.runtime
 
 			}
 
-			var mctx = new RunMethodArgs(_this_, closure.ScopePtr, (ushort)argsCount, argementsPtr, stackslots, frame.stackStPos + result.index, funValue.HeapPtr,false);
+			var mctx = new RunMethodArgs(_this_, closure.ScopePtr, (ushort)argsCount, argementsPtr, stackslots, frame.stackStPos + result.index, funValue.HeapPtr, false);
 			NaNBoxing ret = RunMethod(func, ref mctx);
 			error = mctx.error;
 			if (error.raised)
@@ -4578,14 +4578,15 @@ namespace juicescript.runtime
 
 			stackslots[result.index] = ret;
 
-
+			return new HandlerResult(PC, false);
+			
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe byte* Bindthis_call(int dst_index,  byte* PC, 
+		private unsafe byte* Bindthis_call(int dst_index, byte* PC,
 			//RtHeapBase methodscope,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos,
@@ -4605,7 +4606,7 @@ namespace juicescript.runtime
 			StackLocater _this_;
 			_this_.index = LoadStackLocater(ref PC);
 
-			int argsCount=
+			int argsCount =
 			LoadInt32(ref PC);
 
 			//!!需要考虑对齐问题
@@ -4735,9 +4736,9 @@ namespace juicescript.runtime
 				((func.__ismethod && !func.__is_call_or_apply) ? closure.This : thisValue),
 				closure.ScopePtr,
 
-				(ushort)argsCount, argementsPtr, frame.stackslots, 
+				(ushort)argsCount, argementsPtr, frame.stackslots,
 				frame.stackStPos + result.index,
-				funValue.HeapPtr,false);
+				funValue.HeapPtr, false);
 
 			NaNBoxing ret = RunMethod(
 				func,
@@ -4760,9 +4761,9 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_function_call( byte* PC, 
-			int dst_index, 
-			
+		private unsafe HandlerResult Ld_function_call(byte* PC,
+			int dst_index,
+
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, 
 			////ASContainer scopeType,
 			//int scope_ptr,
@@ -4792,7 +4793,7 @@ namespace juicescript.runtime
 			Debug.Assert(((ASMethodBody)frame.methodscope.Type).heapConstants.pool_kinds[fbox.IntValue] == ASMethodBody.PoolHeapPtrKind.Method);
 
 			ASMethod function = (ASMethod)((ASMethodBody)frame.methodscope.Type).heapConstants.pool_values[fbox.IntValue];
-			
+
 			//Context.link_const_methods[(int)fbox.UIntValue]; //((ASMethodBody)obj.Type).Method;
 
 			////加载global。或者instance。
@@ -4807,7 +4808,7 @@ namespace juicescript.runtime
 			//_this_.SetHeapPtr(globalptr);
 
 			var o = frame.methodscope; //HeapShotCut[scope_ptr];
-								 //int instancePtr = scope_ptr;
+									   //int instancePtr = scope_ptr;
 			NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(frame.scope_ptr, (byte)o.Kind, (byte)(o.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)o.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 			do
 			{
@@ -4827,7 +4828,7 @@ namespace juicescript.runtime
 			NaNBoxing _this_ = new NaNBoxing();
 			_this_ = instancePtr; //.SetHeapPtr(instancePtr);
 
-			var mctx = new RunMethodArgs(_this_, frame.scope_ptr, (ushort)argsCount, argementsPtr, frame.stackslots,frame.stackStPos + target.index,0,false);
+			var mctx = new RunMethodArgs(_this_, frame.scope_ptr, (ushort)argsCount, argementsPtr, frame.stackslots, frame.stackStPos + target.index, 0, false);
 			NaNBoxing result = RunMethod(function, ref mctx);
 			error = mctx.error;
 			if (error.raised)
@@ -4837,13 +4838,15 @@ namespace juicescript.runtime
 
 			frame.stackslots[target.index] = result;
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe byte* Ld_function_bindglobal_call( byte* PC,
+		private unsafe HandlerResult Ld_function_bindglobal_call(byte* PC,
 			//RtHeapBase methodscope,
 			int dst_index,
 			//Span<NaNBoxing> constants,
@@ -4919,7 +4922,7 @@ namespace juicescript.runtime
 			//if (((method.Flags & (MethodFlags.NeedRest | MethodFlags.NeedArguments | MethodFlags.Generator | MethodFlags.ASYNC)) == 0) 
 			//	&&
 			//	method.Parameters.Count == argsCount
-				
+
 			//	)
 			//{
 			//	RunMethod_MatchArgs(method, _this_, ((RtClosure)closure).ScopePtr, stackslots, (ushort)argsCount, argementsPtr, stackStPos + target.index,ref error);
@@ -4929,9 +4932,9 @@ namespace juicescript.runtime
 			{
 				var mctx = new RunMethodArgs(_this_,
 					((RtClosure)closure).ScopePtr,
-					(ushort)argsCount, argementsPtr, frame.stackslots, frame.stackStPos + dst_index, closure_ptr,false);
+					(ushort)argsCount, argementsPtr, frame.stackslots, frame.stackStPos + dst_index, closure_ptr, false);
 
-				NaNBoxing ret = RunMethod(method,ref mctx);
+				NaNBoxing ret = RunMethod(method, ref mctx);
 				error = mctx.error;
 				if (error.raised)
 				{
@@ -4941,20 +4944,22 @@ namespace juicescript.runtime
 				frame.stackslots[dst_index] = ret;
 			}
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
 
-		
-		private unsafe byte* O_BindGlobal_Recurse_Call( int dst_index,  byte* PC,ref FrameContext frame,
+
+		private unsafe byte* O_BindGlobal_Recurse_Call(int dst_index, byte* PC, ref FrameContext frame,
 			ref ReceiveError error)
 		{
 			var method = frame.method;
 
-			int argsCount=
+			int argsCount =
 			LoadInt32(ref PC);
 
 			//!!需要考虑对齐问题
@@ -4991,7 +4996,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* O_Ld_function_bindglobal( byte* PC,
+		private unsafe byte* O_Ld_function_bindglobal(byte* PC,
 			int dst_index,
 
 			//RtHeapBase methodscope,
@@ -5000,7 +5005,7 @@ namespace juicescript.runtime
 			//Span<NaNBoxing> stackslots,
 			//int scope_ptr, int stackStPos,
 
-			ref FrameContext frame,			
+			ref FrameContext frame,
 			ref ReceiveError error)
 		{
 
@@ -5077,7 +5082,7 @@ namespace juicescript.runtime
 		/// <param name="newValue"></param>
 		/// <param name="nvmember"></param>
 		//[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void Fill_StructAutoCtor(Span<byte> store,ushort memberIndex, TypeLayout typeLayout, NaNBoxing newValue,ScopeMember nvmember)
+		private void Fill_StructAutoCtor(Span<byte> store, ushort memberIndex, TypeLayout typeLayout, NaNBoxing newValue, ScopeMember nvmember)
 		{
 			var data = store.Slice(typeLayout.Offset[memberIndex], typeLayout.SlotSize[memberIndex]);
 
@@ -5114,10 +5119,10 @@ namespace juicescript.runtime
 			}
 		}
 
-		private unsafe byte* NEW_INSTANCE(int dst_index,  byte* PC,
+		private unsafe byte* NEW_INSTANCE(int dst_index, byte* PC,
 			//int stackStPos, int scope_ptr,
 			//Span<NaNBoxing> stackslots, 
-			
+
 			//RtHeapBase methodscope,
 
 			ref FrameContext frame,
@@ -5127,8 +5132,8 @@ namespace juicescript.runtime
 			//StackLocater target;
 			//StackLocater typeLocater;
 			int target = dst_index;
-			int typeLocater_index =  LoadStackLocater(ref PC);
-			int argsCount = 
+			int typeLocater_index = LoadStackLocater(ref PC);
+			int argsCount =
 			LoadInt32(ref PC);
 
 			//StackLocater* argements = (StackLocater*)PC;
@@ -5182,7 +5187,7 @@ namespace juicescript.runtime
 						//((RtVector)instance).HEAPINSTANCE_PTR = 0;
 						//((RtVector)instance).element_asclass = @class.Instance._element_class;
 						//((RtVector)instance).element_type = @class.Instance._element_class == null ? TypeKind.Any : (TypeKind)@class.Instance._element_class.Type_identifier;
-						
+
 						//((RtVector)instance).GetStore().length = 0;
 						//((RtVector)instance).GetStore().elementSize = VectorImpl.VectorStore.GetElementSize(((RtVector)instance).element_type, ((RtVector)instance).element_asclass);
 
@@ -5254,7 +5259,7 @@ namespace juicescript.runtime
 								//((RtArray)instance).array_len = 0;
 								//((RtArray)instance).methodscopeslot_ref_state = 0;
 								//((RtArray)instance).HEAPINSTANCE_PTR = 0;
-								((RtArray)instance).SetStoreCacheZero( argsCount == 0 , Context.cache_array_memory[ptrIndex], Context.cache_array_structindex[ptrIndex]);
+								((RtArray)instance).SetStoreCacheZero(argsCount == 0, Context.cache_array_memory[ptrIndex], Context.cache_array_structindex[ptrIndex]);
 								if (argsCount == 0)
 								{
 									stackslots[target] = instancePtr;
@@ -5277,8 +5282,8 @@ namespace juicescript.runtime
 							else if (argsCount >= 1)
 							{
 								byte* P = argementsPtr + sizeof(StackLocater) * (Context.STRING.Instance.Constructor.Parameters.Count - 1);
-								
-								int argLocater_index = LoadStackLocater( ref P);
+
+								int argLocater_index = LoadStackLocater(ref P);
 
 								NaNBoxing box = stackslots[argLocater_index];
 								ConvertValueType(ref error, box, TypeKind.String, Context.STRING, ref stackslots[target], scope_ptr);
@@ -5301,11 +5306,11 @@ namespace juicescript.runtime
 							else if (argsCount >= 1)
 							{
 								byte* P = argementsPtr + sizeof(StackLocater) * (Context.BOOLEAN.Instance.Constructor.Parameters.Count - 1);
-								
+
 								int argLocater = LoadStackLocater(ref P);
 
 								NaNBoxing box = stackslots[argLocater];
-								ConvertToBoolean( box, ref stackslots[target]);
+								ConvertToBoolean(box, ref stackslots[target]);
 
 							}
 
@@ -5351,7 +5356,7 @@ namespace juicescript.runtime
 							else if (argsCount >= 1)
 							{
 								byte* P = argementsPtr + sizeof(StackLocater) * (Context.NUMBER.Instance.Constructor.Parameters.Count - 1);
-								
+
 								int argLocater = LoadStackLocater(ref P);
 
 								NaNBoxing box = stackslots[argLocater];
@@ -5538,7 +5543,7 @@ namespace juicescript.runtime
 					else
 					{
 						var mctx = new RunMethodArgs(stackslots[target], instancePtr.HeapPtr,
-							(ushort)argsCount, argementsPtr, stackslots,-1, 0, true);
+							(ushort)argsCount, argementsPtr, stackslots, -1, 0, true);
 						//执行构造函数
 						RunMethod(ctor, ref mctx);
 						error = mctx.error;
@@ -5560,7 +5565,7 @@ namespace juicescript.runtime
 						int arr_ptr = ((RtArray)instance).HEAPINSTANCE_PTR == 0 ? instancePtr.HeapPtr : ((RtArray)instance).HEAPINSTANCE_PTR;
 						stackslots[target].SetHeapPtr(arr_ptr, (byte)RtHeapTypeKind.ARRAY, (byte)HeapKindFlag.NONE);
 					}
-					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((RtInstance)instance).HEAPINSTANCE_PTR != 0 )
+					else if (instancePtr.HeapKind == (byte)RtHeapTypeKind.INSTANCE && ((RtInstance)instance).HEAPINSTANCE_PTR != 0)
 					{
 						Debug.Assert(!instancePtr.IsStruct());
 
@@ -5649,8 +5654,8 @@ namespace juicescript.runtime
 					var mctx = new RunMethodArgs(Context.StackSlots[ptrIndex],
 						((RtClosure)constructor_closure).ScopePtr,
 						//((RtClosure)constructor_closure).ScopeType, 
-						(ushort)argsCount, argementsPtr, stackslots,  stackStPos + target, type_box.HeapPtr, true);
-					NaNBoxing ret_constructor = RunMethod(constructor,ref mctx);
+						(ushort)argsCount, argementsPtr, stackslots, stackStPos + target, type_box.HeapPtr, true);
+					NaNBoxing ret_constructor = RunMethod(constructor, ref mctx);
 					error = mctx.error;
 
 					if (error.raised)
@@ -5692,7 +5697,7 @@ namespace juicescript.runtime
 							var target_instancePtr = Context.CacheInstancePtr + target_index;
 
 							Debug.Assert(Context.OBJECT.Instance._link_codescope.TypeLayout.Size == 0);
-							
+
 
 							var target_ins = (RtInstance)HeapShortCut[target_instancePtr];
 							//target_ins.Type = Context.OBJECT.Instance;
@@ -5769,7 +5774,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* O_NewInstance_Var(int dst_index,  byte* PC,
+		private unsafe byte* O_NewInstance_Var(int dst_index, byte* PC,
 			//int stackStPos, int scope_ptr,
 			//Span<NaNBoxing> stackslots,
 			//RtHeapBase methodscope, 
@@ -5781,7 +5786,7 @@ namespace juicescript.runtime
 				heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
 				heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
 			}
-			
+
 			int typeLocater = LoadStackLocater(ref PC);
 			int argsCount =
 			LoadInt32(ref PC);
@@ -5809,11 +5814,11 @@ namespace juicescript.runtime
 			NaNBoxing heapV = heap.ReadSlotRef(heapLocater.MemberIndex);
 
 
-			if (heap.IsStackSlot && !heapV.IsStruct() && heapV.ValueType == BoxType.HeapPtr && heapV.HeapKind >=  (byte)RtHeapTypeKind.INSTANCE )
+			if (heap.IsStackSlot && !heapV.IsStruct() && heapV.ValueType == BoxType.HeapPtr && heapV.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 			{
 				//先准备更新原对象
 
-				
+
 				prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, frame.scope_ptr);
 			}
 
@@ -5887,14 +5892,14 @@ namespace juicescript.runtime
 				}
 				else if (ctor.Flags.HasFlag(MethodFlags.BLANK))
 				{
-					
+
 				}
 				else
 				{
 					var mctx = new RunMethodArgs(stackslots[dst_index], instancePtr.HeapPtr,
-						(ushort)argsCount, argementsPtr, stackslots,-1, 0, true);
+						(ushort)argsCount, argementsPtr, stackslots, -1, 0, true);
 					//执行构造函数
-					RunMethod(ctor, ref mctx );
+					RunMethod(ctor, ref mctx);
 					error = mctx.error;
 					if (error.raised)
 					{
@@ -6069,14 +6074,14 @@ namespace juicescript.runtime
 
 			if (heap.IsStackSlot)
 			{
-				if ( !heapV.IsStruct() && heapV.ValueType == BoxType.HeapPtr && heapV.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
+				if (!heapV.IsStruct() && heapV.ValueType == BoxType.HeapPtr && heapV.HeapKind >= (byte)RtHeapTypeKind.INSTANCE)
 				{
 					//先准备更新原对象
 					//int* m_scope = method_scopes;
 					//*m_scope++ = scope_ptr;
 					//prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, null, method_scopes);
 
-					
+
 					prepare_savemethodscope_beforeSave(heap, heapV, heapLocater, frame.scope_ptr);
 				}
 
@@ -6135,7 +6140,7 @@ namespace juicescript.runtime
 
 
 
-		
+
 		private unsafe byte* O_Store_InstanceField(int src_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
@@ -6174,13 +6179,13 @@ namespace juicescript.runtime
 			Debug.Assert(instance_box.ValueType == BoxType.HeapPtr);
 
 			Debug.Assert(instance_box.HeapKind == (byte)RtHeapTypeKind.INSTANCE);
-			
+
 			var instance = HeapShortCut[instance_box.HeapPtr];
 			RtInstance payload = (RtInstance)instance;
 
 			var box = frame.stackslots[source.index];
 
-			
+
 
 
 			if (instance_box.IsStruct())
@@ -6193,7 +6198,7 @@ namespace juicescript.runtime
 						Debug.Assert(box.IsStruct());
 
 						var src_payload = ((RtInstance)HeapShortCut[box.HeapPtr]);
-						var src = src_payload.GetStoreData(this, (ASInstance)src_payload.Type).Slice(0,slotsize);
+						var src = src_payload.GetStoreData(this, (ASInstance)src_payload.Type).Slice(0, slotsize);
 
 						var span = store.Slice(offset, slotsize);
 						src.CopyTo(span);
@@ -6238,7 +6243,7 @@ namespace juicescript.runtime
 
 					}
 				}
-				
+
 			}
 			else
 			{
@@ -6318,7 +6323,7 @@ namespace juicescript.runtime
 
 						if (error.raised)
 							return PC;
-						
+
 
 						RtInstance.SetSlotDataByValue((TypeKind)typekind, ptr, conv);
 
@@ -6347,7 +6352,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* O_NewStruct(int dst_index,  byte* PC,
+		private unsafe byte* O_NewStruct(int dst_index, byte* PC,
 			//int stackStPos,
 			//Span<NaNBoxing> stackslots,
 			ref FrameContext frame,
@@ -6459,7 +6464,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* O_Ld_InstanceField(int dst_index,  byte* PC,
+		private unsafe byte* O_Ld_InstanceField(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
@@ -6556,7 +6561,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Type_cast(int dst_index,  byte* PC, 
+		private unsafe byte* Type_cast(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -6610,7 +6615,7 @@ namespace juicescript.runtime
 			return PC;
 		}
 
-		private unsafe byte* Super_ctor(byte* PC, 
+		private unsafe byte* Super_ctor(byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -6620,7 +6625,7 @@ namespace juicescript.runtime
 			//int classid_index = 0;
 			//LoadInt32(&classid_index, PC);
 
-			int argsCount=
+			int argsCount =
 			LoadInt32(ref PC);
 
 			//StackLocater* argements = (StackLocater*)PC;
@@ -6644,8 +6649,8 @@ namespace juicescript.runtime
 
 			//var super_class = Context.link_const_class[(int)boxing.UIntValue];
 			var ctor = super_class.Instance.Constructor;
-			var mctx = new RunMethodArgs(((RtMethodScope)frame.methodscope).ThisPtr, frame.scope_ptr, (ushort)argsCount, argementsPtr, frame.stackslots, -1,0,false);
-			RunMethod(ctor, ref mctx );
+			var mctx = new RunMethodArgs(((RtMethodScope)frame.methodscope).ThisPtr, frame.scope_ptr, (ushort)argsCount, argementsPtr, frame.stackslots, -1, 0, false);
+			RunMethod(ctor, ref mctx);
 			error = mctx.error;
 			return PC;
 		}
@@ -6858,8 +6863,8 @@ namespace juicescript.runtime
 										_this = _obj.RefInstance; //.SetHeapPtr(_obj.RefInstance.HeapPtr);
 
 										var mctx = new RunMethodArgs(_this,
-											_obj.RefInstance.HeapPtr, 1, (byte*)tmpArgLoc, argSpan,stackStPos + stack.index,0,false);
-										NaNBoxing result = RunMethod(((ASInstance)refObj.Type).indexer_delete,ref mctx);
+											_obj.RefInstance.HeapPtr, 1, (byte*)tmpArgLoc, argSpan, stackStPos + stack.index, 0, false);
+										NaNBoxing result = RunMethod(((ASInstance)refObj.Type).indexer_delete, ref mctx);
 										frame.error = mctx.error;
 										Context.StackPosition -= 1;
 										if (frame.error.raised)
@@ -6930,13 +6935,13 @@ namespace juicescript.runtime
 
 		flag_handle_error:
 			;
-			return new HandlerResult(PC,true);
+			return new HandlerResult(PC, true);
 		}
 
 
 
 
-		private unsafe byte* GET_IN(int dst_index,  byte* PC, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, RtHeapBase methodscope, ref ReceiveError error)
+		private unsafe byte* GET_IN(int dst_index, byte* PC, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, RtHeapBase methodscope, ref ReceiveError error)
 		{
 			//StackLocater dst;
 			//StackLocater v1;
@@ -7131,8 +7136,8 @@ namespace juicescript.runtime
 							{
 								Context.StackPosition++;
 								var mctx = new RunMethodArgs(_this,
-									type.HeapPtr, 1, (byte*)&argLoc, argSpan,  Context.StackPosition - 1,0,false);
-								RunMethod(((ASInstance)obj.Type).indexer_get,ref mctx);
+									type.HeapPtr, 1, (byte*)&argLoc, argSpan, Context.StackPosition - 1, 0, false);
+								RunMethod(((ASInstance)obj.Type).indexer_get, ref mctx);
 								error = mctx.error;
 								find_by_index = Context.StackSlots[Context.StackPosition - 1];
 								Context.StackPosition--;
@@ -7308,7 +7313,7 @@ namespace juicescript.runtime
 
 		}
 
-		private unsafe byte* GET_INSTANCEOF(int dst_index,  byte* PC, Span<NaNBoxing> stackslots,
+		private unsafe byte* GET_INSTANCEOF(int dst_index, byte* PC, Span<NaNBoxing> stackslots,
 			ref ReceiveError error
 			)
 		{
@@ -7571,7 +7576,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_method(int dst_index,  byte* PC, 
+		private unsafe byte* Ld_method(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7582,7 +7587,7 @@ namespace juicescript.runtime
 			int instance =
 			instance = LoadStackLocater(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -7595,7 +7600,7 @@ namespace juicescript.runtime
 			else
 			{
 				var o = frame.methodscope; //HeapShotCut[scope_ptr];
-									 //int instancePtr = scope_ptr;
+										   //int instancePtr = scope_ptr;
 				NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(frame.scope_ptr, (byte)o.Kind, (byte)(o.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)o.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 				do
 				{
@@ -7810,7 +7815,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Read_property(int dst_index,  byte* PC, 
+		private unsafe byte* Read_property(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7818,10 +7823,10 @@ namespace juicescript.runtime
 			StackLocater target;
 			target.index = dst_index;
 
-			int instance=
+			int instance =
 			LoadStackLocater(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -7834,7 +7839,7 @@ namespace juicescript.runtime
 			else
 			{
 				var o = frame.methodscope; //HeapShotCut[scope_ptr];
-									 //int instancePtr = scope_ptr;
+										   //int instancePtr = scope_ptr;
 				NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(frame.scope_ptr, (byte)o.Kind, (byte)(o.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)o.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 				do
 				{
@@ -7874,7 +7879,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Read_property_interface(int dst_index,  byte* PC, 
+		private unsafe byte* Read_property_interface(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int stackStPos, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7885,10 +7890,10 @@ namespace juicescript.runtime
 			int instance =
 			LoadStackLocater(ref PC);
 
-			int class_id = 
+			int class_id =
 			LoadInt32(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -7913,11 +7918,11 @@ namespace juicescript.runtime
 
 				var boxing = frame.constants[class_id];
 
-				
+
 				ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)frame.methodscope.Type).heapConstants;
 				Debug.Assert(heap_consts.pool_kinds[boxing.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-			   var @class = (ASClass)heap_consts.pool_values[boxing.IntValue];
+				var @class = (ASClass)heap_consts.pool_values[boxing.IntValue];
 
 				Debug.Assert(@class.Instance.IsInterface);
 
@@ -7928,8 +7933,8 @@ namespace juicescript.runtime
 
 				var function = vtableitem.Trait.Method;
 				//var define = (ASInstance)vtableitem.DefineAt;
-				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, frame.stackslots, frame.stackStPos + target.index,0,false);
-				NaNBoxing result = RunMethod(function,ref mctx);
+				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 0, null, frame.stackslots, frame.stackStPos + target.index, 0, false);
+				NaNBoxing result = RunMethod(function, ref mctx);
 				error = mctx.error;
 				if (error.raised)
 				{
@@ -7947,7 +7952,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Write_property(int dst_index,  byte* PC,
+		private unsafe byte* Write_property(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7958,7 +7963,7 @@ namespace juicescript.runtime
 			int instance =
 			LoadStackLocater(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -7972,7 +7977,7 @@ namespace juicescript.runtime
 			else
 			{
 				var o = frame.methodscope; //HeapShotCut[scope_ptr];
-									 //int instancePtr = scope_ptr;
+										   //int instancePtr = scope_ptr;
 				NaNBoxing instancePtr = default; instancePtr.SetHeapPtr(frame.scope_ptr, (byte)o.Kind, (byte)(o.Kind == RtHeapTypeKind.INSTANCE ? (((ASInstance)o.Type).Flags.HasFlag(ClassFlags.Struct) ? HeapKindFlag.FLAG_STRUCT : HeapKindFlag.NONE) : HeapKindFlag.NONE));
 				do
 				{
@@ -8015,7 +8020,7 @@ namespace juicescript.runtime
 
 				var define = (ASInstance)vtableitem.DefineAt;
 
-				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots,  -1,0,false);
+				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots, -1, 0, false);
 				RunMethod(function,
 					ref mctx);
 				error = mctx.error;
@@ -8031,8 +8036,8 @@ namespace juicescript.runtime
 				var function = vtableitem.Trait.Method;
 
 				//var define = (ASInstance)vtableitem.DefineAt;
-				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots,  -1,0,false);
-				RunMethod(function,ref mctx );
+				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots, -1, 0, false);
+				RunMethod(function, ref mctx);
 				error = mctx.error;
 				if (error.raised)
 				{
@@ -8044,8 +8049,8 @@ namespace juicescript.runtime
 				var @class = ((RtScriptClass)ins).Meta;
 				var function = @class._vtable.Items[vtable_index].Trait.Method;
 
-				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots, -1,0,false);
-				RunMethod(function,ref mctx);
+				var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots, -1, 0, false);
+				RunMethod(function, ref mctx);
 				error = mctx.error;
 				if (error.raised)
 				{
@@ -8068,7 +8073,7 @@ namespace juicescript.runtime
 
 
 					byte* aPtr = (byte*)argementsPtr;
-					int argLocater=
+					int argLocater =
 					LoadStackLocater(ref aPtr);
 
 					NaNBoxing box = frame.stackslots[argLocater];
@@ -8102,8 +8107,8 @@ namespace juicescript.runtime
 
 
 		private unsafe byte* Write_property_interface(int dst_index, byte* PC,
-			//ASMethodBody.MethodHeapConstants heap_consts,
-			// Span<NaNBoxing> constants, Span<NaNBoxing> stackslots,
+			 //ASMethodBody.MethodHeapConstants heap_consts,
+			 // Span<NaNBoxing> constants, Span<NaNBoxing> stackslots,
 			 ref FrameContext frame,
 			 ref ReceiveError error)
 		{
@@ -8113,10 +8118,10 @@ namespace juicescript.runtime
 			int instance =
 			LoadStackLocater(ref PC);
 
-			int class_id = 
+			int class_id =
 			LoadInt32(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -8180,8 +8185,8 @@ namespace juicescript.runtime
 					var function = vtableitem.Trait.Method;
 
 					//var define = (ASInstance)vtableitem.DefineAt;
-					var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots,-1,0,false);
-					RunMethod(function,ref mctx);
+					var mctx = new RunMethodArgs(thisValue, thisValue.HeapPtr, 1, (byte*)argementsPtr, frame.stackslots, -1, 0, false);
+					RunMethod(function, ref mctx);
 					error = mctx.error;
 					if (error.raised)
 					{
@@ -8207,7 +8212,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_memberInitValue( byte* PC, RtHeapBase methodscope, int scope_ptr, 
+		private unsafe byte* Ld_memberInitValue(byte* PC, RtHeapBase methodscope, int scope_ptr,
 			//ASContainer scopeType,
 			ref ReceiveError error)
 		{
@@ -8318,18 +8323,18 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe HandlerResult Ld_MultiName_Ref(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_MultiName_Ref(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame
 			)
 		{
-			
-	
+
+
 			int src =
 			LoadStackLocater(ref PC);
 
 			int const_id =
-			
+
 			LoadInt32(ref PC);
 			//byte* _p = (byte*)&const_id;
 			//*_p++ = *PC++;
@@ -8459,12 +8464,12 @@ namespace juicescript.runtime
 		flag_handle_error:
 			;
 			Debug.Assert(frame.error.raised);
-			return new HandlerResult(PC,true);
+			return new HandlerResult(PC, true);
 
 		}
 
 
-		private unsafe byte* Ld_MultiName_Val(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_MultiName_Val(int dst_index, byte* PC,
 			//ASMethod method, RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -8475,9 +8480,9 @@ namespace juicescript.runtime
 			int src =
 			LoadStackLocater(ref PC);
 
-			int const_id =			
+			int const_id =
 				LoadInt32(ref PC);
-			
+
 
 
 			string name = ((RtString)HeapShortCut[frame.constants[const_id].HeapPtr]).Str;
@@ -8606,17 +8611,17 @@ namespace juicescript.runtime
 #endif
 			}
 
-
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
 
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
 
-		private unsafe byte* Ld_RTQNameL_Ref(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_RTQNameL_Ref(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -8681,7 +8686,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				
+
 				RtHeapBase ns_instance = HeapShortCut[ns.HeapPtr];
 
 				if (ns_instance.Kind == RtHeapTypeKind.NAMESPACE)
@@ -9362,7 +9367,7 @@ namespace juicescript.runtime
 
 		lbl_rtqname_success:;
 		lbl_rtqname_dynamicprop:;
-			return PC;
+			return new HandlerResult(PC, false);
 		lbl_rtqname_ns_not_a_namespace:
 			//throw new NotImplementedException("输出命名空间类型转换异常");
 			Context.GC.CheckGC(ref error);
@@ -9379,11 +9384,11 @@ namespace juicescript.runtime
 
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe byte* StoreScopeH(int dst_index,  byte* PC,
+		private unsafe byte* StoreScopeH(int dst_index, byte* PC,
 			//int scope_ptr, RtHeapBase methodscope, Span<NaNBoxing> stackslots,
 			ref FrameContext frame,
 			ref ReceiveError error
@@ -9415,7 +9420,7 @@ namespace juicescript.runtime
 			NaNBoxing value = frame.stackslots[stackLocater.index];
 			var s = frame.methodscope; //HeapShotCut[scope_ptr];
 
-			
+
 #if !FORCOMPILER
 
 			switch (kind)
@@ -9751,7 +9756,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_InstanceOrScopeMemberValueRef(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_InstanceOrScopeMemberValueRef(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr,
 			ref FrameContext frame,
@@ -9936,16 +9941,18 @@ namespace juicescript.runtime
 			}
 			while (true);
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 
 		}
 
 
 
 
-		private unsafe byte* Ld_InstanceOrScopeMemberVal(int dst_index, byte* PC, 
+		private unsafe HandlerResult Ld_InstanceOrScopeMemberVal(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr,
 			ref FrameContext frame,
@@ -10103,18 +10110,18 @@ namespace juicescript.runtime
 
 
 
-
+			return new HandlerResult(PC, false);
 
 
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
 
-		
-		private unsafe void Store_Instance_Slow( NaNBoxing box, RtInstance instance,ushort scopemember_index , RtMethodScope methodscope, int scope_ptr , ref ReceiveError error)
+
+		private unsafe void Store_Instance_Slow(NaNBoxing box, RtInstance instance, ushort scopemember_index, RtMethodScope methodscope, int scope_ptr, ref ReceiveError error)
 		{
 			ASTrait trait = instance.Type._link_codescope.Members[(ushort)scopemember_index].trait;
 
@@ -10158,8 +10165,8 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Store_Global_Class(NaNBoxing instance_box,ushort scopemember_index,ref ReceiveError error,
-			Span<NaNBoxing> stackslots,int source_index,int scope_ptr,RtMethodScope methodscope)
+		private unsafe void Store_Global_Class(NaNBoxing instance_box, ushort scopemember_index, ref ReceiveError error,
+			Span<NaNBoxing> stackslots, int source_index, int scope_ptr, RtMethodScope methodscope)
 		{
 			var instance = HeapShortCut[instance_box.HeapPtr];
 			RtScriptClass heap = (RtScriptClass)instance;
@@ -10219,7 +10226,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* Store_InstanceOrScopeMember(int src_index,  byte* PC, 
+		private unsafe HandlerResult Store_InstanceOrScopeMember(int src_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope, 
 			ref FrameContext frame,
@@ -10234,8 +10241,8 @@ namespace juicescript.runtime
 			ushort typekind;
 			ushort scopemember_index;
 
-			typekind = *(ushort*)(PC);PC += 2;
-			scopemember_index = *(ushort*)(PC);PC += 2;
+			typekind = *(ushort*)(PC); PC += 2;
+			scopemember_index = *(ushort*)(PC); PC += 2;
 
 			NaNBoxing instance_box;
 
@@ -10244,7 +10251,7 @@ namespace juicescript.runtime
 			var stackslots = frame.stackslots;
 
 			instance_box = stackslots[insloc];
-			
+
 			if (instance_box.ValueType == BoxType.Null)
 			{
 				RaiseTypeError_AccessNull(ref error);
@@ -10260,13 +10267,13 @@ namespace juicescript.runtime
 
 				var box = stackslots[source.index];
 				Store_Instance_Slow(box, (RtInstance)instance, scopemember_index, (RtMethodScope)frame.methodscope, frame.scope_ptr, ref error);
-				
+
 			}
 			else if (instance_box.HeapKind == (byte)RtHeapTypeKind.CLASS || instance_box.HeapKind == (byte)RtHeapTypeKind.GLOBAL)
 			{
-				Store_Global_Class(instance_box, scopemember_index, ref error, stackslots, source.index, frame.scope_ptr, (RtMethodScope)frame.methodscope);				
+				Store_Global_Class(instance_box, scopemember_index, ref error, stackslots, source.index, frame.scope_ptr, (RtMethodScope)frame.methodscope);
 			}
-			
+
 #if DEBUG
 			else
 			{
@@ -10274,13 +10281,13 @@ namespace juicescript.runtime
 			}
 #endif
 
-
+			return new HandlerResult(PC, false);
 		flag_handle_error:;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe HandlerResult Ld_MulitNameL_Ref(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Ld_MulitNameL_Ref(int dst_index, byte* PC,
 			//Span<NaNBoxing> constants,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
@@ -10333,7 +10340,7 @@ namespace juicescript.runtime
 				ASMethodBody.MethodHeapConstants heap_consts = ((ASMethodBody)frame.methodscope.Type).heapConstants;
 				Debug.Assert(heap_consts.pool_kinds[vbox.IntValue] == ASMethodBody.PoolHeapPtrKind.LD_Class);
 
-			   var super_class = (ASClass)heap_consts.pool_values[vbox.IntValue];
+				var super_class = (ASClass)heap_consts.pool_values[vbox.IntValue];
 
 #if DEBUG
 				var check = GetASTypeFromValue(instance_box);
@@ -10452,7 +10459,7 @@ namespace juicescript.runtime
 
 				stackslots[stack_index].SetHeapPtr(cacheobjpointer, (byte)RtHeapTypeKind.STACK_CACHE_OBJ, (byte)HeapKindFlag.NONE);
 
-				return new HandlerResult(PC,false);
+				return new HandlerResult(PC, false);
 			}
 			else if (prop_name.ValueType != NaNBoxing.BoxType.HeapPtr)
 			{
@@ -10692,7 +10699,7 @@ namespace juicescript.runtime
 					}
 
 					var span = Context.StackSlots.AsSpan(Context.StackPosition, 2); span.Clear();
-					int tmp =  0;
+					int tmp = 0;
 					int tmp2 = 1;
 
 					int stpos = Context.StackPosition;
@@ -10760,10 +10767,10 @@ namespace juicescript.runtime
 		flag_handle_error:
 			;
 			Debug.Assert(frame.error.raised);
-			return new HandlerResult(PC,true);
+			return new HandlerResult(PC, true);
 		}
 
-		private unsafe byte* Store_MultiName(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Store_MultiName(int dst_index, byte* PC,
 			//Span<NaNBoxing> constants,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
@@ -10771,15 +10778,15 @@ namespace juicescript.runtime
 			ref ReceiveError error)
 		{
 
-			
+
 			int source_index = dst_index;
 
 			int ins =
 			LoadStackLocater(ref PC);
 
-			int const_id =			
+			int const_id =
 				LoadInt32(ref PC);
-			
+
 
 			string name = ((RtString)HeapShortCut[frame.constants[const_id].HeapPtr]).Str;
 
@@ -10914,17 +10921,17 @@ namespace juicescript.runtime
 #endif
 			}
 
-
+			return new HandlerResult(PC, false);
 		flag_handle_error:
 			;
 
 
-			return PC;
+			return new HandlerResult(PC, true);
 
 		}
 
 
-		private unsafe void Store_MultiNameL_Slow(int source, int instance_loc, int super_const_index, int tmp_holder, int _name, 
+		private unsafe void Store_MultiNameL_Slow(int source, int instance_loc, int super_const_index, int tmp_holder, int _name,
 			//NaNBoxing* constants,
 			//RtHeapBase methodscope,
 			//Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
@@ -11062,9 +11069,9 @@ namespace juicescript.runtime
 
 				)
 			{
-				
 
-				if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR )//&& RtVector.IsValidIndexType(prop_name))
+
+				if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR)//&& RtVector.IsValidIndexType(prop_name))
 				{
 
 					Context.GC.CheckGC(ref error);
@@ -11182,8 +11189,8 @@ namespace juicescript.runtime
 									}
 									else
 									{
-										
-										bool success  =index.TryFormat(buffers, out int l);
+
+										bool success = index.TryFormat(buffers, out int l);
 										Debug.Assert(success);
 										name = buffers.Slice(0, l);
 
@@ -11394,7 +11401,7 @@ namespace juicescript.runtime
 					}
 
 					var span = Context.StackSlots.AsSpan(Context.StackPosition, 2); span.Clear();
-					int tmp =  0; int tmp2 =  1;
+					int tmp = 0; int tmp2 = 1;
 					int stpos = Context.StackPosition;
 					Context.StackPosition += 2;
 					NaNBoxing primitive_name = ToPrimitive(ref error, prop_name, HINT.h_string, frame.scope_ptr, tmp, tmp2, span, stpos, ((RtMethodScope)frame.methodscope).ThisPtr);
@@ -11496,7 +11503,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* Store_MultiNameL(int dst_index,  byte* PC, 
+		private unsafe HandlerResult Store_MultiNameL(int dst_index, byte* PC,
 			//Span<NaNBoxing> constants,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
@@ -11535,7 +11542,7 @@ namespace juicescript.runtime
 				RtHeapBase instance = HeapShortCut[instance_box.HeapPtr];
 
 				SetArraySlot(stackslots[source_index], array_i, instance, ref error);
-				return PC;
+				return new HandlerResult(PC, false);
 			}
 			else if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
 				&& RtVector.IsValidIndexType(name_box, out int v_index)
@@ -11546,12 +11553,12 @@ namespace juicescript.runtime
 
 
 
-				
+
 				if (Context.StackPosition >= Context.STACK_LENGTH)
 				{
 					Context.GC.CheckGC(ref error);
 					RaiseStackOverflow(ref error);
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 
 				//RtVector vector = ((RtVector)instance);
@@ -11565,14 +11572,14 @@ namespace juicescript.runtime
 				if (error.raised)
 				{
 					Context.StackPosition--;
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 				//为性能考虑，阻止ConvertValueType调函数
 
 
 				int validid = v_index;
 				var store = ((RtVector)vector).GetStore();
-				if (!( validid< store.length ))//store.IsValidIndexRange(name_box, out validid)))
+				if (!(validid < store.length))//store.IsValidIndexRange(name_box, out validid)))
 				{
 					int maxlen = store.length;
 					if (validid == maxlen && maxlen < int.MaxValue) //扩容
@@ -11582,7 +11589,7 @@ namespace juicescript.runtime
 						if (error.raised)
 						{
 							Context.StackPosition--;
-							return PC;
+							return new HandlerResult(PC, true);
 						}
 
 						//throw new NotImplementedException();
@@ -11591,7 +11598,7 @@ namespace juicescript.runtime
 					{
 						Context.StackPosition--;
 						RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128]), maxlen);
-						return PC;
+						return new HandlerResult(PC, true);
 					}
 				}
 
@@ -11599,13 +11606,13 @@ namespace juicescript.runtime
 
 				Context.StackPosition--;
 
-				return PC;
+				return new HandlerResult(PC, false);
 
 			}
 			else
 			{
 				Store_MultiNameL_Slow(source_index, instance_loc, super_const_index, tmp_holder, _name, ref frame, ref error);
-				return PC;
+				return new HandlerResult(PC, error.raised);
 			}
 
 
@@ -11613,7 +11620,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* O_Store_ArrayElement(int dst_index,  byte* PC, 
+		private unsafe byte* O_Store_ArrayElement(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
 
@@ -11677,10 +11684,10 @@ namespace juicescript.runtime
 					SetArraySlot(box, array_i, instance, ref error);
 					return PC;
 				}
-			}			
+			}
 			else
 			{
-				Store_MultiNameL_Slow(source_index, instance_loc, 0, tmp_holder, _name, ref frame , ref error);
+				Store_MultiNameL_Slow(source_index, instance_loc, 0, tmp_holder, _name, ref frame, ref error);
 				return PC;
 			}
 
@@ -11688,7 +11695,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* O_Store_VectorElement(int dst_index,  byte* PC,
+		private unsafe byte* O_Store_VectorElement(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos, int scope_ptr, RtHeapBase methodscope,
 			ref FrameContext frame,
@@ -11696,7 +11703,7 @@ namespace juicescript.runtime
 		{
 			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Store_Array_Element);
 
-			
+
 			int source_index = dst_index;
 
 			int instance_loc =
@@ -11725,12 +11732,12 @@ namespace juicescript.runtime
 
 			int v_index = VectorImpl.VectorStore.GetValidIndex(name_box);
 			if (//RtVector.IsValidIndexType(name_box)
-				v_index>=0
+				v_index >= 0
 				)
 			{
 				//打补丁
 				//*opcodePtr = ((uint)INS_Code.store_Vector | (0xffffff00 & (*opcodePtr)));
-				
+
 				if (Context.StackPosition >= Context.STACK_LENGTH)
 				{
 					Context.GC.CheckGC(ref error);
@@ -11739,7 +11746,7 @@ namespace juicescript.runtime
 				}
 
 				//RtVector vector = ((RtVector)instance);
-				RtVector vector = ((RtVector)HeapShortCut[instance_box.HeapPtr]) ;
+				RtVector vector = ((RtVector)HeapShortCut[instance_box.HeapPtr]);
 				//int vptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
 				int vptr = vector.HEAPINSTANCE_PTR == 0 ? instance_box.HeapPtr : vector.HEAPINSTANCE_PTR;
 				vector = vector.payload;
@@ -11762,7 +11769,7 @@ namespace juicescript.runtime
 				//int validid;
 				var store = ((RtVector)vector).GetStore();
 
-				if (!( v_index < store.length ))//store.IsValidIndexRange(name_box, out validid)))
+				if (!(v_index < store.length))//store.IsValidIndexRange(name_box, out validid)))
 				{
 					int maxlen = store.length;
 					if (v_index == maxlen && maxlen < int.MaxValue) //扩容
@@ -11797,7 +11804,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(source_index, instance_loc, 0, tmp_holder, _name, ref frame , ref error);
+				Store_MultiNameL_Slow(source_index, instance_loc, 0, tmp_holder, _name, ref frame, ref error);
 			}
 
 			return PC;
@@ -11814,7 +11821,7 @@ namespace juicescript.runtime
 		{
 			//uint* opcodePtr = (uint*)*PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.O_Store_Array_Element);
 
-			
+
 			int source_index = dst_index;
 
 			int instance_loc =
@@ -11862,7 +11869,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-		private unsafe void Ld_MultiNameL_Val_Slow(int dst_index,  int src, int stack, int _name,
+		private unsafe void Ld_MultiNameL_Val_Slow(int dst_index, int src, int stack, int _name,
 			ref FrameContext frame
 			, ref ReceiveError error)
 		{
@@ -11997,14 +12004,14 @@ namespace juicescript.runtime
 
 				)
 			{
-				
+
 				if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR)
 				{
 					RtVector vector;
 					int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
 					//int maxlen; int validid;
 					var store = vector.GetStore();
-					if (!( v_index<store.length ))//store.IsValidIndexRange(prop_name, out int validid)))
+					if (!(v_index < store.length))//store.IsValidIndexRange(prop_name, out int validid)))
 					{
 						RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, prop_name, buffers), store.length);
 						goto flag_handle_error;
@@ -12260,7 +12267,7 @@ namespace juicescript.runtime
 				{
 					//不合理的索引范围
 #if DEBUG
-					if (RtVector.IsValidIndexType(prop_name,out int ii))
+					if (RtVector.IsValidIndexType(prop_name, out int ii))
 					{
 						throw new InvalidOperationException();
 					}
@@ -12371,12 +12378,12 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* Ld_MultiNameL_Val(int dst_index, byte* PC, 
+		private unsafe HandlerResult Ld_MultiNameL_Val(int dst_index, byte* PC,
 
 			//ASMethod method, RtHeapBase methodscope,
 
 			//Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
-			
+
 			ref FrameContext frame,
 
 			ref ReceiveError error)
@@ -12409,7 +12416,7 @@ namespace juicescript.runtime
 
 				instance_box.HeapKind == (byte)RtHeapTypeKind.ARRAY
 				&& name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
-				( (int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
+				((int)name_box_index >= 0 || (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue)))
 			{
 
 				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
@@ -12432,7 +12439,7 @@ namespace juicescript.runtime
 				//打补丁
 				//*opcodePtr = ((uint)INS_Code.Q_LD_ARR | (0xffffff00 & (*opcodePtr)));
 
-				return PC;
+				return new HandlerResult(PC, false);
 
 			}
 			else if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
@@ -12443,10 +12450,10 @@ namespace juicescript.runtime
 				int v_ptr = RtVector.FindAndUpdateHeapInstancePtr(instance_box.HeapPtr, this, out vector);
 				//int maxlen; int validid;
 				var store = vector.GetStore();
-				if (!( v_index <store.length  ))//store.IsValidIndexRange(name_box, out int validid)))
+				if (!(v_index < store.length))//store.IsValidIndexRange(name_box, out int validid)))
 				{
 					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128]), store.length);
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 				else
 				{
@@ -12456,17 +12463,17 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Ld_MultiNameL_Val_Slow(dst_index, src_index, refholder_index, _name, ref frame,  ref error);
+				Ld_MultiNameL_Val_Slow(dst_index, src_index, refholder_index, _name, ref frame, ref error);
 			}
 
-			return PC;
+			return new HandlerResult(PC, error.raised);
 
 
 		}
 
 
-		
-		private unsafe byte* O_Ld_ArrayElement (int dst_index, byte* PC, 
+
+		private unsafe byte* O_Ld_ArrayElement(int dst_index, byte* PC,
 			ref FrameContext frame
 			, ref ReceiveError error)
 		{
@@ -12532,7 +12539,7 @@ namespace juicescript.runtime
 
 
 				bool isoutofindex_or_ishole;
-				var a_element = LoadSlotFromArray(array_i,array, out isoutofindex_or_ishole);
+				var a_element = LoadSlotFromArray(array_i, array, out isoutofindex_or_ishole);
 
 				if (a_element.ValueType == BoxType.Fault)
 				{
@@ -12559,7 +12566,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* O_Ld_VectorElement(int dst_index,  byte* PC,
+		private unsafe byte* O_Ld_VectorElement(int dst_index, byte* PC,
 
 			//ASMethod method, RtHeapBase methodscope,
 
@@ -12595,15 +12602,15 @@ namespace juicescript.runtime
 
 			int index = VectorImpl.VectorStore.GetValidIndex(name_box);
 			if (
-				index >=0
+				index >= 0
 				)
 			{
-				RtVector vector = ((RtVector)HeapShortCut[instance_box.HeapPtr]);				
+				RtVector vector = ((RtVector)HeapShortCut[instance_box.HeapPtr]);
 				int v_ptr = vector.HEAPINSTANCE_PTR == 0 ? instance_box.HeapPtr : vector.HEAPINSTANCE_PTR;
 				vector = vector.payload;
-				
+
 				var store = vector.GetStore();
-				if (!( index<store.length ))//store.IsValidIndexRange(name_box, out int validid)))
+				if (!(index < store.length))//store.IsValidIndexRange(name_box, out int validid)))
 				{
 					RaiseRangeError(ref error, Extensions.GetPrimitiveValueToString(this, name_box, stackalloc char[128]), store.length);
 					return PC;
@@ -12627,9 +12634,9 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* O_Ld_Indexer(int dst_index,  byte* PC,
+		private unsafe byte* O_Ld_Indexer(int dst_index, byte* PC,
 
-		
+
 			//Span<NaNBoxing> stackslots, int stackStPos,
 			ref FrameContext frame,
 
@@ -12671,7 +12678,7 @@ namespace juicescript.runtime
 			//cachePayload.searchPropertyName.SetUndefined(); cachePayload.as_type = HeapShotCut[instance_box.HeapPtr].Type;
 			//cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = name_box;
 
-			frame.stackslots[dst_index] = Load_Indexer(name_box,instance_box ,
+			frame.stackslots[dst_index] = Load_Indexer(name_box, instance_box,
 				//stackStPos - method.Body._link_codescope.Members.Count - 2,
 				ref error, //stackslots, 
 				frame.stackStPos + dst_index
@@ -12681,12 +12688,12 @@ namespace juicescript.runtime
 		}
 
 
-		
-		private unsafe byte* O_Ld_ArrayToVar(int dst_index,  byte* PC,
+
+		private unsafe byte* O_Ld_ArrayToVar(int dst_index, byte* PC,
 			ref FrameContext frame
 			, ref ReceiveError error)
 		{
-			
+
 			int src_index =
 			LoadStackLocater(ref PC);
 
@@ -12700,10 +12707,10 @@ namespace juicescript.runtime
 			{
 				heapLocater.ScopeIndex = *(ushort*)PC; PC += 2;
 				heapLocater.MemberIndex = *(ushort*)PC; PC += 2;
-				
+
 			}
 
-			
+
 
 			var stackslots = frame.stackslots;
 			var instance_box = stackslots[src_index];
@@ -12752,7 +12759,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						
+
 						goto lbl_store_var;
 					}
 				}
@@ -12775,12 +12782,12 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Ld_MultiNameL_Val_Slow(dst_index, src_index, refholder_index, _name, ref frame , ref error);
+				Ld_MultiNameL_Val_Slow(dst_index, src_index, refholder_index, _name, ref frame, ref error);
 				element = stackslots[dst_index];
 
 				if (error.raised)
 				{
-					
+
 					stackslots[dst_index] = heapV; //写回去
 					return PC;
 				}
@@ -12793,7 +12800,7 @@ namespace juicescript.runtime
 
 			if (
 				(
-				((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any )
+				((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
 				||
 				(element.ValueType == heapV.ValueType)
 				)
@@ -12820,8 +12827,8 @@ namespace juicescript.runtime
 		}
 
 
-		
-		private unsafe byte* O_ArrayMoveAndSet(int dst_index,  byte* PC,
+
+		private unsafe byte* O_ArrayMoveAndSet(int dst_index, byte* PC,
 			ref FrameContext frame
 			, ref ReceiveError error)
 		{
@@ -12874,9 +12881,9 @@ namespace juicescript.runtime
 			if (
 				(name_box_type >= BoxType.Int && name_box_type <= BoxType.UShort &&
 				((int)name_box_index >= 0 //|| (name_box_type == BoxType.Uint && name_box_index < uint.MaxValue) //快路径不会出现超出int的情况，判断冗余
-				
+
 				))
-				
+
 				&&
 					(index2_box_type >= BoxType.Int && index2_box_type <= BoxType.UShort &&
 				((int)index2_box_type >= 0 //|| (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)  //快路径不会出现超出int的情况，判断冗余	
@@ -12885,7 +12892,7 @@ namespace juicescript.runtime
 
 			{
 
-				if (name_box_index < array.array_len && index2_box_index< array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
+				if (name_box_index < array.array_len && index2_box_index < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
 				{
 					var arrayspan = array.store_memory.Span;
 
@@ -12894,7 +12901,7 @@ namespace juicescript.runtime
 					{
 						goto lbl_fast_loadfault;
 					}
-					
+
 					else if (!value2_box.IsStruct() && !element.IsStruct())
 					{
 						Debug.Assert(element.ValueType != BoxType.HeapPtr || element.HeapPtr >= Context.MIN_HEAPPTR);
@@ -12908,7 +12915,7 @@ namespace juicescript.runtime
 					}
 					else
 					{
-						
+
 						SetArraySlot(element, index2_box_index, array, ref error);
 						SetArraySlot(value2_box, name_box_index, array, ref error);
 						return PC;
@@ -13051,15 +13058,15 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_ScopeH(int dst_index,  byte* PC,
+		private unsafe byte* Ld_ScopeH(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots, RtHeapBase scope,
 			//ASContainer scopeType, 
 			//int stackStPos
-			
+
 			ref FrameContext frame
 			)
 		{
-			
+
 			int stackLocater_index = dst_index;
 
 			ScopeHeapLocater heapLocater;
@@ -13152,7 +13159,7 @@ namespace juicescript.runtime
 						else
 						{
 #if DEBUG
-					throw new InvalidOperationException();
+							throw new InvalidOperationException();
 #else
 					//Environment.FailFast("出错了，这里跑不到");  
 					return PC;
@@ -13163,7 +13170,7 @@ namespace juicescript.runtime
 							//NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex);
 
 							//stackslots[stackLocater.index] = value; return;
-							
+
 						}
 
 					}
@@ -13191,7 +13198,7 @@ namespace juicescript.runtime
 							//scopeType._link_codescope.index != heapLocater.ScopeIndex
 							//&&
 							//s.Type._link_codescope.index != heapLocater.ScopeIndex
-							
+
 							kind != CodeScopeKind.Instance
 							)
 						{
@@ -13228,13 +13235,13 @@ namespace juicescript.runtime
 						}
 						else
 #endif
-						
+
 						{
 
 							Debug.Assert(kind == CodeScopeKind.Instance);
 							//throw new InvalidOperationException();
 
-							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex,  this, frame.stackStPos + stackLocater_index, _parent_ptr);
+							NaNBoxing value = ((RtInstance)s).ReadSlot(heapLocater.MemberIndex, this, frame.stackStPos + stackLocater_index, _parent_ptr);
 							stackslots[stackLocater_index] = value;
 							return PC;
 							//return value;
@@ -13254,7 +13261,7 @@ namespace juicescript.runtime
 						{
 							RtMethodScope heap = (RtMethodScope)s;
 							NaNBoxing value = heap.ReadSlot(heapLocater.MemberIndex
-								
+
 								);
 
 							stackslots[stackLocater_index] = value; return PC;
@@ -13272,13 +13279,13 @@ namespace juicescript.runtime
 		}
 
 
-		
 
 
-		private unsafe byte* Ld_function(int dst_index, byte* PC,
+
+		private unsafe HandlerResult Ld_function(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,
 			ref FrameContext frame,
-			
+
 			ref ReceiveError error)
 		{
 			//StackLocater target;
@@ -13297,7 +13304,7 @@ namespace juicescript.runtime
 				//*_p = *PC++;
 			}
 
-			int function_id = 
+			int function_id =
 			LoadInt32(ref PC);
 
 			NaNBoxing fbox = frame.constants[function_id];
@@ -13312,22 +13319,24 @@ namespace juicescript.runtime
 			RtHeapBase closure;
 			Ld_function_and_store_member(function, heapLocater, frame.methodscope, frame.scope_ptr, ref error, frame.stackStPos, dst_index, frame.stackslots, out closure);
 
-			return PC;
+			Debug.Assert((closure == null && error.raised) || (closure != null && !error.raised));
+			return new HandlerResult(PC, closure == null);
+
 		}
 
 
-		private unsafe byte* Ld_supermethod(int dst_index, byte* PC, 
+		private unsafe byte* Ld_supermethod(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos
 			ref FrameContext frame
 			)
 		{
-			
+
 			int target_index = dst_index;
 
 			int instance =
 			LoadStackLocater(ref PC);
 
-			int method_id = 
+			int method_id =
 			LoadInt32(ref PC);
 
 
@@ -13381,12 +13390,12 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Ld_interface_method(int dst_index, byte* PC, 
+		private unsafe byte* Ld_interface_method(int dst_index, byte* PC,
 			//ASMethodBody.MethodHeapConstants heap_consts, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos, 
 			ref FrameContext frame,
 			ref ReceiveError error)
 		{
-			
+
 			int target_index = dst_index;
 
 			int instance =
@@ -13395,7 +13404,7 @@ namespace juicescript.runtime
 			int class_id =
 			LoadInt32(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -13458,12 +13467,12 @@ namespace juicescript.runtime
 			return PC;
 		}
 
-		private unsafe byte* O_Ld_interface_method(int dst_index,  byte* PC, 
+		private unsafe byte* O_Ld_interface_method(int dst_index, byte* PC,
 			//ASMethodBody.MethodHeapConstants heap_consts, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos
 			ref FrameContext frame
 			)
 		{
-			
+
 			int target_index = dst_index;
 
 			int instance =
@@ -13472,7 +13481,7 @@ namespace juicescript.runtime
 			int class_id =
 			LoadInt32(ref PC);
 
-			uint vtable_ = 
+			uint vtable_ =
 			LoadUInt(ref PC);
 			ushort vtable_index = (ushort)vtable_;
 
@@ -13537,7 +13546,7 @@ namespace juicescript.runtime
 
 		private unsafe byte* Ld_length(int dst_index, byte* PC, Span<NaNBoxing> stackslots, ref ReceiveError error)
 		{
-			
+
 			int target_index = dst_index;
 
 			int instance =
@@ -13583,7 +13592,7 @@ namespace juicescript.runtime
 		}
 
 		private unsafe void StoreMethodVariable_Slow(RtHeapBase methodscope, ScopeHeapLocater heapLocater, NaNBoxing value, ref NaNBoxing heapV, int scope_ptr,
-			
+
 			ref ReceiveError error)
 		{
 			if ((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
@@ -13641,7 +13650,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				
+
 				PrepareSaveMethodScope((RtMethodScope)methodscope, heapLocater, ref value, scope_ptr, ref error);
 
 				if (error.raised)
@@ -13662,7 +13671,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* StoreMethodVariable(int dst_index, byte* PC, 
+		private unsafe byte* StoreMethodVariable(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -13698,7 +13707,7 @@ namespace juicescript.runtime
 
 			if (
 				(
-				((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any )
+				((heapLocater.ScopeIndex & 0xff) == (byte)TypeKind.Any)
 				||
 				(value.ValueType == heapV.ValueType)
 				)
@@ -13728,14 +13737,14 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* StoreHeapValueRef(int dst_index, byte* PC, 
+		private unsafe byte* StoreHeapValueRef(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
 		{
 			uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeHeapValueRef);
 
-			
+
 			int target_index = dst_index;
 			int source_index = LoadStackLocater(ref PC);
 
@@ -13848,7 +13857,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Yield_return(int dst_index, int pc_sub_start,ASMethod method, RtMethodScope methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
+		private unsafe void Yield_return(int dst_index, int pc_sub_start, ASMethod method, RtMethodScope methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			//ExceptionContext* exception_ctx,
 			//ExceptionContext* exception_ctx_stack,
 			int exception_at,
@@ -13874,7 +13883,7 @@ namespace juicescript.runtime
 
 			if (lv.ValueType == BoxType.HeapPtr)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr,  methodscope , lv, ref error,false);
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, methodscope, lv, ref error, false);
 				if (error.raised)
 				{
 					Context.StackSlots[returnSlotIndex].SetUndefined();
@@ -13922,7 +13931,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe void Await_return(int dst_index, int pc_sub_start,ASMethod method, RtMethodScope methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
+		private unsafe void Await_return(int dst_index, int pc_sub_start, ASMethod method, RtMethodScope methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			//ExceptionContext* exception_ctx,
 			//ExceptionContext* exception_ctx_stack,
 			int exception_at,
@@ -13948,7 +13957,7 @@ namespace juicescript.runtime
 
 			if (lv.ValueType == BoxType.HeapPtr)
 			{
-				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, methodscope  ,lv, ref error,false);
+				StoreReturnSlot(ref Context.StackSlots[returnSlotIndex], stackStPos, returnSlotIndex, calleelastPos, scope_ptr, methodscope, lv, ref error, false);
 				if (error.raised)
 				{
 					Context.StackSlots[returnSlotIndex].SetUndefined();
@@ -13994,7 +14003,7 @@ namespace juicescript.runtime
 
 
 
-		
+
 		private unsafe void Return_Value(int dst_index,
 
 			//int returnSlotIndex, 
@@ -14004,7 +14013,7 @@ namespace juicescript.runtime
 			//int stackStPos,
 			//int calleelastPos,
 			//int scope_ptr,
-			
+
 			ref FrameContext frame,
 
 			ref ReceiveError error,
@@ -14032,7 +14041,7 @@ namespace juicescript.runtime
 				}
 			}
 
-			if ((method.Flags & MethodFlags.ASYNC) == MethodFlags.ASYNC )//.HasFlag(MethodFlags.ASYNC))
+			if ((method.Flags & MethodFlags.ASYNC) == MethodFlags.ASYNC)//.HasFlag(MethodFlags.ASYNC))
 			{
 			}
 			else if (returnTypeKind == TypeKind.Any
@@ -14067,8 +14076,8 @@ namespace juicescript.runtime
 															//v.HeapKind == (byte)RtHeapTypeKind.CLOSURE
 				)
 			{
-				StoreReturnSlot(ref Context.StackSlots[frame.returnSlotIndex], frame.stackStPos, frame.returnSlotIndex, frame.calleelastPos, frame.scope_ptr, 
-					(RtMethodScope)frame.methodscope ,v, ref error,compute_ref);
+				StoreReturnSlot(ref Context.StackSlots[frame.returnSlotIndex], frame.stackStPos, frame.returnSlotIndex, frame.calleelastPos, frame.scope_ptr,
+					(RtMethodScope)frame.methodscope, v, ref error, compute_ref);
 				if (error.raised)
 				{
 					Context.StackSlots[frame.returnSlotIndex].SetUndefined();
