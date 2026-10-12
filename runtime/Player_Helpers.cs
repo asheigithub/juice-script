@@ -4381,7 +4381,7 @@ namespace juicescript.runtime
 
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization )]
-		private unsafe byte* M_Call(int dst_index, byte* PC,
+		private unsafe HandlerResult M_Call(int dst_index, byte* PC,
 			//RtMethodScope methodscope,
 			//Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
 			ref FrameContext frame,
@@ -4429,9 +4429,11 @@ namespace juicescript.runtime
 
 			stackslots[target.index] = result;
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
@@ -4586,7 +4588,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Bindthis_call(int dst_index, byte* PC,
+		private unsafe HandlerResult Bindthis_call(int dst_index, byte* PC,
 			//RtHeapBase methodscope,
 			//Span<NaNBoxing> stackslots,
 			//int stackStPos,
@@ -4691,7 +4693,7 @@ namespace juicescript.runtime
 						{
 							goto flag_handle_error;
 						}
-						return PC;
+						return new HandlerResult(PC,false) ;
 
 						//}
 						//else
@@ -4752,10 +4754,11 @@ namespace juicescript.runtime
 
 			frame.stackslots[result.index] = ret;
 
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC,true);
 		}
 
 
@@ -7576,7 +7579,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Ld_method(int dst_index, byte* PC,
+		private unsafe HandlerResult Ld_method(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, int stackStPos,
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7807,15 +7810,16 @@ namespace juicescript.runtime
 #endif
 			}
 
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC,true);
 		}
 
 
 
-		private unsafe byte* Read_property(int dst_index, byte* PC,
+		private unsafe HandlerResult Read_property(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7873,13 +7877,15 @@ namespace juicescript.runtime
 
 			frame.stackslots[target.index] = result;
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe byte* Read_property_interface(int dst_index, byte* PC,
+		private unsafe HandlerResult Read_property_interface(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> constants, Span<NaNBoxing> stackslots, int stackStPos, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -7946,13 +7952,15 @@ namespace juicescript.runtime
 
 			}
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe byte* Write_property(int dst_index, byte* PC,
+		private unsafe HandlerResult Write_property(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -8098,15 +8106,15 @@ namespace juicescript.runtime
 				throw new InvalidOperationException();//其他类型应该没有要写的属性
 			}
 #endif
-
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
-		private unsafe byte* Write_property_interface(int dst_index, byte* PC,
+		private unsafe HandlerResult Write_property_interface(int dst_index, byte* PC,
 			 //ASMethodBody.MethodHeapConstants heap_consts,
 			 // Span<NaNBoxing> constants, Span<NaNBoxing> stackslots,
 			 ref FrameContext frame,
@@ -8202,9 +8210,11 @@ namespace juicescript.runtime
 #endif
 			}
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
@@ -9388,7 +9398,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* StoreScopeH(int dst_index, byte* PC,
+		private unsafe HandlerResult StoreScopeH(int dst_index, byte* PC,
 			//int scope_ptr, RtHeapBase methodscope, Span<NaNBoxing> stackslots,
 			ref FrameContext frame,
 			ref ReceiveError error
@@ -9487,7 +9497,7 @@ namespace juicescript.runtime
 
 							heap.SetSlot(value, heapLocater.MemberIndex);
 						}
-						return PC;
+						return new HandlerResult(PC, false);
 					}
 
 				case CodeScopeKind.Instance:
@@ -9745,9 +9755,11 @@ namespace juicescript.runtime
 #endif
 			}
 
+			return new HandlerResult(PC, false);
+
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 
@@ -13390,7 +13402,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Ld_interface_method(int dst_index, byte* PC,
+		private unsafe HandlerResult Ld_interface_method(int dst_index, byte* PC,
 			//ASMethodBody.MethodHeapConstants heap_consts, Span<NaNBoxing> stackslots, Span<NaNBoxing> constants, int stackStPos, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -13461,10 +13473,11 @@ namespace juicescript.runtime
 
 			frame.stackslots[target_index].SetHeapPtr(closurePtr, (byte)RtHeapTypeKind.CLOSURE, (byte)HeapKindFlag.NONE);
 
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC, true);
 		}
 
 		private unsafe byte* O_Ld_interface_method(int dst_index, byte* PC,
@@ -13544,7 +13557,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe byte* Ld_length(int dst_index, byte* PC, Span<NaNBoxing> stackslots, ref ReceiveError error)
+		private unsafe HandlerResult Ld_length(int dst_index, byte* PC, Span<NaNBoxing> stackslots, ref ReceiveError error)
 		{
 
 			int target_index = dst_index;
@@ -13564,7 +13577,7 @@ namespace juicescript.runtime
 				int len = thisValue.GetLocalStringChars(temp);
 				stackslots[target_index].SetInt(len);
 
-				return PC;
+				return new HandlerResult(PC, false);
 			}
 
 			var obj = HeapShortCut[thisValue.HeapPtr];
@@ -13585,10 +13598,10 @@ namespace juicescript.runtime
 				stackslots[target_index].SetInt(len);
 			}
 
-
+			return new HandlerResult(PC, false);
 		flag_handle_error:
 			;
-			return PC;
+			return new HandlerResult(PC,true);
 		}
 
 		private unsafe void StoreMethodVariable_Slow(RtHeapBase methodscope, ScopeHeapLocater heapLocater, NaNBoxing value, ref NaNBoxing heapV, int scope_ptr,
@@ -13671,7 +13684,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		private unsafe byte* StoreMethodVariable(int dst_index, byte* PC,
+		private unsafe HandlerResult StoreMethodVariable(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
@@ -13723,14 +13736,14 @@ namespace juicescript.runtime
 					((RtMethodScope)heap).SetSlot(value, heapLocater.MemberIndex);
 #endif
 
-					return PC;
+					return new HandlerResult(PC, false);
 				}
 			}
 
 			StoreMethodVariable_Slow(methodscope, heapLocater, value, ref heapV, frame.scope_ptr, ref error);
 			stackslots[convertedloc] = heapV;
 
-			return PC;
+			return new HandlerResult(PC, error.raised);
 		}
 
 

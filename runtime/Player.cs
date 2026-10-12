@@ -13900,8 +13900,9 @@ namespace juicescript.runtime
 						case INS_Code.bindthis_call:
 							{								
 								//Bindthis_call(dst_index,ref PC, frame.methodscope,  stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Bindthis_call(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = Bindthis_call(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13917,8 +13918,9 @@ namespace juicescript.runtime
 						case INS_Code.ld_method:
 							{								
 								//Ld_method(dst_index,ref PC, frame.methodscope,  stackslots, frame.scope_ptr, frame.stackStPos, ref error);
-								PC = Ld_method(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = Ld_method(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13928,8 +13930,9 @@ namespace juicescript.runtime
 						case INS_Code.ld_interface_method:
 							{
 								//Ld_interface_method(dst_index, ref PC, method.Body.heapConstants , stackslots, constants, frame.stackStPos, ref error);
-								PC = Ld_interface_method(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = Ld_interface_method(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13967,8 +13970,9 @@ namespace juicescript.runtime
 								//stackslots[target.index] = result;
 
 								//M_Call(dst_index, ref PC, (RtMethodScope)frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr,ref error);
-								PC = M_Call(dst_index,  PC,ref frame,ref error);
-								if (error.raised)
+								var result = M_Call(dst_index,  PC,ref frame,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13984,8 +13988,9 @@ namespace juicescript.runtime
 								}
 #endif
 
-								PC = Ld_length(dst_index, PC, stackslots,  ref error);
-								if (error.raised)
+								var result = Ld_length(dst_index, PC, stackslots,  ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -13995,8 +14000,9 @@ namespace juicescript.runtime
 						case INS_Code.read_property:
 							{
 								//Read_property(dst_index, ref PC, frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Read_property(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = Read_property(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14005,8 +14011,9 @@ namespace juicescript.runtime
 						case INS_Code.read_property_interface:
 							{
 								//Read_property_interface(dst_index, ref PC, frame.methodscope, constants, stackslots, frame.stackStPos, ref error);
-								PC = Read_property_interface(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Read_property_interface(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14015,8 +14022,9 @@ namespace juicescript.runtime
 						case INS_Code.write_property:
 							{
 								//Write_property(dst_index, ref PC, frame.methodscope,stackslots, frame.stackStPos, frame.scope_ptr,ref error);
-								PC = Write_property(dst_index, PC, ref frame ,ref error);
-								if (error.raised)
+								var result = Write_property(dst_index, PC, ref frame ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14026,8 +14034,9 @@ namespace juicescript.runtime
 						case INS_Code.write_property_interface:
 							{
 								//Write_property_interface(dst_index, ref PC, method.Body.heapConstants ,constants, stackslots, ref error);
-								PC = Write_property_interface(dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = Write_property_interface(dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14040,8 +14049,9 @@ namespace juicescript.runtime
 								//StoreScopeH(dst_index,ref PC, frame.scope_ptr, frame.methodscope, stackslots, 
 								//	//scopeType,
 								//	ref error);
-								PC = StoreScopeH(dst_index,PC, ref frame,ref error);
-								if (error.raised)
+								var result = StoreScopeH(dst_index,PC, ref frame,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14051,8 +14061,9 @@ namespace juicescript.runtime
 						case INS_Code.storeMethodVariable:
 							{
 								//StoreMethodVariable(dst_index, ref PC, frame.methodscope, stackslots, frame.scope_ptr, ref error);
-								PC = StoreMethodVariable(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = StoreMethodVariable(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14545,8 +14556,9 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_Call:
 							{
-								PC = M_Call(dst_index,  PC, ref frame , ref error);
-								if (error.raised)
+								var result = M_Call(dst_index,  PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
