@@ -14458,8 +14458,9 @@ namespace juicescript.runtime
 						case INS_Code.get_in:
 							{
 								
-								PC = GET_IN( dst_index, PC,  stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope, ref error);
-								if (error.raised)
+								var result = GET_IN( dst_index, PC,  ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14550,8 +14551,9 @@ namespace juicescript.runtime
 						case INS_Code.increment_decrement:
 							{
 								//Increment_decrement(dst_index, ref PC, frame.methodscope, stackslots, frame.scope_ptr, frame.stackStPos, ref error);
-								PC = Increment_decrement(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Increment_decrement(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{ 
 									goto flag_handle_error;
 								}
@@ -14560,8 +14562,9 @@ namespace juicescript.runtime
 						case INS_Code.get_instanceof:
 							{
 								
-								PC = GET_INSTANCEOF(dst_index, PC, stackslots, ref error);
-								if (error.raised)
+								var result = GET_INSTANCEOF(dst_index, PC, stackslots, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14582,10 +14585,11 @@ namespace juicescript.runtime
 								//	//ref global_obj, 
 								//	ref error
 								//	);
-								PC = O_Ld_function_bindglobal(PC,  dst_index, ref frame,
+								var result = O_Ld_function_bindglobal(PC,  dst_index, ref frame,
 									ref error
 									);
-								if (error.raised)
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14618,8 +14622,9 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_IncrDecr_StoreVar:
 							{
-								PC = IncrDecrStoreVar(dst_index, PC,ref frame ,ref error);
-								if (error.raised)
+								var result = IncrDecrStoreVar(dst_index, PC,ref frame ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14752,13 +14757,19 @@ namespace juicescript.runtime
 							}
 						case INS_Code.LoopFoot_IncrVar_CmpSlot:
 							{
+								//offset不可能是1，所以用1表示报错
 								int offset = LoopFoot_IncrVar_CmpSlot(dst_index, PC,ref frame,ref error);
 								PC = PC + 4 * 4;
-								if (error.raised)
+								//if (error.raised)
+								//{
+								//	goto flag_handle_error;
+								//}
+
+								if (offset == 1)
 								{
 									goto flag_handle_error;
 								}
-								if (offset != 0)
+								else if (offset != 0)
 								{
 									PC = PC_START + offset;
 								}
