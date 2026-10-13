@@ -14282,8 +14282,9 @@ namespace juicescript.runtime
 							{
 								
 								//Exec_Division(dst_index,ref PC, ref error, frame.scope_ptr,  stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_Division(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Division(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14294,8 +14295,9 @@ namespace juicescript.runtime
 							{
 								
 								//Exec_Modulus( dst_index,ref PC ,ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_Modulus( dst_index, PC,ref frame ,ref error);
-								if (error.raised)
+								var result = Exec_Modulus( dst_index, PC,ref frame ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14305,8 +14307,9 @@ namespace juicescript.runtime
 							{
 								
 								//Exec_bitWise( dst_index,ref PC, ref error, frame.scope_ptr,stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_bitWise( dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Exec_bitWise( dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14316,8 +14319,9 @@ namespace juicescript.runtime
 							{
 								
 								//Exec_Comparse(dst_index,ref PC,ref error, frame.scope_ptr,  stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_Comparse(dst_index, PC,ref frame,ref error);
-								if (error.raised)
+								var result = Exec_Comparse(dst_index, PC,ref frame,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14388,12 +14392,30 @@ namespace juicescript.runtime
 								int v1 = *(int*)(PC); (PC) += 4; //LoadInt32(ref PC);
 								int v2 = *(int*)(PC); (PC) += 4; //LoadInt32(ref PC);
 
-								bool isEqual = IsEqual(stackslots[v1], stackslots[v2], dst_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								if (error.raised)
+								var n1 = stackslots[v1];
+								var n2 = stackslots[v2];
+
+								bool fast_comp;
+								if (n1.FastTestComp(n2, out fast_comp))
 								{
-									goto flag_handle_error;
+									stackslots[dst_index].SetBoolean(fast_comp);
 								}
-								stackslots[dst_index].SetBoolean(isEqual);
+								else
+								{
+									bool isEqual = IsEqual_Slow(n1, n2, dst_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+									stackslots[dst_index].SetBoolean(isEqual);
+								}
+
+								//bool isEqual = IsEqual(stackslots[v1], stackslots[v2], dst_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+								//if (error.raised)
+								//{
+								//	goto flag_handle_error;
+								//}
+								//stackslots[dst_index].SetBoolean(isEqual);
 
 							}
 							break;
@@ -14407,12 +14429,30 @@ namespace juicescript.runtime
 								int v1 = *(int*)(PC); (PC) += 4; //LoadInt32(ref PC);
 								int v2 = *(int*)(PC); (PC) += 4; //LoadInt32(ref PC);
 
-								bool isEqual = IsEqual(stackslots[v1], stackslots[v2], dst_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								if (error.raised)
+								var n1 = stackslots[v1];
+								var n2 = stackslots[v2];
+
+								bool fast_comp;
+								if (n1.FastTestComp(n2, out fast_comp))
 								{
-									goto flag_handle_error;
+									stackslots[dst_index].SetBoolean(!fast_comp);
 								}
-								stackslots[dst_index].SetBoolean(!isEqual);
+								else
+								{
+									bool isEqual = IsEqual_Slow(n1, n2, dst_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+									if (error.raised)
+									{
+										goto flag_handle_error;
+									}
+									stackslots[dst_index].SetBoolean(!isEqual);
+								}
+
+								//bool isEqual = IsEqual(stackslots[v1], stackslots[v2], dst_index, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
+								//if (error.raised)
+								//{
+								//	goto flag_handle_error;
+								//}
+								//stackslots[dst_index].SetBoolean(!isEqual);
 							}
 							break;
 						case INS_Code.get_in:

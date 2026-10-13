@@ -1931,7 +1931,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Exec_Division(int dst_index, byte* PC,
+		private unsafe HandlerResult Exec_Division(int dst_index, byte* PC,
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
@@ -1974,7 +1974,7 @@ namespace juicescript.runtime
 						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
 						if (error.raised)
 						{
-							return PC;
+							return new HandlerResult(PC, true);
 						}
 					}
 					if (t2 != null)
@@ -1982,7 +1982,7 @@ namespace juicescript.runtime
 						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
 						if (error.raised)
 						{
-							return PC;
+							return new HandlerResult(PC, true);
 						}
 					}
 
@@ -1991,7 +1991,7 @@ namespace juicescript.runtime
 					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
-						return PC;
+						return new HandlerResult(PC, true);
 					}
 
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
@@ -2012,7 +2012,7 @@ namespace juicescript.runtime
 					}
 					Context.StackPosition -= 2;
 
-					return PC;
+					return new HandlerResult(PC, error.raised);
 				}
 			}
 
@@ -2022,7 +2022,7 @@ namespace juicescript.runtime
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 				if (error.raised)
 				{
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 			}
 
@@ -2036,7 +2036,7 @@ namespace juicescript.runtime
 				n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 				if (error.raised)
 				{
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 			}
 
@@ -2113,10 +2113,10 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #endif
 			}
-			return PC;
+			return new HandlerResult(PC, false);
 		}
 
-		private unsafe byte* Exec_Modulus(int dst_index, byte* PC,
+		private unsafe HandlerResult Exec_Modulus(int dst_index, byte* PC,
 
 			ref FrameContext frame,
 			ref ReceiveError error
@@ -2159,7 +2159,7 @@ namespace juicescript.runtime
 						InitScript((ASScript)t1._link_codescope.Parent.Container, ref error);
 						if (error.raised)
 						{
-							return PC;
+							return new HandlerResult(PC, true);
 						}
 					}
 					if (t2 != null)
@@ -2167,7 +2167,7 @@ namespace juicescript.runtime
 						InitScript((ASScript)t2._link_codescope.Parent.Container, ref error);
 						if (error.raised)
 						{
-							return PC;
+							return new HandlerResult(PC, true);
 						}
 					}
 
@@ -2176,7 +2176,7 @@ namespace juicescript.runtime
 					if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 					{
 						RaiseStackOverflow(ref error);
-						return PC;
+						return new HandlerResult(PC, true);
 					}
 
 					Span<NaNBoxing> slots = Context.StackSlots.AsSpan(Context.StackPosition, 2);
@@ -2197,7 +2197,7 @@ namespace juicescript.runtime
 					}
 					Context.StackPosition -= 2;
 
-					return PC;
+					return new HandlerResult(PC, error.raised);
 				}
 			}
 
@@ -2206,7 +2206,7 @@ namespace juicescript.runtime
 				n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 				if (error.raised)
 				{
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 			}
 
@@ -2220,7 +2220,7 @@ namespace juicescript.runtime
 				n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 				if (error.raised)
 				{
-					return PC;
+					return new HandlerResult(PC, true);
 				}
 			}
 
@@ -2311,13 +2311,13 @@ namespace juicescript.runtime
 #endif
 
 			}
-			return PC;
+			return new HandlerResult(PC, false);
 
 		}
 
 
 
-		private unsafe byte* Exec_bitWise(int dst_index, byte* PC,
+		private unsafe HandlerResult Exec_bitWise(int dst_index, byte* PC,
 			ref FrameContext frame,
 			ref ReceiveError error
 			//, int scope_ptr, Span<NaNBoxing> stackslots, int stackStPos, NaNBoxing thisPtr
@@ -2352,7 +2352,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
@@ -2362,7 +2362,7 @@ namespace juicescript.runtime
 							n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2380,7 +2380,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
@@ -2389,7 +2389,7 @@ namespace juicescript.runtime
 							n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 						ConvertValueType(ref error, n2, TypeKind.Int, Context.INT, ref n2);
@@ -2404,7 +2404,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2421,7 +2421,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2432,7 +2432,7 @@ namespace juicescript.runtime
 							n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2449,7 +2449,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 						ConvertValueType(ref error, n1, TypeKind.Int, Context.INT, ref n1);
@@ -2459,7 +2459,7 @@ namespace juicescript.runtime
 							n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2476,7 +2476,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
@@ -2486,7 +2486,7 @@ namespace juicescript.runtime
 							n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2503,7 +2503,7 @@ namespace juicescript.runtime
 							n1 = ToPrimitive(ref error, n1, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 						ConvertValueType(ref error, n1, TypeKind.Uint, Context.UINT, ref n1);
@@ -2513,7 +2513,7 @@ namespace juicescript.runtime
 							n2 = ToPrimitive(ref error, n2, HINT.h_number, frame.scope_ptr, dst_index, dst_index, frame.stackslots, frame.stackStPos, thisPtr);
 							if (error.raised)
 							{
-								return PC;
+								return new HandlerResult(PC, true);
 							}
 						}
 
@@ -2530,7 +2530,7 @@ namespace juicescript.runtime
 #endif
 			}
 
-			return PC;
+			return new HandlerResult(PC, false);
 
 
 		}
@@ -2756,7 +2756,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe byte* Exec_Comparse(int dst_index, byte* PC,
+		private unsafe HandlerResult Exec_Comparse(int dst_index, byte* PC,
 
 			ref FrameContext frame,
 			ref ReceiveError error
@@ -2782,7 +2782,7 @@ namespace juicescript.runtime
 
 			DoCompress(opMode, dst_index, n1, n2, frame.scope_ptr, frame.stackslots, frame.stackStPos, thisPtr, ref error);
 
-			return PC;
+			return new HandlerResult(PC, error.raised);
 
 			//			if (((n1.ValueType == BoxType.Int || n1.ValueType > BoxType.Uint) && n1.ValueType < BoxType.Float)
 			//				&&
