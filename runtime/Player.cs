@@ -6918,7 +6918,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe void SaveHeapRef(RtHeapBase cache, int source, Span<NaNBoxing> stackslots, Span<char> frame_holdchars,
+		internal unsafe bool SaveHeapRef(RtHeapBase cache, int source, Span<NaNBoxing> stackslots, Span<char> frame_holdchars,
 			StackLocater* tmpArgLoc, int scope_ptr, int stackStPos, RtHeapBase methodscope,
 			ref ReceiveError error)
 		{
@@ -7339,10 +7339,12 @@ namespace juicescript.runtime
 				}
 			}
 
+			return true;
+
 		flag_handle_error:
 			;
 
-
+			return false;
 		}
 
 
@@ -14073,8 +14075,9 @@ namespace juicescript.runtime
 						case INS_Code.storeHeapValueRef:
 							{
 								//StoreHeapValueRef(dst_index, ref PC, frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = StoreHeapValueRef(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = StoreHeapValueRef(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14141,8 +14144,9 @@ namespace juicescript.runtime
 
 								//NEW_INSTANCE( dst_index,ref PC, frame.stackStPos, frame.scope_ptr, stackslots, //scopeType, 
 								//	 frame.methodscope, ref error);
-								PC = NEW_INSTANCE(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = NEW_INSTANCE(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14151,8 +14155,9 @@ namespace juicescript.runtime
 						case INS_Code.type_cast:
 							{
 								//Type_cast(dst_index, ref PC, frame.methodscope, constants, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = Type_cast(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Type_cast(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14160,8 +14165,9 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.create_prop:
 							{
-								PC = Create_prop(dst_index, PC, stackslots, ref error);
-								if (error.raised)
+								var result = Create_prop(dst_index, PC, stackslots, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14170,8 +14176,9 @@ namespace juicescript.runtime
 						case INS_Code.super_ctor:
 							{
 								//Super_ctor(ref PC, frame.methodscope, constants, stackslots, frame.scope_ptr, ref error);
-								PC = Super_ctor(PC, ref frame , ref error);
-								if (error.raised)
+								var result = Super_ctor(PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14180,8 +14187,9 @@ namespace juicescript.runtime
 						case INS_Code.positive:
 							{							
 								//POSITIVE( dst_index, ref PC, frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = POSITIVE( dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = POSITIVE( dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14191,8 +14199,9 @@ namespace juicescript.runtime
 							{
 								
 								//NEG( dst_index,ref PC, frame.methodscope,  stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = NEG( dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = NEG( dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14203,8 +14212,9 @@ namespace juicescript.runtime
 							{
 								
 								//Exec_Add( dst_index, &PC ,ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_Add( dst_index, PC,ref frame ,ref error);
-								if (error.raised)
+								var result = Exec_Add( dst_index, PC,ref frame ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14230,8 +14240,9 @@ namespace juicescript.runtime
 
 								
 								//Exec_Sub( dst_index,&PC, ref error, frame.scope_ptr, stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_Sub( dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Sub( dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14259,8 +14270,9 @@ namespace juicescript.runtime
 							{
 								
 								//Exec_Multiply( dst_index,ref PC, ref error, frame.scope_ptr,  stackslots, frame.stackStPos, ((RtMethodScope)frame.methodscope).ThisPtr);
-								PC = Exec_Multiply( dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Multiply( dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
