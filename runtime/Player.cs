@@ -7143,11 +7143,11 @@ namespace juicescript.runtime
 									}
 								}
 
-								vector.SetSlot(validid, this, cacheObj.RefInstance.HeapPtr, conv, ref error);
+								bool isSet = vector.SetSlot(validid, this, cacheObj.RefInstance.HeapPtr, conv, ref error);
 
 								Context.StackPosition--;
 
-								if (error.raised)
+								if (!isSet)
 								{
 									goto flag_handle_error;
 								}
@@ -10995,8 +10995,8 @@ namespace juicescript.runtime
 						int _i;
 						Debug.Assert(dst.GetStore(this).IsValidIndexRange(index, out _i));
 #endif
-						dst.SetSlot(i, this, vptr, e, ref error);
-						if (error.raised)
+						bool isSet = dst.SetSlot(i, this, vptr, e, ref error);
+						if (!isSet)
 						{
 							return;
 						}
@@ -14641,8 +14641,9 @@ namespace juicescript.runtime
 						case INS_Code.O_NewInstance_MethodVar:
 							{
 								//O_NewInstance_Var(dst_index, ref PC, frame.stackStPos, frame.scope_ptr, stackslots, frame.methodscope ,ref error);
-								PC = O_NewInstance_Var(dst_index, PC, ref frame  ,ref error);
-								if (error.raised)
+								var result = O_NewInstance_Var(dst_index, PC, ref frame  ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14651,8 +14652,9 @@ namespace juicescript.runtime
 						case INS_Code.O_Ld_InstanceFiled:
 							{
 								//O_Ld_InstanceField(dst_index,ref PC,stackslots, frame.stackStPos, frame.scope_ptr,ref error);
-								PC = O_Ld_InstanceField(dst_index, PC,ref frame,ref error);
-								if (error.raised)
+								var result = O_Ld_InstanceField(dst_index, PC,ref frame,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14661,8 +14663,9 @@ namespace juicescript.runtime
 						case INS_Code.O_StoreMethodVar_Instance:
 							{
 								//O_StoreMethodVariable_Instance(dst_index, ref PC, frame.methodscope, stackslots, frame.scope_ptr, ref error);
-								PC = O_StoreMethodVariable_Instance(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = O_StoreMethodVariable_Instance(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14670,9 +14673,10 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_Ld_Array_Element:
 							{
-								PC = O_Ld_ArrayElement(dst_index, PC,
+								var result = O_Ld_ArrayElement(dst_index, PC,
 									  ref frame, ref error);
-								if (error.raised)
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14682,8 +14686,9 @@ namespace juicescript.runtime
 						case INS_Code.O_Store_Array_Element:
 							{
 								//O_Store_ArrayElement(dst_index, ref PC, stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope, ref error);
-								PC = O_Store_ArrayElement(dst_index, PC, ref frame , ref error);
-								if (error.raised)
+								var result = O_Store_ArrayElement(dst_index, PC, ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14693,9 +14698,10 @@ namespace juicescript.runtime
 							{
 								//O_Ld_VectorElement(dst_index, ref PC,
 								//	  method, frame.methodscope, stackslots, frame.stackStPos, frame.scope_ptr, ref error);
-								PC = O_Ld_VectorElement(dst_index, PC,
+								var result = O_Ld_VectorElement(dst_index, PC,
 									  ref frame, ref error);
-								if (error.raised)
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14706,8 +14712,9 @@ namespace juicescript.runtime
 							{
 
 								//O_Store_VectorElement(dst_index, ref PC, stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope, ref error);
-								PC = O_Store_VectorElement(dst_index, PC,ref frame , ref error);
-								if (error.raised)
+								var result = O_Store_VectorElement(dst_index, PC,ref frame , ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}

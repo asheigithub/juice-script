@@ -220,7 +220,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void SetSlot(int validid,Player player,int vector_ptr,NaNBoxing value , ref Player.ReceiveError error)
+		internal bool SetSlot(int validid,Player player,int vector_ptr,NaNBoxing value , ref Player.ReceiveError error)
         {
             Debug.Assert(HEAPINSTANCE_PTR == 0);
 
@@ -233,55 +233,55 @@ namespace juicescript.runtime
                         bool v = value.Boolean;
                         MemoryMarshal.Write(bytes, ref v);
                     }
-                    return;
+                    return true;
                 case ABC.TypeKind.SByte:
                     {
                         sbyte v = value.SByteValue;
                         MemoryMarshal.Write(bytes, ref v);
                     }
-                    return;
+                    return true;
                 case ABC.TypeKind.Byte:
 					{
 						byte v = value.ByteValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
-					return;
+					return true;
 				case ABC.TypeKind.Short:
 					{
 						short v = value.ShortValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
-                    return;
+                    return true;
                 case ABC.TypeKind.UShort:
                     {
                         ushort v = value.UShortValue;
                         MemoryMarshal.Write(bytes, ref v);
                     }
-                    return;
+                    return true;
                 case ABC.TypeKind.Int:
 					{
 						int v = value.IntValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
-					return;
+					return true;
 				case ABC.TypeKind.Uint:
 					{
 						uint v = value.UIntValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
-					return;
+					return true;
 				case ABC.TypeKind.Float:
 					{
 						float v = value.FloatValue;
 						MemoryMarshal.Write(bytes, ref v);
 					}
-					return;
+					return true;
 				case ABC.TypeKind.Number:
 					{
 						double v = value.Number;
 						MemoryMarshal.Write(bytes, ref v);
 					}
-					return;
+					return true;
 				case ABC.TypeKind.Fun_Void:
                 case ABC.TypeKind.TraitDataReference:
                 case ABC.TypeKind.RTQName_MultiName_DataReference:
@@ -295,7 +295,7 @@ namespace juicescript.runtime
 					throw new InvalidOperationException();
 #else
 					//Environment.FailFast("出错了，这里跑不到"); 
-                    return;
+                    return false;
 #endif
 				case ABC.TypeKind.Any:
 				case ABC.TypeKind.Object:
@@ -309,10 +309,10 @@ namespace juicescript.runtime
                         NaNBoxing v = player.GetSaveValue(value, ref error);
                         if (error.raised)
                         {
-                            return;
+                            return false;
                         }
 						MemoryMarshal.Write(bytes, ref v);
-						return;
+						return true;
 					}
 				default:
 					{
@@ -321,8 +321,8 @@ namespace juicescript.runtime
                             if (value.ValueType != NaNBoxing.BoxType.HeapPtr)
                             {
                                 VectorImpl.VectorStore.InitStructSpan(bytes, element_asclass);
-                                return;
-                            }
+								return true;
+							}
                             else
                             {
 #if DEBUG
@@ -334,18 +334,18 @@ namespace juicescript.runtime
 
 								RtInstance src = ((RtInstance)player.HeapShortCut[value.HeapPtr]);
                                 src.GetStoreData(player,(ASInstance)element_asclass.Instance).Slice(0, bytes.Length).CopyTo(bytes);
-                                return;
-                            }
+								return true;
+							}
 						}
 						else
 						{
 							NaNBoxing v = player.GetSaveValue(value, ref error);
 							if (error.raised)
 							{
-								return;
+								return false;
 							}
 							MemoryMarshal.Write(bytes, ref v);
-                            return;
+							return true;
 						}
 					}
 			}

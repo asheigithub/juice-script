@@ -379,8 +379,8 @@ namespace juicescript.runtime.buildin
 				{
 
 					NaNBoxing value = srcVec.ReadSlot(j, context.player, sindex, srcVecPtr);
-					dstVec.SetSlot(len + j, context.player, vptr, value, ref error); //里面可能有分配内存的操作
-					if (error.raised)
+					bool isSet = dstVec.SetSlot(len + j, context.player, vptr, value, ref error); //里面可能有分配内存的操作
+					if (!isSet)
 					{
 						context.StackPosition--;
 						return;
@@ -453,9 +453,9 @@ namespace juicescript.runtime.buildin
 				}
 				
 				int vptr = vector.HEAPINSTANCE_PTR == 0 ? thisPtr.HeapPtr : vector.HEAPINSTANCE_PTR; //RtVector.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out vector);
-				vector.SetSlot(len + i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
+				bool isSet = vector.SetSlot(len + i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 
-				if (error.raised)
+				if (!isSet)
 				{
 					return;
 				}
@@ -634,9 +634,9 @@ namespace juicescript.runtime.buildin
 				}
 				
 
-				vectorAfterResize.SetSlot(i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
+				bool isSet = vectorAfterResize.SetSlot(i, context.player, vptr, context.StackSlots[returnSlotIndex], ref error);
 
-				if (error.raised)
+				if (!isSet)
 				{
 					return;
 				}
@@ -4258,8 +4258,8 @@ namespace juicescript.runtime.buildin
 							return;
 						}
 
-						vectorAfterResize.SetSlot(startIndex + i, context.player, vptr, context.StackSlots[basePos], ref error);
-						if (error.raised)
+						bool isSet = vectorAfterResize.SetSlot(startIndex + i, context.player, vptr, context.StackSlots[basePos], ref error);
+						if (!isSet)
 						{
 							context.StackPosition = basePos;
 							return;
@@ -4654,8 +4654,8 @@ namespace juicescript.runtime.buildin
 							return;
 						}
 						resultVecPtr = RtVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
-						resultVector.SetSlot(newlen, context.player, resultVecPtr, v, ref error);
-						if (error.raised)
+						bool isSet = resultVector.SetSlot(newlen, context.player, resultVecPtr, v, ref error);
+						if (!isSet)
 						{
 							context.StackPosition -= 5;
 							return;
@@ -4818,8 +4818,8 @@ namespace juicescript.runtime.buildin
 						resultVecPtr = RtVector.FindAndUpdateHeapInstancePtr(resultVecPtr, context.player, out resultVector);
 					}
 
-					resultVector.SetSlot(newlen, context.player, resultVecPtr, argSlots[5] , ref error);
-					if (error.raised)
+					bool isSet = resultVector.SetSlot(newlen, context.player, resultVecPtr, argSlots[5] , ref error);
+					if (!isSet)
 					{
 						context.StackPosition -= 6;
 						return;
@@ -5571,6 +5571,7 @@ namespace juicescript.runtime.buildin
 
 			}
 
+			[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 			internal static int GetValidIndex(NaNBoxing index)
 			{
 				switch (index.ValueType)
@@ -5646,41 +5647,81 @@ namespace juicescript.runtime.buildin
 			{
 				NaNBoxing result = default;
 
-				var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
-
+				
 				switch (element_type)
 				{
 					case ABC.TypeKind.Any:
-						result = MemoryMarshal.Read<NaNBoxing>(bytes);
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result = MemoryMarshal.Read<NaNBoxing>(bytes);
+							return result;
+						}
 					case ABC.TypeKind.Boolean:
-						result.SetBoolean(MemoryMarshal.Read<bool>(bytes));
-						return result;
-
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetBoolean(MemoryMarshal.Read<bool>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.SByte:
-						result.SetSByte(MemoryMarshal.Read<sbyte>(bytes));
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetSByte(MemoryMarshal.Read<sbyte>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.Byte:
-						result.SetByte(MemoryMarshal.Read<byte>(bytes));
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetByte(MemoryMarshal.Read<byte>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.Short:
-						result.SetShort(MemoryMarshal.Read<short>(bytes));
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetShort(MemoryMarshal.Read<short>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.UShort:
-						result.SetUShort(MemoryMarshal.Read<ushort>(bytes));
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetUShort(MemoryMarshal.Read<ushort>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.Int:
-						result.SetInt(MemoryMarshal.Cast<byte, int>(bytes)[0]);
-						return result;
+						{
+							unsafe
+							{
+
+
+								//result.SetInt(MemoryMarshal.Read<int>(bytes));
+								byte* v = stackalloc byte[4] {
+								buffer[validid * elementSize],
+								buffer[validid * elementSize + 1],
+								buffer[validid * elementSize + 2],
+								buffer[validid * elementSize + 3] };
+
+								result.SetInt( *(int*)v );
+								return result;
+							}
+
+						}
 					case ABC.TypeKind.Uint:
-						result.SetUInt(MemoryMarshal.Cast<byte, uint>(bytes)[0]);
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetUInt(MemoryMarshal.Read<uint>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.Float:
-						result.SetFloat(MemoryMarshal.Cast<byte, float>(bytes)[0]);
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetFloat(MemoryMarshal.Read<float>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.Number:
-						result.SetNumber(MemoryMarshal.Cast<byte, double>(bytes)[0]);
-						return result;
+						{
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+							result.SetNumber(MemoryMarshal.Read<double>(bytes));
+							return result;
+						}
 					case ABC.TypeKind.Fun_Void:
 					case ABC.TypeKind.TraitDataReference:
 					case ABC.TypeKind.RTQName_MultiName_DataReference:
@@ -5703,7 +5744,9 @@ namespace juicescript.runtime.buildin
 					case ABC.TypeKind.Vector:
 					case ABC.TypeKind.Namespace:
 						{
-							result = MemoryMarshal.Cast<byte, NaNBoxing>(bytes)[0];
+							var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+
+							result = MemoryMarshal.Read<NaNBoxing>(bytes);
 							return result;
 						}
 					default:
@@ -5729,7 +5772,9 @@ namespace juicescript.runtime.buildin
 							}
 							else
 							{
-								result = MemoryMarshal.Cast<byte, NaNBoxing>(bytes)[0];
+								var bytes = CollectionsMarshal.AsSpan(buffer).Slice(validid * elementSize, elementSize); //ReadStoreAt(validid);
+
+								result = MemoryMarshal.Read<NaNBoxing>(bytes);
 								return result;
 
 							}
