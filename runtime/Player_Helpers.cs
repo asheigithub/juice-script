@@ -3542,7 +3542,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void ITER_INITCTX(int dst_index, byte* PC, RtHeapBase methodscope, ref ReceiveError error)
+		private unsafe bool ITER_INITCTX(int dst_index, byte* PC, RtHeapBase methodscope, ref ReceiveError error)
 		{
 			InitScript((ASScript)Context.IITERATOR.Instance._vtable.Items[0].Trait.Method.Body._link_codescope.Members[1].__rt_type_class__._link_codescope.Parent.Container, ref error);
 			if (error.raised)
@@ -3583,11 +3583,11 @@ namespace juicescript.runtime
 			iterCtxValue.SetHeapPtr(iter_context_ptr, (byte)RtHeapTypeKind.INSTANCE, (byte)HeapKindFlag.NONE);
 			heap.SetSlot(iterCtxValue, iterContextVar.MemberIndex);
 
-
+			return true;
 
 		flag_handle_error:
 			;
-
+			return false;
 		}
 
 
@@ -13854,7 +13854,7 @@ namespace juicescript.runtime
 
 
 
-		private unsafe byte* Array_vector_initelement(int dst_index, byte* PC, Span<NaNBoxing> stackslots, ref ReceiveError error)
+		private unsafe HandlerResult Array_vector_initelement(int dst_index, byte* PC, Span<NaNBoxing> stackslots, ref ReceiveError error)
 		{
 			int instance =
 			LoadStackLocater(ref PC);
@@ -13923,11 +13923,12 @@ namespace juicescript.runtime
 
 			}
 
+			return new HandlerResult(PC, false);
 
 		flag_handle_error:
 			;
 
-			return PC;
+			return new HandlerResult(PC,true);
 		}
 
 

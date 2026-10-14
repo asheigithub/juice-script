@@ -14822,8 +14822,9 @@ namespace juicescript.runtime
 						case INS_Code.add_Vec2_Vec2:
 							{
 								//Exec_Add_Vec2_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Add_Vec2_Vec2(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Add_Vec2_Vec2(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14832,8 +14833,9 @@ namespace juicescript.runtime
 						case INS_Code.sub_Vec2_Vec2:
 							{
 								//Exec_Sub_Vec2_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Sub_Vec2_Vec2(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Sub_Vec2_Vec2(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14842,8 +14844,9 @@ namespace juicescript.runtime
 						case INS_Code.scale_Vec2:
 							{
 								//Exec_Scale_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Scale_Vec2(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Scale_Vec2(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14852,8 +14855,9 @@ namespace juicescript.runtime
 						case INS_Code.scale_Vec2_reciprocal:
 							{
 								//Exec_Scale_Vec2_Reciprocal(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Scale_Vec2_Reciprocal(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Scale_Vec2_Reciprocal(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14862,8 +14866,9 @@ namespace juicescript.runtime
 						case INS_Code.neg_pos_Vec2:
 							{
 								//Exec_Neg_Pos_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Neg_Pos_Vec2(dst_index,  PC, ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Neg_Pos_Vec2(dst_index,  PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14872,8 +14877,9 @@ namespace juicescript.runtime
 						case INS_Code.mul_Mat22_Vec2:
 							{
 								//Exec_Mul_Mat22_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Mul_Mat22_Vec2(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Mul_Mat22_Vec2(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14882,8 +14888,9 @@ namespace juicescript.runtime
 						case INS_Code.mul_Mat22_Mat22:
 							{
 								//Exec_Mul_Mat22_Mat22(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Mul_Mat22_Mat22(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Mul_Mat22_Mat22(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14892,8 +14899,9 @@ namespace juicescript.runtime
 						case INS_Code.add_Mat22_Mat22:
 							{
 								//Exec_Add_Mat22_Mat22(dst_index, ref PC, ref error, stackslots, frame.stackStPos);
-								PC = Exec_Add_Mat22_Mat22(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = Exec_Add_Mat22_Mat22(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -15047,8 +15055,9 @@ namespace juicescript.runtime
 								}
 #endif
 
-								PC = Array_vector_initelement(dst_index, PC, stackslots, ref error);
-								if (error.raised)
+								var result = Array_vector_initelement(dst_index, PC, stackslots, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -15162,8 +15171,8 @@ namespace juicescript.runtime
 							break;
 						case INS_Code.iter_initctx:
 							{
-								ITER_INITCTX(dst_index, PC, frame.methodscope, ref error);
-								if (error.raised)
+								bool isSuccess = ITER_INITCTX(dst_index, PC, frame.methodscope, ref error);
+								if (!isSuccess)
 								{
 									goto flag_handle_error;
 								}
