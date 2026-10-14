@@ -6864,7 +6864,7 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private unsafe void SaveIndexer(NaNBoxing RefInstance,NaNBoxing o_indexer_key, NaNBoxing value, StackLocater* tmpArgLoc, ref ReceiveError error)
+		private unsafe bool SaveIndexer(NaNBoxing RefInstance,NaNBoxing o_indexer_key, NaNBoxing value, StackLocater* tmpArgLoc, ref ReceiveError error)
 		{
 			RtHeapBase instance = HeapShortCut[RefInstance.HeapPtr];
 #if DEBUG
@@ -6877,7 +6877,7 @@ namespace juicescript.runtime
 			if (Context.StackPosition + 2 >= Context.STACK_LENGTH)
 			{
 				RaiseStackOverflow(ref error);
-				return;
+				return false;
 			}
 
 			var argSpan = Context.StackSlots.AsSpan(Context.StackPosition, 2);
@@ -6899,7 +6899,7 @@ namespace juicescript.runtime
 			if (error.raised)
 			{
 				Context.StackPosition -= 2;
-				return;
+				return false;
 			}
 
 			argSpan[1] = box;
@@ -6915,6 +6915,7 @@ namespace juicescript.runtime
 			error = mctx.error;
 			Context.StackPosition -= 2;
 			
+			return !error.raised;
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -7156,8 +7157,8 @@ namespace juicescript.runtime
 							}
 							else
 							{
-								SaveIndexer(cacheObj.RefInstance, cacheObj.indexer_key, box, tmpArgLoc, ref error);
-								if (error.raised)
+								bool isSave = SaveIndexer(cacheObj.RefInstance, cacheObj.indexer_key, box, tmpArgLoc, ref error);
+								if (! isSave)
 								{
 									goto flag_handle_error;
 								}
@@ -14724,9 +14725,10 @@ namespace juicescript.runtime
 							{
 								//O_Ld_Indexer(dst_index, ref PC,
 								//	 stackslots, frame.stackStPos, ref error);
-								PC = O_Ld_Indexer(dst_index, PC,
+								var result = O_Ld_Indexer(dst_index, PC,
 									 ref frame , ref error);
-								if (error.raised)
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14735,8 +14737,9 @@ namespace juicescript.runtime
 						case INS_Code.O_Store_Indexer:
 							{
 								//O_Store_Indexer(dst_index, ref PC, stackslots, frame.stackStPos, ref error);
-								PC = O_Store_Indexer(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = O_Store_Indexer(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14746,8 +14749,9 @@ namespace juicescript.runtime
 						case INS_Code.O_Store_InstanceField:
 							{
 								//O_Store_InstanceField(dst_index,ref PC,stackslots, frame.stackStPos, frame.scope_ptr, frame.methodscope,ref error);
-								PC = O_Store_InstanceField(dst_index, PC,ref frame ,ref error);
-								if (error.raised)
+								var result = O_Store_InstanceField(dst_index, PC,ref frame ,ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14755,8 +14759,9 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_BindGlobal_Recurse_Call:
 							{
-								PC = O_BindGlobal_Recurse_Call(dst_index, PC,ref frame, ref error);
-								if (error.raised)
+								var result = O_BindGlobal_Recurse_Call(dst_index, PC,ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14784,8 +14789,9 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_Var_Self_Add:
 							{
-								PC = O_Var_SelfAdd(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = O_Var_SelfAdd(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14793,9 +14799,10 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_Ld_Array_To_Var:
 							{
-								PC = O_Ld_ArrayToVar(dst_index, PC,
+								var result = O_Ld_ArrayToVar(dst_index, PC,
 									  ref frame, ref error);
-								if (error.raised)
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14804,8 +14811,9 @@ namespace juicescript.runtime
 							}
 						case INS_Code.O_Array_MoveAndSet:
 							{
-								PC = O_ArrayMoveAndSet(dst_index, PC, ref frame, ref error);
-								if (error.raised)
+								var result = O_ArrayMoveAndSet(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14894,8 +14902,9 @@ namespace juicescript.runtime
 						case INS_Code.if_logicOp_goto:
 							{
 
-								PC = If_logicOp_Goto(PC, ref frame, PC_START, ref error);
-								if (error.raised)
+								var result = If_logicOp_Goto(PC, ref frame, PC_START, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
 								{
 									goto flag_handle_error;
 								}
@@ -14936,8 +14945,8 @@ namespace juicescript.runtime
 								if (exception_ctx == NO_TRY)
 								{
 									//Return_Value(dst_index, frame.returnSlotIndex, method, (RtMethodScope)frame.methodscope, stackslots, frame.stackStPos, frame.calleelastPos, frame.scope_ptr, ref error,false);
-									Return_Value(dst_index, ref frame, ref error, false);
-									if (error.raised)
+									bool isSuccess = Return_Value(dst_index, ref frame, ref error, false);
+									if (!isSuccess)
 									{
 										goto flag_handle_error;
 									}
@@ -14956,8 +14965,9 @@ namespace juicescript.runtime
 								else
 								{
 
-									PC = ReturnValue_InTry(dst_index, ref frame, PC, exception_ctx, NO_TRY, PC_END, ref error);
-									if (error.raised)
+									var result = ReturnValue_InTry(dst_index, ref frame, PC, exception_ctx, NO_TRY, PC_END, ref error);
+									PC = result.PC;
+									if (result.IsRaised)
 									{
 										goto flag_handle_error;
 									}
