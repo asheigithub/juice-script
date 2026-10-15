@@ -90,7 +90,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var arguments = rest_array.store_memory.Span;
+			var arguments = rest_array.store_memory;
 
 			StringBuilder sb = new StringBuilder();
 
@@ -355,7 +355,7 @@ namespace juicescript.runtime.buildin
 				throw new InvalidOperationException();
 #endif
 
-			var arguments = rest_array.store_memory.Span;
+			var arguments = rest_array.store_memory;
 
 			StringBuilder sb = new StringBuilder();
 

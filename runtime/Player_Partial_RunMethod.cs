@@ -281,7 +281,7 @@ namespace juicescript.runtime
 					}
 
 
-					Memory<NaNBoxing> arguments = Context.StackSlots.AsMemory(Context.StackPosition, args);
+					//Memory<NaNBoxing> arguments = Context.StackSlots.AsMemory(Context.StackPosition, args);
 
 					int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 					RtHeapBase arg_rest = HeapShortCut[argumentsPtr];
@@ -297,7 +297,7 @@ namespace juicescript.runtime
 					//((RtArray)arg_rest).stack_store_startindex = Context.StackPosition;
 					//((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
 					//((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
-					((RtArray)arg_rest).SetStoreRest(arguments, Context.StackPosition);
+					((RtArray)arg_rest).SetStoreRest(Context.StackSlots,Context.StackPosition,args );//arguments, Context.StackPosition);
 					((RtArray)arg_rest).SetIsArguments(true);
 
 					if (methodArgs.callee_closure_ptr != 0)
@@ -427,13 +427,13 @@ namespace juicescript.runtime
 
 				fixed (byte* bp = ((method.Flags & (MethodFlags.HasOptional)) != 0) ? method.Body.param_defaultvalues : null)
 				{
-					Span<NaNBoxing> arguments_span = default;
+					RtArray.ArrayCacheStore arguments_span = default;
 
 					if ((method.Flags & (MethodFlags.NeedArguments)) != 0)
 					{
 						int argumentsPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 						RtHeapBase arg_arguments = HeapShortCut[argumentsPtr];
-						arguments_span = ((RtArray)arg_arguments).store_memory.Span;
+						arguments_span = ((RtArray)arg_arguments).store_memory;
 					}
 
 					var pmembers = method_body_linkcodesocpe.Members;
@@ -448,10 +448,10 @@ namespace juicescript.runtime
 						var p = method.Parameters[i];
 						if (p.IsRest)
 						{
-							Memory<NaNBoxing> rest = Context.StackSlots.AsMemory(
-								Context.StackPosition
+							//Memory<NaNBoxing> rest = Context.StackSlots.AsMemory(
+							//	Context.StackPosition
 
-								- para_argcount, para_argcount);
+							//	- para_argcount, para_argcount);
 
 							int restPtr = Context.M_RestArrayPtr + Context.BackTraceIndex;
 
@@ -469,7 +469,7 @@ namespace juicescript.runtime
 							//((RtArray)arg_rest).stack_store_startindex = Context.StackPosition - para_argcount;
 							//((RtArray)arg_rest).HEAPINSTANCE_PTR = 0;
 							//((RtArray)arg_rest).Set_PROPERTY_PTR(0, this);
-							((RtArray)arg_rest).SetStoreRest(rest, Context.StackPosition - para_argcount);
+							((RtArray)arg_rest).SetStoreRest( Context.StackSlots,Context.StackPosition-para_argcount,para_argcount );//rest, Context.StackPosition - para_argcount);
 
 							//((RtArray)arg_rest).SetIsRest(true);
 

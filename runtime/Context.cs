@@ -175,7 +175,7 @@ namespace juicescript.runtime
         public const int MIN_HEAPPTR = 1+ MAX_BACKTRACE + REAL_STACK_LENGTH + REAL_STACK_LENGTH + REAL_STACK_LENGTH + MAX_BACKTRACE + REAL_STACK_LENGTH * RtArray.MAX_CACHE_ELEMENT + REAL_STACK_LENGTH + REAL_STACK_LENGTH;
 
 
-        internal Memory<NaNBoxing>[] cache_array_memory;
+        internal RtArray.ArrayCacheStore[] cache_array_memory;
         internal int[] cache_array_structindex;
 
         public readonly List<RtHeapBase> HeapShortCut;
@@ -244,14 +244,14 @@ namespace juicescript.runtime
 
 
 
-			cache_array_memory = new Memory<NaNBoxing>[REAL_STACK_LENGTH];
+			cache_array_memory = new RtArray.ArrayCacheStore[REAL_STACK_LENGTH];
             cache_array_structindex = new int[REAL_STACK_LENGTH];
 
 			
             //先分配Array的缓存struct
             for (int i = 0; i < REAL_STACK_LENGTH; i++)
             {
-                cache_array_memory[i] = new Memory<NaNBoxing>(new NaNBoxing[RtArray.MAX_CACHE_ELEMENT]);
+                cache_array_memory[i] = new RtArray.ArrayCacheStore( new NaNBoxing[RtArray.MAX_CACHE_ELEMENT],RtArray.MAX_CACHE_ELEMENT,0);
                 
                 for (int j = 0; j < RtArray.MAX_CACHE_ELEMENT; j++)
                 {

@@ -46,7 +46,7 @@ namespace juicescript.runtime.buildin
 
 			var array = (RtArray)arrayinstance;
 
-			var rest_span = rest_array.store_memory.Span;
+			var rest_span = rest_array.store_memory;
 
 			if (rest_span.Length > 0)
 			{
@@ -92,7 +92,7 @@ namespace juicescript.runtime.buildin
 							uint count = (uint)Math.Floor(len);
 
 							array.array_len = count;
-							var array_store = array.store_memory.Span;
+							var array_store = array.store_memory;
 							if (count <= RtArray.MAX_CACHE_ELEMENT)
 							{
 								for (int i = 0; i < count; i++)
@@ -137,7 +137,7 @@ namespace juicescript.runtime.buildin
 			if (array.StoreMode == RtArray.ArrayStoreMode.cache)
 			{
 				array.array_len = (uint)rest_span.Length;
-				var array_store = array.store_memory.Span;
+				var array_store = array.store_memory;
 				for (int i = 0; i < rest_span.Length; i++)
 				{
 					var oldv = rest_span[i];
@@ -337,7 +337,7 @@ namespace juicescript.runtime.buildin
 			Debug.Assert(rest_array.StoreMode == RtArray.ArrayStoreMode.cache_on_stack);
 
 			//var array = (RtPayloadArray)arrayinstance;
-			var rest_span = rest_array.store_memory.Span;
+			var rest_span = rest_array.store_memory;
 
 			int ptrIndex = returnSlotIndex;
 			int instancePtr = Context.CacheArrayPtr + ptrIndex;
@@ -521,7 +521,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.HeapShortCut[rest.HeapPtr];
-			var restSpan = restArray.store_memory.Span;
+			var restSpan = restArray.store_memory;
 
 			// 3. Get current length
 			var array = (RtArray)arrayInstance;
@@ -857,7 +857,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.HeapShortCut[rest.HeapPtr];
-			var restSpan = restArray.store_memory.Span;
+			var restSpan = restArray.store_memory;
 
 			RtArray array;
 			int instancePtr = RtArray.FindAndUpdateHeapInstancePtr(thisPtr.HeapPtr, context.player, out array);
@@ -1984,7 +1984,7 @@ namespace juicescript.runtime.buildin
 
 			// 检查是否会越界
 			var values_array = (RtArray)context.HeapShortCut[values.HeapPtr];
-			var values_span = values_array.store_memory.Span;
+			var values_span = values_array.store_memory;
 			// 注意：values 的存储方式是 cache_on_stack
 
 			Debug.Assert((long)len - deleteCount + values_span.Length >= 0);
@@ -2193,7 +2193,7 @@ namespace juicescript.runtime.buildin
 			var scope = (RtMethodScope)context.HeapShortCut[scope_ptr];
 			var rest = scope.ReadSlot(0);
 			var restArray = (RtArray)context.HeapShortCut[rest.HeapPtr];
-			var restSpan = restArray.store_memory.Span;
+			var restSpan = restArray.store_memory;
 
 
 			if (restSpan.Length == 0)

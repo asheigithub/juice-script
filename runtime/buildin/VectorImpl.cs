@@ -53,7 +53,7 @@ namespace juicescript.runtime.buildin
 
 			int element_size = VectorStore.GetElementSize(vector.element_type, vector.element_asclass);
 
-			var rest_span = rest_array.store_memory.Span;
+			var rest_span = rest_array.store_memory;
 
 			if (rest_span.Length > 2)
 			{
@@ -305,7 +305,7 @@ namespace juicescript.runtime.buildin
 
 			int len = 0;
 
-			var arguments = rest_array.store_memory.Span;
+			var arguments = rest_array.store_memory;
 			for (var i = -1; i < arguments.Length; i++)
 			{
 				RtVector srcVec;
@@ -430,7 +430,7 @@ namespace juicescript.runtime.buildin
 
 			int len = store.length;
 
-			var arguments = rest_array.store_memory.Span;
+			var arguments = rest_array.store_memory;
 
 			vector.Resize(len + arguments.Length, ref error, context.player, (ASInstance)vector.Type,out VectorStore resizedstore);
 			if (error.raised)
@@ -587,7 +587,7 @@ namespace juicescript.runtime.buildin
 			}
 
 			int len = store.length;
-			var arguments = rest_array.store_memory.Span;
+			var arguments = rest_array.store_memory;
 			int newElements = arguments.Length;
 
 			if (newElements == 0)
@@ -4129,7 +4129,7 @@ namespace juicescript.runtime.buildin
 			{
 				var rest = scope.ReadSlot(2);
 				rest_array = (RtArray)context.HeapShortCut[rest.HeapPtr];
-				insertCount = rest_array.store_memory.Span.Length;
+				insertCount = rest_array.store_memory.Length;
 			}
 
 			willChangeLength = willChangeLength || insertCount > 0;
@@ -4243,7 +4243,7 @@ namespace juicescript.runtime.buildin
 					int basePos = context.StackPosition;
 					context.StackPosition += 1;
 
-					var argsSpan = rest_array.store_memory.Span;
+					var argsSpan = rest_array.store_memory;
 					for (int i = 0; i < insertCount; i++)
 					{
 						NaNBoxing item = argsSpan[i];
@@ -5336,7 +5336,7 @@ namespace juicescript.runtime.buildin
 			//	CopySpan(element_type, element, rest_span, context);
 			//}
 
-			internal void CopySpan(TypeKind element_type, ASClass element, Span<NaNBoxing> rest_span, Context context)
+			internal void CopySpan(TypeKind element_type, ASClass element, RtArray.ArrayCacheStore rest_span, Context context)
 			{
 				var span = CollectionsMarshal.AsSpan(buffer);
 				for (int i = 0; i < rest_span.Length; i++)

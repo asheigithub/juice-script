@@ -11729,7 +11729,7 @@ namespace juicescript.runtime
 				var payload = ((RtArray)instance).payload;
 				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && box.ValueType != BoxType.HeapPtr)
 				{
-					payload.store_memory.Span[(int)array_i] = box;
+					payload.store_memory[(int)array_i] = box;
 
 					if (array_i + 1 > payload.array_len)
 					{
@@ -12576,7 +12576,7 @@ namespace juicescript.runtime
 				var array = ((RtArray)HeapShortCut[instance_box.HeapPtr]).payload;
 				if (array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
 				{
-					var element = array.store_memory.Span[(int)array_i];
+					var element = array.store_memory[(int)array_i];
 					if (element.ValueType == BoxType.Fault)
 					{
 
@@ -12806,7 +12806,7 @@ namespace juicescript.runtime
 				var array = ((RtArray)HeapShortCut[instance_box.HeapPtr]).payload;
 				if (array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
 				{
-					element = array.store_memory.Span[(int)array_i];
+					element = array.store_memory[(int)array_i];
 					if (element.ValueType == BoxType.Fault)
 					{
 
@@ -12953,7 +12953,7 @@ namespace juicescript.runtime
 
 				if (name_box_index < array.array_len && index2_box_index < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
 				{
-					var arrayspan = array.store_memory.Span;
+					var arrayspan = array.store_memory;
 
 					element = arrayspan[(int)name_box_index];
 					if (element.ValueType == BoxType.Fault)
@@ -13012,7 +13012,7 @@ namespace juicescript.runtime
 				uint array_i = name_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 				if (array_i < array.array_len && array.StoreMode != RtArray.ArrayStoreMode.normal)
 				{
-					element = array.store_memory.Span[(int)array_i];
+					element = array.store_memory[(int)array_i];
 					if (element.ValueType == BoxType.Fault)
 					{
 
@@ -13066,7 +13066,7 @@ namespace juicescript.runtime
 				var payload = array;
 				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && box.ValueType != BoxType.HeapPtr)
 				{
-					payload.store_memory.Span[(int)array_i] = box;
+					payload.store_memory[(int)array_i] = box;
 
 					if (array_i + 1 > payload.array_len)
 					{
@@ -13099,7 +13099,7 @@ namespace juicescript.runtime
 				var payload = array;
 				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && value2_box.ValueType != BoxType.HeapPtr)
 				{
-					payload.store_memory.Span[(int)array_i] = value2_box;
+					payload.store_memory[(int)array_i] = value2_box;
 
 					if (array_i + 1 > payload.array_len)
 					{
