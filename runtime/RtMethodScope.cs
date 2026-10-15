@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -15,14 +16,52 @@ namespace juicescript.runtime
 #else
 	public
 #endif
-		sealed class RtMethodScope : RtHeapBase
+	sealed class RtMethodScope : RtHeapBase
 	{
+		public readonly struct MethodScopeSlots
+		{
+			internal readonly NaNBoxing[] store;
+			public readonly int Length;
+			internal readonly int start_index;
+
+			public MethodScopeSlots(NaNBoxing[] s, int len, int start)
+			{
+				store = s;
+				Length = len;
+				start_index = start;
+			}
+
+			
+
+			public ref NaNBoxing this[int index]
+			{
+				get
+				{
+					Debug.Assert(start_index + index < store.Length && index >= 0 && index < Length);
+
+					return ref store[start_index + index];
+				}
+
+			}
+
+			public bool IsEmpty
+			{
+				get { return Length == 0; }
+			}
+
+		}
+
+
+
+
+
 		private static uint verseed;
 
 
 		public RtMethodScope() : base( RtHeapTypeKind.MethodScope) { }
 
-		private Memory<NaNBoxing> Slots;
+		//private Memory<NaNBoxing> Slots;
+		MethodScopeSlots Slots;
 
 		public int ParentPtr;
 
@@ -49,7 +88,7 @@ namespace juicescript.runtime
 		{
 			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get {
-				return Slots.Span[SlotCount - 1];
+				return Slots[SlotCount - 1];
 			}
 		}
 
@@ -83,7 +122,7 @@ namespace juicescript.runtime
 				+ 1 //追加一个槽保存this
 				;
 
-			Slots = new Memory<NaNBoxing>(array, start, codescope.Members.Count + 1);
+			Slots = new MethodScopeSlots(array, codescope.Members.Count + 1, start); //new Memory<NaNBoxing>(array, start, codescope.Members.Count + 1);
 
 			cloneout_ptr = 0;
 
@@ -100,9 +139,11 @@ namespace juicescript.runtime
 			}
 
 #else
-			if (!codescope._rt_cache_init_data.IsEmpty)
+			if (codescope._rt_cache_init_data != null)
 			{
-				codescope._rt_cache_init_data.Span.CopyTo(Slots.Span);
+				Array.Copy(codescope._rt_cache_init_data, 0, Slots.store, Slots.start_index, codescope._rt_cache_init_data.Length);
+
+				//codescope._rt_cache_init_data.Span.CopyTo(Slots.GetSpan());
 				return;
 			}
 
@@ -114,9 +155,9 @@ namespace juicescript.runtime
 		private void InitSlot_Set(CodeScope codescope)
 		{
 
-			Slots.Span[codescope.Members.Count].SetUndefined(); //此处槽保留this
+			Slots[codescope.Members.Count].SetUndefined(); //此处槽保留this
 
-			var span = Slots.Span;
+			var span = Slots;
 			for (int i = codescope.ParameterCout; i < span.Length - 1; i++)
 			{
 				var member = codescope.Members[i];
@@ -192,9 +233,9 @@ namespace juicescript.runtime
 
 #if !FORCOMPILER
 
-			codescope._rt_cache_init_data = new Memory<NaNBoxing>(new NaNBoxing[codescope.Members.Count + 1]);
-			span.CopyTo(codescope._rt_cache_init_data.Span);
-
+			codescope._rt_cache_init_data = new NaNBoxing[codescope.Members.Count + 1];  //new Memory<NaNBoxing>(new NaNBoxing[codescope.Members.Count + 1]);
+																						 //span.GetSpan().CopyTo(codescope._rt_cache_init_data.Span);
+			Array.Copy(span.store, span.start_index, codescope._rt_cache_init_data, 0, span.Length);
 #endif
 		}
 
@@ -232,7 +273,7 @@ namespace juicescript.runtime
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void SetSlot(NaNBoxing value, ushort memberIndex)
 		{
-			Slots.Span[memberIndex] = value;
+			Slots[memberIndex] = value;
 
 #if FORCOMPILER
 			if (isCompiling)
@@ -258,23 +299,23 @@ namespace juicescript.runtime
 
 #endif
 
-			return Slots.Span[memberIndex];
+			return Slots[memberIndex];
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal ref NaNBoxing ReadSlotRef(ushort memberIndex)
 		{ 
 
-			return ref Slots.Span[memberIndex];
+			return ref Slots[memberIndex];
 		}
 
 
-		internal Span<NaNBoxing> __get_slots_internal
+		internal ref MethodScopeSlots __get_slots_internal
 		{
 			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return Slots.Span;
+				return ref Slots;
 			}
 		}
 

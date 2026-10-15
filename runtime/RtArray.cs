@@ -61,11 +61,11 @@ namespace juicescript.runtime
 			}
 
 
-			public readonly NaNBoxing[] store;
+			internal readonly NaNBoxing[] store;
 
 			public readonly int Length;
 
-			public readonly int start_index;
+			private readonly int start_index;
 
 			public ref NaNBoxing this[int index]
 			{

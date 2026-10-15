@@ -112,7 +112,7 @@ namespace juicescript
         public int index;
 
 
-        public Memory<NaNBoxing> _rt_cache_init_data;
+        public NaNBoxing[] _rt_cache_init_data;
 
         public Memory<byte> _rt_cache_instance_data;
 
