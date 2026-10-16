@@ -375,6 +375,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_Array_MoveAndSet:
 					instruction = new INS_O_Arr_MoveAndSet(token);
 					break;
+				case INS_Code.O_Copy_ArrayElement:
+					instruction = new INS_O_Copy_ArrayElement(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;

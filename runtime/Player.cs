@@ -6919,13 +6919,13 @@ namespace juicescript.runtime
 		}
 
 		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		internal unsafe bool SaveHeapRef(RtHeapBase cache, int source, Span<NaNBoxing> stackslots, Span<char> frame_holdchars,
+		internal unsafe bool SaveHeapRef(RtHeapBase cache, NaNBoxing source, Span<NaNBoxing> stackslots, Span<char> frame_holdchars,
 			StackLocater* tmpArgLoc, int scope_ptr, int stackStPos, RtHeapBase methodscope,
 			ref ReceiveError error)
 		{
 			{
 
-				NaNBoxing box = stackslots[source];
+				NaNBoxing box = source; //stackslots[source];
 				RtStackCache cacheObj = (RtStackCache)cache;
 
 				if (cacheObj.RefInstance.ValueType != BoxType.HeapPtr)
@@ -14812,6 +14812,16 @@ namespace juicescript.runtime
 						case INS_Code.O_Array_MoveAndSet:
 							{
 								var result = O_ArrayMoveAndSet(dst_index, PC, ref frame, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
+								{
+									goto flag_handle_error;
+								}
+								break;
+							}
+						case INS_Code.O_Copy_ArrayElement:
+							{
+								var result = O_CopyArrayElement(dst_index, PC, ref frame, ref error);
 								PC = result.PC;
 								if (result.IsRaised)
 								{

@@ -391,6 +391,8 @@ namespace juicescript.ABC.INS
 
         O_Array_MoveAndSet = 113, // 交换操作的后半截 var temp = perm[i]; perm[i] = perm[k - i]; perm[k - i] = temp; 的后半部分，从数组读一个值，把它赋给相同数组的另一个位置，然后给另一个位置赋一个值
 
+        O_Copy_ArrayElement = 114, // b[1] = a[1]; 复制数组元素 
+
 
 		//***矩阵，向量类***
 

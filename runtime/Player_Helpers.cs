@@ -10945,7 +10945,7 @@ namespace juicescript.runtime
 					{
 						StackLocater* tmpArgLoc = stackalloc StackLocater[2];
 
-						SaveHeapRef(HeapShortCut[stackslots[tmp_holder].HeapPtr], source_index, stackslots, stackalloc char[128], tmpArgLoc, frame.scope_ptr, frame.stackStPos, frame.methodscope, ref error);
+						SaveHeapRef(HeapShortCut[stackslots[tmp_holder].HeapPtr],  stackslots[source_index], stackslots, stackalloc char[128], tmpArgLoc, frame.scope_ptr, frame.stackStPos, frame.methodscope, ref error);
 
 						if (error.raised)
 						{
@@ -10989,7 +10989,7 @@ namespace juicescript.runtime
 		}
 
 
-		private unsafe void Store_MultiNameL_Slow(int source, int instance_loc, int super_const_index, int tmp_holder, int _name,
+		private unsafe void Store_MultiNameL_Slow(NaNBoxing source, int instance_loc, int super_const_index, int tmp_holder, int _name,
 			//NaNBoxing* constants,
 			//RtHeapBase methodscope,
 			//Span<NaNBoxing> stackslots, int stackStPos, int scope_ptr,
@@ -11146,7 +11146,7 @@ namespace juicescript.runtime
 					ref NaNBoxing conv = ref Context.StackSlots[Context.StackPosition];
 					Context.StackPosition++;
 
-					ConvertValueType(ref error, frame.stackslots[source], vector.element_type, vector.element_asclass, ref conv);//, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
+					ConvertValueType(ref error, source, vector.element_type, vector.element_asclass, ref conv);//, scope_ptr, ((RtMethodScope)methodscope).ThisPtr);
 					if (error.raised)
 					{
 						Context.StackPosition--;
@@ -11212,7 +11212,7 @@ namespace juicescript.runtime
 					cachePayload.searchNameSpacePtr = 0; cachePayload.indexer_key = prop_name;
 
 
-					SaveHeapRef(cachePayload, source, frame.stackslots, buffers, tmpArgLoc, frame.scope_ptr, frame.stackStPos, frame.methodscope, ref error);
+					SaveHeapRef(cachePayload,  source, frame.stackslots, buffers, tmpArgLoc, frame.scope_ptr, frame.stackStPos, frame.methodscope, ref error);
 					if (error.raised)
 					{
 						goto flag_handle_error;
@@ -11398,7 +11398,7 @@ namespace juicescript.runtime
 
 					RtHeapBase instance = HeapShortCut[instance_box.HeapPtr];
 
-					SetArraySlot(frame.stackslots[source], array_i, instance, ref error);
+					SetArraySlot(source, array_i, instance, ref error);
 					if (error.raised)
 					{
 						goto flag_handle_error;
@@ -11600,7 +11600,7 @@ namespace juicescript.runtime
 				RtHeapBase instance = HeapShortCut[instance_box.HeapPtr];
 
 				SetArraySlot(stackslots[source_index], array_i, instance, ref error);
-				return new HandlerResult(PC, false);
+				return new HandlerResult(PC, error.raised);
 			}
 			else if (instance_box.HeapKind == (byte)RtHeapTypeKind.VECTOR
 				&& RtVector.IsValidIndexType(name_box, out int v_index)
@@ -11669,7 +11669,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(source_index, instance_loc, super_const_index, tmp_holder, _name, ref frame, ref error);
+				Store_MultiNameL_Slow(stackslots[source_index], instance_loc, super_const_index, tmp_holder, _name, ref frame, ref error);
 				return new HandlerResult(PC, error.raised);
 			}
 
@@ -11745,7 +11745,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(source_index, instance_loc, 0, tmp_holder, _name, ref frame, ref error);
+				Store_MultiNameL_Slow(stackslots[source_index], instance_loc, 0, tmp_holder, _name, ref frame, ref error);
 				return new HandlerResult(PC, error.raised);
 			}
 
@@ -11862,7 +11862,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(source_index, instance_loc, 0, tmp_holder, _name, ref frame, ref error);
+				Store_MultiNameL_Slow(stackslots[source_index], instance_loc, 0, tmp_holder, _name, ref frame, ref error);
 				return new HandlerResult(PC, error.raised);
 			}
 
@@ -12945,7 +12945,7 @@ namespace juicescript.runtime
 
 				&&
 					(index2_box_type >= BoxType.Int && index2_box_type <= BoxType.UShort &&
-				((int)index2_box_type >= 0 //|| (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)  //快路径不会出现超出int的情况，判断冗余	
+				((int)index2_box_index >= 0 //|| (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)  //快路径不会出现超出int的情况，判断冗余	
 				))
 				)
 
@@ -13057,7 +13057,7 @@ namespace juicescript.runtime
 
 			if (
 				index2_box_type >= BoxType.Int && index2_box_type <= BoxType.UShort &&
-				((int)index2_box_type >= 0 || (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)))
+				((int)index2_box_index >= 0 || (index2_box_type == BoxType.Uint && index2_box_index < uint.MaxValue)))
 			{
 				uint array_i = index2_box_index; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
 
@@ -13082,7 +13082,7 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(dst_index, instance_index, 0, refholder_index, index2, ref frame, ref error);
+				Store_MultiNameL_Slow( stackslots[ dst_index], instance_index, 0, refholder_index, index2, ref frame, ref error);
 
 				if (error.raised)
 					return new HandlerResult(PC, true);
@@ -13117,15 +13117,179 @@ namespace juicescript.runtime
 			}
 			else
 			{
-				Store_MultiNameL_Slow(value2, instance_index, 0, refholder_index, _name, ref frame, ref error);
+				Store_MultiNameL_Slow( stackslots[ value2], instance_index, 0, refholder_index, _name, ref frame, ref error);
 				return new HandlerResult(PC, error.raised);
 			}
 			
 		}
 
 
+		
+		private unsafe HandlerResult O_CopyArrayElement(int dst_index, byte* PC,
+			ref FrameContext frame
+			, ref ReceiveError error)
+		{
+
+			int src_arr = LoadStackLocater(ref PC) ;
+			int dst_arr = LoadStackLocater(ref PC);
+			int src_index = LoadStackLocater(ref PC);
+			int tmp_holder = LoadStackLocater(ref PC);
+
+			var stackslots = frame.stackslots;
+
+			var src = stackslots[src_arr];
+			var dst = stackslots[dst_arr];
+
+			if (src.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(src.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return new HandlerResult(PC, true);
+			}
+			if (dst.ValueType != BoxType.HeapPtr)
+			{
+				Debug.Assert(dst.ValueType == BoxType.Null);
+				RaiseTypeError_AccessNull(ref error);
+				return new HandlerResult(PC, true);
+			}
 
 
+			var array_src = ((RtArray)HeapShortCut[src.HeapPtr]).payload;
+			var array_dst = ((RtArray)HeapShortCut[dst.HeapPtr]).payload;
+
+			var i_src = stackslots[src_index];
+			var i_dst = stackslots[dst_index];
+
+			uint index_src =  i_src.UIntValue;
+			var index_src_type = i_src.ValueType;
+
+			uint index_dst = i_dst.UIntValue;
+			var index_dst_type = i_dst.ValueType;
+
+
+			if (
+				(index_src_type >= BoxType.Int && index_src_type <= BoxType.UShort &&
+				((int)index_src >= 0 //|| (index_src_type == BoxType.Uint && index_src < uint.MaxValue)
+
+				))
+
+				&&
+					(index_dst_type >= BoxType.Int && index_dst_type <= BoxType.UShort &&
+				((int)index_dst >= 0 //|| (index_dst_type == BoxType.Uint && index_dst < uint.MaxValue)
+				))
+				)
+			{
+				//快路径
+
+				if (index_src < array_src.array_len && index_dst < array_dst.array_len && array_src.StoreMode != ArrayStoreMode.normal && array_dst.StoreMode != ArrayStoreMode.normal)
+				{
+					var e = array_src.store_memory[(int)index_src];
+					if (e.IsStruct())
+						goto lbl_element_is_struct;
+
+					array_dst.store_memory[(int)index_dst] = e;
+					return new HandlerResult(PC, false);
+
+
+				lbl_element_is_struct:
+
+					
+					SetArraySlot(e, index_dst, array_dst, ref error);
+
+					return new HandlerResult(PC, error.raised);
+				}
+			}
+
+			//慢路径			
+			NaNBoxing element = default;
+
+			if (
+				index_src_type >= BoxType.Int && index_src_type <= BoxType.UShort &&
+				((int)index_src >= 0 || (index_src_type == BoxType.Uint && index_src < uint.MaxValue)))
+			{
+
+				uint array_i = index_src; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+				if (array_i < array_src.array_len && array_src.StoreMode != RtArray.ArrayStoreMode.normal)
+				{
+					element = array_src.store_memory[(int)array_i];
+					if (element.ValueType == BoxType.Fault)
+					{
+
+					}
+					else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+					{
+						element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+						goto lbl_load_pass;
+					}
+					else
+					{
+						goto lbl_load_pass;
+					}
+				}
+
+
+				bool isoutofindex_or_ishole;
+				element = LoadSlotFromArray(array_i, array_src, out isoutofindex_or_ishole);
+
+				if (element.ValueType == BoxType.Fault)
+				{
+					element.SetUndefined();
+				}
+				else if (element.IsStruct())//v.ValueType == BoxType.HeapPtr && v.HeapKind == (byte)RtHeapTypeKind.INSTANCE && v.HeapFlag &)
+				{
+					element.SetHeapPtr(element.HeapPtr, (byte)RtHeapTypeKind.INSTANCE, (byte)(HeapKindFlag.FLAG_STRUCT | HeapKindFlag.FLAG_REFSTRUCT));
+				}
+			}
+			else
+			{
+				Ld_MultiNameL_Val_Slow(tmp_holder, src_arr, tmp_holder, src_index, ref frame, ref error);
+				element = stackslots[tmp_holder];
+				if (error.raised)
+					return new HandlerResult(PC, true);
+			}
+
+		lbl_load_pass:
+			//store array element
+			if (
+				index_dst_type >= BoxType.Int && index_dst_type <= BoxType.UShort &&
+				((int)index_dst >= 0 || (index_dst_type == BoxType.Uint && index_dst < uint.MaxValue)))
+			{
+				uint array_i = index_dst; //name_box.ValueType == BoxType.Uint ? name_box.UIntValue : (uint)name_box.IntValue;
+
+				var box = element;
+
+				var payload = array_dst;
+				if (payload.StoreMode != ArrayStoreMode.normal && array_i < payload.store_memory.Length && box.ValueType != BoxType.HeapPtr)
+				{
+					payload.store_memory[(int)array_i] = box;
+
+					if (array_i + 1 > payload.array_len)
+					{
+						payload.array_len = array_i + 1;
+					}
+
+					return new HandlerResult(PC, false);
+
+				}
+				else
+				{
+					SetArraySlot(box, array_i, array_dst, ref error);
+					
+					return new HandlerResult(PC, error.raised);
+				}
+			}
+			else
+			{
+				Store_MultiNameL_Slow(element, dst_arr, 0, tmp_holder, dst_index, ref frame, ref error);
+
+			
+				return new HandlerResult(PC, error.raised);
+			}
+
+
+			
+
+		}
 
 		private unsafe byte* Ld_ScopeH(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots, RtHeapBase scope,
@@ -13842,7 +14006,7 @@ namespace juicescript.runtime
 
 			StackLocater* tmpArgLoc = stackalloc StackLocater[2];
 
-			bool success = SaveHeapRef(cache, source_index, stackslots, stackalloc char[128], tmpArgLoc, frame.scope_ptr, frame.stackStPos, frame.methodscope, ref error);
+			bool success = SaveHeapRef(cache, stackslots[ source_index], stackslots, stackalloc char[128], tmpArgLoc, frame.scope_ptr, frame.stackStPos, frame.methodscope, ref error);
 
 			return new HandlerResult(PC, !success);
 

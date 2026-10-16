@@ -73,6 +73,8 @@ namespace juicescript.compiler.IL
 
             dict_reg_traitreference = new Dictionary<AS3Reg, Tuple<ASTrait[], AS3ExprStep>>();
 
+            dict_traitref_loaded = new Dictionary<Tuple<ASTrait[], AS3ExprStep>, StackLocater>();
+
             dict_reg_NsAccessContext = new Dictionary<AS3Reg, Tuple< ASContainer, ASNamespace>>();
 
             dict_reg_search_imports = new Dictionary<StackLocater, string>();
@@ -110,6 +112,11 @@ namespace juicescript.compiler.IL
             {
                 dict_reg_stacklocater.Add(item.Key, item.Value);
             }
+            foreach (var item in compileEnv.dict_traitref_loaded)
+            {
+                dict_traitref_loaded.Add(item.Key, item.Value);
+            }
+
             foreach (var item in compileEnv.dict_reg_traitreference)
             {
                 dict_reg_traitreference.Add(item.Key, item.Value);
@@ -150,6 +157,9 @@ namespace juicescript.compiler.IL
         private Dictionary<AS3Reg, StackLocater> dict_reg_stacklocater;
 
         private Dictionary<AS3Reg, Tuple<ASTrait[], AS3ExprStep>> dict_reg_traitreference;//AS3Reg对应的ASTrait引用
+
+        private Dictionary<Tuple<ASTrait[], AS3ExprStep>, StackLocater> dict_traitref_loaded;//ASTrait引用已经被解决，类似((a = b[1]) == 2) 这种代码!
+
 
         private Dictionary<AS3Reg, Tuple< ASContainer, ASNamespace>> dict_reg_NsAccessContext;
 
@@ -239,6 +249,20 @@ namespace juicescript.compiler.IL
         {
             dict_reg_traitreference.Add(reg, new Tuple<ASTrait[], AS3ExprStep>(traits, step));
         }
+
+
+        public bool TryRead_TraitRefValue(Tuple<ASTrait[], AS3ExprStep> traitRef,out StackLocater v)
+        {
+            return dict_traitref_loaded.TryGetValue(traitRef, out v);
+        }
+
+        public void SetTraitRef_Load(Tuple<ASTrait[], AS3ExprStep> traitRef, StackLocater ld_v)
+        {
+            dict_traitref_loaded.Add(traitRef, ld_v);
+        }
+
+
+
 
 
         public void SetCallResult(StackLocater stackLocater)

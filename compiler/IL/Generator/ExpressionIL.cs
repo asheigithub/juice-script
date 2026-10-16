@@ -6179,6 +6179,18 @@ namespace juicescript.compiler.IL.Generator
 
 				var instance = compileEnv.ReadRefBindInstance(data.Reg);
 
+				if (compileEnv.TryRead_TraitRefValue(traitRef, out StackLocater ld_v))
+				{
+					var target = makeOrGetLocater(compileEnv.ReadStackType(ld_v).Mir);
+					INS_Move mv = new INS_Move(token);
+					mv.source = ld_v;
+					mv.dst = target;
+
+					compileEnv.instructions.Add(mv);
+
+					return target;
+				}
+
 				if (traitRef.Item1.Length == 3)
 				{
 					//检查索引器返回类型
@@ -6191,6 +6203,8 @@ namespace juicescript.compiler.IL.Generator
 					ld_ValueRef.source = src;
 
 					compileEnv.instructions.Add(ld_ValueRef);
+
+					compileEnv.SetTraitRef_Load(traitRef, target);
 
 					return target;
 
@@ -6220,6 +6234,8 @@ namespace juicescript.compiler.IL.Generator
 						compileEnv.SetCallResult(stacklocator);
 						compileEnv.instructions.Add(readPoperty);
 
+						compileEnv.SetTraitRef_Load(traitRef, stacklocator);
+
 						return stacklocator;
 					}
 					else if (instancetype.Maj == TypeKind.Vector)
@@ -6245,6 +6261,8 @@ namespace juicescript.compiler.IL.Generator
 						compileEnv.SetCallResult(stacklocator);
 						compileEnv.instructions.Add(readPoperty);
 
+						compileEnv.SetTraitRef_Load(traitRef, stacklocator);
+
 						return stacklocator;
 					}
 					else if (instancetype.Maj == TypeKind.Array || instancetype.Maj == TypeKind.String)
@@ -6263,6 +6281,7 @@ namespace juicescript.compiler.IL.Generator
 
 						compileEnv.instructions.Add(ld_Length);
 
+						compileEnv.SetTraitRef_Load(traitRef, stacklocator);
 
 						return stacklocator;
 					}
@@ -6294,6 +6313,7 @@ namespace juicescript.compiler.IL.Generator
 
 								compileEnv.instructions.Add(ld_Length);
 
+								compileEnv.SetTraitRef_Load(traitRef, stacklocator);
 
 								return stacklocator;
 							}
@@ -6324,6 +6344,9 @@ namespace juicescript.compiler.IL.Generator
 								compileEnv.SetCallResult(stacklocator);
 								compileEnv.instructions.Add(readPoperty);
 							}
+
+							compileEnv.SetTraitRef_Load(traitRef, stacklocator);
+
 							return stacklocator;
 						}
 						else
@@ -6356,6 +6379,8 @@ namespace juicescript.compiler.IL.Generator
 							bindThis_Call._this_ = instance;
 
 							compileEnv.instructions.Add(bindThis_Call);
+
+							compileEnv.SetTraitRef_Load(traitRef, stacklocator);
 
 							return stacklocator;
 
@@ -6404,6 +6429,8 @@ namespace juicescript.compiler.IL.Generator
 
 					compileEnv.instructions.Add(ld_ValueRef);
 
+					compileEnv.SetTraitRef_Load(traitRef, target);
+
 					return target;
 
 
@@ -6419,6 +6446,8 @@ namespace juicescript.compiler.IL.Generator
 					ld_ValueRef.source = src;
 
 					compileEnv.instructions.Add(ld_ValueRef);
+
+					compileEnv.SetTraitRef_Load(traitRef, target);
 
 					return target;
 

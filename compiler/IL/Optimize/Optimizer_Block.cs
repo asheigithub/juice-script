@@ -2912,36 +2912,82 @@ namespace juicescript.compiler.IL.Optimize
 			#region Ld_ArrayElement->Var
 			foreach (var b in cfg.Blocks)
 			{
-				for (int i = 0; i < b.Instructions.Count ; i++)
+				for (int i = 0; i < b.Instructions.Count; i++)
 				{
 					var ins = b.Instructions[i];
 					if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
 					{
-						var next = b.Instructions.Skip(i+1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
+						var next = b.Instructions.Skip(i + 1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
 						if (next != null && next.INS_Code == INS_Code.storeMethodVariable)
+
 						{
 							var ld_arr = (INS_O_Ld_Array_Element)ins;
 							var store = (INS_Store_MethodVariable)next;
 
-							INS_O_Ld_Arr_Var ld_Arr_Var = new INS_O_Ld_Arr_Var(ld_arr.token);
-							ld_Arr_Var.name = ld_arr.name;
-							ld_Arr_Var.instance = ld_arr.instance;
-							ld_Arr_Var.refholder = ld_arr.refholder;
-							ld_Arr_Var.heap = store.heap;
-							ld_Arr_Var.dst = store.convertedloc;
+							if (
+								cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii => ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains(ld_arr.dst)).Count() == 1
+							)
+							{
+								INS_O_Ld_Arr_Var ld_Arr_Var = new INS_O_Ld_Arr_Var(ld_arr.token);
+								ld_Arr_Var.name = ld_arr.name;
+								ld_Arr_Var.instance = ld_arr.instance;
+								ld_Arr_Var.refholder = ld_arr.refholder;
+								ld_Arr_Var.heap = store.heap;
+								ld_Arr_Var.dst = store.convertedloc;
 
-							b.Instructions[i] = ld_Arr_Var;
+								b.Instructions[i] = ld_Arr_Var;
 
-							b.Instructions.Remove(next);
+								b.Instructions.Remove(next);
+							}
 						}
 
 					}
 				}
 
-				
-
 			}
 			#endregion
+
+			#region Ld_ArrayElement->O_Store_ArrayElement 
+			foreach (var b in cfg.Blocks)
+			{
+				for (int i = 0; i < b.Instructions.Count; i++)
+				{
+					var ins = b.Instructions[i];
+					if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
+					{
+						var next = b.Instructions.Skip(i + 1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
+						if (next != null && next.INS_Code == INS_Code.O_Store_Array_Element)
+						{
+							var ld_arr = (INS_O_Ld_Array_Element)ins;
+							var store = (INS_O_Store_ArrayElement)next;
+
+							if (ld_arr.dst.index == store.dst.index
+								&&
+								cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii => ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains(ld_arr.dst)).Count() == 1
+
+								) //读取并赋值
+							{
+								INS_O_Copy_ArrayElement o_copy = new INS_O_Copy_ArrayElement(ins.token);
+								o_copy.src_arr = ld_arr.instance;
+								o_copy.src_index = ld_arr.name;
+								o_copy.dst_arr = store.instance;
+								o_copy.dst_index = store.name;
+								o_copy.tmp_holder = store.tmp_holder;
+
+								b.Instructions[i] = o_copy;
+								b.Instructions.Remove(next);
+
+							}
+						}
+					}
+				}
+
+			}
+
+
+			#endregion
+
+
 
 
 			#region 探测数组元素交换

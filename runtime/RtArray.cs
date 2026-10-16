@@ -69,6 +69,7 @@ namespace juicescript.runtime
 
 			public ref NaNBoxing this[int index]
 			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
 				get
 				{
 					Debug.Assert(start_index + index < store.Length && index >=0 && index <Length);
