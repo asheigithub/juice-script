@@ -378,6 +378,9 @@ namespace juicescript.compiler.IL
 				case INS_Code.O_Copy_ArrayElement:
 					instruction = new INS_O_Copy_ArrayElement(token);
 					break;
+				case INS_Code.O_If_Var_Var_Cmp_Goto:
+					instruction = new INS_O_If_Var_Var_Cmp_Goto(token);
+					break;
 				case INS_Code.add_Vec2_Vec2:
 					instruction = new INS_Add_Vec2_Vec2(token);
 					break;

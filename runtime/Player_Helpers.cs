@@ -49,8 +49,7 @@ namespace juicescript.runtime
 
 		}
 
-
-
+		
 
 
 
@@ -11914,14 +11913,75 @@ namespace juicescript.runtime
 		}
 
 
+		//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe HandlerResult O_If_Var_Var_Cmp_Goto(byte* PC, ref FrameContext frame, byte* PC_START, ref ReceiveError error)
+		{
+			var stackslots = frame.stackslots;
 
+			
+			int offset = LoadInt32(ref PC); //br.ReadInt32();
+			
 
+			var compMode = (CompMode) (*(short*)PC) ; PC += 2;
+			bool jump_mode =  *(short*)PC == 1 ; PC += 2;
+			
+			ushort var1 = *(ushort*)PC; PC += 2;
+			ushort var2 = *(ushort*)PC; PC += 2;
 
+			int v1 = LoadInt32(ref PC);
+			int v2 = LoadInt32(ref PC);
 
+			NaNBoxing a = ((RtMethodScope)frame.methodscope).ReadSlot(var1);
+			NaNBoxing b = ((RtMethodScope)frame.methodscope).ReadSlot(var2);
 
+			
+		
+			if ((a.ValueType == BoxType.Int || (a.ValueType > BoxType.Uint && a.ValueType < BoxType.Float))
+				&&
+				(b.ValueType == BoxType.Int || (b.ValueType > BoxType.Uint && b.ValueType < BoxType.Float))
+				)
+			{
+				int cv = a.IntValue - b.IntValue;
+				bool c = (((cv < 0 && (compMode == CompMode.less || compMode == CompMode.less_equal || compMode == CompMode.notequal || compMode == CompMode.strict_neq))
+					||
+					(cv > 0 && (compMode == CompMode.greater || compMode == CompMode.greater_equal || compMode == CompMode.notequal || compMode == CompMode.strict_neq))
+					||
+					(cv == 0 && (compMode == CompMode.greater_equal || compMode == CompMode.less_equal || compMode == CompMode.equal || compMode == CompMode.strict_equal))
+					)
 
+					);
+				
+				if (c == jump_mode)
+				{
+					PC = PC_START + offset;
+				}
 
+				stackslots[v1] = a;
+				stackslots[v2] = b;
 
+				return new HandlerResult(PC, false);
+
+			}
+			else
+			{
+				if (Context.StackPosition >= Context.STACK_LENGTH)
+				{
+					RaiseStackOverflow(ref error);
+					return new HandlerResult(PC, true);
+				}
+
+				
+				if (If_logicOpGoto_Slow(ref frame, compMode, a, b, v1, jump_mode, ref error))
+				{
+					PC = PC_START + offset;
+				}
+
+				stackslots[v1] = a;
+				stackslots[v2] = b;
+
+				return new HandlerResult(PC, error.raised);
+			}
+		}
 
 
 
@@ -12531,7 +12591,7 @@ namespace juicescript.runtime
 		}
 
 
-
+		
 		private unsafe HandlerResult O_Ld_ArrayElement(int dst_index, byte* PC,
 			ref FrameContext frame
 			, ref ReceiveError error)
@@ -12886,7 +12946,7 @@ namespace juicescript.runtime
 		}
 
 
-
+		
 		private unsafe HandlerResult O_ArrayMoveAndSet(int dst_index, byte* PC,
 			ref FrameContext frame
 			, ref ReceiveError error)
@@ -13124,7 +13184,7 @@ namespace juicescript.runtime
 		}
 
 
-		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe HandlerResult O_CopyArrayElement(int dst_index, byte* PC,
 			ref FrameContext frame
 			, ref ReceiveError error)
@@ -13200,6 +13260,32 @@ namespace juicescript.runtime
 				}
 			}
 
+			return O_CopyArrayElement_Slow(PC, 
+				tmp_holder, src_arr, src_index, dst_arr, dst_index, ref frame, ref error);
+
+		}
+
+
+		private unsafe HandlerResult O_CopyArrayElement_Slow(byte* PC,int tmp_holder,int src_arr,int src_index, int dst_arr,int dst_index ,ref FrameContext frame,ref ReceiveError error)
+		{
+
+			var stackslots = frame.stackslots;
+			var i_src = stackslots[src_index];
+			var i_dst = stackslots[dst_index];
+
+			uint index_src = i_src.UIntValue;
+			var index_src_type = i_src.ValueType;
+
+			uint index_dst = i_dst.UIntValue;
+			var index_dst_type = i_dst.ValueType;
+
+			var src = stackslots[src_arr];
+			var dst = stackslots[dst_arr];
+
+			var array_src = ((RtArray)HeapShortCut[src.HeapPtr]).payload;
+			var array_dst = ((RtArray)HeapShortCut[dst.HeapPtr]).payload;
+
+
 			//慢路径			
 			NaNBoxing element = default;
 
@@ -13274,7 +13360,7 @@ namespace juicescript.runtime
 				else
 				{
 					SetArraySlot(box, array_i, array_dst, ref error);
-					
+
 					return new HandlerResult(PC, error.raised);
 				}
 			}
@@ -13282,14 +13368,12 @@ namespace juicescript.runtime
 			{
 				Store_MultiNameL_Slow(element, dst_arr, 0, tmp_holder, dst_index, ref frame, ref error);
 
-			
+
 				return new HandlerResult(PC, error.raised);
 			}
-
-
-			
-
 		}
+
+
 
 		private unsafe byte* Ld_ScopeH(int dst_index, byte* PC,
 			//Span<NaNBoxing> stackslots, RtHeapBase scope,
@@ -13906,13 +13990,13 @@ namespace juicescript.runtime
 			return false;
 		}
 
-		//[MethodImpl(MethodImplOptions.AggressiveOptimization)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe HandlerResult StoreMethodVariable(int dst_index, byte* PC,
 			//RtHeapBase methodscope, Span<NaNBoxing> stackslots, int scope_ptr, 
 			ref FrameContext frame,
 			ref ReceiveError error)
 		{
-			uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
+			//uint* opcodePtr = (uint*)PC - 1; Debug.Assert((*opcodePtr & 0xff) == (byte)INS_Code.storeMethodVariable);
 
 			ScopeHeapLocater heapLocater;
 			{

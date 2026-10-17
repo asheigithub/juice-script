@@ -14829,6 +14829,17 @@ namespace juicescript.runtime
 								}
 								break;
 							}
+						case INS_Code.O_If_Var_Var_Cmp_Goto:
+							{
+								var result = O_If_Var_Var_Cmp_Goto(PC, ref frame, PC_START, ref error);
+								PC = result.PC;
+								if (result.IsRaised)
+								{
+									goto flag_handle_error;
+								}
+
+								break;
+							}
 						case INS_Code.add_Vec2_Vec2:
 							{
 								//Exec_Add_Vec2_Vec2(dst_index, ref PC, ref error, stackslots, frame.stackStPos);

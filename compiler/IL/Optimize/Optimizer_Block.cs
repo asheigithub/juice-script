@@ -2688,6 +2688,103 @@ namespace juicescript.compiler.IL.Optimize
 			int flagseed = flags.Any() ? flags.Max(i => i.flag_id) + 1 : 0;
 
 
+			#region 变量 和 变量 比较然后跳转
+			foreach (var b in cfg.Blocks)
+			{
+				if (b.Instructions.Count > 3)
+				{
+					if (b.Instructions.Last().INS_Code == INS_Code.if_false_goto || b.Instructions.Last().INS_Code == INS_Code.if_true_goto)
+					{
+						if (
+							b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.logic_comparison ||
+							b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.equal ||
+							b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.not_equal ||
+							b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.strict_eq ||
+							b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.strict_neq
+							)
+						{
+							if (b.Instructions[b.Instructions.Count - 3].INS_Code == INS_Code.ld_methodVariable
+								&&
+								b.Instructions[b.Instructions.Count - 4].INS_Code == INS_Code.ld_methodVariable
+								)
+							{
+								INS_Ld_MethodVariable ld_a = (INS_Ld_MethodVariable)b.Instructions[b.Instructions.Count-4];
+								INS_Ld_MethodVariable ld_b = (INS_Ld_MethodVariable)b.Instructions[b.Instructions.Count-3];
+
+								
+								var use = b.Instructions[b.Instructions.Count - 2].GetUse();
+								if (use.First().index == ld_a.dst.index && use.Last().index == ld_b.dst.index
+									&& b.Instructions[b.Instructions.Count - 2].dst.index == b.Instructions.Last().GetUse().First().index
+									
+									&&
+									cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii => ii.INS_Code != INS_Code.expression_barrier && 
+										ii.GetUse().Contains(b.Instructions[b.Instructions.Count - 2].dst)).Count() == 1 //比较结果只用一次
+									
+									)
+								{
+									INS_O_If_Var_Var_Cmp_Goto ins_var_var_cmp_goto = new INS_O_If_Var_Var_Cmp_Goto( b.Instructions.Last().token );
+									if (b.Instructions.Last().INS_Code == INS_Code.if_true_goto)
+									{
+										ins_var_var_cmp_goto.jump_mode = true;
+										ins_var_var_cmp_goto.flag_id = ((INS_If_True_Goto)b.Instructions.Last()).flag_id;										
+									}
+									else
+									{
+										ins_var_var_cmp_goto.jump_mode = false;
+										ins_var_var_cmp_goto.flag_id = ((INS_If_False_Goto)b.Instructions.Last()).flag_id;
+									}
+
+									ins_var_var_cmp_goto.var1 = ld_a.heap.MemberIndex;
+									ins_var_var_cmp_goto.var1_stackindex = ld_a.dst.index;
+									ins_var_var_cmp_goto.var2 = ld_b.heap.MemberIndex;
+									ins_var_var_cmp_goto.var2_stackindex = ld_b.dst.index;
+
+									if (b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.logic_comparison)
+									{
+										ins_var_var_cmp_goto.compMode = (INS_If_LogicOp_Goto.CompMode)((INS_Comparison)b.Instructions[b.Instructions.Count - 2]).opMode + 4;
+									}
+									else if (b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.equal)
+									{
+										ins_var_var_cmp_goto.compMode = INS_If_LogicOp_Goto.CompMode.equal;
+									}
+									else if (b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.not_equal)
+									{
+										ins_var_var_cmp_goto.compMode = INS_If_LogicOp_Goto.CompMode.notequal;
+									}
+									else if (b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.strict_eq)
+									{
+										ins_var_var_cmp_goto.compMode = INS_If_LogicOp_Goto.CompMode.strict_equal;
+									}
+									else if (b.Instructions[b.Instructions.Count - 2].INS_Code == INS_Code.strict_neq)
+									{
+										ins_var_var_cmp_goto.compMode = INS_If_LogicOp_Goto.CompMode.strict_neq;
+									}
+
+
+									var ins_cmp = b.Instructions[b.Instructions.Count - 2];
+
+									b.Instructions.Remove(ld_a);
+									b.Instructions.Remove(ld_b);
+									b.Instructions.Remove(ins_cmp);
+
+									b.Instructions[b.Instructions.Count - 1] = ins_var_var_cmp_goto;
+
+								}
+								
+
+								
+
+							}
+						}
+					}
+				}
+			}
+
+
+			#endregion
+
+
+
 			#region 变量自增自减
 
 			foreach (var block in cfg.Blocks)
@@ -2909,6 +3006,8 @@ namespace juicescript.compiler.IL.Optimize
 
 			#endregion
 
+
+
 			#region Ld_ArrayElement->Var
 			foreach (var b in cfg.Blocks)
 			{
@@ -2946,48 +3045,6 @@ namespace juicescript.compiler.IL.Optimize
 
 			}
 			#endregion
-
-			#region Ld_ArrayElement->O_Store_ArrayElement 
-			foreach (var b in cfg.Blocks)
-			{
-				for (int i = 0; i < b.Instructions.Count; i++)
-				{
-					var ins = b.Instructions[i];
-					if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
-					{
-						var next = b.Instructions.Skip(i + 1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
-						if (next != null && next.INS_Code == INS_Code.O_Store_Array_Element)
-						{
-							var ld_arr = (INS_O_Ld_Array_Element)ins;
-							var store = (INS_O_Store_ArrayElement)next;
-
-							if (ld_arr.dst.index == store.dst.index
-								&&
-								cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii => ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains(ld_arr.dst)).Count() == 1
-
-								) //读取并赋值
-							{
-								INS_O_Copy_ArrayElement o_copy = new INS_O_Copy_ArrayElement(ins.token);
-								o_copy.src_arr = ld_arr.instance;
-								o_copy.src_index = ld_arr.name;
-								o_copy.dst_arr = store.instance;
-								o_copy.dst_index = store.name;
-								o_copy.tmp_holder = store.tmp_holder;
-
-								b.Instructions[i] = o_copy;
-								b.Instructions.Remove(next);
-
-							}
-						}
-					}
-				}
-
-			}
-
-
-			#endregion
-
-
 
 
 			#region 探测数组元素交换
@@ -3032,6 +3089,48 @@ namespace juicescript.compiler.IL.Optimize
 
 					}
 
+				}
+
+			}
+
+
+			#endregion
+
+
+
+			#region Ld_ArrayElement->O_Store_ArrayElement 
+			foreach (var b in cfg.Blocks)
+			{
+				for (int i = 0; i < b.Instructions.Count; i++)
+				{
+					var ins = b.Instructions[i];
+					if (ins.INS_Code == INS_Code.O_Ld_Array_Element)
+					{
+						var next = b.Instructions.Skip(i + 1).SkipWhile(n => n.INS_Code == INS_Code.expression_barrier).FirstOrDefault();
+						if (next != null && next.INS_Code == INS_Code.O_Store_Array_Element)
+						{
+							var ld_arr = (INS_O_Ld_Array_Element)ins;
+							var store = (INS_O_Store_ArrayElement)next;
+
+							if (ld_arr.dst.index == store.dst.index
+								&&
+								cfg.Blocks.SelectMany(bb => bb.Instructions).Where(ii => ii.INS_Code != INS_Code.expression_barrier && ii.GetUse().Contains(ld_arr.dst)).Count() == 1
+
+								) //读取并赋值
+							{
+								INS_O_Copy_ArrayElement o_copy = new INS_O_Copy_ArrayElement(ins.token);
+								o_copy.src_arr = ld_arr.instance;
+								o_copy.src_index = ld_arr.name;
+								o_copy.dst_arr = store.instance;
+								o_copy.dst_index = store.name;
+								o_copy.tmp_holder = store.tmp_holder;
+
+								b.Instructions[i] = o_copy;
+								b.Instructions.Remove(next);
+
+							}
+						}
+					}
 				}
 
 			}

@@ -666,15 +666,15 @@ namespace juicescript
 		}
 
 
-        /// <summary>
-        /// 尝试快速减法，如果失败，退回到慢路径
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        
-        public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
+		/// <summary>
+		/// 尝试快速减法，如果失败，退回到慢路径
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <param name="result"></param>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool FastMinus(NaNBoxing a, NaNBoxing b, ref NaNBoxing result)
         {
 			var vta = a.ValueType;
 			var vtb = b.ValueType;

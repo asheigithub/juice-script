@@ -3680,6 +3680,35 @@ namespace juicescript.compiler
 					}
 				}
 
+				if (instruction.INS_Code == INS_Code.O_If_Var_Var_Cmp_Goto)
+				{
+					INS_O_If_Var_Var_Cmp_Goto var_var_cmp = (INS_O_If_Var_Var_Cmp_Goto)instruction;
+
+					int flagid = var_var_cmp.flag_id;
+
+					bool found = false;
+					offset = 0;
+					for (int j = 0; j < instructions.Length; j++)
+					{
+						if (instructions[j].INS_Code == INS_Code.flag && ((INS_Flag)instructions[j]).flag_id == flagid)
+						{
+							found = true;
+							var_var_cmp.offset = offset;
+							break;
+						}
+						else if (!removeflag || (!(instructions[j].INS_Code == INS_Code.flag || instructions[j].INS_Code == INS_Code.expression_barrier) && removeflag))
+						{
+							offset += instructions[j].Size;
+						}
+					}
+
+					if (!found)
+					{
+						throw new InvalidOperationException();
+					}
+				}
+
+
 				if (instruction.INS_Code == INS_Code.iter_get)
 				{
 					INS_Iter_Get iter_Get = (INS_Iter_Get)instruction;

@@ -393,6 +393,9 @@ namespace juicescript.ABC.INS
 
         O_Copy_ArrayElement = 114, // b[1] = a[1]; 复制数组元素 
 
+        O_If_Var_Var_Cmp_Goto = 115, // 2个变量比较后跳转
+
+
 
 		//***矩阵，向量类***
 
