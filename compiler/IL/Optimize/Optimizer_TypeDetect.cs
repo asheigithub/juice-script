@@ -2647,7 +2647,7 @@ namespace juicescript.compiler.IL.Optimize
 
 		/// <summary>
 		/// 查找某个槽在哪些地方被定义
-		/// 返回定义它的指令，已经那个指令的GetDef()列表中的序号
+		/// 返回定义它的指令，以及那个指令的GetDef()列表中的序号
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="cfg"></param>

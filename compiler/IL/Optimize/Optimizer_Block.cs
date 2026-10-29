@@ -1930,12 +1930,12 @@ namespace juicescript.compiler.IL.Optimize
 			return slotCount;
 		}
 
-		/// <summary>
-		/// 触发可能性过低，不管了
-		/// </summary>
-		/// <param name="ins"></param>
-		/// <param name="loop"></param>
-		/// <returns></returns>
+		///// <summary>
+		///// 触发可能性过低，不管了
+		///// </summary>
+		///// <param name="ins"></param>
+		///// <param name="loop"></param>
+		///// <returns></returns>
 		////		private static int OptimizeCommLdRef(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		////		{
 		////			/* 目前看来，只有这种代码可能触发
@@ -2142,142 +2142,176 @@ namespace juicescript.compiler.IL.Optimize
 					if (group.Count() > 1)
 					{
 						//先按块传播
-						var groupbyblock = group.GroupBy( i=> cfg.Blocks.First( b=>b.Instructions.Contains(i) ) );
-						foreach (var gb in groupbyblock)
+						do
 						{
-							bool flag = false;
+							//不能是object
+							var v1 = group.Key.v1;
+							var v2 = group.Key.v2;
 
-							var first = gb.Key.Instructions.First(i => group.Contains(i));
+							var def1 = FindStackSlotDefAt(v1, cfg);
+							var def2 = FindStackSlotDefAt(v2, cfg);
 
-
-							Stack<BasicBlock> blocks= new Stack<BasicBlock>();
-							blocks.Push(gb.Key);
-
-							HashSet<BasicBlock> visited = new HashSet<BasicBlock>();
-							
-							while (blocks.Count>0)
+							if (def1.Count == 0)
+								break;
+							if (def1.Any(d => !instructionType.ContainsKey(d.Item1)))
+								break;
+							if (def1.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.unkown))
+								break;
+							if (def1.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj))
+								break;
+							if (def1.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable))
+								break;
+							if (def2.Count == 0)
+								break;
+							if (def2.Any(d => !instructionType.ContainsKey(d.Item1)))
+								break;
+							if (def2.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.unkown))
+								break;
+							if (def2.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj))
+								break;
+							if (def2.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable))
+								break;
+							//obj类型会导致公共表达式计算不稳定
+							var groupbyblock = group.GroupBy(i => cfg.Blocks.First(b => b.Instructions.Contains(i)));
+							foreach (var gb in groupbyblock)
 							{
-								var block = blocks.Pop();
-								visited.Add	(block);
+								bool flag = false;
+
+								var first = gb.Key.Instructions.First(i => group.Contains(i));
 
 
-								foreach (var toremove in block.Instructions.Where(i=>group.Contains(i)).ToArray())
+								Stack<BasicBlock> blocks = new Stack<BasicBlock>();
+								blocks.Push(gb.Key);
+
+								HashSet<BasicBlock> visited = new HashSet<BasicBlock>();
+
+								while (blocks.Count > 0)
 								{
-									if (toremove == first)
-										continue;
+									var block = blocks.Pop();
+									visited.Add(block);
 
-									Dictionary<int, int> replace = new Dictionary<int, int> { { toremove.dst.index, first.dst.index } };
-									foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+
+									foreach (var toremove in block.Instructions.Where(i => group.Contains(i)).ToArray())
 									{
-										ins.RemappingSlots(replace);
+										if (toremove == first)
+											continue;
+
+										Dictionary<int, int> replace = new Dictionary<int, int> { { toremove.dst.index, first.dst.index } };
+										foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+										{
+											ins.RemappingSlots(replace);
+										}
+
+										block.Instructions.Remove(toremove);
+										flag = true;
 									}
 
-									block.Instructions.Remove(toremove);
-									flag = true;
+									//传播直接支配节点
+									foreach (var item in block.Successors)
+									{
+										if (!visited.Contains(item) && item.Idom == block)
+										{
+											blocks.Push(item);
+										}
+									}
 								}
 
-								//传播直接支配节点
-								foreach (var item in block.Successors)
+								if (flag)
 								{
-									if (!visited.Contains(item) && item.Idom == block)
-									{
-										blocks.Push(item);
-									}
+									goto lbl_retry;
 								}
 							}
 
-							if (flag)
-							{
-								goto lbl_retry;
-							}
 						}
-						
+						while (false);
 
-						var v1 = group.Key.v1;
-						var v2 = group.Key.v2;
-
-						var def1 = FindStackSlotDefAt(v1, cfg);
-						var def2 = FindStackSlotDefAt(v2, cfg);
-
-						if (def1.Count == 1 && def2.Count == 1 && instructionType.ContainsKey(def1[0].Item1) && instructionType.ContainsKey(def2[0].Item1))
+						//
 						{
-							if (instructionType[def1[0].Item1][def1[0].Item2].DefType == InstructionDefType.primitive &&
-								instructionType[def2[0].Item1][def2[0].Item2].DefType == InstructionDefType.primitive
-								)
+							var v1 = group.Key.v1;
+							var v2 = group.Key.v2;
+
+							var def1 = FindStackSlotDefAt(v1, cfg);
+							var def2 = FindStackSlotDefAt(v2, cfg);
+
+							if (def1.Count == 1 && def2.Count == 1 && instructionType.ContainsKey(def1[0].Item1) && instructionType.ContainsKey(def2[0].Item1))
 							{
-								var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => group.Contains(i))).ToList();
-								var dom = FindCommDom(atblocks);
-
-								int defat1 = dom.Instructions.IndexOf(def1[0].Item1);
-								int defat2 = dom.Instructions.IndexOf(def2[0].Item1);
-
-								int at = Math.Max(defat1, defat2);
-
-								int newslot = slotcount++;
-								//INS_Add add = new INS_Add(group.First().token);
-								//add.dst.index = newslot;
-								//add.v1 = v1;
-								//add.v2 = v2;
-
-								var newins = op.Value.Item2(newslot, v1, v2, group.First());
-
-								instructionType.Add(newins, new List<InstructionDef> { new InstructionDef(InstructionDefType.primitive, TypeKind.Any  ) });
-
-
-								if (at > -1)
+								if (instructionType[def1[0].Item1][def1[0].Item2].DefType == InstructionDefType.primitive &&
+									instructionType[def2[0].Item1][def2[0].Item2].DefType == InstructionDefType.primitive
+									)
 								{
-									dom.Instructions.Insert(at + 1, newins);
-								}
-								else
-								{
-									if (dom.TryStmtId == 0 && dom.Instructions.Any(i => group.Contains(i)))
+									var atblocks = cfg.Blocks.Where(b => b.Instructions.Any(i => group.Contains(i))).ToList();
+									var dom = FindCommDom(atblocks);
+
+									int defat1 = dom.Instructions.IndexOf(def1[0].Item1);
+									int defat2 = dom.Instructions.IndexOf(def2[0].Item1);
+
+									int at = Math.Max(defat1, defat2);
+
+									int newslot = slotcount++;
+									//INS_Add add = new INS_Add(group.First().token);
+									//add.dst.index = newslot;
+									//add.v1 = v1;
+									//add.v2 = v2;
+
+									var newins = op.Value.Item2(newslot, v1, v2, group.First());
+
+									instructionType.Add(newins, new List<InstructionDef> { new InstructionDef(InstructionDefType.primitive, TypeKind.Any) });
+
+
+									if (at > -1)
 									{
-										at = dom.Instructions.FindIndex(i => group.Contains(i));
-										dom.Instructions.Insert(at, newins);
-
+										dom.Instructions.Insert(at + 1, newins);
 									}
 									else
 									{
-										if (dom.Instructions.Count > 0 &&
-												(dom.Instructions[0].INS_Code == INS_Code.flag
-												||
-												dom.Instructions[0].INS_Code == INS_Code.try_enter
-												||
-												dom.Instructions[0].INS_Code == INS_Code.catch_enter
-												||
-												dom.Instructions[0].INS_Code == INS_Code.finally_enter
-												)
-												)
+										if (dom.TryStmtId == 0 && dom.Instructions.Any(i => group.Contains(i)))
 										{
-											dom.Instructions.Insert(1, newins);
+											at = dom.Instructions.FindIndex(i => group.Contains(i));
+											dom.Instructions.Insert(at, newins);
+
 										}
 										else
 										{
-											dom.Instructions.Insert(0, newins);
+											if (dom.Instructions.Count > 0 &&
+													(dom.Instructions[0].INS_Code == INS_Code.flag
+													||
+													dom.Instructions[0].INS_Code == INS_Code.try_enter
+													||
+													dom.Instructions[0].INS_Code == INS_Code.catch_enter
+													||
+													dom.Instructions[0].INS_Code == INS_Code.finally_enter
+													)
+													)
+											{
+												dom.Instructions.Insert(1, newins);
+											}
+											else
+											{
+												dom.Instructions.Insert(0, newins);
+											}
 										}
 									}
-								}
 
-								foreach (var toremove in group)
-								{
-									Dictionary<int, int> replace = new Dictionary<int, int> { { toremove.dst.index, newslot } };
-
-									foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+									foreach (var toremove in group)
 									{
-										ins.RemappingSlots(replace);
+										Dictionary<int, int> replace = new Dictionary<int, int> { { toremove.dst.index, newslot } };
+
+										foreach (var ins in cfg.Blocks.SelectMany(bb => bb.Instructions))
+										{
+											ins.RemappingSlots(replace);
+										}
+
+
+										var atblock = cfg.Blocks.First(b => b.Instructions.Contains(toremove));
+
+										atblock.Instructions.Remove(toremove);
+
 									}
 
-
-									var atblock = cfg.Blocks.First(b => b.Instructions.Contains(toremove));
-
-									atblock.Instructions.Remove(toremove);
-
+									goto lbl_retry;
 								}
-
-								goto lbl_retry;
 							}
 						}
-
 					}
 					else
 					{
@@ -2566,7 +2600,7 @@ namespace juicescript.compiler.IL.Optimize
 							o_Store_Indexer.tmp_holder = store_MultiNameL.tmp_holder;
 
 							block.Instructions[i] = o_Store_Indexer;
-
+							
 
 						}
 
@@ -2683,6 +2717,12 @@ namespace juicescript.compiler.IL.Optimize
 
 		private static int OptimizeSuperInstruction(ControlFlowGraph cfg, int slotcount, CompileContext context)
 		{
+			//重要，融合后的超级指令的类型信息不再更新到instructionType中。只能查询之前的信息
+			var instructions = cfg.Blocks.OrderBy(b => b.OriginalIndex).SelectMany(l => l.Instructions).Where(l => l.INS_Code != INS_Code.expression_barrier).ToArray();
+			var instructionType = DetectType(cfg.Method, new List<Instruction>(instructions), context);
+
+
+
 			var flags = cfg.Blocks.SelectMany(b => b.Instructions).Where(i => i.INS_Code == INS_Code.flag).Select(i => (INS_Flag)i)
 					.Where(i => i.flag_id < 0xfffff8);
 			int flagseed = flags.Any() ? flags.Max(i => i.flag_id) + 1 : 0;
@@ -3092,6 +3132,101 @@ namespace juicescript.compiler.IL.Optimize
 				}
 
 			}
+
+
+
+			//探测Swap, Ld_arrayelement->Var | xxx 一些无关操作 | INS_O_Arr_MoveAndSet
+			//如果中间的操作不会影响数组元素加载，则可以融合成SwapArrayElement!
+
+			foreach (var b in cfg.Blocks)
+			{
+				for (int i = 0; i < b.Instructions.Count; i++)
+				{
+					var ins = b.Instructions[i];
+					if (ins.INS_Code == INS_Code.O_Ld_Array_To_Var)
+					{
+						INS_O_Ld_Arr_Var ld_tmp_var = (INS_O_Ld_Arr_Var)ins;
+
+						var swap_part2 = (INS_O_Arr_MoveAndSet)b.Instructions.Skip(i + 1).FirstOrDefault( s=>s.INS_Code == INS_Code.O_Array_MoveAndSet
+							&&
+							((INS_O_Arr_MoveAndSet)s).instance.index == ld_tmp_var.instance.index
+							&&
+							((INS_O_Arr_MoveAndSet)s).value2.index == ld_tmp_var.dst.index
+						);
+						if (swap_part2 != null)
+						{
+							bool pass = true;
+							//检查中间操作是否会影响INS_O_Ld_Arr_Var，或者INS_O_Ld_Arr_Var是否影响中间操作。
+							int j = i + 1;
+							var next = b.Instructions[j];
+							while (next != swap_part2)
+							{
+
+								if (next.GetUse().Contains(ld_tmp_var.dst) || next.GetDef().Contains(ld_tmp_var.dst))
+								{
+									pass=false;
+									break;
+								}
+								if (!next.MaybeRaiseError())
+								{
+									next = b.Instructions[++j];
+									continue;
+								}
+
+								//先只考虑+-*等
+								if (next.INS_Code == INS_Code.add || next.INS_Code == INS_Code.sub || next.INS_Code == INS_Code.multiply 
+									|| next.INS_Code == INS_Code.div || next.INS_Code == INS_Code.modulus)
+								{
+									foreach (var item in next.GetUse())
+									{
+										var def1 = FindStackSlotDefAt(item, cfg);
+										if (def1.Count == 0)
+										{
+											pass = false;
+											break;
+										}
+										if (def1.Any(d => !instructionType.ContainsKey(d.Item1)))
+										{
+											pass = false;
+											break;
+										}
+										//obj类型可能导致公共表达式计算结果不稳定
+										if (def1.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.unkown))
+										{
+											pass = false;
+											break;
+										}
+										if (def1.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj))
+										{
+											pass = false;
+											break;
+										}
+										if (def1.Any(d => instructionType[d.Item1][d.Item2].DefType == InstructionDefType.obj_maybeCacheable))
+										{
+											pass = false;
+											break;
+										}
+									}
+								}
+								
+
+								next = b.Instructions[++j];
+							}
+
+
+							//如果检查通过，则可以融合为Swap
+							if (pass)
+							{ 
+								
+							}
+						}
+
+					}
+
+
+				}
+			}
+
 
 
 			#endregion
